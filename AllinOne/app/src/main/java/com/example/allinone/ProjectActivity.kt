@@ -38,6 +38,8 @@ class ProjectActivity : AppCompatActivity() {
             projectAdapter.filter(filter)
         }
 
+        findViewById<View>(R.id.btn_back).setOnClickListener { finish() }
+
         findViewById<View>(R.id.btn_create_new_project).setOnClickListener {
             showAddProjectDialog(null)
         }

@@ -19,6 +19,7 @@ class SettingsActivity : AppCompatActivity() {
         // Setup Header (Title)
         findViewById<TextView>(R.id.date_textview).text = "SETTINGS"
         findViewById<View>(R.id.btn_main_menu).visibility = View.GONE
+        findViewById<View>(R.id.btn_back).setOnClickListener { finish() }
 
         val settingsList = findViewById<RecyclerView>(R.id.settings_list)
         settingsList.layoutManager = LinearLayoutManager(this)

@@ -32,6 +32,8 @@ class NotesActivity : AppCompatActivity() {
         noteAdapter = NoteAdapter(notes) { noteAdapter.updateNotes(notes) }
         notesList.adapter = noteAdapter
 
+        findViewById<View>(R.id.btn_back).setOnClickListener { finish() }
+
         findViewById<View>(R.id.btn_create_new_note).setOnClickListener { showAddNoteDialog() }
     }
 

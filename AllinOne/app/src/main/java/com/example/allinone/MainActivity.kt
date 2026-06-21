@@ -38,6 +38,7 @@ class MainActivity : AppCompatActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        android.util.Log.d("MainActivity", "onCreate called")
         setContentView(R.layout.activity_main)
 
         // Load data from persistent storage
@@ -51,6 +52,7 @@ class MainActivity : AppCompatActivity() {
         headerProgressBar = findViewById(R.id.header_progress_bar)
         progressPercentage = findViewById(R.id.progress_percentage)
 
+        findViewById<View>(R.id.btn_back).visibility = View.GONE
         findViewById<ImageButton>(R.id.btn_main_menu).setOnClickListener { showMainMenu(it) }
 
         val menuGrid = findViewById<RecyclerView>(R.id.menu_grid)

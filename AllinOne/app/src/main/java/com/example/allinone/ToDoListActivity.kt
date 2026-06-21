@@ -34,6 +34,8 @@ class ToDoListActivity : AppCompatActivity() {
         }
         taskList.adapter = taskAdapter
 
+        findViewById<View>(R.id.btn_back).setOnClickListener { finish() }
+
         findViewById<View>(R.id.btn_create_new_task).setOnClickListener { showAddTaskDialog(null) }
     }
 

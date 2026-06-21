@@ -57,6 +57,8 @@ class FinanceActivity : AppCompatActivity() {
             startActivity(android.content.Intent(this, FinanceHistoryActivity::class.java))
         }
 
+        findViewById<View>(R.id.btn_back).setOnClickListener { finish() }
+
         findViewById<View>(R.id.btn_create_new_finance).setOnClickListener {
             showAddTransactionDialog()
         }

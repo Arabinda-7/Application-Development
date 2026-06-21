@@ -58,6 +58,8 @@ class HabitTrackerActivity : AppCompatActivity() {
         setupFooterLogic()
         setupGridNavigation()
         updateCalendarDays()
+
+        findViewById<View>(R.id.btn_back).setOnClickListener { finish() }
     }
 
     private fun updateCalendarDays() {

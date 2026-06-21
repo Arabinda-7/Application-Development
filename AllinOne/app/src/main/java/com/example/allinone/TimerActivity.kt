@@ -30,6 +30,8 @@ class TimerActivity : AppCompatActivity() {
         workoutNameTextView.text = workoutName
         timerProgressIndicator.max = timerDuration
 
+        findViewById<android.view.View>(R.id.btn_back).setOnClickListener { finish() }
+
         updateTimer(timerTextView, timerProgressIndicator)
 
         startPauseButton.setOnClickListener {

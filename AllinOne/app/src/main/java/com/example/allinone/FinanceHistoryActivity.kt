@@ -27,13 +27,7 @@ class FinanceHistoryActivity : AppCompatActivity() {
         tvYear.text = Calendar.getInstance().get(Calendar.YEAR).toString()
 
         findViewById<View>(R.id.btn_back).setOnClickListener {
-            if (transactionsList.visibility == View.VISIBLE || findViewById<View>(R.id.month_details_container).visibility == View.VISIBLE) {
-                findViewById<View>(R.id.month_details_container).visibility = View.GONE
-                monthsList.visibility = View.VISIBLE
-                tvYear.visibility = View.VISIBLE
-            } else {
-                finish()
-            }
+            handleBackNavigation()
         }
 
         monthsList = findViewById(R.id.history_months_list)
@@ -62,6 +56,24 @@ class FinanceHistoryActivity : AppCompatActivity() {
         monthsList.adapter = monthAdapter
 
         transactionsList.layoutManager = LinearLayoutManager(this)
+
+        // Handle System Back Button
+        onBackPressedDispatcher.addCallback(this, object : androidx.activity.OnBackPressedCallback(true) {
+            override fun handleOnBackPressed() {
+                handleBackNavigation()
+            }
+        })
+    }
+
+    private fun handleBackNavigation() {
+        val detailsContainer = findViewById<View>(R.id.month_details_container)
+        if (detailsContainer.visibility == View.VISIBLE) {
+            detailsContainer.visibility = View.GONE
+            monthsList.visibility = View.VISIBLE
+            tvYear.visibility = View.VISIBLE
+        } else {
+            finish()
+        }
     }
 
     private fun showTransactionsForMonth(monthName: String) {
