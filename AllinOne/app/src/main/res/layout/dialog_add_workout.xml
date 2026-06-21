@@ -1,0 +1,367 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@color/dark_background"
+    android:padding="20dp">
+
+    <ImageView
+        android:id="@+id/btn_close_workout"
+        android:layout_width="24dp"
+        android:layout_height="24dp"
+        android:src="@android:drawable/ic_menu_close_clear_cancel"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:tint="@color/white"
+        android:contentDescription="Close"
+        android:clickable="true"
+        android:focusable="true"
+        android:background="?attr/selectableItemBackgroundBorderless" />
+
+    <ImageView
+        android:layout_width="24dp"
+        android:layout_height="24dp"
+        android:src="@android:drawable/ic_menu_more"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:tint="@color/white"
+        android:contentDescription="More" />
+
+    <EditText
+        android:id="@+id/workout_name_input"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="24dp"
+        android:background="@null"
+        android:hint="Workout Name"
+        android:textColor="@color/white"
+        android:textColorHint="@color/text_secondary"
+        android:textSize="22sp"
+        android:textStyle="bold"
+        android:inputType="textCapSentences"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/btn_close_workout" />
+
+    <TextView
+        android:id="@+id/tv_workout_type"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Workout routine"
+        android:textColor="@color/text_secondary"
+        android:textSize="14sp"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/workout_name_input" />
+
+    <!-- Icon Selection Card -->
+    <com.google.android.material.card.MaterialCardView
+        android:id="@+id/card_workout_icon"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="24dp"
+        app:cardBackgroundColor="@color/chip_background"
+        app:cardCornerRadius="16dp"
+        app:cardElevation="0dp"
+        android:clickable="true"
+        android:focusable="true"
+        app:layout_constraintTop_toBottomOf="@id/tv_workout_type">
+
+        <RelativeLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:padding="16dp">
+            <ImageView
+                android:id="@+id/icon_preview_workout"
+                android:layout_width="40dp"
+                android:layout_height="40dp"
+                android:background="@drawable/circle_selected_bg"
+                android:backgroundTint="@color/card_blue"
+                android:padding="8dp"
+                android:src="@android:drawable/ic_menu_directions"
+                app:tint="@color/white"
+                android:contentDescription="Icon Preview" />
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_centerVertical="true"
+                android:layout_marginStart="16dp"
+                android:layout_toEndOf="@id/icon_preview_workout"
+                android:text="Icon"
+                android:textColor="@color/white" />
+            <ImageView
+                android:layout_width="20dp"
+                android:layout_height="20dp"
+                android:layout_alignParentEnd="true"
+                android:layout_centerVertical="true"
+                android:src="@android:drawable/ic_media_next"
+                app:tint="@color/text_secondary"
+                android:contentDescription="Change Icon" />
+        </RelativeLayout>
+    </com.google.android.material.card.MaterialCardView>
+
+    <!-- Color Selection Card -->
+    <com.google.android.material.card.MaterialCardView
+        android:id="@+id/card_workout_color"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="12dp"
+        app:cardBackgroundColor="@color/chip_background"
+        app:cardCornerRadius="16dp"
+        app:cardElevation="0dp"
+        android:clickable="true"
+        android:focusable="true"
+        app:layout_constraintTop_toBottomOf="@id/card_workout_icon">
+
+        <RelativeLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:padding="16dp">
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_centerVertical="true"
+                android:text="Color"
+                android:textColor="@color/white" />
+            <LinearLayout
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_alignParentEnd="true"
+                android:layout_centerVertical="true"
+                android:gravity="center_vertical">
+                <View
+                    android:id="@+id/color_preview_workout"
+                    android:layout_width="24dp"
+                    android:layout_height="24dp"
+                    android:background="@drawable/circle_selected_bg"
+                    android:backgroundTint="@color/card_blue" />
+                <ImageView
+                    android:layout_width="20dp"
+                    android:layout_height="20dp"
+                    android:layout_marginStart="8dp"
+                    android:src="@android:drawable/ic_media_next"
+                    app:tint="@color/text_secondary"
+                    android:contentDescription="Change Color" />
+            </LinearLayout>
+        </RelativeLayout>
+    </com.google.android.material.card.MaterialCardView>
+
+    <TextView
+        android:id="@+id/tv_repeat_label_workout"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="24dp"
+        android:text="REPEAT"
+        android:textColor="@color/white"
+        android:textSize="12sp"
+        android:textStyle="bold"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/card_workout_color" />
+
+    <com.google.android.material.card.MaterialCardView
+        android:id="@+id/card_repeat_workout"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="12dp"
+        app:cardBackgroundColor="@color/chip_background"
+        app:cardCornerRadius="16dp"
+        app:cardElevation="0dp"
+        app:layout_constraintTop_toBottomOf="@id/tv_repeat_label_workout">
+        <RelativeLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:padding="16dp">
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Workout days"
+                android:textColor="@color/white" />
+            <LinearLayout
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_alignParentEnd="true"
+                android:gravity="center_vertical">
+                <TextView
+                    android:id="@+id/tv_repeat_summary_workout"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Everyday"
+                    android:textColor="@color/white" />
+                <ImageView
+                    android:layout_width="20dp"
+                    android:layout_height="20dp"
+                    android:layout_marginStart="8dp"
+                    android:src="@android:drawable/ic_media_next"
+                    app:tint="@color/text_secondary"
+                    android:contentDescription="Change Frequency" />
+            </LinearLayout>
+        </RelativeLayout>
+    </com.google.android.material.card.MaterialCardView>
+
+    <com.google.android.material.card.MaterialCardView
+        android:id="@+id/card_workout_settings"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="24dp"
+        app:cardBackgroundColor="@color/chip_background"
+        app:cardCornerRadius="16dp"
+        app:cardElevation="0dp"
+        app:layout_constraintTop_toBottomOf="@id/card_repeat_workout">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:padding="16dp">
+
+            <RelativeLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content">
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Tracking Mode"
+                    android:textColor="@color/white" />
+                <TextView
+                    android:id="@+id/tv_current_mode"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_alignParentEnd="true"
+                    android:text="Reps"
+                    android:textColor="@color/chip_selected" />
+            </RelativeLayout>
+
+            <RadioGroup
+                android:id="@+id/tracking_mode_group"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="12dp"
+                android:orientation="horizontal">
+                <RadioButton android:id="@+id/radio_sets" android:layout_width="0dp" android:layout_height="wrap_content" android:layout_weight="1" android:text="Sets" android:textColor="@color/white" />
+                <RadioButton android:id="@+id/radio_reps" android:layout_width="0dp" android:layout_height="wrap_content" android:layout_weight="1" android:text="Reps" android:textColor="@color/white" android:checked="true" />
+                <RadioButton android:id="@+id/radio_timer" android:layout_width="0dp" android:layout_height="wrap_content" android:layout_weight="1" android:text="Timer" android:textColor="@color/white" />
+            </RadioGroup>
+
+            <View android:layout_width="match_parent" android:layout_height="1dp" android:layout_marginVertical="12dp" android:background="#33FFFFFF" />
+
+            <RelativeLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content">
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Target"
+                    android:textColor="@color/white" />
+                <EditText
+                    android:id="@+id/target_input"
+                    android:layout_width="60dp"
+                    android:layout_height="wrap_content"
+                    android:layout_alignParentEnd="true"
+                    android:background="@null"
+                    android:gravity="end"
+                    android:hint="0"
+                    android:inputType="number"
+                    android:textColor="@color/white"
+                    android:textColorHint="@color/text_secondary" />
+            </RelativeLayout>
+        </LinearLayout>
+    </com.google.android.material.card.MaterialCardView>
+
+    <TextView
+        android:id="@+id/tv_doit_label_workout"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="24dp"
+        android:text="DO IT AT"
+        android:textColor="@color/white"
+        android:textSize="12sp"
+        android:textStyle="bold"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/card_workout_settings" />
+
+    <GridLayout
+        android:id="@+id/workout_frequency_grid"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="12dp"
+        android:columnCount="2"
+        app:layout_constraintTop_toBottomOf="@id/tv_doit_label_workout">
+        <androidx.appcompat.widget.AppCompatRadioButton
+            android:id="@+id/radio_anytime_workout"
+            android:layout_width="0dp"
+            android:layout_height="64dp"
+            android:layout_columnWeight="1"
+            android:layout_margin="4dp"
+            android:background="@drawable/mock_chip_bg_selected"
+            android:button="@null"
+            android:checked="true"
+            android:gravity="center"
+            android:text="Anytime"
+            android:textStyle="bold"
+            android:textColor="@color/white" />
+        <androidx.appcompat.widget.AppCompatRadioButton
+            android:id="@+id/radio_morning_workout"
+            android:layout_width="0dp"
+            android:layout_height="64dp"
+            android:layout_columnWeight="1"
+            android:layout_margin="4dp"
+            android:background="@drawable/mock_chip_bg_selected"
+            android:button="@null"
+            android:drawableStart="@android:drawable/ic_menu_today"
+            android:drawablePadding="12dp"
+            android:drawableTint="@color/white"
+            android:paddingStart="16dp"
+            android:paddingEnd="16dp"
+            android:gravity="center_vertical"
+            android:text="Morning"
+            android:textStyle="bold"
+            android:textColor="@color/white" />
+        <androidx.appcompat.widget.AppCompatRadioButton
+            android:id="@+id/radio_afternoon_workout"
+            android:layout_width="0dp"
+            android:layout_height="64dp"
+            android:layout_columnWeight="1"
+            android:layout_margin="4dp"
+            android:background="@drawable/mock_chip_bg_selected"
+            android:button="@null"
+            android:drawableStart="@android:drawable/ic_menu_today"
+            android:drawablePadding="12dp"
+            android:drawableTint="@color/white"
+            android:paddingStart="16dp"
+            android:paddingEnd="16dp"
+            android:gravity="center_vertical"
+            android:text="Afternoon"
+            android:textStyle="bold"
+            android:textColor="@color/white" />
+        <androidx.appcompat.widget.AppCompatRadioButton
+            android:id="@+id/radio_evening_workout"
+            android:layout_width="0dp"
+            android:layout_height="64dp"
+            android:layout_columnWeight="1"
+            android:layout_margin="4dp"
+            android:background="@drawable/mock_chip_bg_selected"
+            android:button="@null"
+            android:drawableStart="@android:drawable/ic_menu_month"
+            android:drawablePadding="12dp"
+            android:drawableTint="@color/white"
+            android:paddingStart="16dp"
+            android:paddingEnd="16dp"
+            android:gravity="center_vertical"
+            android:text="Evening"
+            android:textStyle="bold"
+            android:textColor="@color/white" />
+    </GridLayout>
+
+    <androidx.appcompat.widget.AppCompatButton
+        android:id="@+id/btn_save_workout"
+        android:layout_width="match_parent"
+        android:layout_height="56dp"
+        android:layout_marginTop="32dp"
+        android:background="@drawable/circle_selected_bg"
+        android:backgroundTint="@color/chip_selected"
+        android:text="SAVE WORKOUT"
+        android:textColor="@color/white"
+        android:textStyle="bold"
+        app:layout_constraintTop_toBottomOf="@id/workout_frequency_grid" />
+
+</androidx.constraintlayout.widget.ConstraintLayout>

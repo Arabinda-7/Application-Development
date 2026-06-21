@@ -1,0 +1,426 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@color/dark_background"
+    tools:context=".WorkoutRoutineActivity">
+
+    <!-- Today Layout -->
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:id="@+id/today_layout"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        app:layout_constraintBottom_toTopOf="@id/bottom_nav_mock"
+        app:layout_constraintTop_toTopOf="parent">
+
+        <TextView
+            android:id="@+id/tv_today"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="24dp"
+            android:layout_marginTop="24dp"
+            android:text="TODAY"
+            android:textColor="@color/white"
+            android:textSize="20sp"
+            android:textStyle="bold"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent" />
+
+        <TextView
+            android:id="@+id/tv_date"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="24dp"
+            android:text="Mar 01"
+            android:textColor="@color/text_secondary"
+            android:textSize="14sp"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/tv_today" />
+
+        <LinearLayout
+            android:id="@+id/day_selector"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="24dp"
+            android:orientation="horizontal"
+            android:paddingHorizontal="16dp"
+            android:gravity="center"
+            app:layout_constraintTop_toBottomOf="@id/tv_date">
+
+            <LinearLayout android:id="@+id/day_sun" android:layout_width="0dp" android:layout_height="wrap_content" android:layout_weight="1" android:orientation="vertical" android:gravity="center" android:clickable="true" android:focusable="true">
+                <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="SUN" android:textColor="@color/text_secondary" android:textSize="10sp" />
+                <FrameLayout android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_marginTop="4dp">
+                    <View android:id="@+id/circle_sun" android:layout_width="36dp" android:layout_height="36dp" android:background="@drawable/circle_selected_bg" android:backgroundTint="@android:color/transparent" />
+                    <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_gravity="center" android:text="22" android:textColor="@color/white" />
+                    <View android:id="@+id/line_sun" android:layout_width="16dp" android:layout_height="3dp" android:layout_gravity="bottom|center_horizontal" android:layout_marginBottom="-6dp" android:background="@color/chip_selected" android:visibility="invisible" />
+                </FrameLayout>
+            </LinearLayout>
+
+            <LinearLayout android:id="@+id/day_mon" android:layout_width="0dp" android:layout_height="wrap_content" android:layout_weight="1" android:orientation="vertical" android:gravity="center" android:clickable="true" android:focusable="true">
+                <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="MON" android:textColor="@color/text_secondary" android:textSize="10sp" />
+                <FrameLayout android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_marginTop="4dp">
+                    <View android:id="@+id/circle_mon" android:layout_width="36dp" android:layout_height="36dp" android:background="@drawable/circle_selected_bg" android:backgroundTint="@android:color/transparent" />
+                    <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_gravity="center" android:text="23" android:textColor="@color/white" />
+                    <View android:id="@+id/line_mon" android:layout_width="16dp" android:layout_height="3dp" android:layout_gravity="bottom|center_horizontal" android:layout_marginBottom="-6dp" android:background="@color/chip_selected" android:visibility="invisible" />
+                </FrameLayout>
+            </LinearLayout>
+
+            <LinearLayout android:id="@+id/day_tue" android:layout_width="0dp" android:layout_height="wrap_content" android:layout_weight="1" android:orientation="vertical" android:gravity="center" android:clickable="true" android:focusable="true">
+                <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="TUE" android:textColor="@color/text_secondary" android:textSize="10sp" />
+                <FrameLayout android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_marginTop="4dp">
+                    <View android:id="@+id/circle_tue" android:layout_width="36dp" android:layout_height="36dp" android:background="@drawable/circle_selected_bg" android:backgroundTint="@android:color/transparent" />
+                    <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_gravity="center" android:text="24" android:textColor="@color/white" />
+                    <View android:id="@+id/line_tue" android:layout_width="16dp" android:layout_height="3dp" android:layout_gravity="bottom|center_horizontal" android:layout_marginBottom="-6dp" android:background="@color/chip_selected" android:visibility="invisible" />
+                </FrameLayout>
+            </LinearLayout>
+
+            <LinearLayout android:id="@+id/day_wed" android:layout_width="0dp" android:layout_height="wrap_content" android:layout_weight="1" android:orientation="vertical" android:gravity="center" android:clickable="true" android:focusable="true">
+                <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="WED" android:textColor="@color/text_secondary" android:textSize="10sp" />
+                <FrameLayout android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_marginTop="4dp">
+                    <View android:id="@+id/circle_wed" android:layout_width="36dp" android:layout_height="36dp" android:background="@drawable/circle_selected_bg" android:backgroundTint="@android:color/transparent" />
+                    <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_gravity="center" android:text="25" android:textColor="@color/white" />
+                    <View android:id="@+id/line_wed" android:layout_width="16dp" android:layout_height="3dp" android:layout_gravity="bottom|center_horizontal" android:layout_marginBottom="-6dp" android:background="@color/chip_selected" android:visibility="invisible" />
+                </FrameLayout>
+            </LinearLayout>
+
+            <LinearLayout android:id="@+id/day_thu" android:layout_width="0dp" android:layout_height="wrap_content" android:layout_weight="1" android:orientation="vertical" android:gravity="center" android:clickable="true" android:focusable="true">
+                <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="THU" android:textColor="@color/text_secondary" android:textSize="10sp" />
+                <FrameLayout android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_marginTop="4dp">
+                    <View android:id="@+id/circle_thu" android:layout_width="36dp" android:layout_height="36dp" android:background="@drawable/circle_selected_bg" android:backgroundTint="@android:color/transparent" />
+                    <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_gravity="center" android:text="26" android:textColor="@color/white" />
+                    <View android:id="@+id/line_thu" android:layout_width="16dp" android:layout_height="3dp" android:layout_gravity="bottom|center_horizontal" android:layout_marginBottom="-6dp" android:background="@color/chip_selected" android:visibility="invisible" />
+                </FrameLayout>
+            </LinearLayout>
+
+            <LinearLayout android:id="@+id/day_fri" android:layout_width="0dp" android:layout_height="wrap_content" android:layout_weight="1" android:orientation="vertical" android:gravity="center" android:clickable="true" android:focusable="true">
+                <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="FRI" android:textColor="@color/text_secondary" android:textSize="10sp" />
+                <FrameLayout android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_marginTop="4dp">
+                    <View android:id="@+id/circle_fri" android:layout_width="36dp" android:layout_height="36dp" android:background="@drawable/circle_selected_bg" android:backgroundTint="@android:color/transparent" />
+                    <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_gravity="center" android:text="27" android:textColor="@color/white" />
+                    <View android:id="@+id/line_fri" android:layout_width="16dp" android:layout_height="3dp" android:layout_gravity="bottom|center_horizontal" android:layout_marginBottom="-6dp" android:background="@color/chip_selected" android:visibility="invisible" />
+                </FrameLayout>
+            </LinearLayout>
+
+            <LinearLayout android:id="@+id/day_sat" android:layout_width="0dp" android:layout_height="wrap_content" android:layout_weight="1" android:orientation="vertical" android:gravity="center" android:clickable="true" android:focusable="true">
+                <TextView android:id="@+id/tv_sat_label" android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="SAT" android:textColor="@color/white" android:textSize="10sp" android:textStyle="bold" />
+                <FrameLayout android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_marginTop="4dp">
+                    <View android:id="@+id/circle_sat" android:layout_width="36dp" android:layout_height="36dp" android:background="@drawable/circle_selected_bg" android:backgroundTint="@color/chip_background" />
+                    <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_gravity="center" android:text="28" android:textColor="@color/white" android:textStyle="bold" />
+                    <View android:id="@+id/line_sat" android:layout_width="16dp" android:layout_height="3dp" android:layout_gravity="bottom|center_horizontal" android:layout_marginBottom="-6dp" android:background="@color/chip_selected" android:visibility="visible" />
+                </FrameLayout>
+            </LinearLayout>
+        </LinearLayout>
+
+        <HorizontalScrollView
+            android:id="@+id/chip_scroll"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="32dp"
+            android:scrollbars="none"
+            app:layout_constraintTop_toBottomOf="@id/day_selector">
+
+            <com.google.android.material.chip.ChipGroup
+                android:id="@+id/filter_chips"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:paddingHorizontal="16dp"
+                app:singleSelection="true"
+                app:selectionRequired="true">
+
+                <com.google.android.material.chip.Chip
+                    android:id="@+id/chip_all"
+                    style="@style/Widget.MaterialComponents.Chip.Choice"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:checked="true"
+                    android:text="ALL"
+                    android:textColor="@color/white"
+                    app:chipBackgroundColor="@color/chip_bg_selector"
+                    app:chipStrokeWidth="0dp" />
+
+                <com.google.android.material.chip.Chip
+                    android:id="@+id/chip_morning"
+                    style="@style/Widget.MaterialComponents.Chip.Choice"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="MORNING"
+                    android:textColor="@color/white"
+                    app:chipBackgroundColor="@color/chip_bg_selector"
+                    app:chipStrokeWidth="0dp"
+                    app:chipIcon="@android:drawable/ic_menu_today"
+                    app:chipIconTint="@color/white" />
+
+                <com.google.android.material.chip.Chip
+                    android:id="@+id/chip_afternoon"
+                    style="@style/Widget.MaterialComponents.Chip.Choice"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="AFTERNOON"
+                    android:textColor="@color/white"
+                    app:chipBackgroundColor="@color/chip_bg_selector"
+                    app:chipStrokeWidth="0dp"
+                    app:chipIcon="@android:drawable/ic_menu_today"
+                    app:chipIconTint="@color/white" />
+
+                <com.google.android.material.chip.Chip
+                    android:id="@+id/chip_evening"
+                    style="@style/Widget.MaterialComponents.Chip.Choice"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="EVENING"
+                    android:textColor="@color/white"
+                    app:chipBackgroundColor="@color/chip_bg_selector"
+                    app:chipStrokeWidth="0dp"
+                    app:chipIcon="@android:drawable/ic_menu_month"
+                    app:chipIconTint="@color/white" />
+            </com.google.android.material.chip.ChipGroup>
+        </HorizontalScrollView>
+
+        <androidx.recyclerview.widget.RecyclerView
+            android:id="@+id/workout_list"
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
+            android:layout_marginTop="16dp"
+            android:paddingBottom="100dp"
+            android:clipToPadding="false"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/chip_scroll" />
+
+        <com.google.android.material.card.MaterialCardView
+            android:id="@+id/btn_create_new_workout"
+            android:layout_width="match_parent"
+            android:layout_height="64dp"
+            android:layout_marginHorizontal="24dp"
+            android:layout_marginBottom="16dp"
+            app:cardBackgroundColor="#333A42"
+            app:cardCornerRadius="20dp"
+            app:cardElevation="0dp"
+            app:strokeWidth="0dp"
+            android:clickable="true"
+            android:focusable="true"
+            app:layout_constraintBottom_toBottomOf="parent">
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center"
+                android:text="CREATE A NEW WORKOUT"
+                android:textColor="@color/white"
+                android:textStyle="bold"
+                android:textSize="16sp" />
+        </com.google.android.material.card.MaterialCardView>
+
+    </androidx.constraintlayout.widget.ConstraintLayout>
+
+    <!-- History Layout -->
+    <ScrollView
+        android:id="@+id/history_layout"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:visibility="gone"
+        app:layout_constraintBottom_toTopOf="@id/bottom_nav_mock"
+        app:layout_constraintTop_toTopOf="parent">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:padding="16dp">
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="HISTORY"
+                android:textColor="@color/white"
+                android:textSize="20sp"
+                android:textStyle="bold" />
+
+            <!-- Stats Cards -->
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="16dp"
+                android:orientation="horizontal">
+
+                <androidx.cardview.widget.CardView
+                    android:layout_width="0dp"
+                    android:layout_height="120dp"
+                    android:layout_weight="1"
+                    android:layout_marginEnd="8dp"
+                    app:cardBackgroundColor="@color/card_blue"
+                    app:cardCornerRadius="12dp">
+                    <LinearLayout android:layout_width="match_parent" android:layout_height="match_parent" android:orientation="vertical" android:padding="12dp" android:gravity="center_vertical">
+                        <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="CURRENT STREAK" android:textColor="#E0E0E0" android:textSize="10sp" android:textStyle="bold" />
+                        <TextView
+                            android:id="@+id/history_current_streak"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="0"
+                            android:textColor="@color/white"
+                            android:textSize="28sp"
+                            android:textStyle="bold" />
+                        <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="Best Streak: 3" android:textColor="#E0E0E0" android:textSize="10sp" />
+                    </LinearLayout>
+                </androidx.cardview.widget.CardView>
+
+                <androidx.cardview.widget.CardView
+                    android:layout_width="0dp"
+                    android:layout_height="120dp"
+                    android:layout_weight="1"
+                    android:layout_marginHorizontal="4dp"
+                    app:cardBackgroundColor="@color/card_orange"
+                    app:cardCornerRadius="12dp">
+                    <LinearLayout android:layout_width="match_parent" android:layout_height="match_parent" android:orientation="vertical" android:padding="12dp" android:gravity="center_vertical">
+                        <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="WORKOUTS" android:textColor="#E0E0E0" android:textSize="10sp" android:textStyle="bold" />
+                        <TextView
+                            android:id="@+id/history_workouts_finished"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="0"
+                            android:textColor="@color/white"
+                            android:textSize="28sp"
+                            android:textStyle="bold" />
+                        <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="This month: 0" android:textColor="#E0E0E0" android:textSize="10sp" />
+                    </LinearLayout>
+                </androidx.cardview.widget.CardView>
+
+                <androidx.cardview.widget.CardView
+                    android:layout_width="0dp"
+                    android:layout_height="120dp"
+                    android:layout_weight="1"
+                    android:layout_marginStart="8dp"
+                    app:cardBackgroundColor="#FBC02D"
+                    app:cardCornerRadius="12dp">
+                    <LinearLayout android:layout_width="match_parent" android:layout_height="match_parent" android:orientation="vertical" android:padding="12dp" android:gravity="center_vertical">
+                        <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="EFFICIENCY" android:textColor="#333333" android:textSize="10sp" android:textStyle="bold" />
+                        <TextView
+                            android:id="@+id/history_efficiency"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="0%"
+                            android:textColor="#333333"
+                            android:textSize="28sp"
+                            android:textStyle="bold" />
+                        <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="Overall progress" android:textColor="#333333" android:textSize="10sp" />
+                    </LinearLayout>
+                </androidx.cardview.widget.CardView>
+            </LinearLayout>
+
+            <!-- Dynamic Grid Section -->
+            <androidx.cardview.widget.CardView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="16dp"
+                app:cardBackgroundColor="#2A2A2A"
+                app:cardCornerRadius="12dp">
+                <LinearLayout android:id="@+id/history_grid_container" android:layout_width="match_parent" android:layout_height="wrap_content" android:orientation="vertical" android:padding="16dp">
+
+                    <RelativeLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content">
+
+                        <ImageView
+                            android:id="@+id/btn_prev_month"
+                            android:layout_width="32dp"
+                            android:layout_height="32dp"
+                            android:layout_alignParentStart="true"
+                            android:src="@android:drawable/ic_media_previous"
+                            app:tint="@color/white" />
+
+                        <TextView
+                            android:id="@+id/tv_grid_month"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_centerInParent="true"
+                            android:text="March 2026"
+                            android:textColor="@color/white"
+                            android:textStyle="bold" />
+
+                        <ImageView
+                            android:id="@+id/btn_next_month"
+                            android:layout_width="32dp"
+                            android:layout_height="32dp"
+                            android:layout_alignParentEnd="true"
+                            android:src="@android:drawable/ic_media_next"
+                            app:tint="@color/white" />
+                    </RelativeLayout>
+
+                    <GridLayout android:id="@+id/history_dynamic_grid" android:layout_width="match_parent" android:layout_height="wrap_content" android:layout_marginTop="16dp" android:columnCount="7">
+                        <TextView style="@style/CalendarDayHeader" android:text="SUN" />
+                        <TextView style="@style/CalendarDayHeader" android:text="MON" />
+                        <TextView style="@style/CalendarDayHeader" android:text="TUE" />
+                        <TextView style="@style/CalendarDayHeader" android:text="WED" />
+                        <TextView style="@style/CalendarDayHeader" android:text="THU" />
+                        <TextView style="@style/CalendarDayHeader" android:text="FRI" />
+                        <TextView style="@style/CalendarDayHeader" android:text="SAT" />
+                    </GridLayout>
+                </LinearLayout>
+            </androidx.cardview.widget.CardView>
+
+        </LinearLayout>
+    </ScrollView>
+
+    <!-- Bottom Navigation Mock -->
+    <LinearLayout
+        android:id="@+id/bottom_nav_mock"
+        android:layout_width="match_parent"
+        android:layout_height="64dp"
+        android:background="#1A1A1A"
+        android:orientation="horizontal"
+        android:gravity="center_vertical"
+        app:layout_constraintBottom_toBottomOf="parent">
+
+        <LinearLayout
+            android:id="@+id/nav_today"
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
+            android:layout_weight="1"
+            android:orientation="vertical"
+            android:gravity="center"
+            android:clickable="true"
+            android:focusable="true">
+            <ImageView
+                android:id="@+id/iv_today"
+                android:layout_width="24dp"
+                android:layout_height="24dp"
+                android:src="@android:drawable/ic_menu_today"
+                app:tint="@color/chip_selected" />
+            <TextView
+                android:id="@+id/tv_today_nav"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="TODAY"
+                android:textColor="@color/chip_selected"
+                android:textSize="8sp"
+                android:layout_marginTop="4dp" />
+        </LinearLayout>
+
+        <LinearLayout
+            android:id="@+id/nav_history"
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
+            android:layout_weight="1"
+            android:orientation="vertical"
+            android:gravity="center"
+            android:clickable="true"
+            android:focusable="true">
+            <ImageView
+                android:id="@+id/iv_history"
+                android:layout_width="24dp"
+                android:layout_height="24dp"
+                android:src="@android:drawable/ic_menu_sort_by_size"
+                app:tint="@color/text_secondary" />
+            <TextView
+                android:id="@+id/tv_history_nav"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="HISTORY"
+                android:textColor="@color/text_secondary"
+                android:textSize="8sp"
+                android:layout_marginTop="4dp" />
+        </LinearLayout>
+
+    </LinearLayout>
+
+</androidx.constraintlayout.widget.ConstraintLayout>

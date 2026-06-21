@@ -1,0 +1,195 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@color/dark_background">
+
+    <!-- Top Toolbar -->
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:id="@+id/toolbar"
+        android:layout_width="match_parent"
+        android:layout_height="64dp"
+        app:layout_constraintTop_toTopOf="parent">
+
+        <ImageView
+            android:id="@+id/btn_back"
+            android:layout_width="48dp"
+            android:layout_height="48dp"
+            android:layout_marginStart="8dp"
+            android:padding="12dp"
+            android:src="?attr/homeAsUpIndicator"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            app:tint="@color/white" />
+
+    </androidx.constraintlayout.widget.ConstraintLayout>
+
+    <ScrollView
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/toolbar">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:padding="20dp">
+
+            <TextView
+                android:id="@+id/tv_workout_title"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Full Body Workout"
+                android:textColor="@color/white"
+                android:textSize="24sp"
+                android:textStyle="bold" />
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="12dp"
+                android:orientation="horizontal">
+
+                <TextView
+                    android:id="@+id/tv_frequency_chip"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:background="@drawable/chip_background_dark"
+                    android:paddingHorizontal="12dp"
+                    android:paddingVertical="4dp"
+                    android:text="ANYTIME"
+                    android:textColor="@color/white"
+                    android:textSize="10sp"
+                    android:textStyle="bold" />
+
+                <TextView
+                    android:id="@+id/tv_repeat_chip"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="8dp"
+                    android:background="@drawable/chip_background_dark"
+                    android:paddingHorizontal="12dp"
+                    android:paddingVertical="4dp"
+                    android:text="EVERYDAY"
+                    android:textColor="@color/white"
+                    android:textSize="10sp"
+                    android:textStyle="bold" />
+            </LinearLayout>
+
+            <!-- Stats Row -->
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="120dp"
+                android:layout_marginTop="20dp"
+                android:orientation="horizontal">
+
+                <androidx.cardview.widget.CardView
+                    android:layout_width="0dp"
+                    android:layout_height="match_parent"
+                    android:layout_weight="1"
+                    android:layout_marginEnd="8dp"
+                    app:cardBackgroundColor="@color/card_blue"
+                    app:cardCornerRadius="16dp">
+                    <LinearLayout android:layout_width="match_parent" android:layout_height="match_parent" android:orientation="vertical" android:padding="12dp" android:gravity="center_vertical">
+                        <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="CURRENT STREAK" android:textColor="#E0E0E0" android:textSize="10sp" android:textStyle="bold" />
+                        <TextView android:id="@+id/tv_streak_count" android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="0" android:textColor="@color/white" android:textSize="32sp" android:textStyle="bold" />
+                        <TextView android:id="@+id/tv_best_streak" android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="Best Streak: 0" android:textColor="#E0E0E0" android:textSize="10sp" />
+                    </LinearLayout>
+                </androidx.cardview.widget.CardView>
+
+                <androidx.cardview.widget.CardView
+                    android:layout_width="0dp"
+                    android:layout_height="match_parent"
+                    android:layout_weight="1"
+                    android:layout_marginHorizontal="4dp"
+                    app:cardBackgroundColor="@color/card_orange"
+                    app:cardCornerRadius="16dp">
+                    <LinearLayout android:layout_width="match_parent" android:layout_height="match_parent" android:orientation="vertical" android:padding="12dp" android:gravity="center_vertical">
+                        <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="WORKOUTS FINISHED" android:textColor="#E0E0E0" android:textSize="10sp" android:textStyle="bold" />
+                        <TextView android:id="@+id/tv_finished_count" android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="0" android:textColor="@color/white" android:textSize="32sp" android:textStyle="bold" />
+                        <TextView android:id="@+id/tv_this_week" android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="This week: 0" android:textColor="#E0E0E0" android:textSize="10sp" />
+                    </LinearLayout>
+                </androidx.cardview.widget.CardView>
+
+                <androidx.cardview.widget.CardView
+                    android:layout_width="0dp"
+                    android:layout_height="match_parent"
+                    android:layout_weight="1"
+                    android:layout_marginStart="8dp"
+                    app:cardBackgroundColor="#FBC02D"
+                    app:cardCornerRadius="16dp">
+                    <LinearLayout android:layout_width="match_parent" android:layout_height="match_parent" android:orientation="vertical" android:padding="12dp" android:gravity="center_vertical">
+                        <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="EFFICIENCY" android:textColor="#333333" android:textSize="10sp" android:textStyle="bold" />
+                        <TextView android:id="@+id/tv_rate_percent" android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="0%" android:textColor="#333333" android:textSize="32sp" android:textStyle="bold" />
+                        <TextView android:id="@+id/tv_rate_fraction" android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="0/0 workouts" android:textColor="#333333" android:textSize="10sp" />
+                    </LinearLayout>
+                </androidx.cardview.widget.CardView>
+            </LinearLayout>
+
+            <!-- Calendar Section -->
+            <androidx.cardview.widget.CardView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="20dp"
+                app:cardBackgroundColor="#2A2F35"
+                app:cardCornerRadius="16dp">
+                <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content" android:orientation="vertical" android:padding="16dp">
+
+                    <RelativeLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content">
+
+                        <ImageView
+                            android:id="@+id/btn_prev_month"
+                            android:layout_width="32dp"
+                            android:layout_height="32dp"
+                            android:layout_alignParentStart="true"
+                            android:src="@android:drawable/ic_media_previous"
+                            app:tint="@color/white" />
+
+                        <TextView
+                            android:id="@+id/tv_calendar_month"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_centerInParent="true"
+                            android:text="March 2026"
+                            android:textColor="@color/white"
+                            android:textSize="16sp"
+                            android:textStyle="bold" />
+
+                        <ImageView
+                            android:id="@+id/btn_next_month"
+                            android:layout_width="32dp"
+                            android:layout_height="32dp"
+                            android:layout_alignParentEnd="true"
+                            android:src="@android:drawable/ic_media_next"
+                            app:tint="@color/white" />
+                    </RelativeLayout>
+
+                    <GridLayout
+                        android:id="@+id/calendar_grid"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="16dp"
+                        android:columnCount="7"
+                        android:alignmentMode="alignBounds">
+                        <!-- Day Headers -->
+                        <TextView style="@style/CalendarDayHeader" android:text="SUN" />
+                        <TextView style="@style/CalendarDayHeader" android:text="MON" />
+                        <TextView style="@style/CalendarDayHeader" android:text="TUE" />
+                        <TextView style="@style/CalendarDayHeader" android:text="WED" />
+                        <TextView style="@style/CalendarDayHeader" android:text="THU" />
+                        <TextView style="@style/CalendarDayHeader" android:text="FRI" />
+                        <TextView style="@style/CalendarDayHeader" android:text="SAT" />
+                    </GridLayout>
+                </LinearLayout>
+            </androidx.cardview.widget.CardView>
+
+        </LinearLayout>
+    </ScrollView>
+
+</androidx.constraintlayout.widget.ConstraintLayout>

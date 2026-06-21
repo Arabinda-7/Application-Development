@@ -1,0 +1,69 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:orientation="vertical"
+    android:padding="24dp"
+    android:background="@color/dark_background">
+
+    <EditText
+        android:id="@+id/note_title_input"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:hint="Title"
+        android:textColor="@color/white"
+        android:textColorHint="@color/text_secondary"
+        android:inputType="textCapSentences"
+        android:textStyle="bold"
+        android:backgroundTint="@color/white" />
+
+    <EditText
+        android:id="@+id/note_content_input"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="16dp"
+        android:hint="Write your note here..."
+        android:textColor="@color/white"
+        android:textColorHint="@color/text_secondary"
+        android:gravity="top"
+        android:inputType="textMultiLine"
+        android:minLines="5"
+        android:backgroundTint="@color/white" />
+
+    <LinearLayout
+        android:id="@+id/note_color_selection_row"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="20dp"
+        android:gravity="center_vertical"
+        android:orientation="horizontal"
+        android:padding="8dp"
+        android:clickable="true"
+        android:focusable="true"
+        android:background="?attr/selectableItemBackground">
+
+        <TextView
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:text="Note Color"
+            android:textColor="@color/white"
+            android:textSize="16sp" />
+
+        <View
+            android:id="@+id/note_color_preview"
+            android:layout_width="24dp"
+            android:layout_height="24dp"
+            android:background="@drawable/circle_selected_bg"
+            android:backgroundTint="@color/card_blue" />
+
+        <ImageView
+            android:layout_width="20dp"
+            android:layout_height="20dp"
+            android:layout_marginStart="8dp"
+            android:src="@android:drawable/ic_media_next"
+            app:tint="@color/text_secondary" />
+    </LinearLayout>
+
+</LinearLayout>
