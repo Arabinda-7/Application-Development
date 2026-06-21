@@ -25,8 +25,6 @@ class MainActivity : AppCompatActivity() {
 
     private lateinit var adapter: MenuAdapter
     private lateinit var menuItems: MutableList<MenuItem>
-    private lateinit var headerProgressBar: ProgressBar
-    private lateinit var progressPercentage: TextView
 
     private val exportLauncher = registerForActivityResult(ActivityResultContracts.CreateDocument("application/json")) { uri ->
         uri?.let { exportToFile(it) }
@@ -48,9 +46,6 @@ class MainActivity : AppCompatActivity() {
         val sdf = SimpleDateFormat("MMMM dd, yyyy", Locale.getDefault())
         val currentDate = sdf.format(Date())
         dateTextView.text = currentDate
-
-        headerProgressBar = findViewById(R.id.header_progress_bar)
-        progressPercentage = findViewById(R.id.progress_percentage)
 
         findViewById<View>(R.id.btn_back).visibility = View.GONE
         findViewById<ImageButton>(R.id.btn_main_menu).setOnClickListener { showMainMenu(it) }
@@ -147,10 +142,5 @@ class MainActivity : AppCompatActivity() {
         // Update individual menu items
         adapter.updateProgress("Habit Tracker", DataManager.getHabitProgress())
         adapter.updateProgress("Workout Routine", DataManager.getWorkoutProgress())
-
-        // Update overall daily progress in the header
-        val totalProgress = DataManager.getTotalDailyProgress()
-        headerProgressBar.progress = totalProgress
-        progressPercentage.text = "$totalProgress%"
     }
 }

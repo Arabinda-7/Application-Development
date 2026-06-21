@@ -52,14 +52,55 @@
             app:layout_constraintTop_toBottomOf="@id/tv_today" />
 
         <LinearLayout
+            android:id="@+id/section_progress_container"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="16dp"
+            android:paddingHorizontal="24dp"
+            android:orientation="vertical"
+            app:layout_constraintTop_toBottomOf="@id/tv_date">
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal">
+                <TextView
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:text="Daily Workout Progress"
+                    android:textColor="@color/white"
+                    android:textSize="12sp" />
+                <TextView
+                    android:id="@+id/tv_section_progress_percentage"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="0%"
+                    android:textColor="@color/white"
+                    android:textSize="12sp"
+                    android:textStyle="bold" />
+            </LinearLayout>
+
+            <ProgressBar
+                android:id="@+id/section_progress_bar"
+                style="@android:style/Widget.ProgressBar.Horizontal"
+                android:layout_width="match_parent"
+                android:layout_height="8dp"
+                android:layout_marginTop="4dp"
+                android:progress="0"
+                android:progressDrawable="@android:drawable/progress_horizontal"
+                android:progressTint="@color/chip_selected" />
+        </LinearLayout>
+
+        <LinearLayout
             android:id="@+id/day_selector"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginTop="24dp"
+            android:layout_marginTop="16dp"
             android:orientation="horizontal"
             android:paddingHorizontal="16dp"
             android:gravity="center"
-            app:layout_constraintTop_toBottomOf="@id/tv_date">
+            app:layout_constraintTop_toBottomOf="@id/section_progress_container">
 
             <LinearLayout android:id="@+id/day_sun" android:layout_width="0dp" android:layout_height="wrap_content" android:layout_weight="1" android:orientation="vertical" android:gravity="center" android:clickable="true" android:focusable="true">
                 <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="SUN" android:textColor="@color/text_secondary" android:textSize="10sp" />

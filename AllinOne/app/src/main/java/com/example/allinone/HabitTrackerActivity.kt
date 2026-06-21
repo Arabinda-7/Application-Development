@@ -29,6 +29,8 @@ class HabitTrackerActivity : AppCompatActivity() {
 
     private val habits = DataManager.habits
     private lateinit var habitAdapter: HabitAdapter
+    private lateinit var sectionProgressBar: android.widget.ProgressBar
+    private lateinit var sectionProgressText: TextView
     private var selectedDayId: Int = -1
     private var selectedTimeFilter: String = "All"
     private var selectedDateString: String = SimpleDateFormat("yyyyMMdd", Locale.getDefault()).format(Date())
@@ -46,9 +48,14 @@ class HabitTrackerActivity : AppCompatActivity() {
 
         val habitList = findViewById<RecyclerView>(R.id.habit_list)
         habitList.layoutManager = LinearLayoutManager(this)
+        
+        sectionProgressBar = findViewById(R.id.section_progress_bar)
+        sectionProgressText = findViewById(R.id.tv_section_progress_percentage)
+        
         habitAdapter = HabitAdapter(habits, { 
             DataManager.saveData(this)
             updateHistoryUI()
+            updateSectionProgress()
         }, { _, _ -> })
         habitList.adapter = habitAdapter
 
@@ -58,6 +65,7 @@ class HabitTrackerActivity : AppCompatActivity() {
         setupFooterLogic()
         setupGridNavigation()
         updateCalendarDays()
+        updateSectionProgress()
 
         findViewById<View>(R.id.btn_back).setOnClickListener { finish() }
     }
@@ -155,6 +163,13 @@ class HabitTrackerActivity : AppCompatActivity() {
         findViewById<TextView>(R.id.history_habits_finished).text = DataManager.getTotalHabitsFinished().toString()
         findViewById<TextView>(R.id.history_completion_rate).text = "${DataManager.getGlobalCompletionRate()}%"
         setupDynamicHistoryGrid()
+        updateSectionProgress()
+    }
+
+    private fun updateSectionProgress() {
+        val progress = DataManager.getHabitProgress()
+        sectionProgressBar.progress = progress
+        sectionProgressText.text = "$progress%"
     }
 
     private fun setupDynamicHistoryGrid() {

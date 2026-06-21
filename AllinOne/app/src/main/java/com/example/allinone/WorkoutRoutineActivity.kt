@@ -32,6 +32,8 @@ class WorkoutRoutineActivity : AppCompatActivity() {
 
     private val workouts = DataManager.workouts
     private lateinit var workoutAdapter: WorkoutAdapter
+    private lateinit var sectionProgressBar: android.widget.ProgressBar
+    private lateinit var sectionProgressText: TextView
     private var currentlyTimingWorkoutPosition: Int = -1
     private var selectedDayId: Int = -1
     private var selectedTimeFilter: String = "All"
@@ -66,9 +68,14 @@ class WorkoutRoutineActivity : AppCompatActivity() {
 
         val workoutList = findViewById<RecyclerView>(R.id.workout_list)
         workoutList.layoutManager = LinearLayoutManager(this)
+
+        sectionProgressBar = findViewById(R.id.section_progress_bar)
+        sectionProgressText = findViewById(R.id.tv_section_progress_percentage)
+
         workoutAdapter = WorkoutAdapter(workouts, { 
             DataManager.saveData(this)
             updateHistoryUI()
+            updateSectionProgress()
         }, { workout, position -> startTimerForWorkout(workout, position) })
         workoutList.adapter = workoutAdapter
 
@@ -78,6 +85,7 @@ class WorkoutRoutineActivity : AppCompatActivity() {
         setupFooterLogic()
         setupGridNavigation()
         updateCalendarDays()
+        updateSectionProgress()
 
         findViewById<View>(R.id.btn_back).setOnClickListener { finish() }
     }
@@ -174,6 +182,13 @@ class WorkoutRoutineActivity : AppCompatActivity() {
         findViewById<TextView>(R.id.history_workouts_finished).text = DataManager.getTotalWorkoutsFinished().toString()
         findViewById<TextView>(R.id.history_efficiency).text = "${DataManager.getGlobalCompletionRate()}%"
         setupDynamicHistoryGrid()
+        updateSectionProgress()
+    }
+
+    private fun updateSectionProgress() {
+        val progress = DataManager.getWorkoutProgress()
+        sectionProgressBar.progress = progress
+        sectionProgressText.text = "$progress%"
     }
 
     private fun setupDynamicHistoryGrid() {
