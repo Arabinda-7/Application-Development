@@ -7,6 +7,7 @@ import android.view.View
 import android.widget.EditText
 import android.widget.RadioGroup
 import android.widget.TextView
+import android.view.ViewGroup
 import androidx.appcompat.app.AppCompatActivity
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
@@ -91,8 +92,10 @@ class FinanceActivity : AppCompatActivity() {
     }
 
     private fun showEditTransactionDialog(transaction: Transaction, position: Int) {
-        val dialog = Dialog(this, android.R.style.Theme_Black_NoTitleBar_Fullscreen)
+        val dialog = Dialog(this)
         dialog.setContentView(R.layout.dialog_add_transaction)
+        dialog.window?.setBackgroundDrawableResource(android.R.color.transparent)
+        dialog.window?.setLayout(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT)
 
         val etAmount = dialog.findViewById<EditText>(R.id.et_trans_amount)
         val etTitle = dialog.findViewById<EditText>(R.id.et_trans_title)
@@ -162,8 +165,10 @@ class FinanceActivity : AppCompatActivity() {
     }
 
     private fun showSetBudgetDialog() {
-        val dialog = Dialog(this, android.R.style.Theme_Black_NoTitleBar_Fullscreen)
+        val dialog = Dialog(this)
         dialog.setContentView(R.layout.dialog_set_budget)
+        dialog.window?.setBackgroundDrawableResource(android.R.color.transparent)
+        dialog.window?.setLayout(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT)
 
         val etBudget = dialog.findViewById<EditText>(R.id.et_budget_amount)
         val btnSave = dialog.findViewById<View>(R.id.btn_save_budget)
@@ -186,8 +191,10 @@ class FinanceActivity : AppCompatActivity() {
     }
 
     private fun showSetSavingsGoalDialog() {
-        val dialog = Dialog(this, android.R.style.Theme_Black_NoTitleBar_Fullscreen)
+        val dialog = Dialog(this)
         dialog.setContentView(R.layout.dialog_set_budget)
+        dialog.window?.setBackgroundDrawableResource(android.R.color.transparent)
+        dialog.window?.setLayout(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT)
 
         val etGoal = dialog.findViewById<EditText>(R.id.et_budget_amount)
         val btnSave = dialog.findViewById<View>(R.id.btn_save_budget)
@@ -212,8 +219,10 @@ class FinanceActivity : AppCompatActivity() {
     }
 
     private fun showAddTransactionDialog() {
-        val dialog = Dialog(this, android.R.style.Theme_Black_NoTitleBar_Fullscreen)
+        val dialog = Dialog(this)
         dialog.setContentView(R.layout.dialog_add_transaction)
+        dialog.window?.setBackgroundDrawableResource(android.R.color.transparent)
+        dialog.window?.setLayout(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT)
 
         val etAmount = dialog.findViewById<EditText>(R.id.et_trans_amount)
         val etTitle = dialog.findViewById<EditText>(R.id.et_trans_title)

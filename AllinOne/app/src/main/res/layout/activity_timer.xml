@@ -56,23 +56,30 @@
         app:layout_constraintStart_toStartOf="@id/timer_progress_indicator"
         app:layout_constraintEnd_toEndOf="@id/timer_progress_indicator" />
 
-    <Button
+    <androidx.appcompat.widget.AppCompatButton
         android:id="@+id/start_pause_button"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
+        android:layout_width="200dp"
+        android:layout_height="64dp"
         android:layout_marginBottom="32dp"
+        android:background="@drawable/bg_blue_oval_button"
+        android:backgroundTint="@color/white"
         android:text="Start"
+        android:textColor="@color/primary_blue"
+        android:textStyle="bold"
         app:layout_constraintBottom_toTopOf="@id/finish_button"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent" />
 
-    <Button
+    <androidx.appcompat.widget.AppCompatButton
         android:id="@+id/finish_button"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
+        android:layout_width="200dp"
+        android:layout_height="64dp"
         android:layout_marginBottom="48dp"
+        android:background="@drawable/bg_blue_oval_button"
+        android:backgroundTint="#4DFFFFFF"
         android:text="Finish Early"
-        android:backgroundTint="#80FFFFFF"
+        android:textColor="@color/white"
+        android:textStyle="bold"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent" />

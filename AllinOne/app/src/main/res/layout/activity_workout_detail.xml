@@ -93,7 +93,7 @@
                     android:layout_weight="1"
                     android:layout_marginEnd="8dp"
                     app:cardBackgroundColor="@color/card_blue"
-                    app:cardCornerRadius="16dp">
+                    app:cardCornerRadius="24dp">
                     <LinearLayout android:layout_width="match_parent" android:layout_height="match_parent" android:orientation="vertical" android:padding="12dp" android:gravity="center_vertical">
                         <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="CURRENT STREAK" android:textColor="#E0E0E0" android:textSize="10sp" android:textStyle="bold" />
                         <TextView android:id="@+id/tv_streak_count" android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="0" android:textColor="@color/white" android:textSize="32sp" android:textStyle="bold" />
@@ -107,7 +107,7 @@
                     android:layout_weight="1"
                     android:layout_marginHorizontal="4dp"
                     app:cardBackgroundColor="@color/card_orange"
-                    app:cardCornerRadius="16dp">
+                    app:cardCornerRadius="24dp">
                     <LinearLayout android:layout_width="match_parent" android:layout_height="match_parent" android:orientation="vertical" android:padding="12dp" android:gravity="center_vertical">
                         <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="WORKOUTS FINISHED" android:textColor="#E0E0E0" android:textSize="10sp" android:textStyle="bold" />
                         <TextView android:id="@+id/tv_finished_count" android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="0" android:textColor="@color/white" android:textSize="32sp" android:textStyle="bold" />
@@ -121,7 +121,7 @@
                     android:layout_weight="1"
                     android:layout_marginStart="8dp"
                     app:cardBackgroundColor="#FBC02D"
-                    app:cardCornerRadius="16dp">
+                    app:cardCornerRadius="24dp">
                     <LinearLayout android:layout_width="match_parent" android:layout_height="match_parent" android:orientation="vertical" android:padding="12dp" android:gravity="center_vertical">
                         <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="EFFICIENCY" android:textColor="#333333" android:textSize="10sp" android:textStyle="bold" />
                         <TextView android:id="@+id/tv_rate_percent" android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="0%" android:textColor="#333333" android:textSize="32sp" android:textStyle="bold" />
@@ -136,7 +136,7 @@
                 android:layout_height="wrap_content"
                 android:layout_marginTop="20dp"
                 app:cardBackgroundColor="#2A2F35"
-                app:cardCornerRadius="16dp">
+                app:cardCornerRadius="24dp">
                 <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content" android:orientation="vertical" android:padding="16dp">
 
                     <RelativeLayout

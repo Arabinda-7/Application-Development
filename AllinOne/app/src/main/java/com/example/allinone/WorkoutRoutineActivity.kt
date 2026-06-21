@@ -24,6 +24,7 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.ContextCompat
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
+import androidx.viewpager2.widget.ViewPager2
 import com.google.android.material.chip.ChipGroup
 import java.text.SimpleDateFormat
 import java.util.*
@@ -32,15 +33,14 @@ class WorkoutRoutineActivity : AppCompatActivity() {
 
     private val workouts = DataManager.workouts
     private lateinit var workoutAdapter: WorkoutAdapter
+    private lateinit var weekAdapter: CalendarWeekAdapter
     private lateinit var sectionProgressBar: android.widget.ProgressBar
     private lateinit var sectionProgressText: TextView
     private var currentlyTimingWorkoutPosition: Int = -1
-    private var selectedDayId: Int = -1
     private var selectedTimeFilter: String = "All"
     private var selectedDateString: String = SimpleDateFormat("yyyyMMdd", Locale.getDefault()).format(Date())
     
     private var currentGridCalendar = Calendar.getInstance()
-    private val dayToDateMap = mutableMapOf<Int, String>()
 
     private val timerActivityResultLauncher = registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
         if (result.resultCode == Activity.RESULT_OK) {
@@ -84,42 +84,69 @@ class WorkoutRoutineActivity : AppCompatActivity() {
         setupHeaderLogic()
         setupFooterLogic()
         setupGridNavigation()
-        updateCalendarDays()
+        setupCalendarViewPager()
         updateSectionProgress()
 
         findViewById<View>(R.id.btn_back).setOnClickListener { finish() }
     }
 
-    private fun updateCalendarDays() {
+    private fun setupCalendarViewPager() {
+        val vpCalendar = findViewById<ViewPager2>(R.id.vp_calendar)
+        val weeks = mutableListOf<List<DayModel>>()
         val calendar = Calendar.getInstance()
-        val todayStr = SimpleDateFormat("yyyyMMdd", Locale.getDefault()).format(calendar.time)
-        val dayIds = listOf(R.id.day_sun, R.id.day_mon, R.id.day_tue, R.id.day_wed, R.id.day_thu, R.id.day_fri, R.id.day_sat)
         
-        val sdf = SimpleDateFormat("yyyyMMdd", Locale.getDefault())
+        calendar.add(Calendar.WEEK_OF_YEAR, -52)
         calendar.set(Calendar.DAY_OF_WEEK, Calendar.SUNDAY)
         
-        dayIds.forEachIndexed { index, id ->
-            val dateStr = sdf.format(calendar.time)
-            dayToDateMap[id] = dateStr
-            
-            val dayLayout = findViewById<View>(id)
-            val frameLayout = (dayLayout as android.widget.LinearLayout).getChildAt(1) as android.widget.FrameLayout
-            val numberTextView = frameLayout.getChildAt(1) as TextView
-            numberTextView.text = calendar.get(Calendar.DAY_OF_MONTH).toString()
-            
-            if (dateStr == todayStr) {
-                updateDaySelection(id)
+        val sdfDate = SimpleDateFormat("yyyyMMdd", Locale.getDefault())
+        val todayStr = sdfDate.format(Date())
+        val sdfDayName = SimpleDateFormat("EEE", Locale.getDefault())
+        val sdfDayNum = SimpleDateFormat("dd", Locale.getDefault())
+
+        var initialPageIndex = 0
+        val totalWeeksCount = 105 
+
+        for (w in 0 until totalWeeksCount) {
+            val weekDays = mutableListOf<DayModel>()
+            for (d in 0 until 7) {
+                val dateStr = sdfDate.format(calendar.time)
+                val isSelected = dateStr == todayStr
+                if (isSelected) initialPageIndex = w
+                
+                weekDays.add(DayModel(
+                    date = calendar.time,
+                    dayName = sdfDayName.format(calendar.time),
+                    dayNumber = sdfDayNum.format(calendar.time),
+                    dateString = dateStr,
+                    isSelected = isSelected
+                ))
+                calendar.add(Calendar.DAY_OF_YEAR, 1)
             }
-            calendar.add(Calendar.DAY_OF_MONTH, 1)
+            weeks.add(weekDays)
         }
+
+        weekAdapter = CalendarWeekAdapter(weeks) { day ->
+            selectedDateString = day.dateString
+            weeks.flatten().forEach { it.isSelected = (it.dateString == day.dateString) }
+            weekAdapter.notifyDataSetChanged()
+            applyFilters()
+        }
+        
+        vpCalendar.adapter = weekAdapter
+        vpCalendar.setCurrentItem(initialPageIndex, false)
+
+        vpCalendar.registerOnPageChangeCallback(object : ViewPager2.OnPageChangeCallback() {
+            override fun onPageSelected(position: Int) {
+                val firstDay = weeks[position][0]
+                val sdfMonth = SimpleDateFormat("MMMM yyyy", Locale.getDefault())
+                findViewById<TextView>(R.id.tv_date).text = sdfMonth.format(firstDay.date)
+            }
+        })
     }
 
     private fun setupHeaderLogic() {
-        val dayIds = listOf(R.id.day_sun, R.id.day_mon, R.id.day_tue, R.id.day_wed, R.id.day_thu, R.id.day_fri, R.id.day_sat)
-        dayIds.forEach { id -> findViewById<View>(id).setOnClickListener { updateDaySelection(it.id) } }
-
-        findViewById<ChipGroup>(R.id.filter_chips).setOnCheckedStateChangeListener { _, checkedIds ->
-            selectedTimeFilter = when (checkedIds.firstOrNull()) {
+        findViewById<RadioGroup>(R.id.filter_chips).setOnCheckedChangeListener { _, checkedId ->
+            selectedTimeFilter = when (checkedId) {
                 R.id.chip_morning -> "Morning"
                 R.id.chip_afternoon -> "Afternoon"
                 R.id.chip_evening -> "Evening"
@@ -130,9 +157,16 @@ class WorkoutRoutineActivity : AppCompatActivity() {
     }
 
     private fun applyFilters() {
-        val dayIds = listOf(R.id.day_sun, R.id.day_mon, R.id.day_tue, R.id.day_wed, R.id.day_thu, R.id.day_fri, R.id.day_sat)
-        val dayIndex = if (selectedDayId != -1) dayIds.indexOf(selectedDayId) else 0
-        workoutAdapter.filter(selectedTimeFilter, dayIndex, selectedDateString)
+        val calendar = Calendar.getInstance()
+        val sdf = SimpleDateFormat("yyyyMMdd", Locale.getDefault())
+        try {
+            val selectedDate = sdf.parse(selectedDateString) ?: Date()
+            calendar.time = selectedDate
+            val dayIndex = (calendar.get(Calendar.DAY_OF_WEEK) - 1) // 0=Sun
+            workoutAdapter.filter(selectedTimeFilter, dayIndex, selectedDateString)
+        } catch (e: Exception) {
+            workoutAdapter.filter(selectedTimeFilter, 0, selectedDateString)
+        }
     }
 
     private fun setupFooterLogic() {
@@ -273,25 +307,6 @@ class WorkoutRoutineActivity : AppCompatActivity() {
         frameLayout.addView(textView)
 
         return frameLayout
-    }
-
-    private fun updateDaySelection(newSelectedId: Int) {
-        val dayIds = listOf(R.id.day_sun, R.id.day_mon, R.id.day_tue, R.id.day_wed, R.id.day_thu, R.id.day_fri, R.id.day_sat)
-        val circleMap = mapOf(R.id.day_sun to R.id.circle_sun, R.id.day_mon to R.id.circle_mon, R.id.day_tue to R.id.circle_tue, R.id.day_wed to R.id.circle_wed, R.id.day_thu to R.id.circle_thu, R.id.day_fri to R.id.circle_fri, R.id.day_sat to R.id.circle_sat)
-        val lineMap = mapOf(R.id.day_sun to R.id.line_sun, R.id.day_mon to R.id.line_mon, R.id.day_tue to R.id.line_tue, R.id.day_wed to R.id.line_wed, R.id.day_thu to R.id.line_thu, R.id.day_fri to R.id.line_fri, R.id.day_sat to R.id.line_sat)
-        dayIds.forEach { id ->
-            val circle = findViewById<View>(circleMap[id]!!)
-            if (circle != null) {
-                circle.backgroundTintList = ContextCompat.getColorStateList(this, if (id == newSelectedId) R.color.chip_background else android.R.color.transparent)
-            }
-            val line = findViewById<View>(lineMap[id]!!)
-            if (line != null) {
-                line.visibility = if (id == newSelectedId) View.VISIBLE else View.INVISIBLE
-            }
-        }
-        selectedDayId = newSelectedId
-        selectedDateString = dayToDateMap[newSelectedId] ?: SimpleDateFormat("yyyyMMdd", Locale.getDefault()).format(Date())
-        applyFilters()
     }
 
     private fun startTimerForWorkout(workout: Workout, position: Int) {

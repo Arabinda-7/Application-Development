@@ -56,19 +56,24 @@ class NotesActivity : AppCompatActivity() {
             colorPreview.backgroundTintList = android.content.res.ColorStateList.valueOf(selectedColor)
         }
 
-        AlertDialog.Builder(this)
+        val dialog = AlertDialog.Builder(this)
             .setView(dialogView)
-            .setPositiveButton("Save") { _, _ ->
-                val title = titleInput.text.toString()
-                val content = contentInput.text.toString()
-                if (title.isNotEmpty() || content.isNotEmpty()) {
-                    notes.add(0, Note(title, content, color = selectedColor))
-                    noteAdapter.updateNotes(notes)
-                    DataManager.saveData(this)
-                }
+            .create()
+
+        dialog.window?.setBackgroundDrawableResource(android.R.color.transparent)
+
+        dialogView.findViewById<View>(R.id.btn_save_note).setOnClickListener {
+            val title = titleInput.text.toString()
+            val content = contentInput.text.toString()
+            if (title.isNotEmpty() || content.isNotEmpty()) {
+                notes.add(0, Note(title, content, color = selectedColor))
+                noteAdapter.updateNotes(notes)
+                DataManager.saveData(this)
+                dialog.dismiss()
             }
-            .setNegativeButton("Cancel", null)
-            .show()
+        }
+
+        dialog.show()
     }
 
     fun showEditNoteDialog(note: Note) {
@@ -76,11 +81,14 @@ class NotesActivity : AppCompatActivity() {
         val titleInput = dialogView.findViewById<EditText>(R.id.note_title_input)
         val contentInput = dialogView.findViewById<EditText>(R.id.note_content_input)
         val colorPreview = dialogView.findViewById<View>(R.id.note_color_preview)
+        val btnSave = dialogView.findViewById<TextView>(R.id.btn_save_note)
 
         titleInput.setText(note.title)
         contentInput.setText(note.content)
         var selectedColor = if (note.color != -1) note.color else ContextCompat.getColor(this, R.color.card_blue)
         colorPreview.backgroundTintList = android.content.res.ColorStateList.valueOf(selectedColor)
+
+        btnSave.text = "UPDATE NOTE"
 
         dialogView.findViewById<View>(R.id.note_color_selection_row).setOnClickListener {
             val colors = listOf(
@@ -93,21 +101,26 @@ class NotesActivity : AppCompatActivity() {
             colorPreview.backgroundTintList = android.content.res.ColorStateList.valueOf(selectedColor)
         }
 
-        AlertDialog.Builder(this)
+        val dialog = AlertDialog.Builder(this)
             .setView(dialogView)
-            .setPositiveButton("Save") { _, _ ->
-                note.title = titleInput.text.toString()
-                note.content = contentInput.text.toString()
-                note.color = selectedColor
-                noteAdapter.updateNotes(notes)
-                DataManager.saveData(this)
-            }
             .setNeutralButton("Delete") { _, _ ->
                 notes.remove(note)
                 noteAdapter.updateNotes(notes)
                 DataManager.saveData(this)
             }
-            .setNegativeButton("Cancel", null)
-            .show()
+            .create()
+
+        dialog.window?.setBackgroundDrawableResource(android.R.color.transparent)
+
+        btnSave.setOnClickListener {
+            note.title = titleInput.text.toString()
+            note.content = contentInput.text.toString()
+            note.color = selectedColor
+            noteAdapter.updateNotes(notes)
+            DataManager.saveData(this)
+            dialog.dismiss()
+        }
+
+        dialog.show()
     }
 }

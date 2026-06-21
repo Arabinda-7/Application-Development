@@ -3,6 +3,7 @@ package com.example.allinone
 import android.app.Dialog
 import android.os.Bundle
 import android.view.View
+import android.view.ViewGroup
 import android.widget.EditText
 import android.widget.RadioGroup
 import android.widget.TextView
@@ -46,8 +47,10 @@ class ProjectActivity : AppCompatActivity() {
     }
 
     fun showAddProjectDialog(existingProject: Project? = null) {
-        val dialog = Dialog(this, android.R.style.Theme_Black_NoTitleBar_Fullscreen)
+        val dialog = Dialog(this)
         dialog.setContentView(R.layout.dialog_add_project)
+        dialog.window?.setBackgroundDrawableResource(android.R.color.transparent)
+        dialog.window?.setLayout(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT)
 
         val nameInput = dialog.findViewById<EditText>(R.id.project_name_input)
         val descInput = dialog.findViewById<EditText>(R.id.project_desc_input)

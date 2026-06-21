@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="utf-8"?>
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:clickable="true"
+    android:focusable="true">
+
+    <View
+        android:id="@+id/view_selected_circle"
+        android:layout_width="36dp"
+        android:layout_height="36dp"
+        android:layout_gravity="center"
+        android:background="@drawable/circle_selected_bg"
+        android:backgroundTint="@android:color/transparent" />
+
+    <TextView
+        android:id="@+id/tv_day_number"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center"
+        android:text="22"
+        android:textColor="@color/white"
+        android:textSize="14sp" />
+
+    <View
+        android:id="@+id/view_selection_line"
+        android:layout_width="16dp"
+        android:layout_height="3dp"
+        android:layout_gravity="bottom|center_horizontal"
+        android:layout_marginBottom="2dp"
+        android:background="@color/chip_selected"
+        android:visibility="invisible" />
+
+</FrameLayout>

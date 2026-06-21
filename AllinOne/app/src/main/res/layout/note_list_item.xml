@@ -12,7 +12,7 @@
         android:id="@+id/note_card"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        app:cardCornerRadius="20dp"
+        app:cardCornerRadius="28dp"
         app:cardElevation="0dp"
         app:strokeWidth="0dp"
         app:cardBackgroundColor="@color/card_blue">

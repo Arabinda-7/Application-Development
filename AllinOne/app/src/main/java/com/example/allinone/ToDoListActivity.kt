@@ -62,22 +62,27 @@ class ToDoListActivity : AppCompatActivity() {
             colorPreview.backgroundTintList = android.content.res.ColorStateList.valueOf(selectedColor)
         }
 
-        AlertDialog.Builder(this)
+        val dialog = AlertDialog.Builder(this)
             .setView(dialogView)
-            .setPositiveButton(if (existingTask == null) "Add" else "Save") { _, _ ->
-                val name = editText.text.toString()
-                if (name.isNotEmpty()) {
-                    if (existingTask == null) {
-                        tasks.add(Task(name, color = selectedColor))
-                    } else {
-                        existingTask.name = name
-                        existingTask.color = selectedColor
-                    }
-                    taskAdapter.sortTasks()
-                    DataManager.saveData(this)
+            .create()
+        
+        dialog.window?.setBackgroundDrawableResource(android.R.color.transparent)
+
+        dialogView.findViewById<View>(R.id.btn_save_task).setOnClickListener {
+            val name = editText.text.toString()
+            if (name.isNotEmpty()) {
+                if (existingTask == null) {
+                    tasks.add(Task(name, color = selectedColor))
+                } else {
+                    existingTask.name = name
+                    existingTask.color = selectedColor
                 }
+                taskAdapter.sortTasks()
+                DataManager.saveData(this)
+                dialog.dismiss()
             }
-            .setNegativeButton("Cancel", null)
-            .show()
+        }
+
+        dialog.show()
     }
 }

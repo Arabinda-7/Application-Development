@@ -61,7 +61,7 @@
         android:layout_height="wrap_content"
         android:layout_marginTop="24dp"
         app:cardBackgroundColor="@color/chip_background"
-        app:cardCornerRadius="16dp"
+        app:cardCornerRadius="24dp"
         app:cardElevation="0dp"
         android:clickable="true"
         android:focusable="true"
@@ -107,7 +107,7 @@
         android:layout_height="wrap_content"
         android:layout_marginTop="12dp"
         app:cardBackgroundColor="@color/chip_background"
-        app:cardCornerRadius="16dp"
+        app:cardCornerRadius="24dp"
         app:cardElevation="0dp"
         android:clickable="true"
         android:focusable="true"
@@ -164,7 +164,7 @@
         android:layout_height="wrap_content"
         android:layout_marginTop="12dp"
         app:cardBackgroundColor="@color/chip_background"
-        app:cardCornerRadius="16dp"
+        app:cardCornerRadius="24dp"
         app:cardElevation="0dp"
         app:layout_constraintTop_toBottomOf="@id/tv_repeat_label_workout">
         <RelativeLayout
@@ -204,7 +204,7 @@
         android:layout_height="wrap_content"
         android:layout_marginTop="24dp"
         app:cardBackgroundColor="@color/chip_background"
-        app:cardCornerRadius="16dp"
+        app:cardCornerRadius="24dp"
         app:cardElevation="0dp"
         app:layout_constraintTop_toBottomOf="@id/card_repeat_workout">
 
@@ -355,13 +355,14 @@
     <androidx.appcompat.widget.AppCompatButton
         android:id="@+id/btn_save_workout"
         android:layout_width="match_parent"
-        android:layout_height="56dp"
+        android:layout_height="64dp"
         android:layout_marginTop="32dp"
-        android:background="@drawable/circle_selected_bg"
-        android:backgroundTint="@color/chip_selected"
+        android:layout_marginHorizontal="16dp"
+        android:background="@drawable/bg_blue_oval_button"
         android:text="SAVE WORKOUT"
         android:textColor="@color/white"
         android:textStyle="bold"
+        android:textSize="16sp"
         app:layout_constraintTop_toBottomOf="@id/workout_frequency_grid" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>
