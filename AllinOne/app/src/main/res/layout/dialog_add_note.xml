@@ -1,80 +1,81 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
-    android:layout_height="wrap_content"
-    android:orientation="vertical"
-    android:padding="24dp"
-    android:background="@drawable/bg_dialog_rounded">
+    android:layout_height="match_parent"
+    android:background="#000000"
+    android:padding="16dp">
+
+    <ImageView
+        android:id="@+id/btn_close_note"
+        android:layout_width="32dp"
+        android:layout_height="32dp"
+        android:src="@drawable/ic_back"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:tint="@color/white"
+        android:contentDescription="Back" />
+
+    <TextView
+        android:id="@+id/btn_save_note"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Save"
+        android:textColor="@color/white"
+        android:textSize="18sp"
+        android:textStyle="bold"
+        android:padding="8dp"
+        app:layout_constraintBottom_toBottomOf="@id/btn_close_note"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toTopOf="@id/btn_close_note" />
 
     <EditText
         android:id="@+id/note_title_input"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
+        android:layout_marginTop="32dp"
+        android:background="@null"
         android:hint="Title"
         android:textColor="@color/white"
-        android:textColorHint="@color/text_secondary"
+        android:textColorHint="#80FFFFFF"
+        android:textSize="32sp"
+        android:textStyle="normal"
         android:inputType="textCapSentences"
-        android:textStyle="bold"
-        android:backgroundTint="@color/white" />
+        app:layout_constraintTop_toBottomOf="@id/btn_close_note" />
+
+    <TextView
+        android:id="@+id/tv_note_metadata"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="8dp"
+        android:text="21 June 7:42 PM | 0 characters"
+        android:textColor="#80FFFFFF"
+        android:textSize="12sp"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/note_title_input" />
+
+    <View
+        android:id="@+id/note_color_preview"
+        android:layout_width="20dp"
+        android:layout_height="20dp"
+        android:layout_marginStart="8dp"
+        android:background="@drawable/circle_selected_bg"
+        app:layout_constraintBottom_toBottomOf="@id/tv_note_metadata"
+        app:layout_constraintStart_toEndOf="@id/tv_note_metadata"
+        app:layout_constraintTop_toTopOf="@id/tv_note_metadata" />
 
     <EditText
         android:id="@+id/note_content_input"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="16dp"
-        android:hint="Write your note here..."
+        android:layout_height="0dp"
+        android:layout_marginTop="24dp"
+        android:background="@null"
+        android:hint="Start typing"
         android:textColor="@color/white"
-        android:textColorHint="@color/text_secondary"
+        android:textColorHint="#80FFFFFF"
         android:gravity="top"
         android:inputType="textMultiLine"
-        android:minLines="5"
-        android:backgroundTint="@color/white" />
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/tv_note_metadata" />
 
-    <LinearLayout
-        android:id="@+id/note_color_selection_row"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="20dp"
-        android:gravity="center_vertical"
-        android:orientation="horizontal"
-        android:padding="8dp"
-        android:clickable="true"
-        android:focusable="true"
-        android:background="?attr/selectableItemBackground">
-
-        <TextView
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:layout_weight="1"
-            android:text="Note Color"
-            android:textColor="@color/white"
-            android:textSize="16sp" />
-
-        <View
-            android:id="@+id/note_color_preview"
-            android:layout_width="24dp"
-            android:layout_height="24dp"
-            android:background="@drawable/circle_selected_bg"
-            android:backgroundTint="@color/card_blue" />
-
-        <ImageView
-            android:layout_width="20dp"
-            android:layout_height="20dp"
-            android:layout_marginStart="8dp"
-            android:src="@android:drawable/ic_media_next"
-            app:tint="@color/text_secondary" />
-    </LinearLayout>
-
-    <androidx.appcompat.widget.AppCompatButton
-        android:id="@+id/btn_save_note"
-        android:layout_width="match_parent"
-        android:layout_height="64dp"
-        android:layout_marginTop="32dp"
-        android:background="@drawable/bg_blue_oval_button"
-        android:text="SAVE NOTE"
-        android:textColor="@color/white"
-        android:textStyle="bold"
-        android:textSize="16sp" />
-
-</LinearLayout>
+</androidx.constraintlayout.widget.ConstraintLayout>

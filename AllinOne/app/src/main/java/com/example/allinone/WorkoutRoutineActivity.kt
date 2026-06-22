@@ -359,7 +359,7 @@ class WorkoutRoutineActivity : AppCompatActivity() {
             iconPreview.setImageResource(selectedIcon); iconPreview.backgroundTintList = android.content.res.ColorStateList.valueOf(selectedColor); colorPreview.backgroundTintList = android.content.res.ColorStateList.valueOf(selectedColor)
         }
         dialog.findViewById<View>(R.id.card_workout_icon).setOnClickListener { showIconSelectionDialog { icon -> selectedIcon = icon; iconPreview.setImageResource(selectedIcon) } }
-        dialog.findViewById<View>(R.id.card_workout_color).setOnClickListener { val currentIndex = colors.indexOf(selectedColor); selectedColor = colors[(currentIndex + 1) % colors.size]; iconPreview.backgroundTintList = android.content.res.ColorStateList.valueOf(selectedColor); colorPreview.backgroundTintList = android.content.res.ColorStateList.valueOf(selectedColor) }
+        colorPreview.setOnClickListener { val currentIndex = colors.indexOf(selectedColor); selectedColor = colors[(currentIndex + 1) % colors.size]; iconPreview.backgroundTintList = android.content.res.ColorStateList.valueOf(selectedColor); colorPreview.backgroundTintList = android.content.res.ColorStateList.valueOf(selectedColor) }
         cardRepeat.setOnClickListener { showWorkoutDaysDialog { updateSummary() } }
         btnClose.setOnClickListener { dialog.dismiss() }
         btnSave.setOnClickListener {

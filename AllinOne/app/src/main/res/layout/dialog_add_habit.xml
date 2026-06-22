@@ -99,13 +99,6 @@
                 android:layout_toEndOf="@id/icon_preview"
                 android:text="Icon"
                 android:textColor="@color/white" />
-            <ImageView
-                android:layout_width="20dp"
-                android:layout_height="20dp"
-                android:layout_alignParentEnd="true"
-                android:layout_centerVertical="true"
-                android:src="@android:drawable/ic_media_next"
-                app:tint="@color/text_secondary" />
         </RelativeLayout>
     </com.google.android.material.card.MaterialCardView>
 
@@ -144,12 +137,6 @@
                     android:layout_height="24dp"
                     android:background="@drawable/circle_selected_bg"
                     android:backgroundTint="@color/card_blue" />
-                <ImageView
-                    android:layout_width="20dp"
-                    android:layout_height="20dp"
-                    android:layout_marginStart="8dp"
-                    android:src="@android:drawable/ic_media_next"
-                    app:tint="@color/text_secondary" />
             </LinearLayout>
         </RelativeLayout>
     </com.google.android.material.card.MaterialCardView>
@@ -195,13 +182,6 @@
                     android:layout_height="wrap_content"
                     android:text="Everyday"
                     android:textColor="@color/white" />
-                <ImageView
-                    android:layout_width="20dp"
-                    android:layout_height="20dp"
-                    android:layout_marginStart="8dp"
-                    android:src="@android:drawable/ic_media_next"
-                    app:tint="@color/text_secondary"
-                    android:contentDescription="Change Frequency" />
             </LinearLayout>
         </RelativeLayout>
     </com.google.android.material.card.MaterialCardView>

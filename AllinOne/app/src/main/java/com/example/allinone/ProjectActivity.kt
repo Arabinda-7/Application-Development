@@ -1,6 +1,7 @@
 package com.example.allinone
 
 import android.app.Dialog
+import android.graphics.Color
 import android.os.Bundle
 import android.view.View
 import android.view.ViewGroup
@@ -57,6 +58,21 @@ class ProjectActivity : AppCompatActivity() {
         val statusGroup = dialog.findViewById<RadioGroup>(R.id.status_radio_group)
         val btnSave = dialog.findViewById<View>(R.id.btn_save_project)
         val btnClose = dialog.findViewById<View>(R.id.btn_close_project)
+        val colorPreview = dialog.findViewById<View>(R.id.project_color_preview)
+
+        val colors = listOf(
+            ContextCompat.getColor(this, R.color.card_blue),
+            ContextCompat.getColor(this, R.color.card_orange),
+            ContextCompat.getColor(this, R.color.card_green),
+            Color.MAGENTA, Color.RED, Color.CYAN
+        )
+        var selectedColor = existingProject?.color ?: colors[0]
+        colorPreview.backgroundTintList = android.content.res.ColorStateList.valueOf(selectedColor)
+
+        colorPreview.setOnClickListener {
+            selectedColor = colors[(colors.indexOf(selectedColor) + 1) % colors.size]
+            colorPreview.backgroundTintList = android.content.res.ColorStateList.valueOf(selectedColor)
+        }
 
         if (existingProject != null) {
             nameInput.setText(existingProject.name)
@@ -77,11 +93,12 @@ class ProjectActivity : AppCompatActivity() {
                 val desc = descInput.text.toString()
 
                 if (existingProject == null) {
-                    projects.add(Project(name, desc, status))
+                    projects.add(Project(name, desc, status, color = selectedColor))
                 } else {
                     existingProject.name = name
                     existingProject.description = desc
                     existingProject.status = status
+                    existingProject.color = selectedColor
                 }
 
                 projectAdapter.filter("ALL") // Reset filter to show the new/edited item

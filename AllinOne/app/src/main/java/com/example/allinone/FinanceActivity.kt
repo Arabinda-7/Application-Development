@@ -100,11 +100,12 @@ class FinanceActivity : AppCompatActivity() {
         val etAmount = dialog.findViewById<EditText>(R.id.et_trans_amount)
         val etTitle = dialog.findViewById<EditText>(R.id.et_trans_title)
         val rgType = dialog.findViewById<RadioGroup>(R.id.rg_trans_type)
-        val btnSave = dialog.findViewById<View>(R.id.btn_save_trans)
+        val btnSave = dialog.findViewById<TextView>(R.id.btn_save_trans)
         val btnClose = dialog.findViewById<View>(R.id.btn_close_trans)
         val titleText = dialog.findViewById<TextView>(R.id.tv_dialog_title)
 
         titleText?.text = "Edit Transaction"
+        btnSave.text = "Update"
         etAmount.setText(transaction.amount.toString())
         etTitle.setText(transaction.title)
         when (transaction.type) {

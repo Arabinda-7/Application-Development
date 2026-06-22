@@ -20,11 +20,22 @@
         android:focusable="true"
         android:background="?attr/selectableItemBackgroundBorderless" />
 
+    <View
+        android:id="@+id/project_color_preview"
+        android:layout_width="24dp"
+        android:layout_height="24dp"
+        android:background="@drawable/circle_selected_bg"
+        android:backgroundTint="@color/card_blue"
+        android:clickable="true"
+        android:focusable="true"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
+
     <EditText
         android:id="@+id/project_name_input"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
-        android:layout_marginTop="24dp"
+        android:layout_marginTop="16dp"
         android:background="@null"
         android:hint="Project Name"
         android:textColor="@color/white"

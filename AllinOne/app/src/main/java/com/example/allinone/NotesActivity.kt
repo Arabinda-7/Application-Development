@@ -1,9 +1,10 @@
 package com.example.allinone
 
-import android.app.AlertDialog
+import android.app.Dialog
 import android.graphics.Color
 import android.os.Bundle
-import android.view.LayoutInflater
+import android.text.Editable
+import android.text.TextWatcher
 import android.view.View
 import android.widget.EditText
 import android.widget.TextView
@@ -38,14 +39,37 @@ class NotesActivity : AppCompatActivity() {
     }
 
     private fun showAddNoteDialog() {
-        val dialogView = LayoutInflater.from(this).inflate(R.layout.dialog_add_note, null)
-        val titleInput = dialogView.findViewById<EditText>(R.id.note_title_input)
-        val contentInput = dialogView.findViewById<EditText>(R.id.note_content_input)
-        val colorPreview = dialogView.findViewById<View>(R.id.note_color_preview)
+        val dialog = Dialog(this, android.R.style.Theme_Black_NoTitleBar_Fullscreen)
+        dialog.setContentView(R.layout.dialog_add_note)
+
+        val titleInput = dialog.findViewById<EditText>(R.id.note_title_input)
+        val contentInput = dialog.findViewById<EditText>(R.id.note_content_input)
+        val colorPreview = dialog.findViewById<View>(R.id.note_color_preview)
+        val btnSave = dialog.findViewById<TextView>(R.id.btn_save_note)
+        val btnClose = dialog.findViewById<View>(R.id.btn_close_note)
+        val tvMetadata = dialog.findViewById<TextView>(R.id.tv_note_metadata)
 
         var selectedColor = ContextCompat.getColor(this, R.color.card_blue)
+        colorPreview.backgroundTintList = android.content.res.ColorStateList.valueOf(selectedColor)
 
-        dialogView.findViewById<View>(R.id.note_color_selection_row).setOnClickListener {
+        val sdf = SimpleDateFormat("dd MMMM h:mm a", Locale.getDefault())
+        val currentDateStr = sdf.format(Date())
+        
+        fun updateMetadata() {
+            val count = (titleInput.text.length + contentInput.text.length)
+            tvMetadata.text = "$currentDateStr | $count characters"
+        }
+        updateMetadata()
+
+        val textWatcher = object : TextWatcher {
+            override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {}
+            override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {}
+            override fun afterTextChanged(s: Editable?) { updateMetadata() }
+        }
+        titleInput.addTextChangedListener(textWatcher)
+        contentInput.addTextChangedListener(textWatcher)
+
+        colorPreview.setOnClickListener {
             val colors = listOf(
                 ContextCompat.getColor(this, R.color.card_blue),
                 ContextCompat.getColor(this, R.color.card_orange),
@@ -56,13 +80,9 @@ class NotesActivity : AppCompatActivity() {
             colorPreview.backgroundTintList = android.content.res.ColorStateList.valueOf(selectedColor)
         }
 
-        val dialog = AlertDialog.Builder(this)
-            .setView(dialogView)
-            .create()
+        btnClose.setOnClickListener { dialog.dismiss() }
 
-        dialog.window?.setBackgroundDrawableResource(android.R.color.transparent)
-
-        dialogView.findViewById<View>(R.id.btn_save_note).setOnClickListener {
+        btnSave.setOnClickListener {
             val title = titleInput.text.toString()
             val content = contentInput.text.toString()
             if (title.isNotEmpty() || content.isNotEmpty()) {
@@ -77,20 +97,43 @@ class NotesActivity : AppCompatActivity() {
     }
 
     fun showEditNoteDialog(note: Note) {
-        val dialogView = layoutInflater.inflate(R.layout.dialog_add_note, null)
-        val titleInput = dialogView.findViewById<EditText>(R.id.note_title_input)
-        val contentInput = dialogView.findViewById<EditText>(R.id.note_content_input)
-        val colorPreview = dialogView.findViewById<View>(R.id.note_color_preview)
-        val btnSave = dialogView.findViewById<TextView>(R.id.btn_save_note)
+        val dialog = Dialog(this, android.R.style.Theme_Black_NoTitleBar_Fullscreen)
+        dialog.setContentView(R.layout.dialog_add_note)
+
+        val titleInput = dialog.findViewById<EditText>(R.id.note_title_input)
+        val contentInput = dialog.findViewById<EditText>(R.id.note_content_input)
+        val colorPreview = dialog.findViewById<View>(R.id.note_color_preview)
+        val btnSave = dialog.findViewById<TextView>(R.id.btn_save_note)
+        val btnClose = dialog.findViewById<View>(R.id.btn_close_note)
+        val tvMetadata = dialog.findViewById<TextView>(R.id.tv_note_metadata)
 
         titleInput.setText(note.title)
         contentInput.setText(note.content)
         var selectedColor = if (note.color != -1) note.color else ContextCompat.getColor(this, R.color.card_blue)
         colorPreview.backgroundTintList = android.content.res.ColorStateList.valueOf(selectedColor)
 
-        btnSave.text = "UPDATE NOTE"
+        btnSave.text = "Save"
 
-        dialogView.findViewById<View>(R.id.note_color_selection_row).setOnClickListener {
+        val sdf = SimpleDateFormat("dd MMMM h:mm a", Locale.getDefault())
+        // Explicitly cast to Note if there is any ambiguity
+        val noteToEdit = note as com.example.allinone.Note
+        val dateStr = sdf.format(Date(noteToEdit.timestamp))
+        
+        fun updateMetadata() {
+            val count = (titleInput.text.length + contentInput.text.length)
+            tvMetadata.text = "$dateStr | $count characters"
+        }
+        updateMetadata()
+
+        val textWatcher = object : TextWatcher {
+            override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {}
+            override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {}
+            override fun afterTextChanged(s: Editable?) { updateMetadata() }
+        }
+        titleInput.addTextChangedListener(textWatcher)
+        contentInput.addTextChangedListener(textWatcher)
+
+        colorPreview.setOnClickListener {
             val colors = listOf(
                 ContextCompat.getColor(this, R.color.card_blue),
                 ContextCompat.getColor(this, R.color.card_orange),
@@ -101,16 +144,7 @@ class NotesActivity : AppCompatActivity() {
             colorPreview.backgroundTintList = android.content.res.ColorStateList.valueOf(selectedColor)
         }
 
-        val dialog = AlertDialog.Builder(this)
-            .setView(dialogView)
-            .setNeutralButton("Delete") { _, _ ->
-                notes.remove(note)
-                noteAdapter.updateNotes(notes)
-                DataManager.saveData(this)
-            }
-            .create()
-
-        dialog.window?.setBackgroundDrawableResource(android.R.color.transparent)
+        btnClose.setOnClickListener { dialog.dismiss() }
 
         btnSave.setOnClickListener {
             note.title = titleInput.text.toString()

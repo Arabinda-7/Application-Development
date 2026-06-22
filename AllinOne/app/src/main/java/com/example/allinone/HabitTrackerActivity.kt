@@ -345,7 +345,7 @@ class HabitTrackerActivity : AppCompatActivity() {
             }
         }
 
-        dialog.findViewById<View>(R.id.card_habit_color).setOnClickListener {
+        colorPreview.setOnClickListener {
             val currentIndex = colors.indexOf(selectedColor)
             selectedColor = colors[(currentIndex + 1) % colors.size]
             iconPreview.backgroundTintList = android.content.res.ColorStateList.valueOf(selectedColor)

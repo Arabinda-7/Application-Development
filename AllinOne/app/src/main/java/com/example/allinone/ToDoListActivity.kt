@@ -1,31 +1,30 @@
 package com.example.allinone
 
-import android.app.AlertDialog
+import android.app.Dialog
 import android.graphics.Color
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
+import android.view.ViewGroup
 import android.widget.EditText
+import android.widget.ImageButton
+import android.widget.PopupMenu
 import android.widget.TextView
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.ContextCompat
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
-import java.text.SimpleDateFormat
 import java.util.*
 
 class ToDoListActivity : AppCompatActivity() {
 
     private val tasks = DataManager.tasks
     private lateinit var taskAdapter: TaskAdapter
+    private var isDeleteMode = false
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_to_do_list)
-
-        val dateTextView = findViewById<TextView>(R.id.tv_date)
-        val sdf = SimpleDateFormat("MMM dd", Locale.getDefault())
-        dateTextView.text = sdf.format(Date())
 
         val taskList = findViewById<RecyclerView>(R.id.task_list)
         taskList.layoutManager = LinearLayoutManager(this)
@@ -34,9 +33,49 @@ class ToDoListActivity : AppCompatActivity() {
         }
         taskList.adapter = taskAdapter
 
-        findViewById<View>(R.id.btn_back).setOnClickListener { finish() }
+        findViewById<View>(R.id.btn_back).setOnClickListener {
+            if (isDeleteMode) {
+                toggleDeleteMode(false)
+            } else {
+                finish()
+            }
+        }
 
         findViewById<View>(R.id.btn_create_new_task).setOnClickListener { showAddTaskDialog(null) }
+
+        val btnSettings = findViewById<ImageButton>(R.id.btn_task_settings)
+        btnSettings.setOnClickListener {
+            if (isDeleteMode) {
+                // Delete selected tasks
+                taskAdapter.deleteSelectedTasks(this)
+                toggleDeleteMode(false)
+            } else {
+                showSettingsMenu(it)
+            }
+        }
+    }
+
+    private fun showSettingsMenu(anchor: View) {
+        val popup = PopupMenu(this, anchor)
+        popup.menu.add("Delete")
+        popup.setOnMenuItemClickListener { item ->
+            if (item.title == "Delete") {
+                toggleDeleteMode(true)
+            }
+            true
+        }
+        popup.show()
+    }
+
+    private fun toggleDeleteMode(enabled: Boolean) {
+        isDeleteMode = enabled
+        taskAdapter.setDeleteMode(enabled)
+        val btnSettings = findViewById<ImageButton>(R.id.btn_task_settings)
+        if (enabled) {
+            btnSettings.setImageResource(android.R.drawable.ic_menu_delete)
+        } else {
+            btnSettings.setImageResource(android.R.drawable.ic_menu_manage)
+        }
     }
 
     fun showAddTaskDialog(existingTask: Task? = null) {
@@ -51,7 +90,7 @@ class ToDoListActivity : AppCompatActivity() {
             colorPreview.backgroundTintList = android.content.res.ColorStateList.valueOf(selectedColor)
         }
 
-        dialogView.findViewById<View>(R.id.color_selection_row).setOnClickListener {
+        colorPreview.setOnClickListener {
             val colors = listOf(
                 ContextCompat.getColor(this, R.color.card_blue),
                 ContextCompat.getColor(this, R.color.card_orange),
@@ -62,22 +101,26 @@ class ToDoListActivity : AppCompatActivity() {
             colorPreview.backgroundTintList = android.content.res.ColorStateList.valueOf(selectedColor)
         }
 
-        val dialog = AlertDialog.Builder(this)
-            .setView(dialogView)
-            .create()
-        
+        val dialog = Dialog(this)
+        dialog.setContentView(dialogView)
         dialog.window?.setBackgroundDrawableResource(android.R.color.transparent)
+        dialog.window?.setLayout(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT)
 
-        dialogView.findViewById<View>(R.id.btn_save_task).setOnClickListener {
+        val btnSave = dialogView.findViewById<TextView>(R.id.btn_save_task)
+        if (existingTask != null) {
+            btnSave.text = "Update"
+        }
+
+        btnSave.setOnClickListener {
             val name = editText.text.toString()
             if (name.isNotEmpty()) {
                 if (existingTask == null) {
-                    tasks.add(Task(name, color = selectedColor))
+                    tasks.add(Task(name, isCompleted = false, color = selectedColor))
                 } else {
                     existingTask.name = name
                     existingTask.color = selectedColor
                 }
-                taskAdapter.sortTasks()
+                taskAdapter.updateDisplayList()
                 DataManager.saveData(this)
                 dialog.dismiss()
             }

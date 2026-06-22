@@ -1,13 +1,13 @@
 package com.example.allinone
 
-import android.app.AlertDialog
 import android.content.Context
+import android.graphics.Color
 import android.graphics.Paint
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.CheckBox
-import android.widget.ImageButton
+import android.widget.ImageView
 import android.widget.PopupWindow
 import android.widget.TextView
 import androidx.core.content.ContextCompat
@@ -15,81 +15,104 @@ import androidx.recyclerview.widget.RecyclerView
 import com.google.android.material.card.MaterialCardView
 
 class TaskAdapter(
-    private var tasks: MutableList<Task>,
+    private val allTasks: MutableList<Task>,
     private val onProgressChanged: () -> Unit
-) : RecyclerView.Adapter<TaskAdapter.TaskViewHolder>() {
+) : RecyclerView.Adapter<RecyclerView.ViewHolder>() {
 
-    override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): TaskViewHolder {
-        val view = LayoutInflater.from(parent.context).inflate(R.layout.task_list_item, parent, false)
-        return TaskViewHolder(view)
+    companion object {
+        private const val TYPE_TASK = 0
+        private const val TYPE_HEADER = 1
     }
 
-    override fun onBindViewHolder(holder: TaskViewHolder, position: Int) {
-        val task = tasks[position]
-        holder.taskName.text = task.name
-        holder.taskCompleted.isChecked = task.isCompleted
+    private var isCompletedExpanded = true
+    private var isDeleteMode = false
+    private val displayItems = mutableListOf<Any>()
 
-        val context = holder.itemView.context
-        val cardColor = if (task.color != -1) {
-            task.color
+    init {
+        updateDisplayList()
+    }
+
+    override fun getItemViewType(position: Int): Int {
+        return if (displayItems[position] is String) TYPE_HEADER else TYPE_TASK
+    }
+
+    override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): RecyclerView.ViewHolder {
+        return if (viewType == TYPE_HEADER) {
+            val view = LayoutInflater.from(parent.context).inflate(R.layout.item_task_header, parent, false)
+            HeaderViewHolder(view)
         } else {
-            ContextCompat.getColor(context, R.color.card_blue)
+            val view = LayoutInflater.from(parent.context).inflate(R.layout.task_list_item, parent, false)
+            TaskViewHolder(view)
         }
-        holder.taskCard.setCardBackgroundColor(cardColor)
+    }
 
-        updateVisuals(holder, task.isCompleted)
+    override fun onBindViewHolder(holder: RecyclerView.ViewHolder, position: Int) {
+        if (holder is HeaderViewHolder) {
+            val headerText = displayItems[position] as String
+            holder.title.text = headerText
+            holder.chevron.rotation = if (isCompletedExpanded) 0f else 180f
+            holder.itemView.setOnClickListener {
+                isCompletedExpanded = !isCompletedExpanded
+                updateDisplayList()
+            }
+        } else if (holder is TaskViewHolder) {
+            val task = displayItems[position] as Task
+            val context = holder.itemView.context
+            
+            holder.taskName.text = task.name
+            holder.taskCompleted.isChecked = task.isCompleted
+            
+            // Selection for delete mode
+            holder.selectionCheckbox.visibility = if (isDeleteMode) View.VISIBLE else View.GONE
+            holder.selectionCheckbox.isChecked = task.isSelected
+            
+            updateVisuals(holder, task.isCompleted)
 
-        holder.taskCompleted.setOnClickListener {
-            if (holder.taskCompleted.isChecked) {
-                task.isCompleted = true
-                sortTasks()
-                DataManager.saveData(context)
-                onProgressChanged()
-            } else {
-                holder.taskCompleted.isChecked = true
-                AlertDialog.Builder(context)
-                    .setTitle("Confirm")
-                    .setMessage("Mark as incomplete?")
-                    .setPositiveButton("Yes") { _, _ ->
-                        task.isCompleted = false
-                        sortTasks()
-                        DataManager.saveData(context)
-                        onProgressChanged()
-                    }
-                    .setNegativeButton("No") { _, _ -> holder.taskCompleted.isChecked = true }
-                    .show()
+            holder.taskCompleted.setOnClickListener {
+                if (holder.taskCompleted.isChecked) {
+                    task.isCompleted = true
+                    updateDisplayList()
+                    DataManager.saveData(context)
+                    onProgressChanged()
+                } else {
+                    holder.taskCompleted.isChecked = true // Prevent simple uncheck
+                }
+            }
+
+            holder.itemView.setOnClickListener {
+                if (isDeleteMode) {
+                    task.isSelected = !task.isSelected
+                    notifyItemChanged(position)
+                }
+            }
+
+            holder.itemView.setOnLongClickListener {
+                showCustomMenu(it, task)
+                true
             }
         }
-
-        holder.editButton.setOnClickListener { showCustomMenu(it, position) }
     }
 
-    private fun showCustomMenu(anchor: View, position: Int) {
+    private fun showCustomMenu(anchor: View, task: Task) {
         val context = anchor.context
         val inflater = LayoutInflater.from(context)
         val menuView = inflater.inflate(R.layout.layout_custom_menu, null)
-        val task = tasks[position]
 
-        val popupWindow = PopupWindow(
-            menuView,
-            ViewGroup.LayoutParams.WRAP_CONTENT,
-            ViewGroup.LayoutParams.WRAP_CONTENT,
-            true
-        )
+        val popupWindow = PopupWindow(menuView, ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT, true)
         popupWindow.elevation = 10f
 
-        // Task doesn't have "Day Off", so hide it
         menuView.findViewById<View>(R.id.menu_take_day_off).visibility = View.GONE
-
+        
         menuView.findViewById<View>(R.id.menu_edit).setOnClickListener {
             popupWindow.dismiss()
             (context as? ToDoListActivity)?.showAddTaskDialog(task)
         }
 
         menuView.findViewById<View>(R.id.menu_delete).setOnClickListener {
-            tasks.remove(task)
-            notifyDataSetChanged()
+            allTasks.remove(task)
+            updateDisplayList()
             onProgressChanged()
+            DataManager.saveData(context)
             popupWindow.dismiss()
         }
 
@@ -98,36 +121,69 @@ class TaskAdapter(
             undoView.visibility = View.VISIBLE
             undoView.setOnClickListener {
                 task.isCompleted = false
-                sortTasks()
+                updateDisplayList()
                 onProgressChanged()
+                DataManager.saveData(context)
                 popupWindow.dismiss()
             }
         }
 
-        popupWindow.showAsDropDown(anchor, -150, 0)
+        popupWindow.showAsDropDown(anchor, 150, -100)
     }
 
-    fun sortTasks() {
-        tasks.sortWith(compareBy({ it.isCompleted }, { it.timestamp }))
+    fun updateDisplayList() {
+        displayItems.clear()
+        val activeTasks = allTasks.filter { !it.isCompleted }.sortedByDescending { it.timestamp }
+        val completedTasks = allTasks.filter { it.isCompleted }.sortedByDescending { it.timestamp }
+
+        displayItems.addAll(activeTasks)
+        
+        if (completedTasks.isNotEmpty()) {
+            displayItems.add("Completed ${completedTasks.size}")
+            if (isCompletedExpanded) {
+                displayItems.addAll(completedTasks)
+            }
+        }
         notifyDataSetChanged()
+    }
+
+    fun setDeleteMode(enabled: Boolean) {
+        isDeleteMode = enabled
+        if (!enabled) {
+            allTasks.forEach { it.isSelected = false }
+        }
+        notifyDataSetChanged()
+    }
+
+    fun deleteSelectedTasks(context: Context) {
+        allTasks.removeAll { it.isSelected }
+        setDeleteMode(false)
+        updateDisplayList()
+        onProgressChanged()
+        DataManager.saveData(context)
     }
 
     private fun updateVisuals(holder: TaskViewHolder, isCompleted: Boolean) {
         if (isCompleted) {
             holder.taskName.paintFlags = holder.taskName.paintFlags or Paint.STRIKE_THRU_TEXT_FLAG
-            holder.itemView.alpha = 0.6f
+            holder.taskCard.alpha = 0.6f
         } else {
             holder.taskName.paintFlags = holder.taskName.paintFlags and Paint.STRIKE_THRU_TEXT_FLAG.inv()
-            holder.itemView.alpha = 1.0f
+            holder.taskCard.alpha = 1.0f
         }
     }
 
-    override fun getItemCount() = tasks.size
+    override fun getItemCount() = displayItems.size
 
     class TaskViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
         val taskName: TextView = itemView.findViewById(R.id.task_name)
         val taskCompleted: CheckBox = itemView.findViewById(R.id.task_completed)
-        val editButton: ImageButton = itemView.findViewById(R.id.edit_task_button)
         val taskCard: MaterialCardView = itemView.findViewById(R.id.task_card)
+        val selectionCheckbox: CheckBox = itemView.findViewById(R.id.task_selection_checkbox)
+    }
+
+    class HeaderViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
+        val title: TextView = itemView.findViewById(R.id.tv_header_title)
+        val chevron: ImageView = itemView.findViewById(R.id.iv_header_chevron)
     }
 }
