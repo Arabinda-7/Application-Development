@@ -5,8 +5,12 @@ import android.graphics.Color
 import android.os.Bundle
 import android.text.Editable
 import android.text.TextWatcher
+import android.view.LayoutInflater
 import android.view.View
+import android.view.ViewGroup
 import android.widget.EditText
+import android.widget.ImageButton
+import android.widget.PopupWindow
 import android.widget.TextView
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.ContextCompat
@@ -24,16 +28,25 @@ class NotesActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_notes)
 
-        val dateTextView = findViewById<TextView>(R.id.tv_date)
-        val sdf = SimpleDateFormat("MMM dd", Locale.getDefault())
-        dateTextView.text = sdf.format(Date())
-
         val notesList = findViewById<RecyclerView>(R.id.notes_list)
         notesList.layoutManager = LinearLayoutManager(this)
         noteAdapter = NoteAdapter(notes) { noteAdapter.updateNotes(notes) }
         notesList.adapter = noteAdapter
 
         findViewById<View>(R.id.btn_back).setOnClickListener { finish() }
+
+        findViewById<View>(R.id.btn_notes_settings).setOnClickListener {
+            val inflater = LayoutInflater.from(this)
+            val menuView = inflater.inflate(R.layout.layout_activity_settings_menu, null)
+            val popupWindow = PopupWindow(menuView, ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT, true)
+            popupWindow.elevation = 10f
+
+            menuView.findViewById<View>(R.id.menu_activity_settings).setOnClickListener {
+                popupWindow.dismiss()
+            }
+
+            popupWindow.showAsDropDown(it, -150, 0)
+        }
 
         findViewById<View>(R.id.btn_create_new_note).setOnClickListener { showAddNoteDialog() }
     }
@@ -115,9 +128,7 @@ class NotesActivity : AppCompatActivity() {
         btnSave.text = "Save"
 
         val sdf = SimpleDateFormat("dd MMMM h:mm a", Locale.getDefault())
-        // Explicitly cast to Note if there is any ambiguity
-        val noteToEdit = note as com.example.allinone.Note
-        val dateStr = sdf.format(Date(noteToEdit.timestamp))
+        val dateStr = sdf.format(Date(note.timestamp))
         
         fun updateMetadata() {
             val count = (titleInput.text.length + contentInput.text.length)

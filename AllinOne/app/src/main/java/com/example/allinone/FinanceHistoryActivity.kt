@@ -9,7 +9,6 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import java.text.SimpleDateFormat
 import java.util.*
-import com.example.allinone.*
 
 class FinanceHistoryActivity : AppCompatActivity() {
 
@@ -18,34 +17,45 @@ class FinanceHistoryActivity : AppCompatActivity() {
     private lateinit var monthAdapter: MonthAdapter
     private lateinit var transactionAdapter: TransactionAdapter
     private lateinit var tvYear: TextView
+    private var currentYear: Int = Calendar.getInstance().get(Calendar.YEAR)
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_finance_history)
 
         tvYear = findViewById(R.id.tv_current_year)
-        tvYear.text = Calendar.getInstance().get(Calendar.YEAR).toString()
+        updateYearDisplay()
 
-        findViewById<View>(R.id.btn_back).setOnClickListener {
-            handleBackNavigation()
+        findViewById<View>(R.id.btn_back).setOnClickListener { handleBackNavigation() }
+        
+        findViewById<View>(R.id.btn_prev_year).setOnClickListener {
+            currentYear--
+            updateYearDisplay()
+            updateYearlyAnalytics()
+        }
+        
+        findViewById<View>(R.id.btn_next_year).setOnClickListener {
+            currentYear++
+            updateYearDisplay()
+            updateYearlyAnalytics()
         }
 
         monthsList = findViewById(R.id.history_months_list)
         transactionsList = findViewById(R.id.month_transactions_list)
 
         val monthItems = listOf(
-            MonthItem("January", R.drawable.ic_habit_tracker, "#FF7043"),   // Salmon
-            MonthItem("February", R.drawable.ic_workout_routine, "#FFD54F"), // Yellow
-            MonthItem("March", R.drawable.ic_todo_list, "#4DB6AC"),       // Teal
-            MonthItem("April", R.drawable.ic_notes, "#64B5F6"),           // Blue
-            MonthItem("May", R.drawable.ic_project, "#5C6BC0"),          // Indigo
-            MonthItem("June", R.drawable.ic_finance, "#81C784"),          // Green
-            MonthItem("July", R.drawable.ic_water, "#4FC3F7"),            // Light Blue
-            MonthItem("August", R.drawable.ic_sleep, "#9575CD"),           // Purple
-            MonthItem("September", R.drawable.ic_meditation, "#FF8A65"),   // Deep Orange
-            MonthItem("October", R.drawable.ic_fitness, "#A1887F"),        // Brown
-            MonthItem("November", R.drawable.ic_book, "#90A4AE"),          // Blue Grey
-            MonthItem("December", R.drawable.ic_communication, "#F06292")  // Pink
+            MonthItem("January", R.drawable.ic_finance, "#1A1A1A"),
+            MonthItem("February", R.drawable.ic_finance, "#1A1A1A"),
+            MonthItem("March", R.drawable.ic_finance, "#1A1A1A"),
+            MonthItem("April", R.drawable.ic_finance, "#1A1A1A"),
+            MonthItem("May", R.drawable.ic_finance, "#1A1A1A"),
+            MonthItem("June", R.drawable.ic_finance, "#1A1A1A"),
+            MonthItem("July", R.drawable.ic_finance, "#1A1A1A"),
+            MonthItem("August", R.drawable.ic_finance, "#1A1A1A"),
+            MonthItem("September", R.drawable.ic_finance, "#1A1A1A"),
+            MonthItem("October", R.drawable.ic_finance, "#1A1A1A"),
+            MonthItem("November", R.drawable.ic_finance, "#1A1A1A"),
+            MonthItem("December", R.drawable.ic_finance, "#1A1A1A")
         )
         
         monthAdapter = MonthAdapter(monthItems) { selectedMonth ->
@@ -54,23 +64,56 @@ class FinanceHistoryActivity : AppCompatActivity() {
 
         monthsList.layoutManager = GridLayoutManager(this, 4)
         monthsList.adapter = monthAdapter
-
         transactionsList.layoutManager = LinearLayoutManager(this)
 
-        // Handle System Back Button
+        updateYearlyAnalytics()
+
         onBackPressedDispatcher.addCallback(this, object : androidx.activity.OnBackPressedCallback(true) {
-            override fun handleOnBackPressed() {
-                handleBackNavigation()
-            }
+            override fun handleOnBackPressed() { handleBackNavigation() }
         })
+    }
+
+    private fun updateYearDisplay() {
+        tvYear.text = currentYear.toString()
+    }
+
+    private fun updateYearlyAnalytics() {
+        val yearKey = currentYear.toString()
+        val sdf = SimpleDateFormat("yyyy", Locale.getDefault())
+        val monthCodeSdf = SimpleDateFormat("MM", Locale.getDefault())
+        val monthNameSdf = SimpleDateFormat("MMMM", Locale.getDefault())
+
+        val yearlyTransactions = DataManager.transactions.filter {
+            sdf.format(Date(it.timestamp)) == yearKey
+        }
+
+        val totalSpent = yearlyTransactions.filter { it.type == "Expense" }.sumOf { it.amount }
+        val totalSavings = yearlyTransactions.filter { it.type == "Saving" }.sumOf { it.amount }
+        
+        val uniqueMonthsCount = yearlyTransactions.map { 
+            monthCodeSdf.format(Date(it.timestamp))
+        }.distinct().size.coerceAtLeast(1)
+
+        val avgSpent = totalSpent / uniqueMonthsCount
+
+        // Find highest spend month
+        val highestMonth = yearlyTransactions
+            .filter { it.type == "Expense" }
+            .groupBy { monthNameSdf.format(Date(it.timestamp)) }
+            .mapValues { entry -> entry.value.sumOf { it.amount } }
+            .maxByOrNull { it.value }?.key ?: "None"
+
+        findViewById<TextView>(R.id.tv_yearly_avg_spent).text = String.format(Locale.US, "₹%.0f", avgSpent)
+        findViewById<TextView>(R.id.tv_yearly_total_savings).text = String.format(Locale.US, "₹%.0f", totalSavings)
+        findViewById<TextView>(R.id.tv_yearly_highest_month).text = highestMonth
     }
 
     private fun handleBackNavigation() {
         val detailsContainer = findViewById<View>(R.id.month_details_container)
         if (detailsContainer.visibility == View.VISIBLE) {
             detailsContainer.visibility = View.GONE
-            monthsList.visibility = View.VISIBLE
-            tvYear.visibility = View.VISIBLE
+            findViewById<View>(R.id.history_scroll_view).visibility = View.VISIBLE
+            findViewById<View>(R.id.year_navigation_container).visibility = View.VISIBLE
         } else {
             finish()
         }
@@ -82,9 +125,8 @@ class FinanceHistoryActivity : AppCompatActivity() {
         val date = displaySdf.parse(monthName) ?: Date()
         
         val calendar = Calendar.getInstance()
-        val year = calendar.get(Calendar.YEAR)
         calendar.time = date
-        calendar.set(Calendar.YEAR, year)
+        calendar.set(Calendar.YEAR, currentYear)
         
         val monthKey = sdf.format(calendar.time)
 
@@ -99,7 +141,6 @@ class FinanceHistoryActivity : AppCompatActivity() {
         )
         transactionsList.adapter = transactionAdapter
         
-        // Update Summary
         val budget = DataManager.monthlyBudgets[monthKey] ?: 0.0
         val spent = filteredTransactions.filter { it.type == "Expense" }.sumOf { it.amount }
         val income = filteredTransactions.filter { it.type == "Income" }.sumOf { it.amount }
@@ -113,17 +154,13 @@ class FinanceHistoryActivity : AppCompatActivity() {
         
         val tvRemaining = summary.findViewById<TextView>(R.id.tv_remaining_balance)
         tvRemaining.text = String.format(Locale.US, "₹%.0f", remaining)
-        if (remaining < 0) {
-            tvRemaining.setTextColor(android.graphics.Color.parseColor("#FF5252"))
-        } else {
-            tvRemaining.setTextColor(android.graphics.Color.parseColor("#4CAF50"))
-        }
+        tvRemaining.setTextColor(if (remaining < 0) android.graphics.Color.parseColor("#FF5252") else android.graphics.Color.parseColor("#4CAF50"))
 
         summary.findViewById<TextView>(R.id.tv_current_savings).text = String.format(Locale.US, "₹%.0f", savings)
         summary.findViewById<TextView>(R.id.tv_savings_goal).text = String.format(Locale.US, "Goal: ₹%.0f", savingsGoal)
 
-        monthsList.visibility = View.GONE
-        tvYear.visibility = View.GONE
+        findViewById<View>(R.id.history_scroll_view).visibility = View.GONE
+        findViewById<View>(R.id.year_navigation_container).visibility = View.GONE
         findViewById<View>(R.id.month_details_container).visibility = View.VISIBLE
     }
 }

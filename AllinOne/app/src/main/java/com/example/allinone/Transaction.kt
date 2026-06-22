@@ -6,5 +6,5 @@ data class Transaction(
     var amount: Double,
     var type: String, // "Income" or "Expense"
     var category: String = "General",
-    val timestamp: Long = System.currentTimeMillis()
+    var timestamp: Long = System.currentTimeMillis()
 )

@@ -1,13 +1,18 @@
 package com.example.allinone
 
-import android.app.AlertDialog
+import android.app.DatePickerDialog
 import android.app.Dialog
+import android.app.TimePickerDialog
 import android.os.Bundle
+import android.view.LayoutInflater
 import android.view.View
+import android.view.ViewGroup
 import android.widget.EditText
+import android.widget.ImageButton
+import android.widget.ImageView
+import android.widget.PopupWindow
 import android.widget.RadioGroup
 import android.widget.TextView
-import android.view.ViewGroup
 import androidx.appcompat.app.AppCompatActivity
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
@@ -54,8 +59,27 @@ class FinanceActivity : AppCompatActivity() {
 
         updateSummary()
 
-        findViewById<View>(R.id.btn_finance_history).setOnClickListener {
-            startActivity(android.content.Intent(this, FinanceHistoryActivity::class.java))
+        findViewById<View>(R.id.btn_finance_settings).setOnClickListener {
+            val inflater = LayoutInflater.from(this)
+            val menuView = inflater.inflate(R.layout.layout_activity_settings_menu, null)
+            val popupWindow = PopupWindow(menuView, ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT, true)
+            popupWindow.elevation = 10f
+
+            val historyBtn = menuView.findViewById<View>(R.id.menu_action_primary)
+            historyBtn.visibility = View.VISIBLE
+            menuView.findViewById<TextView>(R.id.tv_action_primary).text = "HISTORY"
+            menuView.findViewById<ImageView>(R.id.iv_action_primary).setImageResource(R.drawable.ic_history)
+            
+            historyBtn.setOnClickListener {
+                startActivity(android.content.Intent(this, FinanceHistoryActivity::class.java))
+                popupWindow.dismiss()
+            }
+
+            menuView.findViewById<View>(R.id.menu_activity_settings).setOnClickListener {
+                popupWindow.dismiss()
+            }
+
+            popupWindow.showAsDropDown(it, -150, 0)
         }
 
         findViewById<View>(R.id.btn_back).setOnClickListener { finish() }
@@ -88,7 +112,7 @@ class FinanceActivity : AppCompatActivity() {
         val currentMonth = sdf.format(Date())
         currentMonthTransactions = DataManager.transactions.filter {
             sdf.format(Date(it.timestamp)) == currentMonth
-        }.toMutableList()
+        }.sortedByDescending { it.timestamp }.toMutableList()
     }
 
     private fun showEditTransactionDialog(transaction: Transaction, position: Int) {
@@ -103,6 +127,8 @@ class FinanceActivity : AppCompatActivity() {
         val btnSave = dialog.findViewById<TextView>(R.id.btn_save_trans)
         val btnClose = dialog.findViewById<View>(R.id.btn_close_trans)
         val titleText = dialog.findViewById<TextView>(R.id.tv_dialog_title)
+        val tvDate = dialog.findViewById<TextView>(R.id.tv_trans_date)
+        val tvTime = dialog.findViewById<TextView>(R.id.tv_trans_time)
 
         titleText?.text = "Edit Transaction"
         btnSave.text = "Update"
@@ -112,6 +138,30 @@ class FinanceActivity : AppCompatActivity() {
             "Income" -> rgType.check(R.id.radio_income)
             "Saving" -> rgType.check(R.id.radio_saving)
             else -> rgType.check(R.id.radio_expense)
+        }
+
+        val calendar = Calendar.getInstance().apply { timeInMillis = transaction.timestamp }
+        val dateSdf = SimpleDateFormat("MMM dd, yyyy", Locale.getDefault())
+        val timeSdf = SimpleDateFormat("h:mm a", Locale.getDefault())
+        
+        tvDate.text = dateSdf.format(calendar.time)
+        tvTime.text = timeSdf.format(calendar.time)
+
+        tvDate.setOnClickListener {
+            DatePickerDialog(this, { _, y, m, d ->
+                calendar.set(Calendar.YEAR, y)
+                calendar.set(Calendar.MONTH, m)
+                calendar.set(Calendar.DAY_OF_MONTH, d)
+                tvDate.text = dateSdf.format(calendar.time)
+            }, calendar.get(Calendar.YEAR), calendar.get(Calendar.MONTH), calendar.get(Calendar.DAY_OF_MONTH)).show()
+        }
+
+        tvTime.setOnClickListener {
+            TimePickerDialog(this, { _, h, min ->
+                calendar.set(Calendar.HOUR_OF_DAY, h)
+                calendar.set(Calendar.MINUTE, min)
+                tvTime.text = timeSdf.format(calendar.time)
+            }, calendar.get(Calendar.HOUR_OF_DAY), calendar.get(Calendar.MINUTE), false).show()
         }
 
         btnClose.setOnClickListener { dialog.dismiss() }
@@ -129,8 +179,10 @@ class FinanceActivity : AppCompatActivity() {
                 transaction.title = title
                 transaction.amount = amount
                 transaction.type = type
+                transaction.timestamp = calendar.timeInMillis
                 
-                transactionAdapter.notifyItemChanged(position)
+                filterCurrentMonthTransactions()
+                transactionAdapter.updateData(currentMonthTransactions)
                 DataManager.saveData(this)
                 updateSummary()
                 dialog.dismiss()
@@ -149,10 +201,8 @@ class FinanceActivity : AppCompatActivity() {
         val savingsGoal = DataManager.monthlySavingsGoal
 
         tvBudget.text = String.format(Locale.US, "₹%.0f", budget)
-        
         tvExpenditure.text = String.format(Locale.US, "₹%.0f", spent)
         tvExpenditure.setTextColor(android.graphics.Color.parseColor("#FF5252"))
-        
         tvRemaining.text = String.format(Locale.US, "₹%.0f", remaining)
         
         if (remaining < 0) {
@@ -228,8 +278,34 @@ class FinanceActivity : AppCompatActivity() {
         val etAmount = dialog.findViewById<EditText>(R.id.et_trans_amount)
         val etTitle = dialog.findViewById<EditText>(R.id.et_trans_title)
         val rgType = dialog.findViewById<RadioGroup>(R.id.rg_trans_type)
-        val btnSave = dialog.findViewById<View>(R.id.btn_save_trans)
+        val btnSave = dialog.findViewById<TextView>(R.id.btn_save_trans)
         val btnClose = dialog.findViewById<View>(R.id.btn_close_trans)
+        val tvDate = dialog.findViewById<TextView>(R.id.tv_trans_date)
+        val tvTime = dialog.findViewById<TextView>(R.id.tv_trans_time)
+
+        val calendar = Calendar.getInstance()
+        val dateSdf = SimpleDateFormat("MMM dd, yyyy", Locale.getDefault())
+        val timeSdf = SimpleDateFormat("h:mm a", Locale.getDefault())
+        
+        tvDate.text = "Today"
+        tvTime.text = "Now"
+
+        tvDate.setOnClickListener {
+            DatePickerDialog(this, { _, y, m, d ->
+                calendar.set(Calendar.YEAR, y)
+                calendar.set(Calendar.MONTH, m)
+                calendar.set(Calendar.DAY_OF_MONTH, d)
+                tvDate.text = dateSdf.format(calendar.time)
+            }, calendar.get(Calendar.YEAR), calendar.get(Calendar.MONTH), calendar.get(Calendar.DAY_OF_MONTH)).show()
+        }
+
+        tvTime.setOnClickListener {
+            TimePickerDialog(this, { _, h, min ->
+                calendar.set(Calendar.HOUR_OF_DAY, h)
+                calendar.set(Calendar.MINUTE, min)
+                tvTime.text = timeSdf.format(calendar.time)
+            }, calendar.get(Calendar.HOUR_OF_DAY), calendar.get(Calendar.MINUTE), false).show()
+        }
 
         btnClose.setOnClickListener { dialog.dismiss() }
 
@@ -246,7 +322,8 @@ class FinanceActivity : AppCompatActivity() {
                 val newTransaction = Transaction(
                     title = title,
                     amount = amount,
-                    type = type
+                    type = type,
+                    timestamp = calendar.timeInMillis
                 )
                 
                 DataManager.transactions.add(0, newTransaction)

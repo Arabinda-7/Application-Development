@@ -7,6 +7,7 @@ import android.view.ViewGroup
 import android.widget.PopupWindow
 import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView
+import java.text.SimpleDateFormat
 import java.util.*
 
 class TransactionAdapter(
@@ -23,7 +24,9 @@ class TransactionAdapter(
     override fun onBindViewHolder(holder: TransactionViewHolder, position: Int) {
         val transaction = transactions[position]
         holder.title.text = transaction.title
-        holder.category.text = transaction.category
+        
+        val sdf = SimpleDateFormat("MMM dd, h:mm a", Locale.getDefault())
+        holder.category.text = sdf.format(Date(transaction.timestamp))
         
         val prefix = if (transaction.type == "Expense") "-" else "+"
         holder.amount.text = String.format(Locale.US, "%s₹%.2f", prefix, transaction.amount)

@@ -32,6 +32,18 @@
         app:layout_constraintStart_toEndOf="@id/btn_back"
         app:layout_constraintTop_toTopOf="@id/btn_back" />
 
+    <ImageButton
+        android:id="@+id/btn_project_settings"
+        android:layout_width="48dp"
+        android:layout_height="48dp"
+        android:layout_marginEnd="16dp"
+        android:background="?attr/selectableItemBackgroundBorderless"
+        android:src="@drawable/baseline_tune_24"
+        app:tint="@color/white"
+        app:layout_constraintBottom_toBottomOf="@id/btn_back"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toTopOf="@id/btn_back" />
+
     <com.google.android.material.chip.ChipGroup
         android:id="@+id/project_filter_chips"
         android:layout_width="wrap_content"

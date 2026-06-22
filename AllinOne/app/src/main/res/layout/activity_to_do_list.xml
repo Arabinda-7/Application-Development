@@ -23,14 +23,25 @@
         android:id="@+id/tv_title"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginStart="24dp"
-        android:layout_marginTop="24dp"
-        android:text="Tasks"
+        android:layout_marginStart="8dp"
+        android:text="TASKS"
         android:textColor="@color/white"
-        android:textSize="28sp"
-        android:textStyle="normal"
+        android:textSize="20sp"
+        android:textStyle="bold"
+        app:layout_constraintBottom_toBottomOf="@id/btn_back"
+        app:layout_constraintStart_toEndOf="@id/btn_back"
+        app:layout_constraintTop_toTopOf="@id/btn_back" />
+
+    <TextView
+        android:id="@+id/tv_date"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="24dp"
+        android:text="Mar 01"
+        android:textColor="@color/text_secondary"
+        android:textSize="14sp"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/btn_back" />
+        app:layout_constraintTop_toBottomOf="@id/tv_title" />
 
     <ImageButton
         android:id="@+id/btn_task_settings"
@@ -38,11 +49,11 @@
         android:layout_height="48dp"
         android:layout_marginEnd="16dp"
         android:background="?attr/selectableItemBackgroundBorderless"
-        android:src="@android:drawable/ic_menu_manage"
+        android:src="@drawable/baseline_tune_24"
         app:tint="@color/white"
-        app:layout_constraintBottom_toBottomOf="@id/tv_title"
+        app:layout_constraintBottom_toBottomOf="@id/btn_back"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintTop_toTopOf="@id/tv_title" />
+        app:layout_constraintTop_toTopOf="@id/btn_back" />
 
     <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/task_list"
@@ -52,7 +63,7 @@
         android:clipToPadding="false"
         android:paddingBottom="100dp"
         app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/tv_title" />
+        app:layout_constraintTop_toBottomOf="@id/tv_date" />
 
     <com.google.android.material.floatingactionbutton.FloatingActionButton
         android:id="@+id/btn_create_new_task"

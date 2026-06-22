@@ -11,9 +11,11 @@ import android.view.ViewGroup
 import android.widget.EditText
 import android.widget.FrameLayout
 import android.widget.GridLayout
+import android.widget.ImageButton
 import android.widget.ImageView
 import android.widget.LinearLayout
 import android.widget.NumberPicker
+import android.widget.PopupWindow
 import android.widget.RadioButton
 import android.widget.RadioGroup
 import android.widget.TextView
@@ -68,6 +70,19 @@ class HabitTrackerActivity : AppCompatActivity() {
         updateSectionProgress()
 
         findViewById<View>(R.id.btn_back).setOnClickListener { finish() }
+
+        findViewById<View>(R.id.btn_habit_settings).setOnClickListener {
+            val inflater = LayoutInflater.from(this)
+            val menuView = inflater.inflate(R.layout.layout_activity_settings_menu, null)
+            val popupWindow = PopupWindow(menuView, ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT, true)
+            popupWindow.elevation = 10f
+
+            menuView.findViewById<View>(R.id.menu_activity_settings).setOnClickListener {
+                popupWindow.dismiss()
+            }
+
+            popupWindow.showAsDropDown(it, -150, 0)
+        }
     }
 
     private fun setupCalendarViewPager() {

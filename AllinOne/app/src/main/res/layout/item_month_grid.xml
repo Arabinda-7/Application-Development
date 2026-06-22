@@ -5,20 +5,23 @@
     android:layout_height="110dp"
     android:layout_margin="4dp"
     app:cardCornerRadius="24dp"
-    app:cardElevation="2dp">
+    app:cardElevation="0dp"
+    app:strokeWidth="1dp"
+    app:strokeColor="#33FFFFFF">
 
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:gravity="center"
         android:orientation="vertical"
-        android:padding="4dp">
+        android:padding="8dp">
 
         <ImageView
             android:id="@+id/iv_month_icon"
-            android:layout_width="32dp"
-            android:layout_height="32dp"
-            android:layout_marginBottom="4dp"
+            android:layout_width="24dp"
+            android:layout_height="24dp"
+            android:layout_marginBottom="8dp"
+            android:alpha="0.6"
             app:tint="@color/white" />
 
         <TextView
@@ -27,8 +30,9 @@
             android:layout_height="wrap_content"
             android:text="JAN"
             android:textColor="@color/white"
-            android:textSize="12sp"
-            android:textStyle="bold" />
+            android:textSize="13sp"
+            android:textStyle="bold"
+            android:letterSpacing="0.1" />
 
     </LinearLayout>
 

@@ -55,7 +55,7 @@
             android:layout_alignParentEnd="true"
             android:layout_centerVertical="true"
             android:background="?attr/selectableItemBackgroundBorderless"
-            android:src="@android:drawable/ic_menu_more"
+            android:src="@drawable/baseline_settings_24"
             app:tint="@color/white"
             android:contentDescription="Menu" />
     </RelativeLayout>

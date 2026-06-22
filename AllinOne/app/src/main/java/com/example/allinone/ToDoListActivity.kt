@@ -8,12 +8,13 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.EditText
 import android.widget.ImageButton
-import android.widget.PopupMenu
+import android.widget.PopupWindow
 import android.widget.TextView
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.ContextCompat
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
+import java.text.SimpleDateFormat
 import java.util.*
 
 class ToDoListActivity : AppCompatActivity() {
@@ -25,6 +26,10 @@ class ToDoListActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_to_do_list)
+
+        val dateTextView = findViewById<TextView>(R.id.tv_date)
+        val sdf = SimpleDateFormat("MMM dd", Locale.getDefault())
+        dateTextView.text = sdf.format(Date())
 
         val taskList = findViewById<RecyclerView>(R.id.task_list)
         taskList.layoutManager = LinearLayoutManager(this)
@@ -56,15 +61,24 @@ class ToDoListActivity : AppCompatActivity() {
     }
 
     private fun showSettingsMenu(anchor: View) {
-        val popup = PopupMenu(this, anchor)
-        popup.menu.add("Delete")
-        popup.setOnMenuItemClickListener { item ->
-            if (item.title == "Delete") {
-                toggleDeleteMode(true)
-            }
-            true
+        val inflater = LayoutInflater.from(this)
+        val menuView = inflater.inflate(R.layout.layout_activity_settings_menu, null)
+        val popupWindow = PopupWindow(menuView, ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT, true)
+        popupWindow.elevation = 10f
+
+        val deleteBtn = menuView.findViewById<View>(R.id.menu_action_primary)
+        deleteBtn.visibility = View.VISIBLE
+        deleteBtn.setOnClickListener {
+            toggleDeleteMode(true)
+            popupWindow.dismiss()
         }
-        popup.show()
+
+        menuView.findViewById<View>(R.id.menu_activity_settings).setOnClickListener {
+            popupWindow.dismiss()
+            // Open settings if needed
+        }
+
+        popupWindow.showAsDropDown(anchor, -150, 0)
     }
 
     private fun toggleDeleteMode(enabled: Boolean) {
@@ -74,7 +88,7 @@ class ToDoListActivity : AppCompatActivity() {
         if (enabled) {
             btnSettings.setImageResource(android.R.drawable.ic_menu_delete)
         } else {
-            btnSettings.setImageResource(android.R.drawable.ic_menu_manage)
+            btnSettings.setImageResource(R.drawable.baseline_settings_24)
         }
     }
 
