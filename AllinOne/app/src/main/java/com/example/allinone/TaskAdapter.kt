@@ -13,6 +13,7 @@ import android.widget.TextView
 import androidx.core.content.ContextCompat
 import androidx.recyclerview.widget.RecyclerView
 import com.google.android.material.card.MaterialCardView
+import java.util.*
 
 class TaskAdapter(
     private val allTasks: MutableList<Task>,
@@ -27,6 +28,9 @@ class TaskAdapter(
     private var isCompletedExpanded = true
     private var isDeleteMode = false
     private val displayItems = mutableListOf<Any>()
+    
+    private var currentCategory = "All"
+    private var currentSearchQuery = ""
 
     init {
         updateDisplayList()
@@ -66,6 +70,28 @@ class TaskAdapter(
             holder.selectionCheckbox.visibility = if (isDeleteMode) View.VISIBLE else View.GONE
             holder.selectionCheckbox.isChecked = task.isSelected
             
+            // Priority Indicator
+            val priorityColor = when(task.priority) {
+                1 -> ContextCompat.getColor(context, R.color.card_orange)
+                2 -> Color.parseColor("#FF5252")
+                else -> ContextCompat.getColor(context, R.color.primary_blue)
+            }
+            holder.priorityIndicator.setBackgroundColor(priorityColor)
+            
+            // Metadata
+            holder.tvCategory.text = task.category ?: "General"
+            
+            val subtasksList = task.subtasks ?: mutableListOf()
+            if (subtasksList.isNotEmpty()) {
+                val completed = subtasksList.count { it.isCompleted }
+                holder.tvSubtasks.text = "$completed/${subtasksList.size} subtasks"
+                holder.tvSubtasks.visibility = View.VISIBLE
+            } else {
+                holder.tvSubtasks.visibility = View.GONE
+            }
+            
+            holder.ivReminder.visibility = if (task.reminderTime != null) View.VISIBLE else View.GONE
+            
             updateVisuals(holder, task.isCompleted)
 
             holder.taskCompleted.setOnClickListener {
@@ -83,6 +109,8 @@ class TaskAdapter(
                 if (isDeleteMode) {
                     task.isSelected = !task.isSelected
                     notifyItemChanged(position)
+                } else {
+                    (context as? ToDoListActivity)?.showAddTaskDialog(task)
                 }
             }
 
@@ -131,10 +159,29 @@ class TaskAdapter(
         popupWindow.showAsDropDown(anchor, 150, -100)
     }
 
+    fun filter(category: String, query: String) {
+        currentCategory = category
+        currentSearchQuery = query
+        updateDisplayList()
+    }
+
+    fun getTaskAt(position: Int): Task? {
+        return if (position in displayItems.indices && displayItems[position] is Task) {
+            displayItems[position] as Task
+        } else null
+    }
+
     fun updateDisplayList() {
         displayItems.clear()
-        val activeTasks = allTasks.filter { !it.isCompleted }.sortedByDescending { it.timestamp }
-        val completedTasks = allTasks.filter { it.isCompleted }.sortedByDescending { it.timestamp }
+        
+        val filtered = allTasks.filter { task ->
+            val matchesCategory = if (currentCategory == "All") true else task.category == currentCategory
+            val matchesSearch = task.name.contains(currentSearchQuery, ignoreCase = true)
+            matchesCategory && matchesSearch
+        }
+
+        val activeTasks = filtered.filter { !it.isCompleted }.sortedWith(compareByDescending<Task> { it.priority }.thenByDescending { it.timestamp })
+        val completedTasks = filtered.filter { it.isCompleted }.sortedByDescending { it.timestamp }
 
         displayItems.addAll(activeTasks)
         
@@ -180,6 +227,10 @@ class TaskAdapter(
         val taskCompleted: CheckBox = itemView.findViewById(R.id.task_completed)
         val taskCard: MaterialCardView = itemView.findViewById(R.id.task_card)
         val selectionCheckbox: CheckBox = itemView.findViewById(R.id.task_selection_checkbox)
+        val priorityIndicator: View = itemView.findViewById(R.id.priority_indicator)
+        val tvCategory: TextView = itemView.findViewById(R.id.tv_task_category)
+        val tvSubtasks: TextView = itemView.findViewById(R.id.tv_subtask_progress)
+        val ivReminder: ImageView = itemView.findViewById(R.id.iv_reminder_icon)
     }
 
     class HeaderViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {

@@ -91,6 +91,16 @@ object DataManager {
         prefs.getString(KEY_TASKS, null)?.let {
             val type = object : TypeToken<MutableList<Task>>() {}.type
             tasks = gson.fromJson(it, type) ?: mutableListOf()
+            // Migration safety: Ensure new fields are never null at runtime
+            tasks = tasks.map { oldTask ->
+                @Suppress("SENSELESS_COMPARISON")
+                if (oldTask.subtasks == null || oldTask.category == null) {
+                    oldTask.copy(
+                        subtasks = oldTask.subtasks ?: mutableListOf(),
+                        category = oldTask.category ?: "General"
+                    )
+                } else oldTask
+            }.toMutableList()
         }
 
         prefs.getString(KEY_NOTES, null)?.let {
