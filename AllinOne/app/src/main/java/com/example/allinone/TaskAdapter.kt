@@ -27,10 +27,12 @@ class TaskAdapter(
 
     private var isCompletedExpanded = true
     private var isDeleteMode = false
+    private var showCompleted = true
     private val displayItems = mutableListOf<Any>()
     
     private var currentCategory = "All"
     private var currentSearchQuery = ""
+    private var currentSortOrder = "Priority"
 
     init {
         updateDisplayList()
@@ -97,6 +99,7 @@ class TaskAdapter(
             holder.taskCompleted.setOnClickListener {
                 if (holder.taskCompleted.isChecked) {
                     task.isCompleted = true
+                    task.completedTimestamp = System.currentTimeMillis()
                     updateDisplayList()
                     DataManager.saveData(context)
                     onProgressChanged()
@@ -180,8 +183,13 @@ class TaskAdapter(
             matchesCategory && matchesSearch
         }
 
-        val activeTasks = filtered.filter { !it.isCompleted }.sortedWith(compareByDescending<Task> { it.priority }.thenByDescending { it.timestamp })
-        val completedTasks = filtered.filter { it.isCompleted }.sortedByDescending { it.timestamp }
+        val activeTasks = when (currentSortOrder) {
+            "Newest" -> filtered.filter { !it.isCompleted }.sortedByDescending { it.timestamp }
+            "Alphabetical" -> filtered.filter { !it.isCompleted }.sortedBy { it.name.lowercase() }
+            else -> filtered.filter { !it.isCompleted }.sortedWith(compareByDescending<Task> { it.priority }.thenByDescending { it.timestamp })
+        }
+
+        val completedTasks = if (showCompleted) filtered.filter { it.isCompleted }.sortedByDescending { it.timestamp } else emptyList()
 
         displayItems.addAll(activeTasks)
         
@@ -192,6 +200,16 @@ class TaskAdapter(
             }
         }
         notifyDataSetChanged()
+    }
+
+    fun setShowCompleted(show: Boolean) {
+        showCompleted = show
+        updateDisplayList()
+    }
+
+    fun setSortOrder(order: String) {
+        currentSortOrder = order
+        updateDisplayList()
     }
 
     fun setDeleteMode(enabled: Boolean) {

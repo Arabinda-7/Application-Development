@@ -19,6 +19,24 @@ object DataManager {
     var history = mutableMapOf<String, DayHistory>()
     var monthlyBudgets = mutableMapOf<String, Double>()
     var monthlySavingsGoals = mutableMapOf<String, Double>()
+    
+    // To-Do List Settings
+    var taskShowCompleted: Boolean = true
+    var taskSortOrder: String = "Priority" // Options: Priority, Newest, Alphabetical
+    var taskCustomCategories = mutableListOf("General", "Personal", "Work", "Shopping")
+    var taskAutoArchive: Boolean = false
+    
+    // Finance Settings
+    var financeCustomCategories = mutableListOf("Food", "Rent", "Transport", "Shopping", "Entertainment", "Health", "Other")
+    var financeCurrency: String = "₹"
+
+    var noteAutoCleanupDays: Int = 0
+    var noteDefaultCategory: String = "Notes"
+    var noteTemplates: MutableMap<String, String> = mutableMapOf(
+        "Daily" to "1. Today I'm grateful for: \n2. Top goal for today: \n3. How I feel: ",
+        "Questions" to "Question: \n\nContext: \n\nGoal: ",
+        "Stories" to "Theme: \nCharacters: \n\nPlot: "
+    )
 
     private const val PREFS_NAME = "all_in_one_prefs"
     private const val KEY_HABITS = "habits_data"
@@ -34,6 +52,15 @@ object DataManager {
     private const val KEY_HISTORY = "history_data"
     private const val KEY_LAST_RESET_DATE = "last_reset_date"
     private const val KEY_LAST_MONTH_RESET = "last_month_reset"
+    private const val KEY_TASK_SHOW_COMPLETED = "task_show_completed"
+    private const val KEY_TASK_SORT_ORDER = "task_sort_order"
+    private const val KEY_TASK_CUSTOM_CATEGORIES = "task_custom_categories"
+    private const val KEY_TASK_AUTO_ARCHIVE = "task_auto_archive"
+    private const val KEY_FINANCE_CUSTOM_CATEGORIES = "finance_custom_categories"
+    private const val KEY_FINANCE_CURRENCY = "finance_currency"
+    private const val KEY_NOTE_AUTO_CLEANUP = "note_auto_cleanup"
+    private const val KEY_NOTE_DEFAULT_CAT = "note_default_cat"
+    private const val KEY_NOTE_TEMPLATES = "note_templates"
 
     private fun getPrefs(context: Context): SharedPreferences {
         return context.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE)
@@ -55,6 +82,15 @@ object DataManager {
             putString(KEY_MONTHLY_BUDGETS, gson.toJson(monthlyBudgets))
             putString(KEY_MONTHLY_SAVINGS_GOALS, gson.toJson(monthlySavingsGoals))
             putString(KEY_HISTORY, gson.toJson(history))
+            putBoolean(KEY_TASK_SHOW_COMPLETED, taskShowCompleted)
+            putString(KEY_TASK_SORT_ORDER, taskSortOrder)
+            putString(KEY_TASK_CUSTOM_CATEGORIES, gson.toJson(taskCustomCategories))
+            putBoolean(KEY_TASK_AUTO_ARCHIVE, taskAutoArchive)
+            putString(KEY_FINANCE_CUSTOM_CATEGORIES, gson.toJson(financeCustomCategories))
+            putString(KEY_FINANCE_CURRENCY, financeCurrency)
+            putInt(KEY_NOTE_AUTO_CLEANUP, noteAutoCleanupDays)
+            putString(KEY_NOTE_DEFAULT_CAT, noteDefaultCategory)
+            putString(KEY_NOTE_TEMPLATES, gson.toJson(noteTemplates))
             apply()
         }
     }
@@ -134,6 +170,30 @@ object DataManager {
         prefs.getString(KEY_HISTORY, null)?.let {
             val type = object : TypeToken<MutableMap<String, DayHistory>>() {}.type
             history = gson.fromJson(it, type) ?: mutableMapOf()
+        }
+
+        taskShowCompleted = prefs.getBoolean(KEY_TASK_SHOW_COMPLETED, true)
+        taskSortOrder = prefs.getString(KEY_TASK_SORT_ORDER, "Priority") ?: "Priority"
+        prefs.getString(KEY_TASK_CUSTOM_CATEGORIES, null)?.let {
+            val type = object : TypeToken<MutableList<String>>() {}.type
+            taskCustomCategories = gson.fromJson(it, type) ?: mutableListOf("General", "Personal", "Work", "Shopping")
+        }
+        taskAutoArchive = prefs.getBoolean(KEY_TASK_AUTO_ARCHIVE, false)
+
+        prefs.getString(KEY_FINANCE_CUSTOM_CATEGORIES, null)?.let {
+            val type = object : TypeToken<MutableList<String>>() {}.type
+            financeCustomCategories = gson.fromJson(it, type) ?: mutableListOf("Food", "Transport", "Rent", "Shopping", "Entertainment")
+        }
+        financeCurrency = prefs.getString(KEY_FINANCE_CURRENCY, "₹") ?: "₹"
+        noteAutoCleanupDays = prefs.getInt(KEY_NOTE_AUTO_CLEANUP, 0)
+        noteDefaultCategory = prefs.getString(KEY_NOTE_DEFAULT_CAT, "Notes") ?: "Notes"
+        prefs.getString(KEY_NOTE_TEMPLATES, null)?.let {
+            val type = object : TypeToken<MutableMap<String, String>>() {}.type
+            noteTemplates = gson.fromJson(it, type) ?: noteTemplates
+        }
+
+        if (taskAutoArchive) {
+            autoArchiveTasks()
         }
 
         checkAndResetDailyProgress(context)
@@ -339,5 +399,12 @@ object DataManager {
             transCal.get(Calendar.MONTH) == currentMonth && 
             transCal.get(Calendar.YEAR) == currentYear
         }.sumOf { it.amount }
+    }
+
+    private fun autoArchiveTasks() {
+        val sevenDaysAgo = System.currentTimeMillis() - (7 * 24 * 60 * 60 * 1000L)
+        tasks.removeAll { 
+            it.isCompleted && (it.completedTimestamp ?: 0L) < sevenDaysAgo 
+        }
     }
 }

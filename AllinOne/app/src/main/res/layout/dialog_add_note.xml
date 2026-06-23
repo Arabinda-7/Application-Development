@@ -29,6 +29,40 @@
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintTop_toTopOf="@id/btn_close_note" />
 
+    <TextView
+        android:id="@+id/btn_reminder"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginEnd="8dp"
+        android:text="Remind"
+        android:textColor="@color/white"
+        android:textSize="16sp"
+        android:textStyle="bold"
+        android:padding="8dp"
+        android:clickable="true"
+        android:focusable="true"
+        android:background="?attr/selectableItemBackground"
+        app:layout_constraintBottom_toBottomOf="@id/btn_save_note"
+        app:layout_constraintEnd_toStartOf="@id/btn_save_note"
+        app:layout_constraintTop_toTopOf="@id/btn_save_note" />
+
+    <TextView
+        android:id="@+id/btn_voice_input"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginEnd="8dp"
+        android:text="Voice"
+        android:textColor="@color/white"
+        android:textSize="16sp"
+        android:textStyle="bold"
+        android:padding="8dp"
+        android:clickable="true"
+        android:focusable="true"
+        android:background="?attr/selectableItemBackground"
+        app:layout_constraintBottom_toBottomOf="@id/btn_reminder"
+        app:layout_constraintEnd_toStartOf="@id/btn_reminder"
+        app:layout_constraintTop_toTopOf="@id/btn_reminder" />
+
     <EditText
         android:id="@+id/note_title_input"
         android:layout_width="match_parent"

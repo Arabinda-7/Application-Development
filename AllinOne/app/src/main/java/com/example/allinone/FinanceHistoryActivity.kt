@@ -17,6 +17,7 @@ class FinanceHistoryActivity : AppCompatActivity() {
     private lateinit var monthAdapter: MonthAdapter
     private lateinit var transactionAdapter: TransactionAdapter
     private lateinit var tvYear: TextView
+    private lateinit var tvMonthComparison: TextView
     private var currentYear: Int = Calendar.getInstance().get(Calendar.YEAR)
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -78,6 +79,7 @@ class FinanceHistoryActivity : AppCompatActivity() {
     }
 
     private fun updateYearlyAnalytics() {
+        val currency = DataManager.financeCurrency
         val yearKey = currentYear.toString()
         val sdf = SimpleDateFormat("yyyy", Locale.getDefault())
         val monthCodeSdf = SimpleDateFormat("MM", Locale.getDefault())
@@ -103,8 +105,8 @@ class FinanceHistoryActivity : AppCompatActivity() {
             .mapValues { entry -> entry.value.sumOf { it.amount } }
             .maxByOrNull { it.value }?.key ?: "None"
 
-        findViewById<TextView>(R.id.tv_yearly_avg_spent).text = String.format(Locale.US, "₹%.0f", avgSpent)
-        findViewById<TextView>(R.id.tv_yearly_total_savings).text = String.format(Locale.US, "₹%.0f", totalSavings)
+        findViewById<TextView>(R.id.tv_yearly_avg_spent).text = String.format(Locale.US, "%s%.0f", currency, avgSpent)
+        findViewById<TextView>(R.id.tv_yearly_total_savings).text = String.format(Locale.US, "%s%.0f", currency, totalSavings)
         findViewById<TextView>(R.id.tv_yearly_highest_month).text = highestMonth
     }
 
@@ -120,6 +122,7 @@ class FinanceHistoryActivity : AppCompatActivity() {
     }
 
     private fun showTransactionsForMonth(monthName: String) {
+        val currency = DataManager.financeCurrency
         val displaySdf = SimpleDateFormat("MMMM", Locale.getDefault())
         val sdf = SimpleDateFormat("yyyyMM", Locale.getDefault())
         val date = displaySdf.parse(monthName) ?: Date()
@@ -149,15 +152,38 @@ class FinanceHistoryActivity : AppCompatActivity() {
         val savingsGoal = DataManager.monthlySavingsGoals[monthKey] ?: 0.0
 
         val summary = findViewById<View>(R.id.finance_summary)
-        summary.findViewById<TextView>(R.id.tv_monthly_budget).text = String.format(Locale.US, "₹%.0f", budget)
-        summary.findViewById<TextView>(R.id.tv_current_expenditure).text = String.format(Locale.US, "₹%.0f", spent)
+        val tvMonthComparison = summary.findViewById<TextView>(R.id.tv_month_comparison)
+        
+        summary.findViewById<TextView>(R.id.tv_monthly_budget).text = String.format(Locale.US, "%s%.0f", currency, budget)
+        summary.findViewById<TextView>(R.id.tv_current_expenditure).text = String.format(Locale.US, "%s%.0f", currency, spent)
         
         val tvRemaining = summary.findViewById<TextView>(R.id.tv_remaining_balance)
-        tvRemaining.text = String.format(Locale.US, "₹%.0f", remaining)
+        tvRemaining.text = String.format(Locale.US, "%s%.0f", currency, remaining)
         tvRemaining.setTextColor(if (remaining < 0) android.graphics.Color.parseColor("#FF5252") else android.graphics.Color.parseColor("#4CAF50"))
 
-        summary.findViewById<TextView>(R.id.tv_current_savings).text = String.format(Locale.US, "₹%.0f", savings)
-        summary.findViewById<TextView>(R.id.tv_savings_goal).text = String.format(Locale.US, "Goal: ₹%.0f", savingsGoal)
+        summary.findViewById<TextView>(R.id.tv_current_savings).text = String.format(Locale.US, "%s%.0f", currency, savings)
+        summary.findViewById<TextView>(R.id.tv_savings_goal).text = String.format(Locale.US, "Goal: %s%.0f", currency, savingsGoal)
+
+        // Month-over-Month Comparison
+        val prevMonthCalendar = calendar.clone() as Calendar
+        prevMonthCalendar.add(Calendar.MONTH, -1)
+        val prevMonthKey = sdf.format(prevMonthCalendar.time)
+        
+        val prevMonthTransactions = DataManager.transactions.filter {
+            sdf.format(Date(it.timestamp)) == prevMonthKey
+        }
+        val prevSpent = prevMonthTransactions.filter { it.type == "Expense" }.sumOf { it.amount }
+        
+        if (prevSpent > 0) {
+            val diff = ((spent - prevSpent) / prevSpent) * 100
+            val color = if (spent > prevSpent) "#FF5252" else "#4CAF50"
+            val trend = if (spent > prevSpent) "more" else "less"
+            tvMonthComparison.visibility = View.VISIBLE
+            tvMonthComparison.text = String.format(Locale.US, "Spent %.0f%% %s than last month", Math.abs(diff), trend)
+            tvMonthComparison.setTextColor(android.graphics.Color.parseColor(color))
+        } else {
+            tvMonthComparison.visibility = View.GONE
+        }
 
         findViewById<View>(R.id.history_scroll_view).visibility = View.GONE
         findViewById<View>(R.id.year_navigation_container).visibility = View.GONE

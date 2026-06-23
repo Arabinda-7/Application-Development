@@ -29,7 +29,7 @@ class TransactionAdapter(
         holder.category.text = sdf.format(Date(transaction.timestamp))
         
         val prefix = if (transaction.type == "Expense") "-" else "+"
-        holder.amount.text = String.format(Locale.US, "%s₹%.2f", prefix, transaction.amount)
+        holder.amount.text = String.format(Locale.US, "%s%s%.2f", prefix, DataManager.financeCurrency, transaction.amount)
         holder.amount.setTextColor(if (transaction.type == "Expense") Color.parseColor("#FF5252") else Color.parseColor("#4CAF50"))
 
         holder.itemView.setOnLongClickListener {

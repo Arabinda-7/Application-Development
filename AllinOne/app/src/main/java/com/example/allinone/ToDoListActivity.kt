@@ -11,6 +11,9 @@ import android.graphics.Color
 import android.os.Bundle
 import android.text.Editable
 import android.text.TextWatcher
+import android.util.TypedValue
+import android.graphics.Typeface
+import android.view.Gravity
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -42,6 +45,8 @@ class ToDoListActivity : AppCompatActivity() {
         taskAdapter = TaskAdapter(allTasks) { 
             DataManager.saveData(this)
         }
+        taskAdapter.setShowCompleted(DataManager.taskShowCompleted)
+        taskAdapter.setSortOrder(DataManager.taskSortOrder)
         taskList.adapter = taskAdapter
 
         setupHeader()
@@ -100,15 +105,39 @@ class ToDoListActivity : AppCompatActivity() {
     }
 
     private fun setupFilters() {
-        val chipGroup = findViewById<ChipGroup>(R.id.category_filter_chips)
-        chipGroup.setOnCheckedStateChangeListener { _, checkedIds ->
-            currentCategoryFilter = when (checkedIds.firstOrNull()) {
-                R.id.chip_cat_personal -> "Personal"
-                R.id.chip_cat_work -> "Work"
-                R.id.chip_cat_shopping -> "Shopping"
-                else -> "All"
+        val radioGroup = findViewById<RadioGroup>(R.id.category_filter_group)
+        radioGroup.removeAllViews()
+
+        val allCategories = mutableListOf("All")
+        allCategories.addAll(DataManager.taskCustomCategories)
+
+        allCategories.forEach { category ->
+            val rb = RadioButton(this).apply {
+                val height = TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, 32f, resources.displayMetrics).toInt()
+                val params = RadioGroup.LayoutParams(ViewGroup.LayoutParams.WRAP_CONTENT, height)
+                val margin = TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, 4f, resources.displayMetrics).toInt()
+                params.setMargins(margin, 0, margin, 0)
+                layoutParams = params
+                
+                val padding = TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, 16f, resources.displayMetrics).toInt()
+                setPadding(padding, 0, padding, 0)
+                
+                background = ContextCompat.getDrawable(this@ToDoListActivity, R.drawable.filter_chip_bg)
+                buttonDrawable = null
+                gravity = Gravity.CENTER
+                text = category.uppercase()
+                setTextColor(Color.WHITE)
+                textSize = 10f
+                typeface = Typeface.create(Typeface.DEFAULT, Typeface.BOLD)
+                
+                isChecked = currentCategoryFilter == category
+                
+                setOnClickListener {
+                    currentCategoryFilter = category
+                    applyFilters()
+                }
             }
-            applyFilters()
+            radioGroup.addView(rb)
         }
     }
 
@@ -145,15 +174,93 @@ class ToDoListActivity : AppCompatActivity() {
         val popupWindow = PopupWindow(menuView, ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT, true)
         popupWindow.elevation = 10f
 
-        val deleteBtn = menuView.findViewById<View>(R.id.menu_action_primary)
-        deleteBtn.visibility = View.VISIBLE
-        deleteBtn.setOnClickListener {
-            toggleDeleteMode(true)
+        // Clear Completed
+        menuView.findViewById<View>(R.id.menu_clear_completed).setOnClickListener {
+            val completedCount = allTasks.count { it.isCompleted }
+            if (completedCount > 0) {
+                allTasks.removeAll { it.isCompleted }
+                taskAdapter.updateDisplayList()
+                DataManager.saveData(this)
+                Toast.makeText(this, "Cleared $completedCount completed tasks", Toast.LENGTH_SHORT).show()
+            }
             popupWindow.dismiss()
         }
 
-        menuView.findViewById<View>(R.id.menu_activity_settings).setOnClickListener { popupWindow.dismiss() }
+        // Toggle Show/Hide Completed
+        val tvToggle = menuView.findViewById<TextView>(R.id.tv_toggle_completed)
+        val ivToggle = menuView.findViewById<ImageView>(R.id.iv_toggle_completed)
+        
+        tvToggle.text = if (DataManager.taskShowCompleted) "HIDE COMPLETED" else "SHOW COMPLETED"
+        ivToggle.setImageResource(if (DataManager.taskShowCompleted) android.R.drawable.checkbox_on_background else android.R.drawable.checkbox_off_background)
+
+        menuView.findViewById<View>(R.id.menu_toggle_completed).setOnClickListener {
+            DataManager.taskShowCompleted = !DataManager.taskShowCompleted
+            taskAdapter.setShowCompleted(DataManager.taskShowCompleted)
+            DataManager.saveData(this)
+            popupWindow.dismiss()
+        }
+
+        menuView.findViewById<View>(R.id.menu_activity_settings).setOnClickListener { 
+            showAdvancedSettingsDialog()
+            popupWindow.dismiss() 
+        }
         popupWindow.showAsDropDown(anchor, -150, 0)
+    }
+
+    private fun showAdvancedSettingsDialog() {
+        val dialog = Dialog(this)
+        val view = layoutInflater.inflate(R.layout.dialog_task_advanced_settings, null)
+        dialog.setContentView(view)
+        dialog.window?.setBackgroundDrawableResource(android.R.color.transparent)
+        dialog.window?.setLayout(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT)
+
+        // Select and Delete
+        view.findViewById<View>(R.id.item_delete).setOnClickListener {
+            toggleDeleteMode(true)
+            dialog.dismiss()
+        }
+
+        // Sort Order
+        val tvSortLabel = view.findViewById<TextView>(R.id.tv_sort_label)
+        fun updateSortText() { tvSortLabel.text = "Sort Order: ${DataManager.taskSortOrder}" }
+        updateSortText()
+        
+        view.findViewById<View>(R.id.item_sort).setOnClickListener {
+            val orders = listOf("Priority", "Newest", "Alphabetical")
+            val currentIndex = orders.indexOf(DataManager.taskSortOrder)
+            DataManager.taskSortOrder = orders[(currentIndex + 1) % orders.size]
+            taskAdapter.setSortOrder(DataManager.taskSortOrder)
+            DataManager.saveData(this)
+            updateSortText()
+        }
+
+        // Auto Archive
+        val ivArchive = view.findViewById<ImageView>(R.id.iv_archive_check)
+        fun updateArchiveUI() {
+            ivArchive.setImageResource(if (DataManager.taskAutoArchive) android.R.drawable.checkbox_on_background else android.R.drawable.checkbox_off_background)
+        }
+        updateArchiveUI()
+        
+        view.findViewById<View>(R.id.item_archive).setOnClickListener {
+            DataManager.taskAutoArchive = !DataManager.taskAutoArchive
+            DataManager.saveData(this)
+            updateArchiveUI()
+            Toast.makeText(this, "Auto-Archive ${if (DataManager.taskAutoArchive) "enabled" else "disabled"}", Toast.LENGTH_SHORT).show()
+        }
+
+        // Analytics
+        view.findViewById<View>(R.id.item_analytics).setOnClickListener {
+            showTaskAnalyticsDialog()
+        }
+
+        // Manage Categories
+        view.findViewById<View>(R.id.item_categories).setOnClickListener {
+            showManageCategoriesDialog()
+        }
+
+        view.findViewById<View>(R.id.btn_close_settings).setOnClickListener { dialog.dismiss() }
+        
+        dialog.show()
     }
 
     private fun toggleDeleteMode(enabled: Boolean) {
@@ -181,7 +288,7 @@ class ToDoListActivity : AppCompatActivity() {
         val btnSave = view.findViewById<TextView>(R.id.btn_save_task)
 
         // Setup Category Spinner
-        val categories = listOf("General", "Personal", "Work", "Shopping")
+        val categories = DataManager.taskCustomCategories
         spinnerCat.adapter = ArrayAdapter(this, android.R.layout.simple_spinner_dropdown_item, categories)
 
         var selectedPriority = existingTask?.priority ?: 0
@@ -256,7 +363,9 @@ class ToDoListActivity : AppCompatActivity() {
                 task.subtasks.clear()
                 task.subtasks.addAll(tempSubtasks)
                 
-                if (existingTask == null) allTasks.add(0, task)
+                if (existingTask == null) {
+                    allTasks.add(0, task)
+                }
                 
                 // Schedule Reminder
                 selectedReminder?.let { time ->
@@ -277,12 +386,99 @@ class ToDoListActivity : AppCompatActivity() {
         dialog.show()
     }
 
+    private fun showManageCategoriesDialog() {
+        val dialog = Dialog(this)
+        val view = layoutInflater.inflate(R.layout.dialog_manage_categories, null)
+        dialog.setContentView(view)
+        dialog.window?.setBackgroundDrawableResource(android.R.color.transparent)
+        dialog.window?.setLayout(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT)
+
+        val container = view.findViewById<LinearLayout>(R.id.categories_container)
+        val etNewCategory = view.findViewById<EditText>(R.id.et_new_category)
+        val btnAdd = view.findViewById<ImageButton>(R.id.btn_add_category)
+
+        fun render() {
+            container.removeAllViews()
+            DataManager.taskCustomCategories.forEach { category ->
+                val catView = layoutInflater.inflate(R.layout.item_category_manage, container, false)
+                catView.findViewById<TextView>(R.id.tv_category_name).text = category
+                catView.findViewById<View>(R.id.btn_remove_category).setOnClickListener {
+                    if (DataManager.taskCustomCategories.size > 1) {
+                        DataManager.taskCustomCategories.remove(category)
+                        DataManager.saveData(this)
+                        render()
+                        setupFilters() // Refresh main screen chips
+                    } else {
+                        Toast.makeText(this, "At least one category required", Toast.LENGTH_SHORT).show()
+                    }
+                }
+                container.addView(catView)
+            }
+        }
+
+        btnAdd.setOnClickListener {
+            val name = etNewCategory.text.toString().trim()
+            if (name.isNotEmpty() && !DataManager.taskCustomCategories.contains(name)) {
+                DataManager.taskCustomCategories.add(name)
+                DataManager.saveData(this)
+                etNewCategory.text.clear()
+                render()
+                setupFilters() // Refresh main screen chips
+            }
+        }
+
+        render()
+        dialog.show()
+    }
+
+    private fun showTaskAnalyticsDialog() {
+        val total = allTasks.size
+        val completed = allTasks.count { it.isCompleted }
+        val pending = total - completed
+        val highPriorityPending = allTasks.count { !it.isCompleted && it.priority == 2 }
+        val completionRate = if (total > 0) (completed * 100) / total else 0
+        
+        val message = """
+            Total Tasks: $total
+            Completed: $completed
+            Pending: $pending
+            
+            Completion Rate: $completionRate%
+            Urgent Tasks Pending: $highPriorityPending
+        """.trimIndent()
+
+        val dialog = Dialog(this)
+        val view = layoutInflater.inflate(R.layout.dialog_analytics_simple, null)
+        dialog.setContentView(view)
+        dialog.window?.setBackgroundDrawableResource(android.R.color.transparent)
+        dialog.window?.setLayout(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT)
+        
+        view.findViewById<TextView>(R.id.tv_analytics_content).text = message
+        view.findViewById<View>(R.id.btn_close_analytics).setOnClickListener { dialog.dismiss() }
+
+        dialog.show()
+    }
+
     private fun scheduleReminder(task: Task) {
         val alarmManager = getSystemService(ALARM_SERVICE) as AlarmManager
+        
+        // Android 12+ check for exact alarm permission
+        if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.S) {
+            if (!alarmManager.canScheduleExactAlarms()) {
+                val intent = Intent(android.provider.Settings.ACTION_REQUEST_SCHEDULE_EXACT_ALARM)
+                startActivity(intent)
+                return
+            }
+        }
+
         val intent = Intent(this, ReminderReceiver::class.java).apply {
             putExtra("TASK_NAME", task.name)
+            putExtra("TASK_TIMESTAMP", task.timestamp)
         }
-        val pendingIntent = PendingIntent.getBroadcast(this, task.timestamp.toInt(), intent, PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE)
+        
+        // Use a more unique request code for PendingIntent
+        val requestCode = (task.timestamp % Int.MAX_VALUE).toInt()
+        val pendingIntent = PendingIntent.getBroadcast(this, requestCode, intent, PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE)
 
         alarmManager.setExactAndAllowWhileIdle(AlarmManager.RTC_WAKEUP, task.reminderTime!!, pendingIntent)
     }

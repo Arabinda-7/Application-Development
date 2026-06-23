@@ -92,48 +92,12 @@
         android:scrollbars="none"
         app:layout_constraintTop_toBottomOf="@id/tv_date">
 
-        <com.google.android.material.chip.ChipGroup
-            android:id="@+id/category_filter_chips"
+        <RadioGroup
+            android:id="@+id/category_filter_group"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:paddingHorizontal="16dp"
-            app:selectionRequired="true"
-            app:singleSelection="true">
-
-            <com.google.android.material.chip.Chip
-                android:id="@+id/chip_cat_all"
-                style="@style/Widget.MaterialComponents.Chip.Choice"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:checked="true"
-                android:text="All"
-                app:chipBackgroundColor="@color/chip_bg_selector" />
-
-            <com.google.android.material.chip.Chip
-                android:id="@+id/chip_cat_personal"
-                style="@style/Widget.MaterialComponents.Chip.Choice"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="Personal"
-                app:chipBackgroundColor="@color/chip_bg_selector" />
-
-            <com.google.android.material.chip.Chip
-                android:id="@+id/chip_cat_work"
-                style="@style/Widget.MaterialComponents.Chip.Choice"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="Work"
-                app:chipBackgroundColor="@color/chip_bg_selector" />
-
-            <com.google.android.material.chip.Chip
-                android:id="@+id/chip_cat_shopping"
-                style="@style/Widget.MaterialComponents.Chip.Choice"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="Shopping"
-                app:chipBackgroundColor="@color/chip_bg_selector" />
-
-        </com.google.android.material.chip.ChipGroup>
+            android:orientation="horizontal" />
     </HorizontalScrollView>
 
     <androidx.recyclerview.widget.RecyclerView
