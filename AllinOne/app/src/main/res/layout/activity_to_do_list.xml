@@ -107,7 +107,7 @@
         android:layout_marginTop="8dp"
         android:clipToPadding="false"
         android:paddingBottom="100dp"
-        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintBottom_toTopOf="@id/bottom_navigation_tasks"
         app:layout_constraintTop_toBottomOf="@id/chip_scroll_categories" />
 
     <com.google.android.material.floatingactionbutton.FloatingActionButton
@@ -119,8 +119,78 @@
         android:src="@android:drawable/ic_input_add"
         app:backgroundTint="@color/card_orange"
         app:fabSize="normal"
-        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintBottom_toTopOf="@id/bottom_navigation_tasks"
         app:layout_constraintEnd_toEndOf="parent"
         app:tint="@color/white" />
+
+    <!-- Custom Bottom Navigation -->
+    <LinearLayout
+        android:id="@+id/bottom_navigation_tasks"
+        android:layout_width="match_parent"
+        android:layout_height="72dp"
+        android:background="#121212"
+        android:orientation="horizontal"
+        android:gravity="center_vertical"
+        app:layout_constraintBottom_toBottomOf="parent">
+
+        <LinearLayout
+            android:id="@+id/nav_tasks"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:orientation="vertical"
+            android:gravity="center"
+            android:clickable="true"
+            android:focusable="true">
+            <ImageView
+                android:id="@+id/iv_tasks_icon"
+                android:layout_width="32dp"
+                android:layout_height="32dp"
+                android:padding="6dp"
+                android:background="@drawable/bg_dialog_rounded"
+                android:backgroundTint="#33FFFFFF"
+                android:src="@drawable/ic_habit_tracker"
+                app:tint="@color/white" />
+            <TextView
+                android:id="@+id/tv_tasks_label"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="4dp"
+                android:text="Tasks"
+                android:textColor="@color/white"
+                android:textSize="10sp"
+                android:textStyle="bold" />
+        </LinearLayout>
+
+        <LinearLayout
+            android:id="@+id/nav_todo_list"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:orientation="vertical"
+            android:gravity="center"
+            android:clickable="true"
+            android:focusable="true">
+            <ImageView
+                android:id="@+id/iv_todo_icon"
+                android:layout_width="32dp"
+                android:layout_height="32dp"
+                android:padding="6dp"
+                android:background="@drawable/bg_dialog_rounded"
+                android:backgroundTint="#33FFFFFF"
+                android:src="@drawable/ic_todo_list"
+                app:tint="@color/white" />
+            <TextView
+                android:id="@+id/tv_todo_label"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="4dp"
+                android:text="To-Do List"
+                android:textColor="@color/white"
+                android:textSize="10sp"
+                android:textStyle="bold" />
+        </LinearLayout>
+
+    </LinearLayout>
 
 </androidx.constraintlayout.widget.ConstraintLayout>

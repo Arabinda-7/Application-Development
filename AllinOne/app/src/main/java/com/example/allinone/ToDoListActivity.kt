@@ -35,6 +35,7 @@ class ToDoListActivity : AppCompatActivity() {
     
     private var currentCategoryFilter = "All"
     private var currentSearchQuery = ""
+    private var currentSection = DataManager.taskDefaultSection
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -51,6 +52,7 @@ class ToDoListActivity : AppCompatActivity() {
 
         setupHeader()
         setupFilters()
+        setupBottomNavigation()
         setupSwipeActions(taskList)
 
         findViewById<View>(R.id.btn_create_new_task).setOnClickListener { 
@@ -258,6 +260,18 @@ class ToDoListActivity : AppCompatActivity() {
             showManageCategoriesDialog()
         }
 
+        // Default Section (NEW)
+        val tvDefaultSection = view.findViewById<TextView>(R.id.tv_default_section_summary)
+        tvDefaultSection.text = "Current: ${DataManager.taskDefaultSection}"
+        view.findViewById<View>(R.id.item_default_section).setOnClickListener {
+            val sections = listOf("Tasks", "To-Do List")
+            val next = sections[(sections.indexOf(DataManager.taskDefaultSection) + 1) % sections.size]
+            DataManager.taskDefaultSection = next
+            tvDefaultSection.text = "Current: $next"
+            DataManager.saveData(this)
+            Toast.makeText(this, "Default tab set to $next", Toast.LENGTH_SHORT).show()
+        }
+
         view.findViewById<View>(R.id.btn_close_settings).setOnClickListener { dialog.dismiss() }
         
         dialog.show()
@@ -354,7 +368,7 @@ class ToDoListActivity : AppCompatActivity() {
         btnSave.setOnClickListener {
             val name = etName.text.toString().trim()
             if (name.isNotEmpty()) {
-                val task = existingTask ?: Task(name)
+                val task = existingTask ?: Task(name, section = currentSection)
                 task.name = name
                 task.priority = selectedPriority
                 task.category = spinnerCat.selectedItem.toString()
@@ -384,6 +398,40 @@ class ToDoListActivity : AppCompatActivity() {
         }
 
         dialog.show()
+    }
+
+    private fun setupBottomNavigation() {
+        val navTasks = findViewById<View>(R.id.nav_tasks)
+        val navTodo = findViewById<View>(R.id.nav_todo_list)
+
+        navTasks.setOnClickListener { switchSection("Tasks") }
+        navTodo.setOnClickListener { switchSection("To-Do List") }
+        
+        updateNavUI()
+    }
+
+    private fun switchSection(section: String) {
+        currentSection = section
+        taskAdapter.setSection(section)
+        findViewById<TextView>(R.id.tv_title).text = section.uppercase()
+        updateNavUI()
+    }
+
+    private fun updateNavUI() {
+        val navs = mapOf(
+            "Tasks" to Pair(findViewById<ImageView>(R.id.iv_tasks_icon), findViewById<TextView>(R.id.tv_tasks_label)),
+            "To-Do List" to Pair(findViewById<ImageView>(R.id.iv_todo_icon), findViewById<TextView>(R.id.tv_todo_label))
+        )
+
+        navs.forEach { (sec, views) ->
+            val isActive = sec == currentSection
+            val color = if (isActive) Color.WHITE else Color.GRAY
+            val bgAlpha = if (isActive) "#66FFFFFF" else "#22FFFFFF"
+            
+            views.first.setColorFilter(color)
+            views.first.backgroundTintList = android.content.res.ColorStateList.valueOf(Color.parseColor(bgAlpha))
+            views.second.setTextColor(color)
+        }
     }
 
     private fun showManageCategoriesDialog() {

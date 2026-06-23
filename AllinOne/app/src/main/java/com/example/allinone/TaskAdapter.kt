@@ -33,6 +33,7 @@ class TaskAdapter(
     private var currentCategory = "All"
     private var currentSearchQuery = ""
     private var currentSortOrder = "Priority"
+    private var currentSection = DataManager.taskDefaultSection
 
     init {
         updateDisplayList()
@@ -168,6 +169,11 @@ class TaskAdapter(
         updateDisplayList()
     }
 
+    fun setSection(section: String) {
+        currentSection = section
+        updateDisplayList()
+    }
+
     fun getTaskAt(position: Int): Task? {
         return if (position in displayItems.indices && displayItems[position] is Task) {
             displayItems[position] as Task
@@ -180,7 +186,8 @@ class TaskAdapter(
         val filtered = allTasks.filter { task ->
             val matchesCategory = if (currentCategory == "All") true else task.category == currentCategory
             val matchesSearch = task.name.contains(currentSearchQuery, ignoreCase = true)
-            matchesCategory && matchesSearch
+            val matchesSection = task.section == currentSection
+            matchesCategory && matchesSearch && matchesSection
         }
 
         val activeTasks = when (currentSortOrder) {

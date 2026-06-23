@@ -25,6 +25,7 @@ object DataManager {
     var taskSortOrder: String = "Priority" // Options: Priority, Newest, Alphabetical
     var taskCustomCategories = mutableListOf("General", "Personal", "Work", "Shopping")
     var taskAutoArchive: Boolean = false
+    var taskDefaultSection: String = "Tasks"
     
     // Finance Settings
     var financeCustomCategories = mutableListOf("Food", "Rent", "Transport", "Shopping", "Entertainment", "Health", "Other")
@@ -56,6 +57,7 @@ object DataManager {
     private const val KEY_TASK_SORT_ORDER = "task_sort_order"
     private const val KEY_TASK_CUSTOM_CATEGORIES = "task_custom_categories"
     private const val KEY_TASK_AUTO_ARCHIVE = "task_auto_archive"
+    private const val KEY_TASK_DEFAULT_SECTION = "task_default_section"
     private const val KEY_FINANCE_CUSTOM_CATEGORIES = "finance_custom_categories"
     private const val KEY_FINANCE_CURRENCY = "finance_currency"
     private const val KEY_NOTE_AUTO_CLEANUP = "note_auto_cleanup"
@@ -86,6 +88,7 @@ object DataManager {
             putString(KEY_TASK_SORT_ORDER, taskSortOrder)
             putString(KEY_TASK_CUSTOM_CATEGORIES, gson.toJson(taskCustomCategories))
             putBoolean(KEY_TASK_AUTO_ARCHIVE, taskAutoArchive)
+            putString(KEY_TASK_DEFAULT_SECTION, taskDefaultSection)
             putString(KEY_FINANCE_CUSTOM_CATEGORIES, gson.toJson(financeCustomCategories))
             putString(KEY_FINANCE_CURRENCY, financeCurrency)
             putInt(KEY_NOTE_AUTO_CLEANUP, noteAutoCleanupDays)
@@ -133,7 +136,8 @@ object DataManager {
                 if (oldTask.subtasks == null || oldTask.category == null) {
                     oldTask.copy(
                         subtasks = oldTask.subtasks ?: mutableListOf(),
-                        category = oldTask.category ?: "General"
+                        category = oldTask.category ?: "General",
+                        section = oldTask.section ?: "Tasks"
                     )
                 } else oldTask
             }.toMutableList()
@@ -179,6 +183,7 @@ object DataManager {
             taskCustomCategories = gson.fromJson(it, type) ?: mutableListOf("General", "Personal", "Work", "Shopping")
         }
         taskAutoArchive = prefs.getBoolean(KEY_TASK_AUTO_ARCHIVE, false)
+        taskDefaultSection = prefs.getString(KEY_TASK_DEFAULT_SECTION, "Tasks") ?: "Tasks"
 
         prefs.getString(KEY_FINANCE_CUSTOM_CATEGORIES, null)?.let {
             val type = object : TypeToken<MutableList<String>>() {}.type
@@ -399,6 +404,20 @@ object DataManager {
             transCal.get(Calendar.MONTH) == currentMonth && 
             transCal.get(Calendar.YEAR) == currentYear
         }.sumOf { it.amount }
+    }
+
+    fun getHabitPerformanceByFrequency(): Map<String, Int> {
+        val frequencies = listOf("Morning", "Afternoon", "Evening", "Anytime")
+        return frequencies.associateWith { freq ->
+            val freqHabits = habits.filter { it.frequency == freq }
+            if (freqHabits.isEmpty()) -1
+            else {
+                // Calculate historical performance if possible, but for now use current completion rate
+                // actually, looking at completedDates would be more accurate for history
+                // but let's keep it simple for a "real-time" insight
+                (freqHabits.count { it.isCompleted } * 100) / freqHabits.size
+            }
+        }
     }
 
     private fun autoArchiveTasks() {
