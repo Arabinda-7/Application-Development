@@ -107,12 +107,52 @@
                     android:textColor="@color/text_secondary"
                     android:textSize="11sp" />
             </LinearLayout>
-            <ImageView
+            <androidx.appcompat.widget.SwitchCompat
                 android:id="@+id/iv_archive_check"
-                android:layout_width="24dp"
-                android:layout_height="24dp"
-                android:src="@android:drawable/checkbox_off_background"
-                app:tint="@color/primary_blue" />
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                app:thumbTint="@color/primary_blue"
+                android:clickable="false"
+                android:focusable="false" />
+        </LinearLayout>
+
+        <!-- Show Hidden Tasks -->
+        <LinearLayout
+            android:id="@+id/item_show_hidden"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:background="?attr/selectableItemBackground"
+            android:clickable="true"
+            android:focusable="true"
+            android:gravity="center_vertical"
+            android:orientation="horizontal"
+            android:paddingVertical="12dp">
+            <LinearLayout
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:orientation="vertical">
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Show Hidden Tasks"
+                    android:textColor="@color/white"
+                    android:textSize="14sp"
+                    android:textStyle="bold" />
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Reveal tasks you've marked as hidden"
+                    android:textColor="@color/text_secondary"
+                    android:textSize="11sp" />
+            </LinearLayout>
+            <androidx.appcompat.widget.SwitchCompat
+                android:id="@+id/iv_hidden_check"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                app:thumbTint="@color/primary_blue"
+                android:clickable="false"
+                android:focusable="false" />
         </LinearLayout>
 
         <!-- Analytics -->

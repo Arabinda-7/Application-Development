@@ -13,8 +13,7 @@ data class AllAppData(
     val tasks: List<Task>,
     val notes: List<Note>,
     val history: Map<String, DayHistory>,
-    val projects: List<Project> = emptyList(),
-    val transactions: List<Transaction> = emptyList(),
-    val monthlyBudget: Double = 0.0,
-    val monthlySavingsGoal: Double = 0.0
+    val transactions: List<Transaction>,
+    val monthlyBudget: Double,
+    val monthlySavingsGoal: Double
 )

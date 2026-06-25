@@ -10,6 +10,7 @@ data class Task(
     var reminderTime: Long? = null,
     var category: String = "General",
     var section: String = "Tasks", // "Tasks" or "To-Do List"
+    var isHidden: Boolean = false,
     val subtasks: MutableList<Subtask> = mutableListOf(),
     var completedTimestamp: Long? = null
 )

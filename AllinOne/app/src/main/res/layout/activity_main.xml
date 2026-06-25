@@ -20,9 +20,42 @@
         android:layout_height="0dp"
         android:padding="12dp"
         android:clipToPadding="false"
-        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintBottom_toTopOf="@id/ai_input_container"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@id/header" />
+
+    <!-- AI Chatbot Command Input -->
+    <LinearLayout
+        android:id="@+id/ai_input_container"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:padding="16dp"
+        android:background="#1AFFFFFF"
+        app:layout_constraintBottom_toBottomOf="parent">
+
+        <EditText
+            android:id="@+id/et_ai_command"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:background="@drawable/bg_finance_input"
+            android:backgroundTint="#2C2C2C"
+            android:hint="Ask AI (e.g. 'Spent $12 on lunch')"
+            android:textColor="@color/white"
+            android:textColorHint="#80FFFFFF"
+            android:padding="12dp"
+            android:textSize="14sp" />
+
+        <ImageButton
+            android:id="@+id/btn_send_ai"
+            android:layout_width="48dp"
+            android:layout_height="48dp"
+            android:layout_marginStart="8dp"
+            android:background="@drawable/bg_blue_oval_button"
+            android:src="@android:drawable/ic_menu_send"
+            app:tint="@color/white" />
+    </LinearLayout>
 
 </androidx.constraintlayout.widget.ConstraintLayout>

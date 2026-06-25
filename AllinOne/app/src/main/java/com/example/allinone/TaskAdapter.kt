@@ -135,6 +135,27 @@ class TaskAdapter(
 
         menuView.findViewById<View>(R.id.menu_take_day_off).visibility = View.GONE
         
+        val hideUnhideView = menuView.findViewById<View>(R.id.menu_hide_unhide)
+        val hideUnhideText = menuView.findViewById<TextView>(R.id.tv_hide_unhide_text)
+        val hideUnhideIcon = menuView.findViewById<ImageView>(R.id.iv_hide_unhide_icon)
+        
+        hideUnhideView.visibility = View.VISIBLE
+        if (task.isHidden) {
+            hideUnhideText.text = "UNHIDE"
+            hideUnhideIcon.setImageResource(android.R.drawable.ic_menu_view)
+        } else {
+            hideUnhideText.text = "HIDE"
+            hideUnhideIcon.setImageResource(android.R.drawable.ic_menu_close_clear_cancel)
+        }
+
+        hideUnhideView.setOnClickListener {
+            task.isHidden = !task.isHidden
+            popupWindow.dismiss()
+            updateDisplayList()
+            onProgressChanged()
+            DataManager.saveData(context)
+        }
+
         menuView.findViewById<View>(R.id.menu_edit).setOnClickListener {
             popupWindow.dismiss()
             (context as? ToDoListActivity)?.showAddTaskDialog(task)
@@ -187,7 +208,8 @@ class TaskAdapter(
             val matchesCategory = if (currentCategory == "All") true else task.category == currentCategory
             val matchesSearch = task.name.contains(currentSearchQuery, ignoreCase = true)
             val matchesSection = task.section == currentSection
-            matchesCategory && matchesSearch && matchesSection
+            val isNotHidden = DataManager.taskShowHidden || !task.isHidden
+            matchesCategory && matchesSearch && matchesSection && isNotHidden
         }
 
         val activeTasks = when (currentSortOrder) {

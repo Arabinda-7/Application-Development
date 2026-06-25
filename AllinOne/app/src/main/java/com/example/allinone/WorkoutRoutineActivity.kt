@@ -23,6 +23,7 @@ import android.widget.RadioGroup
 import android.widget.TextView
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AppCompatActivity
+import androidx.appcompat.widget.SwitchCompat
 import androidx.core.content.ContextCompat
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
@@ -78,6 +79,9 @@ class WorkoutRoutineActivity : AppCompatActivity() {
             DataManager.saveData(this)
             updateHistoryUI()
             updateSectionProgress()
+            if (DataManager.workoutAutoRestTimer) {
+                startRestTimer()
+            }
         }, { workout, position -> startTimerForWorkout(workout, position) })
         workoutList.adapter = workoutAdapter
 
@@ -97,7 +101,38 @@ class WorkoutRoutineActivity : AppCompatActivity() {
             val popupWindow = PopupWindow(menuView, ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT, true)
             popupWindow.elevation = 10f
 
+            // Set Primary Action to Analytics/Balance
+            val balanceBtn = menuView.findViewById<View>(R.id.menu_action_primary)
+            balanceBtn.visibility = View.VISIBLE
+            menuView.findViewById<TextView>(R.id.tv_action_primary).text = "MUSCLE BALANCE"
+            menuView.findViewById<ImageView>(R.id.iv_action_primary).setImageResource(R.drawable.ic_fitness)
+            
+            balanceBtn.setOnClickListener {
+                showWorkoutStatsDialog()
+                popupWindow.dismiss()
+            }
+
+            // Toggle Show/Hide Completed
+            val menuToggle = menuView.findViewById<View>(R.id.menu_toggle_completed)
+            val tvToggle = menuView.findViewById<TextView>(R.id.tv_toggle_completed)
+            val ivToggle = menuView.findViewById<ImageView>(R.id.iv_toggle_completed)
+            
+            menuToggle.visibility = View.VISIBLE
+            tvToggle.text = if (DataManager.workoutShowCompleted) "HIDE COMPLETED" else "SHOW COMPLETED"
+            ivToggle.setImageResource(if (DataManager.workoutShowCompleted) android.R.drawable.ic_menu_view else android.R.drawable.ic_partial_secure)
+
+            menuToggle.setOnClickListener {
+                DataManager.workoutShowCompleted = !DataManager.workoutShowCompleted
+                workoutAdapter.setShowCompleted(DataManager.workoutShowCompleted)
+                DataManager.saveData(this)
+                popupWindow.dismiss()
+            }
+
+            // Hide task-specific items
+            menuView.findViewById<View>(R.id.menu_clear_completed).visibility = View.GONE
+
             menuView.findViewById<View>(R.id.menu_activity_settings).setOnClickListener {
+                showWorkoutSettingsDialog()
                 popupWindow.dismiss()
             }
 
@@ -339,12 +374,41 @@ class WorkoutRoutineActivity : AppCompatActivity() {
         val nameInput = dialog.findViewById<EditText>(R.id.workout_name_input)
         val trackingGroup = dialog.findViewById<RadioGroup>(R.id.tracking_mode_group)
         val targetInput = dialog.findViewById<EditText>(R.id.target_input)
+        val chipGroup = dialog.findViewById<ChipGroup>(R.id.muscle_chip_group)
         val btnClose = dialog.findViewById<View>(R.id.btn_close_workout)
-        val btnSave = dialog.findViewById<View>(R.id.btn_save_workout)
+        val btnSave = dialog.findViewById<TextView>(R.id.btn_save_workout)
         val iconPreview = dialog.findViewById<ImageView>(R.id.icon_preview_workout)
         val colorPreview = dialog.findViewById<View>(R.id.color_preview_workout)
         val cardRepeat = dialog.findViewById<View>(R.id.card_repeat_workout)
         val tvRepeatSummary = dialog.findViewById<TextView>(R.id.tv_repeat_summary_workout)
+        
+        val muscleGroups = DataManager.workoutMuscleGroups
+        val selectedMuscleGroups = existingWorkout?.muscleGroups?.toMutableList() ?: mutableListOf("General")
+
+        // Populate Muscle Group Chips
+        muscleGroups.forEach { group ->
+            val chip = com.google.android.material.chip.Chip(this)
+            chip.text = group
+            chip.isCheckable = true
+            chip.isChecked = selectedMuscleGroups.contains(group)
+            
+            // Style the chip for dark theme
+            chip.setChipBackgroundColorResource(R.color.chip_background)
+            chip.setTextColor(Color.WHITE)
+            chip.setCheckable(true)
+            chip.setCheckedIconVisible(true)
+            chip.setCheckedIconTintResource(R.color.white)
+            
+            chip.setOnCheckedChangeListener { _, isChecked ->
+                if (isChecked) {
+                    if (!selectedMuscleGroups.contains(group)) selectedMuscleGroups.add(group)
+                } else {
+                    selectedMuscleGroups.remove(group)
+                }
+            }
+            chipGroup.addView(chip)
+        }
+
         val radioAnytime = dialog.findViewById<RadioButton>(R.id.radio_anytime_workout)
         val radioMorning = dialog.findViewById<RadioButton>(R.id.radio_morning_workout)
         val radioAfternoon = dialog.findViewById<RadioButton>(R.id.radio_afternoon_workout)
@@ -367,8 +431,17 @@ class WorkoutRoutineActivity : AppCompatActivity() {
         }
         updateSummary()
 
+        if (existingWorkout == null) {
+            when(DataManager.workoutDefaultMode) {
+                "Sets" -> trackingGroup.check(R.id.radio_sets)
+                "Timer" -> trackingGroup.check(R.id.radio_timer)
+                else -> trackingGroup.check(R.id.radio_reps)
+            }
+        }
+
         if (existingWorkout != null) {
             nameInput.setText(existingWorkout.name); targetInput.setText(existingWorkout.target.toString())
+            btnSave.text = "Save"
             when (existingWorkout.trackingMode) { "Sets" -> trackingGroup.check(R.id.radio_sets); "Reps" -> trackingGroup.check(R.id.radio_reps); "Timer" -> trackingGroup.check(R.id.radio_timer) }
             when (existingWorkout.frequency) { "Morning" -> updateRadioSelection(frequencyRadios, radioMorning); "Afternoon" -> updateRadioSelection(frequencyRadios, radioAfternoon); "Evening" -> updateRadioSelection(frequencyRadios, radioEvening); else -> updateRadioSelection(frequencyRadios, radioAnytime) }
             iconPreview.setImageResource(selectedIcon); iconPreview.backgroundTintList = android.content.res.ColorStateList.valueOf(selectedColor); colorPreview.backgroundTintList = android.content.res.ColorStateList.valueOf(selectedColor)
@@ -383,8 +456,12 @@ class WorkoutRoutineActivity : AppCompatActivity() {
                 val trackingMode = when (trackingGroup.checkedRadioButtonId) { R.id.radio_sets -> "Sets"; R.id.radio_reps -> "Reps"; else -> "Timer" }
                 val frequency = when { radioMorning.isChecked -> "Morning"; radioAfternoon.isChecked -> "Afternoon"; radioEvening.isChecked -> "Evening"; else -> "Anytime" }
                 val target = targetInput.text.toString().toIntOrNull() ?: 0
-                if (existingWorkout == null) workouts.add(Workout(name, false, trackingMode, target, frequency = frequency, color = selectedColor, iconResId = selectedIcon, repeatType = tempRepeatType, repeatDays = tempRepeatDays.toList(), repeatCount = tempRepeatCount))
-                else { existingWorkout.name = name; existingWorkout.target = target; existingWorkout.trackingMode = trackingMode; existingWorkout.frequency = frequency; existingWorkout.color = selectedColor; existingWorkout.iconResId = selectedIcon; existingWorkout.repeatType = tempRepeatType; existingWorkout.repeatDays = tempRepeatDays.toList(); existingWorkout.repeatCount = tempRepeatCount }
+                
+                // Final selection check
+                val finalSelection = if (selectedMuscleGroups.isEmpty()) listOf("General") else selectedMuscleGroups.toList()
+                
+                if (existingWorkout == null) workouts.add(Workout(name, false, trackingMode, target, frequency = frequency, color = selectedColor, iconResId = selectedIcon, muscleGroups = finalSelection, repeatType = tempRepeatType, repeatDays = tempRepeatDays.toList(), repeatCount = tempRepeatCount))
+                else { existingWorkout.name = name; existingWorkout.target = target; existingWorkout.trackingMode = trackingMode; existingWorkout.frequency = frequency; existingWorkout.color = selectedColor; existingWorkout.iconResId = selectedIcon; existingWorkout.muscleGroups = finalSelection; existingWorkout.repeatType = tempRepeatType; existingWorkout.repeatDays = tempRepeatDays.toList(); existingWorkout.repeatCount = tempRepeatCount }
                 workoutAdapter.sortWorkouts(); DataManager.saveData(this); dialog.dismiss()
             }
         }
@@ -449,4 +526,279 @@ class WorkoutRoutineActivity : AppCompatActivity() {
     }
 
     private fun updateRadioSelection(list: List<RadioButton>, selected: RadioButton) { list.forEach { it.isChecked = false }; selected.isChecked = true }
+
+    private fun showWorkoutSettingsDialog() {
+        val dialog = Dialog(this)
+        val view = layoutInflater.inflate(R.layout.dialog_habit_settings, null)
+        dialog.setContentView(view)
+        dialog.window?.setBackgroundDrawableResource(android.R.color.transparent)
+        dialog.window?.setLayout(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT)
+
+        val title = view.findViewById<TextView>(R.id.tv_settings_title)
+        val itemMuscle = view.findViewById<View>(R.id.item_default_tab) 
+        val tvMuscleSummary = view.findViewById<TextView>(R.id.tv_default_tab_summary)
+        
+        val itemRest = view.findViewById<View>(R.id.item_vacation_mode)
+        val swRest = view.findViewById<SwitchCompat>(R.id.iv_vacation_check)
+        
+        val itemUnit = view.findViewById<View>(R.id.item_day_reset)
+        val tvUnitSummary = view.findViewById<TextView>(R.id.tv_day_reset_summary)
+        
+        val itemReadiness = view.findViewById<View>(R.id.item_bulk_mode)
+        val ivReadiness = view.findViewById<View>(R.id.iv_bulk_check)
+        
+        val itemDefaultMode = view.findViewById<View>(R.id.item_sort_order)
+        val tvDefaultModeSummary = view.findViewById<TextView>(R.id.tv_sort_summary)
+        
+        val itemRestDuration = view.findViewById<View>(R.id.item_sound)
+        val btnClose = view.findViewById<View>(R.id.btn_close_settings)
+
+        // Hide unused rows
+        view.findViewById<View>(R.id.item_haptics)?.visibility = View.GONE
+        view.findViewById<View>(R.id.item_grace_period)?.visibility = View.GONE
+
+        title.text = "Workout Settings"
+        
+        // Find labels via tags or index safely
+        fun setLabel(container: View?, text: String) {
+            (container as? ViewGroup)?.let { vg ->
+                for (i in 0 until vg.childCount) {
+                    val child = vg.getChildAt(i)
+                    if (child is TextView && child.id != R.id.tv_default_tab_summary && 
+                        child.id != R.id.tv_sort_summary && child.id != R.id.tv_day_reset_summary &&
+                        child.id != R.id.tv_grace_summary) {
+                        child.text = text
+                        return
+                    }
+                    if (child is ViewGroup) setLabel(child, text)
+                }
+            }
+        }
+
+        setLabel(itemMuscle, "Manage Muscle Groups")
+        tvMuscleSummary?.text = "Add or remove body part tags"
+        
+        setLabel(itemRest, "Auto-Rest Timer")
+        swRest?.isChecked = DataManager.workoutAutoRestTimer
+
+        setLabel(itemUnit, "Workout Unit")
+        tvUnitSummary?.text = "Current: ${DataManager.workoutWeightUnit} (Tap to change)"
+
+        setLabel(itemReadiness, "Workout Readiness")
+        ivReadiness?.visibility = View.GONE
+
+        setLabel(itemDefaultMode, "Default Tracking Mode")
+        tvDefaultModeSummary?.text = "Current: ${DataManager.workoutDefaultMode}"
+
+        setLabel(itemRestDuration, "Rest Duration")
+        val tvRestDurationSummary = (itemRestDuration as? ViewGroup)?.findViewById<TextView>(R.id.tv_sort_summary) 
+                                     ?: (itemRestDuration as? ViewGroup)?.findViewById<TextView>(R.id.tv_default_tab_summary)
+                                     ?: (itemRestDuration as? ViewGroup)?.getChildAt(0).let { (it as? ViewGroup)?.getChildAt(1) as? TextView }
+        
+        tvRestDurationSummary?.text = "Current: ${DataManager.workoutRestDuration}s (Tap to cycle)"
+        view.findViewById<View>(R.id.iv_sound_check)?.visibility = View.GONE
+
+        itemMuscle?.setOnClickListener { showManageMuscleGroupsDialog() }
+        
+        itemRest?.setOnClickListener {
+            DataManager.workoutAutoRestTimer = !DataManager.workoutAutoRestTimer
+            swRest?.isChecked = DataManager.workoutAutoRestTimer
+            DataManager.saveData(this)
+        }
+
+        itemUnit?.setOnClickListener {
+            DataManager.workoutWeightUnit = if (DataManager.workoutWeightUnit == "Kg") "Lb" else "Kg"
+            DataManager.saveData(this)
+            tvUnitSummary?.text = "Current: ${DataManager.workoutWeightUnit} (Tap to change)"
+            android.widget.Toast.makeText(this, "Unit changed to ${DataManager.workoutWeightUnit}", android.widget.Toast.LENGTH_SHORT).show()
+        }
+
+        itemReadiness?.setOnClickListener { showWorkoutReadinessDialog() }
+
+        itemDefaultMode?.setOnClickListener {
+            val modes = listOf("Reps", "Sets", "Timer")
+            val next = modes[(modes.indexOf(DataManager.workoutDefaultMode) + 1) % modes.size]
+            DataManager.workoutDefaultMode = next
+            tvDefaultModeSummary?.text = "Current: $next"
+            DataManager.saveData(this)
+        }
+
+        itemRestDuration?.setOnClickListener {
+            val durations = listOf(30, 60, 90, 120, 180)
+            val currentIdx = durations.indexOf(DataManager.workoutRestDuration)
+            val next = durations[(if (currentIdx == -1) 1 else currentIdx + 1) % durations.size]
+            DataManager.workoutRestDuration = next
+            tvRestDurationSummary?.text = "Current: ${next}s (Tap to cycle)"
+            DataManager.saveData(this)
+        }
+
+        btnClose?.setOnClickListener { dialog.dismiss() }
+        dialog.show()
+    }
+
+    private fun showManageMuscleGroupsDialog() {
+        val dialog = Dialog(this)
+        dialog.setContentView(R.layout.dialog_manage_categories)
+        dialog.window?.setBackgroundDrawableResource(android.R.color.transparent)
+        dialog.window?.setLayout(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT)
+
+        val container = dialog.findViewById<LinearLayout>(R.id.categories_container)
+        val etNew = dialog.findViewById<EditText>(R.id.et_new_category)
+        val btnAdd = dialog.findViewById<View>(R.id.btn_add_category)
+        val title = dialog.findViewById<TextView>(R.id.tv_categories_title)
+
+        title.text = "Manage Muscle Groups"
+
+        fun refresh() {
+            container.removeAllViews()
+            DataManager.workoutMuscleGroups.forEach { group ->
+                val itemView = LayoutInflater.from(this).inflate(R.layout.item_task_header, container, false)
+                itemView.findViewById<TextView>(R.id.tv_header_title).text = group
+                itemView.findViewById<View>(R.id.iv_header_chevron).visibility = View.GONE
+                itemView.setOnLongClickListener {
+                    DataManager.workoutMuscleGroups.remove(group)
+                    DataManager.saveData(this)
+                    refresh()
+                    true
+                }
+                container.addView(itemView)
+            }
+        }
+
+        btnAdd.setOnClickListener {
+            val name = etNew.text.toString().trim()
+            if (name.isNotEmpty() && !DataManager.workoutMuscleGroups.contains(name)) {
+                DataManager.workoutMuscleGroups.add(name)
+                DataManager.saveData(this)
+                refresh()
+                etNew.text.clear()
+            }
+        }
+
+        refresh()
+        dialog.show()
+    }
+
+    private fun showWorkoutStatsDialog() {
+        val dialog = Dialog(this)
+        dialog.setContentView(R.layout.dialog_set_budget)
+        dialog.window?.setBackgroundDrawableResource(android.R.color.transparent)
+        dialog.window?.setLayout(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT)
+
+        val title = dialog.findViewById<TextView>(R.id.tv_dialog_title)
+        val etInput = dialog.findViewById<View>(R.id.et_budget_amount)
+        val subtext = dialog.findViewById<TextView>(R.id.tv_dialog_subtext)
+        val btnClose = dialog.findViewById<TextView>(R.id.btn_save_budget)
+
+        title.text = "HEALTH & TRAINING STATS"
+        etInput.visibility = View.GONE
+        
+        val muscleStats = mutableMapOf<String, Int>()
+        workouts.forEach { workout ->
+            workout.muscleGroups.forEach { group ->
+                muscleStats[group] = (muscleStats[group] ?: 0) + 1
+            }
+        }
+        
+        val calories = DataManager.getTodayCaloriesBurned()
+        val sb = StringBuilder()
+        sb.append("🔥 Calories Burned Today: $calories kcal\n\n")
+        
+        if (muscleStats.isEmpty()) {
+            sb.append("No workouts tracked yet. Assign muscle groups to see balance!")
+        } else {
+            sb.append("Muscle Group Distribution:\n\n")
+            DataManager.workoutMuscleGroups.forEach { group ->
+                val count = muscleStats[group] ?: 0
+                sb.append("$group: $count sessions\n")
+            }
+        }
+        subtext.text = sb.toString()
+        btnClose.text = "CLOSE"
+        btnClose.setOnClickListener { dialog.dismiss() }
+        dialog.show()
+    }
+
+    private fun showWorkoutReadinessDialog() {
+        val dialog = Dialog(this)
+        dialog.setContentView(R.layout.dialog_set_budget)
+        dialog.window?.setBackgroundDrawableResource(android.R.color.transparent)
+        dialog.window?.setLayout(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT)
+
+        val title = dialog.findViewById<TextView>(R.id.tv_dialog_title)
+        val etInput = dialog.findViewById<View>(R.id.et_budget_amount)
+        val subtext = dialog.findViewById<TextView>(R.id.tv_dialog_subtext)
+        val btnAction = dialog.findViewById<TextView>(R.id.btn_save_budget)
+
+        title.text = "READINESS CHECK"
+        etInput.visibility = View.GONE
+        subtext.text = "How are you feeling today?\n\n1. Did you sleep 7+ hours?\n2. Do you have high energy?"
+        btnAction.text = "START SURVEY"
+
+        var step = 1
+        var score = 0
+
+        fun finishSurvey() {
+            step = 3
+            title.text = "YOUR SCORE: $score%"
+            subtext.text = if (score >= 100) "You are fully ready! Crush it!" 
+                          else if (score >= 50) "Proceed with caution. Maybe a lighter session?"
+                          else "Recovery might be better today. Consider a rest day."
+            btnAction.text = "CLOSE"
+        }
+
+        fun nextStep() { 
+            step = 2
+            subtext.text = "Step 2: Check your energy levels." 
+        }
+
+        btnAction.setOnClickListener {
+            when (step) {
+                1 -> {
+                    AlertDialog.Builder(this).setTitle("Sleep").setMessage("Did you sleep well?")
+                        .setPositiveButton("Yes") { _, _ -> score += 50; nextStep() }
+                        .setNegativeButton("No") { _, _ -> nextStep() }.show()
+                }
+                2 -> {
+                    AlertDialog.Builder(this).setTitle("Energy").setMessage("Ready for heavy lifting?")
+                        .setPositiveButton("Yes") { _, _ -> score += 50; finishSurvey() }
+                        .setNegativeButton("No") { _, _ -> finishSurvey() }.show()
+                }
+                else -> dialog.dismiss()
+            }
+        }
+        dialog.show()
+    }
+
+    private fun startRestTimer() {
+        val dialog = Dialog(this)
+        dialog.setContentView(R.layout.dialog_set_budget)
+        dialog.window?.setBackgroundDrawableResource(android.R.color.transparent)
+        dialog.window?.setLayout(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT)
+
+        val title = dialog.findViewById<TextView>(R.id.tv_dialog_title)
+        val etInput = dialog.findViewById<View>(R.id.et_budget_amount)
+        val subtext = dialog.findViewById<TextView>(R.id.tv_dialog_subtext)
+        val btnClose = dialog.findViewById<TextView>(R.id.btn_save_budget)
+
+        val duration = DataManager.workoutRestDuration
+        title.text = "REST TIMER"
+        etInput.visibility = View.GONE
+        btnClose.text = "SKIP"
+        
+        val timer = object : android.os.CountDownTimer(duration * 1000L, 1000) {
+            override fun onTick(millisUntilFinished: Long) {
+                val timeLeft = (millisUntilFinished / 1000).toInt()
+                subtext.text = "Rest for $timeLeft seconds..."
+            }
+            override fun onFinish() {
+                dialog.dismiss()
+                android.widget.Toast.makeText(this@WorkoutRoutineActivity, "Rest finished! Back to work!", android.widget.Toast.LENGTH_SHORT).show()
+            }
+        }
+        timer.start()
+
+        btnClose.setOnClickListener { timer.cancel(); dialog.dismiss() }
+        dialog.show()
+    }
 }

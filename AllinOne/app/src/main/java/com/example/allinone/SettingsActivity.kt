@@ -29,7 +29,6 @@ class SettingsActivity : AppCompatActivity() {
             "Workout Routine" to WorkoutRoutineActivity::class.java,
             "To-Do List" to ToDoListActivity::class.java,
             "Notes" to NotesActivity::class.java,
-            "Project" to ProjectActivity::class.java,
             "Finance" to FinanceActivity::class.java
         )
 

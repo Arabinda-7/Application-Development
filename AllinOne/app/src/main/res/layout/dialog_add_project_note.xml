@@ -1,0 +1,363 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.core.widget.NestedScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="#000000"
+    android:fillViewport="true">
+
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:padding="16dp">
+
+        <ImageView
+            android:id="@+id/btn_close_note"
+            android:layout_width="32dp"
+            android:layout_height="32dp"
+            android:src="@drawable/ic_back"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            app:tint="@color/white"
+            android:contentDescription="Back" />
+
+        <TextView
+            android:id="@+id/btn_save_note"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Save"
+            android:textColor="@color/white"
+            android:textSize="18sp"
+            android:textStyle="bold"
+            android:padding="8dp"
+            app:layout_constraintBottom_toBottomOf="@id/btn_close_note"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintTop_toTopOf="@id/btn_close_note" />
+
+        <EditText
+            android:id="@+id/note_title_input"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="24dp"
+            android:background="@null"
+            android:hint="Project Title"
+            android:textColor="@color/white"
+            android:textColorHint="#80FFFFFF"
+            android:textSize="28sp"
+            android:textStyle="bold"
+            android:inputType="textCapSentences"
+            app:layout_constraintTop_toBottomOf="@id/btn_close_note" />
+
+        <!-- Status and Priority Row -->
+        <LinearLayout
+            android:id="@+id/row_controls"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="16dp"
+            android:orientation="vertical"
+            app:layout_constraintTop_toBottomOf="@id/note_title_input">
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="STATUS"
+                android:textColor="@color/text_secondary"
+                android:textSize="10sp"
+                android:textStyle="bold"
+                android:layout_marginBottom="4dp"/>
+
+            <HorizontalScrollView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:scrollbars="none">
+                <RadioGroup
+                    android:id="@+id/rg_status"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal">
+                    <RadioButton
+                        android:id="@+id/rb_status_todo"
+                        android:layout_width="wrap_content"
+                        android:layout_height="32dp"
+                        android:text="TODO"
+                        android:button="@null"
+                        android:paddingHorizontal="16dp"
+                        android:textColor="@color/white"
+                        android:gravity="center"
+                        android:textSize="12sp"
+                        android:layout_marginEnd="8dp"
+                        android:background="@drawable/priority_chip_bg"/>
+                    <RadioButton
+                        android:id="@+id/rb_status_progress"
+                        android:layout_width="wrap_content"
+                        android:layout_height="32dp"
+                        android:text="IN PROGRESS"
+                        android:button="@null"
+                        android:paddingHorizontal="16dp"
+                        android:textColor="@color/white"
+                        android:gravity="center"
+                        android:textSize="12sp"
+                        android:layout_marginEnd="8dp"
+                        android:background="@drawable/priority_chip_bg"/>
+                    <RadioButton
+                        android:id="@+id/rb_status_completed"
+                        android:layout_width="wrap_content"
+                        android:layout_height="32dp"
+                        android:text="DONE"
+                        android:button="@null"
+                        android:paddingHorizontal="16dp"
+                        android:textColor="@color/white"
+                        android:gravity="center"
+                        android:textSize="12sp"
+                        android:layout_marginEnd="8dp"
+                        android:background="@drawable/priority_chip_bg"/>
+                    <RadioButton
+                        android:id="@+id/rb_status_hold"
+                        android:layout_width="wrap_content"
+                        android:layout_height="32dp"
+                        android:text="HOLD"
+                        android:button="@null"
+                        android:paddingHorizontal="16dp"
+                        android:textColor="@color/white"
+                        android:gravity="center"
+                        android:textSize="12sp"
+                        android:background="@drawable/priority_chip_bg"/>
+                </RadioGroup>
+            </HorizontalScrollView>
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="PRIORITY"
+                android:textColor="@color/text_secondary"
+                android:textSize="10sp"
+                android:textStyle="bold"
+                android:layout_marginTop="12dp"
+                android:layout_marginBottom="4dp"/>
+
+            <RadioGroup
+                android:id="@+id/rg_priority"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal">
+                <RadioButton
+                    android:id="@+id/rb_priority_low"
+                    android:layout_width="0dp"
+                    android:layout_height="32dp"
+                    android:layout_weight="1"
+                    android:text="LOW"
+                    android:button="@null"
+                    android:textColor="@color/white"
+                    android:gravity="center"
+                    android:textSize="12sp"
+                    android:layout_marginEnd="8dp"
+                    android:background="@drawable/priority_chip_bg"/>
+                <RadioButton
+                    android:id="@+id/rb_priority_med"
+                    android:layout_width="0dp"
+                    android:layout_height="32dp"
+                    android:layout_weight="1"
+                    android:text="MED"
+                    android:button="@null"
+                    android:textColor="@color/white"
+                    android:gravity="center"
+                    android:textSize="12sp"
+                    android:layout_marginEnd="8dp"
+                    android:background="@drawable/priority_chip_bg"/>
+                <RadioButton
+                    android:id="@+id/rb_priority_high"
+                    android:layout_width="0dp"
+                    android:layout_height="32dp"
+                    android:layout_weight="1"
+                    android:text="HIGH"
+                    android:button="@null"
+                    android:textColor="@color/white"
+                    android:gravity="center"
+                    android:textSize="12sp"
+                    android:background="@drawable/priority_chip_bg"/>
+            </RadioGroup>
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="16dp"
+                android:gravity="center_vertical"
+                android:orientation="horizontal">
+
+                <TextView
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:text="Color Theme"
+                    android:textColor="@color/text_secondary"
+                    android:textSize="14sp" />
+
+                <ImageView
+                    android:id="@+id/btn_pin"
+                    android:layout_width="32dp"
+                    android:layout_height="32dp"
+                    android:padding="4dp"
+                    android:src="@android:drawable/btn_star_big_off"
+                    app:tint="@color/white"
+                    android:contentDescription="Pin" />
+
+                <View
+                    android:id="@+id/note_color_preview"
+                    android:layout_width="24dp"
+                    android:layout_height="24dp"
+                    android:layout_marginStart="8dp"
+                    android:background="@drawable/circle_selected_bg" />
+            </LinearLayout>
+        </LinearLayout>
+
+        <!-- Progress Slider -->
+        <LinearLayout
+            android:id="@+id/container_progress_input"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="16dp"
+            android:orientation="vertical"
+            app:layout_constraintTop_toBottomOf="@id/row_controls">
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal">
+                <TextView
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:text="Overall Progress"
+                    android:textColor="@color/text_secondary"
+                    android:textSize="12sp" />
+                <TextView
+                    android:id="@+id/tv_progress_value"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="0%"
+                    android:textColor="@color/white"
+                    android:textSize="12sp"
+                    android:textStyle="bold" />
+            </LinearLayout>
+
+            <SeekBar
+                android:id="@+id/seek_progress"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="8dp"
+                android:max="100"
+                android:progress="0"
+                android:progressTint="#1A73E8"
+                android:thumbTint="#1A73E8" />
+        </LinearLayout>
+
+        <EditText
+            android:id="@+id/note_content_input"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="24dp"
+            android:background="@null"
+            android:hint="Describe the project goal or notes..."
+            android:textColor="@color/white"
+            android:textColorHint="#80FFFFFF"
+            android:gravity="top"
+            android:minLines="5"
+            android:inputType="textMultiLine"
+            app:layout_constraintTop_toBottomOf="@id/container_progress_input" />
+
+        <!-- Deadline Section -->
+        <LinearLayout
+            android:id="@+id/container_deadline"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="16dp"
+            android:orientation="horizontal"
+            android:gravity="center_vertical"
+            app:layout_constraintTop_toBottomOf="@id/note_content_input">
+
+            <ImageView
+                android:layout_width="20dp"
+                android:layout_height="20dp"
+                android:src="@drawable/ic_notes"
+                app:tint="@color/text_secondary" />
+
+            <TextView
+                android:id="@+id/tv_deadline_display"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:layout_marginStart="8dp"
+                android:text="No Deadline Set"
+                android:textColor="@color/text_secondary"
+                android:textSize="14sp" />
+
+            <TextView
+                android:id="@+id/btn_set_deadline"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="SET DEADLINE"
+                android:textColor="#1A73E8"
+                android:textSize="12sp"
+                android:textStyle="bold"
+                android:padding="8dp" />
+        </LinearLayout>
+
+        <!-- Sub-features Header -->
+        <LinearLayout
+            android:id="@+id/container_subfeatures_header"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="24dp"
+            android:orientation="horizontal"
+            android:gravity="center_vertical"
+            app:layout_constraintTop_toBottomOf="@id/container_deadline">
+
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="SUB-FEATURES"
+                android:textColor="@color/white"
+                android:textSize="14sp"
+                android:textStyle="bold" />
+        </LinearLayout>
+
+        <LinearLayout
+            android:id="@+id/container_subfeatures"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="8dp"
+            android:orientation="vertical"
+            app:layout_constraintTop_toBottomOf="@id/container_subfeatures_header" />
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="8dp"
+            android:orientation="horizontal"
+            android:gravity="center_vertical"
+            app:layout_constraintTop_toBottomOf="@id/container_subfeatures">
+
+            <EditText
+                android:id="@+id/et_new_subfeature"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:hint="Add new sub-feature..."
+                android:textColor="@color/white"
+                android:textColorHint="#4DFFFFFF"
+                android:textSize="14sp"
+                android:background="@null"
+                android:padding="8dp"
+                android:inputType="textCapSentences" />
+
+            <ImageButton
+                android:id="@+id/btn_add_subfeature"
+                android:layout_width="40dp"
+                android:layout_height="40dp"
+                android:src="@android:drawable/ic_input_add"
+                android:background="?attr/selectableItemBackgroundBorderless"
+                app:tint="@color/white" />
+        </LinearLayout>
+
+    </androidx.constraintlayout.widget.ConstraintLayout>
+</androidx.core.widget.NestedScrollView>

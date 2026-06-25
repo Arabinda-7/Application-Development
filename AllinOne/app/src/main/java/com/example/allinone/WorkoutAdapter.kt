@@ -23,17 +23,37 @@ class WorkoutAdapter(
     private val allWorkouts: MutableList<Workout>,
     private val onProgressChanged: () -> Unit,
     private val onTimerStart: (Workout, Int) -> Unit
-) : RecyclerView.Adapter<WorkoutAdapter.WorkoutViewHolder>() {
+) : RecyclerView.Adapter<RecyclerView.ViewHolder>() {
 
-    private var displayWorkouts = allWorkouts.toMutableList()
+    companion object {
+        private const val TYPE_WORKOUT = 0
+        private const val TYPE_HEADER = 1
+    }
+
+    private var isCompletedExpanded = true
+    private var displayItems = mutableListOf<Any>()
     private var currentFilter = "All"
     private var selectedDayIndex = 0
     private var selectedDateString = SimpleDateFormat("yyyyMMdd", Locale.getDefault()).format(Date())
     private val todayDateString = SimpleDateFormat("yyyyMMdd", Locale.getDefault()).format(Date())
+    private var showCompleted = DataManager.workoutShowCompleted
 
-    override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): WorkoutViewHolder {
-        val view = LayoutInflater.from(parent.context).inflate(R.layout.workout_list_item, parent, false)
-        return WorkoutViewHolder(view)
+    init {
+        applyFilterAndSort()
+    }
+
+    override fun getItemViewType(position: Int): Int {
+        return if (displayItems[position] is String) TYPE_HEADER else TYPE_WORKOUT
+    }
+
+    override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): RecyclerView.ViewHolder {
+        return if (viewType == TYPE_HEADER) {
+            val view = LayoutInflater.from(parent.context).inflate(R.layout.item_task_header, parent, false)
+            HeaderViewHolder(view)
+        } else {
+            val view = LayoutInflater.from(parent.context).inflate(R.layout.workout_list_item, parent, false)
+            WorkoutViewHolder(view)
+        }
     }
 
     private fun isWorkoutCompletedOnSelectedDate(workout: Workout): Boolean {
@@ -44,154 +64,159 @@ class WorkoutAdapter(
         }
     }
 
-    override fun onBindViewHolder(holder: WorkoutViewHolder, position: Int) {
-        val workout = displayWorkouts[position]
-        val context = holder.itemView.context
-        val isCompleted = isWorkoutCompletedOnSelectedDate(workout)
-
-        holder.workoutName.text = workout.name
-        
-        if (workout.isDayOff && selectedDateString == todayDateString) {
-            holder.workoutDetails.text = "DAY OFF"
-        } else {
-            val details = when (workout.trackingMode) {
-                "Timer" -> "${workout.target}s"
-                else -> "${workout.progress}/${workout.target} ${workout.trackingMode}"
+    override fun onBindViewHolder(holder: RecyclerView.ViewHolder, position: Int) {
+        if (holder is HeaderViewHolder) {
+            val headerText = displayItems[position] as String
+            holder.title.text = headerText
+            holder.chevron.rotation = if (isCompletedExpanded) 0f else 180f
+            holder.itemView.setOnClickListener {
+                isCompletedExpanded = !isCompletedExpanded
+                applyFilterAndSort()
             }
-            holder.workoutDetails.text = details
-        }
+        } else if (holder is WorkoutViewHolder) {
+            val workout = displayItems[position] as Workout
+            val context = holder.itemView.context
+            val isCompleted = isWorkoutCompletedOnSelectedDate(workout)
 
-        val cardColor = if (workout.color != -1) {
-            workout.color
-        } else {
-            ContextCompat.getColor(context, R.color.card_blue)
-        }
-        holder.workoutCard.setCardBackgroundColor(cardColor)
+            holder.workoutName.text = workout.name
+            
+            if (workout.isDayOff && selectedDateString == todayDateString) {
+                holder.workoutDetails.text = "DAY OFF"
+            } else {
+                val details = when (workout.trackingMode) {
+                    "Timer" -> "${workout.target}s"
+                    else -> "${workout.progress}/${workout.target} ${workout.trackingMode}"
+                }
+                holder.workoutDetails.text = details
+            }
 
-        if (workout.iconResId != -1) {
-            holder.workoutIcon.setImageResource(workout.iconResId)
-        }
+            val cardColor = if (workout.color != -1) {
+                workout.color
+            } else {
+                ContextCompat.getColor(context, R.color.card_blue)
+            }
+            holder.workoutCard.setCardBackgroundColor(cardColor)
 
-        // Expansion Logic with Smooth Transition
-        // Force hide controls if completed or not expanded to prevent accidental showing
-        val shouldShowControls = workout.isExpanded && !isCompleted && selectedDateString == todayDateString
-        holder.expandableControls.visibility = if (shouldShowControls) View.VISIBLE else View.GONE
-        holder.expandChevron.rotation = if (workout.isExpanded) 270f else 90f
+            if (workout.iconResId != -1) {
+                holder.workoutIcon.setImageResource(workout.iconResId)
+            }
 
-        holder.workoutCard.setOnClickListener {
-            if (isCompleted || selectedDateString != todayDateString) {
+            // Expansion Logic with Smooth Transition
+            val shouldShowControls = workout.isExpanded && !isCompleted && selectedDateString == todayDateString
+            holder.expandableControls.visibility = if (shouldShowControls) View.VISIBLE else View.GONE
+            holder.expandChevron.rotation = if (workout.isExpanded) 270f else 90f
+
+            holder.workoutCard.setOnClickListener {
+                if (isCompleted || selectedDateString != todayDateString) {
+                    val intent = Intent(context, WorkoutDetailActivity::class.java).apply {
+                        putExtra("WORKOUT_NAME", workout.name)
+                        putExtra("WORKOUT_ID", workout.timestamp)
+                    }
+                    context.startActivity(intent)
+                } else {
+                    TransitionManager.beginDelayedTransition(holder.itemView as ViewGroup)
+                    workout.isExpanded = !workout.isExpanded
+                    notifyItemChanged(position)
+                }
+            }
+            
+            holder.workoutName.setOnClickListener {
                 val intent = Intent(context, WorkoutDetailActivity::class.java).apply {
                     putExtra("WORKOUT_NAME", workout.name)
                     putExtra("WORKOUT_ID", workout.timestamp)
                 }
                 context.startActivity(intent)
-            } else {
-                TransitionManager.beginDelayedTransition(holder.itemView as ViewGroup)
-                workout.isExpanded = !workout.isExpanded
-                notifyItemChanged(position)
             }
-        }
-        
-        holder.workoutName.setOnClickListener {
-            val intent = Intent(context, WorkoutDetailActivity::class.java).apply {
-                putExtra("WORKOUT_NAME", workout.name)
-                putExtra("WORKOUT_ID", workout.timestamp)
-            }
-            context.startActivity(intent)
-        }
 
-        holder.expandChevron.setOnClickListener {
-            if (!isCompleted && selectedDateString == todayDateString) {
-                TransitionManager.beginDelayedTransition(holder.itemView as ViewGroup)
-                workout.isExpanded = !workout.isExpanded
-                notifyItemChanged(position)
-            }
-        }
-
-        // Context-aware UI based on tracking mode
-        if (workout.trackingMode == "Timer") {
-            holder.layoutRepsControls.visibility = View.GONE
-            holder.btnStartTimer.visibility = if (shouldShowControls) View.VISIBLE else View.GONE
-            holder.btnStartTimer.setOnClickListener {
-                if (!isCompleted) {
-                    onTimerStart(workout, allWorkouts.indexOf(workout))
+            holder.expandChevron.setOnClickListener {
+                if (!isCompleted && selectedDateString == todayDateString) {
+                    TransitionManager.beginDelayedTransition(holder.itemView as ViewGroup)
+                    workout.isExpanded = !workout.isExpanded
+                    notifyItemChanged(position)
                 }
             }
-        } else {
-            holder.layoutRepsControls.visibility = if (shouldShowControls) View.VISIBLE else View.GONE
-            holder.btnStartTimer.visibility = View.GONE
-            
-            val remainingReps = (workout.target - workout.progress).coerceAtLeast(0)
 
-            if (remainingReps > 0) {
-                holder.numberPicker.minValue = 1
-                holder.numberPicker.maxValue = remainingReps
-                holder.numberPicker.wrapSelectorWheel = false
-                holder.numberPicker.value = 1
-            } else {
-                holder.numberPicker.minValue = 0
-                holder.numberPicker.maxValue = 0
-                holder.numberPicker.value = 0
-            }
-            
-            updateFinishSelectionUI(holder, holder.numberPicker.value, workout.trackingMode)
-
-            holder.numberPicker.setOnValueChangedListener { _, _, newVal ->
-                updateFinishSelectionUI(holder, newVal, workout.trackingMode)
-            }
-
-            // Finish Selected Reps
-            holder.btnFinishSelection.setOnClickListener {
-                val addedValue = holder.numberPicker.value
-                if (addedValue > 0) {
-                    workout.progress += addedValue
-                    if (workout.progress >= workout.target) {
-                        workout.isCompleted = true
-                        workout.isExpanded = false
-                        if (!workout.completedDates.contains(todayDateString)) {
-                            workout.completedDates.add(todayDateString)
-                        }
+            // Context-aware UI based on tracking mode
+            if (workout.trackingMode == "Timer") {
+                holder.layoutRepsControls.visibility = View.GONE
+                holder.btnStartTimer.visibility = if (shouldShowControls) View.VISIBLE else View.GONE
+                holder.btnStartTimer.setOnClickListener {
+                    if (!isCompleted) {
+                        onTimerStart(workout, allWorkouts.indexOf(workout))
                     }
-                    // Collapse the spinner after finishing task
+                }
+            } else {
+                holder.layoutRepsControls.visibility = if (shouldShowControls) View.VISIBLE else View.GONE
+                holder.btnStartTimer.visibility = View.GONE
+                
+                val remainingReps = (workout.target - workout.progress).coerceAtLeast(0)
+
+                if (remainingReps > 0) {
+                    holder.numberPicker.minValue = 1
+                    holder.numberPicker.maxValue = remainingReps
+                    holder.numberPicker.wrapSelectorWheel = false
+                    holder.numberPicker.value = 1
+                } else {
+                    holder.numberPicker.minValue = 0
+                    holder.numberPicker.maxValue = 0
+                    holder.numberPicker.value = 0
+                }
+                
+                updateFinishSelectionUI(holder, holder.numberPicker.value, workout.trackingMode)
+
+                holder.numberPicker.setOnValueChangedListener { _, _, newVal ->
+                    updateFinishSelectionUI(holder, newVal, workout.trackingMode)
+                }
+
+                holder.btnFinishSelection.setOnClickListener {
+                    val addedValue = holder.numberPicker.value
+                    if (addedValue > 0) {
+                        workout.progress += addedValue
+                        if (workout.progress >= workout.target) {
+                            workout.isCompleted = true
+                            workout.isExpanded = false
+                            if (!workout.completedDates.contains(todayDateString)) {
+                                workout.completedDates.add(todayDateString)
+                            }
+                        }
+                        TransitionManager.beginDelayedTransition(holder.itemView as ViewGroup)
+                        workout.isExpanded = false
+                        applyFilterAndSort()
+                        onProgressChanged()
+                    }
+                }
+
+                holder.btnFinishAll.setOnClickListener {
+                    workout.progress = workout.target
+                    workout.isCompleted = true
                     TransitionManager.beginDelayedTransition(holder.itemView as ViewGroup)
                     workout.isExpanded = false
+                    
+                    if (!workout.completedDates.contains(todayDateString)) {
+                        workout.completedDates.add(todayDateString)
+                    }
+                    
                     applyFilterAndSort()
                     onProgressChanged()
                 }
             }
 
-            // Finish All
-            holder.btnFinishAll.setOnClickListener {
-                workout.progress = workout.target
-                workout.isCompleted = true
-                // Collapse the spinner after finishing task
-                TransitionManager.beginDelayedTransition(holder.itemView as ViewGroup)
-                workout.isExpanded = false
-                
-                if (!workout.completedDates.contains(todayDateString)) {
-                    workout.completedDates.add(todayDateString)
-                }
-                
-                applyFilterAndSort()
-                onProgressChanged()
-            }
+            holder.editButton.setOnClickListener { showCustomMenu(it, workout) }
+            
+            updateVisuals(holder, isCompleted)
         }
-
-        holder.editButton.setOnClickListener { showCustomMenu(it, position) }
-        
-        updateVisuals(holder, isCompleted)
     }
 
     private fun updateFinishSelectionUI(holder: WorkoutViewHolder, value: Int, mode: String) {
         holder.tvSelectedNumCircle.text = value.toString()
-        holder.tvFinishRepsLabel.text = "$value ${mode.uppercase()}"
+        val unit = if (mode == "Reps") DataManager.workoutWeightUnit else mode
+        holder.tvFinishRepsLabel.text = "$value ${unit.uppercase()}"
     }
 
-    private fun showCustomMenu(anchor: View, position: Int) {
+    private fun showCustomMenu(anchor: View, workout: Workout) {
         val context = anchor.context
         val inflater = LayoutInflater.from(context)
         val menuView = inflater.inflate(R.layout.layout_custom_menu, null)
-        val workout = displayWorkouts[position]
         val isCompleted = isWorkoutCompletedOnSelectedDate(workout)
 
         val popupWindow = PopupWindow(menuView, ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT, true)
@@ -256,7 +281,9 @@ class WorkoutAdapter(
     }
 
     private fun applyFilterAndSort() {
-        displayWorkouts = allWorkouts.filter { workout ->
+        displayItems.clear()
+
+        val filtered = allWorkouts.filter { workout ->
             val matchesTime = if (currentFilter == "All") true else workout.frequency == currentFilter
             val matchesDay = if (workout.repeatType == "SPECIFIC_DAYS") {
                 workout.repeatDays.contains(selectedDayIndex)
@@ -264,9 +291,26 @@ class WorkoutAdapter(
                 true 
             }
             matchesTime && matchesDay
-        }.toMutableList()
-        displayWorkouts.sortWith(compareBy({ isWorkoutCompletedOnSelectedDate(it) }, { it.timestamp }))
+        }
+
+        val activeWorkouts = filtered.filter { !isWorkoutCompletedOnSelectedDate(it) }.sortedByDescending { it.timestamp }
+        val completedWorkouts = filtered.filter { isWorkoutCompletedOnSelectedDate(it) }.sortedByDescending { it.timestamp }
+
+        displayItems.addAll(activeWorkouts)
+
+        if (showCompleted && completedWorkouts.isNotEmpty()) {
+            displayItems.add("Completed ${completedWorkouts.size}")
+            if (isCompletedExpanded) {
+                displayItems.addAll(completedWorkouts)
+            }
+        }
+
         notifyDataSetChanged()
+    }
+
+    fun setShowCompleted(show: Boolean) {
+        showCompleted = show
+        applyFilterAndSort()
     }
 
     private fun updateVisuals(holder: WorkoutViewHolder, isCompleted: Boolean) {
@@ -279,7 +323,7 @@ class WorkoutAdapter(
         }
     }
 
-    override fun getItemCount() = displayWorkouts.size
+    override fun getItemCount() = displayItems.size
 
     class WorkoutViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
         val mainContainer: View = itemView
@@ -298,5 +342,10 @@ class WorkoutAdapter(
         val tvFinishRepsLabel: TextView = itemView.findViewById(R.id.tv_finish_reps_label)
         val btnFinishAll: MaterialCardView = itemView.findViewById(R.id.btn_finish_all)
         val btnStartTimer: MaterialCardView = itemView.findViewById(R.id.btn_start_timer_workout)
+    }
+
+    class HeaderViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
+        val title: TextView = itemView.findViewById(R.id.tv_header_title)
+        val chevron: ImageView = itemView.findViewById(R.id.iv_header_chevron)
     }
 }

@@ -3,290 +3,271 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@color/dark_background"
-    android:padding="20dp">
+    android:background="@color/dark_background">
 
-    <ImageView
-        android:id="@+id/btn_close"
-        android:layout_width="24dp"
-        android:layout_height="24dp"
-        android:src="@android:drawable/ic_menu_close_clear_cancel"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent"
-        app:tint="@color/white"
-        android:contentDescription="Close"
-        android:clickable="true"
-        android:focusable="true"
-        android:background="?attr/selectableItemBackgroundBorderless" />
-
-    <ImageView
-        android:layout_width="24dp"
-        android:layout_height="24dp"
-        android:src="@drawable/baseline_settings_24"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintTop_toTopOf="parent"
-        app:tint="@color/white"
-        android:contentDescription="More" />
-
-    <EditText
-        android:id="@+id/habit_name_input"
-        android:layout_width="0dp"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="24dp"
-        android:background="@null"
-        android:hint="Habit Name"
-        android:textColor="@color/white"
-        android:textColorHint="@color/text_secondary"
-        android:textSize="22sp"
-        android:textStyle="bold"
-        android:inputType="textCapSentences"
-        app:layout_constraintEnd_toStartOf="@+id/btn_edit_name"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/btn_close" />
-
-    <ImageView
-        android:id="@+id/btn_edit_name"
-        android:layout_width="20dp"
-        android:layout_height="20dp"
-        android:src="@android:drawable/ic_menu_edit"
-        app:layout_constraintBottom_toBottomOf="@id/habit_name_input"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintTop_toTopOf="@id/habit_name_input"
-        app:tint="@color/text_secondary"
-        android:contentDescription="Edit" />
-
-    <TextView
-        android:id="@+id/tv_habit_type"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="Regular habit"
-        android:textColor="@color/text_secondary"
-        android:textSize="14sp"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/habit_name_input" />
-
-    <!-- Icon Selection Card -->
-    <com.google.android.material.card.MaterialCardView
-        android:id="@+id/card_habit_icon"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="24dp"
-        app:cardBackgroundColor="@color/chip_background"
-        app:cardCornerRadius="24dp"
-        app:cardElevation="0dp"
-        android:clickable="true"
-        android:focusable="true"
-        app:layout_constraintTop_toBottomOf="@id/tv_habit_type">
-
-        <RelativeLayout
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:padding="16dp">
-            <ImageView
-                android:id="@+id/icon_preview"
-                android:layout_width="40dp"
-                android:layout_height="40dp"
-                android:background="@drawable/circle_selected_bg"
-                android:backgroundTint="@color/card_blue"
-                android:padding="8dp"
-                android:src="@android:drawable/ic_menu_edit"
-                app:tint="@color/white" />
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_centerVertical="true"
-                android:layout_marginStart="16dp"
-                android:layout_toEndOf="@id/icon_preview"
-                android:text="Icon"
-                android:textColor="@color/white" />
-        </RelativeLayout>
-    </com.google.android.material.card.MaterialCardView>
-
-    <!-- Color Selection Card -->
-    <com.google.android.material.card.MaterialCardView
-        android:id="@+id/card_habit_color"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="12dp"
-        app:cardBackgroundColor="@color/chip_background"
-        app:cardCornerRadius="24dp"
-        app:cardElevation="0dp"
-        android:clickable="true"
-        android:focusable="true"
-        app:layout_constraintTop_toBottomOf="@id/card_habit_icon">
-
-        <RelativeLayout
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:padding="16dp">
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_centerVertical="true"
-                android:text="Color"
-                android:textColor="@color/white" />
-            <LinearLayout
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_alignParentEnd="true"
-                android:layout_centerVertical="true"
-                android:gravity="center_vertical">
-                <View
-                    android:id="@+id/color_preview"
-                    android:layout_width="24dp"
-                    android:layout_height="24dp"
-                    android:background="@drawable/circle_selected_bg"
-                    android:backgroundTint="@color/card_blue" />
-            </LinearLayout>
-        </RelativeLayout>
-    </com.google.android.material.card.MaterialCardView>
-
-    <TextView
-        android:id="@+id/tv_repeat_label"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="24dp"
-        android:text="REPEAT"
-        android:textColor="@color/white"
-        android:textSize="12sp"
-        android:textStyle="bold"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/card_habit_color" />
-
-    <com.google.android.material.card.MaterialCardView
-        android:id="@+id/card_repeat"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="12dp"
-        app:cardBackgroundColor="@color/chip_background"
-        app:cardCornerRadius="24dp"
-        app:cardElevation="0dp"
-        app:layout_constraintTop_toBottomOf="@id/tv_repeat_label">
-        <RelativeLayout
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:padding="16dp">
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="Habit days"
-                android:textColor="@color/white" />
-            <LinearLayout
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_alignParentEnd="true"
-                android:gravity="center_vertical">
-                <TextView
-                    android:id="@+id/tv_repeat_summary"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="Everyday"
-                    android:textColor="@color/white" />
-            </LinearLayout>
-        </RelativeLayout>
-    </com.google.android.material.card.MaterialCardView>
-
-    <TextView
-        android:id="@+id/tv_doit_label"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="24dp"
-        android:text="DO IT AT"
-        android:textColor="@color/white"
-        android:textSize="12sp"
-        android:textStyle="bold"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/card_repeat" />
-
-    <RadioGroup
-        android:id="@+id/frequency_radio_group"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="12dp"
-        android:orientation="vertical"
-        app:layout_constraintTop_toBottomOf="@id/tv_doit_label">
-        <GridLayout
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:columnCount="2">
-            <androidx.appcompat.widget.AppCompatRadioButton
-                android:id="@+id/radio_daily"
-                android:layout_width="0dp"
-                android:layout_height="64dp"
-                android:layout_columnWeight="1"
-                android:layout_margin="4dp"
-                android:background="@drawable/mock_chip_bg_selected"
-                android:button="@null"
-                android:checked="true"
-                android:gravity="center"
-                android:text="Anytime"
-                android:textStyle="bold"
-                android:textColor="@color/white" />
-            <androidx.appcompat.widget.AppCompatRadioButton
-                android:id="@+id/radio_morning"
-                android:layout_width="0dp"
-                android:layout_height="64dp"
-                android:layout_columnWeight="1"
-                android:layout_margin="4dp"
-                android:background="@drawable/mock_chip_bg_selected"
-                android:button="@null"
-                android:drawableStart="@android:drawable/ic_menu_today"
-                android:drawablePadding="12dp"
-                android:drawableTint="@color/white"
-                android:paddingStart="16dp"
-                android:paddingEnd="16dp"
-                android:gravity="center_vertical"
-                android:text="Morning"
-                android:textStyle="bold"
-                android:textColor="@color/white" />
-            <androidx.appcompat.widget.AppCompatRadioButton
-                android:id="@+id/radio_afternoon"
-                android:layout_width="0dp"
-                android:layout_height="64dp"
-                android:layout_columnWeight="1"
-                android:layout_margin="4dp"
-                android:background="@drawable/mock_chip_bg_selected"
-                android:button="@null"
-                android:drawableStart="@android:drawable/ic_menu_today"
-                android:drawablePadding="12dp"
-                android:drawableTint="@color/white"
-                android:paddingStart="16dp"
-                android:paddingEnd="16dp"
-                android:gravity="center_vertical"
-                android:text="Afternoon"
-                android:textStyle="bold"
-                android:textColor="@color/white" />
-            <androidx.appcompat.widget.AppCompatRadioButton
-                android:id="@+id/radio_evening"
-                android:layout_width="0dp"
-                android:layout_height="64dp"
-                android:layout_columnWeight="1"
-                android:layout_margin="4dp"
-                android:background="@drawable/mock_chip_bg_selected"
-                android:button="@null"
-                android:drawableStart="@android:drawable/ic_menu_month"
-                android:drawablePadding="12dp"
-                android:drawableTint="@color/white"
-                android:paddingStart="16dp"
-                android:paddingEnd="16dp"
-                android:gravity="center_vertical"
-                android:text="Evening"
-                android:textStyle="bold"
-                android:textColor="@color/white" />
-        </GridLayout>
-    </RadioGroup>
-
-    <androidx.appcompat.widget.AppCompatButton
-        android:id="@+id/btn_save"
+    <!-- Header Toolbar -->
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:id="@+id/toolbar_habit"
         android:layout_width="match_parent"
         android:layout_height="64dp"
-        android:layout_marginTop="32dp"
-        android:layout_marginHorizontal="16dp"
-        android:background="@drawable/bg_blue_oval_button"
-        android:text="SAVE"
-        android:textColor="@color/white"
-        android:textStyle="bold"
-        android:textSize="16sp"
-        app:layout_constraintTop_toBottomOf="@id/frequency_radio_group" />
+        android:paddingHorizontal="16dp"
+        app:layout_constraintTop_toTopOf="parent">
+
+        <ImageView
+            android:id="@+id/btn_close"
+            android:layout_width="32dp"
+            android:layout_height="32dp"
+            android:background="?attr/selectableItemBackgroundBorderless"
+            android:src="@drawable/ic_back"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            app:tint="@color/white" />
+
+        <TextView
+            android:id="@+id/btn_save"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:background="?attr/selectableItemBackground"
+            android:padding="8dp"
+            android:text="Save"
+            android:textColor="@color/white"
+            android:textSize="18sp"
+            android:textStyle="bold"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintTop_toTopOf="parent" />
+
+    </androidx.constraintlayout.widget.ConstraintLayout>
+
+    <ScrollView
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/toolbar_habit">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:padding="20dp">
+
+            <EditText
+                android:id="@+id/habit_name_input"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:background="@null"
+                android:hint="Habit Name"
+                android:inputType="textCapSentences"
+                android:textColor="@color/white"
+                android:textColorHint="@color/text_secondary"
+                android:textSize="24sp"
+                android:textStyle="bold" />
+
+            <TextView
+                android:id="@+id/tv_habit_type"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="4dp"
+                android:text="Regular habit"
+                android:textColor="@color/text_secondary"
+                android:textSize="14sp" />
+
+            <!-- Style Options (Icon & Color) -->
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="24dp"
+                android:orientation="horizontal">
+
+                <com.google.android.material.card.MaterialCardView
+                    android:id="@+id/card_habit_icon"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:layout_marginEnd="6dp"
+                    app:cardBackgroundColor="@color/chip_background"
+                    app:cardCornerRadius="20dp"
+                    app:cardElevation="0dp">
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:gravity="center"
+                        android:orientation="vertical"
+                        android:padding="12dp">
+                        <ImageView
+                            android:id="@+id/icon_preview"
+                            android:layout_width="32dp"
+                            android:layout_height="32dp"
+                            android:background="@drawable/circle_selected_bg"
+                            android:backgroundTint="@color/card_blue"
+                            android:padding="6dp"
+                            android:src="@android:drawable/ic_menu_edit"
+                            app:tint="@color/white" />
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_marginTop="8dp"
+                            android:text="Icon"
+                            android:textColor="@color/white"
+                            android:textSize="12sp" />
+                    </LinearLayout>
+                </com.google.android.material.card.MaterialCardView>
+
+                <com.google.android.material.card.MaterialCardView
+                    android:id="@+id/card_habit_color"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:layout_marginStart="6dp"
+                    app:cardBackgroundColor="@color/chip_background"
+                    app:cardCornerRadius="20dp"
+                    app:cardElevation="0dp">
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:gravity="center"
+                        android:orientation="vertical"
+                        android:padding="12dp">
+                        <View
+                            android:id="@+id/color_preview"
+                            android:layout_width="32dp"
+                            android:layout_height="32dp"
+                            android:background="@drawable/circle_selected_bg"
+                            android:backgroundTint="@color/card_blue" />
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_marginTop="8dp"
+                            android:text="Color"
+                            android:textColor="@color/white"
+                            android:textSize="12sp" />
+                    </LinearLayout>
+                </com.google.android.material.card.MaterialCardView>
+            </LinearLayout>
+
+            <!-- Schedule Card -->
+            <TextView
+                android:id="@+id/tv_repeat_label"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="24dp"
+                android:text="REPEAT"
+                android:textColor="#80FFFFFF"
+                android:textSize="10sp"
+                android:textStyle="bold" />
+
+            <com.google.android.material.card.MaterialCardView
+                android:id="@+id/card_repeat"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="12dp"
+                app:cardBackgroundColor="@color/chip_background"
+                app:cardCornerRadius="20dp"
+                app:cardElevation="0dp">
+                <RelativeLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:padding="16dp">
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="Habit Days"
+                        android:textColor="@color/white"
+                        android:textSize="14sp" />
+                    <TextView
+                        android:id="@+id/tv_repeat_summary"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_alignParentEnd="true"
+                        android:text="Everyday"
+                        android:textColor="@color/chip_selected"
+                        android:textSize="14sp"
+                        android:textStyle="bold" />
+                </RelativeLayout>
+            </com.google.android.material.card.MaterialCardView>
+
+            <!-- Frequency Card -->
+            <TextView
+                android:id="@+id/tv_doit_label"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="20dp"
+                android:text="TIME OF DAY"
+                android:textColor="#80FFFFFF"
+                android:textSize="10sp"
+                android:textStyle="bold" />
+
+            <RadioGroup
+                android:id="@+id/frequency_radio_group"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="12dp">
+                <GridLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:columnCount="2">
+                    <androidx.appcompat.widget.AppCompatRadioButton
+                        android:id="@+id/radio_daily"
+                        android:layout_width="0dp"
+                        android:layout_height="56dp"
+                        android:layout_columnWeight="1"
+                        android:layout_margin="4dp"
+                        android:background="@drawable/mock_chip_bg_selected"
+                        android:button="@null"
+                        android:checked="true"
+                        android:gravity="center"
+                        android:text="Anytime"
+                        android:textColor="@color/white"
+                        android:textSize="13sp"
+                        android:textStyle="bold" />
+                    <androidx.appcompat.widget.AppCompatRadioButton
+                        android:id="@+id/radio_morning"
+                        android:layout_width="0dp"
+                        android:layout_height="56dp"
+                        android:layout_columnWeight="1"
+                        android:layout_margin="4dp"
+                        android:background="@drawable/mock_chip_bg_selected"
+                        android:button="@null"
+                        android:gravity="center"
+                        android:text="Morning"
+                        android:textColor="@color/white"
+                        android:textSize="13sp"
+                        android:textStyle="bold" />
+                    <androidx.appcompat.widget.AppCompatRadioButton
+                        android:id="@+id/radio_afternoon"
+                        android:layout_width="0dp"
+                        android:layout_height="56dp"
+                        android:layout_columnWeight="1"
+                        android:layout_margin="4dp"
+                        android:background="@drawable/mock_chip_bg_selected"
+                        android:button="@null"
+                        android:gravity="center"
+                        android:text="Afternoon"
+                        android:textColor="@color/white"
+                        android:textSize="13sp"
+                        android:textStyle="bold" />
+                    <androidx.appcompat.widget.AppCompatRadioButton
+                        android:id="@+id/radio_evening"
+                        android:layout_width="0dp"
+                        android:layout_height="56dp"
+                        android:layout_columnWeight="1"
+                        android:layout_margin="4dp"
+                        android:background="@drawable/mock_chip_bg_selected"
+                        android:button="@null"
+                        android:gravity="center"
+                        android:text="Evening"
+                        android:textColor="@color/white"
+                        android:textSize="13sp"
+                        android:textStyle="bold" />
+                </GridLayout>
+            </RadioGroup>
+
+            <View
+                android:layout_width="match_parent"
+                android:layout_height="40dp" />
+
+        </LinearLayout>
+    </ScrollView>
 
 </androidx.constraintlayout.widget.ConstraintLayout>

@@ -10,6 +10,7 @@ data class Workout(
     var isDayOff: Boolean = false,
     var color: Int = -1,
     var iconResId: Int = -1,
+    var muscleGroups: List<String> = listOf("General"),
     var repeatType: String = "SPECIFIC_DAYS",
     var repeatDays: List<Int> = listOf(0, 1, 2, 3, 4, 5, 6), // 0=Sun, 6=Sat
     var repeatCount: Int = 1,

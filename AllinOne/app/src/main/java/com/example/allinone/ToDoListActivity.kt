@@ -19,6 +19,7 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.*
 import androidx.appcompat.app.AppCompatActivity
+import androidx.appcompat.widget.SwitchCompat
 import androidx.core.content.ContextCompat
 import androidx.recyclerview.widget.ItemTouchHelper
 import androidx.recyclerview.widget.LinearLayoutManager
@@ -113,8 +114,9 @@ class ToDoListActivity : AppCompatActivity() {
         val allCategories = mutableListOf("All")
         allCategories.addAll(DataManager.taskCustomCategories)
 
-        allCategories.forEach { category ->
+        allCategories.forEachIndexed { index, category ->
             val rb = RadioButton(this).apply {
+                id = index + 1000 // Unique ID for RadioGroup management
                 val height = TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, 32f, resources.displayMetrics).toInt()
                 val params = RadioGroup.LayoutParams(ViewGroup.LayoutParams.WRAP_CONTENT, height)
                 val margin = TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, 4f, resources.displayMetrics).toInt()
@@ -133,13 +135,16 @@ class ToDoListActivity : AppCompatActivity() {
                 typeface = Typeface.create(Typeface.DEFAULT, Typeface.BOLD)
                 
                 isChecked = currentCategoryFilter == category
-                
-                setOnClickListener {
-                    currentCategoryFilter = category
-                    applyFilters()
-                }
             }
             radioGroup.addView(rb)
+        }
+
+        radioGroup.setOnCheckedChangeListener { group, checkedId ->
+            val checkedRb = group.findViewById<RadioButton>(checkedId)
+            if (checkedRb != null) {
+                currentCategoryFilter = allCategories[checkedId - 1000]
+                applyFilters()
+            }
         }
     }
 
@@ -193,7 +198,7 @@ class ToDoListActivity : AppCompatActivity() {
         val ivToggle = menuView.findViewById<ImageView>(R.id.iv_toggle_completed)
         
         tvToggle.text = if (DataManager.taskShowCompleted) "HIDE COMPLETED" else "SHOW COMPLETED"
-        ivToggle.setImageResource(if (DataManager.taskShowCompleted) android.R.drawable.checkbox_on_background else android.R.drawable.checkbox_off_background)
+        ivToggle.setImageResource(if (DataManager.taskShowCompleted) android.R.drawable.ic_menu_view else android.R.drawable.ic_partial_secure)
 
         menuView.findViewById<View>(R.id.menu_toggle_completed).setOnClickListener {
             DataManager.taskShowCompleted = !DataManager.taskShowCompleted
@@ -237,9 +242,9 @@ class ToDoListActivity : AppCompatActivity() {
         }
 
         // Auto Archive
-        val ivArchive = view.findViewById<ImageView>(R.id.iv_archive_check)
+        val swArchive = view.findViewById<SwitchCompat>(R.id.iv_archive_check)
         fun updateArchiveUI() {
-            ivArchive.setImageResource(if (DataManager.taskAutoArchive) android.R.drawable.checkbox_on_background else android.R.drawable.checkbox_off_background)
+            swArchive.isChecked = DataManager.taskAutoArchive
         }
         updateArchiveUI()
         
@@ -248,6 +253,18 @@ class ToDoListActivity : AppCompatActivity() {
             DataManager.saveData(this)
             updateArchiveUI()
             Toast.makeText(this, "Auto-Archive ${if (DataManager.taskAutoArchive) "enabled" else "disabled"}", Toast.LENGTH_SHORT).show()
+        }
+
+        // Show Hidden Tasks
+        val swHidden = view.findViewById<SwitchCompat>(R.id.iv_hidden_check)
+        swHidden.isChecked = DataManager.taskShowHidden
+        
+        view.findViewById<View>(R.id.item_show_hidden).setOnClickListener {
+            DataManager.taskShowHidden = !DataManager.taskShowHidden
+            DataManager.saveData(this)
+            swHidden.isChecked = DataManager.taskShowHidden
+            taskAdapter.updateDisplayList()
+            Toast.makeText(this, "Hidden tasks ${if (DataManager.taskShowHidden) "visible" else "hidden"}", Toast.LENGTH_SHORT).show()
         }
 
         // Analytics
@@ -264,7 +281,7 @@ class ToDoListActivity : AppCompatActivity() {
         val tvDefaultSection = view.findViewById<TextView>(R.id.tv_default_section_summary)
         tvDefaultSection.text = "Current: ${DataManager.taskDefaultSection}"
         view.findViewById<View>(R.id.item_default_section).setOnClickListener {
-            val sections = listOf("Tasks", "To-Do List")
+            val sections = listOf("Tasks", "Work List")
             val next = sections[(sections.indexOf(DataManager.taskDefaultSection) + 1) % sections.size]
             DataManager.taskDefaultSection = next
             tvDefaultSection.text = "Current: $next"
@@ -293,27 +310,35 @@ class ToDoListActivity : AppCompatActivity() {
 
         val etName = view.findViewById<EditText>(R.id.task_name_input)
         val rgPriority = view.findViewById<RadioGroup>(R.id.rg_priority)
-        val spinnerCat = view.findViewById<Spinner>(R.id.spinner_category)
+        val chipGroupCat = view.findViewById<com.google.android.material.chip.ChipGroup>(R.id.category_chip_group)
         val containerSubtasks = view.findViewById<LinearLayout>(R.id.container_subtasks)
         val etNewSubtask = view.findViewById<EditText>(R.id.et_new_subtask)
         val btnAddSubtask = view.findViewById<ImageButton>(R.id.btn_add_subtask)
         val tvReminder = view.findViewById<TextView>(R.id.tv_reminder_summary)
-        val colorPreview = view.findViewById<View>(R.id.task_color_preview)
         val btnSave = view.findViewById<TextView>(R.id.btn_save_task)
 
-        // Setup Category Spinner
+        // Setup Category Chips
         val categories = DataManager.taskCustomCategories
-        spinnerCat.adapter = ArrayAdapter(this, android.R.layout.simple_spinner_dropdown_item, categories)
+        var selectedCategory = existingTask?.category ?: "General"
+
+        categories.forEach { cat ->
+            val chip = com.google.android.material.chip.Chip(this)
+            chip.text = cat
+            chip.isCheckable = true
+            chip.isChecked = (cat == selectedCategory)
+            chip.setChipBackgroundColorResource(R.color.chip_background)
+            chip.setTextColor(Color.WHITE)
+            chip.setOnCheckedChangeListener { _, isChecked -> if (isChecked) selectedCategory = cat }
+            chipGroupCat.addView(chip)
+        }
 
         var selectedPriority = existingTask?.priority ?: 0
         var selectedReminder: Long? = existingTask?.reminderTime
-        var selectedColor = existingTask?.color ?: ContextCompat.getColor(this, R.color.card_blue)
         val tempSubtasks = existingTask?.subtasks?.toMutableList() ?: mutableListOf()
 
         // Initial UI State
         existingTask?.let {
             etName.setText(it.name)
-            spinnerCat.setSelection(categories.indexOf(it.category))
             when (it.priority) {
                 0 -> rgPriority.check(R.id.rb_priority_low)
                 1 -> rgPriority.check(R.id.rb_priority_medium)
@@ -326,7 +351,6 @@ class ToDoListActivity : AppCompatActivity() {
                 else -> R.id.rb_priority_low
             })
         }
-        colorPreview.backgroundTintList = android.content.res.ColorStateList.valueOf(selectedColor)
         renderSubtasks(containerSubtasks, tempSubtasks)
 
         // Listeners
@@ -337,12 +361,6 @@ class ToDoListActivity : AppCompatActivity() {
                 else -> 0
             }
             updatePriorityAlpha(view, id)
-        }
-
-        colorPreview.setOnClickListener {
-            val colors = listOf(ContextCompat.getColor(this, R.color.card_blue), ContextCompat.getColor(this, R.color.card_orange), ContextCompat.getColor(this, R.color.card_green), Color.MAGENTA, Color.RED, Color.CYAN)
-            selectedColor = colors[(colors.indexOf(selectedColor) + 1) % colors.size]
-            colorPreview.backgroundTintList = android.content.res.ColorStateList.valueOf(selectedColor)
         }
 
         btnAddSubtask.setOnClickListener {
@@ -371,8 +389,7 @@ class ToDoListActivity : AppCompatActivity() {
                 val task = existingTask ?: Task(name, section = currentSection)
                 task.name = name
                 task.priority = selectedPriority
-                task.category = spinnerCat.selectedItem.toString()
-                task.color = selectedColor
+                task.category = selectedCategory
                 task.reminderTime = selectedReminder
                 task.subtasks.clear()
                 task.subtasks.addAll(tempSubtasks)
@@ -405,7 +422,7 @@ class ToDoListActivity : AppCompatActivity() {
         val navTodo = findViewById<View>(R.id.nav_todo_list)
 
         navTasks.setOnClickListener { switchSection("Tasks") }
-        navTodo.setOnClickListener { switchSection("To-Do List") }
+        navTodo.setOnClickListener { switchSection("List") }
         
         updateNavUI()
     }
@@ -420,7 +437,7 @@ class ToDoListActivity : AppCompatActivity() {
     private fun updateNavUI() {
         val navs = mapOf(
             "Tasks" to Pair(findViewById<ImageView>(R.id.iv_tasks_icon), findViewById<TextView>(R.id.tv_tasks_label)),
-            "To-Do List" to Pair(findViewById<ImageView>(R.id.iv_todo_icon), findViewById<TextView>(R.id.tv_todo_label))
+            "List" to Pair(findViewById<ImageView>(R.id.iv_todo_icon), findViewById<TextView>(R.id.tv_todo_label))
         )
 
         navs.forEach { (sec, views) ->

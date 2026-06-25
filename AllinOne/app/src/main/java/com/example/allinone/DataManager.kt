@@ -12,7 +12,6 @@ object DataManager {
     var workouts = mutableListOf<Workout>()
     var tasks = mutableListOf<Task>()
     var notes = mutableListOf<Note>()
-    var projects = mutableListOf<Project>()
     var transactions = mutableListOf<Transaction>()
     var monthlyBudget: Double = 0.0
     var monthlySavingsGoal: Double = 0.0
@@ -22,17 +21,38 @@ object DataManager {
     
     // To-Do List Settings
     var taskShowCompleted: Boolean = true
+    var taskShowHidden: Boolean = false
     var taskSortOrder: String = "Priority" // Options: Priority, Newest, Alphabetical
     var taskCustomCategories = mutableListOf("General", "Personal", "Work", "Shopping")
     var taskAutoArchive: Boolean = false
     var taskDefaultSection: String = "Tasks"
-    
+
     // Finance Settings
     var financeCustomCategories = mutableListOf("Food", "Rent", "Transport", "Shopping", "Entertainment", "Health", "Other")
     var financeCurrency: String = "₹"
 
+    // Habit Settings
+    var habitDefaultTab: String = "TODAY"
+    var habitVacationMode: Boolean = false
+    var habitSortOrder: String = "Time" // Time, Streak
+    var habitCompletionSound: Boolean = true
+    var habitCompletionHaptics: Boolean = true
+    var habitDayResetHour: Int = 0
+    var habitBulkMode: Boolean = false
+    var habitGraceDaysAllowed: Int = 1
+    var habitShowCompleted: Boolean = true
+
+    // Workout Settings
+    var workoutMuscleGroups = mutableListOf("Chest", "Back", "Legs", "Shoulders", "Arms", "Cardio", "Full Body")
+    var workoutAutoRestTimer: Boolean = false
+    var workoutWeightUnit: String = "Kg"
+    var workoutDefaultMode: String = "Reps"
+    var workoutRestDuration: Int = 60
+    var workoutShowCompleted: Boolean = true
+
     var noteAutoCleanupDays: Int = 0
     var noteDefaultCategory: String = "Notes"
+    var noteShowHidden: Boolean = false
     var noteTemplates: MutableMap<String, String> = mutableMapOf(
         "Daily" to "1. Today I'm grateful for: \n2. Top goal for today: \n3. How I feel: ",
         "Questions" to "Question: \n\nContext: \n\nGoal: ",
@@ -44,7 +64,6 @@ object DataManager {
     private const val KEY_WORKOUTS = "workouts_data"
     private const val KEY_TASKS = "tasks_data"
     private const val KEY_NOTES = "notes_data"
-    private const val KEY_PROJECTS = "projects_data"
     private const val KEY_TRANSACTIONS = "transactions_data"
     private const val KEY_BUDGET = "monthly_budget"
     private const val KEY_SAVINGS_GOAL = "monthly_savings_goal"
@@ -54,6 +73,7 @@ object DataManager {
     private const val KEY_LAST_RESET_DATE = "last_reset_date"
     private const val KEY_LAST_MONTH_RESET = "last_month_reset"
     private const val KEY_TASK_SHOW_COMPLETED = "task_show_completed"
+    private const val KEY_TASK_SHOW_HIDDEN = "task_show_hidden"
     private const val KEY_TASK_SORT_ORDER = "task_sort_order"
     private const val KEY_TASK_CUSTOM_CATEGORIES = "task_custom_categories"
     private const val KEY_TASK_AUTO_ARCHIVE = "task_auto_archive"
@@ -61,14 +81,31 @@ object DataManager {
     private const val KEY_FINANCE_CUSTOM_CATEGORIES = "finance_custom_categories"
     private const val KEY_FINANCE_CURRENCY = "finance_currency"
     private const val KEY_NOTE_AUTO_CLEANUP = "note_auto_cleanup"
+    private const val KEY_NOTE_SHOW_HIDDEN = "note_show_hidden"
     private const val KEY_NOTE_DEFAULT_CAT = "note_default_cat"
     private const val KEY_NOTE_TEMPLATES = "note_templates"
+    private const val KEY_HABIT_DEFAULT_TAB = "habit_default_tab"
+    private const val KEY_HABIT_VACATION_MODE = "habit_vacation_mode"
+    private const val KEY_HABIT_SORT_ORDER = "habit_sort_order"
+    private const val KEY_HABIT_SOUND = "habit_sound"
+    private const val KEY_HABIT_HAPTICS = "habit_haptics"
+    private const val KEY_HABIT_RESET_HOUR = "habit_reset_hour"
+    private const val KEY_HABIT_BULK_MODE = "habit_bulk_mode"
+    private const val KEY_HABIT_GRACE_DAYS = "habit_grace_days"
+    private const val KEY_HABIT_SHOW_COMPLETED = "habit_show_completed"
+    private const val KEY_WORKOUT_MUSCLE_GROUPS = "workout_muscle_groups"
+    private const val KEY_WORKOUT_AUTO_REST = "workout_auto_rest"
+    private const val KEY_WORKOUT_UNIT = "workout_unit"
+    private const val KEY_WORKOUT_DEFAULT_MODE = "workout_default_mode"
+    private const val KEY_WORKOUT_REST_DURATION = "workout_rest_duration"
+    private const val KEY_WORKOUT_SHOW_COMPLETED = "workout_show_completed"
 
     private fun getPrefs(context: Context): SharedPreferences {
         return context.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE)
     }
 
-    fun saveData(context: Context) {
+    fun saveData(context: Context?) {
+        if (context == null) return
         val prefs = getPrefs(context)
         val gson = Gson()
         
@@ -77,7 +114,6 @@ object DataManager {
             putString(KEY_WORKOUTS, gson.toJson(workouts))
             putString(KEY_TASKS, gson.toJson(tasks))
             putString(KEY_NOTES, gson.toJson(notes))
-            putString(KEY_PROJECTS, gson.toJson(projects))
             putString(KEY_TRANSACTIONS, gson.toJson(transactions))
             putFloat(KEY_BUDGET, monthlyBudget.toFloat())
             putFloat(KEY_SAVINGS_GOAL, monthlySavingsGoal.toFloat())
@@ -85,6 +121,7 @@ object DataManager {
             putString(KEY_MONTHLY_SAVINGS_GOALS, gson.toJson(monthlySavingsGoals))
             putString(KEY_HISTORY, gson.toJson(history))
             putBoolean(KEY_TASK_SHOW_COMPLETED, taskShowCompleted)
+            putBoolean(KEY_TASK_SHOW_HIDDEN, taskShowHidden)
             putString(KEY_TASK_SORT_ORDER, taskSortOrder)
             putString(KEY_TASK_CUSTOM_CATEGORIES, gson.toJson(taskCustomCategories))
             putBoolean(KEY_TASK_AUTO_ARCHIVE, taskAutoArchive)
@@ -92,8 +129,24 @@ object DataManager {
             putString(KEY_FINANCE_CUSTOM_CATEGORIES, gson.toJson(financeCustomCategories))
             putString(KEY_FINANCE_CURRENCY, financeCurrency)
             putInt(KEY_NOTE_AUTO_CLEANUP, noteAutoCleanupDays)
+            putBoolean(KEY_NOTE_SHOW_HIDDEN, noteShowHidden)
             putString(KEY_NOTE_DEFAULT_CAT, noteDefaultCategory)
             putString(KEY_NOTE_TEMPLATES, gson.toJson(noteTemplates))
+            putString(KEY_HABIT_DEFAULT_TAB, habitDefaultTab)
+            putBoolean(KEY_HABIT_VACATION_MODE, habitVacationMode)
+            putString(KEY_HABIT_SORT_ORDER, habitSortOrder)
+            putBoolean(KEY_HABIT_SOUND, habitCompletionSound)
+            putBoolean(KEY_HABIT_HAPTICS, habitCompletionHaptics)
+            putInt(KEY_HABIT_RESET_HOUR, habitDayResetHour)
+            putBoolean(KEY_HABIT_BULK_MODE, habitBulkMode)
+            putInt(KEY_HABIT_GRACE_DAYS, habitGraceDaysAllowed)
+            putBoolean(KEY_HABIT_SHOW_COMPLETED, habitShowCompleted)
+            putString(KEY_WORKOUT_MUSCLE_GROUPS, gson.toJson(workoutMuscleGroups))
+            putBoolean(KEY_WORKOUT_AUTO_REST, workoutAutoRestTimer)
+            putString(KEY_WORKOUT_UNIT, workoutWeightUnit)
+            putString(KEY_WORKOUT_DEFAULT_MODE, workoutDefaultMode)
+            putInt(KEY_WORKOUT_REST_DURATION, workoutRestDuration)
+            putBoolean(KEY_WORKOUT_SHOW_COMPLETED, workoutShowCompleted)
             apply()
         }
     }
@@ -102,16 +155,12 @@ object DataManager {
         val prefs = getPrefs(context)
         val gson = Gson()
 
-        // ... existing loads ...
         prefs.getString(KEY_HABITS, null)?.let {
             val type = object : TypeToken<MutableList<Habit>>() {}.type
             habits = gson.fromJson(it, type) ?: mutableListOf()
             habits.forEach { habit ->
-                habit.isExpanded = false // Reset expansion state on load
-                @Suppress("UNNECESSARY_SAFE_CALL")
-                if (habit.completedDates == null) {
-                    habit.completedDates = mutableListOf()
-                }
+                habit.isExpanded = false
+                if (habit.completedDates == null) habit.completedDates = mutableListOf()
             }
         }
 
@@ -119,20 +168,15 @@ object DataManager {
             val type = object : TypeToken<MutableList<Workout>>() {}.type
             workouts = gson.fromJson(it, type) ?: mutableListOf()
             workouts.forEach { workout ->
-                workout.isExpanded = false // Reset expansion state on load
-                @Suppress("UNNECESSARY_SAFE_CALL")
-                if (workout.completedDates == null) {
-                    workout.completedDates = mutableListOf()
-                }
+                workout.isExpanded = false
+                if (workout.completedDates == null) workout.completedDates = mutableListOf()
             }
         }
 
         prefs.getString(KEY_TASKS, null)?.let {
             val type = object : TypeToken<MutableList<Task>>() {}.type
             tasks = gson.fromJson(it, type) ?: mutableListOf()
-            // Migration safety: Ensure new fields are never null at runtime
             tasks = tasks.map { oldTask ->
-                @Suppress("SENSELESS_COMPARISON")
                 if (oldTask.subtasks == null || oldTask.category == null) {
                     oldTask.copy(
                         subtasks = oldTask.subtasks ?: mutableListOf(),
@@ -146,11 +190,29 @@ object DataManager {
         prefs.getString(KEY_NOTES, null)?.let {
             val type = object : TypeToken<MutableList<Note>>() {}.type
             notes = gson.fromJson(it, type) ?: mutableListOf()
-        }
-
-        prefs.getString(KEY_PROJECTS, null)?.let {
-            val type = object : TypeToken<MutableList<Project>>() {}.type
-            projects = gson.fromJson(it, type) ?: mutableListOf()
+            // Sanitize for new fields
+            notes.forEach { note ->
+                if (note.status == null) note.status = "Not Started"
+                if (note.category == null) note.category = "Notes"
+                
+                @Suppress("SENSELESS_COMPARISON")
+                if (note.subFeatures == null) {
+                    try {
+                        val field = note::class.java.getDeclaredField("subFeatures")
+                        field.isAccessible = true
+                        field.set(note, mutableListOf<ProjectFeature>())
+                    } catch (e: Exception) {}
+                }
+                
+                @Suppress("SENSELESS_COMPARISON")
+                if (note.changeHistory == null) {
+                    try {
+                        val field = note::class.java.getDeclaredField("changeHistory")
+                        field.isAccessible = true
+                        field.set(note, mutableListOf<ProjectHistory>())
+                    } catch (e: Exception) {}
+                }
+            }
         }
 
         prefs.getString(KEY_TRANSACTIONS, null)?.let {
@@ -177,6 +239,7 @@ object DataManager {
         }
 
         taskShowCompleted = prefs.getBoolean(KEY_TASK_SHOW_COMPLETED, true)
+        taskShowHidden = prefs.getBoolean(KEY_TASK_SHOW_HIDDEN, false)
         taskSortOrder = prefs.getString(KEY_TASK_SORT_ORDER, "Priority") ?: "Priority"
         prefs.getString(KEY_TASK_CUSTOM_CATEGORIES, null)?.let {
             val type = object : TypeToken<MutableList<String>>() {}.type
@@ -191,11 +254,30 @@ object DataManager {
         }
         financeCurrency = prefs.getString(KEY_FINANCE_CURRENCY, "₹") ?: "₹"
         noteAutoCleanupDays = prefs.getInt(KEY_NOTE_AUTO_CLEANUP, 0)
+        noteShowHidden = prefs.getBoolean(KEY_NOTE_SHOW_HIDDEN, false)
         noteDefaultCategory = prefs.getString(KEY_NOTE_DEFAULT_CAT, "Notes") ?: "Notes"
         prefs.getString(KEY_NOTE_TEMPLATES, null)?.let {
             val type = object : TypeToken<MutableMap<String, String>>() {}.type
             noteTemplates = gson.fromJson(it, type) ?: noteTemplates
         }
+
+        habitDefaultTab = prefs.getString(KEY_HABIT_DEFAULT_TAB, "TODAY") ?: "TODAY"
+        habitVacationMode = prefs.getBoolean(KEY_HABIT_VACATION_MODE, false)
+        habitSortOrder = prefs.getString(KEY_HABIT_SORT_ORDER, "Time") ?: "Time"
+        habitCompletionSound = prefs.getBoolean(KEY_HABIT_SOUND, true)
+        habitCompletionHaptics = prefs.getBoolean(KEY_HABIT_HAPTICS, true)
+        habitDayResetHour = prefs.getInt(KEY_HABIT_RESET_HOUR, 0)
+        habitBulkMode = prefs.getBoolean(KEY_HABIT_BULK_MODE, false)
+        habitGraceDaysAllowed = prefs.getInt(KEY_HABIT_GRACE_DAYS, 1)
+
+        prefs.getString(KEY_WORKOUT_MUSCLE_GROUPS, null)?.let {
+            val type = object : TypeToken<MutableList<String>>() {}.type
+            workoutMuscleGroups = gson.fromJson(it, type) ?: workoutMuscleGroups
+        }
+        workoutAutoRestTimer = prefs.getBoolean(KEY_WORKOUT_AUTO_REST, false)
+        workoutWeightUnit = prefs.getString(KEY_WORKOUT_UNIT, "Kg") ?: "Kg"
+        workoutDefaultMode = prefs.getString(KEY_WORKOUT_DEFAULT_MODE, "Reps") ?: "Reps"
+        workoutRestDuration = prefs.getInt(KEY_WORKOUT_REST_DURATION, 60)
 
         if (taskAutoArchive) {
             autoArchiveTasks()
@@ -207,8 +289,7 @@ object DataManager {
 
     private fun checkAndResetDailyProgress(context: Context) {
         val prefs = getPrefs(context)
-        val sdf = SimpleDateFormat("yyyyMMdd", Locale.getDefault())
-        val today = sdf.format(Date())
+        val today = getTrackingDateString()
         val lastResetDate = prefs.getString(KEY_LAST_RESET_DATE, "") ?: ""
 
         if (lastResetDate.isNotEmpty() && today != lastResetDate) {
@@ -245,7 +326,6 @@ object DataManager {
         val lastResetMonth = prefs.getString(KEY_LAST_MONTH_RESET, "") ?: ""
 
         if (lastResetMonth.isNotEmpty() && currentMonth != lastResetMonth) {
-            // Save current budget and goal to history before resetting
             monthlyBudgets[lastResetMonth] = monthlyBudget
             monthlySavingsGoals[lastResetMonth] = monthlySavingsGoal
             
@@ -257,7 +337,6 @@ object DataManager {
             prefs.edit().putString(KEY_LAST_MONTH_RESET, currentMonth).apply()
         }
         
-        // Ensure current month budget is tracked if not already
         if (!monthlyBudgets.containsKey(currentMonth)) {
             monthlyBudgets[currentMonth] = monthlyBudget
         }
@@ -267,7 +346,7 @@ object DataManager {
     }
 
     fun exportData(): String {
-        val allData = AllAppData(habits, workouts, tasks, notes, history, projects, transactions, monthlyBudget, monthlySavingsGoal)
+        val allData = AllAppData(habits, workouts, tasks, notes, history, transactions, monthlyBudget, monthlySavingsGoal)
         return Gson().toJson(allData)
     }
 
@@ -276,9 +355,14 @@ object DataManager {
             val allData = Gson().fromJson(json, AllAppData::class.java)
             habits = allData.habits.toMutableList()
             workouts = allData.workouts.toMutableList()
+            workouts.forEach { workout ->
+                @Suppress("SENSELESS_COMPARISON")
+                if (workout.muscleGroups == null) {
+                    workout.muscleGroups = listOf("General")
+                }
+            }
             tasks = allData.tasks.toMutableList()
             notes = allData.notes.toMutableList()
-            projects = allData.projects.toMutableList()
             transactions = allData.transactions.toMutableList()
             monthlyBudget = allData.monthlyBudget
             monthlySavingsGoal = allData.monthlySavingsGoal
@@ -301,7 +385,7 @@ object DataManager {
     }
 
     fun getHabitProgress(): Int {
-        val todayIndex = (Calendar.getInstance().get(Calendar.DAY_OF_WEEK) - 1) // 0=Sun
+        val todayIndex = (getTrackingCalendar().get(Calendar.DAY_OF_WEEK) - 1)
         val todaysHabits = habits.filter { 
             it.repeatType != "SPECIFIC_DAYS" || it.repeatDays.contains(todayIndex) 
         }
@@ -310,7 +394,7 @@ object DataManager {
     }
 
     fun getWorkoutProgress(): Int {
-        val todayIndex = (Calendar.getInstance().get(Calendar.DAY_OF_WEEK) - 1)
+        val todayIndex = (getTrackingCalendar().get(Calendar.DAY_OF_WEEK) - 1)
         val todaysWorkouts = workouts.filter { 
             it.repeatType != "SPECIFIC_DAYS" || it.repeatDays.contains(todayIndex) 
         }
@@ -319,7 +403,7 @@ object DataManager {
     }
 
     fun getTotalDailyProgress(): Int {
-        val todayIndex = (Calendar.getInstance().get(Calendar.DAY_OF_WEEK) - 1)
+        val todayIndex = (getTrackingCalendar().get(Calendar.DAY_OF_WEEK) - 1)
         val todaysHabits = habits.filter { 
             it.repeatType != "SPECIFIC_DAYS" || it.repeatDays.contains(todayIndex) 
         }
@@ -341,18 +425,31 @@ object DataManager {
 
     fun getCurrentStreak(): Int {
         val sdf = SimpleDateFormat("yyyyMMdd", Locale.getDefault())
-        val calendar = Calendar.getInstance()
+        val calendar = getTrackingCalendar()
         var streak = 0
+        var graceDaysUsed = 0
         
         if (getTotalDailyProgress() >= 100) streak = 1
         
         calendar.add(Calendar.DAY_OF_YEAR, -1)
-        while (true) {
+        var lookbackDays = 0
+        while (lookbackDays < 365) {
+            lookbackDays++
             val dateStr = sdf.format(calendar.time)
             val dayData = history[dateStr]
-            if (dayData != null && (dayData.habitsCompleted + dayData.workoutsCompleted) > 0 && 
-                (dayData.habitsCompleted + dayData.workoutsCompleted) >= (dayData.totalHabits + dayData.totalWorkouts)) {
+            
+            if (dayData == null && !habitVacationMode && graceDaysUsed >= habitGraceDaysAllowed) break
+
+            val isDayFullFilled = dayData != null && (dayData.habitsCompleted + dayData.workoutsCompleted) > 0 && 
+                (dayData.habitsCompleted + dayData.workoutsCompleted) >= (dayData.totalHabits + dayData.totalWorkouts)
+
+            if (isDayFullFilled) {
                 streak++
+                calendar.add(Calendar.DAY_OF_YEAR, -1)
+            } else if (habitVacationMode) {
+                calendar.add(Calendar.DAY_OF_YEAR, -1)
+            } else if (graceDaysUsed < habitGraceDaysAllowed) {
+                graceDaysUsed++
                 calendar.add(Calendar.DAY_OF_YEAR, -1)
             } else break
         }
@@ -412,12 +509,36 @@ object DataManager {
             val freqHabits = habits.filter { it.frequency == freq }
             if (freqHabits.isEmpty()) -1
             else {
-                // Calculate historical performance if possible, but for now use current completion rate
-                // actually, looking at completedDates would be more accurate for history
-                // but let's keep it simple for a "real-time" insight
                 (freqHabits.count { it.isCompleted } * 100) / freqHabits.size
             }
         }
+    }
+
+    fun getTrackingDateString(): String {
+        return SimpleDateFormat("yyyyMMdd", Locale.getDefault()).format(getTrackingCalendar().time)
+    }
+
+    fun getTrackingCalendar(): Calendar {
+        val calendar = Calendar.getInstance()
+        val hour = calendar.get(Calendar.HOUR_OF_DAY)
+        if (hour < habitDayResetHour) {
+            calendar.add(Calendar.DAY_OF_YEAR, -1)
+        }
+        return calendar
+    }
+
+    fun getTodayCaloriesBurned(): Int {
+        val todayWorkouts = workouts.filter { it.isCompleted }
+        var total = 0.0
+        todayWorkouts.forEach { workout ->
+            total += when (workout.trackingMode) {
+                "Timer" -> workout.target * 0.1
+                "Reps" -> workout.target * 0.5
+                "Sets" -> workout.target * 5.0
+                else -> 0.0
+            }
+        }
+        return total.toInt()
     }
 
     private fun autoArchiveTasks() {

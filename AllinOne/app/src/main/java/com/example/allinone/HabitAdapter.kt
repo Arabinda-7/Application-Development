@@ -25,10 +25,12 @@ class HabitAdapter(
 ) : RecyclerView.Adapter<HabitAdapter.HabitViewHolder>() {
 
     private var displayHabits = allHabits.toMutableList()
+    private var isBulkMode = false
     private var currentFilter = "All"
     private var selectedDayIndex = 6
     private var selectedDateString = SimpleDateFormat("yyyyMMdd", Locale.getDefault()).format(Date())
     private val todayDateString = SimpleDateFormat("yyyyMMdd", Locale.getDefault()).format(Date())
+    private var showCompleted = DataManager.habitShowCompleted
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): HabitViewHolder {
         val view = LayoutInflater.from(parent.context).inflate(R.layout.habit_list_item, parent, false)
@@ -114,6 +116,7 @@ class HabitAdapter(
                 
                 if (!habit.completedDates.contains(selectedDateString)) {
                     habit.completedDates.add(selectedDateString)
+                    triggerCompletionEffects(context)
                 }
                 
                 applyFilterAndSort()
@@ -200,11 +203,47 @@ class HabitAdapter(
             } else {
                 true 
             }
-            matchesTime && matchesDay
+            
+            val isCompleted = isHabitCompletedOnSelectedDate(habit)
+            val matchesVisibility = if (showCompleted) true else !isCompleted
+
+            matchesTime && matchesDay && matchesVisibility
         }.toMutableList()
         
-        displayHabits.sortWith(compareBy({ isHabitCompletedOnSelectedDate(it) }, { it.timestamp }))
+        // Sorting logic based on Settings
+        if (DataManager.habitSortOrder == "Streak") {
+            displayHabits.sortWith(compareByDescending<Habit> { it.completedDates.size }.thenBy { it.timestamp })
+        } else {
+            // Default: Time based sort (Morning -> Afternoon -> Evening -> Anytime)
+            val order = listOf("Morning", "Afternoon", "Evening", "Anytime")
+            displayHabits.sortWith(compareBy<Habit> { order.indexOf(it.frequency) }.thenBy { it.timestamp })
+        }
+
+        // Keep completed items at the bottom if desired? 
+        // Current logic puts completed at the top due to `isHabitCompletedOnSelectedDate(it)` sort.
+        // Actually, users usually prefer completed at bottom. Let's move them to bottom.
+        displayHabits.sortBy { isHabitCompletedOnSelectedDate(it) }
+
         notifyDataSetChanged()
+    }
+
+    private fun triggerCompletionEffects(context: android.content.Context) {
+        if (DataManager.habitCompletionHaptics) {
+            val vibrator = context.getSystemService(android.content.Context.VIBRATOR_SERVICE) as android.os.Vibrator
+            if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.O) {
+                vibrator.vibrate(android.os.VibrationEffect.createOneShot(50, android.os.VibrationEffect.DEFAULT_AMPLITUDE))
+            } else {
+                vibrator.vibrate(50)
+            }
+        }
+        
+        if (DataManager.habitCompletionSound) {
+            try {
+                val notification = android.media.RingtoneManager.getDefaultUri(android.media.RingtoneManager.TYPE_NOTIFICATION)
+                val r = android.media.RingtoneManager.getRingtone(context, notification)
+                r.play()
+            } catch (e: Exception) {}
+        }
     }
 
     private fun updateVisuals(holder: HabitViewHolder, isCompleted: Boolean) {
@@ -217,7 +256,49 @@ class HabitAdapter(
         }
     }
 
+    fun setShowCompleted(show: Boolean) {
+        showCompleted = show
+        applyFilterAndSort()
+    }
+
     override fun getItemCount() = displayHabits.size
+
+    fun setBulkMode(enabled: Boolean) {
+        isBulkMode = enabled
+        if (!enabled) allHabits.forEach { it.isSelected = false }
+        notifyDataSetChanged()
+    }
+
+    fun markSelectedDone(context: android.content.Context) {
+        displayHabits.filter { it.isSelected }.forEach { habit ->
+            if (selectedDateString == todayDateString) {
+                habit.isCompleted = true
+                habit.progress = habit.target
+            }
+            if (!habit.completedDates.contains(selectedDateString)) {
+                habit.completedDates.add(selectedDateString)
+            }
+        }
+        setBulkMode(false)
+        onProgressChanged()
+        DataManager.saveData(context)
+    }
+
+    fun markSelectedDayOff(context: android.content.Context) {
+        displayHabits.filter { it.isSelected }.forEach { habit ->
+            if (selectedDateString == todayDateString) {
+                habit.isCompleted = true
+                habit.isDayOff = true
+                habit.progress = habit.target
+            }
+            if (!habit.completedDates.contains(selectedDateString)) {
+                habit.completedDates.add(selectedDateString)
+            }
+        }
+        setBulkMode(false)
+        onProgressChanged()
+        DataManager.saveData(context)
+    }
 
     class HabitViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
         val mainContainer: View = itemView

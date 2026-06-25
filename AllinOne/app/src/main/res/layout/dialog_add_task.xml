@@ -7,17 +7,6 @@
     android:background="@drawable/bg_dialog_rounded"
     android:padding="20dp">
 
-    <!-- Header: Color Preview -->
-    <View
-        android:id="@+id/task_color_preview"
-        android:layout_width="24dp"
-        android:layout_height="24dp"
-        android:background="@drawable/circle_selected_bg"
-        android:clickable="true"
-        android:focusable="true"
-        app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintEnd_toEndOf="parent" />
-
     <ScrollView
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
@@ -98,12 +87,14 @@
                 android:textSize="10sp"
                 android:textStyle="bold" />
 
-            <Spinner
-                android:id="@+id/spinner_category"
+            <com.google.android.material.chip.ChipGroup
+                android:id="@+id/category_chip_group"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="4dp"
-                android:backgroundTint="@color/white" />
+                android:layout_marginTop="8dp"
+                app:singleSelection="true"
+                app:chipSpacingHorizontal="8dp"
+                app:chipSpacingVertical="4dp" />
 
             <View
                 android:id="@+id/divider_add_task"

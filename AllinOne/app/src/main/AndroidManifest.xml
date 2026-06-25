@@ -37,7 +37,6 @@
         <activity android:name=".TimerActivity" />
         <activity android:name=".NotesActivity"
             tools:ignore="MissingClass" />
-        <activity android:name=".ProjectActivity" />
         <activity android:name=".FinanceActivity" />
         <activity android:name=".FinanceHistoryActivity" />
         <activity android:name=".SettingsActivity"
@@ -45,6 +44,7 @@
         <activity android:name=".HabitDetailActivity" />
         <activity android:name=".WorkoutDetailActivity"
             tools:ignore="MissingClass" />
+        <activity android:name=".ProjectActivity" />
     </application>
 
 </manifest>

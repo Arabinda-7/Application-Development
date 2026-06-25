@@ -114,7 +114,9 @@ class NotesActivity : AppCompatActivity() {
 
     private fun updateDisplayList() {
         displayNotes.clear()
-        displayNotes.addAll(allNotes.filter { it.category == currentCategory }.sortedByDescending { it.timestamp })
+        displayNotes.addAll(allNotes.filter { 
+            it.category == currentCategory && (DataManager.noteShowHidden || !it.isHidden) 
+        }.sortedByDescending { it.timestamp })
     }
 
     private fun showAddNoteDialog() {
@@ -329,12 +331,15 @@ class NotesActivity : AppCompatActivity() {
         val itemTemplates = dialog.findViewById<View>(R.id.item_templates)
         val itemBulk = dialog.findViewById<View>(R.id.item_bulk_move)
         val itemExport = dialog.findViewById<View>(R.id.item_export_notes)
+        val itemShowHidden = dialog.findViewById<View>(R.id.item_show_hidden)
+        val swShowHidden = dialog.findViewById<androidx.appcompat.widget.SwitchCompat>(R.id.sw_show_hidden)
         val tvDefaultSummary = dialog.findViewById<TextView>(R.id.tv_default_cat_summary)
         val tvCleanupSummary = dialog.findViewById<TextView>(R.id.tv_cleanup_summary)
         val btnClose = dialog.findViewById<View>(R.id.btn_close_settings)
 
         tvDefaultSummary.text = "Current: ${DataManager.noteDefaultCategory}"
         tvCleanupSummary.text = if (DataManager.noteAutoCleanupDays > 0) "Cleanup after ${DataManager.noteAutoCleanupDays} days" else "Disabled"
+        swShowHidden?.isChecked = DataManager.noteShowHidden
 
         itemDefault.setOnClickListener {
             val categories = listOf("Notes", "Questions", "Daily", "Stories")
@@ -353,6 +358,14 @@ class NotesActivity : AppCompatActivity() {
             DataManager.saveData(this)
             tvCleanupSummary.text = if (next > 0) "Cleanup after $next days" else "Disabled"
             android.widget.Toast.makeText(this, "Auto-cleanup: ${if (next > 0) "$next days" else "Off"}", android.widget.Toast.LENGTH_SHORT).show()
+        }
+
+        itemShowHidden.setOnClickListener {
+            DataManager.noteShowHidden = !DataManager.noteShowHidden
+            swShowHidden?.isChecked = DataManager.noteShowHidden
+            DataManager.saveData(this)
+            updateDisplayList()
+            noteAdapter.updateNotes(displayNotes)
         }
 
         itemTemplates.setOnClickListener { showTemplateEditorDialog() }

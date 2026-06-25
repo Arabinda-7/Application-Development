@@ -15,5 +15,6 @@ data class Habit(
     var repeatCount: Int = 1,
     val timestamp: Long = System.currentTimeMillis(),
     var isExpanded: Boolean = false,
+    var isSelected: Boolean = false,
     var completedDates: MutableList<String> = mutableListOf()
 )

@@ -3,9 +3,9 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:id="@+id/card_view"
     android:layout_width="match_parent"
-    android:layout_height="210dp"
-    android:layout_margin="8dp"
-    app:cardCornerRadius="32dp"
+    android:layout_height="180dp"
+    android:layout_margin="10dp"
+    app:cardCornerRadius="40dp"
     app:cardElevation="0dp"
     app:strokeWidth="0dp"
     app:cardBackgroundColor="#222222">

@@ -20,6 +20,7 @@ import android.widget.RadioButton
 import android.widget.RadioGroup
 import android.widget.TextView
 import androidx.appcompat.app.AppCompatActivity
+import androidx.appcompat.widget.SwitchCompat
 import androidx.core.content.ContextCompat
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
@@ -36,7 +37,7 @@ class HabitTrackerActivity : AppCompatActivity() {
     private lateinit var sectionProgressBar: android.widget.ProgressBar
     private lateinit var sectionProgressText: TextView
     private var selectedTimeFilter: String = "All"
-    private var selectedDateString: String = SimpleDateFormat("yyyyMMdd", Locale.getDefault()).format(Date())
+    private var selectedDateString: String = DataManager.getTrackingDateString()
     
     private var currentGridCalendar = Calendar.getInstance()
 
@@ -46,7 +47,7 @@ class HabitTrackerActivity : AppCompatActivity() {
 
         val dateTextView = findViewById<TextView>(R.id.tv_date)
         val sdf = SimpleDateFormat("MMM dd", Locale.getDefault())
-        dateTextView.text = sdf.format(Date())
+        dateTextView.text = sdf.format(DataManager.getTrackingCalendar().time)
 
         val habitList = findViewById<RecyclerView>(R.id.habit_list)
         habitList.layoutManager = LinearLayoutManager(this)
@@ -69,6 +70,13 @@ class HabitTrackerActivity : AppCompatActivity() {
         setupCalendarViewPager()
         updateSectionProgress()
 
+        // Apply Default Startup Tab
+        if (DataManager.habitDefaultTab == "HISTORY") {
+            findViewById<View>(R.id.today_layout).visibility = View.GONE
+            findViewById<View>(R.id.history_layout).visibility = View.VISIBLE
+            updateNavUI("HISTORY")
+        }
+
         findViewById<View>(R.id.btn_back).setOnClickListener { finish() }
 
         findViewById<View>(R.id.btn_habit_settings).setOnClickListener {
@@ -77,7 +85,27 @@ class HabitTrackerActivity : AppCompatActivity() {
             val popupWindow = PopupWindow(menuView, ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT, true)
             popupWindow.elevation = 10f
 
+            // Toggle Show/Hide Completed
+            val menuToggle = menuView.findViewById<View>(R.id.menu_toggle_completed)
+            val tvToggle = menuView.findViewById<TextView>(R.id.tv_toggle_completed)
+            val ivToggle = menuView.findViewById<ImageView>(R.id.iv_toggle_completed)
+            
+            menuToggle.visibility = View.VISIBLE
+            tvToggle.text = if (DataManager.habitShowCompleted) "HIDE COMPLETED" else "SHOW COMPLETED"
+            ivToggle.setImageResource(if (DataManager.habitShowCompleted) android.R.drawable.ic_menu_view else android.R.drawable.ic_partial_secure)
+
+            menuToggle.setOnClickListener {
+                DataManager.habitShowCompleted = !DataManager.habitShowCompleted
+                habitAdapter.setShowCompleted(DataManager.habitShowCompleted)
+                DataManager.saveData(this)
+                popupWindow.dismiss()
+            }
+
+            // Hide task-specific items
+            menuView.findViewById<View>(R.id.menu_clear_completed).visibility = View.GONE
+
             menuView.findViewById<View>(R.id.menu_activity_settings).setOnClickListener {
+                showHabitSettingsDialog()
                 popupWindow.dismiss()
             }
 
@@ -315,7 +343,7 @@ class HabitTrackerActivity : AppCompatActivity() {
 
         val nameInput = dialog.findViewById<EditText>(R.id.habit_name_input)
         val btnClose = dialog.findViewById<View>(R.id.btn_close)
-        val btnSave = dialog.findViewById<View>(R.id.btn_save)
+        val btnSave = dialog.findViewById<TextView>(R.id.btn_save)
         val iconPreview = dialog.findViewById<ImageView>(R.id.icon_preview)
         val colorPreview = dialog.findViewById<View>(R.id.color_preview)
         val cardRepeat = dialog.findViewById<View>(R.id.card_repeat)
@@ -342,6 +370,7 @@ class HabitTrackerActivity : AppCompatActivity() {
 
         if (existingHabit != null) {
             nameInput.setText(existingHabit.name)
+            btnSave.text = "Save"
             when (existingHabit.frequency) {
                 "Morning" -> updateRadioSelection(frequencyRadios, radioMorning)
                 "Afternoon" -> updateRadioSelection(frequencyRadios, radioAfternoon)
@@ -475,5 +504,180 @@ class HabitTrackerActivity : AppCompatActivity() {
     private fun updateRadioSelection(list: List<RadioButton>, selected: RadioButton) {
         list.forEach { it.isChecked = false }
         selected.isChecked = true
+    }
+
+    private fun showHabitSettingsDialog() {
+        val dialog = Dialog(this)
+        val view = layoutInflater.inflate(R.layout.dialog_habit_settings, null)
+        dialog.setContentView(view)
+        dialog.window?.setBackgroundDrawableResource(android.R.color.transparent)
+        dialog.window?.setLayout(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT)
+
+        val itemDefaultTab = view.findViewById<View>(R.id.item_default_tab)
+        val tvDefaultSummary = view.findViewById<TextView>(R.id.tv_default_tab_summary)
+        val itemSort = view.findViewById<View>(R.id.item_sort_order)
+        val tvSortSummary = view.findViewById<TextView>(R.id.tv_sort_summary)
+        val itemVacation = view.findViewById<View>(R.id.item_vacation_mode)
+        val swVacation = view.findViewById<SwitchCompat>(R.id.iv_vacation_check)
+        val itemSound = view.findViewById<View>(R.id.item_sound)
+        val swSound = view.findViewById<SwitchCompat>(R.id.iv_sound_check)
+        val itemHaptics = view.findViewById<View>(R.id.item_haptics)
+        val swHaptics = view.findViewById<SwitchCompat>(R.id.iv_haptics_check)
+        val itemDayReset = view.findViewById<View>(R.id.item_day_reset)
+        val tvDayReset = view.findViewById<TextView>(R.id.tv_day_reset_summary)
+        val itemBulk = view.findViewById<View>(R.id.item_bulk_mode)
+        val swBulk = view.findViewById<SwitchCompat>(R.id.iv_bulk_check)
+        val itemGrace = view.findViewById<View>(R.id.item_grace_period)
+        val tvGrace = view.findViewById<TextView>(R.id.tv_grace_summary)
+        val btnClose = view.findViewById<View>(R.id.btn_close_settings)
+
+        // Behavioral Insights Button (NEW - moved from home page)
+        val btnInsights = TextView(this).apply {
+            text = "VIEW BEHAVIORAL INSIGHTS"
+            setTextColor(ContextCompat.getColor(this@HabitTrackerActivity, R.color.chip_selected))
+            textSize = 12f
+            setPadding(0, 20, 0, 20)
+            gravity = Gravity.CENTER
+            setOnClickListener {
+                showBehavioralInsightsDialog()
+            }
+        }
+        view.findViewById<LinearLayout>(R.id.container_settings_items).addView(btnInsights, 0)
+
+        // Initial State
+        tvDefaultSummary.text = "Current: ${DataManager.habitDefaultTab}"
+        tvSortSummary.text = "Current: ${DataManager.habitSortOrder}"
+        swVacation.isChecked = DataManager.habitVacationMode
+        swSound.isChecked = DataManager.habitCompletionSound
+        swHaptics.isChecked = DataManager.habitCompletionHaptics
+        swBulk.isChecked = DataManager.habitBulkMode
+        tvGrace.text = "Allowed misses: ${DataManager.habitGraceDaysAllowed} days"
+        
+        fun updateResetSummary() {
+            val hour = DataManager.habitDayResetHour
+            val amPm = if (hour < 12) "AM" else "PM"
+            val displayHour = if (hour == 0) 12 else if (hour > 12) hour - 12 else hour
+            tvDayReset.text = "Ends at: $displayHour:00 $amPm"
+        }
+        updateResetSummary()
+
+        itemDefaultTab.setOnClickListener {
+            DataManager.habitDefaultTab = if (DataManager.habitDefaultTab == "TODAY") "HISTORY" else "TODAY"
+            tvDefaultSummary.text = "Current: ${DataManager.habitDefaultTab}"
+            DataManager.saveData(this)
+        }
+
+        itemSort.setOnClickListener {
+            DataManager.habitSortOrder = if (DataManager.habitSortOrder == "Time") "Streak" else "Time"
+            tvSortSummary.text = "Current: ${DataManager.habitSortOrder}"
+            DataManager.saveData(this)
+            applyFilters() // Refresh list with new sort
+        }
+
+        itemVacation.setOnClickListener {
+            DataManager.habitVacationMode = !DataManager.habitVacationMode
+            swVacation.isChecked = DataManager.habitVacationMode
+            DataManager.saveData(this)
+        }
+
+        itemSound.setOnClickListener {
+            DataManager.habitCompletionSound = !DataManager.habitCompletionSound
+            swSound.isChecked = DataManager.habitCompletionSound
+            DataManager.saveData(this)
+        }
+
+        itemHaptics.setOnClickListener {
+            DataManager.habitCompletionHaptics = !DataManager.habitCompletionHaptics
+            swHaptics.isChecked = DataManager.habitCompletionHaptics
+            DataManager.saveData(this)
+        }
+
+        itemDayReset.setOnClickListener {
+            val options = listOf(0, 1, 2, 3, 4) // 12 AM to 4 AM
+            val current = DataManager.habitDayResetHour
+            val next = options[(options.indexOf(current).coerceAtLeast(0) + 1) % options.size]
+            DataManager.habitDayResetHour = next
+            DataManager.saveData(this)
+            updateResetSummary()
+            
+            // Update the main date display
+            val dateTextViewMain = findViewById<TextView>(R.id.tv_date)
+            val sdfMain = SimpleDateFormat("MMM dd", Locale.getDefault())
+            dateTextViewMain.text = sdfMain.format(DataManager.getTrackingCalendar().time)
+            
+            selectedDateString = DataManager.getTrackingDateString()
+            applyFilters()
+        }
+
+        itemBulk.setOnClickListener {
+            DataManager.habitBulkMode = !DataManager.habitBulkMode
+            swBulk.isChecked = DataManager.habitBulkMode
+            DataManager.saveData(this)
+            // Just update adapter state, no bar in UI anymore as requested
+            habitAdapter.setBulkMode(DataManager.habitBulkMode)
+        }
+
+        itemGrace.setOnClickListener {
+            val options = listOf(0, 1, 2, 3)
+            val next = options[(options.indexOf(DataManager.habitGraceDaysAllowed).coerceAtLeast(0) + 1) % options.size]
+            DataManager.habitGraceDaysAllowed = next
+            DataManager.saveData(this)
+            tvGrace.text = "Allowed misses: $next days"
+            updateHistoryUI() // Streaks might change
+        }
+
+        btnClose.setOnClickListener { dialog.dismiss() }
+        dialog.show()
+    }
+
+    private fun showBehavioralInsightsDialog() {
+        val dialog = Dialog(this)
+        dialog.setContentView(R.layout.dialog_set_budget) // Re-use simple dialog structure
+        dialog.window?.setBackgroundDrawableResource(android.R.color.transparent)
+        dialog.window?.setLayout(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT)
+
+        val title = dialog.findViewById<TextView>(R.id.tv_dialog_title)
+        val etInput = dialog.findViewById<View>(R.id.et_budget_amount)
+        val subtext = dialog.findViewById<TextView>(R.id.tv_dialog_subtext)
+        val btnSave = dialog.findViewById<View>(R.id.btn_save_budget)
+
+        title.text = "BEHAVIORAL INSIGHTS"
+        etInput.visibility = View.GONE
+        
+        val stats = DataManager.getHabitPerformanceByFrequency()
+        val peak = stats.maxByOrNull { it.value }
+        
+        if (peak == null || peak.value <= 0) {
+            subtext.text = "Not enough data yet. Keep tracking your habits to see your peak performance times!"
+        } else {
+            val sb = StringBuilder()
+            sb.append("Your Peak Performance Time: ${peak.key.uppercase()}\n\n")
+            stats.forEach { (freq, score) ->
+                if (score >= 0) {
+                    sb.append("$freq Habits: $score% Completion\n")
+                }
+            }
+            subtext.text = sb.toString()
+        }
+        
+        (btnSave as? TextView)?.text = "CLOSE"
+        btnSave.setOnClickListener { dialog.dismiss() }
+        dialog.show()
+    }
+
+    override fun onResume() {
+        super.onResume()
+        // Ensure sorting is applied if it changed in settings
+        applyFilters()
+    }
+
+    private fun updateNavUI(active: String) {
+        val todayColor = if (active == "TODAY") ContextCompat.getColor(this, R.color.chip_selected) else ContextCompat.getColor(this, R.color.text_secondary)
+        val historyColor = if (active == "HISTORY") ContextCompat.getColor(this, R.color.chip_selected) else ContextCompat.getColor(this, R.color.text_secondary)
+        
+        findViewById<ImageView>(R.id.iv_today).setColorFilter(todayColor)
+        findViewById<TextView>(R.id.tv_today_nav).setTextColor(todayColor)
+        findViewById<ImageView>(R.id.iv_history).setColorFilter(historyColor)
+        findViewById<TextView>(R.id.tv_history_nav).setTextColor(historyColor)
     }
 }
