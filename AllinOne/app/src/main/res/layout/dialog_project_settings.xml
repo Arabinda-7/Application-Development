@@ -182,45 +182,6 @@
                 android:focusable="false" />
         </LinearLayout>
 
-        <!-- Enable Tree -->
-        <LinearLayout
-            android:id="@+id/item_enable_tree"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:background="?attr/selectableItemBackground"
-            android:clickable="true"
-            android:focusable="true"
-            android:gravity="center_vertical"
-            android:orientation="horizontal"
-            android:paddingVertical="6dp">
-            <LinearLayout
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:layout_weight="1"
-                android:orientation="vertical">
-                <TextView
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="Enable Tree Section"
-                    android:textColor="@color/white"
-                    android:textSize="14sp"
-                    android:textStyle="bold" />
-                <TextView
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="Show Nexus hierarchical architect tool"
-                    android:textColor="@color/text_secondary"
-                    android:textSize="11sp" />
-            </LinearLayout>
-            <androidx.appcompat.widget.SwitchCompat
-                android:id="@+id/sw_enable_tree"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                app:thumbTint="@color/chip_selected"
-                android:clickable="false"
-                android:focusable="false" />
-        </LinearLayout>
-
     </LinearLayout>
 
     <TextView

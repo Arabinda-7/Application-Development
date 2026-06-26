@@ -62,7 +62,9 @@ object DataManager {
     var projectSynergySync: Boolean = false
     var projectDeadlineAlerts: Boolean = true
     var projectAnalyticsEnabled: Boolean = false
-    var projectTreeViewEnabled: Boolean = true
+    var isAppLockEnabled: Boolean = false
+    var isOledThemeEnabled: Boolean = false
+
     var projectTemplates: MutableMap<String, List<String>> = mutableMapOf(
         "App Feature" to listOf("UI Design", "Business Logic", "Integration", "Testing", "Deployment"),
         "Personal Goal" to listOf("Planning", "Execution", "Review"),
@@ -107,7 +109,8 @@ object DataManager {
     private const val KEY_PROJ_SYNC = "project_synergy_sync"
     private const val KEY_PROJ_ALERTS = "project_deadline_alerts"
     private const val KEY_PROJ_ANALYTICS = "project_analytics_enabled"
-    private const val KEY_PROJ_TREE_VISIBLE = "project_tree_view_enabled"
+    private const val KEY_APP_LOCK = "app_lock_enabled"
+    private const val KEY_OLED_THEME = "oled_theme_enabled"
     private const val KEY_PROJ_TEMPLATES = "project_templates_data"
     private const val KEY_PROJECT_AUTO_SYNC = "project_auto_task_sync"
     private const val KEY_PROJECT_AUTO_ARCHIVE = "project_auto_archive"
@@ -166,7 +169,8 @@ object DataManager {
             putBoolean(KEY_PROJ_SYNC, projectSynergySync)
             putBoolean(KEY_PROJ_ALERTS, projectDeadlineAlerts)
             putBoolean(KEY_PROJ_ANALYTICS, projectAnalyticsEnabled)
-            putBoolean(KEY_PROJ_TREE_VISIBLE, projectTreeViewEnabled)
+            putBoolean(KEY_APP_LOCK, isAppLockEnabled)
+            putBoolean(KEY_OLED_THEME, isOledThemeEnabled)
             putString(KEY_PROJ_TEMPLATES, gson.toJson(projectTemplates))
             putString(KEY_HABIT_DEFAULT_TAB, habitDefaultTab)
             putBoolean(KEY_HABIT_VACATION_MODE, habitVacationMode)
@@ -226,7 +230,7 @@ object DataManager {
         prefs.getString(KEY_NOTES, null)?.let {
             val type = object : TypeToken<MutableList<Note>>() {}.type
             notes = gson.fromJson(it, type) ?: mutableListOf()
-            // Sanitize for new fields and recursive tree structure
+            // Sanitize for new fields
             notes.forEach { note ->
                 if (note.status == null) note.status = "Not Started"
                 if (note.category == null) note.category = "Notes"
@@ -297,7 +301,8 @@ object DataManager {
         projectSynergySync = prefs.getBoolean(KEY_PROJ_SYNC, false)
         projectDeadlineAlerts = prefs.getBoolean(KEY_PROJ_ALERTS, true)
         projectAnalyticsEnabled = prefs.getBoolean(KEY_PROJ_ANALYTICS, false)
-        projectTreeViewEnabled = prefs.getBoolean(KEY_PROJ_TREE_VISIBLE, true)
+        isAppLockEnabled = prefs.getBoolean(KEY_APP_LOCK, false)
+        isOledThemeEnabled = prefs.getBoolean(KEY_OLED_THEME, false)
         prefs.getString(KEY_PROJ_TEMPLATES, null)?.let {
             val type = object : TypeToken<MutableMap<String, List<String>>>() {}.type
             projectTemplates = gson.fromJson(it, type) ?: projectTemplates
@@ -615,7 +620,12 @@ object DataManager {
     }
 
     private fun sanitizeProjectFeatures(features: MutableList<ProjectFeature>) {
+        if (features == null) return // Extreme safety
+        
         features.forEach { feature ->
+            @Suppress("SENSELESS_COMPARISON")
+            if (feature == null) return@forEach
+
             @Suppress("SENSELESS_COMPARISON")
             if (feature.name == null) feature.name = "New Node"
             @Suppress("SENSELESS_COMPARISON")
@@ -645,7 +655,9 @@ object DataManager {
                 } catch (e: Exception) {}
             }
 
-            feature.subFeatures?.let { sanitizeProjectFeatures(it) }
+            if (feature.subFeatures != null) {
+                sanitizeProjectFeatures(feature.subFeatures)
+            }
         }
     }
 

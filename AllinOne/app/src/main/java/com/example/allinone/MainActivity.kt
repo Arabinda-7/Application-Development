@@ -1,20 +1,10 @@
 package com.example.allinone
 
 import android.content.Intent
-import android.net.Uri
 import android.os.Bundle
-import android.view.LayoutInflater
-import android.view.View
-import android.view.ViewGroup
-import android.widget.ImageButton
-import android.widget.PopupWindow
-import android.widget.ProgressBar
-import android.widget.TextView
 import android.widget.Toast
 import androidx.activity.compose.setContent
 import androidx.appcompat.app.AppCompatActivity
-import androidx.compose.runtime.collectAsState
-import androidx.compose.runtime.getValue
 import androidx.lifecycle.lifecycleScope
 import kotlinx.coroutines.launch
 import java.text.SimpleDateFormat
@@ -25,10 +15,10 @@ class MainActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         
-        // Load data from persistent storage
-        DataManager.loadData(this)
-
-        val aiChatbot = AIChatbot("YOUR_GEMINI_API_KEY") // Replace with actual key
+        // Background Data Loading to prevent ANR
+        lifecycleScope.launch {
+            DataManager.loadData(this@MainActivity)
+        }
 
         setContent {
             val state = DashboardState(
@@ -45,18 +35,7 @@ class MainActivity : AppCompatActivity() {
                 onNavigateToNotes = { startActivity(Intent(this, NotesActivity::class.java)) },
                 onNavigateToProjects = { startActivity(Intent(this, ProjectActivity::class.java)) },
                 onNavigateToFinance = { startActivity(Intent(this, FinanceActivity::class.java)) },
-                onNavigateToSettings = { startActivity(Intent(this, SettingsActivity::class.java)) },
-                onSendMessage = { command ->
-                    lifecycleScope.launch {
-                        val result = aiChatbot.processCommand(command)
-                        if (result != null) {
-                            Toast.makeText(this@MainActivity, "AI Processed: $result", Toast.LENGTH_LONG).show()
-                            // Further logic to parse JSON and update DataManager
-                        } else {
-                            Toast.makeText(this@MainActivity, "AI failed to process", Toast.LENGTH_SHORT).show()
-                        }
-                    }
-                }
+                onNavigateToSettings = { startActivity(Intent(this, SettingsActivity::class.java)) }
             )
         }
     }

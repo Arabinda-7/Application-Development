@@ -29,11 +29,8 @@ fun HomeScreen(
     onNavigateToNotes: () -> Unit,
     onNavigateToProjects: () -> Unit,
     onNavigateToFinance: () -> Unit,
-    onNavigateToSettings: () -> Unit,
-    onSendMessage: (String) -> Unit
+    onNavigateToSettings: () -> Unit
 ) {
-    var aiText by remember { mutableStateOf("") }
-
     Column(
         modifier = Modifier
             .fillMaxSize()
@@ -90,7 +87,7 @@ fun HomeScreen(
                     DashboardCard(
                         title = "Habit Tracker",
                         subtitle = "${state.habitProgress}%",
-                        icon = Icons.Default.Check,
+                        iconRes = R.drawable.ic_habit_tracker,
                         backgroundColor = Color(0xFFFF7A59),
                         onClick = onNavigateToHabits
                     )
@@ -99,7 +96,7 @@ fun HomeScreen(
                     DashboardCard(
                         title = "Workout Routine",
                         subtitle = "${state.workoutProgress}%",
-                        icon = Icons.Default.FitnessCenter,
+                        iconRes = R.drawable.ic_fitness,
                         backgroundColor = Color(0xFFFFB800),
                         onClick = onNavigateToWorkout
                     )
@@ -107,7 +104,7 @@ fun HomeScreen(
                 item {
                     DashboardCard(
                         title = "Tasks",
-                        icon = Icons.AutoMirrored.Filled.List,
+                        iconRes = R.drawable.ic_todo_list,
                         backgroundColor = Color(0xFF2EC4B6),
                         onClick = onNavigateToTodos
                     )
@@ -115,7 +112,7 @@ fun HomeScreen(
                 item {
                     DashboardCard(
                         title = "Notes",
-                        icon = Icons.Default.EditNote,
+                        iconRes = R.drawable.ic_notes,
                         backgroundColor = Color(0xFF3A86F0),
                         onClick = onNavigateToNotes
                     )
@@ -123,7 +120,7 @@ fun HomeScreen(
                 item {
                     DashboardCard(
                         title = "Project",
-                        icon = Icons.Default.RocketLaunch,
+                        iconRes = R.drawable.ic_project,
                         backgroundColor = Color(0xFF1A73E8),
                         onClick = onNavigateToProjects
                     )
@@ -131,57 +128,9 @@ fun HomeScreen(
                 item {
                     DashboardCard(
                         title = "Finance",
-                        icon = Icons.Default.AccountBalance,
+                        iconRes = R.drawable.ic_finance,
                         backgroundColor = Color(0xFF1A73E8),
                         onClick = onNavigateToFinance
-                    )
-                }
-            }
-        }
-
-        // AI Command Input
-        Surface(
-            color = Color.White.copy(alpha = 0.05f),
-            modifier = Modifier.fillMaxWidth()
-        ) {
-            Row(
-                modifier = Modifier
-                    .padding(16.dp)
-                    .fillMaxWidth(),
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                TextField(
-                    value = aiText,
-                    onValueChange = { aiText = it },
-                    placeholder = { Text("Ask AI (e.g. 'Spent $12 on lunch')", color = Color.Gray) },
-                    modifier = Modifier
-                        .weight(1f)
-                        .background(Color(0xFF2C2C2C), RoundedCornerShape(12.dp)),
-                    colors = TextFieldDefaults.colors(
-                        focusedContainerColor = Color.Transparent,
-                        unfocusedContainerColor = Color.Transparent,
-                        disabledContainerColor = Color.Transparent,
-                        focusedIndicatorColor = Color.Transparent,
-                        unfocusedIndicatorColor = Color.Transparent,
-                        focusedTextColor = Color.White,
-                        unfocusedTextColor = Color.White
-                    )
-                )
-                Spacer(modifier = Modifier.width(8.dp))
-                IconButton(
-                    onClick = {
-                        if (aiText.isNotEmpty()) {
-                            onSendMessage(aiText)
-                            aiText = ""
-                        }
-                    },
-                    modifier = Modifier
-                        .background(Color(0xFF1A73E8), RoundedCornerShape(12.dp))
-                ) {
-                    Icon(
-                        imageVector = Icons.AutoMirrored.Filled.Send,
-                        contentDescription = "Send",
-                        tint = Color.White
                     )
                 }
             }
@@ -192,7 +141,7 @@ fun HomeScreen(
 @Composable
 fun DashboardCard(
     title: String,
-    icon: ImageVector,
+    iconRes: Int,
     backgroundColor: Color,
     onClick: () -> Unit,
     subtitle: String? = null
@@ -212,11 +161,11 @@ fun DashboardCard(
             horizontalAlignment = Alignment.CenterHorizontally,
             verticalArrangement = Arrangement.Center
         ) {
-            Icon(
-                imageVector = icon,
+            androidx.compose.foundation.Image(
+                painter = androidx.compose.ui.res.painterResource(id = iconRes),
                 contentDescription = title,
-                tint = Color.White,
-                modifier = Modifier.size(48.dp)
+                modifier = Modifier.size(48.dp),
+                colorFilter = androidx.compose.ui.graphics.ColorFilter.tint(Color.White)
             )
             Spacer(modifier = Modifier.height(12.dp))
             Text(

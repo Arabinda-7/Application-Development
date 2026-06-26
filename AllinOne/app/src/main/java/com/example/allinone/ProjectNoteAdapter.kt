@@ -33,7 +33,7 @@ class ProjectNoteAdapter(
 
         holder.title.text = note.title
         holder.content.text = note.content
-        
+
         // Visual Completion Feedback
         if (isCompleted) {
             holder.title.paintFlags = holder.title.paintFlags or Paint.STRIKE_THRU_TEXT_FLAG
@@ -45,7 +45,7 @@ class ProjectNoteAdapter(
             holder.card.alpha = 1.0f
             holder.card.strokeWidth = 0
         }
-        
+
         // Deadline/Date
         val sdf = SimpleDateFormat("MMM dd, yyyy", Locale.getDefault())
         if (note.deadline != null) {
@@ -70,7 +70,7 @@ class ProjectNoteAdapter(
 
         // Pin
         holder.ivPin.visibility = if (note.isPinned) View.VISIBLE else View.GONE
-        
+
         // Completion Check
         holder.ivCompletedCheck.visibility = if (note.status == "Completed") View.VISIBLE else View.GONE
 
@@ -97,7 +97,7 @@ class ProjectNoteAdapter(
             "On Hold" -> Color.parseColor("#FF7A59")
             else -> Color.GRAY
         }
-        holder.statusBadge.backgroundTintList = ColorStateList.valueOf(statusColor.apply { 
+        holder.statusBadge.backgroundTintList = ColorStateList.valueOf(statusColor.apply {
             // Add transparency for badge background if needed, but here we just use the color
         }).withAlpha(60)
         holder.statusBadge.setTextColor(statusColor)

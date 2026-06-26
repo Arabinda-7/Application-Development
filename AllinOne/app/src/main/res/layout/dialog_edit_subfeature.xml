@@ -1,129 +1,153 @@
 <?xml version="1.0" encoding="utf-8"?>
-<com.google.android.material.card.MaterialCardView xmlns:android="http://schemas.android.com/apk/res/android"
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:layout_margin="24dp"
-    app:cardBackgroundColor="#1A1A1A"
-    app:cardCornerRadius="28dp"
-    app:cardElevation="0dp"
-    app:strokeWidth="1dp"
-    app:strokeColor="#33FFFFFF">
+    android:layout_marginHorizontal="20dp"
+    android:background="@drawable/bg_dialog_rounded"
+    android:padding="20dp">
 
-    <LinearLayout
+    <ImageView
+        android:id="@+id/btn_close_subfeature"
+        android:layout_width="24dp"
+        android:layout_height="24dp"
+        android:src="@android:drawable/ic_menu_close_clear_cancel"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:tint="@color/white"
+        android:contentDescription="Close"
+        android:clickable="true"
+        android:focusable="true"
+        android:background="?attr/selectableItemBackgroundBorderless" />
+
+    <TextView
+        android:id="@+id/tv_dialog_title"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="16dp"
+        android:text="Edit Sub-feature"
+        android:textColor="@color/white"
+        android:textSize="18sp"
+        android:textStyle="bold"
+        app:layout_constraintBottom_toBottomOf="@id/btn_close_subfeature"
+        app:layout_constraintStart_toEndOf="@id/btn_close_subfeature"
+        app:layout_constraintTop_toTopOf="@id/btn_close_subfeature" />
+
+    <EditText
+        android:id="@+id/et_serial_input"
+        android:layout_width="match_parent"
+        android:layout_height="80dp"
+        android:layout_marginTop="24dp"
+        android:background="@drawable/bg_finance_input"
+        android:gravity="center"
+        android:hint="0"
+        android:inputType="number"
+        android:textColor="@color/white"
+        android:textColorHint="#40FFFFFF"
+        android:textSize="32sp"
+        android:textStyle="bold"
+        android:paddingHorizontal="16dp"
+        app:layout_constraintTop_toBottomOf="@id/tv_dialog_title" />
+
+    <TextView
+        android:id="@+id/tv_difficulty_label"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="20dp"
+        android:text="DIFFICULTY"
+        android:textColor="@color/white"
+        android:textSize="12sp"
+        android:textStyle="bold"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/et_serial_input" />
+
+    <RadioGroup
+        android:id="@+id/rg_difficulty"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:orientation="vertical"
-        android:padding="24dp">
+        android:layout_marginTop="12dp"
+        android:orientation="horizontal"
+        app:layout_constraintTop_toBottomOf="@id/tv_difficulty_label">
+        <androidx.appcompat.widget.AppCompatRadioButton
+            android:id="@+id/rb_diff_low"
+            android:layout_width="0dp"
+            android:layout_height="56dp"
+            android:layout_weight="1"
+            android:layout_marginEnd="4dp"
+            android:background="@drawable/mock_chip_bg_selected"
+            android:button="@null"
+            android:gravity="center"
+            android:text="Low"
+            android:textStyle="bold"
+            android:textColor="@color/white" />
+        <androidx.appcompat.widget.AppCompatRadioButton
+            android:id="@+id/rb_diff_med"
+            android:layout_width="0dp"
+            android:layout_height="56dp"
+            android:layout_weight="1"
+            android:layout_marginHorizontal="4dp"
+            android:background="@drawable/mock_chip_bg_selected"
+            android:button="@null"
+            android:gravity="center"
+            android:text="Med"
+            android:textStyle="bold"
+            android:textColor="@color/white" />
+        <androidx.appcompat.widget.AppCompatRadioButton
+            android:id="@+id/rb_diff_high"
+            android:layout_width="0dp"
+            android:layout_height="56dp"
+            android:layout_weight="1"
+            android:layout_marginStart="4dp"
+            android:background="@drawable/mock_chip_bg_selected"
+            android:button="@null"
+            android:gravity="center"
+            android:text="High"
+            android:textStyle="bold"
+            android:textColor="@color/white" />
+    </RadioGroup>
 
-        <LinearLayout
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:orientation="horizontal"
-            android:gravity="center_vertical">
+    <TextView
+        android:id="@+id/tv_notes_label"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="20dp"
+        android:text="TECHNICAL NOTES"
+        android:textColor="@color/white"
+        android:textSize="12sp"
+        android:textStyle="bold"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/rg_difficulty" />
 
-            <TextView
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:layout_weight="1"
-                android:text="EDIT SUB-FEATURE"
-                android:textColor="@color/white"
-                android:textSize="18sp"
-                android:textStyle="bold" />
+    <EditText
+        android:id="@+id/et_details_input"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="8dp"
+        android:background="@drawable/bg_finance_input"
+        android:hint="Implementation details..."
+        android:textColor="@color/white"
+        android:textColorHint="#40FFFFFF"
+        android:textSize="16sp"
+        android:padding="16dp"
+        android:gravity="top"
+        android:minLines="3"
+        android:inputType="textMultiLine"
+        app:layout_constraintTop_toBottomOf="@id/tv_notes_label" />
 
-            <TextView
-                android:id="@+id/btn_save_subfeature"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="SAVE"
-                android:textColor="#1A73E8"
-                android:textSize="16sp"
-                android:textStyle="bold"
-                android:padding="8dp"
-                android:clickable="true"
-                android:focusable="true"
-                android:background="?attr/selectableItemBackgroundBorderless" />
-        </LinearLayout>
+    <TextView
+        android:id="@+id/btn_save_subfeature"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="24dp"
+        android:text="SAVE"
+        android:textColor="#1A73E8"
+        android:textSize="16sp"
+        android:textStyle="bold"
+        android:clickable="true"
+        android:focusable="true"
+        android:padding="8dp"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/et_details_input" />
 
-        <!-- Serial Number Row -->
-        <LinearLayout
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="20dp"
-            android:orientation="horizontal"
-            android:gravity="center_vertical">
-
-            <TextView
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:layout_weight="1"
-                android:text="Sequence Number"
-                android:textColor="@color/text_secondary"
-                android:textSize="14sp" />
-
-            <EditText
-                android:id="@+id/et_serial_input"
-                android:layout_width="60dp"
-                android:layout_height="44dp"
-                android:background="@drawable/priority_chip_bg"
-                android:gravity="center"
-                android:inputType="number"
-                android:textColor="@color/white"
-                android:textSize="16sp"
-                android:textStyle="bold" />
-        </LinearLayout>
-
-        <!-- Difficulty Row -->
-        <LinearLayout
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="20dp"
-            android:orientation="horizontal"
-            android:gravity="center_vertical">
-
-            <TextView
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:layout_weight="1"
-                android:text="Difficulty / Weight"
-                android:textColor="@color/text_secondary"
-                android:textSize="14sp" />
-
-            <RadioGroup
-                android:id="@+id/rg_difficulty"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:orientation="horizontal">
-                <RadioButton android:id="@+id/rb_diff_low" android:layout_width="40dp" android:layout_height="32dp" android:text="L" android:button="@null" android:textColor="@color/white" android:gravity="center" android:background="@drawable/priority_chip_bg" android:layout_marginEnd="4dp" />
-                <RadioButton android:id="@+id/rb_diff_med" android:layout_width="40dp" android:layout_height="32dp" android:text="M" android:button="@null" android:textColor="@color/white" android:gravity="center" android:background="@drawable/priority_chip_bg" android:layout_marginEnd="4dp" />
-                <RadioButton android:id="@+id/rb_diff_high" android:layout_width="40dp" android:layout_height="32dp" android:text="H" android:button="@null" android:textColor="@color/white" android:gravity="center" android:background="@drawable/priority_chip_bg" />
-            </RadioGroup>
-        </LinearLayout>
-
-        <!-- Technical Notes Section -->
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="20dp"
-            android:text="Technical Notes"
-            android:textColor="@color/text_secondary"
-            android:textSize="14sp" />
-
-        <EditText
-            android:id="@+id/et_details_input"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="8dp"
-            android:background="@drawable/bg_dialog_rounded"
-            android:backgroundTint="#11FFFFFF"
-            android:gravity="top"
-            android:hint="Implementation details, code logic, etc..."
-            android:inputType="textMultiLine"
-            android:minLines="5"
-            android:padding="16dp"
-            android:textColor="@color/white"
-            android:textColorHint="#4DFFFFFF"
-            android:textSize="14sp" />
-
-    </LinearLayout>
-</com.google.android.material.card.MaterialCardView>
+</androidx.constraintlayout.widget.ConstraintLayout>
