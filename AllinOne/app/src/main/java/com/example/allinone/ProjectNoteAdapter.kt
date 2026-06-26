@@ -1,5 +1,6 @@
 package com.example.allinone
 
+import android.graphics.Paint
 import android.content.res.ColorStateList
 import android.graphics.Color
 import android.view.LayoutInflater
@@ -28,9 +29,22 @@ class ProjectNoteAdapter(
     override fun onBindViewHolder(holder: ProjectViewHolder, position: Int) {
         val note = notes[position]
         val context = holder.itemView.context
+        val isCompleted = note.status == "Completed"
 
         holder.title.text = note.title
         holder.content.text = note.content
+        
+        // Visual Completion Feedback
+        if (isCompleted) {
+            holder.title.paintFlags = holder.title.paintFlags or Paint.STRIKE_THRU_TEXT_FLAG
+            holder.card.alpha = 0.5f
+            holder.card.strokeWidth = 2
+            holder.card.strokeColor = Color.parseColor("#2EC4B6")
+        } else {
+            holder.title.paintFlags = holder.title.paintFlags and Paint.STRIKE_THRU_TEXT_FLAG.inv()
+            holder.card.alpha = 1.0f
+            holder.card.strokeWidth = 0
+        }
         
         // Deadline/Date
         val sdf = SimpleDateFormat("MMM dd, yyyy", Locale.getDefault())
@@ -56,6 +70,9 @@ class ProjectNoteAdapter(
 
         // Pin
         holder.ivPin.visibility = if (note.isPinned) View.VISIBLE else View.GONE
+        
+        // Completion Check
+        holder.ivCompletedCheck.visibility = if (note.status == "Completed") View.VISIBLE else View.GONE
 
         // Priority
         val priorityText = when (note.priority) {
@@ -86,14 +103,10 @@ class ProjectNoteAdapter(
         holder.statusBadge.setTextColor(statusColor)
 
         // Progress
-        if (note.status == "In Progress" || note.status == "Completed") {
-            holder.containerProgress.visibility = View.VISIBLE
-            holder.progressBar.progress = if (note.status == "Completed") 100 else note.progress
-            holder.tvProgressPercent.text = "${holder.progressBar.progress}%"
-            holder.progressBar.progressTintList = ColorStateList.valueOf(statusColor)
-        } else {
-            holder.containerProgress.visibility = View.GONE
-        }
+        holder.containerProgress.visibility = View.VISIBLE
+        holder.progressBar.progress = if (note.status == "Completed") 100 else note.progress
+        holder.tvProgressPercent.text = "${holder.progressBar.progress}%"
+        holder.progressBar.progressTintList = ColorStateList.valueOf(statusColor)
 
         holder.itemView.setOnClickListener {
             (context as? ProjectActivity)?.showProjectDetailsDialog(note)
@@ -123,6 +136,7 @@ class ProjectNoteAdapter(
         val date: TextView = itemView.findViewById(R.id.tv_note_date)
         val statusBadge: TextView = itemView.findViewById(R.id.tv_status_badge)
         val ivPin: ImageView = itemView.findViewById(R.id.iv_pin)
+        val ivCompletedCheck: ImageView = itemView.findViewById(R.id.iv_completed_check)
         val ivHistory: ImageView = itemView.findViewById(R.id.iv_history_icon)
         val tvPriorityBadge: TextView = itemView.findViewById(R.id.tv_priority_badge)
         val containerProgress: LinearLayout = itemView.findViewById(R.id.container_progress)

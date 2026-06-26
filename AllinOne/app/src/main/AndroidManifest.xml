@@ -45,6 +45,7 @@
         <activity android:name=".WorkoutDetailActivity"
             tools:ignore="MissingClass" />
         <activity android:name=".ProjectActivity" />
+        <activity android:name=".LedgerActivity" />
     </application>
 
 </manifest>

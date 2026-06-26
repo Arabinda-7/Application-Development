@@ -73,6 +73,33 @@
                 android:textStyle="bold" />
         </LinearLayout>
 
+        <!-- Difficulty Row -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="20dp"
+            android:orientation="horizontal"
+            android:gravity="center_vertical">
+
+            <TextView
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:text="Difficulty / Weight"
+                android:textColor="@color/text_secondary"
+                android:textSize="14sp" />
+
+            <RadioGroup
+                android:id="@+id/rg_difficulty"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal">
+                <RadioButton android:id="@+id/rb_diff_low" android:layout_width="40dp" android:layout_height="32dp" android:text="L" android:button="@null" android:textColor="@color/white" android:gravity="center" android:background="@drawable/priority_chip_bg" android:layout_marginEnd="4dp" />
+                <RadioButton android:id="@+id/rb_diff_med" android:layout_width="40dp" android:layout_height="32dp" android:text="M" android:button="@null" android:textColor="@color/white" android:gravity="center" android:background="@drawable/priority_chip_bg" android:layout_marginEnd="4dp" />
+                <RadioButton android:id="@+id/rb_diff_high" android:layout_width="40dp" android:layout_height="32dp" android:text="H" android:button="@null" android:textColor="@color/white" android:gravity="center" android:background="@drawable/priority_chip_bg" />
+            </RadioGroup>
+        </LinearLayout>
+
         <!-- Technical Notes Section -->
         <TextView
             android:layout_width="wrap_content"

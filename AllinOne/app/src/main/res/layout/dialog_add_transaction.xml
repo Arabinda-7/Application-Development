@@ -49,25 +49,49 @@
         android:paddingHorizontal="16dp"
         app:layout_constraintTop_toBottomOf="@id/tv_dialog_title" />
 
+    <TextView
+        android:id="@+id/tv_category_label"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="20dp"
+        android:text="CATEGORY"
+        android:textColor="@color/white"
+        android:textSize="12sp"
+        android:textStyle="bold"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/et_trans_amount" />
+
+    <com.google.android.material.chip.ChipGroup
+        android:id="@+id/cg_trans_category"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="8dp"
+        app:singleSelection="true"
+        app:chipSpacingHorizontal="8dp"
+        app:chipSpacingVertical="4dp"
+        app:layout_constraintTop_toBottomOf="@id/tv_category_label" />
+
     <EditText
-        android:id="@+id/et_trans_title"
+        android:id="@+id/et_trans_custom_category"
         android:layout_width="match_parent"
         android:layout_height="56dp"
-        android:layout_marginTop="16dp"
+        android:layout_marginTop="8dp"
         android:background="@drawable/bg_finance_input"
-        android:hint="Title (e.g. Salary, Grocery)"
+        android:hint="Enter specific reason..."
         android:textColor="@color/white"
         android:textColorHint="#40FFFFFF"
         android:textSize="16sp"
         android:paddingHorizontal="16dp"
-        app:layout_constraintTop_toBottomOf="@id/et_trans_amount" />
+        android:visibility="gone"
+        app:layout_constraintTop_toBottomOf="@id/cg_trans_category" />
 
     <View
         android:id="@+id/divider_trans"
         android:layout_width="match_parent"
         android:layout_height="1dp"
+        android:layout_marginTop="16dp"
         android:background="#33FFFFFF"
-        app:layout_constraintTop_toBottomOf="@id/et_trans_title" />
+        app:layout_constraintTop_toBottomOf="@id/et_trans_custom_category" />
 
     <LinearLayout
         android:id="@+id/container_date_time"
@@ -169,32 +193,12 @@
     </RadioGroup>
 
     <TextView
-        android:id="@+id/tv_category_label"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="20dp"
-        android:text="CATEGORY"
-        android:textColor="@color/white"
-        android:textSize="12sp"
-        android:textStyle="bold"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/rg_trans_type" />
-
-    <Spinner
-        android:id="@+id/spinner_trans_category"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="8dp"
-        android:backgroundTint="@color/white"
-        app:layout_constraintTop_toBottomOf="@id/tv_category_label" />
-
-    <TextView
         android:id="@+id/btn_save_trans"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginTop="24dp"
-        android:text="Done"
-        android:textColor="@color/white"
+        android:text="SAVE"
+        android:textColor="#1A73E8"
         android:textSize="16sp"
         android:textStyle="bold"
         android:clickable="true"
@@ -202,6 +206,6 @@
         android:padding="8dp"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/spinner_trans_category" />
+        app:layout_constraintTop_toBottomOf="@id/rg_trans_type" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>

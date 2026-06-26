@@ -22,7 +22,7 @@
         android:id="@+id/container_settings_items"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_marginTop="20dp"
+        android:layout_marginTop="12dp"
         android:orientation="vertical"
         app:layout_constraintTop_toBottomOf="@id/tv_settings_title">
 
@@ -35,7 +35,7 @@
             android:clickable="true"
             android:focusable="true"
             android:orientation="vertical"
-            android:paddingVertical="12dp">
+            android:paddingVertical="6dp">
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
@@ -61,7 +61,7 @@
             android:clickable="true"
             android:focusable="true"
             android:orientation="vertical"
-            android:paddingVertical="12dp">
+            android:paddingVertical="6dp">
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
@@ -87,7 +87,7 @@
             android:clickable="true"
             android:focusable="true"
             android:orientation="vertical"
-            android:paddingVertical="12dp">
+            android:paddingVertical="6dp">
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"

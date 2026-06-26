@@ -1,0 +1,106 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:orientation="horizontal"
+    android:gravity="center_vertical"
+    android:paddingVertical="4dp"
+    android:paddingHorizontal="16dp">
+
+    <!-- Branch Line (for depth visualization) -->
+    <View
+        android:id="@+id/branch_line"
+        android:layout_width="2dp"
+        android:layout_height="32dp"
+        android:background="#33FFFFFF"
+        android:layout_marginEnd="8dp" />
+
+    <ImageView
+        android:id="@+id/iv_node_expand"
+        android:layout_width="24dp"
+        android:layout_height="24dp"
+        android:src="@android:drawable/arrow_down_float"
+        app:tint="@color/text_secondary"
+        android:padding="4dp" />
+
+    <LinearLayout
+        android:id="@+id/node_content_container"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_weight="1"
+        android:orientation="vertical"
+        android:background="@drawable/bg_dialog_rounded"
+        android:backgroundTint="#1AFFFFFF"
+        android:padding="12dp"
+        android:layout_marginStart="4dp">
+
+        <TextView
+            android:id="@+id/tv_node_path"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="ROOT > SUB"
+            android:textColor="#80FFFFFF"
+            android:textSize="8sp"
+            android:textStyle="bold" />
+
+        <TextView
+            android:id="@+id/tv_node_name"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="2dp"
+            android:text="Node Name"
+            android:textColor="@color/white"
+            android:textSize="14sp"
+            android:textStyle="bold" />
+
+        <LinearLayout
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="6dp"
+            android:orientation="horizontal">
+
+            <TextView
+                android:id="@+id/tag_resource"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:background="@drawable/priority_chip_bg"
+                android:backgroundTint="#1A73E8"
+                android:paddingHorizontal="6dp"
+                android:paddingVertical="2dp"
+                android:text="RESOURCE"
+                android:textColor="@color/white"
+                android:textSize="8sp"
+                android:textStyle="bold"
+                android:visibility="gone" />
+
+            <TextView
+                android:id="@+id/tag_blocked"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="6dp"
+                android:background="@drawable/priority_chip_bg"
+                android:backgroundTint="#FF5252"
+                android:paddingHorizontal="6dp"
+                android:paddingVertical="2dp"
+                android:text="BLOCKED"
+                android:textColor="@color/white"
+                android:textSize="8sp"
+                android:textStyle="bold"
+                android:visibility="gone" />
+        </LinearLayout>
+
+    </LinearLayout>
+
+    <ImageView
+        android:id="@+id/btn_add_sub_node"
+        android:layout_width="32dp"
+        android:layout_height="32dp"
+        android:layout_marginStart="8dp"
+        android:padding="8dp"
+        android:src="@android:drawable/ic_input_add"
+        app:tint="@color/text_secondary"
+        android:background="?attr/selectableItemBackgroundBorderless"
+        android:contentDescription="Add Sub-node" />
+
+</LinearLayout>

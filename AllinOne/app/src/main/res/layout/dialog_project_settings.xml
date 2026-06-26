@@ -11,7 +11,7 @@
         android:id="@+id/tv_settings_title"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="Task Settings"
+        android:text="Project Settings"
         android:textColor="@color/white"
         android:textSize="18sp"
         android:textStyle="bold"
@@ -26,60 +26,9 @@
         android:orientation="vertical"
         app:layout_constraintTop_toBottomOf="@id/tv_settings_title">
 
-        <!-- Multi-Delete -->
-        <LinearLayout
-            android:id="@+id/item_delete"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:background="?attr/selectableItemBackground"
-            android:clickable="true"
-            android:focusable="true"
-            android:orientation="vertical"
-            android:paddingVertical="6dp">
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="Select and Delete"
-                android:textColor="@color/white"
-                android:textSize="14sp"
-                android:textStyle="bold" />
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="Enter selection mode to delete multiple tasks at once"
-                android:textColor="@color/text_secondary"
-                android:textSize="11sp" />
-        </LinearLayout>
-
-        <!-- Sort Order -->
-        <LinearLayout
-            android:id="@+id/item_sort"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:background="?attr/selectableItemBackground"
-            android:clickable="true"
-            android:focusable="true"
-            android:orientation="vertical"
-            android:paddingVertical="6dp">
-            <TextView
-                android:id="@+id/tv_sort_label"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="Sort Order"
-                android:textColor="@color/white"
-                android:textSize="14sp"
-                android:textStyle="bold" />
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="Change how your list is organized (Priority, Time, etc.)"
-                android:textColor="@color/text_secondary"
-                android:textSize="11sp" />
-        </LinearLayout>
-
         <!-- Auto Archive -->
         <LinearLayout
-            android:id="@+id/item_archive"
+            android:id="@+id/item_auto_archive"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:background="?attr/selectableItemBackground"
@@ -96,29 +45,29 @@
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="Auto-Archive"
+                    android:text="Auto-Archive Completed"
                     android:textColor="@color/white"
                     android:textSize="14sp"
                     android:textStyle="bold" />
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="Automatically delete completed tasks after 7 days"
+                    android:text="Automatically hide finished projects"
                     android:textColor="@color/text_secondary"
                     android:textSize="11sp" />
             </LinearLayout>
             <androidx.appcompat.widget.SwitchCompat
-                android:id="@+id/iv_archive_check"
+                android:id="@+id/sw_auto_archive"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                app:thumbTint="@color/primary_blue"
+                app:thumbTint="@color/chip_selected"
                 android:clickable="false"
                 android:focusable="false" />
         </LinearLayout>
 
-        <!-- Show Hidden Tasks -->
+        <!-- Synergy Sync -->
         <LinearLayout
-            android:id="@+id/item_show_hidden"
+            android:id="@+id/item_synergy_sync"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:background="?attr/selectableItemBackground"
@@ -135,22 +84,61 @@
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="Show Hidden Tasks"
+                    android:text="Synergy Sync (To-Do)"
                     android:textColor="@color/white"
                     android:textSize="14sp"
                     android:textStyle="bold" />
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="Reveal tasks you've marked as hidden"
+                    android:text="Bridge roadmaps with daily habits"
                     android:textColor="@color/text_secondary"
                     android:textSize="11sp" />
             </LinearLayout>
             <androidx.appcompat.widget.SwitchCompat
-                android:id="@+id/iv_hidden_check"
+                android:id="@+id/sw_synergy_sync"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                app:thumbTint="@color/primary_blue"
+                app:thumbTint="@color/chip_selected"
+                android:clickable="false"
+                android:focusable="false" />
+        </LinearLayout>
+
+        <!-- Deadline Alerts -->
+        <LinearLayout
+            android:id="@+id/item_deadline_alerts"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:background="?attr/selectableItemBackground"
+            android:clickable="true"
+            android:focusable="true"
+            android:gravity="center_vertical"
+            android:orientation="horizontal"
+            android:paddingVertical="6dp">
+            <LinearLayout
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:orientation="vertical">
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Deadline Notifications"
+                    android:textColor="@color/white"
+                    android:textSize="14sp"
+                    android:textStyle="bold" />
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Get alerts for upcoming milestones"
+                    android:textColor="@color/text_secondary"
+                    android:textSize="11sp" />
+            </LinearLayout>
+            <androidx.appcompat.widget.SwitchCompat
+                android:id="@+id/sw_deadline_alerts"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                app:thumbTint="@color/chip_selected"
                 android:clickable="false"
                 android:focusable="false" />
         </LinearLayout>
@@ -163,72 +151,74 @@
             android:background="?attr/selectableItemBackground"
             android:clickable="true"
             android:focusable="true"
-            android:orientation="vertical"
+            android:gravity="center_vertical"
+            android:orientation="horizontal"
             android:paddingVertical="6dp">
-            <TextView
+            <LinearLayout
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:orientation="vertical">
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Productivity Analytics"
+                    android:textColor="@color/white"
+                    android:textSize="14sp"
+                    android:textStyle="bold" />
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Track completion velocity and speed"
+                    android:textColor="@color/text_secondary"
+                    android:textSize="11sp" />
+            </LinearLayout>
+            <androidx.appcompat.widget.SwitchCompat
+                android:id="@+id/sw_analytics"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="Productivity Analytics"
-                android:textColor="@color/white"
-                android:textSize="14sp"
-                android:textStyle="bold" />
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="View your task completion rates and pending totals"
-                android:textColor="@color/text_secondary"
-                android:textSize="11sp" />
+                app:thumbTint="@color/chip_selected"
+                android:clickable="false"
+                android:focusable="false" />
         </LinearLayout>
 
-        <!-- Manage Categories -->
+        <!-- Enable Tree -->
         <LinearLayout
-            android:id="@+id/item_categories"
+            android:id="@+id/item_enable_tree"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:background="?attr/selectableItemBackground"
             android:clickable="true"
             android:focusable="true"
-            android:orientation="vertical"
+            android:gravity="center_vertical"
+            android:orientation="horizontal"
             android:paddingVertical="6dp">
-            <TextView
+            <LinearLayout
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:orientation="vertical">
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Enable Tree Section"
+                    android:textColor="@color/white"
+                    android:textSize="14sp"
+                    android:textStyle="bold" />
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Show Nexus hierarchical architect tool"
+                    android:textColor="@color/text_secondary"
+                    android:textSize="11sp" />
+            </LinearLayout>
+            <androidx.appcompat.widget.SwitchCompat
+                android:id="@+id/sw_enable_tree"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="Manage Categories"
-                android:textColor="@color/white"
-                android:textSize="14sp"
-                android:textStyle="bold" />
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="Add, rename, or remove your custom task tags"
-                android:textColor="@color/text_secondary"
-                android:textSize="11sp" />
-        </LinearLayout>
-
-        <!-- Default Section -->
-        <LinearLayout
-            android:id="@+id/item_default_section"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:background="?attr/selectableItemBackground"
-            android:clickable="true"
-            android:focusable="true"
-            android:orientation="vertical"
-            android:paddingVertical="6dp">
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="Default Startup Tab"
-                android:textColor="@color/white"
-                android:textSize="14sp"
-                android:textStyle="bold" />
-            <TextView
-                android:id="@+id/tv_default_section_summary"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="Current: Tasks"
-                android:textColor="@color/text_secondary"
-                android:textSize="11sp" />
+                app:thumbTint="@color/chip_selected"
+                android:clickable="false"
+                android:focusable="false" />
         </LinearLayout>
 
     </LinearLayout>

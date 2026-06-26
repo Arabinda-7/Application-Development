@@ -3,16 +3,12 @@ package com.example.allinone
 import android.app.DatePickerDialog
 import android.app.Dialog
 import android.app.TimePickerDialog
+import android.graphics.Color
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.widget.EditText
-import android.widget.ImageButton
-import android.widget.ImageView
-import android.widget.PopupWindow
-import android.widget.RadioGroup
-import android.widget.TextView
+import android.widget.*
 import androidx.appcompat.app.AppCompatActivity
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
@@ -62,7 +58,7 @@ class FinanceActivity : AppCompatActivity() {
         
         transactionAdapter = TransactionAdapter(
             currentMonthTransactions,
-            onEdit = { transaction, position -> showEditTransactionDialog(transaction, position) },
+            onEdit = { transaction, _ -> showAddTransactionDialog(transaction) },
             onDelete = { _, position -> deleteTransaction(position) }
         )
         financeList.adapter = transactionAdapter
@@ -80,7 +76,6 @@ class FinanceActivity : AppCompatActivity() {
             menuView.findViewById<TextView>(R.id.tv_action_primary).text = "HISTORY"
             menuView.findViewById<ImageView>(R.id.iv_action_primary).setImageResource(R.drawable.ic_history)
             
-            // Hide task-related menu items
             menuView.findViewById<View>(R.id.menu_clear_completed).visibility = View.GONE
             menuView.findViewById<View>(R.id.menu_toggle_completed).visibility = View.GONE
             
@@ -98,6 +93,10 @@ class FinanceActivity : AppCompatActivity() {
         }
 
         findViewById<View>(R.id.btn_back).setOnClickListener { finish() }
+
+        findViewById<View>(R.id.btn_finance_ledger).setOnClickListener {
+            startActivity(android.content.Intent(this, LedgerActivity::class.java))
+        }
 
         findViewById<View>(R.id.btn_create_new_finance).setOnClickListener {
             showAddTransactionDialog()
@@ -130,65 +129,83 @@ class FinanceActivity : AppCompatActivity() {
         }.sortedByDescending { it.timestamp }.toMutableList()
     }
 
-    private fun showEditTransactionDialog(transaction: Transaction, position: Int) {
+    private fun showAddTransactionDialog(existingTransaction: Transaction? = null) {
         val dialog = Dialog(this)
         dialog.setContentView(R.layout.dialog_add_transaction)
         dialog.window?.setBackgroundDrawableResource(android.R.color.transparent)
         dialog.window?.setLayout(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT)
 
         val etAmount = dialog.findViewById<EditText>(R.id.et_trans_amount)
-        val etTitle = dialog.findViewById<EditText>(R.id.et_trans_title)
+        val chipGroup = dialog.findViewById<com.google.android.material.chip.ChipGroup>(R.id.cg_trans_category)
+        val etCustomNote = dialog.findViewById<EditText>(R.id.et_trans_custom_category)
         val rgType = dialog.findViewById<RadioGroup>(R.id.rg_trans_type)
-        val spinnerCategory = dialog.findViewById<android.widget.Spinner>(R.id.spinner_trans_category)
         val btnSave = dialog.findViewById<TextView>(R.id.btn_save_trans)
         val btnClose = dialog.findViewById<View>(R.id.btn_close_trans)
         val titleText = dialog.findViewById<TextView>(R.id.tv_dialog_title)
         val tvDate = dialog.findViewById<TextView>(R.id.tv_trans_date)
         val tvTime = dialog.findViewById<TextView>(R.id.tv_trans_time)
 
-        titleText?.text = "Edit Transaction"
-        btnSave.text = "Update"
-        
-        val currency = DataManager.financeCurrency
-        etAmount.hint = "${currency}0.00"
-        etAmount.setText(transaction.amount.toString())
-        etTitle.setText(transaction.title)
-        when (transaction.type) {
-            "Income" -> rgType.check(R.id.radio_income)
-            "Saving" -> rgType.check(R.id.radio_saving)
-            else -> rgType.check(R.id.radio_expense)
+        if (existingTransaction != null) {
+            titleText?.text = "Edit Transaction"
+            btnSave.text = "SAVE"
+            etAmount.setText(existingTransaction.amount.toString())
+            if (existingTransaction.category == "Other") {
+                etCustomNote.visibility = View.VISIBLE
+                etCustomNote.setText(existingTransaction.title)
+            }
+            when (existingTransaction.type) {
+                "Income" -> rgType.check(R.id.radio_income)
+                "Saving" -> rgType.check(R.id.radio_saving)
+                else -> rgType.check(R.id.radio_expense)
+            }
         }
 
-        val calendar = Calendar.getInstance().apply { timeInMillis = transaction.timestamp }
+        val currency = DataManager.financeCurrency
+        etAmount.hint = "${currency}0.00"
+
+        val calendar = Calendar.getInstance()
+        if (existingTransaction != null) calendar.timeInMillis = existingTransaction.timestamp
+        
         val dateSdf = SimpleDateFormat("MMM dd, yyyy", Locale.getDefault())
         val timeSdf = SimpleDateFormat("h:mm a", Locale.getDefault())
         
-        tvDate.text = dateSdf.format(calendar.time)
-        tvTime.text = timeSdf.format(calendar.time)
+        tvDate.text = if (existingTransaction == null) "Today" else dateSdf.format(calendar.time)
+        tvTime.text = if (existingTransaction == null) "Now" else timeSdf.format(calendar.time)
 
         val categories = DataManager.financeCustomCategories
-        val adapter = android.widget.ArrayAdapter(this, android.R.layout.simple_spinner_item, categories)
-        adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
-        spinnerCategory.adapter = adapter
-        
-        val categoryIndex = categories.indexOf(transaction.category)
-        if (categoryIndex >= 0) {
-            spinnerCategory.setSelection(categoryIndex)
+        var selectedCategoryName = existingTransaction?.category ?: "Other"
+
+        categories.forEach { category ->
+            val chip = com.google.android.material.chip.Chip(this)
+            chip.text = category
+            chip.isCheckable = true
+            chip.isChecked = (category == selectedCategoryName)
+            chip.setChipBackgroundColorResource(R.color.chip_background)
+            chip.setTextColor(Color.WHITE)
+            chip.setOnCheckedChangeListener { _, isChecked ->
+                if (isChecked) {
+                    selectedCategoryName = category
+                    if (category == "Other") {
+                        etCustomNote.visibility = View.VISIBLE
+                        etCustomNote.requestFocus()
+                    } else {
+                        etCustomNote.visibility = View.GONE
+                    }
+                }
+            }
+            chipGroup.addView(chip)
         }
 
         tvDate.setOnClickListener {
             DatePickerDialog(this, { _, y, m, d ->
-                calendar.set(Calendar.YEAR, y)
-                calendar.set(Calendar.MONTH, m)
-                calendar.set(Calendar.DAY_OF_MONTH, d)
+                calendar.set(Calendar.YEAR, y); calendar.set(Calendar.MONTH, m); calendar.set(Calendar.DAY_OF_MONTH, d)
                 tvDate.text = dateSdf.format(calendar.time)
             }, calendar.get(Calendar.YEAR), calendar.get(Calendar.MONTH), calendar.get(Calendar.DAY_OF_MONTH)).show()
         }
 
         tvTime.setOnClickListener {
             TimePickerDialog(this, { _, h, min ->
-                calendar.set(Calendar.HOUR_OF_DAY, h)
-                calendar.set(Calendar.MINUTE, min)
+                calendar.set(Calendar.HOUR_OF_DAY, h); calendar.set(Calendar.MINUTE, min)
                 tvTime.text = timeSdf.format(calendar.time)
             }, calendar.get(Calendar.HOUR_OF_DAY), calendar.get(Calendar.MINUTE), false).show()
         }
@@ -197,28 +214,29 @@ class FinanceActivity : AppCompatActivity() {
 
         btnSave.setOnClickListener {
             val amount = etAmount.text.toString().toDoubleOrNull() ?: 0.0
-            val title = etTitle.text.toString()
-            if (title.isNotEmpty() && amount > 0) {
+            val finalTitle = if (selectedCategoryName == "Other") {
+                etCustomNote.text.toString().trim().takeIf { it.isNotEmpty() } ?: "Other Expense"
+            } else {
+                selectedCategoryName
+            }
+
+            if (amount > 0) {
                 val type = when (rgType.checkedRadioButtonId) {
-                    R.id.radio_income -> "Income"
-                    R.id.radio_saving -> "Saving"
-                    else -> "Expense"
+                    R.id.radio_income -> "Income"; R.id.radio_saving -> "Saving"; else -> "Expense"
                 }
                 
-                transaction.title = title
-                transaction.amount = amount
-                transaction.type = type
-                transaction.category = spinnerCategory.selectedItem?.toString() ?: "General"
-                transaction.timestamp = calendar.timeInMillis
+                if (existingTransaction == null) {
+                    val newTransaction = Transaction(title = finalTitle, amount = amount, type = type, category = selectedCategoryName, timestamp = calendar.timeInMillis)
+                    DataManager.transactions.add(0, newTransaction)
+                } else {
+                    existingTransaction.title = finalTitle; existingTransaction.amount = amount; existingTransaction.type = type; existingTransaction.category = selectedCategoryName; existingTransaction.timestamp = calendar.timeInMillis
+                }
                 
                 filterCurrentMonthTransactions()
                 transactionAdapter.updateData(currentMonthTransactions)
-                DataManager.saveData(this)
-                updateSummary()
-                dialog.dismiss()
+                DataManager.saveData(this); updateSummary(); dialog.dismiss()
             }
         }
-
         dialog.show()
     }
 
@@ -245,7 +263,6 @@ class FinanceActivity : AppCompatActivity() {
         tvCurrentSavings.text = String.format(Locale.US, "%s%.0f", currency, savings)
         tvSavingsGoal.text = String.format(Locale.US, "Goal: %s%.0f", currency, savingsGoal)
 
-        // Calculate Daily Limit
         val calendar = Calendar.getInstance()
         val daysInMonth = calendar.getActualMaximum(Calendar.DAY_OF_MONTH)
         val currentDay = calendar.get(Calendar.DAY_OF_MONTH)
@@ -253,7 +270,6 @@ class FinanceActivity : AppCompatActivity() {
         val dailyLimit = (remaining / daysRemaining).coerceAtLeast(0.0)
         tvDailyLimit.text = String.format(Locale.US, "Daily: %s%.0f", currency, dailyLimit)
 
-        // Update Progress Bars
         pbBudget.progress = if (budget > 0) ((spent / budget) * 100).toInt().coerceIn(0, 100) else 0
         pbSavings.progress = if (savingsGoal > 0) ((savings / savingsGoal) * 100).toInt().coerceIn(0, 100) else 0
 
@@ -282,7 +298,6 @@ class FinanceActivity : AppCompatActivity() {
         }
         tvCategorySummary.text = breakdown.toString().trim()
 
-        // Dynamic Insights
         val topCategory = categoryGroups.first()
         val topPercentage = (topCategory.second / totalSpent) * 100
         
@@ -333,7 +348,6 @@ class FinanceActivity : AppCompatActivity() {
         }
 
         itemGoals.setOnClickListener {
-            // Re-use existing budget dialog
             showSetBudgetDialog()
         }
 
@@ -360,9 +374,13 @@ class FinanceActivity : AppCompatActivity() {
                 itemView.findViewById<View>(R.id.iv_header_chevron).visibility = View.GONE
                 
                 itemView.setOnLongClickListener {
-                    DataManager.financeCustomCategories.remove(category)
-                    DataManager.saveData(this)
-                    refreshList()
+                    if (category != "Other") {
+                        DataManager.financeCustomCategories.remove(category)
+                        DataManager.saveData(this)
+                        refreshList()
+                    } else {
+                        Toast.makeText(this, "Cannot remove 'Other' category", Toast.LENGTH_SHORT).show()
+                    }
                     true
                 }
                 container.addView(itemView)
@@ -438,85 +456,6 @@ class FinanceActivity : AppCompatActivity() {
             DataManager.saveData(this)
             updateSummary()
             dialog.dismiss()
-        }
-
-        dialog.show()
-    }
-
-    private fun showAddTransactionDialog() {
-        val dialog = Dialog(this)
-        dialog.setContentView(R.layout.dialog_add_transaction)
-        dialog.window?.setBackgroundDrawableResource(android.R.color.transparent)
-        dialog.window?.setLayout(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT)
-
-        val etAmount = dialog.findViewById<EditText>(R.id.et_trans_amount)
-        val etTitle = dialog.findViewById<EditText>(R.id.et_trans_title)
-        val rgType = dialog.findViewById<RadioGroup>(R.id.rg_trans_type)
-        val spinnerCategory = dialog.findViewById<android.widget.Spinner>(R.id.spinner_trans_category)
-        val btnSave = dialog.findViewById<TextView>(R.id.btn_save_trans)
-        val btnClose = dialog.findViewById<View>(R.id.btn_close_trans)
-        val tvDate = dialog.findViewById<TextView>(R.id.tv_trans_date)
-        val tvTime = dialog.findViewById<TextView>(R.id.tv_trans_time)
-
-        val currency = DataManager.financeCurrency
-        etAmount.hint = "${currency}0.00"
-
-        val calendar = Calendar.getInstance()
-        val dateSdf = SimpleDateFormat("MMM dd, yyyy", Locale.getDefault())
-        val timeSdf = SimpleDateFormat("h:mm a", Locale.getDefault())
-        
-        tvDate.text = "Today"
-        tvTime.text = "Now"
-
-        val categories = DataManager.financeCustomCategories
-        val adapter = android.widget.ArrayAdapter(this, android.R.layout.simple_spinner_item, categories)
-        adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
-        spinnerCategory.adapter = adapter
-
-        tvDate.setOnClickListener {
-            DatePickerDialog(this, { _, y, m, d ->
-                calendar.set(Calendar.YEAR, y)
-                calendar.set(Calendar.MONTH, m)
-                calendar.set(Calendar.DAY_OF_MONTH, d)
-                tvDate.text = dateSdf.format(calendar.time)
-            }, calendar.get(Calendar.YEAR), calendar.get(Calendar.MONTH), calendar.get(Calendar.DAY_OF_MONTH)).show()
-        }
-
-        tvTime.setOnClickListener {
-            TimePickerDialog(this, { _, h, min ->
-                calendar.set(Calendar.HOUR_OF_DAY, h)
-                calendar.set(Calendar.MINUTE, min)
-                tvTime.text = timeSdf.format(calendar.time)
-            }, calendar.get(Calendar.HOUR_OF_DAY), calendar.get(Calendar.MINUTE), false).show()
-        }
-
-        btnClose.setOnClickListener { dialog.dismiss() }
-
-        btnSave.setOnClickListener {
-            val amount = etAmount.text.toString().toDoubleOrNull() ?: 0.0
-            val title = etTitle.text.toString()
-            if (title.isNotEmpty() && amount > 0) {
-                val type = when (rgType.checkedRadioButtonId) {
-                    R.id.radio_income -> "Income"
-                    R.id.radio_saving -> "Saving"
-                    else -> "Expense"
-                }
-                
-                val newTransaction = Transaction(
-                    title = title,
-                    amount = amount,
-                    type = type,
-                    category = spinnerCategory.selectedItem?.toString() ?: "General",
-                    timestamp = calendar.timeInMillis
-                )
-                
-                DataManager.transactions.add(0, newTransaction)
-                filterCurrentMonthTransactions()
-                transactionAdapter.updateData(currentMonthTransactions)
-                DataManager.saveData(this)
-                updateSummary()
-                dialog.dismiss()
-            }
         }
 
         dialog.show()

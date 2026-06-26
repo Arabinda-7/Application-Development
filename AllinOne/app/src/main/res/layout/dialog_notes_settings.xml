@@ -22,7 +22,7 @@
         android:id="@+id/container_settings_items"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_marginTop="20dp"
+        android:layout_marginTop="12dp"
         android:orientation="vertical"
         app:layout_constraintTop_toBottomOf="@id/tv_settings_title">
 
@@ -35,7 +35,7 @@
             android:clickable="true"
             android:focusable="true"
             android:orientation="vertical"
-            android:paddingVertical="12dp">
+            android:paddingVertical="6dp">
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
@@ -61,7 +61,7 @@
             android:clickable="true"
             android:focusable="true"
             android:orientation="vertical"
-            android:paddingVertical="12dp">
+            android:paddingVertical="6dp">
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
@@ -87,7 +87,7 @@
             android:clickable="true"
             android:focusable="true"
             android:orientation="vertical"
-            android:paddingVertical="12dp">
+            android:paddingVertical="6dp">
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
@@ -112,7 +112,7 @@
             android:clickable="true"
             android:focusable="true"
             android:orientation="vertical"
-            android:paddingVertical="12dp">
+            android:paddingVertical="6dp">
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
@@ -128,45 +128,6 @@
                 android:textSize="11sp" />
         </LinearLayout>
 
-        <!-- Show Hidden Notes -->
-        <LinearLayout
-            android:id="@+id/item_show_hidden"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:background="?attr/selectableItemBackground"
-            android:clickable="true"
-            android:focusable="true"
-            android:gravity="center_vertical"
-            android:orientation="horizontal"
-            android:paddingVertical="12dp">
-            <LinearLayout
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:layout_weight="1"
-                android:orientation="vertical">
-                <TextView
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="Show Hidden Notes"
-                    android:textColor="@color/white"
-                    android:textSize="14sp"
-                    android:textStyle="bold" />
-                <TextView
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="Reveal notes you've marked as hidden"
-                    android:textColor="@color/text_secondary"
-                    android:textSize="11sp" />
-            </LinearLayout>
-            <androidx.appcompat.widget.SwitchCompat
-                android:id="@+id/sw_show_hidden"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                app:thumbTint="@color/chip_selected"
-                android:clickable="false"
-                android:focusable="false" />
-        </LinearLayout>
-
         <!-- Export -->
         <LinearLayout
             android:id="@+id/item_export_notes"
@@ -176,7 +137,7 @@
             android:clickable="true"
             android:focusable="true"
             android:orientation="vertical"
-            android:paddingVertical="12dp">
+            android:paddingVertical="6dp">
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"

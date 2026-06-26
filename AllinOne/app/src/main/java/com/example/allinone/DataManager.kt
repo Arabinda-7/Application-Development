@@ -13,6 +13,7 @@ object DataManager {
     var tasks = mutableListOf<Task>()
     var notes = mutableListOf<Note>()
     var transactions = mutableListOf<Transaction>()
+    var ledgerEntries = mutableListOf<LedgerEntry>()
     var monthlyBudget: Double = 0.0
     var monthlySavingsGoal: Double = 0.0
     var history = mutableMapOf<String, DayHistory>()
@@ -26,6 +27,7 @@ object DataManager {
     var taskCustomCategories = mutableListOf("General", "Personal", "Work", "Shopping")
     var taskAutoArchive: Boolean = false
     var taskDefaultSection: String = "Tasks"
+    var taskVisibleSections = mutableListOf("Tasks", "List")
 
     // Finance Settings
     var financeCustomCategories = mutableListOf("Food", "Rent", "Transport", "Shopping", "Entertainment", "Health", "Other")
@@ -53,6 +55,20 @@ object DataManager {
     var noteAutoCleanupDays: Int = 0
     var noteDefaultCategory: String = "Notes"
     var noteShowHidden: Boolean = false
+    var noteVisibleSections = mutableListOf("Notes", "Questions", "Daily", "Stories")
+    
+    // Project Advanced Settings
+    var projectAutoArchive: Boolean = false
+    var projectSynergySync: Boolean = false
+    var projectDeadlineAlerts: Boolean = true
+    var projectAnalyticsEnabled: Boolean = false
+    var projectTreeViewEnabled: Boolean = true
+    var projectTemplates: MutableMap<String, List<String>> = mutableMapOf(
+        "App Feature" to listOf("UI Design", "Business Logic", "Integration", "Testing", "Deployment"),
+        "Personal Goal" to listOf("Planning", "Execution", "Review"),
+        "Bug Fix" to listOf("Reproduction", "Debugging", "Fix", "Verification")
+    )
+
     var noteTemplates: MutableMap<String, String> = mutableMapOf(
         "Daily" to "1. Today I'm grateful for: \n2. Top goal for today: \n3. How I feel: ",
         "Questions" to "Question: \n\nContext: \n\nGoal: ",
@@ -65,6 +81,7 @@ object DataManager {
     private const val KEY_TASKS = "tasks_data"
     private const val KEY_NOTES = "notes_data"
     private const val KEY_TRANSACTIONS = "transactions_data"
+    private const val KEY_LEDGER = "ledger_data"
     private const val KEY_BUDGET = "monthly_budget"
     private const val KEY_SAVINGS_GOAL = "monthly_savings_goal"
     private const val KEY_MONTHLY_BUDGETS = "monthly_budgets_data"
@@ -78,12 +95,22 @@ object DataManager {
     private const val KEY_TASK_CUSTOM_CATEGORIES = "task_custom_categories"
     private const val KEY_TASK_AUTO_ARCHIVE = "task_auto_archive"
     private const val KEY_TASK_DEFAULT_SECTION = "task_default_section"
+    private const val KEY_TASK_VISIBLE_SECTIONS = "task_visible_sections"
     private const val KEY_FINANCE_CUSTOM_CATEGORIES = "finance_custom_categories"
     private const val KEY_FINANCE_CURRENCY = "finance_currency"
     private const val KEY_NOTE_AUTO_CLEANUP = "note_auto_cleanup"
     private const val KEY_NOTE_SHOW_HIDDEN = "note_show_hidden"
+    private const val KEY_NOTE_VISIBLE_SECTIONS = "note_visible_sections"
     private const val KEY_NOTE_DEFAULT_CAT = "note_default_cat"
     private const val KEY_NOTE_TEMPLATES = "note_templates"
+    private const val KEY_PROJ_ARCHIVE = "project_auto_archive"
+    private const val KEY_PROJ_SYNC = "project_synergy_sync"
+    private const val KEY_PROJ_ALERTS = "project_deadline_alerts"
+    private const val KEY_PROJ_ANALYTICS = "project_analytics_enabled"
+    private const val KEY_PROJ_TREE_VISIBLE = "project_tree_view_enabled"
+    private const val KEY_PROJ_TEMPLATES = "project_templates_data"
+    private const val KEY_PROJECT_AUTO_SYNC = "project_auto_task_sync"
+    private const val KEY_PROJECT_AUTO_ARCHIVE = "project_auto_archive"
     private const val KEY_HABIT_DEFAULT_TAB = "habit_default_tab"
     private const val KEY_HABIT_VACATION_MODE = "habit_vacation_mode"
     private const val KEY_HABIT_SORT_ORDER = "habit_sort_order"
@@ -115,6 +142,7 @@ object DataManager {
             putString(KEY_TASKS, gson.toJson(tasks))
             putString(KEY_NOTES, gson.toJson(notes))
             putString(KEY_TRANSACTIONS, gson.toJson(transactions))
+            putString(KEY_LEDGER, gson.toJson(ledgerEntries))
             putFloat(KEY_BUDGET, monthlyBudget.toFloat())
             putFloat(KEY_SAVINGS_GOAL, monthlySavingsGoal.toFloat())
             putString(KEY_MONTHLY_BUDGETS, gson.toJson(monthlyBudgets))
@@ -126,12 +154,20 @@ object DataManager {
             putString(KEY_TASK_CUSTOM_CATEGORIES, gson.toJson(taskCustomCategories))
             putBoolean(KEY_TASK_AUTO_ARCHIVE, taskAutoArchive)
             putString(KEY_TASK_DEFAULT_SECTION, taskDefaultSection)
+            putString(KEY_TASK_VISIBLE_SECTIONS, gson.toJson(taskVisibleSections))
             putString(KEY_FINANCE_CUSTOM_CATEGORIES, gson.toJson(financeCustomCategories))
             putString(KEY_FINANCE_CURRENCY, financeCurrency)
             putInt(KEY_NOTE_AUTO_CLEANUP, noteAutoCleanupDays)
             putBoolean(KEY_NOTE_SHOW_HIDDEN, noteShowHidden)
+            putString(KEY_NOTE_VISIBLE_SECTIONS, gson.toJson(noteVisibleSections))
             putString(KEY_NOTE_DEFAULT_CAT, noteDefaultCategory)
             putString(KEY_NOTE_TEMPLATES, gson.toJson(noteTemplates))
+            putBoolean(KEY_PROJ_ARCHIVE, projectAutoArchive)
+            putBoolean(KEY_PROJ_SYNC, projectSynergySync)
+            putBoolean(KEY_PROJ_ALERTS, projectDeadlineAlerts)
+            putBoolean(KEY_PROJ_ANALYTICS, projectAnalyticsEnabled)
+            putBoolean(KEY_PROJ_TREE_VISIBLE, projectTreeViewEnabled)
+            putString(KEY_PROJ_TEMPLATES, gson.toJson(projectTemplates))
             putString(KEY_HABIT_DEFAULT_TAB, habitDefaultTab)
             putBoolean(KEY_HABIT_VACATION_MODE, habitVacationMode)
             putString(KEY_HABIT_SORT_ORDER, habitSortOrder)
@@ -190,34 +226,23 @@ object DataManager {
         prefs.getString(KEY_NOTES, null)?.let {
             val type = object : TypeToken<MutableList<Note>>() {}.type
             notes = gson.fromJson(it, type) ?: mutableListOf()
-            // Sanitize for new fields
+            // Sanitize for new fields and recursive tree structure
             notes.forEach { note ->
                 if (note.status == null) note.status = "Not Started"
                 if (note.category == null) note.category = "Notes"
                 
-                @Suppress("SENSELESS_COMPARISON")
-                if (note.subFeatures == null) {
-                    try {
-                        val field = note::class.java.getDeclaredField("subFeatures")
-                        field.isAccessible = true
-                        field.set(note, mutableListOf<ProjectFeature>())
-                    } catch (e: Exception) {}
-                }
-                
-                @Suppress("SENSELESS_COMPARISON")
-                if (note.changeHistory == null) {
-                    try {
-                        val field = note::class.java.getDeclaredField("changeHistory")
-                        field.isAccessible = true
-                        field.set(note, mutableListOf<ProjectHistory>())
-                    } catch (e: Exception) {}
-                }
+                sanitizeProjectNote(note)
             }
         }
 
         prefs.getString(KEY_TRANSACTIONS, null)?.let {
             val type = object : TypeToken<MutableList<Transaction>>() {}.type
             transactions = gson.fromJson(it, type) ?: mutableListOf()
+        }
+
+        prefs.getString(KEY_LEDGER, null)?.let {
+            val type = object : TypeToken<MutableList<LedgerEntry>>() {}.type
+            ledgerEntries = gson.fromJson(it, type) ?: mutableListOf()
         }
 
         monthlyBudget = prefs.getFloat(KEY_BUDGET, 0.0f).toDouble()
@@ -247,6 +272,10 @@ object DataManager {
         }
         taskAutoArchive = prefs.getBoolean(KEY_TASK_AUTO_ARCHIVE, false)
         taskDefaultSection = prefs.getString(KEY_TASK_DEFAULT_SECTION, "Tasks") ?: "Tasks"
+        prefs.getString(KEY_TASK_VISIBLE_SECTIONS, null)?.let {
+            val type = object : TypeToken<MutableList<String>>() {}.type
+            taskVisibleSections = gson.fromJson(it, type) ?: mutableListOf("Tasks", "List")
+        }
 
         prefs.getString(KEY_FINANCE_CUSTOM_CATEGORIES, null)?.let {
             val type = object : TypeToken<MutableList<String>>() {}.type
@@ -255,10 +284,23 @@ object DataManager {
         financeCurrency = prefs.getString(KEY_FINANCE_CURRENCY, "₹") ?: "₹"
         noteAutoCleanupDays = prefs.getInt(KEY_NOTE_AUTO_CLEANUP, 0)
         noteShowHidden = prefs.getBoolean(KEY_NOTE_SHOW_HIDDEN, false)
+        prefs.getString(KEY_NOTE_VISIBLE_SECTIONS, null)?.let {
+            val type = object : TypeToken<MutableList<String>>() {}.type
+            noteVisibleSections = gson.fromJson(it, type) ?: mutableListOf("Notes", "Questions", "Daily", "Stories")
+        }
         noteDefaultCategory = prefs.getString(KEY_NOTE_DEFAULT_CAT, "Notes") ?: "Notes"
         prefs.getString(KEY_NOTE_TEMPLATES, null)?.let {
             val type = object : TypeToken<MutableMap<String, String>>() {}.type
             noteTemplates = gson.fromJson(it, type) ?: noteTemplates
+        }
+        projectAutoArchive = prefs.getBoolean(KEY_PROJ_ARCHIVE, false)
+        projectSynergySync = prefs.getBoolean(KEY_PROJ_SYNC, false)
+        projectDeadlineAlerts = prefs.getBoolean(KEY_PROJ_ALERTS, true)
+        projectAnalyticsEnabled = prefs.getBoolean(KEY_PROJ_ANALYTICS, false)
+        projectTreeViewEnabled = prefs.getBoolean(KEY_PROJ_TREE_VISIBLE, true)
+        prefs.getString(KEY_PROJ_TEMPLATES, null)?.let {
+            val type = object : TypeToken<MutableMap<String, List<String>>>() {}.type
+            projectTemplates = gson.fromJson(it, type) ?: projectTemplates
         }
 
         habitDefaultTab = prefs.getString(KEY_HABIT_DEFAULT_TAB, "TODAY") ?: "TODAY"
@@ -539,6 +581,72 @@ object DataManager {
             }
         }
         return total.toInt()
+    }
+
+    private fun sanitizeProjectNote(note: Note) {
+        @Suppress("SENSELESS_COMPARISON")
+        if (note.title == null) note.title = "Untitled Project"
+        @Suppress("SENSELESS_COMPARISON")
+        if (note.content == null) note.content = ""
+        @Suppress("SENSELESS_COMPARISON")
+        if (note.status == null) note.status = "Not Started"
+        @Suppress("SENSELESS_COMPARISON")
+        if (note.category == null) note.category = "Project"
+
+        @Suppress("SENSELESS_COMPARISON")
+        if (note.subFeatures == null) {
+            try {
+                val field = note::class.java.getDeclaredField("subFeatures")
+                field.isAccessible = true
+                field.set(note, mutableListOf<ProjectFeature>())
+            } catch (e: Exception) {}
+        }
+        
+        note.subFeatures?.let { sanitizeProjectFeatures(it) }
+
+        @Suppress("SENSELESS_COMPARISON")
+        if (note.changeHistory == null) {
+            try {
+                val field = note::class.java.getDeclaredField("changeHistory")
+                field.isAccessible = true
+                field.set(note, mutableListOf<ProjectHistory>())
+            } catch (e: Exception) {}
+        }
+    }
+
+    private fun sanitizeProjectFeatures(features: MutableList<ProjectFeature>) {
+        features.forEach { feature ->
+            @Suppress("SENSELESS_COMPARISON")
+            if (feature.name == null) feature.name = "New Node"
+            @Suppress("SENSELESS_COMPARISON")
+            if (feature.details == null) feature.details = ""
+            @Suppress("SENSELESS_COMPARISON")
+            if (feature.resourceUrl == null) feature.resourceUrl = ""
+            @Suppress("SENSELESS_COMPARISON")
+            if (feature.resourcePath == null) feature.resourcePath = ""
+            @Suppress("SENSELESS_COMPARISON")
+            if (feature.blockedByNodeId == null) feature.blockedByNodeId = ""
+
+            @Suppress("SENSELESS_COMPARISON")
+            if (feature.subFeatures == null) {
+                try {
+                    val field = feature::class.java.getDeclaredField("subFeatures")
+                    field.isAccessible = true
+                    field.set(feature, mutableListOf<ProjectFeature>())
+                } catch (e: Exception) {}
+            }
+            
+            @Suppress("SENSELESS_COMPARISON")
+            if (feature.id == null) {
+                try {
+                    val field = feature::class.java.getDeclaredField("id")
+                    field.isAccessible = true
+                    field.set(feature, java.util.UUID.randomUUID().toString())
+                } catch (e: Exception) {}
+            }
+
+            feature.subFeatures?.let { sanitizeProjectFeatures(it) }
+        }
     }
 
     private fun autoArchiveTasks() {

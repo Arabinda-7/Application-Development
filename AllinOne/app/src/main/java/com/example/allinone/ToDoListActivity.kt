@@ -289,6 +289,18 @@ class ToDoListActivity : AppCompatActivity() {
             Toast.makeText(this, "Default tab set to $next", Toast.LENGTH_SHORT).show()
         }
 
+        // Customize Navigation (NEW)
+        val itemCustomize = view.findViewById<View>(R.id.item_categories) // Re-using an existing icon row logic
+        (itemCustomize as? ViewGroup)?.let { vg ->
+            for (i in 0 until vg.childCount) {
+                (vg.getChildAt(i) as? TextView)?.let { if (it.id != R.id.tv_sort_label) it.text = "Customize Navigation" }
+            }
+        }
+        itemCustomize.setOnClickListener {
+            showManageSectionsDialog("TASK")
+            dialog.dismiss()
+        }
+
         view.findViewById<View>(R.id.btn_close_settings).setOnClickListener { dialog.dismiss() }
         
         dialog.show()
@@ -420,6 +432,30 @@ class ToDoListActivity : AppCompatActivity() {
     private fun setupBottomNavigation() {
         val navTasks = findViewById<View>(R.id.nav_tasks)
         val navTodo = findViewById<View>(R.id.nav_todo_list)
+        val footer = findViewById<View>(R.id.bottom_navigation_tasks)
+
+        // Show/Hide based on settings
+        val showTasks = DataManager.taskVisibleSections.contains("Tasks")
+        val showTodo = DataManager.taskVisibleSections.contains("List")
+
+        navTasks.visibility = if (showTasks) View.VISIBLE else View.GONE
+        navTodo.visibility = if (showTodo) View.VISIBLE else View.GONE
+
+        // Dynamic Visibility: Hide the entire footer if only one section is enabled
+        if (DataManager.taskVisibleSections.size > 1) {
+            footer.visibility = View.VISIBLE
+        } else {
+            footer.visibility = View.GONE
+            // If only one is visible, ensure we switch to it
+            val onlyVisible = DataManager.taskVisibleSections.firstOrNull() ?: "Tasks"
+            if (currentSection != onlyVisible) switchSection(onlyVisible)
+        }
+
+        // If current section is hidden, switch to the first visible one
+        if (!DataManager.taskVisibleSections.contains(currentSection)) {
+            val firstVisible = DataManager.taskVisibleSections.firstOrNull() ?: "Tasks"
+            switchSection(firstVisible)
+        }
 
         navTasks.setOnClickListener { switchSection("Tasks") }
         navTodo.setOnClickListener { switchSection("List") }
@@ -521,6 +557,57 @@ class ToDoListActivity : AppCompatActivity() {
         view.findViewById<TextView>(R.id.tv_analytics_content).text = message
         view.findViewById<View>(R.id.btn_close_analytics).setOnClickListener { dialog.dismiss() }
 
+        dialog.show()
+    }
+
+    private fun showManageSectionsDialog(type: String) {
+        val dialog = Dialog(this)
+        dialog.setContentView(R.layout.dialog_manage_sections)
+        dialog.window?.setBackgroundDrawableResource(android.R.color.transparent)
+        dialog.window?.setLayout(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT)
+
+        val container = dialog.findViewById<LinearLayout>(R.id.container_section_switches)
+        val btnSave = dialog.findViewById<View>(R.id.btn_save_sections)
+        
+        val options = if (type == "TASK") listOf("Tasks", "List") else listOf("Notes", "Questions", "Daily", "Stories")
+        val currentVisible = if (type == "TASK") DataManager.taskVisibleSections else DataManager.noteVisibleSections
+        val tempSelection = currentVisible.toMutableList()
+
+        options.forEach { option ->
+            val switch = SwitchCompat(this).apply {
+                text = option
+                setTextColor(Color.WHITE)
+                textSize = 16f
+                isChecked = tempSelection.contains(option)
+                setPadding(0, 24, 0, 24)
+                setOnCheckedChangeListener { _, isChecked ->
+                    if (isChecked) {
+                        if (!tempSelection.contains(option)) tempSelection.add(option)
+                    } else {
+                        if (tempSelection.size > 1) {
+                            tempSelection.remove(option)
+                        } else {
+                            this.isChecked = true
+                            Toast.makeText(this@ToDoListActivity, "At least one section must be visible", Toast.LENGTH_SHORT).show()
+                        }
+                    }
+                }
+            }
+            container.addView(switch)
+        }
+
+        btnSave.setOnClickListener {
+            if (type == "TASK") {
+                DataManager.taskVisibleSections.clear()
+                DataManager.taskVisibleSections.addAll(tempSelection)
+            } else {
+                DataManager.noteVisibleSections.clear()
+                DataManager.noteVisibleSections.addAll(tempSelection)
+            }
+            DataManager.saveData(this)
+            setupBottomNavigation() // Refresh current screen
+            dialog.dismiss()
+        }
         dialog.show()
     }
 

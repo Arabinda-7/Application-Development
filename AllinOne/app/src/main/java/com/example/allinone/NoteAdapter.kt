@@ -1,5 +1,6 @@
 package com.example.allinone
 
+import android.graphics.Color
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -15,6 +16,9 @@ class NoteAdapter(
     private var notes: MutableList<Note>,
     private val onProgressChanged: () -> Unit
 ) : RecyclerView.Adapter<NoteAdapter.NoteViewHolder>() {
+
+    private var isDeleteMode = false
+    private val selectedNotes = mutableSetOf<Note>()
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): NoteViewHolder {
         val view = LayoutInflater.from(parent.context).inflate(R.layout.note_list_item, parent, false)
@@ -37,12 +41,44 @@ class NoteAdapter(
         val sdf = SimpleDateFormat("MMMM dd, yyyy", Locale.getDefault())
         holder.noteDate.text = sdf.format(Date(note.timestamp))
         
-        holder.itemView.setOnClickListener { (context as? NotesActivity)?.showEditNoteDialog(note) }
+        // Selection UI
+        if (isDeleteMode) {
+            holder.noteCard.strokeWidth = if (selectedNotes.contains(note)) 4 else 0
+            holder.noteCard.strokeColor = Color.RED
+        } else {
+            holder.noteCard.strokeWidth = 0
+        }
+
+        holder.itemView.setOnClickListener { 
+            if (isDeleteMode) {
+                if (selectedNotes.contains(note)) {
+                    selectedNotes.remove(note)
+                } else {
+                    selectedNotes.add(note)
+                }
+                notifyItemChanged(position)
+            } else {
+                (context as? NotesActivity)?.showEditNoteDialog(note) 
+            }
+        }
         
         holder.itemView.setOnLongClickListener {
-            showCustomMenu(it, note)
+            if (!isDeleteMode) showCustomMenu(it, note)
             true
         }
+    }
+
+    fun setDeleteMode(enabled: Boolean) {
+        isDeleteMode = enabled
+        selectedNotes.clear()
+        notifyDataSetChanged()
+    }
+
+    fun deleteSelectedNotes(context: android.content.Context) {
+        DataManager.notes.removeAll(selectedNotes)
+        selectedNotes.clear()
+        DataManager.saveData(context)
+        onProgressChanged()
     }
 
     private fun showCustomMenu(anchor: View, note: Note) {

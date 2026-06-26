@@ -25,11 +25,14 @@
             android:id="@+id/btn_save_note"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="Save"
-            android:textColor="@color/white"
-            android:textSize="18sp"
+            android:text="SAVE"
+            android:textColor="#1A73E8"
+            android:textSize="16sp"
             android:textStyle="bold"
             android:padding="8dp"
+            android:clickable="true"
+            android:focusable="true"
+            android:background="?attr/selectableItemBackgroundBorderless"
             app:layout_constraintBottom_toBottomOf="@id/btn_close_note"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintTop_toTopOf="@id/btn_close_note" />
@@ -48,14 +51,48 @@
             android:inputType="textCapSentences"
             app:layout_constraintTop_toBottomOf="@id/btn_close_note" />
 
+        <!-- Templates Header -->
+        <LinearLayout
+            android:id="@+id/container_templates_header"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="24dp"
+            android:orientation="horizontal"
+            android:gravity="center_vertical"
+            app:layout_constraintTop_toBottomOf="@id/note_title_input">
+
+            <TextView
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:text="TEMPLATES"
+                android:textColor="@color/white"
+                android:textSize="12sp"
+                android:textStyle="bold" />
+        </LinearLayout>
+
+        <HorizontalScrollView
+            android:id="@+id/scroll_templates"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="8dp"
+            android:scrollbars="none"
+            app:layout_constraintTop_toBottomOf="@id/container_templates_header">
+            <LinearLayout
+                android:id="@+id/container_templates"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal" />
+        </HorizontalScrollView>
+
         <!-- Status and Priority Row -->
         <LinearLayout
             android:id="@+id/row_controls"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginTop="16dp"
+            android:layout_marginTop="24dp"
             android:orientation="vertical"
-            app:layout_constraintTop_toBottomOf="@id/note_title_input">
+            app:layout_constraintTop_toBottomOf="@id/scroll_templates">
 
             <TextView
                 android:layout_width="wrap_content"
@@ -302,7 +339,6 @@
                 android:padding="8dp" />
         </LinearLayout>
 
-        <!-- Sub-features Header -->
         <LinearLayout
             android:id="@+id/container_subfeatures_header"
             android:layout_width="match_parent"

@@ -14,9 +14,11 @@ import android.view.ViewGroup
 import android.widget.EditText
 import android.widget.ImageButton
 import android.widget.ImageView
+import android.widget.LinearLayout
 import android.widget.PopupWindow
 import android.widget.TextView
 import androidx.appcompat.app.AppCompatActivity
+import androidx.appcompat.widget.SwitchCompat
 import androidx.core.content.ContextCompat
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
@@ -31,6 +33,7 @@ class NotesActivity : AppCompatActivity() {
     private lateinit var noteAdapter: NoteAdapter
     private var currentCategory = DataManager.noteDefaultCategory
     private var displayNotes = mutableListOf<Note>()
+    private var isDeleteMode = false
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -48,28 +51,76 @@ class NotesActivity : AppCompatActivity() {
         }
         notesList.adapter = noteAdapter
 
-        findViewById<View>(R.id.btn_back).setOnClickListener { finish() }
+        findViewById<View>(R.id.btn_back).setOnClickListener { 
+            if (isDeleteMode) toggleDeleteMode(false) else finish() 
+        }
 
         setupBottomNavigation()
 
         findViewById<View>(R.id.btn_notes_settings).setOnClickListener {
-            val inflater = LayoutInflater.from(this)
-            val menuView = inflater.inflate(R.layout.layout_activity_settings_menu, null)
-            val popupWindow = PopupWindow(menuView, ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT, true)
-            popupWindow.elevation = 10f
-            
-            // Hide task-specific items
-            menuView.findViewById<View>(R.id.menu_clear_completed).visibility = View.GONE
-            menuView.findViewById<View>(R.id.menu_toggle_completed).visibility = View.GONE
-            
-            menuView.findViewById<View>(R.id.menu_activity_settings).setOnClickListener {
-                showNotesSettingsDialog()
-                popupWindow.dismiss()
+            if (isDeleteMode) {
+                noteAdapter.deleteSelectedNotes(this)
+                toggleDeleteMode(false)
+            } else {
+                showSettingsMenu(it)
             }
-            popupWindow.showAsDropDown(it, -150, 0)
         }
 
         findViewById<View>(R.id.btn_create_new_note).setOnClickListener { showAddNoteDialog() }
+    }
+
+    private fun toggleDeleteMode(enabled: Boolean) {
+        isDeleteMode = enabled
+        noteAdapter.setDeleteMode(enabled)
+        val btnSettings = findViewById<ImageButton>(R.id.btn_notes_settings)
+        btnSettings.setImageResource(if (enabled) android.R.drawable.ic_menu_delete else R.drawable.baseline_tune_24)
+        findViewById<View>(R.id.btn_create_new_note).visibility = if (enabled) View.GONE else View.VISIBLE
+    }
+
+    private fun showSettingsMenu(anchor: View) {
+        val inflater = LayoutInflater.from(this)
+        val menuView = inflater.inflate(R.layout.layout_activity_settings_menu, null)
+        val popupWindow = PopupWindow(menuView, ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT, true)
+        popupWindow.elevation = 10f
+        
+        // Repurpose toggle_completed for SHOW/HIDE HIDDEN
+        val btnToggleHidden = menuView.findViewById<View>(R.id.menu_toggle_completed)
+        val tvToggleHidden = menuView.findViewById<TextView>(R.id.tv_toggle_completed)
+        val ivToggleHidden = menuView.findViewById<ImageView>(R.id.iv_toggle_completed)
+        
+        btnToggleHidden.visibility = View.VISIBLE
+        tvToggleHidden.text = if (DataManager.noteShowHidden) "HIDE HIDDEN" else "SHOW HIDDEN"
+        ivToggleHidden.setImageResource(if (DataManager.noteShowHidden) android.R.drawable.ic_menu_view else android.R.drawable.ic_partial_secure)
+
+        btnToggleHidden.setOnClickListener {
+            DataManager.noteShowHidden = !DataManager.noteShowHidden
+            DataManager.saveData(this)
+            updateDisplayList()
+            noteAdapter.updateNotes(displayNotes)
+            popupWindow.dismiss()
+        }
+
+        // Repurpose clear_completed for MULTI-DELETE
+        val btnMultiDelete = menuView.findViewById<View>(R.id.menu_clear_completed)
+        btnMultiDelete.visibility = View.VISIBLE
+        
+        // Use recursive search or specific child index to find the text
+        val tvLabel = if (btnMultiDelete is ViewGroup && btnMultiDelete.childCount > 1) {
+            btnMultiDelete.getChildAt(1) as? TextView
+        } else null
+        
+        tvLabel?.text = "SELECT & DELETE"
+
+        btnMultiDelete.setOnClickListener {
+            toggleDeleteMode(true)
+            popupWindow.dismiss()
+        }
+        
+        menuView.findViewById<View>(R.id.menu_activity_settings).setOnClickListener {
+            showNotesSettingsDialog()
+            popupWindow.dismiss()
+        }
+        popupWindow.showAsDropDown(anchor, -150, 0)
     }
 
     private fun setupBottomNavigation() {
@@ -77,6 +128,29 @@ class NotesActivity : AppCompatActivity() {
         val navQuestions = findViewById<View>(R.id.nav_questions)
         val navDaily = findViewById<View>(R.id.nav_daily)
         val navStories = findViewById<View>(R.id.nav_stories)
+        val footer = findViewById<View>(R.id.bottom_navigation_notes)
+
+        // Visibility based on settings
+        navNotes.visibility = if (DataManager.noteVisibleSections.contains("Notes")) View.VISIBLE else View.GONE
+        navQuestions.visibility = if (DataManager.noteVisibleSections.contains("Questions")) View.VISIBLE else View.GONE
+        navDaily.visibility = if (DataManager.noteVisibleSections.contains("Daily")) View.VISIBLE else View.GONE
+        navStories.visibility = if (DataManager.noteVisibleSections.contains("Stories")) View.VISIBLE else View.GONE
+
+        // Dynamic Visibility: Hide the entire footer if only one section is enabled
+        if (DataManager.noteVisibleSections.size > 1) {
+            footer.visibility = View.VISIBLE
+        } else {
+            footer.visibility = View.GONE
+            // If only one is visible, ensure we switch to it
+            val onlyVisible = DataManager.noteVisibleSections.firstOrNull() ?: "Notes"
+            if (currentCategory != onlyVisible) switchCategory(onlyVisible)
+        }
+
+        // If current is hidden, switch
+        if (!DataManager.noteVisibleSections.contains(currentCategory)) {
+            val firstVisible = DataManager.noteVisibleSections.firstOrNull() ?: "Notes"
+            switchCategory(firstVisible)
+        }
 
         navNotes.setOnClickListener { switchCategory("Notes") }
         navQuestions.setOnClickListener { switchCategory("Questions") }
@@ -308,6 +382,51 @@ class NotesActivity : AppCompatActivity() {
         }, calendar.get(Calendar.HOUR_OF_DAY), calendar.get(Calendar.MINUTE), false).show()
     }
 
+    private fun showManageSectionsDialog(type: String) {
+        val dialog = Dialog(this)
+        dialog.setContentView(R.layout.dialog_manage_sections)
+        dialog.window?.setBackgroundDrawableResource(android.R.color.transparent)
+        dialog.window?.setLayout(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT)
+
+        val container = dialog.findViewById<LinearLayout>(R.id.container_section_switches)
+        val btnSave = dialog.findViewById<View>(R.id.btn_save_sections)
+        
+        val options = listOf("Notes", "Questions", "Daily", "Stories")
+        val tempSelection = DataManager.noteVisibleSections.toMutableList()
+
+        options.forEach { option ->
+            val switch = SwitchCompat(this).apply {
+                text = option
+                setTextColor(Color.WHITE)
+                textSize = 16f
+                isChecked = tempSelection.contains(option)
+                setPadding(0, 24, 0, 24)
+                setOnCheckedChangeListener { _, isChecked ->
+                    if (isChecked) {
+                        if (!tempSelection.contains(option)) tempSelection.add(option)
+                    } else {
+                        if (tempSelection.size > 1) {
+                            tempSelection.remove(option)
+                        } else {
+                            this.isChecked = true
+                            android.widget.Toast.makeText(this@NotesActivity, "At least one section must be visible", android.widget.Toast.LENGTH_SHORT).show()
+                        }
+                    }
+                }
+            }
+            container.addView(switch)
+        }
+
+        btnSave.setOnClickListener {
+            DataManager.noteVisibleSections.clear()
+            DataManager.noteVisibleSections.addAll(tempSelection)
+            DataManager.saveData(this)
+            setupBottomNavigation() // Refresh current screen
+            dialog.dismiss()
+        }
+        dialog.show()
+    }
+
     private fun applyAutoCleanup() {
         val days = DataManager.noteAutoCleanupDays
         if (days <= 0) return
@@ -331,15 +450,12 @@ class NotesActivity : AppCompatActivity() {
         val itemTemplates = dialog.findViewById<View>(R.id.item_templates)
         val itemBulk = dialog.findViewById<View>(R.id.item_bulk_move)
         val itemExport = dialog.findViewById<View>(R.id.item_export_notes)
-        val itemShowHidden = dialog.findViewById<View>(R.id.item_show_hidden)
-        val swShowHidden = dialog.findViewById<androidx.appcompat.widget.SwitchCompat>(R.id.sw_show_hidden)
         val tvDefaultSummary = dialog.findViewById<TextView>(R.id.tv_default_cat_summary)
         val tvCleanupSummary = dialog.findViewById<TextView>(R.id.tv_cleanup_summary)
         val btnClose = dialog.findViewById<View>(R.id.btn_close_settings)
 
         tvDefaultSummary.text = "Current: ${DataManager.noteDefaultCategory}"
         tvCleanupSummary.text = if (DataManager.noteAutoCleanupDays > 0) "Cleanup after ${DataManager.noteAutoCleanupDays} days" else "Disabled"
-        swShowHidden?.isChecked = DataManager.noteShowHidden
 
         itemDefault.setOnClickListener {
             val categories = listOf("Notes", "Questions", "Daily", "Stories")
@@ -360,17 +476,19 @@ class NotesActivity : AppCompatActivity() {
             android.widget.Toast.makeText(this, "Auto-cleanup: ${if (next > 0) "$next days" else "Off"}", android.widget.Toast.LENGTH_SHORT).show()
         }
 
-        itemShowHidden.setOnClickListener {
-            DataManager.noteShowHidden = !DataManager.noteShowHidden
-            swShowHidden?.isChecked = DataManager.noteShowHidden
-            DataManager.saveData(this)
-            updateDisplayList()
-            noteAdapter.updateNotes(displayNotes)
-        }
-
         itemTemplates.setOnClickListener { showTemplateEditorDialog() }
         itemBulk.setOnClickListener { showBulkMoveDialog() }
-        itemExport.setOnClickListener { exportCategoryToText() }
+        
+        // Customize Navigation (NEW)
+        itemExport.setOnClickListener { 
+            showManageSectionsDialog("NOTE")
+            dialog.dismiss()
+        }
+        (itemExport as? ViewGroup)?.let { vg ->
+            for (i in 0 until vg.childCount) {
+                (vg.getChildAt(i) as? TextView)?.let { it.text = "Customize Navigation" }
+            }
+        }
 
         btnClose.setOnClickListener { dialog.dismiss() }
         dialog.show()
