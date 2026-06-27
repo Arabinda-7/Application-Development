@@ -282,8 +282,8 @@ class SettingsActivity : AppCompatActivity() {
                     SettingsHubItem("Section Icons", "Manage section and item icons", R.drawable.ic_habit_tracker, "APPEARANCE_ICONS"),
                     SettingsHubItem("Section Colors", "Manage section theme colors", R.drawable.ic_project, "APPEARANCE_COLORS"),
                     SettingsHubItem("Add Feature", "Custom section features", R.drawable.ic_habit_tracker, "APPEARANCE_ADD_FEATURE"),
-                    SettingsHubItem("Color", "Custom section colors", R.drawable.ic_project, "APPEARANCE_COLOR"),
-                    SettingsHubItem("Icon", "Custom section icons", R.drawable.ic_habit_tracker, "APPEARANCE_ICON")
+                    SettingsHubItem("Color Management", "Custom section colors", R.drawable.ic_project, "APPEARANCE_COLOR"),
+                    SettingsHubItem("Icon Management", "Custom section icons", R.drawable.ic_habit_tracker, "APPEARANCE_ICON")
                 )
                 settingsList.adapter = SettingsHubAdapter(menuItems) { section ->
                     showSectionSettings(section)
@@ -298,8 +298,23 @@ class SettingsActivity : AppCompatActivity() {
                 settings.add(ConfigItem("Note Add & Save Color", "Theme for creating notes") { showColorPickerDialog("ADD_NOTE") })
                 settings.add(ConfigItem("Finance Add & Save Color", "Theme for creating transactions") { showColorPickerDialog("ADD_FINANCE") })
             }
-            "APPEARANCE_COLOR", "APPEARANCE_ICON" -> {
-                // Empty sections as requested
+            "APPEARANCE_COLOR" -> {
+                settings.add(ConfigItem("ADD NEW CUSTOM COLOR", "Create a color to use app-wide") {
+                    showAddCustomColorDialog()
+                })
+                
+                if (DataManager.userCustomColors.isNotEmpty()) {
+                    settings.add(ConfigItem("--- YOUR CUSTOM COLORS ---", "Long-press to remove") {})
+                    DataManager.userCustomColors.forEach { color ->
+                        val hex = String.format("#%06X", (0xFFFFFF and color))
+                        settings.add(ConfigItem("Custom Color $hex", "Click to preview") {
+                            Toast.makeText(this, "Hex: $hex", Toast.LENGTH_SHORT).show()
+                        })
+                    }
+                }
+            }
+            "APPEARANCE_ICON" -> {
+                // Empty section for now
             }
             "APPEARANCE_ICONS" -> {
                 settings.add(ConfigItem("RESET ALL ICONS", "Restore original section icons") {
@@ -946,7 +961,7 @@ class SettingsActivity : AppCompatActivity() {
 
         title.text = "SECTION COLOR: $section"
 
-        val colors = listOf(
+        val defaultColors = listOf(
             Color.parseColor("#1E88E5"), // Blue
             Color.parseColor("#F57C00"), // Orange
             Color.parseColor("#43A047"), // Green
@@ -961,7 +976,9 @@ class SettingsActivity : AppCompatActivity() {
             Color.parseColor("#616161")  // Gray
         )
 
-        colors.forEach { color ->
+        val allColors = defaultColors + DataManager.userCustomColors
+
+        allColors.forEach { color ->
             val colorView = View(this).apply {
                 val size = (48 * resources.displayMetrics.density).toInt()
                 layoutParams = android.widget.GridLayout.LayoutParams().apply {
@@ -998,6 +1015,39 @@ class SettingsActivity : AppCompatActivity() {
         }
 
         btnCancel.setOnClickListener { dialog.dismiss() }
+        dialog.show()
+    }
+
+    private fun showAddCustomColorDialog() {
+        val dialog = Dialog(this)
+        dialog.setContentView(R.layout.dialog_set_budget) // Re-use hex input logic
+        dialog.window?.setBackgroundDrawableResource(android.R.color.transparent)
+        dialog.window?.setLayout(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT)
+
+        val etInput = dialog.findViewById<EditText>(R.id.et_budget_amount)
+        val btnSave = dialog.findViewById<TextView>(R.id.btn_save_budget)
+        val title = dialog.findViewById<TextView>(R.id.tv_dialog_title)
+        val subtext = dialog.findViewById<TextView>(R.id.tv_dialog_subtext)
+
+        title.text = "ADD CUSTOM COLOR"
+        subtext.text = "Enter color HEX code (e.g. #FF5733)"
+        etInput.hint = "#000000"
+        etInput.inputType = android.text.InputType.TYPE_CLASS_TEXT
+        
+        btnSave.text = "ADD COLOR"
+        btnSave.setOnClickListener {
+            val hex = etInput.text.toString().trim()
+            try {
+                val color = Color.parseColor(if (hex.startsWith("#")) hex else "#$hex")
+                DataManager.userCustomColors.add(color)
+                DataManager.saveData(this)
+                showSectionSettings("APPEARANCE_COLOR")
+                dialog.dismiss()
+                Toast.makeText(this, "Color added successfully!", Toast.LENGTH_SHORT).show()
+            } catch (e: Exception) {
+                Toast.makeText(this, "Invalid Hex Code", Toast.LENGTH_SHORT).show()
+            }
+        }
         dialog.show()
     }
 

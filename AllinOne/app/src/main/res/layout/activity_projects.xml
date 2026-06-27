@@ -73,7 +73,19 @@
         android:layout_marginTop="8dp"
         android:clipToPadding="false"
         android:paddingBottom="100dp"
-        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintBottom_toTopOf="@id/bottom_navigation_projects"
+        app:layout_constraintTop_toBottomOf="@id/tv_subtitle" />
+
+    <!-- Section for Project Ideas -->
+    <androidx.recyclerview.widget.RecyclerView
+        android:id="@+id/project_ideas_list"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_marginTop="8dp"
+        android:clipToPadding="false"
+        android:paddingBottom="100dp"
+        android:visibility="gone"
+        app:layout_constraintBottom_toTopOf="@id/bottom_navigation_projects"
         app:layout_constraintTop_toBottomOf="@id/tv_subtitle" />
 
     <com.google.android.material.floatingactionbutton.FloatingActionButton
@@ -85,8 +97,78 @@
         android:src="@android:drawable/ic_input_add"
         app:backgroundTint="#1A73E8"
         app:fabSize="normal"
-        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintBottom_toTopOf="@id/bottom_navigation_projects"
         app:layout_constraintEnd_toEndOf="parent"
         app:tint="@color/white" />
+
+    <!-- Custom Bottom Navigation -->
+    <LinearLayout
+        android:id="@+id/bottom_navigation_projects"
+        android:layout_width="match_parent"
+        android:layout_height="72dp"
+        android:background="#121212"
+        android:orientation="horizontal"
+        android:gravity="center_vertical"
+        app:layout_constraintBottom_toBottomOf="parent">
+
+        <LinearLayout
+            android:id="@+id/nav_projects"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:orientation="vertical"
+            android:gravity="center"
+            android:clickable="true"
+            android:focusable="true">
+            <ImageView
+                android:id="@+id/iv_projects_icon"
+                android:layout_width="32dp"
+                android:layout_height="32dp"
+                android:padding="6dp"
+                android:background="@drawable/bg_dialog_rounded"
+                android:backgroundTint="#33FFFFFF"
+                android:src="@drawable/ic_project"
+                app:tint="@color/white" />
+            <TextView
+                android:id="@+id/tv_projects_label"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="4dp"
+                android:text="Projects"
+                android:textColor="@color/white"
+                android:textSize="10sp"
+                android:textStyle="bold" />
+        </LinearLayout>
+
+        <LinearLayout
+            android:id="@+id/nav_notes"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:orientation="vertical"
+            android:gravity="center"
+            android:clickable="true"
+            android:focusable="true">
+            <ImageView
+                android:id="@+id/iv_notes_icon"
+                android:layout_width="32dp"
+                android:layout_height="32dp"
+                android:padding="6dp"
+                android:background="@drawable/bg_dialog_rounded"
+                android:backgroundTint="#33FFFFFF"
+                android:src="@drawable/ic_notes"
+                app:tint="@color/white" />
+            <TextView
+                android:id="@+id/tv_notes_label"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="4dp"
+                android:text="Notes"
+                android:textColor="@color/text_secondary"
+                android:textSize="10sp"
+                android:textStyle="bold" />
+        </LinearLayout>
+
+    </LinearLayout>
 
 </androidx.constraintlayout.widget.ConstraintLayout>

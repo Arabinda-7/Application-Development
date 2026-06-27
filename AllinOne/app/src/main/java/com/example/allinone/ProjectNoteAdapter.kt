@@ -112,6 +112,11 @@ class ProjectNoteAdapter(
             (context as? ProjectActivity)?.showProjectDetailsDialog(note)
         }
 
+        holder.itemView.setOnLongClickListener {
+            (context as? ProjectActivity)?.showProjectMenu(it, note)
+            true
+        }
+
         holder.ivHistory.setOnClickListener {
             (context as? ProjectActivity)?.showProjectHistoryDialog(note)
         }

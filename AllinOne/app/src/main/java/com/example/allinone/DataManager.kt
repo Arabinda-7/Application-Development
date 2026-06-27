@@ -65,6 +65,9 @@ object DataManager {
     var isAppLockEnabled: Boolean = false
     var isOledThemeEnabled: Boolean = false
 
+    // User Custom Colors
+    var userCustomColors = mutableListOf<Int>()
+
     // Global Appearance Settings
     var globalHabitColor: Int = -1
     var globalWorkoutColor: Int = -1
@@ -133,6 +136,7 @@ object DataManager {
     private const val KEY_PROJ_ANALYTICS = "project_analytics_enabled"
     private const val KEY_APP_LOCK = "app_lock_enabled"
     private const val KEY_OLED_THEME = "oled_theme_enabled"
+    private const val KEY_CUSTOM_COLORS = "user_custom_colors_data"
 
     private const val KEY_GLOBAL_HABIT_COLOR = "global_habit_color"
     private const val KEY_GLOBAL_WORKOUT_COLOR = "global_workout_color"
@@ -215,6 +219,7 @@ object DataManager {
             putBoolean(KEY_PROJ_ANALYTICS, projectAnalyticsEnabled)
             putBoolean(KEY_APP_LOCK, isAppLockEnabled)
             putBoolean(KEY_OLED_THEME, isOledThemeEnabled)
+            putString(KEY_CUSTOM_COLORS, gson.toJson(userCustomColors))
 
             putInt(KEY_GLOBAL_HABIT_COLOR, globalHabitColor)
             putInt(KEY_GLOBAL_WORKOUT_COLOR, globalWorkoutColor)
@@ -369,6 +374,11 @@ object DataManager {
         projectAnalyticsEnabled = prefs.getBoolean(KEY_PROJ_ANALYTICS, false)
         isAppLockEnabled = prefs.getBoolean(KEY_APP_LOCK, false)
         isOledThemeEnabled = prefs.getBoolean(KEY_OLED_THEME, false)
+
+        prefs.getString(KEY_CUSTOM_COLORS, null)?.let {
+            val type = object : TypeToken<MutableList<Int>>() {}.type
+            userCustomColors = gson.fromJson(it, type) ?: mutableListOf()
+        }
 
         globalHabitColor = prefs.getInt(KEY_GLOBAL_HABIT_COLOR, -1)
         globalWorkoutColor = prefs.getInt(KEY_GLOBAL_WORKOUT_COLOR, -1)

@@ -58,12 +58,21 @@ class NoteAdapter(
                 }
                 notifyItemChanged(position)
             } else {
-                (context as? NotesActivity)?.showEditNoteDialog(note) 
+                when (context) {
+                    is NotesActivity -> context.showEditNoteDialog(note)
+                    is ProjectActivity -> context.showEditIdeaDialog(note)
+                }
             }
         }
         
         holder.itemView.setOnLongClickListener {
-            if (!isDeleteMode) showCustomMenu(it, note)
+            if (!isDeleteMode) {
+                if (context is ProjectActivity) {
+                    context.showProjectMenu(it, note)
+                } else {
+                    showCustomMenu(it, note)
+                }
+            }
             true
         }
     }

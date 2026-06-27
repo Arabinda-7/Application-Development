@@ -22,7 +22,10 @@ class ProjectActivity : AppCompatActivity() {
 
     private val allNotes = DataManager.notes
     private lateinit var projectAdapter: ProjectNoteAdapter
+    private lateinit var ideaAdapter: NoteAdapter
     private var displayNotes = mutableListOf<Note>()
+    private var displayIdeas = mutableListOf<Note>()
+    private var isProjectsTab = true
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -30,6 +33,9 @@ class ProjectActivity : AppCompatActivity() {
 
         val projectList = findViewById<RecyclerView>(R.id.project_notes_list)
         projectList.layoutManager = StaggeredGridLayoutManager(2, StaggeredGridLayoutManager.VERTICAL)
+
+        val ideaList = findViewById<RecyclerView>(R.id.project_ideas_list)
+        ideaList.layoutManager = LinearLayoutManager(this)
 
         val dateTextView = findViewById<TextView>(R.id.tv_date)
         val sdf = SimpleDateFormat("MMM dd", Locale.getDefault())
@@ -42,31 +48,92 @@ class ProjectActivity : AppCompatActivity() {
         }
         projectList.adapter = projectAdapter
 
+        ideaAdapter = NoteAdapter(displayIdeas) {
+            DataManager.saveData(this)
+            updateDisplayList()
+        }
+        ideaList.adapter = ideaAdapter
+
         findViewById<View>(R.id.btn_back).setOnClickListener { finish() }
         val btnCreate = findViewById<com.google.android.material.floatingactionbutton.FloatingActionButton>(R.id.btn_add_project_note)
         if (DataManager.projectAddThemeColor != -1) {
             btnCreate.backgroundTintList = android.content.res.ColorStateList.valueOf(DataManager.projectAddThemeColor)
         }
-        btnCreate.setOnClickListener { showAddProjectNoteDialog() }
+        btnCreate.setOnClickListener { 
+            if (isProjectsTab) showAddProjectNoteDialog() else showAddIdeaDialog()
+        }
+        
+        setupBottomNavigation()
+    }
+
+    private fun setupBottomNavigation() {
+        val navProjects = findViewById<View>(R.id.nav_projects)
+        val navNotes = findViewById<View>(R.id.nav_notes)
+        val projectList = findViewById<View>(R.id.project_notes_list)
+        val ideaList = findViewById<View>(R.id.project_ideas_list)
+        val btnAdd = findViewById<View>(R.id.btn_add_project_note)
+
+        val ivProjects = findViewById<ImageView>(R.id.iv_projects_icon)
+        val tvProjects = findViewById<TextView>(R.id.tv_projects_label)
+        val ivNotes = findViewById<ImageView>(R.id.iv_notes_icon)
+        val tvNotes = findViewById<TextView>(R.id.tv_notes_label)
+
+        fun updateUI(isProjects: Boolean) {
+            isProjectsTab = isProjects
+            projectList.visibility = if (isProjects) View.VISIBLE else View.GONE
+            ideaList.visibility = if (isProjects) View.GONE else View.VISIBLE
+            btnAdd.visibility = View.VISIBLE // Keep always visible as it handles both now
+
+            val activeColor = ContextCompat.getColor(this, R.color.white)
+            val inactiveColor = ContextCompat.getColor(this, R.color.text_secondary)
+
+            ivProjects.imageTintList = android.content.res.ColorStateList.valueOf(if (isProjects) activeColor else inactiveColor)
+            tvProjects.setTextColor(if (isProjects) activeColor else inactiveColor)
+            ivNotes.imageTintList = android.content.res.ColorStateList.valueOf(if (isProjects) activeColor else inactiveColor).takeIf { !isProjects } ?: android.content.res.ColorStateList.valueOf(inactiveColor)
+
+            // Simpler color toggle
+            if (isProjects) {
+                ivProjects.imageTintList = android.content.res.ColorStateList.valueOf(activeColor)
+                tvProjects.setTextColor(activeColor)
+                ivNotes.imageTintList = android.content.res.ColorStateList.valueOf(inactiveColor)
+                tvNotes.setTextColor(inactiveColor)
+            } else {
+                ivProjects.imageTintList = android.content.res.ColorStateList.valueOf(inactiveColor)
+                tvProjects.setTextColor(inactiveColor)
+                ivNotes.imageTintList = android.content.res.ColorStateList.valueOf(activeColor)
+                tvNotes.setTextColor(activeColor)
+            }
+        }
+
+        navProjects.setOnClickListener { updateUI(true) }
+        navNotes.setOnClickListener { updateUI(false) }
+
         findViewById<View>(R.id.btn_project_settings).setOnClickListener { showProjectSettingsDialog() }
     }
 
     private fun updateDisplayList() {
         displayNotes.clear()
-        val filtered = allNotes.filter { it.category == "Project" }
+        displayIdeas.clear()
 
-        val visibleNotes = if (DataManager.projectAutoArchive) {
-            filtered.filter { it.status != "Completed" }
+        val filteredProjects = allNotes.filter { it.category == "Project" }
+        val visibleProjects = if (DataManager.projectAutoArchive) {
+            filteredProjects.filter { it.status != "Completed" }
         } else {
-            filtered
+            filteredProjects
         }
 
-        displayNotes.addAll(visibleNotes.sortedWith(compareByDescending<Note> { it.isPinned }
+        displayNotes.addAll(visibleProjects.sortedWith(compareByDescending<Note> { it.isPinned }
             .thenBy { it.status == "Completed" } // Completed at bottom
             .thenByDescending { it.timestamp }))
 
+        displayIdeas.addAll(allNotes.filter { it.category == "ProjectIdea" }
+            .sortedByDescending { it.timestamp })
+
         if (::projectAdapter.isInitialized) {
             projectAdapter.updateNotes(displayNotes)
+        }
+        if (::ideaAdapter.isInitialized) {
+            ideaAdapter.notifyDataSetChanged()
         }
     }
 
@@ -76,6 +143,10 @@ class ProjectActivity : AppCompatActivity() {
 
     fun showEditProjectNoteDialog(note: Note) {
         setupProjectDialog(note)
+    }
+
+    fun showEditIdeaDialog(note: Note) {
+        showAddIdeaDialog(note)
     }
 
     private fun setupProjectDialog(existingNote: Note? = null) {
@@ -93,6 +164,7 @@ class ProjectActivity : AppCompatActivity() {
         val btnPin = dialog.findViewById<ImageView>(R.id.btn_pin)
         val colorPreview = dialog.findViewById<View>(R.id.note_color_preview)
         val btnSave = dialog.findViewById<TextView>(R.id.btn_save_note)
+        btnSave.text = if (existingNote == null) "SAVE" else "UPDATE"
         if (DataManager.projectAddThemeColor != -1) {
             btnSave.setTextColor(DataManager.projectAddThemeColor)
         }
@@ -735,11 +807,136 @@ class ProjectActivity : AppCompatActivity() {
             swAnalytics.isChecked = DataManager.projectAnalyticsEnabled
         }
 
+        dialog.findViewById<View>(R.id.item_manage_templates).setOnClickListener {
+            showManageTemplatesDialog()
+        }
+
         dialog.findViewById<View>(R.id.btn_close_settings).setOnClickListener {
             DataManager.saveData(this)
             updateDisplayList()
             dialog.dismiss()
         }
+        dialog.show()
+    }
+
+    private fun showManageTemplatesDialog() {
+        val dialog = Dialog(this)
+        dialog.setContentView(R.layout.dialog_manage_categories)
+        dialog.window?.setBackgroundDrawableResource(android.R.color.transparent)
+        dialog.window?.setLayout(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT)
+
+        val container = dialog.findViewById<LinearLayout>(R.id.categories_container)
+        val etNew = dialog.findViewById<EditText>(R.id.et_new_category)
+        val btnAdd = dialog.findViewById<View>(R.id.btn_add_category)
+        val title = dialog.findViewById<TextView>(R.id.tv_categories_title)
+
+        title.text = "Project Templates"
+        etNew.hint = "Template Name..."
+
+        fun refresh() {
+            container.removeAllViews()
+            DataManager.projectTemplates.keys.forEach { templateName ->
+                val itemView = LayoutInflater.from(this).inflate(R.layout.item_category_manage, container, false)
+                itemView.findViewById<TextView>(R.id.tv_category_name).text = templateName
+                
+                // Show steps on tap
+                itemView.setOnClickListener {
+                    Toast.makeText(this, "Steps: ${DataManager.projectTemplates[templateName]?.joinToString(", ")}", Toast.LENGTH_LONG).show()
+                }
+
+                itemView.findViewById<View>(R.id.btn_remove_category).setOnClickListener {
+                    if (DataManager.projectTemplates.size > 1) {
+                        DataManager.projectTemplates.remove(templateName)
+                        DataManager.saveData(this)
+                        refresh()
+                    } else {
+                        Toast.makeText(this, "At least one template required", Toast.LENGTH_SHORT).show()
+                    }
+                }
+                container.addView(itemView)
+            }
+        }
+
+        btnAdd.setOnClickListener {
+            val name = etNew.text.toString().trim()
+            if (name.isNotEmpty() && !DataManager.projectTemplates.containsKey(name)) {
+                showCreateTemplateStepsDialog(name) {
+                    refresh()
+                    etNew.text.clear()
+                }
+            }
+        }
+
+        refresh()
+        dialog.show()
+    }
+
+    private fun showCreateTemplateStepsDialog(templateName: String, onComplete: () -> Unit) {
+        val dialog = Dialog(this)
+        dialog.setContentView(R.layout.dialog_manage_categories)
+        dialog.window?.setBackgroundDrawableResource(android.R.color.transparent)
+        dialog.window?.setLayout(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT)
+
+        val container = dialog.findViewById<LinearLayout>(R.id.categories_container)
+        val etStep = dialog.findViewById<EditText>(R.id.et_new_category)
+        val btnAddStep = dialog.findViewById<View>(R.id.btn_add_category)
+        val title = dialog.findViewById<TextView>(R.id.tv_categories_title)
+        
+        // Add a "SAVE TEMPLATE" button at the bottom
+        val btnSave = TextView(this).apply {
+            text = "SAVE TEMPLATE"
+            setTextColor(Color.parseColor("#1A73E8"))
+            textSize = 16f
+            setTypeface(null, android.graphics.Typeface.BOLD)
+            gravity = android.view.Gravity.CENTER
+            setPadding(0, 40, 0, 40)
+            isClickable = true
+            isFocusable = true
+            val outValue = android.util.TypedValue()
+            context.theme.resolveAttribute(android.R.attr.selectableItemBackground, outValue, true)
+            setBackgroundResource(outValue.resourceId)
+        }
+
+        title.text = "Add Steps for: $templateName"
+        etStep.hint = "Step name (e.g. Design)..."
+        
+        val steps = mutableListOf<String>()
+
+        fun refreshSteps() {
+            container.removeAllViews()
+            steps.forEach { step ->
+                val itemView = LayoutInflater.from(this).inflate(R.layout.item_category_manage, container, false)
+                itemView.findViewById<TextView>(R.id.tv_category_name).text = step
+                itemView.findViewById<View>(R.id.btn_remove_category).setOnClickListener {
+                    steps.remove(step)
+                    refreshSteps()
+                }
+                container.addView(itemView)
+            }
+            container.addView(btnSave)
+        }
+
+        btnAddStep.setOnClickListener {
+            val stepName = etStep.text.toString().trim()
+            if (stepName.isNotEmpty()) {
+                steps.add(stepName)
+                etStep.text.clear()
+                refreshSteps()
+            }
+        }
+
+        btnSave.setOnClickListener {
+            if (steps.isNotEmpty()) {
+                DataManager.projectTemplates[templateName] = steps
+                DataManager.saveData(this)
+                onComplete()
+                dialog.dismiss()
+            } else {
+                Toast.makeText(this, "Add at least one step", Toast.LENGTH_SHORT).show()
+            }
+        }
+
+        refreshSteps()
         dialog.show()
     }
 
@@ -768,7 +965,11 @@ class ProjectActivity : AppCompatActivity() {
 
         btnEdit.setOnClickListener {
             popupWindow.dismiss()
-            showEditProjectNoteDialog(note)
+            if (note.category == "Project") {
+                showEditProjectNoteDialog(note)
+            } else {
+                showEditIdeaDialog(note)
+            }
         }
 
         btnDelete.setOnClickListener {
@@ -786,5 +987,195 @@ class ProjectActivity : AppCompatActivity() {
         }
 
         popupWindow.showAsDropDown(anchor, 150, -100)
+    }
+
+    private var currentVoiceInput: EditText? = null
+
+    override fun onActivityResult(requestCode: Int, resultCode: Int, data: android.content.Intent?) {
+        super.onActivityResult(requestCode, resultCode, data)
+        if (requestCode == 201 && resultCode == RESULT_OK) {
+            val results = data?.getStringArrayListExtra(android.speech.RecognizerIntent.EXTRA_RESULTS)
+            val spokenText = results?.get(0) ?: ""
+            currentVoiceInput?.let {
+                val start = it.selectionStart
+                val end = it.selectionEnd
+                it.text.replace(Math.min(start, end), Math.max(start, end), spokenText, 0, spokenText.length)
+            }
+        }
+    }
+
+    private fun showAddIdeaDialog(existingIdea: Note? = null) {
+        val dialog = Dialog(this, android.R.style.Theme_Black_NoTitleBar_Fullscreen)
+        dialog.setContentView(R.layout.dialog_add_note_project)
+
+        val titleInput = dialog.findViewById<EditText>(R.id.note_title_input)
+        val contentInput = dialog.findViewById<EditText>(R.id.note_content_input)
+        val btnSave = dialog.findViewById<TextView>(R.id.btn_save_note)
+        val btnClose = dialog.findViewById<View>(R.id.btn_close_note)
+        val btnBullet = dialog.findViewById<ImageButton>(R.id.btn_bullet_list)
+        val btnNumeric = dialog.findViewById<ImageButton>(R.id.btn_numeric_list)
+        val btnConvert = dialog.findViewById<TextView>(R.id.btn_convert_project)
+        val btnVoice = dialog.findViewById<View>(R.id.btn_voice_input)
+        val btnPriority = dialog.findViewById<TextView>(R.id.btn_priority_tag)
+        val tvCharCount = dialog.findViewById<TextView>(R.id.tv_char_count)
+
+        var currentPriority = existingIdea?.priority ?: 0 // 0=Low, 1=Med, 2=High
+
+        fun updatePriorityUI() {
+            val (text, color) = when(currentPriority) {
+                2 -> "HIGH" to Color.RED
+                1 -> "MED" to Color.parseColor("#FFB800")
+                else -> "LOW" to Color.parseColor("#2EC4B6")
+            }
+            btnPriority.text = text
+            btnPriority.backgroundTintList = android.content.res.ColorStateList.valueOf(color)
+        }
+        updatePriorityUI()
+
+        if (DataManager.projectAddThemeColor != -1) {
+            btnSave.setTextColor(DataManager.projectAddThemeColor)
+        }
+
+        existingIdea?.let {
+            titleInput.setText(it.title)
+            contentInput.setText(it.content)
+            btnSave.text = "UPDATE"
+            btnConvert.visibility = View.VISIBLE
+            tvCharCount.text = "${it.content.length} characters"
+        }
+
+        // Logic for auto-formatting and char count
+        contentInput.addTextChangedListener(object : android.text.TextWatcher {
+            override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {}
+            override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {
+                tvCharCount.text = "${s?.length ?: 0} characters"
+                
+                // Auto-bullet/number on Enter
+                if (count == 1 && s?.get(start) == '\n') {
+                    val textBefore = s.subSequence(0, start).toString()
+                    val lines = textBefore.split("\n")
+                    if (lines.isNotEmpty()) {
+                        val lastLine = lines.last()
+                        if (lastLine.trim().startsWith("•")) {
+                            contentInput.text.insert(start + 1, "• ")
+                        } else {
+                            val match = Regex("^(\\d+)\\. ").find(lastLine.trim())
+                            if (match != null) {
+                                val nextNum = match.groupValues[1].toInt() + 1
+                                contentInput.text.insert(start + 1, "$nextNum. ")
+                            }
+                        }
+                    }
+                }
+            }
+            override fun afterTextChanged(s: android.text.Editable?) {}
+        })
+
+        btnPriority.setOnClickListener {
+            currentPriority = (currentPriority + 1) % 3
+            updatePriorityUI()
+        }
+
+        btnVoice.setOnClickListener {
+            currentVoiceInput = contentInput
+            val intent = android.content.Intent(android.speech.RecognizerIntent.ACTION_RECOGNIZE_SPEECH).apply {
+                putExtra(android.speech.RecognizerIntent.EXTRA_LANGUAGE_MODEL, android.speech.RecognizerIntent.LANGUAGE_MODEL_FREE_FORM)
+                putExtra(android.speech.RecognizerIntent.EXTRA_PROMPT, "Speak your idea...")
+            }
+            try {
+                startActivityForResult(intent, 201)
+            } catch (e: Exception) {
+                Toast.makeText(this, "Speech recognition not available", Toast.LENGTH_SHORT).show()
+            }
+        }
+
+        btnConvert.setOnClickListener {
+            AlertDialog.Builder(this)
+                .setTitle("Convert to Project?")
+                .setMessage("This will turn your idea into a full Project Board with a roadmap. The original idea will be moved.")
+                .setPositiveButton("CONVERT") { _, _ ->
+                    val title = titleInput.text.toString()
+                    if (title.isNotEmpty()) {
+                        // Create Project
+                        val newProject = Note(
+                            title = title,
+                            content = contentInput.text.toString(),
+                            category = "Project",
+                            timestamp = System.currentTimeMillis()
+                        )
+                        allNotes.add(0, newProject)
+                        
+                        // Add history log
+                        addHistoryLog(newProject, "Conversion", "Created from Idea: $title")
+
+                        // Remove Idea if it was existing
+                        existingIdea?.let { original -> allNotes.remove(original) }
+                        
+                        DataManager.saveData(this)
+                        updateDisplayList()
+                        dialog.dismiss()
+                        
+                        // Switch to Projects tab and show details
+                        findViewById<View>(R.id.nav_projects).performClick()
+                        showProjectDetailsDialog(newProject)
+                        
+                        Toast.makeText(this, "Idea successfully converted!", Toast.LENGTH_SHORT).show()
+                    }
+                }
+                .setNegativeButton("CANCEL", null)
+                .show()
+        }
+
+        fun insertAtCursor(text: String) {
+            val start = contentInput.selectionStart
+            val end = contentInput.selectionEnd
+            contentInput.text.replace(Math.min(start, end), Math.max(start, end), text, 0, text.length)
+        }
+
+        btnBullet.setOnClickListener {
+            insertAtCursor("\n• ")
+        }
+
+        btnNumeric.setOnClickListener {
+            val text = contentInput.text.toString()
+            val lines = text.split("\n")
+            var lastNumber = 0
+            for (line in lines.reversed()) {
+                val match = Regex("^(\\d+)\\. ").find(line.trim())
+                if (match != null) {
+                    lastNumber = match.groupValues[1].toInt()
+                    break
+                }
+            }
+            insertAtCursor("\n${lastNumber + 1}. ")
+        }
+
+        btnSave.setOnClickListener {
+            val title = titleInput.text.toString()
+            if (title.isNotEmpty()) {
+                if (existingIdea == null) {
+                    val newIdea = Note(
+                        title = title,
+                        content = contentInput.text.toString(),
+                        category = "ProjectIdea",
+                        priority = currentPriority,
+                        timestamp = System.currentTimeMillis()
+                    )
+                    allNotes.add(0, newIdea)
+                } else {
+                    existingIdea.title = title
+                    existingIdea.content = contentInput.text.toString()
+                    existingIdea.priority = currentPriority
+                }
+                DataManager.saveData(this)
+                updateDisplayList()
+                dialog.dismiss()
+            } else {
+                Toast.makeText(this, "Please enter a title", Toast.LENGTH_SHORT).show()
+            }
+        }
+
+        btnClose.setOnClickListener { dialog.dismiss() }
+        dialog.show()
     }
 }
