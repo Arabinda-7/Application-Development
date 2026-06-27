@@ -48,6 +48,19 @@ class LedgerActivity : AppCompatActivity() {
             },
             onShowMenu = { anchor, entry, isHistory, onAction ->
                 showCustomLedgerMenu(anchor, entry, isHistory, onAction)
+            },
+            onConfirmSettlement = { entry ->
+                showConfirmationDialog(
+                    title = "SETTLE ENTRY",
+                    message = "Are you sure you want to mark this entry as settled?",
+                    positiveButtonText = "SETTLE",
+                    onConfirm = {
+                        entry.isSettled = true
+                        DataManager.saveData(this)
+                        updateActiveEntries()
+                        updateSummary()
+                    }
+                )
             }
         )
         ledgerList.adapter = ledgerAdapter
@@ -56,7 +69,15 @@ class LedgerActivity : AppCompatActivity() {
 
         findViewById<View>(R.id.btn_back).setOnClickListener { finish() }
         findViewById<View>(R.id.btn_add_ledger).setOnClickListener { showAddLedgerDialog() }
-        findViewById<View>(R.id.btn_ledger_history).setOnClickListener { showLedgerHistoryDialog() }
+        findViewById<View>(R.id.btn_ledger_history).setOnClickListener { 
+            startActivity(Intent(this, LedgerHistoryActivity::class.java))
+        }
+    }
+
+    override fun onResume() {
+        super.onResume()
+        updateActiveEntries()
+        updateSummary()
     }
 
     private fun updateActiveEntries() {
@@ -79,6 +100,7 @@ class LedgerActivity : AppCompatActivity() {
     private fun showLedgerHistoryDialog() {
         val dialog = Dialog(this, R.style.SeamlessDialog)
         dialog.setContentView(R.layout.dialog_project_history)
+        dialog.window?.setLayout(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT)
 
         val historyList = dialog.findViewById<RecyclerView>(R.id.history_list)
         val btnClose = dialog.findViewById<View>(R.id.btn_close_history)
@@ -91,24 +113,32 @@ class LedgerActivity : AppCompatActivity() {
         
         val adapter = object : RecyclerView.Adapter<RecyclerView.ViewHolder>() {
             override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): RecyclerView.ViewHolder {
-                val view = LayoutInflater.from(parent.context).inflate(R.layout.ledger_list_item, parent, false)
+                val view = LayoutInflater.from(parent.context).inflate(R.layout.item_ledger_history, parent, false)
                 return object : RecyclerView.ViewHolder(view) {}
             }
 
             override fun onBindViewHolder(holder: RecyclerView.ViewHolder, position: Int) {
                 val entry = settledEntries[position]
                 val v = holder.itemView
-                v.findViewById<TextView>(R.id.tv_person_name).text = entry.personName
+                val tvName = v.findViewById<TextView>(R.id.tv_person_name)
+                val tvAmount = v.findViewById<TextView>(R.id.tv_ledger_amount)
+                
+                tvName.text = entry.personName
+                tvName.paintFlags = tvName.paintFlags or Paint.STRIKE_THRU_TEXT_FLAG
+                
                 v.findViewById<TextView>(R.id.tv_ledger_type).text = entry.type.uppercase()
-                v.findViewById<TextView>(R.id.tv_ledger_amount).text = "${DataManager.financeCurrency}${entry.amount.toInt()}"
+                tvAmount.text = "${DataManager.financeCurrency}${entry.amount.toInt()}"
                 v.findViewById<TextView>(R.id.tv_ledger_date).text = SimpleDateFormat("MMM dd, yyyy", Locale.getDefault()).format(Date(entry.timestamp))
                 
-                v.findViewById<View>(R.id.btn_settle_ledger).visibility = View.GONE
-                v.alpha = 0.6f
+                val typeColor = if (entry.type == "Borrowed") Color.parseColor("#FF5252") else Color.parseColor("#4CAF50")
+                tvAmount.setTextColor(typeColor)
 
                 v.setOnLongClickListener {
                     showCustomLedgerMenu(it, entry, true) {
-                        dialog.dismiss()
+                        settledEntries.remove(entry)
+                        notifyDataSetChanged()
+                        updateActiveEntries()
+                        updateSummary()
                     }
                     true
                 }
@@ -288,13 +318,42 @@ class LedgerActivity : AppCompatActivity() {
         dialog.show()
     }
 
+    private fun showConfirmationDialog(
+        title: String,
+        message: String,
+        positiveButtonText: String = "PROCEED",
+        onConfirm: () -> Unit
+    ) {
+        val dialog = Dialog(this)
+        dialog.setContentView(R.layout.dialog_confirmation)
+        dialog.window?.setBackgroundDrawableResource(android.R.color.transparent)
+        dialog.window?.setLayout(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT)
+
+        val tvTitle = dialog.findViewById<TextView>(R.id.tv_confirm_title)
+        val tvMessage = dialog.findViewById<TextView>(R.id.tv_confirm_message)
+        val btnNegative = dialog.findViewById<TextView>(R.id.btn_confirm_negative)
+        val btnPositive = dialog.findViewById<TextView>(R.id.btn_confirm_positive)
+
+        tvTitle.text = title
+        tvMessage.text = message
+        btnPositive.text = positiveButtonText
+
+        btnNegative.setOnClickListener { dialog.dismiss() }
+        btnPositive.setOnClickListener {
+            onConfirm()
+            dialog.dismiss()
+        }
+        dialog.show()
+    }
+
     private fun Int.dpToPx(): Int = (this * resources.displayMetrics.density).toInt()
 }
 
 class LedgerAdapter(
     private val entries: MutableList<LedgerEntry>,
     private val onUpdate: () -> Unit,
-    private val onShowMenu: (View, LedgerEntry, Boolean, () -> Unit) -> Unit
+    private val onShowMenu: (View, LedgerEntry, Boolean, () -> Unit) -> Unit,
+    private val onConfirmSettlement: (LedgerEntry) -> Unit
 ) : RecyclerView.Adapter<LedgerAdapter.LedgerViewHolder>() {
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): LedgerViewHolder {
@@ -350,9 +409,7 @@ class LedgerAdapter(
         }
 
         holder.btnSettle.setOnClickListener {
-            entry.isSettled = !entry.isSettled
-            onUpdate()
-            // Entry will be moved to history automatically by onUpdate triggering updateActiveEntries
+            onConfirmSettlement(entry)
         }
 
         holder.itemView.setOnLongClickListener {

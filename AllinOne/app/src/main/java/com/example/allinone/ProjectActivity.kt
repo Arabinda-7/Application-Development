@@ -469,7 +469,7 @@ class ProjectActivity : AppCompatActivity() {
         dialog.show()
     }
 
-    private fun showEditSubFeatureDialog(sub: ProjectFeature, onSaved: () -> Unit) {
+    private fun showEditSubFeatureDialog(sub: ProjectFeature, showNameField: Boolean = false, onSaved: () -> Unit) {
         val dialog = Dialog(this, R.style.SeamlessDialog)
         dialog.setContentView(R.layout.dialog_edit_subfeature)
         dialog.window?.setBackgroundDrawableResource(android.R.color.transparent)
@@ -477,19 +477,29 @@ class ProjectActivity : AppCompatActivity() {
 
         val btnClose = dialog.findViewById<View>(R.id.btn_close_subfeature)
         val etSerial = dialog.findViewById<EditText>(R.id.et_serial_input)
+        val etName = dialog.findViewById<EditText>(R.id.et_name_input)
         val etDetails = dialog.findViewById<EditText>(R.id.et_details_input)
         val btnSave = dialog.findViewById<TextView>(R.id.btn_save_subfeature)
 
         btnClose.setOnClickListener { dialog.dismiss() }
 
-        etSerial.setText(sub.position.toString())
+        if (showNameField) {
+            etName.visibility = View.VISIBLE
+            etName.setText(sub.name)
+            etSerial.visibility = View.GONE
+        } else {
+            etSerial.setText(sub.position.toString())
+        }
+
         etDetails.setText(sub.details)
         etDetails.setSelection(etDetails.text.length)
 
         btnSave.setOnClickListener {
-            val newPos = etSerial.text.toString().toIntOrNull()
-            if (newPos != null) {
-                sub.position = newPos
+            if (showNameField) {
+                sub.name = etName.text.toString().trim()
+            } else {
+                val newPos = etSerial.text.toString().toIntOrNull()
+                if (newPos != null) sub.position = newPos
             }
             sub.details = etDetails.text.toString().trim()
             onSaved()
@@ -1018,8 +1028,93 @@ class ProjectActivity : AppCompatActivity() {
         val btnVoice = dialog.findViewById<View>(R.id.btn_voice_input)
         val btnPriority = dialog.findViewById<TextView>(R.id.btn_priority_tag)
         val tvCharCount = dialog.findViewById<TextView>(R.id.tv_char_count)
+        
+        val containerSubfeatures = dialog.findViewById<LinearLayout>(R.id.container_subfeatures)
+        val etNewSubfeature = dialog.findViewById<EditText>(R.id.et_new_subfeature)
+        val btnAddSubfeature = dialog.findViewById<View>(R.id.btn_add_subfeature)
 
         var currentPriority = existingIdea?.priority ?: 0 // 0=Low, 1=Med, 2=High
+        val tempSubfeatures = existingIdea?.subFeatures?.toMutableList() ?: mutableListOf()
+
+        fun refreshSubFeatures() {
+            containerSubfeatures.removeAllViews()
+            tempSubfeatures.forEach { sub ->
+                val layout = LinearLayout(this).apply {
+                    orientation = LinearLayout.VERTICAL
+                    setPadding(0, 8, 0, 8)
+                }
+
+                val header = LinearLayout(this).apply {
+                    orientation = LinearLayout.HORIZONTAL
+                    gravity = android.view.Gravity.CENTER_VERTICAL
+                }
+                
+                val ctView = CheckedTextView(this).apply {
+                    text = sub.name
+                    setTextColor(Color.WHITE)
+                    isChecked = sub.isCompleted
+                    setCheckMarkTintList(android.content.res.ColorStateList.valueOf(Color.WHITE))
+                    layoutParams = LinearLayout.LayoutParams(0, ViewGroup.LayoutParams.WRAP_CONTENT, 1f)
+                    
+                    if (sub.isCompleted) {
+                        paintFlags = paintFlags or Paint.STRIKE_THRU_TEXT_FLAG
+                        alpha = 0.5f
+                    }
+
+                    setOnClickListener {
+                        sub.isCompleted = !sub.isCompleted
+                        refreshSubFeatures()
+                    }
+                    
+                    setOnLongClickListener {
+                        tempSubfeatures.remove(sub)
+                        refreshSubFeatures()
+                        true
+                    }
+                }
+
+                val btnEdit = ImageButton(this).apply {
+                    setImageResource(android.R.drawable.ic_menu_edit)
+                    background = ContextCompat.getDrawable(this@ProjectActivity, android.R.color.transparent)
+                    imageTintList = android.content.res.ColorStateList.valueOf(Color.GRAY)
+                    layoutParams = LinearLayout.LayoutParams(24.dpToPx(), 24.dpToPx()).apply {
+                        marginEnd = 8.dpToPx()
+                    }
+                    scaleType = ImageView.ScaleType.FIT_CENTER
+                    setPadding(4.dpToPx(), 4.dpToPx(), 4.dpToPx(), 4.dpToPx())
+                }
+
+                header.addView(ctView)
+                header.addView(btnEdit)
+                layout.addView(header)
+
+                val tvNote = TextView(this).apply {
+                    text = sub.details
+                    setTextColor(Color.GRAY)
+                    textSize = 12f
+                    visibility = if (sub.details.isNotEmpty()) View.VISIBLE else View.GONE
+                    setPadding(12.dpToPx(), 0, 0, 8.dpToPx())
+                }
+                layout.addView(tvNote)
+
+                btnEdit.setOnClickListener {
+                    showEditSubFeatureDialog(sub, showNameField = true) {
+                        refreshSubFeatures()
+                    }
+                }
+
+                containerSubfeatures.addView(layout)
+            }
+        }
+
+        btnAddSubfeature.setOnClickListener {
+            val name = etNewSubfeature.text.toString().trim()
+            if (name.isNotEmpty()) {
+                tempSubfeatures.add(ProjectFeature(name = name))
+                etNewSubfeature.text.clear()
+                refreshSubFeatures()
+            }
+        }
 
         fun updatePriorityUI() {
             val (text, color) = when(currentPriority) {
@@ -1042,6 +1137,7 @@ class ProjectActivity : AppCompatActivity() {
             btnSave.text = "UPDATE"
             btnConvert.visibility = View.VISIBLE
             tvCharCount.text = "${it.content.length} characters"
+            refreshSubFeatures()
         }
 
         // Logic for auto-formatting and char count
@@ -1159,13 +1255,16 @@ class ProjectActivity : AppCompatActivity() {
                         content = contentInput.text.toString(),
                         category = "ProjectIdea",
                         priority = currentPriority,
-                        timestamp = System.currentTimeMillis()
+                        timestamp = System.currentTimeMillis(),
+                        subFeatures = tempSubfeatures
                     )
                     allNotes.add(0, newIdea)
                 } else {
                     existingIdea.title = title
                     existingIdea.content = contentInput.text.toString()
                     existingIdea.priority = currentPriority
+                    existingIdea.subFeatures.clear()
+                    existingIdea.subFeatures.addAll(tempSubfeatures)
                 }
                 DataManager.saveData(this)
                 updateDisplayList()

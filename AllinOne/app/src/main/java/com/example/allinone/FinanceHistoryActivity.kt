@@ -1,12 +1,15 @@
 package com.example.allinone
 
 import android.os.Bundle
+import android.view.LayoutInflater
 import android.view.View
+import android.view.ViewGroup
 import android.widget.TextView
 import androidx.appcompat.app.AppCompatActivity
 import androidx.recyclerview.widget.GridLayoutManager
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
+import androidx.viewpager2.widget.ViewPager2
 import java.text.SimpleDateFormat
 import java.util.*
 
@@ -16,30 +19,18 @@ class FinanceHistoryActivity : AppCompatActivity() {
     private lateinit var transactionsList: RecyclerView
     private lateinit var monthAdapter: MonthAdapter
     private lateinit var transactionAdapter: TransactionAdapter
-    private lateinit var tvYear: TextView
-    private lateinit var tvMonthComparison: TextView
-    private var currentYear: Int = Calendar.getInstance().get(Calendar.YEAR)
+    private lateinit var vpYear: ViewPager2
+    private val availableYears = (2020..2030).toList()
+    private var currentYearIndex: Int = availableYears.indexOf(Calendar.getInstance().get(Calendar.YEAR)).coerceAtLeast(0)
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_finance_history)
 
-        tvYear = findViewById(R.id.tv_current_year)
-        updateYearDisplay()
+        vpYear = findViewById(R.id.vp_year_selector)
+        setupYearViewPager()
 
         findViewById<View>(R.id.btn_back).setOnClickListener { handleBackNavigation() }
-        
-        findViewById<View>(R.id.btn_prev_year).setOnClickListener {
-            currentYear--
-            updateYearDisplay()
-            updateYearlyAnalytics()
-        }
-        
-        findViewById<View>(R.id.btn_next_year).setOnClickListener {
-            currentYear++
-            updateYearDisplay()
-            updateYearlyAnalytics()
-        }
 
         monthsList = findViewById(R.id.history_months_list)
         transactionsList = findViewById(R.id.month_transactions_list)
@@ -74,13 +65,32 @@ class FinanceHistoryActivity : AppCompatActivity() {
         })
     }
 
-    private fun updateYearDisplay() {
-        tvYear.text = currentYear.toString()
+    private fun setupYearViewPager() {
+        val adapter = object : RecyclerView.Adapter<RecyclerView.ViewHolder>() {
+            override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): RecyclerView.ViewHolder {
+                val view = LayoutInflater.from(parent.context).inflate(R.layout.item_year_page, parent, false)
+                return object : RecyclerView.ViewHolder(view) {}
+            }
+            override fun onBindViewHolder(holder: RecyclerView.ViewHolder, position: Int) {
+                holder.itemView.findViewById<TextView>(R.id.tv_year_item).text = availableYears[position].toString()
+            }
+            override fun getItemCount() = availableYears.size
+        }
+        vpYear.adapter = adapter
+        vpYear.setCurrentItem(currentYearIndex, false)
+        
+        vpYear.registerOnPageChangeCallback(object : ViewPager2.OnPageChangeCallback() {
+            override fun onPageSelected(position: Int) {
+                currentYearIndex = position
+                updateYearlyAnalytics()
+            }
+        })
     }
 
     private fun updateYearlyAnalytics() {
         val currency = DataManager.financeCurrency
-        val yearKey = currentYear.toString()
+        val currentYearValue = availableYears[currentYearIndex]
+        val yearKey = currentYearValue.toString()
         val sdf = SimpleDateFormat("yyyy", Locale.getDefault())
         val monthCodeSdf = SimpleDateFormat("MM", Locale.getDefault())
         val monthNameSdf = SimpleDateFormat("MMMM", Locale.getDefault())
@@ -96,9 +106,8 @@ class FinanceHistoryActivity : AppCompatActivity() {
             monthCodeSdf.format(Date(it.timestamp))
         }.distinct().size.coerceAtLeast(1)
 
-        val avgSpent = totalSpent / uniqueMonthsCount
+        val avgSpent = if (uniqueMonthsCount > 0) totalSpent / uniqueMonthsCount else 0.0
 
-        // Find highest spend month
         val highestMonth = yearlyTransactions
             .filter { it.type == "Expense" }
             .groupBy { monthNameSdf.format(Date(it.timestamp)) }
@@ -129,7 +138,7 @@ class FinanceHistoryActivity : AppCompatActivity() {
         
         val calendar = Calendar.getInstance()
         calendar.time = date
-        calendar.set(Calendar.YEAR, currentYear)
+        calendar.set(Calendar.YEAR, availableYears[currentYearIndex])
         
         val monthKey = sdf.format(calendar.time)
 
@@ -164,7 +173,6 @@ class FinanceHistoryActivity : AppCompatActivity() {
         summary.findViewById<TextView>(R.id.tv_current_savings).text = String.format(Locale.US, "%s%.0f", currency, savings)
         summary.findViewById<TextView>(R.id.tv_savings_goal).text = String.format(Locale.US, "Goal: %s%.0f", currency, savingsGoal)
 
-        // Month-over-Month Comparison
         val prevMonthCalendar = calendar.clone() as Calendar
         prevMonthCalendar.add(Calendar.MONTH, -1)
         val prevMonthKey = sdf.format(prevMonthCalendar.time)
