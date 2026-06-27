@@ -65,6 +65,28 @@ object DataManager {
     var isAppLockEnabled: Boolean = false
     var isOledThemeEnabled: Boolean = false
 
+    // Global Appearance Settings
+    var globalHabitColor: Int = -1
+    var globalWorkoutColor: Int = -1
+    var globalTaskColor: Int = -1
+    var globalProjectColor: Int = -1
+    var globalNoteColor: Int = -1
+    var globalFinanceColor: Int = -1
+
+    var habitAddThemeColor: Int = -1
+    var workoutAddThemeColor: Int = -1
+    var taskAddThemeColor: Int = -1
+    var noteAddThemeColor: Int = -1
+    var projectAddThemeColor: Int = -1
+    var financeAddThemeColor: Int = -1
+
+    var globalHabitIcon: Int = R.drawable.ic_habit_tracker
+    var globalWorkoutIcon: Int = R.drawable.ic_workout_routine
+    var globalTaskIcon: Int = R.drawable.ic_todo_list
+    var globalProjectIcon: Int = R.drawable.ic_project
+    var globalNoteIcon: Int = R.drawable.ic_notes
+    var globalFinanceIcon: Int = R.drawable.ic_finance
+
     var projectTemplates: MutableMap<String, List<String>> = mutableMapOf(
         "App Feature" to listOf("UI Design", "Business Logic", "Integration", "Testing", "Deployment"),
         "Personal Goal" to listOf("Planning", "Execution", "Review"),
@@ -111,6 +133,28 @@ object DataManager {
     private const val KEY_PROJ_ANALYTICS = "project_analytics_enabled"
     private const val KEY_APP_LOCK = "app_lock_enabled"
     private const val KEY_OLED_THEME = "oled_theme_enabled"
+
+    private const val KEY_GLOBAL_HABIT_COLOR = "global_habit_color"
+    private const val KEY_GLOBAL_WORKOUT_COLOR = "global_workout_color"
+    private const val KEY_GLOBAL_TASK_COLOR = "global_task_color"
+    private const val KEY_GLOBAL_PROJECT_COLOR = "global_project_color"
+    private const val KEY_GLOBAL_NOTE_COLOR = "global_note_color"
+    private const val KEY_GLOBAL_FINANCE_COLOR = "global_finance_color"
+
+    private const val KEY_HABIT_ADD_COLOR = "habit_add_theme_color"
+    private const val KEY_WORKOUT_ADD_COLOR = "workout_add_theme_color"
+    private const val KEY_TASK_ADD_COLOR = "task_add_theme_color"
+    private const val KEY_NOTE_ADD_COLOR = "note_add_theme_color"
+    private const val KEY_PROJECT_ADD_COLOR = "project_add_theme_color"
+    private const val KEY_FINANCE_ADD_COLOR = "finance_add_theme_color"
+
+    private const val KEY_GLOBAL_HABIT_ICON = "global_habit_icon"
+    private const val KEY_GLOBAL_WORKOUT_ICON = "global_workout_icon"
+    private const val KEY_GLOBAL_TASK_ICON = "global_task_icon"
+    private const val KEY_GLOBAL_PROJECT_ICON = "global_project_icon"
+    private const val KEY_GLOBAL_NOTE_ICON = "global_note_icon"
+    private const val KEY_GLOBAL_FINANCE_ICON = "global_finance_icon"
+
     private const val KEY_PROJ_TEMPLATES = "project_templates_data"
     private const val KEY_PROJECT_AUTO_SYNC = "project_auto_task_sync"
     private const val KEY_PROJECT_AUTO_ARCHIVE = "project_auto_archive"
@@ -171,6 +215,28 @@ object DataManager {
             putBoolean(KEY_PROJ_ANALYTICS, projectAnalyticsEnabled)
             putBoolean(KEY_APP_LOCK, isAppLockEnabled)
             putBoolean(KEY_OLED_THEME, isOledThemeEnabled)
+
+            putInt(KEY_GLOBAL_HABIT_COLOR, globalHabitColor)
+            putInt(KEY_GLOBAL_WORKOUT_COLOR, globalWorkoutColor)
+            putInt(KEY_GLOBAL_TASK_COLOR, globalTaskColor)
+            putInt(KEY_GLOBAL_PROJECT_COLOR, globalProjectColor)
+            putInt(KEY_GLOBAL_NOTE_COLOR, globalNoteColor)
+            putInt(KEY_GLOBAL_FINANCE_COLOR, globalFinanceColor)
+
+            putInt(KEY_HABIT_ADD_COLOR, habitAddThemeColor)
+            putInt(KEY_WORKOUT_ADD_COLOR, workoutAddThemeColor)
+            putInt(KEY_TASK_ADD_COLOR, taskAddThemeColor)
+            putInt(KEY_NOTE_ADD_COLOR, noteAddThemeColor)
+            putInt(KEY_PROJECT_ADD_COLOR, projectAddThemeColor)
+            putInt(KEY_FINANCE_ADD_COLOR, financeAddThemeColor)
+
+            putInt(KEY_GLOBAL_HABIT_ICON, globalHabitIcon)
+            putInt(KEY_GLOBAL_WORKOUT_ICON, globalWorkoutIcon)
+            putInt(KEY_GLOBAL_TASK_ICON, globalTaskIcon)
+            putInt(KEY_GLOBAL_PROJECT_ICON, globalProjectIcon)
+            putInt(KEY_GLOBAL_NOTE_ICON, globalNoteIcon)
+            putInt(KEY_GLOBAL_FINANCE_ICON, globalFinanceIcon)
+
             putString(KEY_PROJ_TEMPLATES, gson.toJson(projectTemplates))
             putString(KEY_HABIT_DEFAULT_TAB, habitDefaultTab)
             putBoolean(KEY_HABIT_VACATION_MODE, habitVacationMode)
@@ -303,6 +369,28 @@ object DataManager {
         projectAnalyticsEnabled = prefs.getBoolean(KEY_PROJ_ANALYTICS, false)
         isAppLockEnabled = prefs.getBoolean(KEY_APP_LOCK, false)
         isOledThemeEnabled = prefs.getBoolean(KEY_OLED_THEME, false)
+
+        globalHabitColor = prefs.getInt(KEY_GLOBAL_HABIT_COLOR, -1)
+        globalWorkoutColor = prefs.getInt(KEY_GLOBAL_WORKOUT_COLOR, -1)
+        globalTaskColor = prefs.getInt(KEY_GLOBAL_TASK_COLOR, -1)
+        globalProjectColor = prefs.getInt(KEY_GLOBAL_PROJECT_COLOR, -1)
+        globalNoteColor = prefs.getInt(KEY_GLOBAL_NOTE_COLOR, -1)
+        globalFinanceColor = prefs.getInt(KEY_GLOBAL_FINANCE_COLOR, -1)
+
+        habitAddThemeColor = prefs.getInt(KEY_HABIT_ADD_COLOR, -1)
+        workoutAddThemeColor = prefs.getInt(KEY_WORKOUT_ADD_COLOR, -1)
+        taskAddThemeColor = prefs.getInt(KEY_TASK_ADD_COLOR, -1)
+        noteAddThemeColor = prefs.getInt(KEY_NOTE_ADD_COLOR, -1)
+        projectAddThemeColor = prefs.getInt(KEY_PROJECT_ADD_COLOR, -1)
+        financeAddThemeColor = prefs.getInt(KEY_FINANCE_ADD_COLOR, -1)
+
+        globalHabitIcon = prefs.getInt(KEY_GLOBAL_HABIT_ICON, R.drawable.ic_habit_tracker)
+        globalWorkoutIcon = prefs.getInt(KEY_GLOBAL_WORKOUT_ICON, R.drawable.ic_workout_routine)
+        globalTaskIcon = prefs.getInt(KEY_GLOBAL_TASK_ICON, R.drawable.ic_todo_list)
+        globalProjectIcon = prefs.getInt(KEY_GLOBAL_PROJECT_ICON, R.drawable.ic_project)
+        globalNoteIcon = prefs.getInt(KEY_GLOBAL_NOTE_ICON, R.drawable.ic_notes)
+        globalFinanceIcon = prefs.getInt(KEY_GLOBAL_FINANCE_ICON, R.drawable.ic_finance)
+
         prefs.getString(KEY_PROJ_TEMPLATES, null)?.let {
             val type = object : TypeToken<MutableMap<String, List<String>>>() {}.type
             projectTemplates = gson.fromJson(it, type) ?: projectTemplates
@@ -659,6 +747,31 @@ object DataManager {
                 sanitizeProjectFeatures(feature.subFeatures)
             }
         }
+    }
+
+    fun resetAppearanceIcons() {
+        globalHabitIcon = R.drawable.ic_habit_tracker
+        globalWorkoutIcon = R.drawable.ic_fitness
+        globalTaskIcon = R.drawable.ic_todo_list
+        globalNoteIcon = R.drawable.ic_notes
+        globalProjectIcon = R.drawable.ic_project
+        globalFinanceIcon = R.drawable.ic_finance
+    }
+
+    fun resetAppearanceColors() {
+        globalHabitColor = -1
+        globalWorkoutColor = -1
+        globalTaskColor = -1
+        globalNoteColor = -1
+        globalProjectColor = -1
+        globalFinanceColor = -1
+
+        habitAddThemeColor = -1
+        workoutAddThemeColor = -1
+        taskAddThemeColor = -1
+        noteAddThemeColor = -1
+        projectAddThemeColor = -1
+        financeAddThemeColor = -1
     }
 
     private fun autoArchiveTasks() {

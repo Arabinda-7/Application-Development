@@ -2,20 +2,20 @@ package com.example.allinone
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.filled.List
-import androidx.compose.material.icons.automirrored.filled.Send
 import androidx.compose.material.icons.filled.*
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -29,8 +29,11 @@ fun HomeScreen(
     onNavigateToNotes: () -> Unit,
     onNavigateToProjects: () -> Unit,
     onNavigateToFinance: () -> Unit,
-    onNavigateToSettings: () -> Unit
+    onNavigateToSettings: () -> Unit,
+    onColorSelected: (String, Int) -> Unit = { _, _ -> }
 ) {
+    var showColorPicker by remember { mutableStateOf<String?>(null) }
+
     Column(
         modifier = Modifier
             .fillMaxSize()
@@ -87,63 +90,112 @@ fun HomeScreen(
                     DashboardCard(
                         title = "Habit Tracker",
                         subtitle = "${state.habitProgress}%",
-                        iconRes = R.drawable.ic_habit_tracker,
-                        backgroundColor = Color(0xFFFF7A59),
-                        onClick = onNavigateToHabits
+                        iconRes = state.habitIcon,
+                        backgroundColor = if (state.habitColor != -1) Color(state.habitColor) else Color(0xFFFF7A59),
+                        onClick = onNavigateToHabits,
+                        onLongClick = { showColorPicker = "HABIT" }
                     )
                 }
                 item {
                     DashboardCard(
                         title = "Workout Routine",
                         subtitle = "${state.workoutProgress}%",
-                        iconRes = R.drawable.ic_fitness,
-                        backgroundColor = Color(0xFFFFB800),
-                        onClick = onNavigateToWorkout
+                        iconRes = state.workoutIcon,
+                        backgroundColor = if (state.workoutColor != -1) Color(state.workoutColor) else Color(0xFFFFB800),
+                        onClick = onNavigateToWorkout,
+                        onLongClick = { showColorPicker = "WORKOUT" }
                     )
                 }
                 item {
                     DashboardCard(
                         title = "Tasks",
-                        iconRes = R.drawable.ic_todo_list,
-                        backgroundColor = Color(0xFF2EC4B6),
-                        onClick = onNavigateToTodos
+                        iconRes = state.taskIcon,
+                        backgroundColor = if (state.taskColor != -1) Color(state.taskColor) else Color(0xFF2EC4B6),
+                        onClick = onNavigateToTodos,
+                        onLongClick = { showColorPicker = "TASK" }
                     )
                 }
                 item {
                     DashboardCard(
                         title = "Notes",
-                        iconRes = R.drawable.ic_notes,
-                        backgroundColor = Color(0xFF3A86F0),
-                        onClick = onNavigateToNotes
+                        iconRes = state.noteIcon,
+                        backgroundColor = if (state.noteColor != -1) Color(state.noteColor) else Color(0xFF3A86F0),
+                        onClick = onNavigateToNotes,
+                        onLongClick = { showColorPicker = "NOTE" }
                     )
                 }
                 item {
                     DashboardCard(
                         title = "Project",
-                        iconRes = R.drawable.ic_project,
-                        backgroundColor = Color(0xFF1A73E8),
-                        onClick = onNavigateToProjects
+                        iconRes = state.projectIcon,
+                        backgroundColor = if (state.projectColor != -1) Color(state.projectColor) else Color(0xFF1A73E8),
+                        onClick = onNavigateToProjects,
+                        onLongClick = { showColorPicker = "PROJECT" }
                     )
                 }
                 item {
                     DashboardCard(
                         title = "Finance",
-                        iconRes = R.drawable.ic_finance,
-                        backgroundColor = Color(0xFF1A73E8),
-                        onClick = onNavigateToFinance
+                        iconRes = state.financeIcon,
+                        backgroundColor = if (state.financeColor != -1) Color(state.financeColor) else Color(0xFF1A73E8),
+                        onClick = onNavigateToFinance,
+                        onLongClick = { showColorPicker = "FINANCE" }
                     )
                 }
             }
         }
     }
+
+    if (showColorPicker != null) {
+        AlertDialog(
+            onDismissRequest = { showColorPicker = null },
+            containerColor = Color(0xFF1A1A1A),
+            title = { Text("Pick Color", color = Color.White) },
+            text = {
+                val colors = listOf(
+                    Color(0xFFFF7A59), Color(0xFFFFB800), Color(0xFF2EC4B6), Color(0xFF3A86F0),
+                    Color(0xFF1A73E8), Color(0xFFE91E63), Color(0xFF9C27B0), Color(0xFF673AB7),
+                    Color(0xFF4CAF50), Color(0xFF8BC34A), Color(0xFFCDDC39), Color(0xFFFFEB3B)
+                )
+                LazyVerticalGrid(
+                    columns = GridCells.Fixed(4),
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .height(180.dp),
+                    contentPadding = PaddingValues(8.dp),
+                    horizontalArrangement = Arrangement.spacedBy(8.dp),
+                    verticalArrangement = Arrangement.spacedBy(8.dp)
+                ) {
+                    items(colors.size) { index ->
+                        Box(
+                            modifier = Modifier
+                                .size(48.dp)
+                                .background(colors[index], CircleShape)
+                                .clickable {
+                                    onColorSelected(showColorPicker!!, colors[index].toArgb())
+                                    showColorPicker = null
+                                }
+                        )
+                    }
+                }
+            },
+            confirmButton = {
+                TextButton(onClick = { showColorPicker = null }) {
+                    Text("CLOSE", color = Color(0xFF1A73E8))
+                }
+            }
+        )
+    }
 }
 
+@OptIn(androidx.compose.foundation.ExperimentalFoundationApi::class)
 @Composable
 fun DashboardCard(
     title: String,
     iconRes: Int,
     backgroundColor: Color,
     onClick: () -> Unit,
+    onLongClick: () -> Unit = {},
     subtitle: String? = null
 ) {
     Card(
@@ -152,7 +204,10 @@ fun DashboardCard(
         modifier = Modifier
             .height(180.dp)
             .fillMaxWidth()
-            .clickable(onClick = onClick)
+            .combinedClickable(
+                onClick = onClick,
+                onLongClick = onLongClick
+            )
     ) {
         Column(
             modifier = Modifier

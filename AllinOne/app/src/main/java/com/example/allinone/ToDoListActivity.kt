@@ -328,6 +328,9 @@ class ToDoListActivity : AppCompatActivity() {
         val btnAddSubtask = view.findViewById<ImageButton>(R.id.btn_add_subtask)
         val tvReminder = view.findViewById<TextView>(R.id.tv_reminder_summary)
         val btnSave = view.findViewById<TextView>(R.id.btn_save_task)
+        if (DataManager.taskAddThemeColor != -1) {
+            btnSave.setTextColor(DataManager.taskAddThemeColor)
+        }
 
         // Setup Category Chips
         val categories = DataManager.taskCustomCategories

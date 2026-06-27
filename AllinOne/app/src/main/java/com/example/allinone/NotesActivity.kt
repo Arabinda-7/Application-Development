@@ -201,6 +201,9 @@ class NotesActivity : AppCompatActivity() {
         val contentInput = dialog.findViewById<EditText>(R.id.note_content_input)
         val colorPreview = dialog.findViewById<View>(R.id.note_color_preview)
         val btnSave = dialog.findViewById<TextView>(R.id.btn_save_note)
+        if (DataManager.noteAddThemeColor != -1) {
+            btnSave.setTextColor(DataManager.noteAddThemeColor)
+        }
         val btnClose = dialog.findViewById<View>(R.id.btn_close_note)
         val btnVoice = dialog.findViewById<View>(R.id.btn_voice_input)
         val btnReminder = dialog.findViewById<View>(R.id.btn_reminder)
@@ -272,6 +275,9 @@ class NotesActivity : AppCompatActivity() {
         val contentInput = dialog.findViewById<EditText>(R.id.note_content_input)
         val colorPreview = dialog.findViewById<View>(R.id.note_color_preview)
         val btnSave = dialog.findViewById<TextView>(R.id.btn_save_note)
+        if (DataManager.noteAddThemeColor != -1) {
+            btnSave.setTextColor(DataManager.noteAddThemeColor)
+        }
         val btnClose = dialog.findViewById<View>(R.id.btn_close_note)
         val btnVoice = dialog.findViewById<View>(R.id.btn_voice_input)
         val btnReminder = dialog.findViewById<View>(R.id.btn_reminder)

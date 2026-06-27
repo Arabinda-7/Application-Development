@@ -140,6 +140,9 @@ class FinanceActivity : AppCompatActivity() {
         val etCustomNote = dialog.findViewById<EditText>(R.id.et_trans_custom_category)
         val rgType = dialog.findViewById<RadioGroup>(R.id.rg_trans_type)
         val btnSave = dialog.findViewById<TextView>(R.id.btn_save_trans)
+        if (DataManager.financeAddThemeColor != -1) {
+            btnSave.setTextColor(DataManager.financeAddThemeColor)
+        }
         val btnClose = dialog.findViewById<View>(R.id.btn_close_trans)
         val titleText = dialog.findViewById<TextView>(R.id.tv_dialog_title)
         val tvDate = dialog.findViewById<TextView>(R.id.tv_trans_date)

@@ -62,7 +62,11 @@ class HabitTrackerActivity : AppCompatActivity() {
         }, { _, _ -> })
         habitList.adapter = habitAdapter
 
-        findViewById<View>(R.id.btn_create_new_habit).setOnClickListener { showAddHabitDialog(null) }
+        val btnCreate = findViewById<androidx.appcompat.widget.AppCompatButton>(R.id.btn_create_new_habit)
+        if (DataManager.habitAddThemeColor != -1) {
+            btnCreate.backgroundTintList = android.content.res.ColorStateList.valueOf(DataManager.habitAddThemeColor)
+        }
+        btnCreate.setOnClickListener { showAddHabitDialog(null) }
 
         setupHeaderLogic()
         setupFooterLogic()
@@ -344,6 +348,9 @@ class HabitTrackerActivity : AppCompatActivity() {
         val nameInput = dialog.findViewById<EditText>(R.id.habit_name_input)
         val btnClose = dialog.findViewById<View>(R.id.btn_close)
         val btnSave = dialog.findViewById<TextView>(R.id.btn_save)
+        if (DataManager.habitAddThemeColor != -1) {
+            btnSave.setTextColor(DataManager.habitAddThemeColor)
+        }
         val iconPreview = dialog.findViewById<ImageView>(R.id.icon_preview)
         val colorPreview = dialog.findViewById<View>(R.id.color_preview)
         val cardRepeat = dialog.findViewById<View>(R.id.card_repeat)

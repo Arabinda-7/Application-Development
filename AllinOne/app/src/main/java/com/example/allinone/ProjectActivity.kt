@@ -31,6 +31,10 @@ class ProjectActivity : AppCompatActivity() {
         val projectList = findViewById<RecyclerView>(R.id.project_notes_list)
         projectList.layoutManager = StaggeredGridLayoutManager(2, StaggeredGridLayoutManager.VERTICAL)
 
+        val dateTextView = findViewById<TextView>(R.id.tv_date)
+        val sdf = SimpleDateFormat("MMM dd", Locale.getDefault())
+        dateTextView.text = sdf.format(DataManager.getTrackingCalendar().time)
+
         updateDisplayList()
         projectAdapter = ProjectNoteAdapter(displayNotes) {
             DataManager.saveData(this)
@@ -85,6 +89,9 @@ class ProjectActivity : AppCompatActivity() {
         val btnPin = dialog.findViewById<ImageView>(R.id.btn_pin)
         val colorPreview = dialog.findViewById<View>(R.id.note_color_preview)
         val btnSave = dialog.findViewById<TextView>(R.id.btn_save_note)
+        if (DataManager.projectAddThemeColor != -1) {
+            btnSave.setTextColor(DataManager.projectAddThemeColor)
+        }
         val btnClose = dialog.findViewById<View>(R.id.btn_close_note)
 
         val tvDeadlineDisplay = dialog.findViewById<TextView>(R.id.tv_deadline_display)

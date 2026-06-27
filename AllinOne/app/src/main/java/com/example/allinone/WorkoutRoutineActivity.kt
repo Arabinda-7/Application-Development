@@ -85,7 +85,11 @@ class WorkoutRoutineActivity : AppCompatActivity() {
         }, { workout, position -> startTimerForWorkout(workout, position) })
         workoutList.adapter = workoutAdapter
 
-        findViewById<View>(R.id.btn_create_new_workout).setOnClickListener { showAddWorkoutDialog(null) }
+        val btnCreate = findViewById<androidx.appcompat.widget.AppCompatButton>(R.id.btn_create_new_workout)
+        if (DataManager.workoutAddThemeColor != -1) {
+            btnCreate.backgroundTintList = android.content.res.ColorStateList.valueOf(DataManager.workoutAddThemeColor)
+        }
+        btnCreate.setOnClickListener { showAddWorkoutDialog(null) }
 
         setupHeaderLogic()
         setupFooterLogic()
@@ -377,6 +381,9 @@ class WorkoutRoutineActivity : AppCompatActivity() {
         val chipGroup = dialog.findViewById<ChipGroup>(R.id.muscle_chip_group)
         val btnClose = dialog.findViewById<View>(R.id.btn_close_workout)
         val btnSave = dialog.findViewById<TextView>(R.id.btn_save_workout)
+        if (DataManager.workoutAddThemeColor != -1) {
+            btnSave.setTextColor(DataManager.workoutAddThemeColor)
+        }
         val iconPreview = dialog.findViewById<ImageView>(R.id.icon_preview_workout)
         val colorPreview = dialog.findViewById<View>(R.id.color_preview_workout)
         val cardRepeat = dialog.findViewById<View>(R.id.card_repeat_workout)
