@@ -9,31 +9,71 @@
     app:strokeWidth="1dp"
     app:strokeColor="#33FFFFFF">
 
-    <LinearLayout
+    <FrameLayout
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:gravity="center"
-        android:orientation="vertical"
-        android:padding="8dp">
+        android:layout_height="match_parent">
 
-        <ImageView
-            android:id="@+id/iv_month_icon"
-            android:layout_width="24dp"
-            android:layout_height="24dp"
-            android:layout_marginBottom="8dp"
-            android:alpha="0.6"
-            app:tint="@color/white" />
+        <!-- Circular Progress Ring (Background) -->
+        <ProgressBar
+            android:id="@+id/month_progress_bg"
+            style="?android:attr/progressBarStyleHorizontal"
+            android:layout_width="48dp"
+            android:layout_height="48dp"
+            android:layout_gravity="center_horizontal"
+            android:layout_marginTop="12dp"
+            android:progress="100"
+            android:progressDrawable="@drawable/custom_progress_bar"
+            android:alpha="0.1" />
 
-        <TextView
-            android:id="@+id/tv_month_name"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="JAN"
-            android:textColor="@color/white"
-            android:textSize="13sp"
-            android:textStyle="bold"
-            android:letterSpacing="0.1" />
+        <!-- Circular Progress Ring (Actual) -->
+        <ProgressBar
+            android:id="@+id/month_progress_ring"
+            style="?android:attr/progressBarStyleHorizontal"
+            android:layout_width="48dp"
+            android:layout_height="48dp"
+            android:layout_gravity="center_horizontal"
+            android:layout_marginTop="12dp"
+            android:progress="0"
+            android:progressDrawable="@drawable/custom_progress_bar" />
 
-    </LinearLayout>
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:gravity="center_horizontal"
+            android:orientation="vertical"
+            android:padding="8dp">
+
+            <ImageView
+                android:id="@+id/iv_month_icon"
+                android:layout_width="16dp"
+                android:layout_height="16dp"
+                android:layout_marginTop="12dp"
+                android:alpha="0.8"
+                app:tint="@color/white" />
+
+            <TextView
+                android:id="@+id/tv_month_name"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="14dp"
+                android:text="JAN"
+                android:textColor="@color/white"
+                android:textSize="12sp"
+                android:textStyle="bold"
+                android:letterSpacing="0.1" />
+
+            <TextView
+                android:id="@+id/tv_month_summary"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="2dp"
+                android:text="₹0"
+                android:textColor="#B0B0B0"
+                android:textSize="9sp"
+                android:textStyle="bold"
+                android:visibility="gone" />
+
+        </LinearLayout>
+    </FrameLayout>
 
 </com.google.android.material.card.MaterialCardView>
