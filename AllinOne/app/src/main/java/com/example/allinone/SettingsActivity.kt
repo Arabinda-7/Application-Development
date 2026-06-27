@@ -11,8 +11,10 @@ import android.view.ViewGroup
 import android.widget.EditText
 import android.widget.ImageView
 import android.widget.LinearLayout
+import android.widget.PopupWindow
 import android.widget.TextView
 import android.widget.Toast
+import androidx.activity.OnBackPressedCallback
 import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.widget.SwitchCompat
 import androidx.recyclerview.widget.LinearLayoutManager
@@ -35,23 +37,42 @@ class SettingsActivity : AppCompatActivity() {
         settingsList.layoutManager = LinearLayoutManager(this)
 
         findViewById<View>(R.id.btn_back).setOnClickListener { 
-            when (currentPath) {
-                "HUB" -> finish()
-                "APPEARANCE_ICONS", "APPEARANCE_COLORS", "APPEARANCE_ADD_COLORS" -> showSectionSettings("APPEARANCE")
-                "HELP_DETAIL" -> showSectionSettings("HELP")
-                "HELP", "APPEARANCE" -> showHub()
-                else -> showHub()
-            }
+            handleBackNavigation()
         }
 
+        onBackPressedDispatcher.addCallback(this, object : OnBackPressedCallback(true) {
+            override fun handleOnBackPressed() {
+                if (currentPath == "HUB") {
+                    finish()
+                } else {
+                    handleBackNavigation()
+                }
+            }
+        })
+
         showHub()
+    }
+
+    private fun handleBackNavigation() {
+        when (currentPath) {
+            "HUB" -> finish()
+            "APPEARANCE_ICONS", "APPEARANCE_COLORS", "APPEARANCE_ADD_FEATURE", "APPEARANCE_COLOR", "APPEARANCE_ICON" -> showSectionSettings("APPEARANCE")
+            "HABITS_ICONS", "HABITS_NAMES" -> showSectionSettings("HABITS")
+            "WORKOUTS_ICONS", "WORKOUTS_NAMES" -> showSectionSettings("WORKOUTS")
+            "TASKS_ICONS", "TASKS_NAMES" -> showSectionSettings("TASKS")
+            "NOTES_ICONS", "NOTES_NAMES" -> showSectionSettings("NOTES")
+            "FINANCE_ICONS", "FINANCE_NAMES" -> showSectionSettings("FINANCE")
+            "PROJECTS_ICONS", "PROJECTS_NAMES" -> showSectionSettings("PROJECTS")
+            "APPEARANCE", "OTHERS", "HELP_GUIDE" -> showHub()
+            else -> showHub()
+        }
     }
 
     private fun showHub() {
         currentPath = "HUB"
         tvTitle.text = "APP SETTINGS"
         
-        val menuItems = mutableListOf(
+        val menuItems = listOf(
             SettingsHubItem("Habit Tracker", "Manage your daily rituals and streaks", R.drawable.ic_habit_tracker, "HABITS"),
             SettingsHubItem("Workout Routine", "Configure exercises and rest timers", R.drawable.ic_workout_routine, "WORKOUTS"),
             SettingsHubItem("To-Do List", "Organize tasks and prioritization", R.drawable.ic_todo_list, "TASKS"),
@@ -59,8 +80,9 @@ class SettingsActivity : AppCompatActivity() {
             SettingsHubItem("Finance", "Setup currency and budget goals", R.drawable.ic_finance, "FINANCE"),
             SettingsHubItem("Projects", "Advanced roadmap and project settings", R.drawable.ic_project, "PROJECTS"),
             SettingsHubItem("App Security", "Biometric lock and privacy settings", R.drawable.baseline_settings_24, "SECURITY"),
-            SettingsHubItem("Appearance Settings", "Change section icons and theme colors", R.drawable.ic_habit_tracker, "APPEARANCE"),
-            SettingsHubItem("Help & Guide", "Learn how to use all app features", R.drawable.ic_notes, "HELP")
+            SettingsHubItem("Appearance Settings", "Manage section icons and colors", R.drawable.ic_habit_tracker, "APPEARANCE"),
+            SettingsHubItem("Others", "Additional app configurations", R.drawable.baseline_tune_24, "OTHERS"),
+            SettingsHubItem("Help & Guide", "Support and feature documentation", R.drawable.baseline_settings_24, "HELP_GUIDE")
         )
 
         settingsList.adapter = SettingsHubAdapter(menuItems) { section ->
@@ -70,12 +92,14 @@ class SettingsActivity : AppCompatActivity() {
 
     private fun showSectionSettings(section: String) {
         currentPath = section
-        tvTitle.text = section.replace("_", " ") + " SETTINGS"
+        tvTitle.text = section.removePrefix("APPEARANCE_").replace("_", " ")
         
         val settings = mutableListOf<ConfigItem>()
         
         when(section) {
             "HABITS" -> {
+                settings.add(ConfigItem("Icons", "No features added yet") { showSectionSettings("HABITS_ICONS") })
+                settings.add(ConfigItem("Names", "No features added yet") { showSectionSettings("HABITS_NAMES") })
                 settings.add(ConfigItem("Behavioral Insights", "Peak performance analytics") {
                     showBehavioralInsightsDialog()
                 })
@@ -111,6 +135,8 @@ class SettingsActivity : AppCompatActivity() {
                 })
             }
             "WORKOUTS" -> {
+                settings.add(ConfigItem("Icons", "No features added yet") { showSectionSettings("WORKOUTS_ICONS") })
+                settings.add(ConfigItem("Names", "No features added yet") { showSectionSettings("WORKOUTS_NAMES") })
                 settings.add(ConfigItem("Manage Muscle Groups", "Add or remove body part tags") {
                     showManageMuscleGroupsDialog()
                 })
@@ -136,6 +162,8 @@ class SettingsActivity : AppCompatActivity() {
                 })
             }
             "TASKS" -> {
+                settings.add(ConfigItem("Icons", "No features added yet") { showSectionSettings("TASKS_ICONS") })
+                settings.add(ConfigItem("Names", "No features added yet") { showSectionSettings("TASKS_NAMES") })
                 settings.add(ConfigItem("Manage Categories", "Customize your task tags") {
                     showManageTaskCategoriesDialog()
                 })
@@ -160,6 +188,8 @@ class SettingsActivity : AppCompatActivity() {
                 })
             }
             "NOTES" -> {
+                settings.add(ConfigItem("Icons", "No features added yet") { showSectionSettings("NOTES_ICONS") })
+                settings.add(ConfigItem("Names", "No features added yet") { showSectionSettings("NOTES_NAMES") })
                 settings.add(ConfigItem("Custom Templates", "Edit note pre-fill text") {
                     showNoteTemplatesDialog()
                 })
@@ -181,6 +211,8 @@ class SettingsActivity : AppCompatActivity() {
                 })
             }
             "FINANCE" -> {
+                settings.add(ConfigItem("Icons", "No features added yet") { showSectionSettings("FINANCE_ICONS") })
+                settings.add(ConfigItem("Names", "No features added yet") { showSectionSettings("FINANCE_NAMES") })
                 settings.add(ConfigItem("Primary Currency", "Current: ${DataManager.financeCurrency}") {
                     val symbols = listOf("₹", "$", "€", "£", "¥")
                     DataManager.financeCurrency = symbols[(symbols.indexOf(DataManager.financeCurrency) + 1) % symbols.size]
@@ -197,6 +229,8 @@ class SettingsActivity : AppCompatActivity() {
                 })
             }
             "PROJECTS" -> {
+                settings.add(ConfigItem("Icons", "No features added yet") { showSectionSettings("PROJECTS_ICONS") })
+                settings.add(ConfigItem("Names", "No features added yet") { showSectionSettings("PROJECTS_NAMES") })
                 settings.add(ConfigItem("Manage Templates", "Edit roadmap pre-sets") {
                     showProjectTemplatesDialog()
                 })
@@ -244,15 +278,28 @@ class SettingsActivity : AppCompatActivity() {
                 })
             }
             "APPEARANCE" -> {
-                settings.add(ConfigItem("Section Icons", "Manage default icons for each section") {
-                    showSectionSettings("APPEARANCE_ICONS")
-                })
-                settings.add(ConfigItem("Section Color", "Customize theme colors for each section") {
-                    showSectionSettings("APPEARANCE_COLORS")
-                })
-                settings.add(ConfigItem("Add Section Colors", "Theme colors for creation dialogs") {
-                    showSectionSettings("APPEARANCE_ADD_COLORS")
-                })
+                val menuItems = listOf(
+                    SettingsHubItem("Section Icons", "Manage section and item icons", R.drawable.ic_habit_tracker, "APPEARANCE_ICONS"),
+                    SettingsHubItem("Section Colors", "Manage section theme colors", R.drawable.ic_project, "APPEARANCE_COLORS"),
+                    SettingsHubItem("Add Feature", "Custom section features", R.drawable.ic_habit_tracker, "APPEARANCE_ADD_FEATURE"),
+                    SettingsHubItem("Color", "Custom section colors", R.drawable.ic_project, "APPEARANCE_COLOR"),
+                    SettingsHubItem("Icon", "Custom section icons", R.drawable.ic_habit_tracker, "APPEARANCE_ICON")
+                )
+                settingsList.adapter = SettingsHubAdapter(menuItems) { section ->
+                    showSectionSettings(section)
+                }
+                return
+            }
+            "APPEARANCE_ADD_FEATURE" -> {
+                settings.add(ConfigItem("Habit Add & Save Color", "Theme for creating habits") { showColorPickerDialog("ADD_HABIT") })
+                settings.add(ConfigItem("Workout Add & Save Color", "Theme for creating workouts") { showColorPickerDialog("ADD_WORKOUT") })
+                settings.add(ConfigItem("Task Add & Save Color", "Theme for creating tasks") { showColorPickerDialog("ADD_TASK") })
+                settings.add(ConfigItem("Project Add & Save Color", "Theme for creating projects") { showColorPickerDialog("ADD_PROJECT") })
+                settings.add(ConfigItem("Note Add & Save Color", "Theme for creating notes") { showColorPickerDialog("ADD_NOTE") })
+                settings.add(ConfigItem("Finance Add & Save Color", "Theme for creating transactions") { showColorPickerDialog("ADD_FINANCE") })
+            }
+            "APPEARANCE_COLOR", "APPEARANCE_ICON" -> {
+                // Empty sections as requested
             }
             "APPEARANCE_ICONS" -> {
                 settings.add(ConfigItem("RESET ALL ICONS", "Restore original section icons") {
@@ -271,7 +318,7 @@ class SettingsActivity : AppCompatActivity() {
                 settings.add(ConfigItem("Finance Icon", "Change default finance icon") { showIconPickerDialog("FINANCE") })
             }
             "APPEARANCE_COLORS" -> {
-                settings.add(ConfigItem("RESET ALL COLORS", "Restore original theme colors") {
+                settings.add(ConfigItem("RESET ALL COLORS", "Restore all theme defaults") {
                     showConfirmationDialog("RESET COLORS", "Are you sure you want to reset all section colors to defaults?") {
                         DataManager.resetAppearanceColors()
                         DataManager.saveData(this)
@@ -279,20 +326,14 @@ class SettingsActivity : AppCompatActivity() {
                         Toast.makeText(this, "Colors reset successfully", Toast.LENGTH_SHORT).show()
                     }
                 })
+                
+                settings.add(ConfigItem("--- DASHBOARD COLORS ---", "Section card themes") {})
                 settings.add(ConfigItem("Habit Section Color", "Change theme color for Habits") { showColorPickerDialog("HABIT") })
                 settings.add(ConfigItem("Workout Section Color", "Change theme color for Workouts") { showColorPickerDialog("WORKOUT") })
                 settings.add(ConfigItem("Task Section Color", "Change theme color for Tasks") { showColorPickerDialog("TASK") })
                 settings.add(ConfigItem("Project Section Color", "Change theme color for Projects") { showColorPickerDialog("PROJECT") })
                 settings.add(ConfigItem("Note Section Color", "Change theme color for Notes") { showColorPickerDialog("NOTE") })
                 settings.add(ConfigItem("Finance Section Color", "Change theme color for Finance") { showColorPickerDialog("FINANCE") })
-            }
-            "APPEARANCE_ADD_COLORS" -> {
-                settings.add(ConfigItem("Habit Add Theme", "Color for adding new habits") { showColorPickerDialog("ADD_HABIT") })
-                settings.add(ConfigItem("Workout Add Theme", "Color for adding new workouts") { showColorPickerDialog("ADD_WORKOUT") })
-                settings.add(ConfigItem("Task Add Theme", "Color for adding new tasks") { showColorPickerDialog("ADD_TASK") })
-                settings.add(ConfigItem("Project Add Theme", "Color for adding new projects") { showColorPickerDialog("ADD_PROJECT") })
-                settings.add(ConfigItem("Note Add Theme", "Color for adding new notes") { showColorPickerDialog("ADD_NOTE") })
-                settings.add(ConfigItem("Finance Add Theme", "Color for adding new transactions") { showColorPickerDialog("ADD_FINANCE") })
             }
             "HELP" -> {
                 settings.add(ConfigItem("Habit Tracker Guide", "Learn about rituals and streaks") { showHelpDetail("HABITS") })
@@ -303,6 +344,11 @@ class SettingsActivity : AppCompatActivity() {
                 settings.add(ConfigItem("Projects Guide", "Learn about roadmaps and history") { showHelpDetail("PROJECTS") })
                 settings.add(ConfigItem("Appearance Guide", "Learn how to customize the app") { showHelpDetail("APPEARANCE") })
                 settings.add(ConfigItem("Security Guide", "Learn about locks and backups") { showHelpDetail("SECURITY") })
+            }
+            "HABITS_ICONS", "HABITS_NAMES", "WORKOUTS_ICONS", "WORKOUTS_NAMES",
+            "TASKS_ICONS", "TASKS_NAMES", "NOTES_ICONS", "NOTES_NAMES",
+            "FINANCE_ICONS", "FINANCE_NAMES", "PROJECTS_ICONS", "PROJECTS_NAMES" -> {
+                settings.add(ConfigItem("Empty Section", "No features added yet") {})
             }
         }
         
@@ -781,6 +827,113 @@ class SettingsActivity : AppCompatActivity() {
         dialog.show()
     }
 
+    private fun showHelpDetail(section: String) {
+        val dialog = Dialog(this)
+        dialog.setContentView(R.layout.dialog_help_detail)
+        dialog.window?.setBackgroundDrawableResource(android.R.color.transparent)
+        dialog.window?.setLayout(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT)
+
+        val tvTitle = dialog.findViewById<TextView>(R.id.tv_help_title)
+        val tvContent = dialog.findViewById<TextView>(R.id.tv_help_content)
+        val btnClose = dialog.findViewById<View>(R.id.btn_close_help)
+
+        tvTitle.text = "$section GUIDE"
+        
+        val contentHtml = when(section) {
+            "HABITS" -> """
+                <b>HABIT TRACKING:</b> Create daily rituals to build discipline.<br><br>
+                <b>STREAKS:</b> Complete habits daily to grow your progress.<br><br>
+                <b>VACATION MODE:</b> Pause your streaks when taking a break.<br><br>
+                <b>RESET HOUR:</b> Customize when your day 'ends'.<br><br>
+                <b>BULK MODE:</b> Quickly update multiple habits at once.
+            """.trimIndent()
+            
+            "WORKOUTS" -> """
+                <b>EXERCISES:</b> Add custom routines with target goals.<br><br>
+                <b>TRACKING MODES:</b> Choose between Reps, Sets, or Timer.<br><br>
+                <b>MUSCLE GROUPS:</b> Tag workouts to track specific body parts.<br><br>
+                <b>REST TIMER:</b> Countdown alerts after each set.<br><br>
+                <b>READINESS:</b> Survey to see if you're ready to train.
+            """.trimIndent()
+            
+            "TASKS" -> """
+                <b>SMART LISTS:</b> Organize by Category and Priority.<br><br>
+                <b>AUTO-ARCHIVE:</b> Cleanup old completed tasks.<br><br>
+                <b>REMINDERS:</b> Set alerts for time-sensitive to-dos.<br><br>
+                <b>ANALYTICS:</b> Track your overall completion speed.
+            """.trimIndent()
+            
+            "NOTES" -> """
+                <b>TEMPLATES:</b> Pre-filled text for Daily logs or Stories.<br><br>
+                <b>PRIVACY:</b> Hide sensitive notes with a global toggle.<br><br>
+                <b>AUTO-CLEANUP:</b> Automatically delete very old logs.<br><br>
+                <b>BULK MOVE:</b> Change categories for all notes in one click.
+            """.trimIndent()
+            
+            "FINANCE" -> """
+                <b>BUDGETING:</b> Set monthly limits and savings goals.<br><br>
+                <b>CURRENCY:</b> Support for global symbols like ₹, $, etc.<br><br>
+                <b>HISTORY:</b> View a detailed ledger of transactions.<br><br>
+                <b>CATEGORIES:</b> Group spending by Food, Rent, etc.
+            """.trimIndent()
+            
+            "PROJECTS" -> """
+                <b>ROADMAPS:</b> Break projects into sub-features.<br><br>
+                <b>TEMPLATES:</b> Quick-start with predefined steps.<br><br>
+                <b>HISTORY:</b> Every roadmap change is logged.<br><br>
+                <b>AUTO-ARCHIVE:</b> Hide 100% finished project boards.
+            """.trimIndent()
+            
+            "APPEARANCE" -> """
+                <b>HOME PAGE:</b> Long-press any card to change color.<br><br>
+                <b>ICONS:</b> Choose unique icons for every app section.<br><br>
+                <b>COLORS:</b> Centrally manage theme colors.<br><br>
+                <b>RESET:</b> Revert all visuals back to factory defaults.
+            """.trimIndent()
+            
+            "SECURITY" -> """
+                <b>BIOMETRICS:</b> Secure the app with Fingerprint/Face ID.<br><br>
+                <b>OLED MODE:</b> Pure black theme for better battery life.<br><br>
+                <b>BACKUPS:</b> Export your entire data to a JSON file.<br><br>
+                <b>SYSTEM CLEAN:</b> Clear old history to keep the app fast.
+            """.trimIndent()
+            
+            else -> "Feature guide coming soon."
+        }
+
+        tvContent.text = android.text.Html.fromHtml(contentHtml, android.text.Html.FROM_HTML_MODE_LEGACY)
+        btnClose.setOnClickListener { dialog.dismiss() }
+        dialog.show()
+    }
+
+    private fun showConfirmationDialog(
+        title: String,
+        message: String,
+        positiveButtonText: String = "PROCEED",
+        onConfirm: () -> Unit
+    ) {
+        val dialog = Dialog(this)
+        dialog.setContentView(R.layout.dialog_confirmation)
+        dialog.window?.setBackgroundDrawableResource(android.R.color.transparent)
+        dialog.window?.setLayout(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT)
+
+        val tvTitle = dialog.findViewById<TextView>(R.id.tv_confirm_title)
+        val tvMessage = dialog.findViewById<TextView>(R.id.tv_confirm_message)
+        val btnNegative = dialog.findViewById<TextView>(R.id.btn_confirm_negative)
+        val btnPositive = dialog.findViewById<TextView>(R.id.btn_confirm_positive)
+
+        tvTitle.text = title
+        tvMessage.text = message
+        btnPositive.text = positiveButtonText
+
+        btnNegative.setOnClickListener { dialog.dismiss() }
+        btnPositive.setOnClickListener {
+            onConfirm()
+            dialog.dismiss()
+        }
+        dialog.show()
+    }
+
     private fun showColorPickerDialog(section: String) {
         val dialog = Dialog(this)
         dialog.setContentView(R.layout.dialog_settings_color_picker)
@@ -911,111 +1064,49 @@ class SettingsActivity : AppCompatActivity() {
         dialog.show()
     }
 
-    private fun showHelpDetail(section: String) {
-        val dialog = Dialog(this)
-        dialog.setContentView(R.layout.dialog_help_detail)
-        dialog.window?.setBackgroundDrawableResource(android.R.color.transparent)
-        dialog.window?.setLayout(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT)
+    fun showProjectMenu(anchor: View, note: Note) {
+        val inflater = LayoutInflater.from(this)
+        val menuView = inflater.inflate(R.layout.layout_custom_menu, null)
+        val popupWindow = PopupWindow(menuView, ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT, true)
+        popupWindow.elevation = 20f
 
-        val tvTitle = dialog.findViewById<TextView>(R.id.tv_help_title)
-        val tvContent = dialog.findViewById<TextView>(R.id.tv_help_content)
-        val btnClose = dialog.findViewById<View>(R.id.btn_close_help)
+        // Configure Menu Items
+        val btnDayOff = menuView.findViewById<View>(R.id.menu_take_day_off)
+        val btnEdit = menuView.findViewById<View>(R.id.menu_edit)
+        val btnDelete = menuView.findViewById<View>(R.id.menu_delete)
+        val btnPin = menuView.findViewById<View>(R.id.menu_hide_unhide)
+        val tvPin = menuView.findViewById<TextView>(R.id.tv_hide_unhide_text)
+        val ivPin = menuView.findViewById<ImageView>(R.id.iv_hide_unhide_icon)
+        val btnUndo = menuView.findViewById<View>(R.id.menu_undo)
 
-        tvTitle.text = "$section GUIDE"
-        
-        val contentHtml = when(section) {
-            "HABITS" -> """
-                <b>HABIT TRACKING:</b> Create daily rituals to build discipline.<br><br>
-                <b>STREAKS:</b> Complete habits daily to grow your progress.<br><br>
-                <b>VACATION MODE:</b> Pause your streaks when taking a break.<br><br>
-                <b>RESET HOUR:</b> Customize when your day 'ends'.<br><br>
-                <b>BULK MODE:</b> Quickly update multiple habits at once.
-            """.trimIndent()
-            
-            "WORKOUTS" -> """
-                <b>EXERCISES:</b> Add custom routines with target goals.<br><br>
-                <b>TRACKING MODES:</b> Choose between Reps, Sets, or Timer.<br><br>
-                <b>MUSCLE GROUPS:</b> Tag workouts to track specific body parts.<br><br>
-                <b>REST TIMER:</b> Countdown alerts after each set.<br><br>
-                <b>READINESS:</b> Survey to see if you're ready to train.
-            """.trimIndent()
-            
-            "TASKS" -> """
-                <b>SMART LISTS:</b> Organize by Category and Priority.<br><br>
-                <b>AUTO-ARCHIVE:</b> Cleanup old completed tasks.<br><br>
-                <b>REMINDERS:</b> Set alerts for time-sensitive to-dos.<br><br>
-                <b>ANALYTICS:</b> Track your overall completion speed.
-            """.trimIndent()
-            
-            "NOTES" -> """
-                <b>TEMPLATES:</b> Pre-filled text for Daily logs or Stories.<br><br>
-                <b>PRIVACY:</b> Hide sensitive notes with a global toggle.<br><br>
-                <b>AUTO-CLEANUP:</b> Automatically delete very old logs.<br><br>
-                <b>BULK MOVE:</b> Change categories for all notes in one click.
-            """.trimIndent()
-            
-            "FINANCE" -> """
-                <b>BUDGETING:</b> Set monthly limits and savings goals.<br><br>
-                <b>CURRENCY:</b> Support for global symbols like ₹, $, etc.<br><br>
-                <b>HISTORY:</b> View a detailed ledger of transactions.<br><br>
-                <b>CATEGORIES:</b> Group spending by Food, Rent, etc.
-            """.trimIndent()
-            
-            "PROJECTS" -> """
-                <b>ROADMAPS:</b> Break projects into sub-features.<br><br>
-                <b>TEMPLATES:</b> Quick-start with predefined steps.<br><br>
-                <b>HISTORY:</b> Every roadmap change is logged.<br><br>
-                <b>AUTO-ARCHIVE:</b> Hide 100% finished project boards.
-            """.trimIndent()
-            
-            "APPEARANCE" -> """
-                <b>HOME PAGE:</b> Long-press any card to change color.<br><br>
-                <b>ICONS:</b> Choose unique icons for every app section.<br><br>
-                <b>COLORS:</b> Centrally manage theme colors.<br><br>
-                <b>RESET:</b> Revert all visuals back to factory defaults.
-            """.trimIndent()
-            
-            "SECURITY" -> """
-                <b>BIOMETRICS:</b> Secure the app with Fingerprint/Face ID.<br><br>
-                <b>OLED MODE:</b> Pure black theme for better battery life.<br><br>
-                <b>BACKUPS:</b> Export your entire data to a JSON file.<br><br>
-                <b>SYSTEM CLEAN:</b> Clear old history to keep the app fast.
-            """.trimIndent()
-            
-            else -> "Feature guide coming soon."
+        btnDayOff.visibility = View.GONE
+        btnUndo.visibility = View.GONE
+
+        btnPin.visibility = View.VISIBLE
+        tvPin.text = if (note.isPinned) "UNPIN" else "PIN"
+        ivPin.setImageResource(if (note.isPinned) android.R.drawable.btn_star_big_off else android.R.drawable.btn_star_big_on)
+        ivPin.imageTintList = android.content.res.ColorStateList.valueOf(Color.WHITE)
+
+        btnEdit.setOnClickListener {
+            popupWindow.dismiss()
+            // showEditProjectNoteDialog(note) // This would need to be moved or passed
         }
 
-        tvContent.text = android.text.Html.fromHtml(contentHtml, android.text.Html.FROM_HTML_MODE_LEGACY)
-        btnClose.setOnClickListener { dialog.dismiss() }
-        dialog.show()
-    }
-
-    private fun showConfirmationDialog(
-        title: String,
-        message: String,
-        positiveButtonText: String = "PROCEED",
-        onConfirm: () -> Unit
-    ) {
-        val dialog = Dialog(this)
-        dialog.setContentView(R.layout.dialog_confirmation)
-        dialog.window?.setBackgroundDrawableResource(android.R.color.transparent)
-        dialog.window?.setLayout(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT)
-
-        val tvTitle = dialog.findViewById<TextView>(R.id.tv_confirm_title)
-        val tvMessage = dialog.findViewById<TextView>(R.id.tv_confirm_message)
-        val btnNegative = dialog.findViewById<TextView>(R.id.btn_confirm_negative)
-        val btnPositive = dialog.findViewById<TextView>(R.id.btn_confirm_positive)
-
-        tvTitle.text = title
-        tvMessage.text = message
-        btnPositive.text = positiveButtonText
-
-        btnNegative.setOnClickListener { dialog.dismiss() }
-        btnPositive.setOnClickListener {
-            onConfirm()
-            dialog.dismiss()
+        btnDelete.setOnClickListener {
+            popupWindow.dismiss()
+            // allNotes.remove(note)
+            DataManager.saveData(this)
+            // updateDisplayList()
         }
-        dialog.show()
+
+        btnPin.setOnClickListener {
+            popupWindow.dismiss()
+            note.isPinned = !note.isPinned
+            DataManager.saveData(this)
+            // updateDisplayList()
+        }
+
+        popupWindow.showAsDropDown(anchor, 150, -100)
     }
 
     data class SettingsHubItem(val title: String, val description: String, val iconRes: Int, val sectionKey: String)

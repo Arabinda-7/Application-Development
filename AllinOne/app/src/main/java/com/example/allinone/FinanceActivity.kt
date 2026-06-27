@@ -98,7 +98,11 @@ class FinanceActivity : AppCompatActivity() {
             startActivity(android.content.Intent(this, LedgerActivity::class.java))
         }
 
-        findViewById<View>(R.id.btn_create_new_finance).setOnClickListener {
+        val btnCreate = findViewById<com.google.android.material.floatingactionbutton.FloatingActionButton>(R.id.btn_create_new_finance)
+        if (DataManager.financeAddThemeColor != -1) {
+            btnCreate.backgroundTintList = android.content.res.ColorStateList.valueOf(DataManager.financeAddThemeColor)
+        }
+        btnCreate.setOnClickListener {
             showAddTransactionDialog()
         }
 

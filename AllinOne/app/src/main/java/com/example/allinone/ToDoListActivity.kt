@@ -56,7 +56,11 @@ class ToDoListActivity : AppCompatActivity() {
         setupBottomNavigation()
         setupSwipeActions(taskList)
 
-        findViewById<View>(R.id.btn_create_new_task).setOnClickListener { 
+        val btnCreate = findViewById<com.google.android.material.floatingactionbutton.FloatingActionButton>(R.id.btn_create_new_task)
+        if (DataManager.taskAddThemeColor != -1) {
+            btnCreate.backgroundTintList = android.content.res.ColorStateList.valueOf(DataManager.taskAddThemeColor)
+        }
+        btnCreate.setOnClickListener {
             if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.TIRAMISU) {
                 requestPermissions(arrayOf(android.Manifest.permission.POST_NOTIFICATIONS), 101)
             }

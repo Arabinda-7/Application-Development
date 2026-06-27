@@ -66,7 +66,11 @@ class NotesActivity : AppCompatActivity() {
             }
         }
 
-        findViewById<View>(R.id.btn_create_new_note).setOnClickListener { showAddNoteDialog() }
+        val btnCreate = findViewById<com.google.android.material.floatingactionbutton.FloatingActionButton>(R.id.btn_create_new_note)
+        if (DataManager.noteAddThemeColor != -1) {
+            btnCreate.backgroundTintList = android.content.res.ColorStateList.valueOf(DataManager.noteAddThemeColor)
+        }
+        btnCreate.setOnClickListener { showAddNoteDialog() }
     }
 
     private fun toggleDeleteMode(enabled: Boolean) {

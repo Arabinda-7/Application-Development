@@ -43,7 +43,11 @@ class ProjectActivity : AppCompatActivity() {
         projectList.adapter = projectAdapter
 
         findViewById<View>(R.id.btn_back).setOnClickListener { finish() }
-        findViewById<View>(R.id.btn_add_project_note).setOnClickListener { showAddProjectNoteDialog() }
+        val btnCreate = findViewById<com.google.android.material.floatingactionbutton.FloatingActionButton>(R.id.btn_add_project_note)
+        if (DataManager.projectAddThemeColor != -1) {
+            btnCreate.backgroundTintList = android.content.res.ColorStateList.valueOf(DataManager.projectAddThemeColor)
+        }
+        btnCreate.setOnClickListener { showAddProjectNoteDialog() }
         findViewById<View>(R.id.btn_project_settings).setOnClickListener { showProjectSettingsDialog() }
     }
 
