@@ -31,6 +31,8 @@ object DataManager {
 
     // Finance Settings
     var financeCustomCategories = mutableListOf("Food", "Rent", "Transport", "Shopping", "Entertainment", "Health", "Other")
+    var financeCategoryIcons = mutableMapOf<String, Int>()
+    var financeCategoryColors = mutableMapOf<String, Int>()
     var financeCurrency: String = "₹"
     var financeGraphStartMonth: Int = 0 // 0 = January, 1 = February, etc.
     var financeGraphColor: Int = -1 // Default spending color if -1
@@ -127,6 +129,8 @@ object DataManager {
     private const val KEY_TASK_DEFAULT_SECTION = "task_default_section"
     private const val KEY_TASK_VISIBLE_SECTIONS = "task_visible_sections"
     private const val KEY_FINANCE_CUSTOM_CATEGORIES = "finance_custom_categories"
+    private const val KEY_FINANCE_CATEGORY_ICONS = "finance_category_icons"
+    private const val KEY_FINANCE_CATEGORY_COLORS = "finance_category_colors"
     private const val KEY_FINANCE_CURRENCY = "finance_currency"
     private const val KEY_FINANCE_GRAPH_START_MONTH = "finance_graph_start_month"
     private const val KEY_FINANCE_GRAPH_COLOR = "finance_graph_color"
@@ -213,6 +217,8 @@ object DataManager {
             putString(KEY_TASK_DEFAULT_SECTION, taskDefaultSection)
             putString(KEY_TASK_VISIBLE_SECTIONS, gson.toJson(taskVisibleSections))
             putString(KEY_FINANCE_CUSTOM_CATEGORIES, gson.toJson(financeCustomCategories))
+            putString(KEY_FINANCE_CATEGORY_ICONS, gson.toJson(financeCategoryIcons))
+            putString(KEY_FINANCE_CATEGORY_COLORS, gson.toJson(financeCategoryColors))
             putString(KEY_FINANCE_CURRENCY, financeCurrency)
             putInt(KEY_FINANCE_GRAPH_START_MONTH, financeGraphStartMonth)
             putInt(KEY_FINANCE_GRAPH_COLOR, financeGraphColor)
@@ -363,7 +369,15 @@ object DataManager {
 
         prefs.getString(KEY_FINANCE_CUSTOM_CATEGORIES, null)?.let {
             val type = object : TypeToken<MutableList<String>>() {}.type
-            financeCustomCategories = gson.fromJson(it, type) ?: mutableListOf("Food", "Transport", "Rent", "Shopping", "Entertainment")
+            financeCustomCategories = gson.fromJson(it, type) ?: mutableListOf("Food", "Rent", "Transport", "Shopping", "Entertainment", "Health", "Other")
+        }
+        prefs.getString(KEY_FINANCE_CATEGORY_ICONS, null)?.let {
+            val type = object : TypeToken<MutableMap<String, Int>>() {}.type
+            financeCategoryIcons = gson.fromJson(it, type) ?: mutableMapOf()
+        }
+        prefs.getString(KEY_FINANCE_CATEGORY_COLORS, null)?.let {
+            val type = object : TypeToken<MutableMap<String, Int>>() {}.type
+            financeCategoryColors = gson.fromJson(it, type) ?: mutableMapOf()
         }
         financeCurrency = prefs.getString(KEY_FINANCE_CURRENCY, "₹") ?: "₹"
         financeGraphStartMonth = prefs.getInt(KEY_FINANCE_GRAPH_START_MONTH, 0)

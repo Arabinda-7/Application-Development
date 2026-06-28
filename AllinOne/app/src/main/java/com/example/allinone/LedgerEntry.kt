@@ -9,5 +9,6 @@ data class LedgerEntry(
     var isSettled: Boolean = false,
     var dueDate: Long? = null,
     var paidAmount: Double = 0.0,
-    val timestamp: Long = System.currentTimeMillis()
+    val timestamp: Long = System.currentTimeMillis(),
+    var settlementTimestamp: Long? = null
 )

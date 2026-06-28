@@ -1,9 +1,11 @@
 package com.example.allinone
 
+import android.content.res.ColorStateList
 import android.graphics.Color
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.ImageView
 import android.widget.PopupWindow
 import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView
@@ -30,7 +32,23 @@ class TransactionAdapter(
         
         val prefix = if (transaction.type == "Expense") "-" else "+"
         holder.amount.text = String.format(Locale.US, "%s%s%.2f", prefix, DataManager.financeCurrency, transaction.amount)
-        holder.amount.setTextColor(if (transaction.type == "Expense") Color.parseColor("#FF5252") else Color.parseColor("#4CAF50"))
+        
+        // Feature 2: Color Coding & Mini-Icons
+        val color = when (transaction.type) {
+            "Income" -> Color.parseColor("#4CAF50")
+            "Saving" -> Color.parseColor("#1A73E8")
+            else -> Color.parseColor("#FF5252")
+        }
+        holder.amount.setTextColor(color)
+        holder.iconCard.setCardBackgroundColor(ColorStateList.valueOf(color).withAlpha(30))
+        holder.icon.imageTintList = ColorStateList.valueOf(color)
+        
+        val iconRes = when (transaction.type) {
+            "Income" -> R.drawable.icons8_income_100
+            "Saving" -> R.drawable.icons8_savings_100
+            else -> R.drawable.expenses
+        }
+        holder.icon.setImageResource(iconRes)
 
         holder.itemView.setOnLongClickListener {
             showCustomMenu(it, transaction, position)
@@ -74,5 +92,8 @@ class TransactionAdapter(
         val title: TextView = itemView.findViewById(R.id.tv_transaction_title)
         val category: TextView = itemView.findViewById(R.id.tv_transaction_category)
         val amount: TextView = itemView.findViewById(R.id.tv_transaction_amount)
+        val icon: ImageView = itemView.findViewById(R.id.iv_transaction_type_icon)
+        val iconCard: com.google.android.material.card.MaterialCardView = itemView.findViewById(R.id.card_transaction_icon)
     }
 }
+

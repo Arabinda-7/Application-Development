@@ -1,17 +1,14 @@
 package com.example.allinone
 
 import android.app.Dialog
+import android.content.res.ColorStateList
 import android.graphics.Color
 import android.graphics.Paint
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.widget.ImageView
-import android.widget.LinearLayout
-import android.widget.PopupWindow
-import android.widget.TextView
-import android.widget.Toast
+import android.widget.*
 import androidx.appcompat.app.AppCompatActivity
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
@@ -23,6 +20,7 @@ class LedgerHistoryActivity : AppCompatActivity() {
     private val allEntries = DataManager.ledgerEntries
     private val settledEntries = mutableListOf<LedgerEntry>()
     private lateinit var historyAdapter: HistoryAdapter
+    private var isDeleteMode = false
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -32,14 +30,47 @@ class LedgerHistoryActivity : AppCompatActivity() {
         historyList.layoutManager = LinearLayoutManager(this)
 
         updateHistoryList()
-        historyAdapter = HistoryAdapter(settledEntries) { anchor, entry ->
-            showCustomLedgerMenu(anchor, entry)
-        }
+        historyAdapter = HistoryAdapter(settledEntries, 
+            onLongClick = { anchor, entry ->
+                showCustomLedgerMenu(anchor, entry)
+            },
+            onDeleteClick = { entry ->
+                allEntries.remove(entry)
+                DataManager.saveData(this)
+                updateHistoryList()
+            }
+        )
         historyList.adapter = historyAdapter
 
         findViewById<View>(R.id.btn_back).setOnClickListener { finish() }
         
-        findViewById<View>(R.id.btn_delete_all_history).setOnClickListener {
+        val btnOptions = findViewById<ImageButton>(R.id.btn_history_options)
+        btnOptions.setOnClickListener {
+            showHistoryOptionsMenu(it)
+        }
+    }
+
+    private fun showHistoryOptionsMenu(anchor: View) {
+        if (isDeleteMode) {
+            // Feature 1: Clicking the icon while in delete mode returns the page to normal
+            toggleDeleteMode()
+            return
+        }
+
+        val dialog = Dialog(this)
+        dialog.setContentView(R.layout.dialog_ledger_history_settings)
+        dialog.window?.setBackgroundDrawableResource(android.R.color.transparent)
+        dialog.window?.setLayout(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT)
+
+        dialog.findViewById<TextView>(R.id.tv_delete_mode_title).text = if (isDeleteMode) "Disable Delete Mode" else "Enable Delete Mode"
+
+        dialog.findViewById<View>(R.id.option_toggle_delete).setOnClickListener {
+            toggleDeleteMode()
+            dialog.dismiss()
+        }
+
+        dialog.findViewById<View>(R.id.option_clear_all).setOnClickListener {
+            dialog.dismiss()
             if (settledEntries.isNotEmpty()) {
                 showConfirmationDialog(
                     title = "DELETE ALL HISTORY",
@@ -56,6 +87,17 @@ class LedgerHistoryActivity : AppCompatActivity() {
                 Toast.makeText(this, "History is already empty", Toast.LENGTH_SHORT).show()
             }
         }
+
+        dialog.findViewById<View>(R.id.btn_close_settings).setOnClickListener { dialog.dismiss() }
+        dialog.show()
+    }
+
+    private fun toggleDeleteMode() {
+        isDeleteMode = !isDeleteMode
+        findViewById<ImageButton>(R.id.btn_history_options).imageTintList = ColorStateList.valueOf(
+            if (isDeleteMode) Color.parseColor("#FF5252") else Color.WHITE
+        )
+        historyAdapter.setDeleteMode(isDeleteMode)
     }
 
     private fun updateHistoryList() {
@@ -131,8 +173,16 @@ class LedgerHistoryActivity : AppCompatActivity() {
 
     class HistoryAdapter(
         private val entries: List<LedgerEntry>,
-        private val onLongClick: (View, LedgerEntry) -> Unit
+        private val onLongClick: (View, LedgerEntry) -> Unit,
+        private val onDeleteClick: (LedgerEntry) -> Unit
     ) : RecyclerView.Adapter<HistoryAdapter.ViewHolder>() {
+
+        private var isDeleteMode = false
+
+        fun setDeleteMode(enabled: Boolean) {
+            isDeleteMode = enabled
+            notifyDataSetChanged()
+        }
 
         override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder {
             val view = LayoutInflater.from(parent.context).inflate(R.layout.item_ledger_history, parent, false)
@@ -148,8 +198,28 @@ class LedgerHistoryActivity : AppCompatActivity() {
             holder.tvAmount.text = "${DataManager.financeCurrency}${entry.amount.toInt()}"
             holder.tvDate.text = SimpleDateFormat("MMM dd, yyyy", Locale.getDefault()).format(Date(entry.timestamp))
             
+            if (entry.settlementTimestamp != null) {
+                holder.tvSettledDate.text = "Settled: ${SimpleDateFormat("MMM dd", Locale.getDefault()).format(Date(entry.settlementTimestamp!!))}"
+                holder.tvSettledDate.visibility = View.VISIBLE
+            } else {
+                holder.tvSettledDate.visibility = View.GONE
+            }
+            
             val typeColor = if (entry.type == "Borrowed") Color.parseColor("#FF5252") else Color.parseColor("#4CAF50")
             holder.tvAmount.setTextColor(typeColor)
+
+            // Feature 2: Toggle between 'done' and 'cross' icons based on Delete Mode
+            if (isDeleteMode) {
+                holder.ivStatus.setImageResource(android.R.drawable.ic_menu_close_clear_cancel)
+                holder.ivStatus.imageTintList = ColorStateList.valueOf(Color.parseColor("#FF5252"))
+                holder.ivStatus.setOnClickListener { onDeleteClick(entry) }
+                holder.ivStatus.isClickable = true
+            } else {
+                holder.ivStatus.setImageResource(R.drawable.icons8_done_100)
+                holder.ivStatus.imageTintList = ColorStateList.valueOf(Color.parseColor("#4CAF50"))
+                holder.ivStatus.setOnClickListener(null)
+                holder.ivStatus.isClickable = false
+            }
 
             holder.itemView.setOnLongClickListener {
                 onLongClick(it, entry)
@@ -164,6 +234,8 @@ class LedgerHistoryActivity : AppCompatActivity() {
             val tvType: TextView = v.findViewById(R.id.tv_ledger_type)
             val tvAmount: TextView = v.findViewById(R.id.tv_ledger_amount)
             val tvDate: TextView = v.findViewById(R.id.tv_ledger_date)
+            val tvSettledDate: TextView = v.findViewById(R.id.tv_settled_date)
+            val ivStatus: ImageView = v.findViewById(R.id.iv_ledger_status)
         }
     }
 }

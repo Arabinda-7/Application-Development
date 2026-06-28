@@ -56,6 +56,7 @@ class LedgerActivity : AppCompatActivity() {
                     positiveButtonText = "SETTLE",
                     onConfirm = {
                         entry.isSettled = true
+                        entry.settlementTimestamp = System.currentTimeMillis()
                         DataManager.saveData(this)
                         updateActiveEntries()
                         updateSummary()
@@ -214,6 +215,11 @@ class LedgerActivity : AppCompatActivity() {
             (menuView as ViewGroup).getChildAt(0).let { (it as ViewGroup).addView(paymentLayout, 0) }
         }
 
+        btnEdit.setOnClickListener {
+            popupWindow.dismiss()
+            showAddLedgerDialog(entry)
+        }
+
         btnDelete.setOnClickListener {
             allEntries.remove(entry)
             DataManager.saveData(this)
@@ -228,27 +234,38 @@ class LedgerActivity : AppCompatActivity() {
 
     private fun showAddPaymentDialog(context: Context, entry: LedgerEntry) {
         val dialog = Dialog(context)
-        dialog.setContentView(R.layout.dialog_set_budget)
+        dialog.setContentView(R.layout.dialog_add_payment)
         dialog.window?.setBackgroundDrawableResource(android.R.color.transparent)
         dialog.window?.setLayout(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT)
 
-        val title = dialog.findViewById<TextView>(R.id.tv_dialog_title)
-        val etInput = dialog.findViewById<EditText>(R.id.et_budget_amount)
-        val subtext = dialog.findViewById<TextView>(R.id.tv_dialog_subtext)
-        val btnSave = dialog.findViewById<TextView>(R.id.btn_save_budget)
+        val etInput = dialog.findViewById<EditText>(R.id.et_payment_amount)
+        val tvRemaining = dialog.findViewById<TextView>(R.id.tv_remaining_label)
+        val btnConfirm = dialog.findViewById<TextView>(R.id.btn_confirm_payment)
+        val btnClose = dialog.findViewById<View>(R.id.btn_close_payment)
 
-        title.text = "Add Payment"
         val remaining = entry.amount - entry.paidAmount
-        subtext.text = "Amount remaining: ${DataManager.financeCurrency}${remaining.toInt()}"
-        etInput.hint = "Enter amount..."
-        etInput.inputType = android.text.InputType.TYPE_CLASS_NUMBER or android.text.InputType.TYPE_NUMBER_FLAG_DECIMAL
+        tvRemaining.text = "Amount remaining: ${DataManager.financeCurrency}${remaining.toInt()}"
+        etInput.hint = "${DataManager.financeCurrency}0"
 
-        btnSave.setOnClickListener {
+        dialog.findViewById<View>(R.id.btn_pay_25).setOnClickListener {
+            etInput.setText((remaining * 0.25).toInt().toString())
+        }
+        dialog.findViewById<View>(R.id.btn_pay_50).setOnClickListener {
+            etInput.setText((remaining * 0.50).toInt().toString())
+        }
+        dialog.findViewById<View>(R.id.btn_pay_full).setOnClickListener {
+            etInput.setText(remaining.toInt().toString())
+        }
+
+        btnClose.setOnClickListener { dialog.dismiss() }
+
+        btnConfirm.setOnClickListener {
             val paid = etInput.text.toString().toDoubleOrNull() ?: 0.0
             if (paid > 0) {
                 entry.paidAmount += paid
                 if (entry.paidAmount >= entry.amount) {
                     entry.isSettled = true
+                    entry.settlementTimestamp = System.currentTimeMillis()
                 }
                 DataManager.saveData(this)
                 updateActiveEntries()
@@ -259,7 +276,7 @@ class LedgerActivity : AppCompatActivity() {
         dialog.show()
     }
 
-    private fun showAddLedgerDialog() {
+    private fun showAddLedgerDialog(existingEntry: LedgerEntry? = null) {
         val dialog = Dialog(this)
         dialog.setContentView(R.layout.dialog_add_ledger)
         dialog.window?.setBackgroundDrawableResource(android.R.color.transparent)
@@ -272,12 +289,22 @@ class LedgerActivity : AppCompatActivity() {
         val rgType = dialog.findViewById<RadioGroup>(R.id.rg_ledger_type)
         val btnSave = dialog.findViewById<TextView>(R.id.btn_save_ledger)
         val btnClose = dialog.findViewById<View>(R.id.btn_close_ledger)
+        val tvTitle = dialog.findViewById<TextView>(R.id.tv_dialog_title)
 
         val currency = DataManager.financeCurrency
         etAmount.hint = "${currency}0.00"
 
-        var selectedDueDate: Long? = null
+        var selectedDueDate: Long? = existingEntry?.dueDate
         val sdf = SimpleDateFormat("MMM dd, yyyy", Locale.getDefault())
+
+        if (existingEntry != null) {
+            tvTitle.text = "Edit Ledger"
+            etAmount.setText(existingEntry.amount.toString())
+            etName.setText(existingEntry.personName)
+            etNote.setText(existingEntry.note)
+            if (existingEntry.type == "Borrowed") rgType.check(R.id.radio_borrowed) else rgType.check(R.id.radio_lent)
+            selectedDueDate?.let { tvDueDate.text = sdf.format(Date(it)) }
+        }
 
         tvDueDate.setOnClickListener {
             val cal = Calendar.getInstance()
@@ -297,15 +324,23 @@ class LedgerActivity : AppCompatActivity() {
             if (name.isNotEmpty() && amount > 0) {
                 val type = if (rgType.checkedRadioButtonId == R.id.radio_borrowed) "Borrowed" else "Lent"
                 
-                val entry = LedgerEntry(
-                    personName = name,
-                    amount = amount,
-                    type = type,
-                    note = etNote.text.toString().trim(),
-                    dueDate = selectedDueDate
-                )
+                if (existingEntry == null) {
+                    val entry = LedgerEntry(
+                        personName = name,
+                        amount = amount,
+                        type = type,
+                        note = etNote.text.toString().trim(),
+                        dueDate = selectedDueDate
+                    )
+                    allEntries.add(0, entry)
+                } else {
+                    existingEntry.personName = name
+                    existingEntry.amount = amount
+                    existingEntry.type = type
+                    existingEntry.note = etNote.text.toString().trim()
+                    existingEntry.dueDate = selectedDueDate
+                }
                 
-                allEntries.add(0, entry)
                 updateActiveEntries()
                 DataManager.saveData(this)
                 updateSummary()

@@ -10,16 +10,20 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.*
 import androidx.appcompat.app.AppCompatActivity
+import androidx.core.content.ContextCompat
+import androidx.recyclerview.widget.ItemTouchHelper
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.example.allinone.Transaction
 import com.example.allinone.TransactionAdapter
+import com.google.android.material.chip.ChipGroup
 import java.text.SimpleDateFormat
 import java.util.*
 
 class FinanceActivity : AppCompatActivity() {
 
-    private var currentMonthTransactions = mutableListOf<Transaction>()
+    private var allMonthTransactions = mutableListOf<Transaction>()
+    private var filteredTransactions = mutableListOf<Transaction>()
     private lateinit var transactionAdapter: TransactionAdapter
     
     private lateinit var tvBudget: TextView
@@ -33,6 +37,8 @@ class FinanceActivity : AppCompatActivity() {
     private lateinit var tvCategorySummary: TextView
     private lateinit var tvFinanceInsight: TextView
     private lateinit var cardSavings: View
+    private lateinit var layoutEmptyState: View
+    private var currentFilter = "All"
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -50,18 +56,25 @@ class FinanceActivity : AppCompatActivity() {
         tvCategorySummary = summary.findViewById(R.id.tv_category_summary)
         tvFinanceInsight = summary.findViewById(R.id.tv_finance_insight)
         cardSavings = summary.findViewById(R.id.card_savings)
+        layoutEmptyState = findViewById(R.id.layout_empty_state)
 
         val financeList = findViewById<RecyclerView>(R.id.finance_list)
         financeList.layoutManager = LinearLayoutManager(this)
         
-        filterCurrentMonthTransactions()
-        
         transactionAdapter = TransactionAdapter(
-            currentMonthTransactions,
+            filteredTransactions,
             onEdit = { transaction, _ -> showAddTransactionDialog(transaction) },
-            onDelete = { _, position -> deleteTransaction(position) }
+            onDelete = { transaction, _ -> 
+                val idx = filteredTransactions.indexOf(transaction)
+                if (idx != -1) deleteTransaction(idx)
+            }
         )
         financeList.adapter = transactionAdapter
+
+        loadCurrentMonthTransactions()
+
+        // Feature 1: Category Filters Logic
+        setupFilters()
 
         updateSummary()
 
@@ -116,21 +129,59 @@ class FinanceActivity : AppCompatActivity() {
         }
     }
 
+    private fun setupFilters() {
+        val chipGroup = findViewById<ChipGroup>(R.id.cg_finance_filters)
+        chipGroup.setOnCheckedStateChangeListener { _, checkedIds ->
+            if (checkedIds.isNotEmpty()) {
+                val chipId = checkedIds[0]
+                currentFilter = when (chipId) {
+                    R.id.chip_filter_expense -> "Expense"
+                    R.id.chip_filter_income -> "Income"
+                    R.id.chip_filter_saving -> "Saving"
+                    else -> "All"
+                }
+                applyFilter()
+            }
+        }
+    }
+
+    private fun applyFilter() {
+        filteredTransactions = if (currentFilter == "All") {
+            allMonthTransactions.toMutableList()
+        } else {
+            allMonthTransactions.filter { it.type == currentFilter }.toMutableList()
+        }
+        transactionAdapter.updateData(filteredTransactions)
+        updateEmptyState()
+    }
+
     private fun deleteTransaction(position: Int) {
-        val transaction = currentMonthTransactions[position]
+        if (position < 0 || position >= filteredTransactions.size) return
+        val transaction = filteredTransactions[position]
         DataManager.transactions.remove(transaction)
-        currentMonthTransactions.removeAt(position)
+        allMonthTransactions.remove(transaction)
+        filteredTransactions.removeAt(position)
         transactionAdapter.notifyItemRemoved(position)
         DataManager.saveData(this)
         updateSummary()
+        updateEmptyState()
     }
 
-    private fun filterCurrentMonthTransactions() {
+    private fun loadCurrentMonthTransactions() {
         val sdf = SimpleDateFormat("yyyyMM", Locale.getDefault())
         val currentMonth = sdf.format(Date())
-        currentMonthTransactions = DataManager.transactions.filter {
+        allMonthTransactions = DataManager.transactions.filter {
             sdf.format(Date(it.timestamp)) == currentMonth
         }.sortedByDescending { it.timestamp }.toMutableList()
+        applyFilter()
+    }
+
+    private fun updateEmptyState() {
+        if (filteredTransactions.isEmpty()) {
+            layoutEmptyState.visibility = View.VISIBLE
+        } else {
+            layoutEmptyState.visibility = View.GONE
+        }
     }
 
     private fun showAddTransactionDialog(existingTransaction: Transaction? = null) {
@@ -180,9 +231,12 @@ class FinanceActivity : AppCompatActivity() {
         tvTime.text = if (existingTransaction == null) "Now" else timeSdf.format(calendar.time)
 
         val categories = DataManager.financeCustomCategories
+        // Feature: Sync category sequence with Manage Categories (Alphabetical + Other last)
+        val sortedCategories = categories.filter { it != "Other" }.sorted() + categories.filter { it == "Other" }
+        
         var selectedCategoryName = existingTransaction?.category ?: "Other"
 
-        categories.forEach { category ->
+        sortedCategories.forEach { category ->
             val chip = com.google.android.material.chip.Chip(this)
             chip.text = category
             chip.isCheckable = true
@@ -240,11 +294,15 @@ class FinanceActivity : AppCompatActivity() {
                 }
                 
                 filterCurrentMonthTransactions()
-                transactionAdapter.updateData(currentMonthTransactions)
+                transactionAdapter.updateData(filteredTransactions)
                 DataManager.saveData(this); updateSummary(); dialog.dismiss()
             }
         }
         dialog.show()
+    }
+
+    private fun filterCurrentMonthTransactions() {
+        loadCurrentMonthTransactions()
     }
 
     private fun updateSummary() {
@@ -285,7 +343,7 @@ class FinanceActivity : AppCompatActivity() {
 
     private fun updateCategoryBreakdown() {
         val currency = DataManager.financeCurrency
-        val expenses = currentMonthTransactions.filter { it.type == "Expense" }
+        val expenses = allMonthTransactions.filter { it.type == "Expense" }
         if (expenses.isEmpty()) {
             tvCategorySummary.text = "No expenses recorded this month."
             tvFinanceInsight.text = "Start tracking your expenses to see insights!"
@@ -310,7 +368,7 @@ class FinanceActivity : AppCompatActivity() {
         
         when {
             topPercentage > 50 -> {
-                tvFinanceInsight.text = "Alert: ${topCategory.first} accounts for over 50% of your spending!"
+                tvFinanceInsight.text = String.format(Locale.US, "Alert: %s accounts for over 50%% of your spending!", topCategory.first)
             }
             DataManager.monthlyBudget > 0 && totalSpent > DataManager.monthlyBudget * 0.8 -> {
                 tvFinanceInsight.text = "Warning: You have used 80% of your budget. Slow down!"
@@ -318,7 +376,7 @@ class FinanceActivity : AppCompatActivity() {
             else -> {
                 val dailyLimit = ((DataManager.monthlyBudget - totalSpent).coerceAtLeast(0.0) / 
                     (Calendar.getInstance().getActualMaximum(Calendar.DAY_OF_MONTH) - Calendar.getInstance().get(Calendar.DAY_OF_MONTH) + 1).coerceAtLeast(1))
-                tvFinanceInsight.text = "You're on track! Keep your daily spend under ${currency}${dailyLimit.toInt()}."
+                tvFinanceInsight.text = String.format(Locale.US, "You're on track! Keep your daily spend under %s%d.", currency, dailyLimit.toInt())
             }
         }
     }
@@ -369,34 +427,60 @@ class FinanceActivity : AppCompatActivity() {
         dialog.window?.setBackgroundDrawableResource(android.R.color.transparent)
         dialog.window?.setLayout(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT)
 
-        val container = dialog.findViewById<android.widget.LinearLayout>(R.id.categories_container)
+        val container = dialog.findViewById<LinearLayout>(R.id.categories_container)
         val etNew = dialog.findViewById<EditText>(R.id.et_new_category)
         val btnAdd = dialog.findViewById<View>(R.id.btn_add_category)
+        val btnToggleDelete = dialog.findViewById<ImageButton>(R.id.btn_toggle_delete_mode)
+
+        var isDeleteMode = false
 
         fun refreshList() {
             container.removeAllViews()
-            DataManager.financeCustomCategories.forEach { category ->
-                val itemView = LayoutInflater.from(this).inflate(R.layout.item_task_header, container, false)
-                itemView.findViewById<TextView>(R.id.tv_header_title).text = category
-                itemView.findViewById<View>(R.id.iv_header_chevron).visibility = View.GONE
+            
+            // Feature 1: Sort categories, but keep "Other" at the bottom
+            val sortedList = DataManager.financeCustomCategories.filter { it != "Other" }.sorted() + 
+                            DataManager.financeCustomCategories.filter { it == "Other" }
+
+            sortedList.forEach { category ->
+                val itemView = LayoutInflater.from(this).inflate(R.layout.item_finance_category_manage, container, false)
                 
-                itemView.setOnLongClickListener {
-                    if (category != "Other") {
+                val tvName = itemView.findViewById<TextView>(R.id.tv_cat_name)
+                val btnDelete = itemView.findViewById<View>(R.id.btn_delete_cat)
+                val ivIcon = itemView.findViewById<ImageView>(R.id.iv_cat_icon)
+
+                tvName.text = category
+                ivIcon.setImageResource(R.drawable.ic_finance)
+
+                // Feature 2: Clicking the cross removes the category (Only in delete mode)
+                if (category == "Other" || !isDeleteMode) {
+                    btnDelete.visibility = View.GONE
+                } else {
+                    btnDelete.visibility = View.VISIBLE
+                    btnDelete.setOnClickListener {
                         DataManager.financeCustomCategories.remove(category)
+                        DataManager.financeCategoryIcons.remove(category)
+                        DataManager.financeCategoryColors.remove(category)
                         DataManager.saveData(this)
                         refreshList()
-                    } else {
-                        Toast.makeText(this, "Cannot remove 'Other' category", Toast.LENGTH_SHORT).show()
                     }
-                    true
                 }
+
                 container.addView(itemView)
             }
+        }
+
+        btnToggleDelete.setOnClickListener {
+            isDeleteMode = !isDeleteMode
+            btnToggleDelete.imageTintList = android.content.res.ColorStateList.valueOf(
+                if (isDeleteMode) Color.parseColor("#FF5252") else Color.WHITE
+            )
+            refreshList()
         }
 
         btnAdd.setOnClickListener {
             val name = etNew.text.toString().trim()
             if (name.isNotEmpty() && !DataManager.financeCustomCategories.contains(name)) {
+                // Feature 1: Position at last (but handled by sort logic in refreshList)
                 DataManager.financeCustomCategories.add(name)
                 DataManager.saveData(this)
                 refreshList()

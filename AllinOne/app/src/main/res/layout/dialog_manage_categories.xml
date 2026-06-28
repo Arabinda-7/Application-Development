@@ -18,6 +18,19 @@
         app:layout_constraintTop_toTopOf="parent"
         app:layout_constraintStart_toStartOf="parent" />
 
+    <ImageButton
+        android:id="@+id/btn_toggle_delete_mode"
+        android:layout_width="32dp"
+        android:layout_height="32dp"
+        android:background="?attr/selectableItemBackgroundBorderless"
+        android:src="@drawable/icons8_trash_100"
+        app:tint="@color/white"
+        android:padding="4dp"
+        android:scaleType="centerInside"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toTopOf="@id/tv_categories_title"
+        app:layout_constraintBottom_toBottomOf="@id/tv_categories_title" />
+
     <ScrollView
         android:id="@+id/scroll_categories"
         android:layout_width="match_parent"
