@@ -1,15 +1,15 @@
 package com.example.allinone
 
+import android.app.Dialog
+import android.content.Intent
+import android.content.res.ColorStateList
 import android.graphics.Color
 import android.os.Bundle
-import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.*
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.ContextCompat
-import androidx.recyclerview.widget.GridLayoutManager
-import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import androidx.viewpager2.widget.ViewPager2
 import java.text.SimpleDateFormat
@@ -17,154 +17,197 @@ import java.util.*
 
 class FinanceHistoryActivity : AppCompatActivity() {
 
-    private lateinit var monthAdapter: MonthAdapter
-    private lateinit var vpYear: ViewPager2
-    private lateinit var vpMonthDetails: ViewPager2
-    private lateinit var rgMonthSelector: RadioGroup
-    
+    private lateinit var tvSelectedYear: TextView
     private val availableYears = (2020..2030).toList()
-    private var currentYearIndex: Int = availableYears.indexOf(Calendar.getInstance().get(Calendar.YEAR)).coerceAtLeast(0)
+    private var currentYear: Int = Calendar.getInstance().get(Calendar.YEAR)
     private val monthNames = listOf("January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December")
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_finance_history)
 
-        vpYear = findViewById(R.id.vp_year_selector)
-        vpMonthDetails = findViewById(R.id.vp_month_details)
-        rgMonthSelector = findViewById(R.id.rg_month_selector)
+        tvSelectedYear = findViewById(R.id.tv_selected_year)
+        tvSelectedYear.text = currentYear.toString()
         
-        setupYearViewPager()
-        setupMonthViewPager()
-        setupMonthSelector()
+        tvSelectedYear.setOnClickListener {
+            showYearPickerDialog()
+        }
 
-        findViewById<View>(R.id.btn_back).setOnClickListener { handleBackNavigation() }
+        findViewById<View>(R.id.btn_back).setOnClickListener { finish() }
 
-        // monthsList = findViewById(R.id.history_months_list) // Removed
-        val monthItems = monthNames.map { MonthItem(it, R.drawable.ic_finance, "#1A1A1A") }
-        
-        monthAdapter = MonthAdapter(monthItems) { selectedMonth ->
-            val index = monthNames.indexOf(selectedMonth)
-            if (index != -1) {
-                vpMonthDetails.setCurrentItem(index, true)
-                findViewById<ScrollView>(R.id.history_scroll_view).smoothScrollTo(0, findViewById<View>(R.id.rg_month_selector).top)
+        findViewById<View>(R.id.btn_history_options).setOnClickListener {
+            showHistoryOptionsMenu()
+        }
+
+        findViewById<View>(R.id.card_month_history).setOnClickListener {
+            val intent = Intent(this, FinanceMonthHistoryActivity::class.java).apply {
+                putExtra("year", currentYear)
+                putExtra("month", Calendar.getInstance().get(Calendar.MONTH))
             }
+            startActivity(intent)
         }
 
         updateYearlyAnalytics()
 
         onBackPressedDispatcher.addCallback(this, object : androidx.activity.OnBackPressedCallback(true) {
-            override fun handleOnBackPressed() { handleBackNavigation() }
+            override fun handleOnBackPressed() { finish() }
         })
     }
 
-    private fun setupMonthSelector() {
-        val inflater = LayoutInflater.from(this)
-        monthNames.forEachIndexed { index, name ->
-            val rb = inflater.inflate(R.layout.item_month_tab, rgMonthSelector, false) as RadioButton
-            rb.id = View.generateViewId()
-            rb.text = name.take(3).uppercase()
-            rb.setOnClickListener {
-                vpMonthDetails.currentItem = index
-            }
-            rgMonthSelector.addView(rb)
-        }
-    }
+    private fun showYearPickerDialog() {
+        val dialog = Dialog(this)
+        dialog.setContentView(R.layout.dialog_year_roller)
+        dialog.window?.setBackgroundDrawableResource(android.R.color.transparent)
+        
+        val picker = dialog.findViewById<NumberPicker>(R.id.year_number_picker)
+        val btnSave = dialog.findViewById<TextView>(R.id.btn_save_year)
+        
+        picker.minValue = availableYears.first()
+        picker.maxValue = availableYears.last()
+        picker.value = currentYear
 
-    private fun updateMonthSelectorSelection(index: Int) {
-        val rb = rgMonthSelector.getChildAt(index) as? RadioButton
-        rb?.isChecked = true
-        // Scroll to the selected button
-        val horizontalScroll = rgMonthSelector.parent as? HorizontalScrollView
-        horizontalScroll?.smoothScrollTo(rb?.left ?: 0 - 100, 0)
-    }
-
-    private fun setupMonthViewPager() {
-        vpMonthDetails.adapter = object : RecyclerView.Adapter<MonthDetailsViewHolder>() {
-            override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): MonthDetailsViewHolder {
-                val view = LayoutInflater.from(parent.context).inflate(R.layout.layout_month_detail_page, parent, false)
-                return MonthDetailsViewHolder(view)
-            }
-
-            override fun onBindViewHolder(holder: MonthDetailsViewHolder, position: Int) {
-                holder.bind(monthNames[position])
-            }
-
-            override fun getItemCount() = 12
-        }
-
-        vpMonthDetails.registerOnPageChangeCallback(object : ViewPager2.OnPageChangeCallback() {
-            override fun onPageSelected(position: Int) {
-                updateMonthSelectorSelection(position)
-            }
-        })
-    }
-
-    private fun setupYearViewPager() {
-        val adapter = object : RecyclerView.Adapter<RecyclerView.ViewHolder>() {
-            override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): RecyclerView.ViewHolder {
-                val view = LayoutInflater.from(parent.context).inflate(R.layout.item_year_page, parent, false)
-                return object : RecyclerView.ViewHolder(view) {}
-            }
-            override fun onBindViewHolder(holder: RecyclerView.ViewHolder, position: Int) {
-                holder.itemView.findViewById<TextView>(R.id.tv_year_item).text = availableYears[position].toString()
-            }
-            override fun getItemCount() = availableYears.size
-        }
-        vpYear.adapter = adapter
-        vpYear.setCurrentItem(currentYearIndex, false)
-
-        vpYear.setPageTransformer { page, position ->
-            val absPos = Math.abs(position)
-            page.alpha = 1.0f - (absPos * 0.5f)
-            page.scaleX = 1.0f - (absPos * 0.3f)
-            page.scaleY = 1.0f - (absPos * 0.3f)
+        btnSave.setOnClickListener {
+            currentYear = picker.value
+            tvSelectedYear.text = currentYear.toString()
+            updateYearlyAnalytics()
+            dialog.dismiss()
         }
         
-        vpYear.registerOnPageChangeCallback(object : ViewPager2.OnPageChangeCallback() {
-            override fun onPageSelected(position: Int) {
-                if (currentYearIndex != position) {
-                    vpYear.performHapticFeedback(android.view.HapticFeedbackConstants.VIRTUAL_KEY)
+        dialog.show()
+    }
+
+    private fun showHistoryOptionsMenu() {
+        val dialog = Dialog(this)
+        dialog.setContentView(R.layout.dialog_history_settings)
+        dialog.window?.setBackgroundDrawableResource(android.R.color.transparent)
+        dialog.window?.setLayout(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT)
+
+        // Set current color indicators
+        val spendingIndicator = dialog.findViewById<View>(R.id.view_spending_indicator)
+        val savingsIndicator = dialog.findViewById<View>(R.id.view_savings_indicator)
+        
+        val spendColor = DataManager.financeGraphColor
+        spendingIndicator.backgroundTintList = ColorStateList.valueOf(if (spendColor != -1) spendColor else Color.parseColor("#FF5252"))
+        
+        val saveColor = DataManager.financeGraphSavingsColor
+        savingsIndicator.backgroundTintList = ColorStateList.valueOf(if (saveColor != -1) saveColor else Color.parseColor("#4CAF50"))
+
+        dialog.findViewById<View>(R.id.option_start_month).setOnClickListener {
+            dialog.dismiss()
+            showStartMonthPickerDialog()
+        }
+
+        dialog.findViewById<View>(R.id.option_spending_color).setOnClickListener {
+            dialog.dismiss()
+            showGraphColorPickerDialog(isSpending = true)
+        }
+
+        dialog.findViewById<View>(R.id.option_savings_color).setOnClickListener {
+            dialog.dismiss()
+            showGraphColorPickerDialog(isSpending = false)
+        }
+
+        dialog.findViewById<View>(R.id.btn_close_settings).setOnClickListener { dialog.dismiss() }
+
+        dialog.show()
+    }
+
+    private fun showGraphColorPickerDialog(isSpending: Boolean) {
+        val dialog = Dialog(this)
+        dialog.setContentView(R.layout.dialog_settings_color_picker)
+        dialog.window?.setBackgroundDrawableResource(android.R.color.transparent)
+
+        val grid = dialog.findViewById<GridLayout>(R.id.color_grid)
+        dialog.findViewById<TextView>(R.id.tv_picker_title).text = if (isSpending) "SPENDING COLOR" else "SAVINGS COLOR"
+        
+        val colors = listOf(
+            "#FF5252", "#FBBC05", "#4285F4", "#4CAF50",
+            "#E91E63", "#9C27B0", "#673AB7", "#3F51B5",
+            "#00BCD4", "#009688", "#FF9800", "#FF5722",
+            "#795548", "#9E9E9E", "#607D8B", "#FFFFFF"
+        )
+
+        colors.forEach { colorHex ->
+            val colorView = View(this)
+            val size = (40 * resources.displayMetrics.density).toInt()
+            val params = GridLayout.LayoutParams()
+            params.width = size
+            params.height = size
+            params.setMargins(12, 12, 12, 12)
+            colorView.layoutParams = params
+            
+            // Feature: Clearer Color Preview
+            val shape = android.graphics.drawable.GradientDrawable()
+            shape.shape = android.graphics.drawable.GradientDrawable.OVAL
+            shape.setColor(Color.parseColor(colorHex))
+            shape.setStroke(2, Color.parseColor("#33FFFFFF"))
+            colorView.background = shape
+
+            colorView.setOnClickListener {
+                if (isSpending) {
+                    DataManager.financeGraphColor = Color.parseColor(colorHex)
+                } else {
+                    DataManager.financeGraphSavingsColor = Color.parseColor(colorHex)
                 }
-                currentYearIndex = position
-                monthAdapter.updateYear(availableYears[currentYearIndex])
+                DataManager.saveData(this)
                 updateYearlyAnalytics()
-                // Refresh month details if visible
-                if (findViewById<View>(R.id.month_details_container).visibility == View.VISIBLE) {
-                    vpMonthDetails.adapter?.notifyDataSetChanged()
-                }
+                dialog.dismiss()
             }
-        })
+            grid.addView(colorView)
+        }
+
+        dialog.findViewById<View>(R.id.btn_cancel).setOnClickListener { dialog.dismiss() }
+        dialog.show()
+    }
+
+    private fun showStartMonthPickerDialog() {
+        val dialog = Dialog(this)
+        dialog.setContentView(R.layout.dialog_year_roller)
+        dialog.window?.setBackgroundDrawableResource(android.R.color.transparent)
+        
+        dialog.findViewById<TextView>(R.id.tv_dialog_title).text = "Start Month"
+        val picker = dialog.findViewById<NumberPicker>(R.id.year_number_picker)
+        val btnSave = dialog.findViewById<TextView>(R.id.btn_save_year)
+        
+        picker.minValue = 0
+        picker.maxValue = 11
+        picker.displayedValues = monthNames.map { it.take(3) }.toTypedArray()
+        picker.value = DataManager.financeGraphStartMonth
+
+        btnSave.setOnClickListener {
+            DataManager.financeGraphStartMonth = picker.value
+            DataManager.saveData(this)
+            updateYearlyAnalytics()
+            dialog.dismiss()
+        }
+        
+        dialog.show()
     }
 
     private fun updateYearlyAnalytics() {
         val currency = DataManager.financeCurrency
-        val currentYearValue = availableYears[currentYearIndex]
-        val yearKey = currentYearValue.toString()
+        val yearKey = currentYear.toString()
         val sdf = SimpleDateFormat("yyyy", Locale.getDefault())
-        val monthCodeSdf = SimpleDateFormat("MM", Locale.getDefault())
-        val monthNameSdf = SimpleDateFormat("MMMM", Locale.getDefault())
 
         val yearlyTransactions = DataManager.transactions.filter {
             sdf.format(Date(it.timestamp)) == yearKey
         }
-
-        val emptyState = findViewById<View>(R.id.tv_empty_history)
-        if (yearlyTransactions.isEmpty()) {
-            emptyState.visibility = View.VISIBLE
-        } else {
-            emptyState.visibility = View.GONE
-        }
-
-        val totalSpent = yearlyTransactions.filter { it.type == "Expense" }.sumOf { it.amount }
-        val totalSavings = yearlyTransactions.filter { it.type == "Saving" }.sumOf { it.amount }
+        
+        findViewById<TextView>(R.id.tv_pill_total).text = String.format(Locale.US, "Total Spent: %s%.0f", currency, yearlyTransactions.filter { it.type == "Expense" }.sumOf { it.amount })
+        findViewById<TextView>(R.id.tv_pill_savings).text = String.format(Locale.US, "Savings: %s%.0f", currency, yearlyTransactions.filter { it.type == "Saving" }.sumOf { it.amount })
+        
+        // Update dashboard values
+        val monthCodeSdf = SimpleDateFormat("MM", Locale.getDefault())
+        val monthNameSdf = SimpleDateFormat("MMMM", Locale.getDefault())
         
         val uniqueMonthsCount = yearlyTransactions.map { 
             monthCodeSdf.format(Date(it.timestamp))
         }.distinct().size.coerceAtLeast(1)
 
-        val avgSpent = if (uniqueMonthsCount > 0) totalSpent / uniqueMonthsCount else 0.0
+        val totalSpent = yearlyTransactions.filter { it.type == "Expense" }.sumOf { it.amount }
+        val totalSavings = yearlyTransactions.filter { it.type == "Saving" }.sumOf { it.amount }
 
+        val avgSpent = totalSpent / uniqueMonthsCount
         val highestMonth = yearlyTransactions
             .filter { it.type == "Expense" }
             .groupBy { monthNameSdf.format(Date(it.timestamp)) }
@@ -175,36 +218,73 @@ class FinanceHistoryActivity : AppCompatActivity() {
         findViewById<TextView>(R.id.tv_yearly_total_savings).text = String.format(Locale.US, "%s%.0f", currency, totalSavings)
         findViewById<TextView>(R.id.tv_yearly_highest_month).text = highestMonth
 
-        val pill = findViewById<View>(R.id.pill_floating_summary)
-        if (yearlyTransactions.isNotEmpty()) {
-            pill.visibility = View.VISIBLE
-            findViewById<TextView>(R.id.tv_pill_total).text = String.format(Locale.US, "Total Spent: %s%.0f", currency, totalSpent)
-            findViewById<TextView>(R.id.tv_pill_savings).text = String.format(Locale.US, "Savings: %s%.0f", currency, totalSavings)
-        } else {
-            pill.visibility = View.GONE
-        }
-
         updateSpendGraph(yearlyTransactions)
     }
 
     private fun updateSpendGraph(transactions: List<Transaction>) {
         val container = findViewById<LinearLayout>(R.id.container_spend_graph)
+        val avgLine = findViewById<View>(R.id.view_avg_line)
+        val avgLabel = findViewById<TextView>(R.id.tv_avg_line_label)
+        val tooltipCard = findViewById<com.google.android.material.card.MaterialCardView>(R.id.card_graph_tooltip)
+        val tooltipText = findViewById<TextView>(R.id.tv_tooltip_text)
+        
         container.removeAllViews()
+        tooltipCard.visibility = View.GONE
 
         val sdfMonth = SimpleDateFormat("MM", Locale.getDefault())
         val monthlySpent = DoubleArray(12) { 0.0 }
+        val monthlySavings = DoubleArray(12) { 0.0 }
         
-        transactions.filter { it.type == "Expense" }.forEach {
+        transactions.forEach {
             val monthIndex = sdfMonth.format(Date(it.timestamp)).toInt() - 1
             if (monthIndex in 0..11) {
-                monthlySpent[monthIndex] += it.amount
+                if (it.type == "Expense") monthlySpent[monthIndex] += it.amount
+                else if (it.type == "Saving") monthlySavings[monthIndex] += it.amount
             }
         }
 
-        val maxSpent = monthlySpent.maxOrNull()?.coerceAtLeast(1.0) ?: 1.0
+        val startMonth = DataManager.financeGraphStartMonth
+        val rotatedSpent = DoubleArray(12)
+        val rotatedSavings = DoubleArray(12)
+        val rotatedMonthLabels = Array(12) { "" }
+        val rotatedMonthFullNames = Array(12) { "" }
 
-        monthlySpent.forEachIndexed { index, spent ->
-            val barHeightPercent = (spent / maxSpent).toFloat()
+        for (i in 0..11) {
+            val actualMonthIndex = (i + startMonth) % 12
+            rotatedSpent[i] = monthlySpent[actualMonthIndex]
+            rotatedSavings[i] = monthlySavings[actualMonthIndex]
+            rotatedMonthLabels[i] = monthNames[actualMonthIndex].take(1)
+            rotatedMonthFullNames[i] = monthNames[actualMonthIndex]
+        }
+
+        val maxVal = (rotatedSpent.maxOrNull() ?: 1.0).coerceAtLeast(rotatedSavings.maxOrNull() ?: 1.0).coerceAtLeast(1.0)
+        val avgSpent = if (rotatedSpent.count { it > 0 } > 0) rotatedSpent.sum() / rotatedSpent.count { it > 0 } else 0.0
+
+        // Feature 3: Position Average Line
+        if (avgSpent > 0) {
+            avgLine.visibility = View.VISIBLE
+            avgLabel.visibility = View.VISIBLE
+            val chartHeightPx = 110 * resources.displayMetrics.density
+            val marginFromBottom = (avgSpent / maxVal * chartHeightPx).toInt() + (20 * resources.displayMetrics.density).toInt()
+            
+            val params = avgLine.layoutParams as FrameLayout.LayoutParams
+            params.gravity = android.view.Gravity.BOTTOM
+            params.bottomMargin = marginFromBottom
+            avgLine.layoutParams = params
+            
+            val labelParams = avgLabel.layoutParams as FrameLayout.LayoutParams
+            labelParams.gravity = android.view.Gravity.BOTTOM or android.view.Gravity.START
+            labelParams.bottomMargin = marginFromBottom + 2
+            labelParams.marginStart = (8 * resources.displayMetrics.density).toInt()
+            avgLabel.layoutParams = labelParams
+        } else {
+            avgLine.visibility = View.GONE
+            avgLabel.visibility = View.GONE
+        }
+
+        rotatedSpent.forEachIndexed { index, spent ->
+            val savings = rotatedSavings[index]
+            val actualMonthIndex = (index + startMonth) % 12
             
             val barWrapper = LinearLayout(this)
             val wrapperParams = LinearLayout.LayoutParams(0, ViewGroup.LayoutParams.MATCH_PARENT, 1f)
@@ -212,181 +292,136 @@ class FinanceHistoryActivity : AppCompatActivity() {
             barWrapper.gravity = android.view.Gravity.BOTTOM or android.view.Gravity.CENTER_HORIZONTAL
             barWrapper.orientation = LinearLayout.VERTICAL
 
-            val bar = View(this)
-            val heightPx = (barHeightPercent * (80 * resources.displayMetrics.density)).toInt().coerceAtLeast(4)
-            val barParams = LinearLayout.LayoutParams((12 * resources.displayMetrics.density).toInt(), heightPx)
-            barParams.setMargins(0, 0, 0, 4)
-            bar.layoutParams = barParams
-            bar.background = ContextCompat.getDrawable(this, R.drawable.bg_dialog_rounded)
-            bar.backgroundTintList = android.content.res.ColorStateList.valueOf(
-                if (spent == maxSpent && spent > 0) Color.parseColor("#4CAF50") else Color.parseColor("#33FFFFFF")
+            // Feature 1: Dual Bar Container
+            val dualBarContainer = LinearLayout(this)
+            dualBarContainer.layoutParams = LinearLayout.LayoutParams(ViewGroup.LayoutParams.WRAP_CONTENT, 0, 1f)
+            dualBarContainer.gravity = android.view.Gravity.BOTTOM
+            dualBarContainer.orientation = LinearLayout.HORIZONTAL
+
+            // Spending Bar (Feature 4: Stacked Categories)
+            val spentBar = LinearLayout(this)
+            spentBar.orientation = LinearLayout.VERTICAL
+            spentBar.gravity = android.view.Gravity.BOTTOM
+            val spentHeight = (spent / maxVal * (80 * resources.displayMetrics.density)).toInt().coerceAtLeast(4)
+            val spentParams = LinearLayout.LayoutParams((12 * resources.displayMetrics.density).toInt(), 0)
+            spentParams.setMargins(0, 0, 0, 4)
+            spentBar.layoutParams = spentParams
+            spentBar.background = ContextCompat.getDrawable(this, R.drawable.bg_dialog_rounded)
+            
+            // Get category breakdown for this month
+            val monthTransactions = transactions.filter { 
+                val cal = Calendar.getInstance().apply { timeInMillis = it.timestamp }
+                cal.get(Calendar.MONTH) == actualMonthIndex && it.type == "Expense"
+            }
+            val catBreakdown = monthTransactions.groupBy { it.category }
+                .mapValues { it.value.sumOf { t -> t.amount } }
+                .toList().sortedByDescending { it.second }
+
+            if (spent > 0 && catBreakdown.isNotEmpty()) {
+                val baseColor = DataManager.financeGraphColor
+                val colors = if (baseColor != -1) {
+                    listOf(baseColor, adjustAlpha(baseColor, 0.7f), adjustAlpha(baseColor, 0.4f))
+                } else {
+                    listOf("#FF5252", "#FBBC05", "#4285F4").map { Color.parseColor(it) }
+                }
+
+                catBreakdown.take(3).forEachIndexed { i, (_, amt) ->
+                    val segHeight = (amt / spent * spentHeight).toInt().coerceAtLeast(1)
+                    val segment = View(this)
+                    segment.layoutParams = LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, segHeight)
+                    segment.setBackgroundColor(colors[i % colors.size])
+                    spentBar.addView(segment)
+                }
+            } else {
+                val baseColor = DataManager.financeGraphColor
+                spentBar.backgroundTintList = ColorStateList.valueOf(
+                    if (spent == rotatedSpent.maxOrNull() && spent > 0) {
+                        if (baseColor != -1) baseColor else Color.parseColor("#4CAF50")
+                    } else Color.parseColor("#33FFFFFF")
+                )
+            }
+
+            // Savings Bar
+            val savingsBar = View(this)
+            val savingsHeight = (savings / maxVal * (80 * resources.displayMetrics.density)).toInt().coerceAtLeast(4)
+            val savingsParams = LinearLayout.LayoutParams((12 * resources.displayMetrics.density).toInt(), 0)
+            savingsParams.setMargins(4, 0, 0, 4)
+            savingsBar.layoutParams = savingsParams
+            savingsBar.background = ContextCompat.getDrawable(this, R.drawable.bg_dialog_rounded)
+            
+            val savingsBaseColor = DataManager.financeGraphSavingsColor
+            savingsBar.backgroundTintList = android.content.res.ColorStateList.valueOf(
+                if (savingsBaseColor != -1) savingsBaseColor else Color.parseColor("#4CAF50")
             )
 
+            dualBarContainer.addView(spentBar)
+            if (savings > 0) {
+                dualBarContainer.addView(savingsBar)
+            }
+
             val tvMonth = TextView(this)
-            tvMonth.text = listOf("J", "F", "M", "A", "M", "J", "J", "A", "S", "O", "N", "D")[index]
+            tvMonth.text = rotatedMonthLabels[index]
             tvMonth.setTextColor(Color.parseColor("#80FFFFFF"))
             tvMonth.textSize = 8f
             tvMonth.gravity = android.view.Gravity.CENTER
 
-            barWrapper.addView(bar)
+            barWrapper.addView(dualBarContainer)
             barWrapper.addView(tvMonth)
             
+            barWrapper.post {
+                val sAnimator = android.animation.ValueAnimator.ofInt(0, spentHeight)
+                sAnimator.addUpdateListener {
+                    val p = spentBar.layoutParams
+                    p.height = it.animatedValue as Int
+                    spentBar.layoutParams = p
+                }
+                sAnimator.duration = 500
+                sAnimator.start()
+
+                if (savings > 0) {
+                    val vAnimator = android.animation.ValueAnimator.ofInt(0, savingsHeight)
+                    vAnimator.addUpdateListener {
+                        val p = savingsBar.layoutParams
+                        p.height = it.animatedValue as Int
+                        savingsBar.layoutParams = p
+                    }
+                    vAnimator.duration = 700
+                    vAnimator.start()
+                }
+            }
+
             barWrapper.setOnClickListener {
-                Toast.makeText(this, String.format(Locale.US, "%s%.0f spent in %s", 
-                    DataManager.financeCurrency, spent, 
-                    SimpleDateFormat("MMMM", Locale.getDefault()).format(Calendar.getInstance().apply { set(Calendar.MONTH, index) }.time)), 
-                    Toast.LENGTH_SHORT).show()
+                tooltipCard.visibility = View.VISIBLE
+                val topCatStr = if (catBreakdown.isNotEmpty()) " | Top: ${catBreakdown[0].first}" else ""
+                tooltipText.text = String.format(Locale.US, "%s: %s%.0f spent%s", 
+                    rotatedMonthFullNames[index], DataManager.financeCurrency, spent, topCatStr)
+                
+                tooltipCard.post {
+                    val params = tooltipCard.layoutParams as FrameLayout.LayoutParams
+                    params.gravity = android.view.Gravity.TOP or android.view.Gravity.START
+                    params.topMargin = (4 * resources.displayMetrics.density).toInt()
+                    
+                    val barWidth = container.width / 12
+                    var startMargin = (index * barWidth) + (barWidth / 2) - (tooltipCard.width / 2)
+                    startMargin = startMargin.coerceIn(0, container.width - tooltipCard.width)
+                    
+                    params.leftMargin = startMargin
+                    tooltipCard.layoutParams = params
+                }
+                
+                tooltipCard.removeCallbacks(null)
+                tooltipCard.postDelayed({ tooltipCard.visibility = View.GONE }, 3000)
             }
             
             container.addView(barWrapper)
         }
     }
 
-    private fun handleBackNavigation() {
-        finish()
-    }
-
-    private fun showMonthDetailsContainer() {
-        // No longer needed as UI is consolidated
-    }
-
-    inner class MonthDetailsViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
-        fun bind(monthName: String) {
-            val currency = DataManager.financeCurrency
-            val displaySdf = SimpleDateFormat("MMMM", Locale.getDefault())
-            val sdf = SimpleDateFormat("yyyyMM", Locale.getDefault())
-            val date = displaySdf.parse(monthName) ?: Date()
-            
-            val calendar = Calendar.getInstance()
-            calendar.time = date
-            calendar.set(Calendar.YEAR, availableYears[currentYearIndex])
-            
-            val monthKey = sdf.format(calendar.time)
-
-            val filteredTransactions = DataManager.transactions.filter {
-                sdf.format(Date(it.timestamp)) == monthKey
-            }.toMutableList()
-
-            val transactionsList = itemView.findViewById<RecyclerView>(R.id.month_transactions_list)
-            transactionsList.layoutManager = LinearLayoutManager(itemView.context)
-            transactionsList.adapter = TransactionAdapter(
-                filteredTransactions,
-                onEdit = { _, _ -> },
-                onDelete = { _, _ -> }
-            )
-            
-            val budget = DataManager.monthlyBudgets[monthKey] ?: 0.0
-            val spent = filteredTransactions.filter { it.type == "Expense" }.sumOf { it.amount }
-            val income = filteredTransactions.filter { it.type == "Income" }.sumOf { it.amount }
-            val remaining = (budget - spent) + income
-            val savings = filteredTransactions.filter { it.type == "Saving" }.sumOf { it.amount }
-            val savingsGoal = DataManager.monthlySavingsGoals[monthKey] ?: 0.0
-
-            itemView.findViewById<TextView>(R.id.tv_monthly_budget).text = String.format(Locale.US, "%s%.0f", currency, budget)
-            itemView.findViewById<TextView>(R.id.tv_current_expenditure).text = String.format(Locale.US, "%s%.0f", currency, spent)
-            
-            val tvRemaining = itemView.findViewById<TextView>(R.id.tv_remaining_balance)
-            tvRemaining.text = String.format(Locale.US, "%s%.0f", currency, remaining)
-            tvRemaining.setTextColor(if (remaining < 0) Color.parseColor("#FF5252") else Color.parseColor("#4CAF50"))
-
-            itemView.findViewById<TextView>(R.id.tv_current_savings).text = String.format(Locale.US, "%s%.0f", currency, savings)
-            itemView.findViewById<TextView>(R.id.tv_savings_goal).text = String.format(Locale.US, "Goal: %s%.0f", currency, savingsGoal)
-
-            updateCategoryBreakdown(itemView, filteredTransactions)
-
-            // Month-over-Month Comparison
-            val tvMonthComparison = itemView.findViewById<TextView>(R.id.tv_month_comparison)
-            val prevMonthCalendar = calendar.clone() as Calendar
-            prevMonthCalendar.add(Calendar.MONTH, -1)
-            val prevMonthKey = sdf.format(prevMonthCalendar.time)
-            
-            val prevMonthTransactions = DataManager.transactions.filter {
-                sdf.format(Date(it.timestamp)) == prevMonthKey
-            }
-            val prevSpent = prevMonthTransactions.filter { it.type == "Expense" }.sumOf { it.amount }
-            
-            if (prevSpent > 0) {
-                val diff = ((spent - prevSpent) / prevSpent) * 100
-                val color = if (spent > prevSpent) "#FF5252" else "#4CAF50"
-                val trend = if (spent > prevSpent) "more" else "less"
-                tvMonthComparison.visibility = View.VISIBLE
-                tvMonthComparison.text = String.format(Locale.US, "Spent %.0f%% %s than last month", Math.abs(diff), trend)
-                tvMonthComparison.setTextColor(Color.parseColor(color))
-            } else {
-                tvMonthComparison.visibility = View.GONE
-            }
-        }
-
-        private fun updateCategoryBreakdown(itemView: View, transactions: List<Transaction>) {
-            val cardBreakdown = itemView.findViewById<View>(R.id.card_category_breakdown)
-            val container = itemView.findViewById<LinearLayout>(R.id.container_category_list)
-            container.removeAllViews()
-
-            val expenseTransactions = transactions.filter { it.type == "Expense" }
-            if (expenseTransactions.isEmpty()) {
-                cardBreakdown.visibility = View.GONE
-                return
-            }
-
-            cardBreakdown.visibility = View.VISIBLE
-            val totalSpent = expenseTransactions.sumOf { it.amount }
-            val categoryTotals = expenseTransactions.groupBy { it.category }
-                .mapValues { entry -> entry.value.sumOf { it.amount } }
-                .toList().sortedByDescending { it.second }
-
-            categoryTotals.forEach { (category, amount) ->
-                val percentage = (amount / totalSpent).toFloat()
-                
-                val itemLayout = LinearLayout(itemView.context)
-                itemLayout.orientation = LinearLayout.VERTICAL
-                itemLayout.setPadding(0, 8, 0, 8)
-
-                val labelLayout = LinearLayout(itemView.context)
-                labelLayout.orientation = LinearLayout.HORIZONTAL
-
-                val tvCategory = TextView(itemView.context)
-                tvCategory.text = category
-                tvCategory.setTextColor(Color.WHITE)
-                tvCategory.textSize = 12f
-                tvCategory.layoutParams = LinearLayout.LayoutParams(0, ViewGroup.LayoutParams.WRAP_CONTENT, 1f)
-
-                val tvAmountText = TextView(itemView.context)
-                tvAmountText.text = String.format(Locale.US, "%s%.0f (%.0f%%)", DataManager.financeCurrency, amount, percentage * 100)
-                tvAmountText.setTextColor(Color.parseColor("#B0B0B0"))
-                tvAmountText.textSize = 11f
-
-                labelLayout.addView(tvCategory)
-                labelLayout.addView(tvAmountText)
-
-                val progressContainer = FrameLayout(itemView.context)
-                val containerParams = LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, (8 * resources.displayMetrics.density).toInt())
-                containerParams.topMargin = (6 * resources.displayMetrics.density).toInt()
-                progressContainer.layoutParams = containerParams
-
-                val bg = View(itemView.context)
-                bg.layoutParams = FrameLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT)
-                bg.background = ContextCompat.getDrawable(itemView.context, R.drawable.bg_dialog_rounded)
-                bg.backgroundTintList = android.content.res.ColorStateList.valueOf(Color.parseColor("#1AFFFFFF"))
-
-                val progressView = View(itemView.context)
-                val progressParams = FrameLayout.LayoutParams(0, ViewGroup.LayoutParams.MATCH_PARENT)
-                progressView.layoutParams = progressParams
-                progressView.background = ContextCompat.getDrawable(itemView.context, R.drawable.bg_dialog_rounded)
-                progressView.backgroundTintList = android.content.res.ColorStateList.valueOf(Color.parseColor("#4CAF50"))
-                
-                progressContainer.addView(bg)
-                progressContainer.addView(progressView)
-                
-                progressContainer.post {
-                    val p = progressView.layoutParams as FrameLayout.LayoutParams
-                    p.width = (progressContainer.width * percentage).toInt()
-                    progressView.layoutParams = p
-                }
-
-                itemLayout.addView(labelLayout)
-                itemLayout.addView(progressContainer)
-                container.addView(itemLayout)
-            }
-        }
+    private fun adjustAlpha(color: Int, factor: Float): Int {
+        val alpha = Math.round(Color.alpha(color) * factor)
+        val red = Color.red(color)
+        val green = Color.green(color)
+        val blue = Color.blue(color)
+        return Color.argb(alpha, red, green, blue)
     }
 }

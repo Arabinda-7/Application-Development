@@ -47,6 +47,7 @@
         <activity android:name=".ProjectActivity" />
         <activity android:name=".LedgerActivity" />
         <activity android:name=".LedgerHistoryActivity" />
+        <activity android:name=".FinanceMonthHistoryActivity" />
     </application>
 
 </manifest>

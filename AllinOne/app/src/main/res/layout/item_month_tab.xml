@@ -7,6 +7,6 @@
     android:button="@null"
     android:gravity="center"
     android:paddingHorizontal="16dp"
-    android:textColor="@color/white"
+    android:textColor="@color/month_tab_text_color"
     android:textSize="12sp"
     android:textStyle="bold" />

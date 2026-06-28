@@ -32,6 +32,9 @@ object DataManager {
     // Finance Settings
     var financeCustomCategories = mutableListOf("Food", "Rent", "Transport", "Shopping", "Entertainment", "Health", "Other")
     var financeCurrency: String = "₹"
+    var financeGraphStartMonth: Int = 0 // 0 = January, 1 = February, etc.
+    var financeGraphColor: Int = -1 // Default spending color if -1
+    var financeGraphSavingsColor: Int = -1 // Default savings color if -1
 
     // Habit Settings
     var habitDefaultTab: String = "TODAY"
@@ -125,6 +128,9 @@ object DataManager {
     private const val KEY_TASK_VISIBLE_SECTIONS = "task_visible_sections"
     private const val KEY_FINANCE_CUSTOM_CATEGORIES = "finance_custom_categories"
     private const val KEY_FINANCE_CURRENCY = "finance_currency"
+    private const val KEY_FINANCE_GRAPH_START_MONTH = "finance_graph_start_month"
+    private const val KEY_FINANCE_GRAPH_COLOR = "finance_graph_color"
+    private const val KEY_FINANCE_GRAPH_SAVINGS_COLOR = "finance_graph_savings_color"
     private const val KEY_NOTE_AUTO_CLEANUP = "note_auto_cleanup"
     private const val KEY_NOTE_SHOW_HIDDEN = "note_show_hidden"
     private const val KEY_NOTE_VISIBLE_SECTIONS = "note_visible_sections"
@@ -208,6 +214,9 @@ object DataManager {
             putString(KEY_TASK_VISIBLE_SECTIONS, gson.toJson(taskVisibleSections))
             putString(KEY_FINANCE_CUSTOM_CATEGORIES, gson.toJson(financeCustomCategories))
             putString(KEY_FINANCE_CURRENCY, financeCurrency)
+            putInt(KEY_FINANCE_GRAPH_START_MONTH, financeGraphStartMonth)
+            putInt(KEY_FINANCE_GRAPH_COLOR, financeGraphColor)
+            putInt(KEY_FINANCE_GRAPH_SAVINGS_COLOR, financeGraphSavingsColor)
             putInt(KEY_NOTE_AUTO_CLEANUP, noteAutoCleanupDays)
             putBoolean(KEY_NOTE_SHOW_HIDDEN, noteShowHidden)
             putString(KEY_NOTE_VISIBLE_SECTIONS, gson.toJson(noteVisibleSections))
@@ -357,6 +366,9 @@ object DataManager {
             financeCustomCategories = gson.fromJson(it, type) ?: mutableListOf("Food", "Transport", "Rent", "Shopping", "Entertainment")
         }
         financeCurrency = prefs.getString(KEY_FINANCE_CURRENCY, "₹") ?: "₹"
+        financeGraphStartMonth = prefs.getInt(KEY_FINANCE_GRAPH_START_MONTH, 0)
+        financeGraphColor = prefs.getInt(KEY_FINANCE_GRAPH_COLOR, -1)
+        financeGraphSavingsColor = prefs.getInt(KEY_FINANCE_GRAPH_SAVINGS_COLOR, -1)
         noteAutoCleanupDays = prefs.getInt(KEY_NOTE_AUTO_CLEANUP, 0)
         noteShowHidden = prefs.getBoolean(KEY_NOTE_SHOW_HIDDEN, false)
         prefs.getString(KEY_NOTE_VISIBLE_SECTIONS, null)?.let {
