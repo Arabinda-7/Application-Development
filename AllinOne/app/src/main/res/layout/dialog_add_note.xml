@@ -29,39 +29,35 @@
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintTop_toTopOf="@id/btn_close_note" />
 
-    <TextView
+    <ImageButton
         android:id="@+id/btn_reminder"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
+        android:layout_width="40dp"
+        android:layout_height="40dp"
         android:layout_marginEnd="8dp"
-        android:text="Remind"
-        android:textColor="@color/white"
-        android:textSize="16sp"
-        android:textStyle="bold"
+        android:src="@android:drawable/ic_lock_idle_alarm"
+        android:background="?attr/selectableItemBackgroundBorderless"
+        app:tint="@color/white"
         android:padding="8dp"
-        android:clickable="true"
-        android:focusable="true"
-        android:background="?attr/selectableItemBackground"
+        android:scaleType="centerInside"
         app:layout_constraintBottom_toBottomOf="@id/btn_save_note"
         app:layout_constraintEnd_toStartOf="@id/btn_save_note"
-        app:layout_constraintTop_toTopOf="@id/btn_save_note" />
+        app:layout_constraintTop_toTopOf="@id/btn_save_note"
+        android:contentDescription="Set Reminder" />
 
-    <TextView
+    <ImageButton
         android:id="@+id/btn_voice_input"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
+        android:layout_width="40dp"
+        android:layout_height="40dp"
         android:layout_marginEnd="8dp"
-        android:text="Voice"
-        android:textColor="@color/white"
-        android:textSize="16sp"
-        android:textStyle="bold"
+        android:src="@android:drawable/ic_btn_speak_now"
+        android:background="?attr/selectableItemBackgroundBorderless"
+        app:tint="@color/white"
         android:padding="8dp"
-        android:clickable="true"
-        android:focusable="true"
-        android:background="?attr/selectableItemBackground"
+        android:scaleType="centerInside"
         app:layout_constraintBottom_toBottomOf="@id/btn_reminder"
         app:layout_constraintEnd_toStartOf="@id/btn_reminder"
-        app:layout_constraintTop_toTopOf="@id/btn_reminder" />
+        app:layout_constraintTop_toTopOf="@id/btn_reminder"
+        android:contentDescription="Voice Input" />
 
     <EditText
         android:id="@+id/note_title_input"
