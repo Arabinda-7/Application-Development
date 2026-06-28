@@ -48,6 +48,10 @@
         <activity android:name=".LedgerActivity" />
         <activity android:name=".LedgerHistoryActivity" />
         <activity android:name=".FinanceMonthHistoryActivity" />
+        <activity android:name=".PersonLedgerActivity" />
+        <activity android:name=".AddPersonActivity" />
+        <activity android:name=".PersonalLedgerHubActivity" />
+        <activity android:name=".PersonalLedgerBookActivity" />
     </application>
 
 </manifest>

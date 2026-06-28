@@ -14,6 +14,7 @@ object DataManager {
     var notes = mutableListOf<Note>()
     var transactions = mutableListOf<Transaction>()
     var ledgerEntries = mutableListOf<LedgerEntry>()
+    var personalLedgers = mutableListOf<PersonalLedger>()
     var monthlyBudget: Double = 0.0
     var monthlySavingsGoal: Double = 0.0
     var history = mutableMapOf<String, DayHistory>()
@@ -114,6 +115,7 @@ object DataManager {
     private const val KEY_NOTES = "notes_data"
     private const val KEY_TRANSACTIONS = "transactions_data"
     private const val KEY_LEDGER = "ledger_data"
+    private const val KEY_PERSONAL_LEDGER = "personal_ledger_data"
     private const val KEY_BUDGET = "monthly_budget"
     private const val KEY_SAVINGS_GOAL = "monthly_savings_goal"
     private const val KEY_MONTHLY_BUDGETS = "monthly_budgets_data"
@@ -204,6 +206,7 @@ object DataManager {
             putString(KEY_NOTES, gson.toJson(notes))
             putString(KEY_TRANSACTIONS, gson.toJson(transactions))
             putString(KEY_LEDGER, gson.toJson(ledgerEntries))
+            putString(KEY_PERSONAL_LEDGER, gson.toJson(personalLedgers))
             putFloat(KEY_BUDGET, monthlyBudget.toFloat())
             putFloat(KEY_SAVINGS_GOAL, monthlySavingsGoal.toFloat())
             putString(KEY_MONTHLY_BUDGETS, gson.toJson(monthlyBudgets))
@@ -333,6 +336,19 @@ object DataManager {
         prefs.getString(KEY_LEDGER, null)?.let {
             val type = object : TypeToken<MutableList<LedgerEntry>>() {}.type
             ledgerEntries = gson.fromJson(it, type) ?: mutableListOf()
+            ledgerEntries.forEach { entry ->
+                if (entry.paymentHistory == null) entry.paymentHistory = mutableListOf()
+            }
+        }
+
+        prefs.getString(KEY_PERSONAL_LEDGER, null)?.let {
+            val type = object : TypeToken<MutableList<PersonalLedger>>() {}.type
+            personalLedgers = gson.fromJson(it, type) ?: mutableListOf()
+            personalLedgers.forEach { ledger ->
+                ledger.entries.forEach { entry ->
+                    if (entry.paymentHistory == null) entry.paymentHistory = mutableListOf()
+                }
+            }
         }
 
         monthlyBudget = prefs.getFloat(KEY_BUDGET, 0.0f).toDouble()

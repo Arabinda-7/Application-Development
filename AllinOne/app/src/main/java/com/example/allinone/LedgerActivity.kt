@@ -28,6 +28,7 @@ class LedgerActivity : AppCompatActivity() {
     
     private lateinit var tvTotalBorrowed: TextView
     private lateinit var tvTotalLent: TextView
+    private lateinit var tvNetBalance: TextView
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -35,6 +36,7 @@ class LedgerActivity : AppCompatActivity() {
 
         tvTotalBorrowed = findViewById(R.id.tv_total_borrowed)
         tvTotalLent = findViewById(R.id.tv_total_lent)
+        tvNetBalance = findViewById(R.id.tv_net_balance)
 
         val ledgerList = findViewById<RecyclerView>(R.id.ledger_list)
         ledgerList.layoutManager = LinearLayoutManager(this)
@@ -49,6 +51,9 @@ class LedgerActivity : AppCompatActivity() {
             onShowMenu = { anchor, entry, isHistory, onAction ->
                 showCustomLedgerMenu(anchor, entry, isHistory, onAction)
             },
+            onAddPayment = { entry ->
+                showAddPaymentDialog(this, entry)
+            },
             onConfirmSettlement = { entry ->
                 showConfirmationDialog(
                     title = "SETTLE ENTRY",
@@ -57,6 +62,14 @@ class LedgerActivity : AppCompatActivity() {
                     onConfirm = {
                         entry.isSettled = true
                         entry.settlementTimestamp = System.currentTimeMillis()
+                        
+                        // Add remaining as payment record
+                        val remaining = entry.amount - entry.paidAmount
+                        if (remaining > 0) {
+                            entry.paymentHistory.add(LedgerPayment(remaining))
+                            entry.paidAmount = entry.amount
+                        }
+                        
                         DataManager.saveData(this)
                         updateActiveEntries()
                         updateSummary()
@@ -69,10 +82,61 @@ class LedgerActivity : AppCompatActivity() {
         updateSummary()
 
         findViewById<View>(R.id.btn_back).setOnClickListener { finish() }
-        findViewById<View>(R.id.btn_add_ledger).setOnClickListener { showAddLedgerDialog() }
-        findViewById<View>(R.id.btn_ledger_history).setOnClickListener { 
-            startActivity(Intent(this, LedgerHistoryActivity::class.java))
+
+        findViewById<View>(R.id.btn_personal_ledger).setOnClickListener {
+            startActivity(Intent(this, PersonalLedgerHubActivity::class.java))
         }
+        
+        findViewById<View>(R.id.btn_ledger_settings).setOnClickListener {
+            val inflater = LayoutInflater.from(this)
+            val menuView = inflater.inflate(R.layout.layout_activity_settings_menu, null)
+            val popupWindow = PopupWindow(menuView, ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT, true)
+            popupWindow.elevation = 10f
+
+            val historyBtn = menuView.findViewById<View>(R.id.menu_action_primary)
+            historyBtn.visibility = View.VISIBLE
+            menuView.findViewById<TextView>(R.id.tv_action_primary).text = "HISTORY"
+            menuView.findViewById<ImageView>(R.id.iv_action_primary).setImageResource(R.drawable.ic_history)
+            
+            menuView.findViewById<View>(R.id.menu_clear_completed).visibility = View.GONE
+            menuView.findViewById<View>(R.id.menu_toggle_completed).visibility = View.GONE
+            
+            historyBtn.setOnClickListener {
+                startActivity(Intent(this, LedgerHistoryActivity::class.java))
+                popupWindow.dismiss()
+            }
+
+            menuView.findViewById<View>(R.id.menu_activity_settings).setOnClickListener {
+                showLedgerSettingsDialog()
+                popupWindow.dismiss()
+            }
+
+            popupWindow.showAsDropDown(it, -150, 0)
+        }
+
+        findViewById<View>(R.id.card_add_person).setOnClickListener {
+            startActivity(Intent(this, AddPersonActivity::class.java))
+        }
+        findViewById<View>(R.id.btn_add_ledger).setOnClickListener { showAddLedgerDialog() }
+    }
+
+    private fun showLedgerSettingsDialog() {
+        val dialog = Dialog(this)
+        dialog.setContentView(R.layout.dialog_ledger_settings)
+        dialog.window?.setBackgroundDrawableResource(android.R.color.transparent)
+        dialog.window?.setLayout(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT)
+
+        val itemPersonal = dialog.findViewById<View>(R.id.item_personal_ledger)
+        val btnClose = dialog.findViewById<View>(R.id.btn_close_settings)
+
+        itemPersonal.setOnClickListener {
+            startActivity(Intent(this, PersonalLedgerHubActivity::class.java))
+            dialog.dismiss()
+        }
+
+        btnClose.setOnClickListener { dialog.dismiss() }
+
+        dialog.show()
     }
 
     override fun onResume() {
@@ -83,74 +147,28 @@ class LedgerActivity : AppCompatActivity() {
 
     private fun updateActiveEntries() {
         activeEntries.clear()
-        activeEntries.addAll(allEntries.filter { !it.isSettled }.sortedByDescending { it.timestamp })
+        // Feature 4: Sort by Person Name to naturally group them
+        activeEntries.addAll(allEntries.filter { !it.isSettled }
+            .sortedWith(compareBy({ it.personName }, { it.timestamp })))
+            
         if (::ledgerAdapter.isInitialized) {
             ledgerAdapter.notifyDataSetChanged()
         }
     }
 
     private fun updateSummary() {
-        val activeBorrow = activeEntries.filter { it.type == "Borrowed" }.sumOf { it.amount - it.paidAmount }
-        val activeLent = activeEntries.filter { it.type == "Lent" }.sumOf { it.amount - it.paidAmount }
+        val totalBorrow = activeEntries.filter { it.type == "Borrowed" }.sumOf { it.amount - it.paidAmount }
+        val totalLent = activeEntries.filter { it.type == "Lent" }.sumOf { it.amount - it.paidAmount }
         
+        // Feature 3: Calculate Net Balance
+        val netBalance = totalLent - totalBorrow
         val currency = DataManager.financeCurrency
-        tvTotalBorrowed.text = String.format(Locale.US, "%s%.0f", currency, activeBorrow)
-        tvTotalLent.text = String.format(Locale.US, "%s%.0f", currency, activeLent)
-    }
-
-    private fun showLedgerHistoryDialog() {
-        val dialog = Dialog(this, R.style.SeamlessDialog)
-        dialog.setContentView(R.layout.dialog_project_history)
-        dialog.window?.setLayout(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT)
-
-        val historyList = dialog.findViewById<RecyclerView>(R.id.history_list)
-        val btnClose = dialog.findViewById<View>(R.id.btn_close_history)
-        val title = dialog.findViewById<TextView>(R.id.tv_history_title)
-
-        title.text = "SETTLED LEDGER"
-        historyList.layoutManager = LinearLayoutManager(this)
         
-        val settledEntries = allEntries.filter { it.isSettled }.sortedByDescending { it.timestamp }.toMutableList()
+        tvTotalBorrowed.text = String.format(Locale.US, "%s%.0f", currency, totalBorrow)
+        tvTotalLent.text = String.format(Locale.US, "%s%.0f", currency, totalLent)
         
-        val adapter = object : RecyclerView.Adapter<RecyclerView.ViewHolder>() {
-            override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): RecyclerView.ViewHolder {
-                val view = LayoutInflater.from(parent.context).inflate(R.layout.item_ledger_history, parent, false)
-                return object : RecyclerView.ViewHolder(view) {}
-            }
-
-            override fun onBindViewHolder(holder: RecyclerView.ViewHolder, position: Int) {
-                val entry = settledEntries[position]
-                val v = holder.itemView
-                val tvName = v.findViewById<TextView>(R.id.tv_person_name)
-                val tvAmount = v.findViewById<TextView>(R.id.tv_ledger_amount)
-                
-                tvName.text = entry.personName
-                tvName.paintFlags = tvName.paintFlags or Paint.STRIKE_THRU_TEXT_FLAG
-                
-                v.findViewById<TextView>(R.id.tv_ledger_type).text = entry.type.uppercase()
-                tvAmount.text = "${DataManager.financeCurrency}${entry.amount.toInt()}"
-                v.findViewById<TextView>(R.id.tv_ledger_date).text = SimpleDateFormat("MMM dd, yyyy", Locale.getDefault()).format(Date(entry.timestamp))
-                
-                val typeColor = if (entry.type == "Borrowed") Color.parseColor("#FF5252") else Color.parseColor("#4CAF50")
-                tvAmount.setTextColor(typeColor)
-
-                v.setOnLongClickListener {
-                    showCustomLedgerMenu(it, entry, true) {
-                        settledEntries.remove(entry)
-                        notifyDataSetChanged()
-                        updateActiveEntries()
-                        updateSummary()
-                    }
-                    true
-                }
-            }
-
-            override fun getItemCount(): Int = settledEntries.size
-        }
-        historyList.adapter = adapter
-
-        btnClose.setOnClickListener { dialog.dismiss() }
-        dialog.show()
+        tvNetBalance.text = String.format(Locale.US, "%s%.0f", currency, Math.abs(netBalance))
+        tvNetBalance.setTextColor(if (netBalance >= 0) Color.parseColor("#4CAF50") else Color.parseColor("#FF5252"))
     }
 
     private fun showCustomLedgerMenu(anchor: View, entry: LedgerEntry, isHistory: Boolean, onAction: () -> Unit) {
@@ -262,6 +280,9 @@ class LedgerActivity : AppCompatActivity() {
         btnConfirm.setOnClickListener {
             val paid = etInput.text.toString().toDoubleOrNull() ?: 0.0
             if (paid > 0) {
+                // Feature 5: Record in Payment History
+                entry.paymentHistory.add(LedgerPayment(paid))
+                
                 entry.paidAmount += paid
                 if (entry.paidAmount >= entry.amount) {
                     entry.isSettled = true
@@ -388,6 +409,7 @@ class LedgerAdapter(
     private val entries: MutableList<LedgerEntry>,
     private val onUpdate: () -> Unit,
     private val onShowMenu: (View, LedgerEntry, Boolean, () -> Unit) -> Unit,
+    private val onAddPayment: (LedgerEntry) -> Unit,
     private val onConfirmSettlement: (LedgerEntry) -> Unit
 ) : RecyclerView.Adapter<LedgerAdapter.LedgerViewHolder>() {
 
@@ -405,6 +427,60 @@ class LedgerAdapter(
         holder.tvAmount.text = "${DataManager.financeCurrency}${remaining.toInt()}"
         holder.tvDate.text = SimpleDateFormat("MMM dd, yyyy", Locale.getDefault()).format(Date(entry.timestamp))
         
+        // Feature 1: Circular Progress Calculation
+        val progress = if (entry.amount > 0) ((entry.paidAmount / entry.amount) * 100).toInt() else 0
+        holder.progressBar.progress = progress
+
+        // Feature 6: Overdue Highlighting
+        val isOverdue = entry.dueDate != null && entry.dueDate!! < System.currentTimeMillis() && !entry.isSettled
+        if (isOverdue) {
+            holder.cardView.strokeColor = Color.parseColor("#FF5252")
+            holder.cardView.strokeWidth = (2 * holder.itemView.resources.displayMetrics.density).toInt()
+        } else {
+            holder.cardView.strokeColor = Color.parseColor("#22FFFFFF")
+            holder.cardView.strokeWidth = (1 * holder.itemView.resources.displayMetrics.density).toInt()
+        }
+
+        // Feature 5: Show Payment History if Expanded
+        if (entry.isExpanded && entry.paymentHistory.isNotEmpty()) {
+            holder.historyContainer.visibility = View.VISIBLE
+            holder.historyContainer.removeAllViews()
+            
+            val title = TextView(holder.itemView.context).apply {
+                text = "PAYMENT LOG"
+                setTextColor(Color.parseColor("#80FFFFFF"))
+                textSize = 10f
+                setPadding(0, 8, 0, 8)
+                setTypeface(null, android.graphics.Typeface.BOLD)
+            }
+            holder.historyContainer.addView(title)
+
+            entry.paymentHistory.forEach { payment ->
+                val row = LinearLayout(holder.itemView.context).apply {
+                    orientation = LinearLayout.HORIZONTAL
+                    setPadding(0, 4, 0, 4)
+                    
+                    val tvDate = TextView(holder.itemView.context).apply {
+                        layoutParams = LinearLayout.LayoutParams(0, ViewGroup.LayoutParams.WRAP_CONTENT, 1f)
+                        text = SimpleDateFormat("MMM dd, h:mm a", Locale.getDefault()).format(Date(payment.timestamp))
+                        setTextColor(Color.parseColor("#B0B0B0"))
+                        textSize = 11f
+                    }
+                    val tvAmt = TextView(holder.itemView.context).apply {
+                        text = "+${DataManager.financeCurrency}${payment.amount.toInt()}"
+                        setTextColor(Color.parseColor("#4CAF50"))
+                        textSize = 11f
+                        setTypeface(null, android.graphics.Typeface.BOLD)
+                    }
+                    addView(tvDate)
+                    addView(tvAmt)
+                }
+                holder.historyContainer.addView(row)
+            }
+        } else {
+            holder.historyContainer.visibility = View.GONE
+        }
+
         if (entry.paidAmount > 0 && !entry.isSettled) {
             holder.tvNote.text = "Paid: ${DataManager.financeCurrency}${entry.paidAmount.toInt()} / ${DataManager.financeCurrency}${entry.amount.toInt()}\n${entry.note}"
             holder.tvNote.visibility = View.VISIBLE
@@ -418,7 +494,6 @@ class LedgerAdapter(
         // Due Date Logic
         if (entry.dueDate != null && !entry.isSettled) {
             val sdfDue = SimpleDateFormat("MMM dd", Locale.getDefault())
-            val isOverdue = entry.dueDate!! < System.currentTimeMillis()
             holder.tvDueDate.text = if (isOverdue) "OVERDUE: ${sdfDue.format(Date(entry.dueDate!!))}" else "DUE: ${sdfDue.format(Date(entry.dueDate!!))}"
             holder.tvDueDate.visibility = View.VISIBLE
             holder.tvDueDate.setTextColor(if (isOverdue) Color.RED else Color.parseColor("#FFB800"))
@@ -430,21 +505,26 @@ class LedgerAdapter(
         holder.tvType.setTextColor(typeColor)
         holder.tvAmount.setTextColor(typeColor)
 
-        // Settlement Logic
-        if (entry.isSettled) {
-            holder.tvName.paintFlags = holder.tvName.paintFlags or Paint.STRIKE_THRU_TEXT_FLAG
-            holder.itemView.alpha = 0.5f
-            holder.btnSettle.setImageResource(android.R.drawable.checkbox_on_background)
-            holder.btnSettle.imageTintList = android.content.res.ColorStateList.valueOf(Color.parseColor("#4CAF50"))
-        } else {
-            holder.tvName.paintFlags = holder.tvName.paintFlags and Paint.STRIKE_THRU_TEXT_FLAG.inv()
-            holder.itemView.alpha = 1.0f
-            holder.btnSettle.setImageResource(android.R.drawable.checkbox_off_background)
-            holder.btnSettle.imageTintList = android.content.res.ColorStateList.valueOf(Color.WHITE)
+        // Feature: Quick Add Payment on Price click
+        holder.tvAmount.setOnClickListener {
+            onAddPayment(entry)
+        }
+
+        // Feature: Open Person Detail on Name click
+        holder.tvName.setOnClickListener {
+            val intent = Intent(holder.itemView.context, PersonLedgerActivity::class.java).apply {
+                putExtra("personName", entry.personName)
+            }
+            holder.itemView.context.startActivity(intent)
         }
 
         holder.btnSettle.setOnClickListener {
             onConfirmSettlement(entry)
+        }
+
+        holder.itemView.setOnClickListener {
+            entry.isExpanded = !entry.isExpanded
+            notifyItemChanged(position)
         }
 
         holder.itemView.setOnLongClickListener {
@@ -456,6 +536,7 @@ class LedgerAdapter(
     override fun getItemCount(): Int = entries.size
 
     class LedgerViewHolder(view: View) : RecyclerView.ViewHolder(view) {
+        val cardView: com.google.android.material.card.MaterialCardView = view as com.google.android.material.card.MaterialCardView
         val tvName: TextView = view.findViewById(R.id.tv_person_name)
         val tvType: TextView = view.findViewById(R.id.tv_ledger_type)
         val tvAmount: TextView = view.findViewById(R.id.tv_ledger_amount)
@@ -463,5 +544,7 @@ class LedgerAdapter(
         val tvDueDate: TextView = view.findViewById(R.id.tv_due_date_label)
         val tvDate: TextView = view.findViewById(R.id.tv_ledger_date)
         val btnSettle: ImageView = view.findViewById(R.id.btn_settle_ledger)
+        val progressBar: ProgressBar = view.findViewById(R.id.pb_debt_progress_circular)
+        val historyContainer: LinearLayout = view.findViewById(R.id.container_payment_history)
     }
 }
