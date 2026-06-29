@@ -83,60 +83,11 @@ class LedgerActivity : AppCompatActivity() {
 
         findViewById<View>(R.id.btn_back).setOnClickListener { finish() }
 
-        findViewById<View>(R.id.btn_personal_ledger).setOnClickListener {
-            startActivity(Intent(this, PersonalLedgerHubActivity::class.java))
-        }
-        
-        findViewById<View>(R.id.btn_ledger_settings).setOnClickListener {
-            val inflater = LayoutInflater.from(this)
-            val menuView = inflater.inflate(R.layout.layout_activity_settings_menu, null)
-            val popupWindow = PopupWindow(menuView, ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT, true)
-            popupWindow.elevation = 10f
-
-            val historyBtn = menuView.findViewById<View>(R.id.menu_action_primary)
-            historyBtn.visibility = View.VISIBLE
-            menuView.findViewById<TextView>(R.id.tv_action_primary).text = "HISTORY"
-            menuView.findViewById<ImageView>(R.id.iv_action_primary).setImageResource(R.drawable.ic_history)
-            
-            menuView.findViewById<View>(R.id.menu_clear_completed).visibility = View.GONE
-            menuView.findViewById<View>(R.id.menu_toggle_completed).visibility = View.GONE
-            
-            historyBtn.setOnClickListener {
-                startActivity(Intent(this, LedgerHistoryActivity::class.java))
-                popupWindow.dismiss()
-            }
-
-            menuView.findViewById<View>(R.id.menu_activity_settings).setOnClickListener {
-                showLedgerSettingsDialog()
-                popupWindow.dismiss()
-            }
-
-            popupWindow.showAsDropDown(it, -150, 0)
+        findViewById<View>(R.id.btn_ledger_history).setOnClickListener {
+            startActivity(Intent(this, LedgerHistoryActivity::class.java))
         }
 
-        findViewById<View>(R.id.card_add_person).setOnClickListener {
-            startActivity(Intent(this, AddPersonActivity::class.java))
-        }
         findViewById<View>(R.id.btn_add_ledger).setOnClickListener { showAddLedgerDialog() }
-    }
-
-    private fun showLedgerSettingsDialog() {
-        val dialog = Dialog(this)
-        dialog.setContentView(R.layout.dialog_ledger_settings)
-        dialog.window?.setBackgroundDrawableResource(android.R.color.transparent)
-        dialog.window?.setLayout(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT)
-
-        val itemPersonal = dialog.findViewById<View>(R.id.item_personal_ledger)
-        val btnClose = dialog.findViewById<View>(R.id.btn_close_settings)
-
-        itemPersonal.setOnClickListener {
-            startActivity(Intent(this, PersonalLedgerHubActivity::class.java))
-            dialog.dismiss()
-        }
-
-        btnClose.setOnClickListener { dialog.dismiss() }
-
-        dialog.show()
     }
 
     override fun onResume() {

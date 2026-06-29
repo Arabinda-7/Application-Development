@@ -1,4 +1,5 @@
 <resources>
     <string name="app_name">All in One</string>
     <string name="add_habit">Add Habit</string>
+    <string name="manage_people_title">Manage People</string>
 </resources>

@@ -17,6 +17,7 @@ object DataManager {
     var personalLedgers = mutableListOf<PersonalLedger>()
     var monthlyBudget: Double = 0.0
     var monthlySavingsGoal: Double = 0.0
+    var financeSavingsGoalName: String = "Monthly Savings"
     var history = mutableMapOf<String, DayHistory>()
     var monthlyBudgets = mutableMapOf<String, Double>()
     var monthlySavingsGoals = mutableMapOf<String, Double>()
@@ -38,6 +39,7 @@ object DataManager {
     var financeGraphStartMonth: Int = 0 // 0 = January, 1 = February, etc.
     var financeGraphColor: Int = -1 // Default spending color if -1
     var financeGraphSavingsColor: Int = -1 // Default savings color if -1
+    var isFinanceLedgerEnabled: Boolean = true
 
     // Habit Settings
     var habitDefaultTab: String = "TODAY"
@@ -118,6 +120,7 @@ object DataManager {
     private const val KEY_PERSONAL_LEDGER = "personal_ledger_data"
     private const val KEY_BUDGET = "monthly_budget"
     private const val KEY_SAVINGS_GOAL = "monthly_savings_goal"
+    private const val KEY_SAVINGS_GOAL_NAME = "savings_goal_name"
     private const val KEY_MONTHLY_BUDGETS = "monthly_budgets_data"
     private const val KEY_MONTHLY_SAVINGS_GOALS = "monthly_savings_goals_data"
     private const val KEY_HISTORY = "history_data"
@@ -137,6 +140,7 @@ object DataManager {
     private const val KEY_FINANCE_GRAPH_START_MONTH = "finance_graph_start_month"
     private const val KEY_FINANCE_GRAPH_COLOR = "finance_graph_color"
     private const val KEY_FINANCE_GRAPH_SAVINGS_COLOR = "finance_graph_savings_color"
+    private const val KEY_FINANCE_LEDGER_ENABLED = "finance_ledger_enabled"
     private const val KEY_NOTE_AUTO_CLEANUP = "note_auto_cleanup"
     private const val KEY_NOTE_SHOW_HIDDEN = "note_show_hidden"
     private const val KEY_NOTE_VISIBLE_SECTIONS = "note_visible_sections"
@@ -207,6 +211,7 @@ object DataManager {
             putString(KEY_TRANSACTIONS, gson.toJson(transactions))
             putString(KEY_LEDGER, gson.toJson(ledgerEntries))
             putString(KEY_PERSONAL_LEDGER, gson.toJson(personalLedgers))
+            putString(KEY_SAVINGS_GOAL_NAME, financeSavingsGoalName)
             putFloat(KEY_BUDGET, monthlyBudget.toFloat())
             putFloat(KEY_SAVINGS_GOAL, monthlySavingsGoal.toFloat())
             putString(KEY_MONTHLY_BUDGETS, gson.toJson(monthlyBudgets))
@@ -226,6 +231,7 @@ object DataManager {
             putInt(KEY_FINANCE_GRAPH_START_MONTH, financeGraphStartMonth)
             putInt(KEY_FINANCE_GRAPH_COLOR, financeGraphColor)
             putInt(KEY_FINANCE_GRAPH_SAVINGS_COLOR, financeGraphSavingsColor)
+            putBoolean(KEY_FINANCE_LEDGER_ENABLED, isFinanceLedgerEnabled)
             putInt(KEY_NOTE_AUTO_CLEANUP, noteAutoCleanupDays)
             putBoolean(KEY_NOTE_SHOW_HIDDEN, noteShowHidden)
             putString(KEY_NOTE_VISIBLE_SECTIONS, gson.toJson(noteVisibleSections))
@@ -399,6 +405,8 @@ object DataManager {
         financeGraphStartMonth = prefs.getInt(KEY_FINANCE_GRAPH_START_MONTH, 0)
         financeGraphColor = prefs.getInt(KEY_FINANCE_GRAPH_COLOR, -1)
         financeGraphSavingsColor = prefs.getInt(KEY_FINANCE_GRAPH_SAVINGS_COLOR, -1)
+        financeSavingsGoalName = prefs.getString(KEY_SAVINGS_GOAL_NAME, "Monthly Savings") ?: "Monthly Savings"
+        isFinanceLedgerEnabled = prefs.getBoolean(KEY_FINANCE_LEDGER_ENABLED, true)
         noteAutoCleanupDays = prefs.getInt(KEY_NOTE_AUTO_CLEANUP, 0)
         noteShowHidden = prefs.getBoolean(KEY_NOTE_SHOW_HIDDEN, false)
         prefs.getString(KEY_NOTE_VISIBLE_SECTIONS, null)?.let {

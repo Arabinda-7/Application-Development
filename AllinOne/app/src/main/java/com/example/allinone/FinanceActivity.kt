@@ -31,6 +31,7 @@ class FinanceActivity : AppCompatActivity() {
     private lateinit var tvRemaining: TextView
     private lateinit var tvCurrentSavings: TextView
     private lateinit var tvSavingsGoal: TextView
+    private lateinit var tvSavingsTitle: TextView
     private lateinit var tvDailyLimit: TextView
     private lateinit var pbBudget: android.widget.ProgressBar
     private lateinit var pbSavings: android.widget.ProgressBar
@@ -50,6 +51,7 @@ class FinanceActivity : AppCompatActivity() {
         tvRemaining = summary.findViewById(R.id.tv_remaining_balance)
         tvCurrentSavings = summary.findViewById(R.id.tv_current_savings)
         tvSavingsGoal = summary.findViewById(R.id.tv_savings_goal)
+        tvSavingsTitle = summary.findViewById(R.id.tv_savings_title)
         tvDailyLimit = summary.findViewById(R.id.tv_daily_limit)
         pbBudget = summary.findViewById(R.id.pb_budget)
         pbSavings = summary.findViewById(R.id.pb_savings)
@@ -110,6 +112,7 @@ class FinanceActivity : AppCompatActivity() {
         findViewById<View>(R.id.btn_finance_ledger).setOnClickListener {
             startActivity(android.content.Intent(this, LedgerActivity::class.java))
         }
+        findViewById<View>(R.id.btn_finance_ledger).visibility = if (DataManager.isFinanceLedgerEnabled) View.VISIBLE else View.GONE
 
         val btnCreate = findViewById<com.google.android.material.floatingactionbutton.FloatingActionButton>(R.id.btn_create_new_finance)
         if (DataManager.financeAddThemeColor != -1) {
@@ -123,6 +126,9 @@ class FinanceActivity : AppCompatActivity() {
             showSetBudgetDialog()
         }
 
+        cardSavings.setOnClickListener {
+            showSetSavingsGoalDialog()
+        }
         cardSavings.setOnLongClickListener {
             showSetSavingsGoalDialog()
             true
@@ -327,6 +333,7 @@ class FinanceActivity : AppCompatActivity() {
 
         tvCurrentSavings.text = String.format(Locale.US, "%s%.0f", currency, savings)
         tvSavingsGoal.text = String.format(Locale.US, "Goal: %s%.0f", currency, savingsGoal)
+        tvSavingsTitle.text = DataManager.financeSavingsGoalName.uppercase()
 
         val calendar = Calendar.getInstance()
         val daysInMonth = calendar.getActualMaximum(Calendar.DAY_OF_MONTH)
@@ -390,10 +397,25 @@ class FinanceActivity : AppCompatActivity() {
         val itemCurrency = dialog.findViewById<View>(R.id.item_currency)
         val itemCategories = dialog.findViewById<View>(R.id.item_categories)
         val itemGoals = dialog.findViewById<View>(R.id.item_budget_goals)
+        val itemToggleLedger = dialog.findViewById<View>(R.id.item_toggle_ledger)
+        val switchLedger = dialog.findViewById<androidx.appcompat.widget.SwitchCompat>(R.id.switch_ledger_enabled)
         val tvCurrencySummary = dialog.findViewById<TextView>(R.id.tv_currency_summary)
         val btnClose = dialog.findViewById<View>(R.id.btn_close_settings)
 
         tvCurrencySummary.text = "Tap to change (Current: ${DataManager.financeCurrency})"
+        
+        switchLedger.isChecked = DataManager.isFinanceLedgerEnabled
+        itemToggleLedger.setOnClickListener {
+            switchLedger.toggle()
+            DataManager.isFinanceLedgerEnabled = switchLedger.isChecked
+            DataManager.saveData(this)
+            findViewById<View>(R.id.btn_finance_ledger).visibility = if (DataManager.isFinanceLedgerEnabled) View.VISIBLE else View.GONE
+        }
+        switchLedger.setOnCheckedChangeListener { _, isChecked ->
+            DataManager.isFinanceLedgerEnabled = isChecked
+            DataManager.saveData(this)
+            findViewById<View>(R.id.btn_finance_ledger).visibility = if (isChecked) View.VISIBLE else View.GONE
+        }
 
         itemCurrency.setOnClickListener {
             val symbols = listOf("₹", "$", "€", "£", "¥")
@@ -522,28 +544,39 @@ class FinanceActivity : AppCompatActivity() {
 
     private fun showSetSavingsGoalDialog() {
         val dialog = Dialog(this)
-        dialog.setContentView(R.layout.dialog_set_budget)
+        dialog.setContentView(R.layout.dialog_add_ledger) // Re-use simplified layout
         dialog.window?.setBackgroundDrawableResource(android.R.color.transparent)
         dialog.window?.setLayout(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT)
 
-        val etGoal = dialog.findViewById<EditText>(R.id.et_budget_amount)
-        val btnSave = dialog.findViewById<View>(R.id.btn_save_budget)
-        val btnClose = dialog.findViewById<View>(R.id.btn_close_budget)
+        val etGoal = dialog.findViewById<EditText>(R.id.et_ledger_amount)
+        val etName = dialog.findViewById<EditText>(R.id.et_person_name)
+        val btnSave = dialog.findViewById<View>(R.id.btn_save_ledger)
+        val btnClose = dialog.findViewById<View>(R.id.btn_close_ledger)
         val title = dialog.findViewById<TextView>(R.id.tv_dialog_title)
-        val subtext = dialog.findViewById<TextView>(R.id.tv_dialog_subtext)
+        
+        // Hide unused fields
+        dialog.findViewById<View>(R.id.tv_person_label).visibility = View.VISIBLE // We'll use this for Goal Name
+        (dialog.findViewById<View>(R.id.tv_person_label) as TextView).text = "GOAL FOR"
+        
+        dialog.findViewById<View>(R.id.rg_ledger_type).visibility = View.GONE
+        dialog.findViewById<View>(R.id.tv_ledger_due_date).visibility = View.GONE
+        dialog.findViewById<View>(R.id.et_ledger_note).visibility = View.GONE
 
-        val currency = DataManager.financeCurrency
         title?.text = "SET SAVINGS GOAL"
-        subtext?.text = "Enter your monthly savings target"
-        etGoal.hint = "${currency}0.00"
+        etGoal.hint = "${DataManager.financeCurrency}0.00"
         etGoal.setText(DataManager.monthlySavingsGoal.toInt().toString())
-        etGoal.requestFocus()
+        
+        etName.hint = "e.g. New Bike, iPhone"
+        etName.setText(DataManager.financeSavingsGoalName)
 
         btnClose.setOnClickListener { dialog.dismiss() }
 
         btnSave.setOnClickListener {
             val newGoal = etGoal.text.toString().toDoubleOrNull() ?: 0.0
+            val newName = etName.text.toString().trim().takeIf { it.isNotEmpty() } ?: "Savings Goal"
+            
             DataManager.monthlySavingsGoal = newGoal
+            DataManager.financeSavingsGoalName = newName
             DataManager.saveData(this)
             updateSummary()
             dialog.dismiss()

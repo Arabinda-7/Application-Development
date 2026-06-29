@@ -26,9 +26,9 @@
         android:orientation="vertical"
         app:layout_constraintTop_toBottomOf="@id/tv_settings_title">
 
-        <!-- Personal Ledger Shortcut -->
+        <!-- Manage People (Main Ledger View) -->
         <LinearLayout
-            android:id="@+id/item_personal_ledger"
+            android:id="@+id/item_manage_people"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:background="?attr/selectableItemBackground"
@@ -46,7 +46,37 @@
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="View and organize your personal ledger units"
+                android:text="View main ledger transactions by name"
+                android:textColor="@color/text_secondary"
+                android:textSize="11sp" />
+        </LinearLayout>
+
+        <View
+            android:layout_width="match_parent"
+            android:layout_height="1dp"
+            android:background="#1AFFFFFF" />
+
+        <!-- People Ledger (Independent System) -->
+        <LinearLayout
+            android:id="@+id/item_people_ledger"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:background="?attr/selectableItemBackground"
+            android:clickable="true"
+            android:focusable="true"
+            android:orientation="vertical"
+            android:paddingVertical="8dp">
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="People Ledger"
+                android:textColor="@color/white"
+                android:textSize="14sp"
+                android:textStyle="bold" />
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Independent personal debt books"
                 android:textColor="@color/text_secondary"
                 android:textSize="11sp" />
         </LinearLayout>
