@@ -232,7 +232,7 @@ class FinanceActivity : AppCompatActivity() {
         
         val dateSdf = SimpleDateFormat("MMM dd, yyyy", Locale.getDefault())
         val timeSdf = SimpleDateFormat("h:mm a", Locale.getDefault())
-        
+
         tvDate.text = if (existingTransaction == null) "Today" else dateSdf.format(calendar.time)
         tvTime.text = if (existingTransaction == null) "Now" else timeSdf.format(calendar.time)
 
@@ -324,7 +324,7 @@ class FinanceActivity : AppCompatActivity() {
         tvExpenditure.text = String.format(Locale.US, "%s%.0f", currency, spent)
         tvExpenditure.setTextColor(android.graphics.Color.parseColor("#FF5252"))
         tvRemaining.text = String.format(Locale.US, "%s%.0f", currency, remaining)
-        
+
         if (remaining < 0) {
             tvRemaining.setTextColor(android.graphics.Color.parseColor("#FF5252"))
         } else {
@@ -372,7 +372,7 @@ class FinanceActivity : AppCompatActivity() {
 
         val topCategory = categoryGroups.first()
         val topPercentage = (topCategory.second / totalSpent) * 100
-        
+
         when {
             topPercentage > 50 -> {
                 tvFinanceInsight.text = String.format(Locale.US, "Alert: %s accounts for over 50%% of your spending!", topCategory.first)
@@ -381,7 +381,7 @@ class FinanceActivity : AppCompatActivity() {
                 tvFinanceInsight.text = "Warning: You have used 80% of your budget. Slow down!"
             }
             else -> {
-                val dailyLimit = ((DataManager.monthlyBudget - totalSpent).coerceAtLeast(0.0) / 
+                val dailyLimit = ((DataManager.monthlyBudget - totalSpent).coerceAtLeast(0.0) /
                     (Calendar.getInstance().getActualMaximum(Calendar.DAY_OF_MONTH) - Calendar.getInstance().get(Calendar.DAY_OF_MONTH) + 1).coerceAtLeast(1))
                 tvFinanceInsight.text = String.format(Locale.US, "You're on track! Keep your daily spend under %s%d.", currency, dailyLimit.toInt())
             }
@@ -403,7 +403,7 @@ class FinanceActivity : AppCompatActivity() {
         val btnClose = dialog.findViewById<View>(R.id.btn_close_settings)
 
         tvCurrencySummary.text = "Tap to change (Current: ${DataManager.financeCurrency})"
-        
+
         switchLedger.isChecked = DataManager.isFinanceLedgerEnabled
         itemToggleLedger.setOnClickListener {
             switchLedger.toggle()
@@ -422,7 +422,7 @@ class FinanceActivity : AppCompatActivity() {
             val currentIndex = symbols.indexOf(DataManager.financeCurrency)
             val nextIndex = (currentIndex + 1) % symbols.size
             val nextSymbol = symbols[nextIndex]
-            
+
             DataManager.financeCurrency = nextSymbol
             DataManager.saveData(this)
             tvCurrencySummary.text = "Tap to change (Current: $nextSymbol)"
@@ -458,14 +458,14 @@ class FinanceActivity : AppCompatActivity() {
 
         fun refreshList() {
             container.removeAllViews()
-            
+
             // Feature 1: Sort categories, but keep "Other" at the bottom
-            val sortedList = DataManager.financeCustomCategories.filter { it != "Other" }.sorted() + 
+            val sortedList = DataManager.financeCustomCategories.filter { it != "Other" }.sorted() +
                             DataManager.financeCustomCategories.filter { it == "Other" }
 
             sortedList.forEach { category ->
                 val itemView = LayoutInflater.from(this).inflate(R.layout.item_finance_category_manage, container, false)
-                
+
                 val tvName = itemView.findViewById<TextView>(R.id.tv_cat_name)
                 val btnDelete = itemView.findViewById<View>(R.id.btn_delete_cat)
                 val ivIcon = itemView.findViewById<ImageView>(R.id.iv_cat_icon)
@@ -553,11 +553,11 @@ class FinanceActivity : AppCompatActivity() {
         val btnSave = dialog.findViewById<View>(R.id.btn_save_ledger)
         val btnClose = dialog.findViewById<View>(R.id.btn_close_ledger)
         val title = dialog.findViewById<TextView>(R.id.tv_dialog_title)
-        
+
         // Hide unused fields
         dialog.findViewById<View>(R.id.tv_person_label).visibility = View.VISIBLE // We'll use this for Goal Name
         (dialog.findViewById<View>(R.id.tv_person_label) as TextView).text = "GOAL FOR"
-        
+
         dialog.findViewById<View>(R.id.rg_ledger_type).visibility = View.GONE
         dialog.findViewById<View>(R.id.tv_ledger_due_date).visibility = View.GONE
         dialog.findViewById<View>(R.id.et_ledger_note).visibility = View.GONE
@@ -565,7 +565,7 @@ class FinanceActivity : AppCompatActivity() {
         title?.text = "SET SAVINGS GOAL"
         etGoal.hint = "${DataManager.financeCurrency}0.00"
         etGoal.setText(DataManager.monthlySavingsGoal.toInt().toString())
-        
+
         etName.hint = "e.g. New Bike, iPhone"
         etName.setText(DataManager.financeSavingsGoalName)
 
@@ -574,7 +574,7 @@ class FinanceActivity : AppCompatActivity() {
         btnSave.setOnClickListener {
             val newGoal = etGoal.text.toString().toDoubleOrNull() ?: 0.0
             val newName = etName.text.toString().trim().takeIf { it.isNotEmpty() } ?: "Savings Goal"
-            
+
             DataManager.monthlySavingsGoal = newGoal
             DataManager.financeSavingsGoalName = newName
             DataManager.saveData(this)

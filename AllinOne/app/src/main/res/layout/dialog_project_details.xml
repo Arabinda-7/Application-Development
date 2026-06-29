@@ -1,15 +1,19 @@
 <?xml version="1.0" encoding="utf-8"?>
-<androidx.core.widget.NestedScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="#000000"
-    android:fillViewport="true">
+    android:background="#000000">
 
+    <!-- Sticky Header Section -->
     <androidx.constraintlayout.widget.ConstraintLayout
+        android:id="@+id/sticky_header"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:padding="24dp">
+        android:padding="24dp"
+        android:background="#000000"
+        android:elevation="4dp"
+        app:layout_constraintTop_toTopOf="parent">
 
         <ImageView
             android:id="@+id/btn_close_details"
@@ -37,115 +41,122 @@
             android:id="@+id/tv_detail_title"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginTop="24dp"
+            android:layout_marginTop="20dp"
             android:text="Project Title"
             android:textColor="@color/white"
             android:textSize="28sp"
             android:textStyle="bold"
             app:layout_constraintTop_toBottomOf="@id/btn_close_details" />
 
-        <LinearLayout
-            android:id="@+id/row_badges"
+    </androidx.constraintlayout.widget.ConstraintLayout>
+
+    <!-- Scrollable Content -->
+    <androidx.core.widget.NestedScrollView
+        android:id="@+id/scroll_root"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:fillViewport="true"
+        app:layout_constraintTop_toBottomOf="@id/sticky_header"
+        app:layout_constraintBottom_toBottomOf="parent">
+
+        <androidx.constraintlayout.widget.ConstraintLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginTop="16dp"
-            android:orientation="horizontal"
-            app:layout_constraintTop_toBottomOf="@id/tv_detail_title">
-
-            <TextView
-                android:id="@+id/tv_detail_status"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:background="@drawable/bg_dialog_rounded"
-                android:backgroundTint="#20FFFFFF"
-                android:paddingHorizontal="12dp"
-                android:paddingVertical="4dp"
-                android:text="IN PROGRESS"
-                android:textColor="@color/white"
-                android:textSize="12sp"
-                android:textStyle="bold" />
-
-            <TextView
-                android:id="@+id/tv_detail_priority"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginStart="12dp"
-                android:background="@drawable/bg_dialog_rounded"
-                android:backgroundTint="#20FFFFFF"
-                android:paddingHorizontal="12dp"
-                android:paddingVertical="4dp"
-                android:text="HIGH"
-                android:textColor="#FF5252"
-                android:textSize="12sp"
-                android:textStyle="bold" />
-        </LinearLayout>
-
-        <TextView
-            android:id="@+id/tv_detail_content"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="24dp"
-            android:text="This is the project description..."
-            android:textColor="@color/white"
-            android:textSize="16sp"
-            android:lineSpacingExtra="4dp"
-            app:layout_constraintTop_toBottomOf="@id/row_badges" />
-
-        <View
-            android:id="@+id/detail_divider"
-            android:layout_width="match_parent"
-            android:layout_height="1dp"
-            android:layout_marginTop="24dp"
-            android:background="#20FFFFFF"
-            app:layout_constraintTop_toBottomOf="@id/tv_detail_content" />
-
-        <TextView
-            android:id="@+id/tv_subfeatures_label"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="24dp"
-            android:text="SUB-FEATURES"
-            android:textColor="@color/white"
-            android:textSize="14sp"
-            android:textStyle="bold"
-            app:layout_constraintTop_toBottomOf="@id/detail_divider" />
-
-        <LinearLayout
-            android:id="@+id/container_detail_subfeatures"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="12dp"
-            android:orientation="vertical"
-            app:layout_constraintTop_toBottomOf="@id/tv_subfeatures_label" />
-
-        <!-- Metadata Section at the bottom -->
-        <LinearLayout
-            android:id="@+id/container_footer_metadata"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="32dp"
-            android:orientation="horizontal"
-            android:gravity="bottom"
-            app:layout_constraintTop_toBottomOf="@id/container_detail_subfeatures">
-
-            <View
-                android:layout_width="0dp"
-                android:layout_height="0dp"
-                android:layout_weight="1" />
+            android:paddingHorizontal="24dp"
+            android:paddingBottom="24dp">
 
             <LinearLayout
+                android:id="@+id/row_badges"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                app:layout_constraintTop_toTopOf="parent">
+
+                <TextView
+                    android:id="@+id/tv_detail_status"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:background="@drawable/bg_dialog_rounded"
+                    android:backgroundTint="#20FFFFFF"
+                    android:paddingHorizontal="12dp"
+                    android:paddingVertical="4dp"
+                    android:text="IN PROGRESS"
+                    android:textColor="@color/white"
+                    android:textSize="12sp"
+                    android:textStyle="bold" />
+
+                <TextView
+                    android:id="@+id/tv_detail_priority"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="12dp"
+                    android:background="@drawable/bg_dialog_rounded"
+                    android:backgroundTint="#20FFFFFF"
+                    android:paddingHorizontal="12dp"
+                    android:paddingVertical="4dp"
+                    android:text="HIGH"
+                    android:textColor="#FF5252"
+                    android:textSize="12sp"
+                    android:textStyle="bold" />
+            </LinearLayout>
+
+            <TextView
+                android:id="@+id/tv_detail_content"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="24dp"
+                android:text="This is the project description..."
+                android:textColor="@color/white"
+                android:textSize="16sp"
+                android:lineSpacingExtra="4dp"
+                app:layout_constraintTop_toBottomOf="@id/row_badges" />
+
+            <View
+                android:id="@+id/detail_divider"
+                android:layout_width="match_parent"
+                android:layout_height="1dp"
+                android:layout_marginTop="24dp"
+                android:background="#20FFFFFF"
+                app:layout_constraintTop_toBottomOf="@id/tv_detail_content" />
+
+            <TextView
+                android:id="@+id/tv_subfeatures_label"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="24dp"
+                android:text="SUB-FEATURES"
+                android:textColor="@color/white"
+                android:textSize="14sp"
+                android:textStyle="bold"
+                app:layout_constraintTop_toBottomOf="@id/detail_divider" />
+
+            <LinearLayout
+                android:id="@+id/container_detail_subfeatures"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="12dp"
+                android:orientation="vertical"
+                app:layout_constraintTop_toBottomOf="@id/tv_subfeatures_label" />
+
+            <LinearLayout
+                android:id="@+id/container_footer_metadata"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
+                android:layout_marginTop="40dp"
                 android:orientation="vertical"
-                android:gravity="end">
+                android:gravity="end"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintTop_toBottomOf="@id/container_detail_subfeatures"
+                app:layout_constraintVertical_bias="1.0">
 
                 <TextView
                     android:id="@+id/tv_detail_deadline"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="Deadline: Oct 24, 2026"
-                    android:textColor="@color/text_secondary"
-                    android:textSize="13sp"
+                    android:text="No Deadline Set"
+                    android:textColor="@color/white"
+                    android:textSize="14sp"
                     android:textStyle="bold" />
 
                 <TextView
@@ -157,7 +168,8 @@
                     android:textColor="#4DFFFFFF"
                     android:textSize="11sp" />
             </LinearLayout>
-        </LinearLayout>
 
-    </androidx.constraintlayout.widget.ConstraintLayout>
-</androidx.core.widget.NestedScrollView>
+        </androidx.constraintlayout.widget.ConstraintLayout>
+    </androidx.core.widget.NestedScrollView>
+
+</androidx.constraintlayout.widget.ConstraintLayout>

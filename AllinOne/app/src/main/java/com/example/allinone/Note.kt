@@ -12,6 +12,7 @@ data class Note(
     var priority: Int = 1, // 0=Low, 1=Medium, 2=High
     var isPinned: Boolean = false,
     var deadline: Long? = null,
+    var isArchived: Boolean = false,
     val subFeatures: MutableList<ProjectFeature> = mutableListOf(),
     val changeHistory: MutableList<ProjectHistory> = mutableListOf()
 )

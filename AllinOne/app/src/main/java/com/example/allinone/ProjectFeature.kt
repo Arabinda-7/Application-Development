@@ -10,5 +10,7 @@ data class ProjectFeature(
     var blockedByNodeId: String = "",
     val subFeatures: MutableList<ProjectFeature> = mutableListOf(),
     val id: String = java.util.UUID.randomUUID().toString(),
-    var isExpanded: Boolean = false
+    var isExpanded: Boolean = false,
+    var tag: String = "", // e.g., UI, LOGIC, BUG
+    var dueDate: Long? = null
 )
