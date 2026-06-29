@@ -70,6 +70,10 @@ object DataManager {
     var projectSynergySync: Boolean = false
     var projectDeadlineAlerts: Boolean = true
     var projectAnalyticsEnabled: Boolean = false
+    var projectCustomTags = mutableListOf("UI", "LOGIC", "BUG")
+    var projectDualExistEnabled: Boolean = false
+    var projectIdeasEnabled: Boolean = true
+    var projectRoadmapsEnabled: Boolean = true
     var isAppLockEnabled: Boolean = false
     var isOledThemeEnabled: Boolean = false
 
@@ -153,6 +157,9 @@ object DataManager {
     private const val KEY_APP_LOCK = "app_lock_enabled"
     private const val KEY_OLED_THEME = "oled_theme_enabled"
     private const val KEY_CUSTOM_COLORS = "user_custom_colors_data"
+    private const val KEY_PROJ_TAGS = "project_custom_tags_data"
+    private const val KEY_PROJ_DUAL_EXIST = "project_dual_exist_enabled"
+    private const val KEY_PROJ_IDEAS_ENABLED = "project_ideas_enabled"
 
     private const val KEY_GLOBAL_HABIT_COLOR = "global_habit_color"
     private const val KEY_GLOBAL_WORKOUT_COLOR = "global_workout_color"
@@ -241,9 +248,12 @@ object DataManager {
             putBoolean(KEY_PROJ_SYNC, projectSynergySync)
             putBoolean(KEY_PROJ_ALERTS, projectDeadlineAlerts)
             putBoolean(KEY_PROJ_ANALYTICS, projectAnalyticsEnabled)
+            putBoolean(KEY_PROJ_DUAL_EXIST, projectDualExistEnabled)
+            putBoolean(KEY_PROJ_IDEAS_ENABLED, projectIdeasEnabled)
             putBoolean(KEY_APP_LOCK, isAppLockEnabled)
             putBoolean(KEY_OLED_THEME, isOledThemeEnabled)
             putString(KEY_CUSTOM_COLORS, gson.toJson(userCustomColors))
+            putString(KEY_PROJ_TAGS, gson.toJson(projectCustomTags))
 
             putInt(KEY_GLOBAL_HABIT_COLOR, globalHabitColor)
             putInt(KEY_GLOBAL_WORKOUT_COLOR, globalWorkoutColor)
@@ -422,12 +432,19 @@ object DataManager {
         projectSynergySync = prefs.getBoolean(KEY_PROJ_SYNC, false)
         projectDeadlineAlerts = prefs.getBoolean(KEY_PROJ_ALERTS, true)
         projectAnalyticsEnabled = prefs.getBoolean(KEY_PROJ_ANALYTICS, false)
+        projectDualExistEnabled = prefs.getBoolean(KEY_PROJ_DUAL_EXIST, false)
+        projectIdeasEnabled = prefs.getBoolean(KEY_PROJ_IDEAS_ENABLED, true)
         isAppLockEnabled = prefs.getBoolean(KEY_APP_LOCK, false)
         isOledThemeEnabled = prefs.getBoolean(KEY_OLED_THEME, false)
 
         prefs.getString(KEY_CUSTOM_COLORS, null)?.let {
             val type = object : TypeToken<MutableList<Int>>() {}.type
             userCustomColors = gson.fromJson(it, type) ?: mutableListOf()
+        }
+
+        prefs.getString(KEY_PROJ_TAGS, null)?.let {
+            val type = object : TypeToken<MutableList<String>>() {}.type
+            projectCustomTags = gson.fromJson(it, type) ?: mutableListOf("UI", "LOGIC", "BUG")
         }
 
         globalHabitColor = prefs.getInt(KEY_GLOBAL_HABIT_COLOR, -1)

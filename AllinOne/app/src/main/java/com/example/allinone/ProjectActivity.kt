@@ -67,51 +67,87 @@ class ProjectActivity : AppCompatActivity() {
         }
 
         setupBottomNavigation()
+        updateUI(true) // Set Projects as default on launch
     }
+
+    private lateinit var ivProjects: ImageView
+    private lateinit var tvProjects: TextView
+    private lateinit var ivNotes: ImageView
+    private lateinit var tvNotes: TextView
+    private lateinit var btnAdd: View
 
     private fun setupBottomNavigation() {
         val navProjects = findViewById<View>(R.id.nav_projects)
         val navNotes = findViewById<View>(R.id.nav_notes)
-        val projectList = findViewById<View>(R.id.project_notes_list)
-        val ideaList = findViewById<View>(R.id.project_ideas_list)
-        val btnAdd = findViewById<View>(R.id.btn_add_project_note)
 
-        val ivProjects = findViewById<ImageView>(R.id.iv_projects_icon)
-        val tvProjects = findViewById<TextView>(R.id.tv_projects_label)
-        val ivNotes = findViewById<ImageView>(R.id.iv_notes_icon)
-        val tvNotes = findViewById<TextView>(R.id.tv_notes_label)
-
-        fun updateUI(isProjects: Boolean) {
-            isProjectsTab = isProjects
-            projectList.visibility = if (isProjects) View.VISIBLE else View.GONE
-            ideaList.visibility = if (isProjects) View.GONE else View.VISIBLE
-            btnAdd.visibility = View.VISIBLE // Keep always visible as it handles both now
-
-            val activeColor = ContextCompat.getColor(this, R.color.white)
-            val inactiveColor = ContextCompat.getColor(this, R.color.text_secondary)
-
-            ivProjects.imageTintList = ColorStateList.valueOf(if (isProjects) activeColor else inactiveColor)
-            tvProjects.setTextColor(if (isProjects) activeColor else inactiveColor)
-            ivNotes.imageTintList = ColorStateList.valueOf(if (isProjects) activeColor else inactiveColor).takeIf { !isProjects } ?: ColorStateList.valueOf(inactiveColor)
-
-            // Simpler color toggle
-            if (isProjects) {
-                ivProjects.imageTintList = ColorStateList.valueOf(activeColor)
-                tvProjects.setTextColor(activeColor)
-                ivNotes.imageTintList = ColorStateList.valueOf(inactiveColor)
-                tvNotes.setTextColor(inactiveColor)
-            } else {
-                ivProjects.imageTintList = ColorStateList.valueOf(inactiveColor)
-                tvProjects.setTextColor(inactiveColor)
-                ivNotes.imageTintList = ColorStateList.valueOf(activeColor)
-                tvNotes.setTextColor(activeColor)
-            }
-        }
+        ivProjects = findViewById(R.id.iv_projects_icon)
+        tvProjects = findViewById(R.id.tv_projects_label)
+        ivNotes = findViewById(R.id.iv_notes_icon)
+        tvNotes = findViewById(R.id.tv_notes_label)
+        btnAdd = findViewById(R.id.btn_add_project_note)
 
         navProjects.setOnClickListener { updateUI(true) }
         navNotes.setOnClickListener { updateUI(false) }
 
         findViewById<View>(R.id.btn_project_settings).setOnClickListener { showProjectSettingsDialog() }
+    }
+
+    private fun updateUI(isProjects: Boolean) {
+        val projectList = findViewById<View>(R.id.project_notes_list)
+        val ideaList = findViewById<View>(R.id.project_ideas_list)
+        val bottomNav = findViewById<View>(R.id.bottom_navigation_projects)
+        val navProjects = findViewById<View>(R.id.nav_projects)
+        val navNotes = findViewById<View>(R.id.nav_notes)
+
+        // Feature: Safety Check - Ensure current tab is valid
+        var targetIsProjects = isProjects
+        if (!DataManager.projectRoadmapsEnabled && targetIsProjects) targetIsProjects = false
+        if (!DataManager.projectIdeasEnabled && !targetIsProjects) targetIsProjects = true
+
+        // Feature: Dynamic Footer Visibility (Hide if only one section is active)
+        val showFooter = DataManager.projectRoadmapsEnabled && DataManager.projectIdeasEnabled
+        bottomNav.visibility = if (showFooter) View.VISIBLE else View.GONE
+        
+        navProjects.visibility = if (DataManager.projectRoadmapsEnabled) View.VISIBLE else View.GONE
+        navNotes.visibility = if (DataManager.projectIdeasEnabled) View.VISIBLE else View.GONE
+
+        isProjectsTab = targetIsProjects
+        projectList.visibility = if (targetIsProjects) View.VISIBLE else View.GONE
+        ideaList.visibility = if (targetIsProjects) View.GONE else View.VISIBLE
+        btnAdd.visibility = View.VISIBLE
+
+        // Programmatic padding adjustment for when footer is hidden
+        val bottomPadding = if (showFooter) 100.dpToPx() else 24.dpToPx()
+        projectList.setPadding(0, 0, 0, bottomPadding)
+        ideaList.setPadding(0, 0, 0, bottomPadding)
+
+        val activeColor = Color.WHITE
+        val inactiveColor = Color.parseColor("#80FFFFFF") // 50% White for inactive
+        val activeBg = Color.parseColor("#33FFFFFF") // 20% White for active background
+        val inactiveBg = Color.TRANSPARENT
+
+        // Highlight Active Section
+        if (targetIsProjects) {
+            ivProjects.imageTintList = ColorStateList.valueOf(activeColor)
+            ivProjects.backgroundTintList = ColorStateList.valueOf(activeBg)
+            tvProjects.setTextColor(activeColor)
+            tvProjects.setTypeface(null, android.graphics.Typeface.BOLD)
+            
+            ivNotes.imageTintList = ColorStateList.valueOf(inactiveColor)
+            ivNotes.backgroundTintList = ColorStateList.valueOf(inactiveBg)
+            tvNotes.setTextColor(inactiveColor)
+            tvNotes.setTypeface(null, android.graphics.Typeface.NORMAL)
+        } else {
+            ivProjects.imageTintList = ColorStateList.valueOf(inactiveColor)
+            ivProjects.backgroundTintList = ColorStateList.valueOf(inactiveBg)
+            tvProjects.setTextColor(inactiveColor)
+            tvProjects.setTypeface(null, android.graphics.Typeface.NORMAL)
+            
+            ivNotes.imageTintList = ColorStateList.valueOf(activeColor)
+            ivNotes.backgroundTintList = ColorStateList.valueOf(activeBg)
+            tvNotes.setTextColor(activeColor)
+            tvNotes.setTypeface(null, android.graphics.Typeface.BOLD)
+        }
     }
 
     private fun updateDisplayList() {
@@ -120,11 +156,10 @@ class ProjectActivity : AppCompatActivity() {
 
         val activeNotes = allNotes.filter { !it.isArchived }
         
-        // Feature 1: Allow projects/ideas to exist in BOTH sections if they have relevant data
-        // Roadmaps: Anything explicitly tagged 'Project' OR has sub-features (milestones)
-        // Ideas: Anything explicitly tagged 'ProjectIdea' OR has NO sub-features (conceptual)
-        
-        val roadmapList = activeNotes.filter { it.category == "Project" || it.subFeatures.isNotEmpty() }
+        // Feature: Dual Exist (Global OR Per-Project)
+        val roadmapList = activeNotes.filter { 
+            DataManager.projectDualExistEnabled || it.isDualExist || it.category == "Project" || it.subFeatures.isNotEmpty() 
+        }
         val visibleRoadmaps = if (DataManager.projectAutoArchive) {
             roadmapList.filter { it.status != "Completed" }
         } else {
@@ -134,7 +169,9 @@ class ProjectActivity : AppCompatActivity() {
             .thenBy { it.status == "Completed" }
             .thenByDescending { it.timestamp }))
 
-        val ideasList = activeNotes.filter { it.category == "ProjectIdea" || it.subFeatures.isEmpty() }
+        val ideasList = activeNotes.filter { 
+            DataManager.projectDualExistEnabled || it.isDualExist || it.category == "ProjectIdea" || (it.category != "Project" && it.subFeatures.isEmpty()) 
+        }
         displayIdeas.addAll(ideasList.sortedByDescending { it.timestamp })
 
         if (::projectAdapter.isInitialized) {
@@ -502,8 +539,37 @@ class ProjectActivity : AppCompatActivity() {
         val etDetails = dialog.findViewById<EditText>(R.id.et_details_input)
         val btnSave = dialog.findViewById<TextView>(R.id.btn_save_subfeature)
 
-        val rgTag = dialog.findViewById<RadioGroup>(R.id.rg_feature_tag)
+        val containerTags = dialog.findViewById<LinearLayout>(R.id.container_feature_tags)
         val tvDeadline = dialog.findViewById<TextView>(R.id.tv_feature_deadline)
+
+        var selectedTag = sub.tag
+
+        fun refreshTagsUI() {
+            containerTags.removeAllViews()
+            DataManager.projectCustomTags.forEach { tagName ->
+                val chip = TextView(this).apply {
+                    text = tagName
+                    setTextColor(Color.WHITE)
+                    textSize = 12f
+                    setTypeface(null, android.graphics.Typeface.BOLD)
+                    setPadding(24.dpToPx(), 12.dpToPx(), 24.dpToPx(), 12.dpToPx())
+                    
+                    val isSelected = selectedTag == tagName
+                    background = ContextCompat.getDrawable(this@ProjectActivity, R.drawable.priority_chip_bg)
+                    backgroundTintList = ColorStateList.valueOf(if (isSelected) Color.parseColor("#1A73E8") else Color.parseColor("#33FFFFFF"))
+                    
+                    val params = LinearLayout.LayoutParams(ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT)
+                    params.marginEnd = 8.dpToPx()
+                    layoutParams = params
+
+                    setOnClickListener {
+                        selectedTag = if (selectedTag == tagName) "" else tagName
+                        refreshTagsUI()
+                    }
+                }
+                containerTags.addView(chip)
+            }
+        }
 
         btnClose.setOnClickListener { dialog.dismiss() }
 
@@ -525,12 +591,7 @@ class ProjectActivity : AppCompatActivity() {
         etDetails.setText(sub.details)
         etDetails.setSelection(etDetails.text.length)
 
-        // Feature: Tags
-        when (sub.tag) {
-            "UI" -> rgTag.check(R.id.rb_tag_ui)
-            "LOGIC" -> rgTag.check(R.id.rb_tag_logic)
-            "BUG" -> rgTag.check(R.id.rb_tag_bug)
-        }
+        refreshTagsUI()
 
         // Feature: Due Dates
         fun updateSubDeadlineUI() {
@@ -556,13 +617,7 @@ class ProjectActivity : AppCompatActivity() {
                 if (newPos != null) sub.position = newPos
             }
             sub.details = etDetails.text.toString().trim()
-            
-            sub.tag = when (rgTag.checkedRadioButtonId) {
-                R.id.rb_tag_ui -> "UI"
-                R.id.rb_tag_logic -> "LOGIC"
-                R.id.rb_tag_bug -> "BUG"
-                else -> ""
-            }
+            sub.tag = selectedTag
 
             onSaved()
             dialog.dismiss()
@@ -699,6 +754,7 @@ class ProjectActivity : AppCompatActivity() {
             val btnMarkDone = menuView.findViewById<View>(R.id.menu_detail_mark_done)
             val btnEdit = menuView.findViewById<View>(R.id.menu_detail_edit)
             val btnHistory = menuView.findViewById<View>(R.id.menu_detail_history)
+            val btnConvertNote = menuView.findViewById<View>(R.id.menu_detail_convert_note)
 
             if (note.status == "Completed") {
                 btnMarkDone.visibility = View.GONE
@@ -729,6 +785,17 @@ class ProjectActivity : AppCompatActivity() {
             btnHistory.setOnClickListener {
                 popupWindow.dismiss()
                 showProjectHistoryDialog(note)
+            }
+
+            btnConvertNote.setOnClickListener {
+                popupWindow.dismiss()
+                note.category = "ProjectIdea"
+                note.isDualExist = true // Ensure it stays in both if requested
+                addHistoryLog(note, "Conversion", "Converted Roadmap back to Idea state")
+                DataManager.saveData(this@ProjectActivity)
+                updateDisplayList()
+                dialog.dismiss()
+                Toast.makeText(this@ProjectActivity, "Roadmap converted to Idea!", Toast.LENGTH_SHORT).show()
             }
 
             popupWindow.showAsDropDown(view, -150, 0)
@@ -911,11 +978,17 @@ class ProjectActivity : AppCompatActivity() {
         val swSync = dialog.findViewById<SwitchCompat>(R.id.sw_synergy_sync)
         val swAlerts = dialog.findViewById<SwitchCompat>(R.id.sw_deadline_alerts)
         val swAnalytics = dialog.findViewById<SwitchCompat>(R.id.sw_analytics)
+        val swDualExist = dialog.findViewById<SwitchCompat>(R.id.sw_dual_exist)
+        val swRoadmapsEnabled = dialog.findViewById<SwitchCompat>(R.id.sw_roadmaps_enabled)
+        val swIdeasEnabled = dialog.findViewById<SwitchCompat>(R.id.sw_ideas_enabled)
 
         swArchive.isChecked = DataManager.projectAutoArchive
         swSync.isChecked = DataManager.projectSynergySync
         swAlerts.isChecked = DataManager.projectDeadlineAlerts
         swAnalytics.isChecked = DataManager.projectAnalyticsEnabled
+        swDualExist.isChecked = DataManager.projectDualExistEnabled
+        swRoadmapsEnabled.isChecked = DataManager.projectRoadmapsEnabled
+        swIdeasEnabled.isChecked = DataManager.projectIdeasEnabled
 
         dialog.findViewById<View>(R.id.item_auto_archive).setOnClickListener {
             DataManager.projectAutoArchive = !DataManager.projectAutoArchive
@@ -933,13 +1006,38 @@ class ProjectActivity : AppCompatActivity() {
             DataManager.projectAnalyticsEnabled = !DataManager.projectAnalyticsEnabled
             swAnalytics.isChecked = DataManager.projectAnalyticsEnabled
         }
+        dialog.findViewById<View>(R.id.item_dual_exist).setOnClickListener {
+            DataManager.projectDualExistEnabled = !DataManager.projectDualExistEnabled
+            swDualExist.isChecked = DataManager.projectDualExistEnabled
+        }
+        dialog.findViewById<View>(R.id.item_toggle_roadmaps).setOnClickListener {
+            if (DataManager.projectRoadmapsEnabled && !DataManager.projectIdeasEnabled) {
+                Toast.makeText(this, "At least one section must be enabled", Toast.LENGTH_SHORT).show()
+            } else {
+                DataManager.projectRoadmapsEnabled = !DataManager.projectRoadmapsEnabled
+                swRoadmapsEnabled.isChecked = DataManager.projectRoadmapsEnabled
+            }
+        }
+        dialog.findViewById<View>(R.id.item_toggle_ideas).setOnClickListener {
+            if (DataManager.projectIdeasEnabled && !DataManager.projectRoadmapsEnabled) {
+                Toast.makeText(this, "At least one section must be enabled", Toast.LENGTH_SHORT).show()
+            } else {
+                DataManager.projectIdeasEnabled = !DataManager.projectIdeasEnabled
+                swIdeasEnabled.isChecked = DataManager.projectIdeasEnabled
+            }
+        }
 
         dialog.findViewById<View>(R.id.item_manage_templates).setOnClickListener {
             showManageTemplatesDialog()
         }
 
+        dialog.findViewById<View>(R.id.item_manage_tags).setOnClickListener {
+            showManageTagsDialog()
+        }
+
         dialog.findViewById<View>(R.id.btn_close_settings).setOnClickListener {
             DataManager.saveData(this)
+            updateUI(isProjectsTab)
             updateDisplayList()
             dialog.dismiss()
         }
@@ -956,22 +1054,37 @@ class ProjectActivity : AppCompatActivity() {
         val etNew = dialog.findViewById<EditText>(R.id.et_new_category)
         val btnAdd = dialog.findViewById<View>(R.id.btn_add_category)
         val title = dialog.findViewById<TextView>(R.id.tv_categories_title)
+        val btnDeleteMode = dialog.findViewById<ImageButton>(R.id.btn_toggle_delete_mode)
 
         title.text = "Project Templates"
         etNew.hint = "Template Name..."
 
+        var isDeleteMode = false
+
         fun refresh() {
             container.removeAllViews()
+            
+            // Visual feedback for Delete Mode
+            btnDeleteMode.imageTintList = ColorStateList.valueOf(if (isDeleteMode) Color.RED else Color.WHITE)
+
             DataManager.projectTemplates.keys.forEach { templateName ->
                 val itemView = LayoutInflater.from(this).inflate(R.layout.item_category_manage, container, false)
                 itemView.findViewById<TextView>(R.id.tv_category_name).text = templateName
 
-                // Show steps on tap
+                val btnRemove = itemView.findViewById<View>(R.id.btn_remove_category)
+                btnRemove.visibility = if (isDeleteMode) View.VISIBLE else View.GONE
+
                 itemView.setOnClickListener {
-                    Toast.makeText(this, "Steps: ${DataManager.projectTemplates[templateName]?.joinToString(", ")}", Toast.LENGTH_LONG).show()
+                    if (isDeleteMode) {
+                        // In delete mode, tapping item toggles mode off (or we could just let them tap the X)
+                        isDeleteMode = false
+                        refresh()
+                    } else {
+                        Toast.makeText(this, "Steps: ${DataManager.projectTemplates[templateName]?.joinToString(", ")}", Toast.LENGTH_LONG).show()
+                    }
                 }
 
-                itemView.findViewById<View>(R.id.btn_remove_category).setOnClickListener {
+                btnRemove.setOnClickListener {
                     if (DataManager.projectTemplates.size > 1) {
                         DataManager.projectTemplates.remove(templateName)
                         DataManager.saveData(this)
@@ -984,6 +1097,11 @@ class ProjectActivity : AppCompatActivity() {
             }
         }
 
+        btnDeleteMode.setOnClickListener {
+            isDeleteMode = !isDeleteMode
+            refresh()
+        }
+
         btnAdd.setOnClickListener {
             val name = etNew.text.toString().trim()
             if (name.isNotEmpty() && !DataManager.projectTemplates.containsKey(name)) {
@@ -991,6 +1109,75 @@ class ProjectActivity : AppCompatActivity() {
                     refresh()
                     etNew.text.clear()
                 }
+            }
+        }
+
+        refresh()
+        dialog.show()
+    }
+
+    private fun showManageTagsDialog() {
+        val dialog = Dialog(this)
+        dialog.setContentView(R.layout.dialog_manage_categories)
+        dialog.window?.setBackgroundDrawableResource(android.R.color.transparent)
+        dialog.window?.setLayout(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT)
+
+        val container = dialog.findViewById<LinearLayout>(R.id.categories_container)
+        val etNew = dialog.findViewById<EditText>(R.id.et_new_category)
+        val btnAdd = dialog.findViewById<View>(R.id.btn_add_category)
+        val title = dialog.findViewById<TextView>(R.id.tv_categories_title)
+        val btnDeleteMode = dialog.findViewById<ImageButton>(R.id.btn_toggle_delete_mode)
+
+        title.text = "Project Tags"
+        etNew.hint = "Tag Name (e.g. UI)..."
+
+        var isDeleteMode = false
+
+        fun refresh() {
+            container.removeAllViews()
+            
+            // Visual feedback for Delete Mode
+            btnDeleteMode.imageTintList = ColorStateList.valueOf(if (isDeleteMode) Color.RED else Color.WHITE)
+
+            DataManager.projectCustomTags.forEach { tagName ->
+                val itemView = LayoutInflater.from(this).inflate(R.layout.item_category_manage, container, false)
+                itemView.findViewById<TextView>(R.id.tv_category_name).text = tagName
+
+                val btnRemove = itemView.findViewById<View>(R.id.btn_remove_category)
+                btnRemove.visibility = if (isDeleteMode) View.VISIBLE else View.GONE
+
+                itemView.setOnClickListener {
+                    if (isDeleteMode) {
+                        isDeleteMode = false
+                        refresh()
+                    }
+                }
+
+                btnRemove.setOnClickListener {
+                    if (DataManager.projectCustomTags.size > 1) {
+                        DataManager.projectCustomTags.remove(tagName)
+                        DataManager.saveData(this)
+                        refresh()
+                    } else {
+                        Toast.makeText(this, "At least one tag required", Toast.LENGTH_SHORT).show()
+                    }
+                }
+                container.addView(itemView)
+            }
+        }
+
+        btnDeleteMode.setOnClickListener {
+            isDeleteMode = !isDeleteMode
+            refresh()
+        }
+
+        btnAdd.setOnClickListener {
+            val name = etNew.text.toString().trim().uppercase()
+            if (name.isNotEmpty() && !DataManager.projectCustomTags.contains(name)) {
+                DataManager.projectCustomTags.add(name)
+                DataManager.saveData(this)
+                refresh()
+                etNew.text.clear()
             }
         }
 
@@ -1304,12 +1491,32 @@ class ProjectActivity : AppCompatActivity() {
         }
 
         fun performConversion() {
-            AlertDialog.Builder(this)
-                .setTitle("Convert to Project?")
-                .setMessage("This will turn your idea into a full Project Board with a roadmap. The original idea will be moved.")
-                .setPositiveButton("CONVERT") { _, _ ->
-                    val title = titleInput.text.toString()
-                    if (title.isNotEmpty()) {
+            val confirmDialog = Dialog(this)
+            confirmDialog.setContentView(R.layout.dialog_custom_confirm)
+            confirmDialog.window?.setBackgroundDrawableResource(android.R.color.transparent)
+            confirmDialog.window?.setLayout(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT)
+
+            confirmDialog.findViewById<TextView>(R.id.btn_confirm_cancel).setOnClickListener { confirmDialog.dismiss() }
+            confirmDialog.findViewById<TextView>(R.id.btn_confirm_action).setOnClickListener {
+                val title = titleInput.text.toString()
+                if (title.isNotEmpty()) {
+                    if (existingIdea != null) {
+                        // In simultaneous mode, we just update the existing note
+                        existingIdea.title = title
+                        existingIdea.content = contentInput.text.toString()
+                        existingIdea.category = "Project"
+                        existingIdea.isDualExist = true // Make it show in both sections
+                        
+                        addHistoryLog(existingIdea, "Conversion", "Converted to Dual Project: $title")
+                        
+                        DataManager.saveData(this)
+                        updateDisplayList()
+                        confirmDialog.dismiss()
+                        dialog.dismiss()
+                        
+                        findViewById<View>(R.id.nav_projects).performClick()
+                        showProjectDetailsDialog(existingIdea)
+                    } else {
                         // Create Project
                         val newProject = Note(
                             title = title,
@@ -1318,26 +1525,22 @@ class ProjectActivity : AppCompatActivity() {
                             timestamp = System.currentTimeMillis()
                         )
                         allNotes.add(0, newProject)
-
-                        // Add history log
-                        addHistoryLog(newProject, "Conversion", "Created from Idea: $title")
-
-                        // Remove Idea if it was existing
-                        existingIdea?.let { original -> allNotes.remove(original) }
+                        addHistoryLog(newProject, "Project Created", "Initial project board setup.")
 
                         DataManager.saveData(this)
                         updateDisplayList()
+                        confirmDialog.dismiss()
                         dialog.dismiss()
 
                         // Switch to Projects tab and show details
                         findViewById<View>(R.id.nav_projects).performClick()
                         showProjectDetailsDialog(newProject)
-
-                        Toast.makeText(this, "Idea successfully converted!", Toast.LENGTH_SHORT).show()
                     }
+
+                    Toast.makeText(this, "Successfully converted!", Toast.LENGTH_SHORT).show()
                 }
-                .setNegativeButton("CANCEL", null)
-                .show()
+            }
+            confirmDialog.show()
         }
 
         btnConvertIcon.setOnClickListener { performConversion() }

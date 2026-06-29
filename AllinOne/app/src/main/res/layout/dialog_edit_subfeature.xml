@@ -74,49 +74,17 @@
             android:textSize="10sp"
             android:textStyle="bold" />
 
-        <RadioGroup
-            android:id="@+id/rg_feature_tag"
+        <HorizontalScrollView
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginTop="8dp"
-            android:orientation="horizontal">
-            <androidx.appcompat.widget.AppCompatRadioButton
-                android:id="@+id/rb_tag_ui"
-                android:layout_width="0dp"
-                android:layout_height="40dp"
-                android:layout_weight="1"
-                android:layout_marginEnd="4dp"
-                android:background="@drawable/priority_chip_bg"
-                android:button="@null"
-                android:gravity="center"
-                android:text="UI"
-                android:textStyle="bold"
-                android:textColor="@color/white" />
-            <androidx.appcompat.widget.AppCompatRadioButton
-                android:id="@+id/rb_tag_logic"
-                android:layout_width="0dp"
-                android:layout_height="40dp"
-                android:layout_weight="1"
-                android:layout_marginHorizontal="4dp"
-                android:background="@drawable/priority_chip_bg"
-                android:button="@null"
-                android:gravity="center"
-                android:text="LOGIC"
-                android:textStyle="bold"
-                android:textColor="@color/white" />
-            <androidx.appcompat.widget.AppCompatRadioButton
-                android:id="@+id/rb_tag_bug"
-                android:layout_width="0dp"
-                android:layout_height="40dp"
-                android:layout_weight="1"
-                android:layout_marginStart="4dp"
-                android:background="@drawable/priority_chip_bg"
-                android:button="@null"
-                android:gravity="center"
-                android:text="BUG"
-                android:textStyle="bold"
-                android:textColor="@color/white" />
-        </RadioGroup>
+            android:scrollbars="none">
+            <LinearLayout
+                android:id="@+id/container_feature_tags"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal" />
+        </HorizontalScrollView>
 
         <TextView
             android:layout_width="wrap_content"
