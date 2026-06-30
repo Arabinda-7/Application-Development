@@ -37,16 +37,37 @@ class MainActivity : AppCompatActivity() {
                 onNavigateToSettings = { startActivity(Intent(this, SettingsActivity::class.java)) },
                 onColorSelected = { section, color ->
                     updateSectionColor(section, color)
+                },
+                onMoodSelected = { emoji ->
+                    val today = DataManager.getTrackingDateString()
+                    DataManager.dailyMoods[today] = emoji
+                    DataManager.saveData(this)
+                    refreshState()
                 }
             )
         }
     }
 
     private fun refreshState() {
+        val today = DataManager.getTrackingDateString()
+        val nextMilestone = DataManager.notes
+            .filter { it.category == "Project" }
+            .flatMap { it.subFeatures }
+            .filter { !it.isCompleted && it.dueDate != null }
+            .minByOrNull { it.dueDate!! }
+            ?.let { "${it.name} due ${SimpleDateFormat("MMM dd", Locale.getDefault()).format(java.util.Date(it.dueDate!!))}" }
+            ?: "No upcoming milestones"
+
         dashboardState = DashboardState(
+            userName = "Arabi",
+            overallProgress = DataManager.getTotalDailyProgress(),
             habitProgress = DataManager.getHabitProgress(),
             workoutProgress = DataManager.getWorkoutProgress(),
             dateString = SimpleDateFormat("MMMM dd, yyyy", Locale.getDefault()).format(Date()),
+            safeSpendAmount = DataManager.monthlyBudget - DataManager.getCurrentMonthExpenditure(),
+            nextMilestone = nextMilestone,
+            recentActions = DataManager.recentActivities,
+            currentMood = DataManager.dailyMoods[today],
             habitColor = DataManager.globalHabitColor,
             workoutColor = DataManager.globalWorkoutColor,
             taskColor = DataManager.globalTaskColor,

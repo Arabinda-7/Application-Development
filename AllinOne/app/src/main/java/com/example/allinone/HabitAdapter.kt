@@ -117,6 +117,7 @@ class HabitAdapter(
                 if (!habit.completedDates.contains(selectedDateString)) {
                     habit.completedDates.add(selectedDateString)
                     triggerCompletionEffects(context)
+                    DataManager.addActivity("Finished Ritual: ${habit.name}")
                 }
                 
                 applyFilterAndSort()
@@ -277,6 +278,7 @@ class HabitAdapter(
             }
             if (!habit.completedDates.contains(selectedDateString)) {
                 habit.completedDates.add(selectedDateString)
+                DataManager.addActivity("Bulk Finished: ${habit.name}")
             }
         }
         setBulkMode(false)
@@ -293,6 +295,7 @@ class HabitAdapter(
             }
             if (!habit.completedDates.contains(selectedDateString)) {
                 habit.completedDates.add(selectedDateString)
+                DataManager.addActivity("Bulk Finished: ${habit.name}")
             }
         }
         setBulkMode(false)

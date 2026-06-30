@@ -723,6 +723,7 @@ class ProjectActivity : AppCompatActivity() {
 
     private fun addHistoryLog(note: Note, action: String, description: String) {
         note.changeHistory.add(ProjectHistory(action = action, description = description))
+        DataManager.addActivity("$action: ${note.title}")
     }
 
     private fun Int.dpToPx(): Int = (this * resources.displayMetrics.density).toInt()

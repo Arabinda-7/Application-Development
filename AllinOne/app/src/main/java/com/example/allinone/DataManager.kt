@@ -77,6 +77,9 @@ object DataManager {
     var isAppLockEnabled: Boolean = false
     var isOledThemeEnabled: Boolean = false
 
+    var recentActivities = mutableListOf<String>()
+    var dailyMoods = mutableMapOf<String, String>() // DateString -> Emoji
+
     // User Custom Colors
     var userCustomColors = mutableListOf<Int>()
 
@@ -156,6 +159,8 @@ object DataManager {
     private const val KEY_PROJ_ANALYTICS = "project_analytics_enabled"
     private const val KEY_APP_LOCK = "app_lock_enabled"
     private const val KEY_OLED_THEME = "oled_theme_enabled"
+    private const val KEY_RECENT_ACT = "recent_activities_data"
+    private const val KEY_DAILY_MOODS = "daily_moods_data"
     private const val KEY_CUSTOM_COLORS = "user_custom_colors_data"
     private const val KEY_PROJ_TAGS = "project_custom_tags_data"
     private const val KEY_PROJ_DUAL_EXIST = "project_dual_exist_enabled"
@@ -252,6 +257,8 @@ object DataManager {
             putBoolean(KEY_PROJ_IDEAS_ENABLED, projectIdeasEnabled)
             putBoolean(KEY_APP_LOCK, isAppLockEnabled)
             putBoolean(KEY_OLED_THEME, isOledThemeEnabled)
+            putString(KEY_RECENT_ACT, gson.toJson(recentActivities))
+            putString(KEY_DAILY_MOODS, gson.toJson(dailyMoods))
             putString(KEY_CUSTOM_COLORS, gson.toJson(userCustomColors))
             putString(KEY_PROJ_TAGS, gson.toJson(projectCustomTags))
 
@@ -436,6 +443,16 @@ object DataManager {
         projectIdeasEnabled = prefs.getBoolean(KEY_PROJ_IDEAS_ENABLED, true)
         isAppLockEnabled = prefs.getBoolean(KEY_APP_LOCK, false)
         isOledThemeEnabled = prefs.getBoolean(KEY_OLED_THEME, false)
+
+        prefs.getString(KEY_RECENT_ACT, null)?.let {
+            val type = object : TypeToken<MutableList<String>>() {}.type
+            recentActivities = gson.fromJson(it, type) ?: mutableListOf()
+        }
+
+        prefs.getString(KEY_DAILY_MOODS, null)?.let {
+            val type = object : TypeToken<MutableMap<String, String>>() {}.type
+            dailyMoods = gson.fromJson(it, type) ?: mutableMapOf()
+        }
 
         prefs.getString(KEY_CUSTOM_COLORS, null)?.let {
             val type = object : TypeToken<MutableList<Int>>() {}.type
@@ -855,6 +872,13 @@ object DataManager {
         val sevenDaysAgo = System.currentTimeMillis() - (7 * 24 * 60 * 60 * 1000L)
         tasks.removeAll { 
             it.isCompleted && (it.completedTimestamp ?: 0L) < sevenDaysAgo 
+        }
+    }
+
+    fun addActivity(action: String) {
+        recentActivities.add(0, action)
+        if (recentActivities.size > 10) {
+            recentActivities = recentActivities.take(10).toMutableList()
         }
     }
 }

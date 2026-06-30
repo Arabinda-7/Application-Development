@@ -415,6 +415,9 @@ class ToDoListActivity : AppCompatActivity() {
                 
                 if (existingTask == null) {
                     allTasks.add(0, task)
+                    DataManager.addActivity("Captured Task: $name")
+                } else {
+                    DataManager.addActivity("Updated Task: $name")
                 }
                 
                 // Schedule Reminder

@@ -295,8 +295,10 @@ class FinanceActivity : AppCompatActivity() {
                 if (existingTransaction == null) {
                     val newTransaction = Transaction(title = finalTitle, amount = amount, type = type, category = selectedCategoryName, timestamp = calendar.timeInMillis)
                     DataManager.transactions.add(0, newTransaction)
+                    DataManager.addActivity("Logged $type: ${DataManager.financeCurrency}$amount")
                 } else {
                     existingTransaction.title = finalTitle; existingTransaction.amount = amount; existingTransaction.type = type; existingTransaction.category = selectedCategoryName; existingTransaction.timestamp = calendar.timeInMillis
+                    DataManager.addActivity("Updated $type: ${DataManager.financeCurrency}$amount")
                 }
                 
                 filterCurrentMonthTransactions()
