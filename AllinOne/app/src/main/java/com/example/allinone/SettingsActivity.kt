@@ -92,14 +92,14 @@ class SettingsActivity : AppCompatActivity() {
 
     private fun showSectionSettings(section: String) {
         currentPath = section
-        tvTitle.text = section.removePrefix("APPEARANCE_").replace("_", " ")
+        tvTitle.text = section.removePrefix("APPEARANCE_").replace("_", " ").uppercase()
         
         val settings = mutableListOf<ConfigItem>()
         
         when(section) {
             "HABITS" -> {
                 settings.add(ConfigItem("Icons", "No features added yet") { showSectionSettings("HABITS_ICONS") })
-                settings.add(ConfigItem("Names", "No features added yet") { showSectionSettings("HABITS_NAMES") })
+                settings.add(ConfigItem("Theme Color", "Customize creating habits theme") { showColorPickerDialog("ADD_HABIT") })
                 settings.add(ConfigItem("Behavioral Insights", "Peak performance analytics") {
                     showBehavioralInsightsDialog()
                 })
@@ -136,7 +136,7 @@ class SettingsActivity : AppCompatActivity() {
             }
             "WORKOUTS" -> {
                 settings.add(ConfigItem("Icons", "No features added yet") { showSectionSettings("WORKOUTS_ICONS") })
-                settings.add(ConfigItem("Names", "No features added yet") { showSectionSettings("WORKOUTS_NAMES") })
+                settings.add(ConfigItem("Theme Color", "Customize creating workouts theme") { showColorPickerDialog("ADD_WORKOUT") })
                 settings.add(ConfigItem("Manage Muscle Groups", "Add or remove body part tags") {
                     showManageMuscleGroupsDialog()
                 })
@@ -162,8 +162,6 @@ class SettingsActivity : AppCompatActivity() {
                 })
             }
             "TASKS" -> {
-                settings.add(ConfigItem("Icons", "No features added yet") { showSectionSettings("TASKS_ICONS") })
-                settings.add(ConfigItem("Names", "No features added yet") { showSectionSettings("TASKS_NAMES") })
                 settings.add(ConfigItem("Manage Categories", "Customize your task tags") {
                     showManageTaskCategoriesDialog()
                 })
@@ -188,8 +186,6 @@ class SettingsActivity : AppCompatActivity() {
                 })
             }
             "NOTES" -> {
-                settings.add(ConfigItem("Icons", "No features added yet") { showSectionSettings("NOTES_ICONS") })
-                settings.add(ConfigItem("Names", "No features added yet") { showSectionSettings("NOTES_NAMES") })
                 settings.add(ConfigItem("Custom Templates", "Edit note pre-fill text") {
                     showNoteTemplatesDialog()
                 })
@@ -211,8 +207,6 @@ class SettingsActivity : AppCompatActivity() {
                 })
             }
             "FINANCE" -> {
-                settings.add(ConfigItem("Icons", "No features added yet") { showSectionSettings("FINANCE_ICONS") })
-                settings.add(ConfigItem("Names", "No features added yet") { showSectionSettings("FINANCE_NAMES") })
                 settings.add(ConfigItem("Primary Currency", "Current: ${DataManager.financeCurrency}") {
                     val symbols = listOf("₹", "$", "€", "£", "¥")
                     DataManager.financeCurrency = symbols[(symbols.indexOf(DataManager.financeCurrency) + 1) % symbols.size]
@@ -229,8 +223,6 @@ class SettingsActivity : AppCompatActivity() {
                 })
             }
             "PROJECTS" -> {
-                settings.add(ConfigItem("Icons", "No features added yet") { showSectionSettings("PROJECTS_ICONS") })
-                settings.add(ConfigItem("Names", "No features added yet") { showSectionSettings("PROJECTS_NAMES") })
                 settings.add(ConfigItem("Manage Templates", "Edit roadmap pre-sets") {
                     showProjectTemplatesDialog()
                 })
@@ -350,19 +342,16 @@ class SettingsActivity : AppCompatActivity() {
                 settings.add(ConfigItem("Note Section Color", "Change theme color for Notes") { showColorPickerDialog("NOTE") })
                 settings.add(ConfigItem("Finance Section Color", "Change theme color for Finance") { showColorPickerDialog("FINANCE") })
             }
-            "HELP" -> {
-                settings.add(ConfigItem("Habit Tracker Guide", "Learn about rituals and streaks") { showHelpDetail("HABITS") })
-                settings.add(ConfigItem("Workout Routine Guide", "Learn about exercises and timers") { showHelpDetail("WORKOUTS") })
-                settings.add(ConfigItem("To-Do List Guide", "Learn about tasks and priority") { showHelpDetail("TASKS") })
-                settings.add(ConfigItem("Notes Guide", "Learn about templates and privacy") { showHelpDetail("NOTES") })
+            "HELP", "HELP_GUIDE" -> {
+                settings.add(ConfigItem("Habit Guide", "Learn about rituals and streaks") { showHelpDetail("HABITS") })
+                settings.add(ConfigItem("Workout Guide", "Learn about exercises and timers") { showHelpDetail("WORKOUTS") })
+                settings.add(ConfigItem("Task Guide", "Learn about tasks and priority") { showHelpDetail("TASKS") })
+                settings.add(ConfigItem("Project Guide", "Learn about roadmaps and history") { showHelpDetail("PROJECTS") })
+                settings.add(ConfigItem("Note Guide", "Learn about templates and privacy") { showHelpDetail("NOTES") })
                 settings.add(ConfigItem("Finance Guide", "Learn about budgets and currency") { showHelpDetail("FINANCE") })
-                settings.add(ConfigItem("Projects Guide", "Learn about roadmaps and history") { showHelpDetail("PROJECTS") })
-                settings.add(ConfigItem("Appearance Guide", "Learn how to customize the app") { showHelpDetail("APPEARANCE") })
-                settings.add(ConfigItem("Security Guide", "Learn about locks and backups") { showHelpDetail("SECURITY") })
+                settings.add(ConfigItem("Others Guide", "Appearance, Security, and Backups") { showHelpDetail("OTHERS") })
             }
-            "HABITS_ICONS", "HABITS_NAMES", "WORKOUTS_ICONS", "WORKOUTS_NAMES",
-            "TASKS_ICONS", "TASKS_NAMES", "NOTES_ICONS", "NOTES_NAMES",
-            "FINANCE_ICONS", "FINANCE_NAMES", "PROJECTS_ICONS", "PROJECTS_NAMES" -> {
+            "HABITS_ICONS", "WORKOUTS_ICONS" -> {
                 settings.add(ConfigItem("Empty Section", "No features added yet") {})
             }
         }
@@ -856,64 +845,62 @@ class SettingsActivity : AppCompatActivity() {
         
         val contentHtml = when(section) {
             "HABITS" -> """
-                <b>HABIT TRACKING:</b> Create daily rituals to build discipline.<br><br>
-                <b>STREAKS:</b> Complete habits daily to grow your progress.<br><br>
-                <b>VACATION MODE:</b> Pause your streaks when taking a break.<br><br>
-                <b>RESET HOUR:</b> Customize when your day 'ends'.<br><br>
-                <b>BULK MODE:</b> Quickly update multiple habits at once.
+                <b>1. BUILDING RITUALS:</b> Create recurring daily goals. You can set them for specific times (Morning, Afternoon, Evening) or 'Anytime' to maintain structure.<br><br>
+                <b>2. STREAK SYSTEM:</b> Every consecutive day you finish all your specific habits, your streak grows. This builds long-term discipline.<br><br>
+                <b>3. VACATION MODE:</b> Use this when traveling or taking a break. It pauses your streak so you don't lose progress while away.<br><br>
+                <b>4. CUSTOM RESET HOUR:</b> If you stay up late, you can set the day to reset at 3 AM or 4 AM instead of midnight, keeping your night-owl progress on the current day.<br><br>
+                <b>5. BULK UPDATES:</b> Long-press habit cards to enter a fast mode where you can mark many habits as done in seconds.
             """.trimIndent()
             
             "WORKOUTS" -> """
-                <b>EXERCISES:</b> Add custom routines with target goals.<br><br>
-                <b>TRACKING MODES:</b> Choose between Reps, Sets, or Timer.<br><br>
-                <b>MUSCLE GROUPS:</b> Tag workouts to track specific body parts.<br><br>
-                <b>REST TIMER:</b> Countdown alerts after each set.<br><br>
-                <b>READINESS:</b> Survey to see if you're ready to train.
+                <b>1. ROUTINE MANAGEMENT:</b> Add exercises with specific targets. You can track progress by Reps, Total Sets, or a precise Countdown Timer.<br><br>
+                <b>2. MUSCLE GROUP TRACKING:</b> Tag your workouts (Chest, Legs, Arms, etc.). The app keeps track of what you've trained to ensure balanced body development.<br><br>
+                <b>3. SMART REST TIMER:</b> After finishing a set, the app provides a customizable rest period with a sound alert when it's time for the next set.<br><br>
+                <b>4. READINESS SURVEY:</b> A quick daily check-in to see if your body is recovered enough for heavy training, helping you avoid injuries.<br><br>
+                <b>5. HISTORY & PERFORMANCE:</b> Tap on any exercise to see your lifetime completion count and streak.
             """.trimIndent()
             
             "TASKS" -> """
-                <b>SMART LISTS:</b> Organize by Category and Priority.<br><br>
-                <b>AUTO-ARCHIVE:</b> Cleanup old completed tasks.<br><br>
-                <b>REMINDERS:</b> Set alerts for time-sensitive to-dos.<br><br>
-                <b>ANALYTICS:</b> Track your overall completion speed.
-            """.trimIndent()
-            
-            "NOTES" -> """
-                <b>TEMPLATES:</b> Pre-filled text for Daily logs or Stories.<br><br>
-                <b>PRIVACY:</b> Hide sensitive notes with a global toggle.<br><br>
-                <b>AUTO-CLEANUP:</b> Automatically delete very old logs.<br><br>
-                <b>BULK MOVE:</b> Change categories for all notes in one click.
-            """.trimIndent()
-            
-            "FINANCE" -> """
-                <b>BUDGETING:</b> Set monthly limits and savings goals.<br><br>
-                <b>CURRENCY:</b> Support for global symbols like ₹, $, etc.<br><br>
-                <b>HISTORY:</b> View a detailed ledger of transactions.<br><br>
-                <b>CATEGORIES:</b> Group spending by Food, Rent, etc.
+                <b>1. SMART LISTS:</b> Categorize tasks into Personal, Work, or Shopping. Assign Priority (High, Med, Low) to keep important items at the top.<br><br>
+                <b>2. SUBTASK MILESTONES:</b> Break big tasks into smaller, manageable steps. Progress is tracked automatically as you check them off.<br><br>
+                <b>3. AUTO-ARCHIVE:</b> Keep your list clean. Completed tasks are automatically moved to a graveyard after a few days to remove clutter.<br><br>
+                <b>4. PRODUCTIVITY ANALYTICS:</b> View charts that show how many tasks you finish per day and track your 'completion velocity' over time.<br><br>
+                <b>5. REMINDERS:</b> Set exact time alerts for critical tasks so you never miss a deadline.
             """.trimIndent()
             
             "PROJECTS" -> """
-                <b>ROADMAPS:</b> Break projects into sub-features.<br><br>
-                <b>TEMPLATES:</b> Quick-start with predefined steps.<br><br>
-                <b>HISTORY:</b> Every roadmap change is logged.<br><br>
-                <b>AUTO-ARCHIVE:</b> Hide 100% finished project boards.
+                <b>1. ROADMAP BOARDS:</b> Advanced project tracking. Break your major goals into 'Roadmaps' with detailed sub-features and milestones.<br><br>
+                <b>2. SUB-TASK SEQUENCING:</b> Assign position numbers (1, 2, 3...) to your roadmap items. Use the 'Number Roller' to easily reorder your project steps.<br><br>
+                <b>3. CATEGORY TAGS:</b> Label your roadmap steps as UI, LOGIC, or BUG to quickly identify the type of work needed.<br><br>
+                <b>4. DUAL EXISTENCE:</b> Toggle 'Dual Exist' to let your projects appear in both 'Roadmaps' and 'Ideas' tabs simultaneously for brainstorming.<br><br>
+                <b>5. PROJECT HISTORY:</b> The app logs every status update, progress change, or milestone finished, giving you a full audit trail of your work.
             """.trimIndent()
             
-            "APPEARANCE" -> """
-                <b>HOME PAGE:</b> Long-press any card to change color.<br><br>
-                <b>ICONS:</b> Choose unique icons for every app section.<br><br>
-                <b>COLORS:</b> Centrally manage theme colors.<br><br>
-                <b>RESET:</b> Revert all visuals back to factory defaults.
+            "NOTES" -> """
+                <b>1. SMART TEMPLATES:</b> Use pre-built structures for Daily Gratitude, Story Writing, or Question logs to start writing instantly.<br><br>
+                <b>2. PRIVACY & SECURITY:</b> Long-press a note to 'Hide' it. Use the global 'Show Hidden' toggle in settings to keep your sensitive data private.<br><br>
+                <b>3. VOICE-TO-TEXT:</b> Tap the microphone icon inside any note to dictate your thoughts quickly using speech recognition.<br><br>
+                <b>4. QUICK SEARCH & SORT:</b> Filter your notes by 4 categories and sort them by Date or Title to find your ideas in seconds.<br><br>
+                <b>5. AUTO-CLEANUP:</b> Set an expiration date for old logs to ensure your notepad stays focused only on relevant information.
             """.trimIndent()
             
-            "SECURITY" -> """
-                <b>BIOMETRICS:</b> Secure the app with Fingerprint/Face ID.<br><br>
-                <b>OLED MODE:</b> Pure black theme for better battery life.<br><br>
-                <b>BACKUPS:</b> Export your entire data to a JSON file.<br><br>
-                <b>SYSTEM CLEAN:</b> Clear old history to keep the app fast.
+            "FINANCE" -> """
+                <b>1. PROFESSIONAL BUDGETING:</b> Set a Monthly Budget and a specific Savings Goal (like 'New Car'). The app tracks your remaining 'Safe Spend'.<br><br>
+                <b>2. INDEPENDENT LEDGERS:</b> Create private 'Books' for different people. Track who owes you money or who you owe, with automated FIFO reconciliation.<br><br>
+                <b>3. SPLIT-BILL INTEGRATION:</b> Long-press any expense to split it with friends. The app automatically creates 'Lent' entries in your ledger for their shares.<br><br>
+                <b>4. SPEND HEATMAP:</b> View a 31-day visual grid that shows exactly which days you spend the most money using intensity colors.<br><br>
+                <b>5. SMART INSIGHTS:</b> Dynamic cards alert you if you've spent more than 70% of your budget before the middle of the month.
             """.trimIndent()
             
-            else -> "Feature guide coming soon."
+            "OTHERS" -> """
+                <b>1. DATA GOVERNANCE (Authority):</b> You have full ownership of your data. Export your entire database to a JSON file for backup or migrate to a new device by importing it back.<br><br>
+                <b>2. UI ARCHITECTURE:</b> You can manipulate the app's structure. Enable or disable entire sections like 'Ideas' or 'Roadmaps' to create a specialized workflow that matches your needs.<br><br>
+                <b>3. LOGIC CUSTOMIZATION:</b> Adjust core app behaviors. Customize 'Day Reset' hours for habits, set spending 'Alert Thresholds' for finance, and define how many days until finished tasks are archived.<br><br>
+                <b>4. GLOBAL STYLING:</b> You have the authority to redesign the dashboard. Long-press any card to change its color and choose unique icons for every section in the Appearance menu.<br><br>
+                <b>5. SECURITY PRIVILEGES:</b> Lock the app with biometric authentication (Fingerprint) or a PIN. Enable 'OLED Mode' to force a high-contrast pure black theme across all screens.
+            """.trimIndent()
+            
+            else -> "Comprehensive feature guide coming soon."
         }
 
         tvContent.text = android.text.Html.fromHtml(contentHtml, android.text.Html.FROM_HTML_MODE_LEGACY)
@@ -1180,9 +1167,9 @@ class SettingsActivity : AppCompatActivity() {
 
         override fun getItemCount() = items.size
         class ViewHolder(view: View) : RecyclerView.ViewHolder(view) {
-            val title: TextView = view.findViewById(R.id.tv_settings_name)
-            val description: TextView = view.findViewById(R.id.tv_settings_description)
-            val icon: ImageView = view.findViewById(R.id.iv_settings_icon)
+            val title: TextView = view.findViewById(R.id.tv_item_title)
+            val description: TextView = view.findViewById(R.id.tv_item_description)
+            val icon: ImageView = view.findViewById(R.id.iv_item_icon)
         }
     }
 
@@ -1199,11 +1186,15 @@ class SettingsActivity : AppCompatActivity() {
             holder.title.text = item.title
             holder.summary.text = item.summary
             
+            val chevron = holder.itemView.findViewById<View>(R.id.iv_chevron)
+
             if (item.isToggle) {
                 holder.switch.visibility = View.VISIBLE
                 holder.switch.isChecked = item.isChecked
+                chevron.visibility = View.GONE
             } else {
                 holder.switch.visibility = View.GONE
+                chevron.visibility = View.VISIBLE
             }
 
             holder.itemView.setOnClickListener { 
