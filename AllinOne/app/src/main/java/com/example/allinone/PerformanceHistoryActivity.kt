@@ -103,22 +103,17 @@ class PerformanceHistoryActivity : AppCompatActivity() {
         params.columnSpec = GridLayout.spec(GridLayout.UNDEFINED, 1f)
         frameLayout.layoutParams = params
 
-        // Performance Indicator Circle
-        if (progressPercent > 0) {
-            val circle = View(this)
-            // Size mapping: 60px to 100px based on progress
-            val size = (60 * (progressPercent / 100f) + 40).toInt()
-            val circleParams = FrameLayout.LayoutParams(size, size)
-            circleParams.gravity = Gravity.CENTER
-            circle.layoutParams = circleParams
-            
-            circle.background = ContextCompat.getDrawable(this, R.drawable.circle_selected_bg)
-            circle.backgroundTintList = ContextCompat.getColorStateList(this, R.color.card_blue)
-            // Use alpha for visual intensity
-            circle.alpha = (progressPercent / 100f).coerceAtLeast(0.15f)
-            
-            frameLayout.addView(circle)
-        }
+        // Circular Progress Bar
+        val progressBar = android.widget.ProgressBar(this, null, android.R.attr.progressBarStyleHorizontal)
+        val s = (36 * resources.displayMetrics.density).toInt() // Slightly larger for main history
+        val pbParams = FrameLayout.LayoutParams(s, s)
+        pbParams.gravity = Gravity.CENTER
+        progressBar.layoutParams = pbParams
+        progressBar.progressDrawable = ContextCompat.getDrawable(this, R.drawable.circular_history_progress)
+        progressBar.max = 100
+        progressBar.progress = progressPercent
+        progressBar.scaleX = -1f // Flip horizontally for anti-clockwise fill
+        frameLayout.addView(progressBar)
 
         // Day Number
         val textView = TextView(this)

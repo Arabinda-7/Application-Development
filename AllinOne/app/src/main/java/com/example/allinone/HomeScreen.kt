@@ -177,19 +177,21 @@ fun HomeScreen(
                         Box(contentAlignment = Alignment.BottomEnd) {
                             Box(
                                 modifier = Modifier
-                                    .size(36.dp)
+                                    .size(48.dp)
                                     .clip(CircleShape)
                                     .background(Color(0xFF1A1A1A))
+                                    .border(1.5.dp, Color.White.copy(alpha = 0.2f), CircleShape)
                                     .clickable { onNavigateToProfile() },
                                 contentAlignment = Alignment.Center
                             ) {
                                 Image(
                                     painter = painterResource(id = state.userAvatarRes),
                                     contentDescription = "Profile",
-                                    modifier = Modifier.fillMaxSize()
+                                    modifier = Modifier.fillMaxSize(),
+                                    contentScale = androidx.compose.ui.layout.ContentScale.Crop
                                 )
                             }
-                            Box(modifier = Modifier.size(10.dp).background(Color(0xFF2EC4B6), CircleShape).border(2.dp, Color.Black, CircleShape))
+                            Box(modifier = Modifier.size(12.dp).background(Color(0xFF2EC4B6), CircleShape).border(2.dp, Color.Black, CircleShape))
                         }
 
                         Row(verticalAlignment = Alignment.CenterVertically) {
@@ -200,8 +202,21 @@ fun HomeScreen(
                                 Box(modifier = Modifier.size(7.dp).background(Color.Red, CircleShape).align(Alignment.TopEnd))
                             }
                             Spacer(modifier = Modifier.width(12.dp))
-                            IconButton(onClick = onNavigateToSettings, modifier = Modifier.size(32.dp)) {
-                                Icon(Icons.Default.Settings, "Settings", tint = Color.White, modifier = Modifier.size(18.dp))
+                            Box(
+                                modifier = Modifier
+                                    .size(48.dp)
+                                    .clip(CircleShape)
+                                    .background(Color(0xFF1A1A1A))
+                                    .border(1.dp, Color.White.copy(alpha = 0.1f), CircleShape)
+                                    .clickable { onNavigateToSettings() },
+                                contentAlignment = Alignment.Center
+                            ) {
+                                Icon(
+                                    imageVector = Icons.Default.Settings,
+                                    contentDescription = "Settings",
+                                    tint = Color.White,
+                                    modifier = Modifier.size(24.dp)
+                                )
                             }
                         }
                     }
@@ -458,7 +473,7 @@ fun HabitCard(progress: Int, color: Color, icon: Int, onClick: () -> Unit, onCol
             Box(contentAlignment = Alignment.Center, modifier = Modifier.size(80.dp)) {
                 CircularProgressIndicator(
                     progress = { progress / 100f },
-                    modifier = Modifier.fillMaxSize(),
+                    modifier = Modifier.fillMaxSize().graphicsLayer(scaleX = -1f),
                     color = color,
                     strokeWidth = 8.dp,
                     trackColor = Color.White.copy(alpha = 0.05f),

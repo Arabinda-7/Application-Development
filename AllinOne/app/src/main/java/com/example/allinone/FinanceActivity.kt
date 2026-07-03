@@ -307,7 +307,14 @@ class FinanceActivity : AppCompatActivity() {
                 
                 filterCurrentMonthTransactions()
                 transactionAdapter.updateData(filteredTransactions)
-                DataManager.saveData(this); updateSummary(); dialog.dismiss()
+                DataManager.saveData(this)
+                updateSummary()
+                
+                if (intent.getBooleanExtra("SHOW_ADD_DIALOG", false)) {
+                    finish()
+                } else {
+                    dialog.dismiss()
+                }
             }
         }
         dialog.show()

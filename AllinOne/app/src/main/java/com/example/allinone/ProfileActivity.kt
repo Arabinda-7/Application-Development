@@ -56,10 +56,10 @@ class ProfileActivity : AppCompatActivity() {
         findViewById<ImageView>(R.id.iv_profile_avatar).setOnLongClickListener {
             // Toggle between two profile icons
             val current = DataManager.userAvatarRes
-            val next = if (current == R.drawable.icons8_profile_100) {
-                R.drawable.icons8_profile_100_2
+            val next = if (current == R.drawable.boy_avatar_profile) {
+                R.drawable.girl_avatar_profile
             } else {
-                R.drawable.icons8_profile_100
+                R.drawable.boy_avatar_profile
             }
             
             DataManager.userAvatarRes = next

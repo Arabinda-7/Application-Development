@@ -64,7 +64,7 @@
                     android:layout_height="64dp"
                     android:layout_gravity="center"
                     android:scaleType="centerCrop"
-                    android:src="@drawable/icons8_profile_100"
+                    android:src="@drawable/boy_avatar_profile"
                     android:clickable="true"
                     android:focusable="true"
                     android:contentDescription="Profile Icon"/>

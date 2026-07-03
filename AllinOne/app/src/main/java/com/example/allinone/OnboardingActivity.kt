@@ -1,7 +1,6 @@
 package com.example.allinone
 
 import android.content.Intent
-import android.content.res.ColorStateList
 import android.graphics.Color
 import android.os.Bundle
 import android.widget.EditText
@@ -9,10 +8,11 @@ import android.widget.ImageView
 import android.widget.TextView
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
+import androidx.core.content.ContextCompat
 
 class OnboardingActivity : AppCompatActivity() {
 
-    private var selectedAvatarRes: Int = R.drawable.icons8_profile_100
+    private var selectedAvatarRes: Int = R.drawable.boy_avatar_profile
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -25,15 +25,16 @@ class OnboardingActivity : AppCompatActivity() {
 
         fun updateAvatarSelection(resId: Int) {
             selectedAvatarRes = resId
-            val activeColor = Color.parseColor("#33FFFFFF")
-            val inactiveColor = Color.parseColor("#11FFFFFF")
             
-            ivAvatar1.backgroundTintList = ColorStateList.valueOf(if (resId == R.drawable.icons8_profile_100) activeColor else inactiveColor)
-            ivAvatar2.backgroundTintList = ColorStateList.valueOf(if (resId == R.drawable.icons8_profile_100_2) activeColor else inactiveColor)
+            val activeAlpha = 1.0f
+            val inactiveAlpha = 0.3f
+            
+            ivAvatar1.alpha = if (resId == R.drawable.boy_avatar_profile) activeAlpha else inactiveAlpha
+            ivAvatar2.alpha = if (resId == R.drawable.girl_avatar_profile) activeAlpha else inactiveAlpha
         }
 
-        ivAvatar1.setOnClickListener { updateAvatarSelection(R.drawable.icons8_profile_100) }
-        ivAvatar2.setOnClickListener { updateAvatarSelection(R.drawable.icons8_profile_100_2) }
+        ivAvatar1.setOnClickListener { updateAvatarSelection(R.drawable.boy_avatar_profile) }
+        ivAvatar2.setOnClickListener { updateAvatarSelection(R.drawable.girl_avatar_profile) }
 
         btnGetStarted.setOnClickListener {
             val name = etName.text.toString().trim()

@@ -269,7 +269,12 @@ class NotesActivity : AppCompatActivity() {
                 updateDisplayList()
                 noteAdapter.updateNotes(displayNotes)
                 DataManager.saveData(this)
-                dialog.dismiss()
+                
+                if (intent.getBooleanExtra("SHOW_ADD_DIALOG", false)) {
+                    finish()
+                } else {
+                    dialog.dismiss()
+                }
             }
         }
         dialog.show()

@@ -81,7 +81,7 @@ object DataManager {
 
     var userName: String = "Arabi"
     var userBio: String = "Professional Tier"
-    var userAvatarRes: Int = R.drawable.icons8_profile_100
+    var userAvatarRes: Int = R.drawable.boy_avatar_profile
 
     var recentActivities = mutableListOf<String>()
     var dailyMoods = mutableMapOf<String, String>() // DateString -> Emoji

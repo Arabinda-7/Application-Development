@@ -446,7 +446,7 @@ class SettingsActivity : AppCompatActivity() {
         
         title.text = "SELECT AVATAR STYLE"
         
-        val icons = listOf(R.drawable.icons8_profile_100, R.drawable.icons8_profile_100_2)
+        val icons = listOf(R.drawable.boy_avatar_profile, R.drawable.girl_avatar_profile)
         
         container.removeAllViews()
         val row = LinearLayout(this).apply {

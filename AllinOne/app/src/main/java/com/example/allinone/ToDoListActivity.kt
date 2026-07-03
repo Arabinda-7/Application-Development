@@ -433,7 +433,12 @@ class ToDoListActivity : AppCompatActivity() {
 
                 taskAdapter.updateDisplayList()
                 DataManager.saveData(this)
-                dialog.dismiss()
+                
+                if (intent.getBooleanExtra("SHOW_ADD_DIALOG", false)) {
+                    finish()
+                } else {
+                    dialog.dismiss()
+                }
             } else {
                 Toast.makeText(this, "Task Name is required", Toast.LENGTH_SHORT).show()
                 etName.requestFocus()

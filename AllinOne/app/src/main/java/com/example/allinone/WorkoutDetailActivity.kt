@@ -132,21 +132,22 @@ class WorkoutDetailActivity : AppCompatActivity() {
         params.columnSpec = GridLayout.spec(GridLayout.UNDEFINED, 1f)
         frameLayout.layoutParams = params
         
-        if (progressPercent > 0) {
-            val circle = View(this)
-            val size = (80 * (progressPercent / 100f)).coerceAtLeast(40f).toInt()
-            val circleParams = FrameLayout.LayoutParams(size, size)
-            circleParams.gravity = Gravity.CENTER
-            circle.layoutParams = circleParams
-            circle.background = ContextCompat.getDrawable(this, R.drawable.circle_selected_bg)
-            circle.alpha = (progressPercent / 100f).coerceAtLeast(0.25f)
-            circle.backgroundTintList = ContextCompat.getColorStateList(this, R.color.card_blue)
-            frameLayout.addView(circle)
-        }
+        // Circular Progress Bar
+        val progressBar = android.widget.ProgressBar(this, null, android.R.attr.progressBarStyleHorizontal)
+        val s = (32 * resources.displayMetrics.density).toInt()
+        val pbParams = FrameLayout.LayoutParams(s, s)
+        pbParams.gravity = Gravity.CENTER
+        progressBar.layoutParams = pbParams
+        progressBar.progressDrawable = ContextCompat.getDrawable(this, R.drawable.circular_history_progress)
+        progressBar.max = 100
+        progressBar.progress = progressPercent
+        progressBar.scaleX = -1f // Flip for anti-clockwise
+        frameLayout.addView(progressBar)
         
         val textView = TextView(this)
         textView.text = day
         textView.setTextColor(Color.WHITE)
+        textView.textSize = 12f
         textView.gravity = Gravity.CENTER
         frameLayout.addView(textView)
 

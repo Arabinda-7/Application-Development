@@ -339,25 +339,26 @@ class WorkoutRoutineActivity : AppCompatActivity() {
         val frameLayout = FrameLayout(this)
         val params = GridLayout.LayoutParams()
         params.width = 0
-        params.height = 100
+        params.height = 120
         params.columnSpec = GridLayout.spec(GridLayout.UNDEFINED, 1f)
         frameLayout.layoutParams = params
 
-        if (progressPercent > 0) {
-            val circle = View(this)
-            val size = (80 * (progressPercent / 100f)).coerceAtLeast(40f).toInt()
-            val circleParams = FrameLayout.LayoutParams(size, size)
-            circleParams.gravity = Gravity.CENTER
-            circle.layoutParams = circleParams
-            circle.background = ContextCompat.getDrawable(this, R.drawable.circle_selected_bg)
-            circle.alpha = (progressPercent / 100f).coerceAtLeast(0.25f)
-            circle.backgroundTintList = ContextCompat.getColorStateList(this, R.color.card_blue)
-            frameLayout.addView(circle)
-        }
+        // Circular Progress Bar
+        val progressBar = android.widget.ProgressBar(this, null, android.R.attr.progressBarStyleHorizontal)
+        val s = (32 * resources.displayMetrics.density).toInt()
+        val pbParams = FrameLayout.LayoutParams(s, s)
+        pbParams.gravity = Gravity.CENTER
+        progressBar.layoutParams = pbParams
+        progressBar.progressDrawable = ContextCompat.getDrawable(this, R.drawable.circular_history_progress)
+        progressBar.max = 100
+        progressBar.progress = progressPercent
+        progressBar.scaleX = -1f // Flip horizontally for anti-clockwise fill
+        frameLayout.addView(progressBar)
 
         val textView = TextView(this)
         textView.text = day
         textView.setTextColor(Color.WHITE)
+        textView.textSize = 12f
         textView.gravity = Gravity.CENTER
         frameLayout.addView(textView)
 
@@ -477,10 +478,18 @@ class WorkoutRoutineActivity : AppCompatActivity() {
     }
 
     private fun showIconSelectionDialog(onSelected: (Int) -> Unit) {
-        val icons = listOf(R.drawable.ic_fitness, android.R.drawable.ic_menu_directions, android.R.drawable.ic_menu_upload, android.R.drawable.ic_menu_view, android.R.drawable.ic_menu_myplaces, android.R.drawable.ic_lock_power_off, android.R.drawable.ic_media_play, android.R.drawable.ic_menu_compass)
+        val icons = listOf(
+            R.drawable.icons8_exercise_100, R.drawable.icons8_exercise_100_2, R.drawable.icons8_exercise_100_3,
+            R.drawable.icons8_exercise_100_4, R.drawable.icons8_exercise_100_5, R.drawable.icons8_exercise_100_6,
+            R.drawable.icons8_exercise_100_7, R.drawable.icons8_exercise_100_8, R.drawable.icons8_exercise_100_9,
+            R.drawable.icons8_exercise_100_10, R.drawable.icons8_exercise_100_11, R.drawable.icons8_exercise_100_12,
+            R.drawable.icons8_dumbbell_100, R.drawable.icons8_deadlift_100, R.drawable.icons8_plank_100,
+            R.drawable.icons8_skipping_rope_100_2, R.drawable.icons8_treadmill_100_2, R.drawable.icons8_warm_up_100,
+            R.drawable.icons8_pilates_100, R.drawable.icons8_triceps_100, R.drawable.icons8_yoga_100
+        )
         val dialogView = LayoutInflater.from(this).inflate(R.layout.dialog_icon_picker, null)
         val gridLayout = dialogView.findViewById<GridLayout>(R.id.icon_grid)
-        val pickerDialog = AlertDialog.Builder(this).setTitle("Select Icon").setView(dialogView).create()
+        val pickerDialog = AlertDialog.Builder(this).setTitle("Select Exercise Icon").setView(dialogView).create()
         icons.forEach { iconRes ->
             val iconView = ImageView(this); val params = GridLayout.LayoutParams(); params.width = 120; params.height = 120; params.setMargins(16, 16, 16, 16); iconView.layoutParams = params; iconView.setImageResource(iconRes); iconView.setPadding(24, 24, 24, 24); iconView.setBackgroundResource(R.drawable.circle_selected_bg); iconView.backgroundTintList = ContextCompat.getColorStateList(this, R.color.chip_background); iconView.imageTintList = ContextCompat.getColorStateList(this, R.color.white); iconView.setOnClickListener { onSelected(iconRes); pickerDialog.dismiss() }; gridLayout.addView(iconView)
         }
