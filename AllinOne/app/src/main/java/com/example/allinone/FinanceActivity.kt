@@ -133,6 +133,10 @@ class FinanceActivity : AppCompatActivity() {
             showSetSavingsGoalDialog()
             true
         }
+
+        if (intent.getBooleanExtra("SHOW_ADD_DIALOG", false)) {
+            showAddTransactionDialog()
+        }
     }
 
     private fun setupFilters() {

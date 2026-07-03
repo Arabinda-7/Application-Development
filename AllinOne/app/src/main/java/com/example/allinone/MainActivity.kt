@@ -1,13 +1,22 @@
 package com.example.allinone
 
+import android.app.Dialog
 import android.content.Intent
 import android.os.Bundle
+import android.view.LayoutInflater
+import android.view.View
+import android.view.ViewGroup
+import android.widget.ImageView
+import android.widget.TextView
+import android.widget.Toast
 import androidx.activity.compose.setContent
 import androidx.appcompat.app.AppCompatActivity
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.lifecycle.lifecycleScope
+import androidx.recyclerview.widget.LinearLayoutManager
+import androidx.recyclerview.widget.RecyclerView
 import kotlinx.coroutines.launch
 import java.text.SimpleDateFormat
 import java.util.*
@@ -16,13 +25,41 @@ class MainActivity : AppCompatActivity() {
 
     private var dashboardState by mutableStateOf(DashboardState())
 
+    // Direct Access Dialogs for Speed Dial
+    private fun quickAddTask() {
+        val intent = Intent(this, ToDoListActivity::class.java).apply {
+            putExtra("SHOW_ADD_DIALOG", true)
+        }
+        startActivity(intent)
+    }
+
+    private fun quickAddExpense() {
+        val intent = Intent(this, FinanceActivity::class.java).apply {
+            putExtra("SHOW_ADD_DIALOG", true)
+        }
+        startActivity(intent)
+    }
+
+    private fun quickAddNote() {
+        val intent = Intent(this, NotesActivity::class.java).apply {
+            putExtra("SHOW_ADD_DIALOG", true)
+        }
+        startActivity(intent)
+    }
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         
         // Background Data Loading
         lifecycleScope.launch {
             DataManager.loadData(this@MainActivity)
-            refreshState()
+            
+            if (!DataManager.isOnboardingCompleted) {
+                startActivity(Intent(this@MainActivity, OnboardingActivity::class.java))
+                finish()
+            } else {
+                refreshState()
+            }
         }
 
         setContent {
@@ -35,6 +72,10 @@ class MainActivity : AppCompatActivity() {
                 onNavigateToProjects = { startActivity(Intent(this, ProjectActivity::class.java)) },
                 onNavigateToFinance = { startActivity(Intent(this, FinanceActivity::class.java)) },
                 onNavigateToSettings = { startActivity(Intent(this, SettingsActivity::class.java)) },
+                onNavigateToProfile = { startActivity(Intent(this, ProfileActivity::class.java)) },
+                onQuickAddTodo = { quickAddTask() },
+                onQuickAddExpense = { quickAddExpense() },
+                onQuickAddNote = { quickAddNote() },
                 onColorSelected = { section, color ->
                     updateSectionColor(section, color)
                 },
@@ -43,9 +84,72 @@ class MainActivity : AppCompatActivity() {
                     DataManager.dailyMoods[today] = emoji
                     DataManager.saveData(this)
                     refreshState()
+                },
+                onSearchRequested = { query ->
+                    performUniversalSearch(query)
                 }
             )
         }
+    }
+
+    private fun performUniversalSearch(query: String) {
+        val results = mutableListOf<SearchResult>()
+        val lowQuery = query.lowercase()
+
+        // 1. Search Habits
+        DataManager.habits.filter { it.name.lowercase().contains(lowQuery) }.forEach { habit ->
+            results.add(SearchResult(habit.name, "HABIT TRACKER", R.drawable.ic_habit_tracker) {
+                startActivity(Intent(this, HabitTrackerActivity::class.java))
+            })
+        }
+
+        // 2. Search Tasks
+        DataManager.tasks.filter { it.name.lowercase().contains(lowQuery) }.forEach { task ->
+            results.add(SearchResult(task.name, "TO-DO LIST", R.drawable.ic_todo_list) {
+                startActivity(Intent(this, ToDoListActivity::class.java))
+            })
+        }
+
+        // 3. Search Notes / Projects
+        DataManager.notes.filter { it.title.lowercase().contains(lowQuery) || it.content.lowercase().contains(lowQuery) }.forEach { note ->
+            val section = if (note.category == "Project") "PROJECT BOARDS" else "IDEA BANK"
+            val icon = if (note.category == "Project") R.drawable.ic_project else R.drawable.ic_notes
+            results.add(SearchResult(note.title, section, icon) {
+                val intent = if (note.category == "Project") Intent(this, ProjectActivity::class.java) else Intent(this, NotesActivity::class.java)
+                startActivity(intent)
+            })
+        }
+
+        // 4. Search Finance
+        DataManager.transactions.filter { it.title.lowercase().contains(lowQuery) }.forEach { tx ->
+            results.add(SearchResult(tx.title, "FINANCE LOGS", R.drawable.ic_finance) {
+                startActivity(Intent(this, FinanceActivity::class.java))
+            })
+        }
+
+        if (results.isEmpty()) {
+            Toast.makeText(this, "No results found for '$query'", Toast.LENGTH_SHORT).show()
+        } else {
+            showSearchResultsDialog(query, results)
+        }
+    }
+
+    private fun showSearchResultsDialog(query: String, results: List<SearchResult>) {
+        val dialog = Dialog(this)
+        dialog.setContentView(R.layout.dialog_search_results)
+        dialog.window?.setBackgroundDrawableResource(android.R.color.transparent)
+        dialog.window?.setLayout(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT)
+
+        val tvTitle = dialog.findViewById<TextView>(R.id.tv_search_title)
+        val rvResults = dialog.findViewById<RecyclerView>(R.id.rv_search_results)
+        val btnClose = dialog.findViewById<View>(R.id.btn_close_search)
+
+        tvTitle.text = "RESULTS FOR: ${query.uppercase()}"
+        rvResults.layoutManager = LinearLayoutManager(this)
+        rvResults.adapter = SearchResultsAdapter(results) { dialog.dismiss() }
+
+        btnClose.setOnClickListener { dialog.dismiss() }
+        dialog.show()
     }
 
     private fun refreshState() {
@@ -59,7 +163,7 @@ class MainActivity : AppCompatActivity() {
             ?: "No upcoming milestones"
 
         dashboardState = DashboardState(
-            userName = "Arabi",
+            userName = DataManager.userName,
             overallProgress = DataManager.getTotalDailyProgress(),
             habitProgress = DataManager.getHabitProgress(),
             workoutProgress = DataManager.getWorkoutProgress(),
@@ -79,7 +183,8 @@ class MainActivity : AppCompatActivity() {
             taskIcon = DataManager.globalTaskIcon,
             noteIcon = DataManager.globalNoteIcon,
             projectIcon = DataManager.globalProjectIcon,
-            financeIcon = DataManager.globalFinanceIcon
+            financeIcon = DataManager.globalFinanceIcon,
+            userAvatarRes = DataManager.userAvatarRes
         )
     }
 
@@ -99,5 +204,37 @@ class MainActivity : AppCompatActivity() {
     override fun onResume() {
         super.onResume()
         refreshState()
+    }
+
+    // --- Search Adapter ---
+    inner class SearchResultsAdapter(
+        private val items: List<SearchResult>,
+        private val onResultClick: () -> Unit
+    ) : RecyclerView.Adapter<SearchResultsAdapter.ViewHolder>() {
+
+        override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder {
+            val view = LayoutInflater.from(parent.context).inflate(R.layout.item_search_result, parent, false)
+            return ViewHolder(view)
+        }
+
+        override fun onBindViewHolder(holder: ViewHolder, position: Int) {
+            val item = items[position]
+            holder.title.text = item.title
+            holder.category.text = item.section
+            holder.icon.setImageResource(item.iconRes)
+            
+            holder.itemView.setOnClickListener {
+                item.onClick()
+                onResultClick()
+            }
+        }
+
+        override fun getItemCount() = items.size
+
+        inner class ViewHolder(view: View) : RecyclerView.ViewHolder(view) {
+            val title: TextView = view.findViewById(R.id.tv_result_title)
+            val category: TextView = view.findViewById(R.id.tv_result_category)
+            val icon: ImageView = view.findViewById(R.id.iv_result_icon)
+        }
     }
 }

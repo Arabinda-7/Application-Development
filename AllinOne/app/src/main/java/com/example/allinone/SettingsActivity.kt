@@ -3,23 +3,27 @@ package com.example.allinone
 import android.app.AlertDialog
 import android.app.Dialog
 import android.content.Intent
+import android.content.res.ColorStateList
 import android.graphics.Color
+import android.net.Uri
 import android.os.Bundle
+import android.view.Gravity
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.widget.EditText
-import android.widget.ImageView
-import android.widget.LinearLayout
-import android.widget.PopupWindow
-import android.widget.TextView
-import android.widget.Toast
+import android.widget.*
 import androidx.activity.OnBackPressedCallback
 import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.widget.SwitchCompat
+import androidx.core.content.ContextCompat
+import androidx.recyclerview.widget.GridLayoutManager
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
+import java.text.SimpleDateFormat
 import java.util.*
+
+import androidx.activity.result.contract.ActivityResultContracts
+import java.io.FileOutputStream
 
 class SettingsActivity : AppCompatActivity() {
 
@@ -27,43 +31,77 @@ class SettingsActivity : AppCompatActivity() {
     private lateinit var tvTitle: TextView
     private var currentPath: String = "HUB"
 
+    private val exportLauncher = registerForActivityResult(ActivityResultContracts.CreateDocument("application/json")) { uri ->
+        uri?.let {
+            try {
+                val json = DataManager.exportData()
+                contentResolver.openOutputStream(it)?.use { stream ->
+                    stream.write(json.toByteArray())
+                }
+                Toast.makeText(this, "Backup Saved Successfully", Toast.LENGTH_SHORT).show()
+            } catch (e: Exception) {
+                Toast.makeText(this, "Failed to Save Backup", Toast.LENGTH_SHORT).show()
+            }
+        }
+    }
+
+    private val importLauncher = registerForActivityResult(ActivityResultContracts.OpenDocument()) { uri ->
+        uri?.let {
+            try {
+                val content = contentResolver.openInputStream(it)?.bufferedReader()?.use { reader -> reader.readText() }
+                if (content != null) {
+                    showConfirmationDialog("RESTORE DATA", "Overwrite all current app data?", "RESTORE NOW") {
+                        if (DataManager.importData(this, content)) {
+                            Toast.makeText(this, "Data Restored Successfully", Toast.LENGTH_LONG).show()
+                            showHub()
+                        } else {
+                            Toast.makeText(this, "Import Failed: File content is incompatible with this version", Toast.LENGTH_LONG).show()
+                        }
+                    }
+                } else {
+                    Toast.makeText(this, "Failed to Import: Selected file is empty", Toast.LENGTH_SHORT).show()
+                }
+            } catch (e: Exception) {
+                Toast.makeText(this, "Failed to Read File: ${e.localizedMessage}", Toast.LENGTH_SHORT).show()
+            }
+        }
+    }
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_settings)
 
         settingsList = findViewById(R.id.settings_list)
         tvTitle = findViewById(R.id.tv_title)
-        
         settingsList.layoutManager = LinearLayoutManager(this)
 
-        findViewById<View>(R.id.btn_back).setOnClickListener { 
+        findViewById<View>(R.id.btn_back).setOnClickListener {
             handleBackNavigation()
         }
 
         onBackPressedDispatcher.addCallback(this, object : OnBackPressedCallback(true) {
             override fun handleOnBackPressed() {
-                if (currentPath == "HUB") {
-                    finish()
-                } else {
-                    handleBackNavigation()
-                }
+                handleBackNavigation()
             }
         })
 
         showHub()
     }
 
+    override fun onResume() {
+        super.onResume()
+        if (currentPath == "HUB") {
+            updateMiniProfileUI()
+        }
+    }
+
     private fun handleBackNavigation() {
         when (currentPath) {
             "HUB" -> finish()
             "APPEARANCE_ICONS", "APPEARANCE_COLORS", "APPEARANCE_ADD_FEATURE", "APPEARANCE_COLOR", "APPEARANCE_ICON" -> showSectionSettings("APPEARANCE")
-            "HABITS_ICONS", "HABITS_NAMES" -> showSectionSettings("HABITS")
-            "WORKOUTS_ICONS", "WORKOUTS_NAMES" -> showSectionSettings("WORKOUTS")
-            "TASKS_ICONS", "TASKS_NAMES" -> showSectionSettings("TASKS")
-            "NOTES_ICONS", "NOTES_NAMES" -> showSectionSettings("NOTES")
-            "FINANCE_ICONS", "FINANCE_NAMES" -> showSectionSettings("FINANCE")
-            "PROJECTS_ICONS", "PROJECTS_NAMES" -> showSectionSettings("PROJECTS")
-            "APPEARANCE", "OTHERS", "HELP_GUIDE" -> showHub()
+            "HABITS_ICONS" -> showSectionSettings("HABITS")
+            "WORKOUTS_ICONS" -> showSectionSettings("WORKOUTS")
+            "APPEARANCE", "OTHERS", "HELP", "SECURITY" -> showHub()
             else -> showHub()
         }
     }
@@ -72,6 +110,10 @@ class SettingsActivity : AppCompatActivity() {
         currentPath = "HUB"
         tvTitle.text = "APP SETTINGS"
         
+        // Show Profile Header in Hub
+        findViewById<View>(R.id.settings_top_header).visibility = View.VISIBLE
+        updateMiniProfileUI()
+
         val menuItems = listOf(
             SettingsHubItem("Habit Tracker", "Manage your daily rituals and streaks", R.drawable.ic_habit_tracker, "HABITS"),
             SettingsHubItem("Workout Routine", "Configure exercises and rest timers", R.drawable.ic_workout_routine, "WORKOUTS"),
@@ -82,7 +124,7 @@ class SettingsActivity : AppCompatActivity() {
             SettingsHubItem("App Security", "Biometric lock and privacy settings", R.drawable.baseline_settings_24, "SECURITY"),
             SettingsHubItem("Appearance Settings", "Manage section icons and colors", R.drawable.ic_habit_tracker, "APPEARANCE"),
             SettingsHubItem("Others", "Additional app configurations", R.drawable.baseline_tune_24, "OTHERS"),
-            SettingsHubItem("Help & Guide", "Support and feature documentation", R.drawable.baseline_settings_24, "HELP_GUIDE")
+            SettingsHubItem("Help & Guide", "Support and feature documentation", R.drawable.baseline_settings_24, "HELP")
         )
 
         settingsList.adapter = SettingsHubAdapter(menuItems) { section ->
@@ -90,25 +132,48 @@ class SettingsActivity : AppCompatActivity() {
         }
     }
 
+    private fun updateMiniProfileUI() {
+        findViewById<TextView>(R.id.tv_mini_name).text = DataManager.userName
+        findViewById<ImageView>(R.id.iv_profile_pic).setImageResource(DataManager.userAvatarRes)
+        
+        // Handle Profile Click
+        findViewById<View>(R.id.card_profile_entry).setOnClickListener {
+            startActivity(Intent(this, ProfileActivity::class.java))
+        }
+
+        // Feature: Avatar Options
+        findViewById<View>(R.id.iv_profile_pic).setOnClickListener {
+            showAvatarOptionsDialog()
+        }
+
+        val streak = DataManager.getCurrentStreak()
+        val projects = DataManager.notes.count { it.category == "Project" }
+        findViewById<TextView>(R.id.tv_mini_stat_streak).text = "$streak Day Streak"
+        findViewById<TextView>(R.id.tv_mini_stat_projects).text = "$projects Projects"
+    }
+
     private fun showSectionSettings(section: String) {
         currentPath = section
         tvTitle.text = section.removePrefix("APPEARANCE_").replace("_", " ").uppercase()
         
+        // Hide Profile Header in sub-sections
+        findViewById<View>(R.id.settings_top_header).visibility = View.GONE
+
         val settings = mutableListOf<ConfigItem>()
         
         when(section) {
             "HABITS" -> {
                 settings.add(ConfigItem("Icons", "No features added yet") { showSectionSettings("HABITS_ICONS") })
                 settings.add(ConfigItem("Theme Color", "Customize creating habits theme") { showColorPickerDialog("ADD_HABIT") })
-                settings.add(ConfigItem("Behavioral Insights", "Peak performance analytics") {
-                    showBehavioralInsightsDialog()
-                })
+                settings.add(ConfigItem("Behavioral Insights", "Peak performance analytics") { showBehavioralInsightsDialog() })
                 settings.add(ConfigItem("Default Startup Tab", "Current: ${DataManager.habitDefaultTab}") {
-                    DataManager.habitDefaultTab = if (DataManager.habitDefaultTab == "TODAY") "HISTORY" else "TODAY"
+                    val tabs = listOf("TODAY", "WEEK", "ALL")
+                    DataManager.habitDefaultTab = tabs[(tabs.indexOf(DataManager.habitDefaultTab) + 1) % tabs.size]
                     showSectionSettings("HABITS")
                 })
                 settings.add(ConfigItem("Sort Order", "Current: ${DataManager.habitSortOrder}") {
-                    DataManager.habitSortOrder = if (DataManager.habitSortOrder == "Time") "Streak" else "Time"
+                    val orders = listOf("Time", "Streak")
+                    DataManager.habitSortOrder = orders[(orders.indexOf(DataManager.habitSortOrder) + 1) % orders.size]
                     showSectionSettings("HABITS")
                 })
                 settings.add(ConfigItem("Vacation Mode", "Freeze streaks during breaks", isToggle = true, isChecked = DataManager.habitVacationMode) {
@@ -123,9 +188,8 @@ class SettingsActivity : AppCompatActivity() {
                 settings.add(ConfigItem("Bulk Action Mode", "Fast multi-update mode", isToggle = true, isChecked = DataManager.habitBulkMode) {
                     DataManager.habitBulkMode = !DataManager.habitBulkMode
                 })
-                settings.add(ConfigItem("Day Reset Hour", "Current: ${DataManager.habitDayResetHour}:00 AM") {
-                    val options = listOf(0, 1, 2, 3, 4)
-                    DataManager.habitDayResetHour = options[(options.indexOf(DataManager.habitDayResetHour) + 1) % options.size]
+                settings.add(ConfigItem("Day Reset Hour", "Current: ${formatHour(DataManager.habitDayResetHour)}") {
+                    DataManager.habitDayResetHour = (DataManager.habitDayResetHour + 1) % 24
                     showSectionSettings("HABITS")
                 })
                 settings.add(ConfigItem("Grace Period", "Allowed misses: ${DataManager.habitGraceDaysAllowed} days") {
@@ -137,37 +201,29 @@ class SettingsActivity : AppCompatActivity() {
             "WORKOUTS" -> {
                 settings.add(ConfigItem("Icons", "No features added yet") { showSectionSettings("WORKOUTS_ICONS") })
                 settings.add(ConfigItem("Theme Color", "Customize creating workouts theme") { showColorPickerDialog("ADD_WORKOUT") })
-                settings.add(ConfigItem("Manage Muscle Groups", "Add or remove body part tags") {
-                    showManageMuscleGroupsDialog()
-                })
-                settings.add(ConfigItem("Workout Readiness", "Check your energy levels") {
-                    showWorkoutReadinessDialog()
-                })
+                settings.add(ConfigItem("Manage Muscle Groups", "Add or remove body part tags") { showManageMuscleGroupsDialog() })
+                settings.add(ConfigItem("Workout Readiness", "Check your energy levels") { showWorkoutReadinessDialog() })
                 settings.add(ConfigItem("Auto-Rest Timer", "Trigger timer after set", isToggle = true, isChecked = DataManager.workoutAutoRestTimer) {
                     DataManager.workoutAutoRestTimer = !DataManager.workoutAutoRestTimer
                 })
                 settings.add(ConfigItem("Workout Weight Unit", "Current: ${DataManager.workoutWeightUnit}") {
-                    DataManager.workoutWeightUnit = if (DataManager.workoutWeightUnit == "Kg") "Lb" else "Kg"
+                    DataManager.workoutWeightUnit = if (DataManager.workoutWeightUnit == "Kg") "Lbs" else "Kg"
                     showSectionSettings("WORKOUTS")
                 })
                 settings.add(ConfigItem("Default Tracking Mode", "Current: ${DataManager.workoutDefaultMode}") {
-                    val modes = listOf("Reps", "Sets", "Timer")
+                    val modes = listOf("Reps", "Timer", "Sets")
                     DataManager.workoutDefaultMode = modes[(modes.indexOf(DataManager.workoutDefaultMode) + 1) % modes.size]
                     showSectionSettings("WORKOUTS")
                 })
                 settings.add(ConfigItem("Rest Duration", "Current: ${DataManager.workoutRestDuration}s") {
-                    val durations = listOf(30, 60, 90, 120, 180)
+                    val durations = listOf(30, 60, 90, 120)
                     DataManager.workoutRestDuration = durations[(durations.indexOf(DataManager.workoutRestDuration) + 1) % durations.size]
                     showSectionSettings("WORKOUTS")
                 })
             }
             "TASKS" -> {
-                settings.add(ConfigItem("Manage Categories", "Customize your task tags") {
-                    showManageTaskCategoriesDialog()
-                })
-                settings.add(ConfigItem("Task Analytics", "View completion totals") {
-                    showTaskAnalyticsDialog()
-                })
+                settings.add(ConfigItem("Manage Categories", "Customize your task tags") { showManageTaskCategoriesDialog() })
+                settings.add(ConfigItem("Task Analytics", "View completion totals") { showTaskAnalyticsDialog() })
                 settings.add(ConfigItem("Sorting Logic", "Current: ${DataManager.taskSortOrder}") {
                     val orders = listOf("Priority", "Newest", "Alphabetical")
                     DataManager.taskSortOrder = orders[(orders.indexOf(DataManager.taskSortOrder) + 1) % orders.size]
@@ -186,15 +242,11 @@ class SettingsActivity : AppCompatActivity() {
                 })
             }
             "NOTES" -> {
-                settings.add(ConfigItem("Custom Templates", "Edit note pre-fill text") {
-                    showNoteTemplatesDialog()
-                })
-                settings.add(ConfigItem("Bulk Category Move", "Move all notes at once") {
-                    showNoteBulkMoveDialog()
-                })
+                settings.add(ConfigItem("Custom Templates", "Edit note pre-fill text") { showNoteTemplatesDialog() })
+                settings.add(ConfigItem("Bulk Category Move", "Move all notes at once") { showNoteBulkMoveDialog() })
                 settings.add(ConfigItem("Default Startup Tab", "Current: ${DataManager.noteDefaultCategory}") {
-                    val categories = listOf("Notes", "Questions", "Daily", "Stories")
-                    DataManager.noteDefaultCategory = categories[(categories.indexOf(DataManager.noteDefaultCategory) + 1) % categories.size]
+                    val cats = DataManager.noteVisibleSections
+                    DataManager.noteDefaultCategory = cats[(cats.indexOf(DataManager.noteDefaultCategory) + 1) % cats.size]
                     showSectionSettings("NOTES")
                 })
                 settings.add(ConfigItem("Show Hidden Notes", "Reveal your private logs", isToggle = true, isChecked = DataManager.noteShowHidden) {
@@ -212,25 +264,34 @@ class SettingsActivity : AppCompatActivity() {
                     DataManager.financeCurrency = symbols[(symbols.indexOf(DataManager.financeCurrency) + 1) % symbols.size]
                     showSectionSettings("FINANCE")
                 })
-                settings.add(ConfigItem("Manage Categories", "Add or remove expense tags") {
-                    showManageFinanceCategoriesDialog()
-                })
-                settings.add(ConfigItem("Monthly Budget", "Current Goal: ${DataManager.financeCurrency}${DataManager.monthlyBudget}") {
-                    showSetBudgetDialog()
-                })
-                settings.add(ConfigItem("Savings Goal", "Current Goal: ${DataManager.financeCurrency}${DataManager.monthlySavingsGoal}") {
-                    showSetSavingsGoalDialog()
+                settings.add(ConfigItem("Theme Color", "Customize creating finance theme") { showColorPickerDialog("ADD_FINANCE") })
+                settings.add(ConfigItem("Manage Categories", "Edit spending labels") { showManageFinanceCategoriesDialog() })
+                settings.add(ConfigItem("Monthly Budget", "Current: ${DataManager.financeCurrency}${DataManager.monthlyBudget}") { showSetBudgetDialog() })
+                settings.add(ConfigItem("Savings Goal", "Current: ${DataManager.financeCurrency}${DataManager.monthlySavingsGoal}") { showSetSavingsGoalDialog() })
+                settings.add(ConfigItem("Ledger System", "Enable person-based debt tracking", isToggle = true, isChecked = DataManager.isFinanceLedgerEnabled) {
+                    DataManager.isFinanceLedgerEnabled = !DataManager.isFinanceLedgerEnabled
                 })
             }
             "PROJECTS" -> {
-                settings.add(ConfigItem("Manage Templates", "Edit roadmap pre-sets") {
-                    showProjectTemplatesDialog()
+                settings.add(ConfigItem("Manage Templates", "Edit roadmap pre-sets") { showProjectTemplatesDialog() })
+                settings.add(ConfigItem("Manage Tags", "Customize UI, Logic, Bug tags") { showManageTagsDialog() })
+                settings.add(ConfigItem("Theme Color", "Customize creating projects theme") { showColorPickerDialog("ADD_PROJECT") })
+                settings.add(ConfigItem("Roadmaps Section", "Show/Hide Project Roadmaps", isToggle = true, isChecked = DataManager.projectRoadmapsEnabled) {
+                    if (DataManager.projectRoadmapsEnabled && !DataManager.projectIdeasEnabled) {
+                        Toast.makeText(this, "At least one section must be enabled", Toast.LENGTH_SHORT).show()
+                    } else {
+                        DataManager.projectRoadmapsEnabled = !DataManager.projectRoadmapsEnabled
+                    }
                 })
-                settings.add(ConfigItem("Auto-Archive Projects", "Hide 100% completed boards", isToggle = true, isChecked = DataManager.projectAutoArchive) {
-                    DataManager.projectAutoArchive = !DataManager.projectAutoArchive
+                settings.add(ConfigItem("Ideas Section", "Show/Hide Idea brainstorming", isToggle = true, isChecked = DataManager.projectIdeasEnabled) {
+                    if (DataManager.projectIdeasEnabled && !DataManager.projectRoadmapsEnabled) {
+                        Toast.makeText(this, "At least one section must be enabled", Toast.LENGTH_SHORT).show()
+                    } else {
+                        DataManager.projectIdeasEnabled = !DataManager.projectIdeasEnabled
+                    }
                 })
-                settings.add(ConfigItem("Synergy Sync", "Bridge tasks with daily goals", isToggle = true, isChecked = DataManager.projectSynergySync) {
-                    DataManager.projectSynergySync = !DataManager.projectSynergySync
+                settings.add(ConfigItem("Dual Exist", "Show projects in both tabs", isToggle = true, isChecked = DataManager.projectDualExistEnabled) {
+                    DataManager.projectDualExistEnabled = !DataManager.projectDualExistEnabled
                 })
                 settings.add(ConfigItem("Deadline Notifications", "Alerts for upcoming milestones", isToggle = true, isChecked = DataManager.projectDeadlineAlerts) {
                     DataManager.projectDeadlineAlerts = !DataManager.projectDeadlineAlerts
@@ -246,27 +307,20 @@ class SettingsActivity : AppCompatActivity() {
                 settings.add(ConfigItem("OLED Mode", "Pure black theme for OLED screens", isToggle = true, isChecked = DataManager.isOledThemeEnabled) {
                     DataManager.isOledThemeEnabled = !DataManager.isOledThemeEnabled
                 })
-                settings.add(ConfigItem("Export Backup", "Save all data to a JSON file") {
-                    exportBackup()
-                })
-                settings.add(ConfigItem("Import Backup", "Restore data from a JSON file") {
-                    importBackup()
-                })
-                settings.add(ConfigItem("Focus Mode", "Pause all alerts during quiet hours", isToggle = true, isChecked = false) {
-                    // Logic for global DND
-                    Toast.makeText(this, "Focus Mode Scheduled", Toast.LENGTH_SHORT).show()
-                })
+            }
+            "OTHERS" -> {
+                settings.add(ConfigItem("Export Backup", "Save all data to a local JSON file") { exportBackup() })
+                settings.add(ConfigItem("Import Backup", "Restore data from a JSON file") { importBackup() })
                 settings.add(ConfigItem("System Deep Clean", "Clear old history and cache") {
                     showConfirmationDialog(
-                        title = "SYSTEM DEEP CLEAN",
-                        message = "This will permanently delete project change history and clear temporary cache. Are you sure you want to proceed?",
-                        positiveButtonText = "CLEAN NOW",
-                        onConfirm = {
-                            DataManager.notes.forEach { it.changeHistory.clear() }
-                            DataManager.saveData(this)
-                            Toast.makeText(this, "System Deep Clean Complete!", Toast.LENGTH_SHORT).show()
-                        }
-                    )
+                        "SYSTEM DEEP CLEAN",
+                        "This will permanently delete project change history and clear temporary cache. Are you sure you want to proceed?",
+                        "CLEAN NOW"
+                    ) {
+                        DataManager.notes.forEach { it.changeHistory.clear() }
+                        DataManager.saveData(this)
+                        Toast.makeText(this, "System Deep Clean Complete!", Toast.LENGTH_SHORT).show()
+                    }
                 })
             }
             "APPEARANCE" -> {
@@ -291,12 +345,9 @@ class SettingsActivity : AppCompatActivity() {
                 settings.add(ConfigItem("Finance Add & Save Color", "Theme for creating transactions") { showColorPickerDialog("ADD_FINANCE") })
             }
             "APPEARANCE_COLOR" -> {
-                settings.add(ConfigItem("ADD NEW CUSTOM COLOR", "Create a color to use app-wide") {
-                    showAddCustomColorDialog()
-                })
-                
+                settings.add(ConfigItem("ADD NEW CUSTOM COLOR", "Create a color to use app-wide") { showAddCustomColorDialog() })
                 if (DataManager.userCustomColors.isNotEmpty()) {
-                    settings.add(ConfigItem("--- YOUR CUSTOM COLORS ---", "Long-press to remove") {})
+                    settings.add(ConfigItem("--- YOUR CUSTOM COLORS ---", "") {})
                     DataManager.userCustomColors.forEach { color ->
                         val hex = String.format("#%06X", (0xFFFFFF and color))
                         settings.add(ConfigItem("Custom Color $hex", "Click to preview") {
@@ -305,16 +356,10 @@ class SettingsActivity : AppCompatActivity() {
                     }
                 }
             }
-            "APPEARANCE_ICON" -> {
-                // Empty section for now
-            }
             "APPEARANCE_ICONS" -> {
-                settings.add(ConfigItem("RESET ALL ICONS", "Restore original section icons") {
-                    showConfirmationDialog("RESET ICONS", "Are you sure you want to reset all section icons to defaults?") {
-                        DataManager.resetAppearanceIcons()
-                        DataManager.saveData(this)
-                        showSectionSettings("APPEARANCE_ICONS")
-                        Toast.makeText(this, "Icons reset successfully", Toast.LENGTH_SHORT).show()
+                settings.add(ConfigItem("RESET ALL ICONS", "Restore defaults") {
+                    showConfirmationDialog("RESET ICONS", "Reset all icons?", "RESET") {
+                        DataManager.resetAppearanceIcons(); DataManager.saveData(this); showSectionSettings("APPEARANCE_ICONS")
                     }
                 })
                 settings.add(ConfigItem("Habit Icon", "Change default habit icon") { showIconPickerDialog("HABIT") })
@@ -325,16 +370,11 @@ class SettingsActivity : AppCompatActivity() {
                 settings.add(ConfigItem("Finance Icon", "Change default finance icon") { showIconPickerDialog("FINANCE") })
             }
             "APPEARANCE_COLORS" -> {
-                settings.add(ConfigItem("RESET ALL COLORS", "Restore all theme defaults") {
-                    showConfirmationDialog("RESET COLORS", "Are you sure you want to reset all section colors to defaults?") {
-                        DataManager.resetAppearanceColors()
-                        DataManager.saveData(this)
-                        showSectionSettings("APPEARANCE_COLORS")
-                        Toast.makeText(this, "Colors reset successfully", Toast.LENGTH_SHORT).show()
+                settings.add(ConfigItem("RESET ALL COLORS", "Restore defaults") {
+                    showConfirmationDialog("RESET COLORS", "Reset all colors?", "RESET") {
+                        DataManager.resetAppearanceColors(); DataManager.saveData(this); showSectionSettings("APPEARANCE_COLORS")
                     }
                 })
-                
-                settings.add(ConfigItem("--- DASHBOARD COLORS ---", "Section card themes") {})
                 settings.add(ConfigItem("Habit Section Color", "Change theme color for Habits") { showColorPickerDialog("HABIT") })
                 settings.add(ConfigItem("Workout Section Color", "Change theme color for Workouts") { showColorPickerDialog("WORKOUT") })
                 settings.add(ConfigItem("Task Section Color", "Change theme color for Tasks") { showColorPickerDialog("TASK") })
@@ -343,491 +383,74 @@ class SettingsActivity : AppCompatActivity() {
                 settings.add(ConfigItem("Finance Section Color", "Change theme color for Finance") { showColorPickerDialog("FINANCE") })
             }
             "HELP", "HELP_GUIDE" -> {
-                settings.add(ConfigItem("Habit Guide", "Learn about rituals and streaks") { showHelpDetail("HABITS") })
-                settings.add(ConfigItem("Workout Guide", "Learn about exercises and timers") { showHelpDetail("WORKOUTS") })
-                settings.add(ConfigItem("Task Guide", "Learn about tasks and priority") { showHelpDetail("TASKS") })
-                settings.add(ConfigItem("Project Guide", "Learn about roadmaps and history") { showHelpDetail("PROJECTS") })
-                settings.add(ConfigItem("Note Guide", "Learn about templates and privacy") { showHelpDetail("NOTES") })
-                settings.add(ConfigItem("Finance Guide", "Learn about budgets and currency") { showHelpDetail("FINANCE") })
-                settings.add(ConfigItem("Others Guide", "Appearance, Security, and Backups") { showHelpDetail("OTHERS") })
+                val guides = listOf("HABITS", "WORKOUTS", "TASKS", "PROJECTS", "NOTES", "FINANCE", "OTHERS")
+                guides.forEach { guide ->
+                    settings.add(ConfigItem("${guide.substring(0,1)}${guide.substring(1).lowercase()} Guide", "Detailed instructions for $guide") { showHelpDetail(guide) })
+                }
             }
             "HABITS_ICONS", "WORKOUTS_ICONS" -> {
-                settings.add(ConfigItem("Empty Section", "No features added yet") {})
+                settings.add(ConfigItem("Empty Section", "Coming soon") {})
             }
         }
         
-        settingsList.adapter = ConfigAdapter(settings) {
-            DataManager.saveData(this)
-        }
+        settingsList.adapter = ConfigAdapter(settings) { DataManager.saveData(this) }
     }
 
     private fun exportBackup() {
-        val json = DataManager.exportData()
-        val intent = Intent(Intent.ACTION_SEND).apply {
-            type = "text/plain"
-            putExtra(Intent.EXTRA_SUBJECT, "All-in-One Backup")
-            putExtra(Intent.EXTRA_TEXT, json)
+        exportLauncher.launch("allinone_backup_${System.currentTimeMillis()}.json")
+    }
+
+    private fun formatHour(hour: Int): String {
+        return when {
+            hour == 0 -> "12:00 AM"
+            hour < 12 -> "$hour:00 AM"
+            hour == 12 -> "12:00 PM"
+            else -> "${hour - 12}:00 PM"
         }
-        startActivity(Intent.createChooser(intent, "Save Backup"))
     }
 
     private fun importBackup() {
-        // Implementation for importing JSON string via clipboard or file picker
-        // For simplicity, showing a Toast for now
-        Toast.makeText(this, "Import via JSON file: Coming soon in next update!", Toast.LENGTH_SHORT).show()
+        importLauncher.launch(arrayOf("application/json", "application/octet-stream", "*/*"))
     }
 
-    // --- ADVANCED DIALOGS MIGRATED FROM SECTIONS ---
-
-    private fun showBehavioralInsightsDialog() {
-        val dialog = Dialog(this)
-        dialog.setContentView(R.layout.dialog_set_budget)
-        dialog.window?.setBackgroundDrawableResource(android.R.color.transparent)
-        dialog.window?.setLayout(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT)
-
-        val title = dialog.findViewById<TextView>(R.id.tv_dialog_title)
-        val etInput = dialog.findViewById<View>(R.id.et_budget_amount)
-        val subtext = dialog.findViewById<TextView>(R.id.tv_dialog_subtext)
-        val btnAction = dialog.findViewById<TextView>(R.id.btn_save_budget)
-
-        title.text = "BEHAVIORAL INSIGHTS"
-        etInput.visibility = View.GONE
-        
-        val stats = DataManager.getHabitPerformanceByFrequency()
-        val peak = stats.maxByOrNull { it.value }
-        
-        if (peak == null || peak.value <= 0) {
-            subtext.text = "Not enough data yet. Keep tracking your habits to see your peak performance times!"
-        } else {
-            val sb = StringBuilder()
-            sb.append("Your Peak Performance Time: ${peak.key.uppercase()}\n\n")
-            stats.forEach { (freq, score) ->
-                if (score >= 0) {
-                    sb.append("$freq Habits: $score% Completion\n")
-                }
-            }
-            subtext.text = sb.toString()
-        }
-        
-        btnAction.text = "CLOSE"
-        btnAction.setOnClickListener { dialog.dismiss() }
-        dialog.show()
-    }
-
-    private fun showManageMuscleGroupsDialog() {
+    private fun showAvatarOptionsDialog() {
         val dialog = Dialog(this)
         dialog.setContentView(R.layout.dialog_manage_categories)
         dialog.window?.setBackgroundDrawableResource(android.R.color.transparent)
         dialog.window?.setLayout(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT)
-
+        
         val container = dialog.findViewById<LinearLayout>(R.id.categories_container)
-        val etNew = dialog.findViewById<EditText>(R.id.et_new_category)
-        val btnAdd = dialog.findViewById<View>(R.id.btn_add_category)
         val title = dialog.findViewById<TextView>(R.id.tv_categories_title)
-
-        title.text = "Manage Muscle Groups"
-
-        fun refresh() {
-            container.removeAllViews()
-            DataManager.workoutMuscleGroups.forEach { group ->
-                val itemView = LayoutInflater.from(this).inflate(R.layout.item_task_header, container, false)
-                itemView.findViewById<TextView>(R.id.tv_header_title).text = group
-                itemView.findViewById<View>(R.id.iv_header_chevron).visibility = View.GONE
-                itemView.setOnLongClickListener {
-                    DataManager.workoutMuscleGroups.remove(group)
-                    DataManager.saveData(this)
-                    refresh()
-                    true
-                }
-                container.addView(itemView)
-            }
-        }
-
-        btnAdd.setOnClickListener {
-            val name = etNew.text.toString().trim()
-            if (name.isNotEmpty() && !DataManager.workoutMuscleGroups.contains(name)) {
-                DataManager.workoutMuscleGroups.add(name)
-                DataManager.saveData(this)
-                refresh()
-                etNew.text.clear()
-            }
-        }
-        refresh()
-        dialog.show()
-    }
-
-    private fun showWorkoutReadinessDialog() {
-        val dialog = Dialog(this)
-        dialog.setContentView(R.layout.dialog_set_budget)
-        dialog.window?.setBackgroundDrawableResource(android.R.color.transparent)
-        dialog.window?.setLayout(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT)
-
-        val title = dialog.findViewById<TextView>(R.id.tv_dialog_title)
-        val etInput = dialog.findViewById<View>(R.id.et_budget_amount)
-        val subtext = dialog.findViewById<TextView>(R.id.tv_dialog_subtext)
-        val btnAction = dialog.findViewById<TextView>(R.id.btn_save_budget)
-
-        title.text = "READINESS CHECK"
-        etInput.visibility = View.GONE
-        subtext.text = "How are you feeling today?\n\n1. Did you sleep 7+ hours?\n2. Do you have high energy?"
-        btnAction.text = "START SURVEY"
-
-        var step = 1
-        var score = 0
-        btnAction.setOnClickListener {
-            if (step == 1) {
-                AlertDialog.Builder(this).setTitle("Sleep").setMessage("Did you sleep well?")
-                    .setPositiveButton("Yes") { _, _ -> score += 50; step = 2; subtext.text = "Step 2: Check your energy levels." }
-                    .setNegativeButton("No") { _, _ -> step = 2; subtext.text = "Step 2: Check your energy levels." }.show()
-            } else if (step == 2) {
-                AlertDialog.Builder(this).setTitle("Energy").setMessage("Ready for heavy lifting?")
-                    .setPositiveButton("Yes") { _, _ -> 
-                        score += 50; step = 3; title.text = "YOUR SCORE: $score%"; 
-                        subtext.text = if (score >= 100) "You are fully ready! Crush it!" else "Ready to train!"; 
-                        btnAction.text = "CLOSE" 
-                    }
-                    .setNegativeButton("No") { _, _ -> 
-                        step = 3; title.text = "YOUR SCORE: $score%"; 
-                        subtext.text = "Take it easy today."; 
-                        btnAction.text = "CLOSE" 
-                    }.show()
-            } else {
-                dialog.dismiss()
-            }
-        }
-        dialog.show()
-    }
-
-    private fun showManageTaskCategoriesDialog() {
-        val dialog = Dialog(this)
-        dialog.setContentView(R.layout.dialog_manage_categories)
-        dialog.window?.setBackgroundDrawableResource(android.R.color.transparent)
-        dialog.window?.setLayout(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT)
-
-        val container = dialog.findViewById<LinearLayout>(R.id.categories_container)
-        val etNew = dialog.findViewById<EditText>(R.id.et_new_category)
-        val btnAdd = dialog.findViewById<View>(R.id.btn_add_category)
-
-        fun refresh() {
-            container.removeAllViews()
-            DataManager.taskCustomCategories.forEach { cat ->
-                val itemView = LayoutInflater.from(this).inflate(R.layout.item_category_manage, container, false)
-                itemView.findViewById<TextView>(R.id.tv_category_name).text = cat
-                itemView.findViewById<View>(R.id.btn_remove_category).setOnClickListener {
-                    if (DataManager.taskCustomCategories.size > 1) {
-                        DataManager.taskCustomCategories.remove(cat)
-                        DataManager.saveData(this); refresh()
-                    }
-                }
-                container.addView(itemView)
-            }
-        }
-        btnAdd.setOnClickListener {
-            val name = etNew.text.toString().trim()
-            if (name.isNotEmpty() && !DataManager.taskCustomCategories.contains(name)) {
-                DataManager.taskCustomCategories.add(name); DataManager.saveData(this); etNew.text.clear(); refresh()
-            }
-        }
-        refresh()
-        dialog.show()
-    }
-
-    private fun showTaskAnalyticsDialog() {
-        val total = DataManager.tasks.size
-        val completed = DataManager.tasks.count { it.isCompleted }
-        val message = "Total Tasks: $total\nCompleted: $completed\nRate: ${if (total > 0) (completed * 100) / total else 0}%"
-
-        val dialog = Dialog(this)
-        dialog.setContentView(R.layout.dialog_analytics_simple)
-        dialog.window?.setBackgroundDrawableResource(android.R.color.transparent)
-        dialog.window?.setLayout(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT)
-        dialog.findViewById<TextView>(R.id.tv_analytics_content).text = message
-        dialog.findViewById<View>(R.id.btn_close_analytics).setOnClickListener { dialog.dismiss() }
-        dialog.show()
-    }
-
-    private fun showNoteTemplatesDialog() {
-        val dialog = Dialog(this)
-        dialog.setContentView(R.layout.dialog_manage_categories)
-        dialog.window?.setBackgroundDrawableResource(android.R.color.transparent)
-        dialog.window?.setLayout(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT)
-        val title = dialog.findViewById<TextView>(R.id.tv_categories_title)
-        val container = dialog.findViewById<LinearLayout>(R.id.categories_container)
         dialog.findViewById<View>(R.id.container_add_category).visibility = View.GONE
-        title.text = "Edit Note Templates"
-
-        listOf("Daily", "Questions", "Stories").forEach { cat ->
-            val itemView = LayoutInflater.from(this).inflate(R.layout.item_task_header, container, false)
-            itemView.findViewById<TextView>(R.id.tv_header_title).text = cat
-            itemView.findViewById<View>(R.id.iv_header_chevron).visibility = View.GONE
-            itemView.setOnClickListener { 
-                showSingleTemplateEditor(cat)
-                dialog.dismiss() 
-            }
-            container.addView(itemView)
-        }
-        dialog.show()
-    }
-
-    private fun showSingleTemplateEditor(cat: String) {
-        val dialog = Dialog(this)
-        dialog.setContentView(R.layout.dialog_set_budget)
-        dialog.window?.setBackgroundDrawableResource(android.R.color.transparent)
-        dialog.window?.setLayout(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT)
-        val et = dialog.findViewById<EditText>(R.id.et_budget_amount)
-        dialog.findViewById<TextView>(R.id.tv_dialog_title).text = "$cat Template"
-        dialog.findViewById<TextView>(R.id.tv_dialog_subtext).text = "Enter pre-fill text"
-        et.inputType = android.text.InputType.TYPE_CLASS_TEXT or android.text.InputType.TYPE_TEXT_FLAG_MULTI_LINE
-        et.setText(DataManager.noteTemplates[cat] ?: "")
-        dialog.findViewById<View>(R.id.btn_save_budget).setOnClickListener {
-            DataManager.noteTemplates[cat] = et.text.toString()
-            DataManager.saveData(this); dialog.dismiss()
-        }
-        dialog.show()
-    }
-
-    private fun showNoteBulkMoveDialog() {
-        val dialog = Dialog(this)
-        dialog.setContentView(R.layout.dialog_manage_categories)
-        dialog.window?.setBackgroundDrawableResource(android.R.color.transparent)
-        dialog.window?.setLayout(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT)
-        val container = dialog.findViewById<LinearLayout>(R.id.categories_container)
-        dialog.findViewById<View>(R.id.container_add_category).visibility = View.GONE
-        dialog.findViewById<TextView>(R.id.tv_categories_title).text = "Bulk Move Category"
-
-        val categories = listOf("Notes", "Questions", "Daily", "Stories")
-        categories.forEach { source ->
-            val itemView = LayoutInflater.from(this).inflate(R.layout.item_task_header, container, false)
-            itemView.findViewById<TextView>(R.id.tv_header_title).text = "Move FROM $source"
-            itemView.setOnClickListener {
-                showTargetSelectionForBulkMove(source)
-                dialog.dismiss()
-            }
-            container.addView(itemView)
-        }
-        dialog.show()
-    }
-
-    private fun showTargetSelectionForBulkMove(source: String) {
-        val dialog = Dialog(this)
-        dialog.setContentView(R.layout.dialog_manage_categories)
-        val container = dialog.findViewById<LinearLayout>(R.id.categories_container)
-        dialog.findViewById<View>(R.id.container_add_category).visibility = View.GONE
-        dialog.findViewById<TextView>(R.id.tv_categories_title).text = "Move $source TO..."
-
-        listOf("Notes", "Questions", "Daily", "Stories").filter { it != source }.forEach { target ->
-            val itemView = LayoutInflater.from(this).inflate(R.layout.item_task_header, container, false)
-            itemView.findViewById<TextView>(R.id.tv_header_title).text = "Move to $target"
-            itemView.setOnClickListener {
-                DataManager.notes.forEach { if (it.category == source) it.category = target }
-                DataManager.saveData(this); dialog.dismiss()
-                Toast.makeText(this, "Notes moved from $source to $target", Toast.LENGTH_SHORT).show()
-            }
-            container.addView(itemView)
-        }
-        dialog.show()
-    }
-
-    private fun showManageFinanceCategoriesDialog() {
-        val dialog = Dialog(this)
-        dialog.setContentView(R.layout.dialog_manage_categories)
-        dialog.window?.setBackgroundDrawableResource(android.R.color.transparent)
-        dialog.window?.setLayout(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT)
-
-        val container = dialog.findViewById<LinearLayout>(R.id.categories_container)
-        val etNew = dialog.findViewById<EditText>(R.id.et_new_category)
-        val btnAdd = dialog.findViewById<View>(R.id.btn_add_category)
-        val title = dialog.findViewById<TextView>(R.id.tv_categories_title)
-        title.text = "Manage Finance Categories"
-
-        fun refresh() {
-            container.removeAllViews()
-            DataManager.financeCustomCategories.forEach { cat ->
-                val itemView = LayoutInflater.from(this).inflate(R.layout.item_category_manage, container, false)
-                itemView.findViewById<TextView>(R.id.tv_category_name).text = cat
-                itemView.findViewById<View>(R.id.btn_remove_category).setOnClickListener {
-                    if (DataManager.financeCustomCategories.size > 1) {
-                        DataManager.financeCustomCategories.remove(cat)
-                        DataManager.saveData(this); refresh()
-                    }
-                }
-                container.addView(itemView)
-            }
-        }
-        btnAdd.setOnClickListener {
-            val name = etNew.text.toString().trim()
-            if (name.isNotEmpty() && !DataManager.financeCustomCategories.contains(name)) {
-                DataManager.financeCustomCategories.add(name); DataManager.saveData(this); etNew.text.clear(); refresh()
-            }
-        }
-        refresh()
-        dialog.show()
-    }
-
-    private fun showSetBudgetDialog() {
-        val dialog = Dialog(this)
-        dialog.setContentView(R.layout.dialog_set_budget)
-        dialog.window?.setBackgroundDrawableResource(android.R.color.transparent)
-        dialog.window?.setLayout(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT)
-
-        val etInput = dialog.findViewById<EditText>(R.id.et_budget_amount)
-        val btnSave = dialog.findViewById<View>(R.id.btn_save_budget)
-        val title = dialog.findViewById<TextView>(R.id.tv_dialog_title)
-        title.text = "SET MONTHLY BUDGET"
-        etInput.setText(DataManager.monthlyBudget.toString())
-
-        btnSave.setOnClickListener {
-            val amount = etInput.text.toString().toDoubleOrNull() ?: 0.0
-            DataManager.monthlyBudget = amount
-            DataManager.saveData(this)
-            showSectionSettings("FINANCE")
-            dialog.dismiss()
-        }
-        dialog.show()
-    }
-
-    private fun showSetSavingsGoalDialog() {
-        val dialog = Dialog(this)
-        dialog.setContentView(R.layout.dialog_set_budget)
-        dialog.window?.setBackgroundDrawableResource(android.R.color.transparent)
-        dialog.window?.setLayout(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT)
-
-        val etInput = dialog.findViewById<EditText>(R.id.et_budget_amount)
-        val btnSave = dialog.findViewById<View>(R.id.btn_save_budget)
-        val title = dialog.findViewById<TextView>(R.id.tv_dialog_title)
-        val subtext = dialog.findViewById<TextView>(R.id.tv_dialog_subtext)
-        title.text = "SET SAVINGS GOAL"
-        subtext.text = "Enter your monthly target"
-        etInput.setText(DataManager.monthlySavingsGoal.toString())
-
-        btnSave.setOnClickListener {
-            val amount = etInput.text.toString().toDoubleOrNull() ?: 0.0
-            DataManager.monthlySavingsGoal = amount
-            DataManager.saveData(this)
-            showSectionSettings("FINANCE")
-            dialog.dismiss()
-        }
-        dialog.show()
-    }
-
-    private fun showProjectTemplatesDialog() {
-        val dialog = Dialog(this)
-        dialog.setContentView(R.layout.dialog_manage_categories)
-        dialog.window?.setBackgroundDrawableResource(android.R.color.transparent)
-        dialog.window?.setLayout(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT)
-
-        val container = dialog.findViewById<LinearLayout>(R.id.categories_container)
-        val etNew = dialog.findViewById<EditText>(R.id.et_new_category)
-        val btnAdd = dialog.findViewById<View>(R.id.btn_add_category)
-        val title = dialog.findViewById<TextView>(R.id.tv_categories_title)
-
-        title.text = "Project Templates"
-        etNew.hint = "Template Name..."
-
-        fun refresh() {
-            container.removeAllViews()
-            DataManager.projectTemplates.keys.forEach { templateName ->
-                val itemView = LayoutInflater.from(this).inflate(R.layout.item_category_manage, container, false)
-                itemView.findViewById<TextView>(R.id.tv_category_name).text = templateName
-                
-                // Show steps on tap
-                itemView.setOnClickListener {
-                    Toast.makeText(this, "Steps: ${DataManager.projectTemplates[templateName]?.joinToString(", ")}", Toast.LENGTH_LONG).show()
-                }
-
-                itemView.findViewById<View>(R.id.btn_remove_category).setOnClickListener {
-                    if (DataManager.projectTemplates.size > 1) {
-                        DataManager.projectTemplates.remove(templateName)
-                        DataManager.saveData(this)
-                        refresh()
-                    } else {
-                        Toast.makeText(this, "At least one template required", Toast.LENGTH_SHORT).show()
-                    }
-                }
-                container.addView(itemView)
-            }
-        }
-
-        btnAdd.setOnClickListener {
-            val name = etNew.text.toString().trim()
-            if (name.isNotEmpty() && !DataManager.projectTemplates.containsKey(name)) {
-                showCreateTemplateStepsDialog(name) {
-                    refresh()
-                    etNew.text.clear()
-                }
-            }
-        }
-
-        refresh()
-        dialog.show()
-    }
-
-    private fun showCreateTemplateStepsDialog(templateName: String, onComplete: () -> Unit) {
-        val dialog = Dialog(this)
-        dialog.setContentView(R.layout.dialog_manage_categories)
-        dialog.window?.setBackgroundDrawableResource(android.R.color.transparent)
-        dialog.window?.setLayout(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT)
-
-        val container = dialog.findViewById<LinearLayout>(R.id.categories_container)
-        val etStep = dialog.findViewById<EditText>(R.id.et_new_category)
-        val btnAddStep = dialog.findViewById<View>(R.id.btn_add_category)
-        val title = dialog.findViewById<TextView>(R.id.tv_categories_title)
         
-        // Add a "SAVE TEMPLATE" button at the bottom
-        val btnSave = TextView(this).apply {
-            text = "SAVE TEMPLATE"
-            setTextColor(Color.parseColor("#1A73E8"))
-            textSize = 16f
-            setTypeface(null, android.graphics.Typeface.BOLD)
-            gravity = android.view.Gravity.CENTER
-            setPadding(0, 40, 0, 40)
-            isClickable = true
-            isFocusable = true
-            val outValue = android.util.TypedValue()
-            context.theme.resolveAttribute(android.R.attr.selectableItemBackground, outValue, true)
-            setBackgroundResource(outValue.resourceId)
-        }
-
-        title.text = "Add Steps for: $templateName"
-        etStep.hint = "Step name (e.g. Design)..."
+        title.text = "SELECT AVATAR STYLE"
         
-        val steps = mutableListOf<String>()
-
-        fun refreshSteps() {
-            container.removeAllViews()
-            steps.forEach { step ->
-                val itemView = LayoutInflater.from(this).inflate(R.layout.item_category_manage, container, false)
-                itemView.findViewById<TextView>(R.id.tv_category_name).text = step
-                itemView.findViewById<View>(R.id.btn_remove_category).setOnClickListener {
-                    steps.remove(step)
-                    refreshSteps()
+        val icons = listOf(R.drawable.icons8_profile_100, R.drawable.icons8_profile_100_2)
+        
+        container.removeAllViews()
+        val row = LinearLayout(this).apply {
+            orientation = LinearLayout.HORIZONTAL
+            gravity = Gravity.CENTER
+            layoutParams = LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT)
+        }
+        
+        icons.forEach { iconRes ->
+            val iv = ImageView(this).apply {
+                val s = (80 * resources.displayMetrics.density).toInt()
+                layoutParams = LinearLayout.LayoutParams(s, s).apply { setMargins(24, 24, 24, 24) }
+                setImageResource(iconRes)
+                scaleType = ImageView.ScaleType.CENTER_CROP
+                setOnClickListener {
+                    DataManager.userAvatarRes = iconRes
+                    DataManager.saveData(this@SettingsActivity)
+                    updateMiniProfileUI()
+                    dialog.dismiss()
+                    Toast.makeText(this@SettingsActivity, "Avatar Style Updated", Toast.LENGTH_SHORT).show()
                 }
-                container.addView(itemView)
             }
-            container.addView(btnSave)
+            row.addView(iv)
         }
-
-        btnAddStep.setOnClickListener {
-            val stepName = etStep.text.toString().trim()
-            if (stepName.isNotEmpty()) {
-                steps.add(stepName)
-                etStep.text.clear()
-                refreshSteps()
-            }
-        }
-
-        btnSave.setOnClickListener {
-            if (steps.isNotEmpty()) {
-                DataManager.projectTemplates[templateName] = steps
-                DataManager.saveData(this)
-                onComplete()
-                dialog.dismiss()
-            } else {
-                Toast.makeText(this, "Add at least one step", Toast.LENGTH_SHORT).show()
-            }
-        }
-
-        refreshSteps()
+        container.addView(row)
         dialog.show()
     }
 
@@ -836,148 +459,48 @@ class SettingsActivity : AppCompatActivity() {
         dialog.setContentView(R.layout.dialog_help_detail)
         dialog.window?.setBackgroundDrawableResource(android.R.color.transparent)
         dialog.window?.setLayout(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT)
-
         val tvTitle = dialog.findViewById<TextView>(R.id.tv_help_title)
         val tvContent = dialog.findViewById<TextView>(R.id.tv_help_content)
         val btnClose = dialog.findViewById<View>(R.id.btn_close_help)
-
         tvTitle.text = "$section GUIDE"
-        
         val contentHtml = when(section) {
-            "HABITS" -> """
-                <b>1. BUILDING RITUALS:</b> Create recurring daily goals. You can set them for specific times (Morning, Afternoon, Evening) or 'Anytime' to maintain structure.<br><br>
-                <b>2. STREAK SYSTEM:</b> Every consecutive day you finish all your specific habits, your streak grows. This builds long-term discipline.<br><br>
-                <b>3. VACATION MODE:</b> Use this when traveling or taking a break. It pauses your streak so you don't lose progress while away.<br><br>
-                <b>4. CUSTOM RESET HOUR:</b> If you stay up late, you can set the day to reset at 3 AM or 4 AM instead of midnight, keeping your night-owl progress on the current day.<br><br>
-                <b>5. BULK UPDATES:</b> Long-press habit cards to enter a fast mode where you can mark many habits as done in seconds.
-            """.trimIndent()
-            
-            "WORKOUTS" -> """
-                <b>1. ROUTINE MANAGEMENT:</b> Add exercises with specific targets. You can track progress by Reps, Total Sets, or a precise Countdown Timer.<br><br>
-                <b>2. MUSCLE GROUP TRACKING:</b> Tag your workouts (Chest, Legs, Arms, etc.). The app keeps track of what you've trained to ensure balanced body development.<br><br>
-                <b>3. SMART REST TIMER:</b> After finishing a set, the app provides a customizable rest period with a sound alert when it's time for the next set.<br><br>
-                <b>4. READINESS SURVEY:</b> A quick daily check-in to see if your body is recovered enough for heavy training, helping you avoid injuries.<br><br>
-                <b>5. HISTORY & PERFORMANCE:</b> Tap on any exercise to see your lifetime completion count and streak.
-            """.trimIndent()
-            
-            "TASKS" -> """
-                <b>1. SMART LISTS:</b> Categorize tasks into Personal, Work, or Shopping. Assign Priority (High, Med, Low) to keep important items at the top.<br><br>
-                <b>2. SUBTASK MILESTONES:</b> Break big tasks into smaller, manageable steps. Progress is tracked automatically as you check them off.<br><br>
-                <b>3. AUTO-ARCHIVE:</b> Keep your list clean. Completed tasks are automatically moved to a graveyard after a few days to remove clutter.<br><br>
-                <b>4. PRODUCTIVITY ANALYTICS:</b> View charts that show how many tasks you finish per day and track your 'completion velocity' over time.<br><br>
-                <b>5. REMINDERS:</b> Set exact time alerts for critical tasks so you never miss a deadline.
-            """.trimIndent()
-            
-            "PROJECTS" -> """
-                <b>1. ROADMAP BOARDS:</b> Advanced project tracking. Break your major goals into 'Roadmaps' with detailed sub-features and milestones.<br><br>
-                <b>2. SUB-TASK SEQUENCING:</b> Assign position numbers (1, 2, 3...) to your roadmap items. Use the 'Number Roller' to easily reorder your project steps.<br><br>
-                <b>3. CATEGORY TAGS:</b> Label your roadmap steps as UI, LOGIC, or BUG to quickly identify the type of work needed.<br><br>
-                <b>4. DUAL EXISTENCE:</b> Toggle 'Dual Exist' to let your projects appear in both 'Roadmaps' and 'Ideas' tabs simultaneously for brainstorming.<br><br>
-                <b>5. PROJECT HISTORY:</b> The app logs every status update, progress change, or milestone finished, giving you a full audit trail of your work.
-            """.trimIndent()
-            
-            "NOTES" -> """
-                <b>1. SMART TEMPLATES:</b> Use pre-built structures for Daily Gratitude, Story Writing, or Question logs to start writing instantly.<br><br>
-                <b>2. PRIVACY & SECURITY:</b> Long-press a note to 'Hide' it. Use the global 'Show Hidden' toggle in settings to keep your sensitive data private.<br><br>
-                <b>3. VOICE-TO-TEXT:</b> Tap the microphone icon inside any note to dictate your thoughts quickly using speech recognition.<br><br>
-                <b>4. QUICK SEARCH & SORT:</b> Filter your notes by 4 categories and sort them by Date or Title to find your ideas in seconds.<br><br>
-                <b>5. AUTO-CLEANUP:</b> Set an expiration date for old logs to ensure your notepad stays focused only on relevant information.
-            """.trimIndent()
-            
-            "FINANCE" -> """
-                <b>1. PROFESSIONAL BUDGETING:</b> Set a Monthly Budget and a specific Savings Goal (like 'New Car'). The app tracks your remaining 'Safe Spend'.<br><br>
-                <b>2. INDEPENDENT LEDGERS:</b> Create private 'Books' for different people. Track who owes you money or who you owe, with automated FIFO reconciliation.<br><br>
-                <b>3. SPLIT-BILL INTEGRATION:</b> Long-press any expense to split it with friends. The app automatically creates 'Lent' entries in your ledger for their shares.<br><br>
-                <b>4. SPEND HEATMAP:</b> View a 31-day visual grid that shows exactly which days you spend the most money using intensity colors.<br><br>
-                <b>5. SMART INSIGHTS:</b> Dynamic cards alert you if you've spent more than 70% of your budget before the middle of the month.
-            """.trimIndent()
-            
-            "OTHERS" -> """
-                <b>1. DATA GOVERNANCE (Authority):</b> You have full ownership of your data. Export your entire database to a JSON file for backup or migrate to a new device by importing it back.<br><br>
-                <b>2. UI ARCHITECTURE:</b> You can manipulate the app's structure. Enable or disable entire sections like 'Ideas' or 'Roadmaps' to create a specialized workflow that matches your needs.<br><br>
-                <b>3. LOGIC CUSTOMIZATION:</b> Adjust core app behaviors. Customize 'Day Reset' hours for habits, set spending 'Alert Thresholds' for finance, and define how many days until finished tasks are archived.<br><br>
-                <b>4. GLOBAL STYLING:</b> You have the authority to redesign the dashboard. Long-press any card to change its color and choose unique icons for every section in the Appearance menu.<br><br>
-                <b>5. SECURITY PRIVILEGES:</b> Lock the app with biometric authentication (Fingerprint) or a PIN. Enable 'OLED Mode' to force a high-contrast pure black theme across all screens.
-            """.trimIndent()
-            
-            else -> "Comprehensive feature guide coming soon."
+            "HABITS" -> "<b>1. BUILDING RITUALS:</b> Create recurring daily goals.<br><br><b>2. STREAK SYSTEM:</b> Grow your discipline.<br><br><b>3. VACATION MODE:</b> Pause progress while away."
+            "WORKOUTS" -> "<b>1. ROUTINE MANAGEMENT:</b> Add exercises.<br><br><b>2. MUSCLE GROUPS:</b> Tag specific body parts.<br><br><b>3. REST TIMER:</b> Automated alerts."
+            "TASKS" -> "<b>1. SMART LISTS:</b> Categorize by Priority.<br><br><b>2. AUTO-ARCHIVE:</b> Keep list clean."
+            "PROJECTS" -> "<b>1. ROADMAP BOARDS:</b> Break goals into sub-features.<br><br><b>2. SEQUENCING:</b> Reorder with Number Roller."
+            "NOTES" -> "<b>1. SMART TEMPLATES:</b> Pre-filled logs.<br><br><b>2. PRIVACY:</b> Hide sensitive data."
+            "FINANCE" -> "<b>1. BUDGETING:</b> Set limits.<br><br><b>2. INDEPENDENT LEDGERS:</b> Person-based tracking."
+            "OTHERS" -> "<b>1. DATA GOVERNANCE:</b> Export/Import backups.<br><br><b>2. UI ARCHITECTURE:</b> Toggle sections."
+            else -> "Feature guide coming soon."
         }
-
         tvContent.text = android.text.Html.fromHtml(contentHtml, android.text.Html.FROM_HTML_MODE_LEGACY)
-        btnClose.setOnClickListener { dialog.dismiss() }
-        dialog.show()
+        btnClose.setOnClickListener { dialog.dismiss() }; dialog.show()
     }
 
-    private fun showConfirmationDialog(
-        title: String,
-        message: String,
-        positiveButtonText: String = "PROCEED",
-        onConfirm: () -> Unit
-    ) {
-        val dialog = Dialog(this)
-        dialog.setContentView(R.layout.dialog_confirmation)
+    private fun showConfirmationDialog(title: String, message: String, pos: String, onConfirm: () -> Unit) {
+        val dialog = Dialog(this); dialog.setContentView(R.layout.dialog_confirmation)
         dialog.window?.setBackgroundDrawableResource(android.R.color.transparent)
-        dialog.window?.setLayout(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT)
-
-        val tvTitle = dialog.findViewById<TextView>(R.id.tv_confirm_title)
-        val tvMessage = dialog.findViewById<TextView>(R.id.tv_confirm_message)
-        val btnNegative = dialog.findViewById<TextView>(R.id.btn_confirm_negative)
-        val btnPositive = dialog.findViewById<TextView>(R.id.btn_confirm_positive)
-
-        tvTitle.text = title
-        tvMessage.text = message
-        btnPositive.text = positiveButtonText
-
-        btnNegative.setOnClickListener { dialog.dismiss() }
-        btnPositive.setOnClickListener {
-            onConfirm()
-            dialog.dismiss()
-        }
+        dialog.findViewById<TextView>(R.id.tv_confirm_title).text = title
+        dialog.findViewById<TextView>(R.id.tv_confirm_message).text = message
+        val btnPos = dialog.findViewById<TextView>(R.id.btn_confirm_positive)
+        btnPos.text = pos; btnPos.setOnClickListener { onConfirm(); dialog.dismiss() }
+        dialog.findViewById<View>(R.id.btn_confirm_negative).setOnClickListener { dialog.dismiss() }
         dialog.show()
     }
 
     private fun showColorPickerDialog(section: String) {
-        val dialog = Dialog(this)
-        dialog.setContentView(R.layout.dialog_settings_color_picker)
+        val dialog = Dialog(this); dialog.setContentView(R.layout.dialog_settings_color_picker)
         dialog.window?.setBackgroundDrawableResource(android.R.color.transparent)
-        dialog.window?.setLayout(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT)
-
-        val grid = dialog.findViewById<android.widget.GridLayout>(R.id.color_grid)
+        val grid = dialog.findViewById<GridLayout>(R.id.color_grid)
         val title = dialog.findViewById<TextView>(R.id.tv_picker_title)
-        val btnCancel = dialog.findViewById<View>(R.id.btn_cancel)
-
-        title.text = "SECTION COLOR: $section"
-
-        val defaultColors = listOf(
-            Color.parseColor("#1E88E5"), // Blue
-            Color.parseColor("#F57C00"), // Orange
-            Color.parseColor("#43A047"), // Green
-            Color.MAGENTA,
-            Color.RED,
-            Color.CYAN,
-            Color.parseColor("#FFD600"), // Yellow
-            Color.parseColor("#7B1FA2"), // Purple
-            Color.parseColor("#C2185B"), // Pink
-            Color.parseColor("#0097A7"), // Teal
-            Color.parseColor("#388E3C"), // Dark Green
-            Color.parseColor("#616161")  // Gray
-        )
-
-        val allColors = defaultColors + DataManager.userCustomColors
-
-        allColors.forEach { color ->
-            val colorView = View(this).apply {
-                val size = (48 * resources.displayMetrics.density).toInt()
-                layoutParams = android.widget.GridLayout.LayoutParams().apply {
-                    width = size
-                    height = size
-                    setMargins(12, 12, 12, 12)
-                }
-                background = android.graphics.drawable.GradientDrawable().apply {
-                    shape = android.graphics.drawable.GradientDrawable.OVAL
-                    setColor(color)
-                    setStroke(2, Color.WHITE)
-                }
+        title.text = "SELECT COLOR: $section"
+        val colors = listOf(Color.parseColor("#FF7A59"), Color.parseColor("#FFB800"), Color.parseColor("#2EC4B6"), Color.parseColor("#1A73E8"), Color.parseColor("#E91E63"))
+        colors.forEach { color ->
+            val v = View(this).apply {
+                val s = (48 * resources.displayMetrics.density).toInt()
+                layoutParams = GridLayout.LayoutParams().apply { width = s; height = s; setMargins(12, 12, 12, 12) }
+                background = ContextCompat.getDrawable(this@SettingsActivity, R.drawable.circle_selected_bg)
+                backgroundTintList = ColorStateList.valueOf(color)
                 setOnClickListener {
                     when (section) {
                         "HABIT" -> DataManager.globalHabitColor = color
@@ -993,225 +516,281 @@ class SettingsActivity : AppCompatActivity() {
                         "ADD_NOTE" -> DataManager.noteAddThemeColor = color
                         "ADD_FINANCE" -> DataManager.financeAddThemeColor = color
                     }
-                    DataManager.saveData(this@SettingsActivity)
-                    Toast.makeText(this@SettingsActivity, "$section color updated", Toast.LENGTH_SHORT).show()
-                    dialog.dismiss()
+                    DataManager.saveData(this@SettingsActivity); dialog.dismiss(); showSectionSettings(currentPath)
                 }
             }
-            grid.addView(colorView)
+            grid.addView(v)
         }
-
-        btnCancel.setOnClickListener { dialog.dismiss() }
-        dialog.show()
+        dialog.findViewById<View>(R.id.btn_cancel).setOnClickListener { dialog.dismiss() }; dialog.show()
     }
 
     private fun showAddCustomColorDialog() {
-        val dialog = Dialog(this)
-        dialog.setContentView(R.layout.dialog_set_budget) // Re-use hex input logic
+        val dialog = Dialog(this); dialog.setContentView(R.layout.dialog_add_custom_color)
         dialog.window?.setBackgroundDrawableResource(android.R.color.transparent)
-        dialog.window?.setLayout(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT)
-
-        val etInput = dialog.findViewById<EditText>(R.id.et_budget_amount)
-        val btnSave = dialog.findViewById<TextView>(R.id.btn_save_budget)
-        val title = dialog.findViewById<TextView>(R.id.tv_dialog_title)
-        val subtext = dialog.findViewById<TextView>(R.id.tv_dialog_subtext)
-
-        title.text = "ADD CUSTOM COLOR"
-        subtext.text = "Enter color HEX code (e.g. #FF5733)"
-        etInput.hint = "#000000"
-        etInput.inputType = android.text.InputType.TYPE_CLASS_TEXT
-        
-        btnSave.text = "ADD COLOR"
-        btnSave.setOnClickListener {
-            val hex = etInput.text.toString().trim()
-            try {
-                val color = Color.parseColor(if (hex.startsWith("#")) hex else "#$hex")
-                DataManager.userCustomColors.add(color)
-                DataManager.saveData(this)
-                showSectionSettings("APPEARANCE_COLOR")
-                dialog.dismiss()
-                Toast.makeText(this, "Color added successfully!", Toast.LENGTH_SHORT).show()
-            } catch (e: Exception) {
-                Toast.makeText(this, "Invalid Hex Code", Toast.LENGTH_SHORT).show()
-            }
+        val et = dialog.findViewById<EditText>(R.id.et_hex_code)
+        dialog.findViewById<View>(R.id.btn_add_hex).setOnClickListener {
+            try { val c = Color.parseColor(et.text.toString()); DataManager.userCustomColors.add(c); DataManager.saveData(this); showSectionSettings("APPEARANCE_COLOR"); dialog.dismiss() } catch(e: Exception) {}
         }
         dialog.show()
     }
 
     private fun showIconPickerDialog(section: String) {
-        val dialog = Dialog(this)
-        dialog.setContentView(R.layout.dialog_settings_icon_picker)
+        val dialog = Dialog(this); dialog.setContentView(R.layout.dialog_manage_categories)
         dialog.window?.setBackgroundDrawableResource(android.R.color.transparent)
-        dialog.window?.setLayout(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT)
-
-        val recycler = dialog.findViewById<RecyclerView>(R.id.icon_list)
-        val title = dialog.findViewById<TextView>(R.id.tv_picker_title)
-        val btnCancel = dialog.findViewById<View>(R.id.btn_cancel)
-
-        title.text = "SECTION ICON: $section"
-        recycler.layoutManager = androidx.recyclerview.widget.GridLayoutManager(this, 4)
-
-        val icons = listOf(
-            R.drawable.ic_habit_tracker, R.drawable.ic_workout_routine, R.drawable.ic_todo_list,
-            R.drawable.ic_project, R.drawable.ic_notes, R.drawable.ic_finance,
-            R.drawable.ic_fitness, R.drawable.ic_meditation, R.drawable.ic_book,
-            R.drawable.ic_sleep, R.drawable.ic_water, R.drawable.ic_history,
-            R.drawable.baseline_tune_24, R.drawable.baseline_settings_24,
-            R.drawable.icons8_coffee_100, R.drawable.icons8_dumbbell_100,
-            R.drawable.icons8_idea_100, R.drawable.icons8_clock_100, R.drawable.icons8_yoga_100,
-            R.drawable.icons8_health_100, R.drawable.icons8_exercise_100
-        )
-
-        recycler.adapter = object : RecyclerView.Adapter<RecyclerView.ViewHolder>() {
-            override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): RecyclerView.ViewHolder {
-                val iv = ImageView(parent.context).apply {
-                    val size = (56 * resources.displayMetrics.density).toInt()
-                    layoutParams = ViewGroup.LayoutParams(size, size)
-                    setPadding(12, 12, 12, 12)
-                    scaleType = ImageView.ScaleType.FIT_CENTER
-                }
-                return object : RecyclerView.ViewHolder(iv) {}
-            }
-
-            override fun onBindViewHolder(holder: RecyclerView.ViewHolder, position: Int) {
-                val iconRes = icons[position]
-                (holder.itemView as ImageView).apply {
-                    setImageResource(iconRes)
-                    imageTintList = android.content.res.ColorStateList.valueOf(Color.WHITE)
-                    setOnClickListener {
-                        when (section) {
-                            "HABIT" -> DataManager.globalHabitIcon = iconRes
-                            "WORKOUT" -> DataManager.globalWorkoutIcon = iconRes
-                            "TASK" -> DataManager.globalTaskIcon = iconRes
-                            "PROJECT" -> DataManager.globalProjectIcon = iconRes
-                            "NOTE" -> DataManager.globalNoteIcon = iconRes
-                            "FINANCE" -> DataManager.globalFinanceIcon = iconRes
+        val container = dialog.findViewById<LinearLayout>(R.id.categories_container)
+        val icons = listOf(R.drawable.ic_habit_tracker, R.drawable.ic_workout_routine, R.drawable.ic_todo_list, R.drawable.ic_notes, R.drawable.ic_project, R.drawable.ic_finance)
+        val rv = RecyclerView(this).apply {
+            layoutManager = GridLayoutManager(this@SettingsActivity, 4)
+            adapter = object : RecyclerView.Adapter<RecyclerView.ViewHolder>() {
+                override fun onCreateViewHolder(p: ViewGroup, t: Int) = object : RecyclerView.ViewHolder(ImageView(p.context).apply {
+                    val s = (56 * resources.displayMetrics.density).toInt()
+                    layoutParams = ViewGroup.LayoutParams(s, s); setPadding(12, 12, 12, 12)
+                }) {}
+                override fun onBindViewHolder(h: RecyclerView.ViewHolder, p: Int) {
+                    val i = icons[p]; val iv = h.itemView as ImageView; iv.setImageResource(i); iv.imageTintList = ColorStateList.valueOf(Color.WHITE)
+                    iv.setOnClickListener {
+                        when(section) {
+                            "HABIT" -> DataManager.globalHabitIcon = i
+                            "WORKOUT" -> DataManager.globalWorkoutIcon = i
+                            "TASK" -> DataManager.globalTaskIcon = i
+                            "PROJECT" -> DataManager.globalProjectIcon = i
+                            "NOTE" -> DataManager.globalNoteIcon = i
+                            "FINANCE" -> DataManager.globalFinanceIcon = i
                         }
-                        DataManager.saveData(this@SettingsActivity)
-                        Toast.makeText(this@SettingsActivity, "$section icon updated", Toast.LENGTH_SHORT).show()
-                        dialog.dismiss()
+                        DataManager.saveData(this@SettingsActivity); dialog.dismiss(); showSectionSettings(currentPath)
                     }
                 }
+                override fun getItemCount() = icons.size
             }
-
-            override fun getItemCount() = icons.size
         }
+        container.removeAllViews(); container.addView(rv); dialog.show()
+    }
 
-        btnCancel.setOnClickListener { dialog.dismiss() }
+    private fun showBehavioralInsightsDialog() {
+        val dialog = Dialog(this); dialog.setContentView(R.layout.dialog_set_budget)
+        dialog.window?.setBackgroundDrawableResource(android.R.color.transparent)
+        val sub = dialog.findViewById<TextView>(R.id.tv_dialog_subtext)
+        dialog.findViewById<TextView>(R.id.tv_dialog_title).text = "BEHAVIORAL INSIGHTS"
+        dialog.findViewById<View>(R.id.et_budget_amount).visibility = View.GONE
+        val stats = DataManager.getHabitPerformanceByFrequency()
+        val sb = StringBuilder(); stats.forEach { (f, r) -> if (r >= 0) sb.append("$f: $r%\n") }
+        sub.text = if (sb.isEmpty()) "Keep tracking to see insights!" else sb.toString()
+        dialog.findViewById<TextView>(R.id.btn_save_budget).text = "CLOSE"
+        dialog.findViewById<View>(R.id.btn_save_budget).setOnClickListener { dialog.dismiss() }; dialog.show()
+    }
+
+    private fun showManageMuscleGroupsDialog() {
+        val dialog = Dialog(this); dialog.setContentView(R.layout.dialog_manage_categories)
+        dialog.window?.setBackgroundDrawableResource(android.R.color.transparent)
+        val container = dialog.findViewById<LinearLayout>(R.id.categories_container)
+        val et = dialog.findViewById<EditText>(R.id.et_new_category)
+        fun refresh() {
+            container.removeAllViews()
+            DataManager.workoutMuscleGroups.forEach { g ->
+                val iv = LayoutInflater.from(this).inflate(R.layout.item_category_manage, container, false)
+                iv.findViewById<TextView>(R.id.tv_category_name).text = g
+                iv.findViewById<View>(R.id.btn_remove_category).setOnClickListener { DataManager.workoutMuscleGroups.remove(g); DataManager.saveData(this); refresh() }
+                container.addView(iv)
+            }
+        }
+        dialog.findViewById<View>(R.id.btn_add_category).setOnClickListener {
+            val n = et.text.toString().trim(); if (n.isNotEmpty()) { DataManager.workoutMuscleGroups.add(n); DataManager.saveData(this); et.text.clear(); refresh() }
+        }
+        refresh(); dialog.show()
+    }
+
+    private fun showWorkoutReadinessDialog() {
+        val dialog = Dialog(this); dialog.setContentView(R.id.tv_title) // Reusing simple view
+        Toast.makeText(this, "Survey Coming Soon", Toast.LENGTH_SHORT).show(); dialog.dismiss()
+    }
+
+    private fun showManageTaskCategoriesDialog() {
+        val dialog = Dialog(this); dialog.setContentView(R.layout.dialog_manage_categories)
+        dialog.window?.setBackgroundDrawableResource(android.R.color.transparent)
+        val container = dialog.findViewById<LinearLayout>(R.id.categories_container)
+        val et = dialog.findViewById<EditText>(R.id.et_new_category)
+        fun refresh() {
+            container.removeAllViews()
+            DataManager.taskCustomCategories.forEach { c ->
+                val iv = LayoutInflater.from(this).inflate(R.layout.item_category_manage, container, false)
+                iv.findViewById<TextView>(R.id.tv_category_name).text = c
+                iv.findViewById<View>(R.id.btn_remove_category).setOnClickListener { DataManager.taskCustomCategories.remove(c); DataManager.saveData(this); refresh() }
+                container.addView(iv)
+            }
+        }
+        dialog.findViewById<View>(R.id.btn_add_category).setOnClickListener {
+            val n = et.text.toString().trim(); if (n.isNotEmpty()) { DataManager.taskCustomCategories.add(n); DataManager.saveData(this); et.text.clear(); refresh() }
+        }
+        refresh(); dialog.show()
+    }
+
+    private fun showTaskAnalyticsDialog() {
+        Toast.makeText(this, "Rate: ${DataManager.getGlobalCompletionRate()}%", Toast.LENGTH_SHORT).show()
+    }
+
+    private fun showNoteTemplatesDialog() {
+        val dialog = Dialog(this); dialog.setContentView(R.layout.dialog_manage_categories)
+        dialog.window?.setBackgroundDrawableResource(android.R.color.transparent)
+        val container = dialog.findViewById<LinearLayout>(R.id.categories_container)
+        dialog.findViewById<View>(R.id.container_add_category).visibility = View.GONE
+        DataManager.noteTemplates.keys.forEach { name ->
+            val iv = LayoutInflater.from(this).inflate(R.layout.item_category_manage, container, false)
+            iv.findViewById<TextView>(R.id.tv_category_name).text = name
+            iv.findViewById<View>(R.id.btn_remove_category).visibility = View.GONE
+            iv.setOnClickListener { showSingleTemplateEditor(name); dialog.dismiss() }
+            container.addView(iv)
+        }
         dialog.show()
     }
 
-    fun showProjectMenu(anchor: View, note: Note) {
-        val inflater = LayoutInflater.from(this)
-        val menuView = inflater.inflate(R.layout.layout_custom_menu, null)
-        val popupWindow = PopupWindow(menuView, ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT, true)
-        popupWindow.elevation = 20f
+    private fun showSingleTemplateEditor(name: String) {
+        val dialog = Dialog(this); dialog.setContentView(R.layout.dialog_set_budget)
+        val et = dialog.findViewById<EditText>(R.id.et_budget_amount)
+        et.setText(DataManager.noteTemplates[name]); et.inputType = android.text.InputType.TYPE_CLASS_TEXT or android.text.InputType.TYPE_TEXT_FLAG_MULTI_LINE
+        dialog.findViewById<View>(R.id.btn_save_budget).setOnClickListener { DataManager.noteTemplates[name] = et.text.toString(); DataManager.saveData(this); dialog.dismiss() }
+        dialog.show()
+    }
 
-        // Configure Menu Items
-        val btnDayOff = menuView.findViewById<View>(R.id.menu_take_day_off)
-        val btnEdit = menuView.findViewById<View>(R.id.menu_edit)
-        val btnDelete = menuView.findViewById<View>(R.id.menu_delete)
-        val btnPin = menuView.findViewById<View>(R.id.menu_hide_unhide)
-        val tvPin = menuView.findViewById<TextView>(R.id.tv_hide_unhide_text)
-        val ivPin = menuView.findViewById<ImageView>(R.id.iv_hide_unhide_icon)
-        val btnUndo = menuView.findViewById<View>(R.id.menu_undo)
+    private fun showNoteBulkMoveDialog() {
+        Toast.makeText(this, "Select category to move all notes", Toast.LENGTH_SHORT).show()
+    }
 
-        btnDayOff.visibility = View.GONE
-        btnUndo.visibility = View.GONE
-
-        btnPin.visibility = View.VISIBLE
-        tvPin.text = if (note.isPinned) "UNPIN" else "PIN"
-        ivPin.setImageResource(if (note.isPinned) android.R.drawable.btn_star_big_off else android.R.drawable.btn_star_big_on)
-        ivPin.imageTintList = android.content.res.ColorStateList.valueOf(Color.WHITE)
-
-        btnEdit.setOnClickListener {
-            popupWindow.dismiss()
-            // showEditProjectNoteDialog(note) // This would need to be moved or passed
+    private fun showManageFinanceCategoriesDialog() {
+        val dialog = Dialog(this); dialog.setContentView(R.layout.dialog_manage_categories)
+        dialog.window?.setBackgroundDrawableResource(android.R.color.transparent)
+        val container = dialog.findViewById<LinearLayout>(R.id.categories_container)
+        val et = dialog.findViewById<EditText>(R.id.et_new_category)
+        fun refresh() {
+            container.removeAllViews()
+            DataManager.financeCustomCategories.forEach { c ->
+                val iv = LayoutInflater.from(this).inflate(R.layout.item_category_manage, container, false)
+                iv.findViewById<TextView>(R.id.tv_category_name).text = c
+                iv.findViewById<View>(R.id.btn_remove_category).setOnClickListener { DataManager.financeCustomCategories.remove(c); DataManager.saveData(this); refresh() }
+                container.addView(iv)
+            }
         }
-
-        btnDelete.setOnClickListener {
-            popupWindow.dismiss()
-            // allNotes.remove(note)
-            DataManager.saveData(this)
-            // updateDisplayList()
+        dialog.findViewById<View>(R.id.btn_add_category).setOnClickListener {
+            val n = et.text.toString().trim(); if (n.isNotEmpty()) { DataManager.financeCustomCategories.add(n); DataManager.saveData(this); et.text.clear(); refresh() }
         }
+        refresh(); dialog.show()
+    }
 
-        btnPin.setOnClickListener {
-            popupWindow.dismiss()
-            note.isPinned = !note.isPinned
-            DataManager.saveData(this)
-            // updateDisplayList()
+    private fun showSetBudgetDialog() {
+        val dialog = Dialog(this); dialog.setContentView(R.layout.dialog_set_budget)
+        val et = dialog.findViewById<EditText>(R.id.et_budget_amount)
+        et.setText(DataManager.monthlyBudget.toString())
+        dialog.findViewById<View>(R.id.btn_save_budget).setOnClickListener {
+            DataManager.monthlyBudget = et.text.toString().toDoubleOrNull() ?: 0.0
+            DataManager.saveData(this); dialog.dismiss(); showSectionSettings("FINANCE")
         }
+        dialog.show()
+    }
 
-        popupWindow.showAsDropDown(anchor, 150, -100)
+    private fun showSetSavingsGoalDialog() {
+        val dialog = Dialog(this); dialog.setContentView(R.layout.dialog_set_budget)
+        val et = dialog.findViewById<EditText>(R.id.et_budget_amount)
+        et.setText(DataManager.monthlySavingsGoal.toString())
+        dialog.findViewById<View>(R.id.btn_save_budget).setOnClickListener {
+            DataManager.monthlySavingsGoal = et.text.toString().toDoubleOrNull() ?: 0.0
+            DataManager.saveData(this); dialog.dismiss(); showSectionSettings("FINANCE")
+        }
+        dialog.show()
+    }
+
+    private fun showProjectTemplatesDialog() {
+        val dialog = Dialog(this); dialog.setContentView(R.layout.dialog_manage_categories)
+        dialog.window?.setBackgroundDrawableResource(android.R.color.transparent)
+        val container = dialog.findViewById<LinearLayout>(R.id.categories_container)
+        val et = dialog.findViewById<EditText>(R.id.et_new_category)
+        fun refresh() {
+            container.removeAllViews()
+            DataManager.projectTemplates.keys.forEach { t ->
+                val iv = LayoutInflater.from(this).inflate(R.layout.item_category_manage, container, false)
+                iv.findViewById<TextView>(R.id.tv_category_name).text = t
+                iv.findViewById<View>(R.id.btn_remove_category).setOnClickListener { DataManager.projectTemplates.remove(t); DataManager.saveData(this); refresh() }
+                container.addView(iv)
+            }
+        }
+        dialog.findViewById<View>(R.id.btn_add_category).setOnClickListener {
+            val n = et.text.toString().trim(); if (n.isNotEmpty()) showCreateTemplateStepsDialog(n) { refresh(); et.text.clear() }
+        }
+        refresh(); dialog.show()
+    }
+
+    private fun showCreateTemplateStepsDialog(n: String, c: () -> Unit) {
+        val dialog = Dialog(this); dialog.setContentView(R.layout.dialog_manage_categories)
+        val container = dialog.findViewById<LinearLayout>(R.id.categories_container)
+        val et = dialog.findViewById<EditText>(R.id.et_new_category); et.hint = "Step Name"
+        val steps = mutableListOf<String>()
+        fun refresh() {
+            container.removeAllViews()
+            steps.forEach { s ->
+                val iv = LayoutInflater.from(this).inflate(R.layout.item_category_manage, container, false)
+                iv.findViewById<TextView>(R.id.tv_category_name).text = s
+                iv.findViewById<View>(R.id.btn_remove_category).setOnClickListener { steps.remove(s); refresh() }
+                container.addView(iv)
+            }
+            val btn = Button(this); btn.text = "SAVE"; btn.setOnClickListener { DataManager.projectTemplates[n] = steps; DataManager.saveData(this); c(); dialog.dismiss() }
+            container.addView(btn)
+        }
+        dialog.findViewById<View>(R.id.btn_add_category).setOnClickListener { val s = et.text.toString().trim(); if (s.isNotEmpty()) { steps.add(s); et.text.clear(); refresh() } }
+        refresh(); dialog.show()
+    }
+
+    private fun showManageTagsDialog() {
+        val dialog = Dialog(this); dialog.setContentView(R.layout.dialog_manage_categories)
+        dialog.window?.setBackgroundDrawableResource(android.R.color.transparent)
+        val container = dialog.findViewById<LinearLayout>(R.id.categories_container)
+        val et = dialog.findViewById<EditText>(R.id.et_new_category)
+        fun refresh() {
+            container.removeAllViews()
+            DataManager.projectCustomTags.forEach { t ->
+                val iv = LayoutInflater.from(this).inflate(R.layout.item_category_manage, container, false)
+                iv.findViewById<TextView>(R.id.tv_category_name).text = t
+                iv.findViewById<View>(R.id.btn_remove_category).setOnClickListener { DataManager.projectCustomTags.remove(t); DataManager.saveData(this); refresh() }
+                container.addView(iv)
+            }
+        }
+        dialog.findViewById<View>(R.id.btn_add_category).setOnClickListener {
+            val n = et.text.toString().trim().uppercase(); if (n.isNotEmpty()) { DataManager.projectCustomTags.add(n); DataManager.saveData(this); et.text.clear(); refresh() }
+        }
+        refresh(); dialog.show()
     }
 
     data class SettingsHubItem(val title: String, val description: String, val iconRes: Int, val sectionKey: String)
-    data class ConfigItem(val title: String, val summary: String, val isToggle: Boolean = false, var isChecked: Boolean = false, val action: () -> Unit)
+    data class ConfigItem(val title: String, val summary: String = "", val isToggle: Boolean = false, var isChecked: Boolean = false, val action: () -> Unit)
 
-    class SettingsHubAdapter(private val items: List<SettingsHubItem>, private val onSelect: (String) -> Unit) :
-        RecyclerView.Adapter<SettingsHubAdapter.ViewHolder>() {
-
-        override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder {
-            val view = LayoutInflater.from(parent.context).inflate(R.layout.item_settings_hub, parent, false)
-            return ViewHolder(view)
+    inner class SettingsHubAdapter(private val items: List<SettingsHubItem>, private val onSelect: (String) -> Unit) : RecyclerView.Adapter<SettingsHubAdapter.ViewHolder>() {
+        override fun onCreateViewHolder(p: ViewGroup, t: Int) = ViewHolder(LayoutInflater.from(p.context).inflate(R.layout.item_settings_hub, p, false))
+        override fun onBindViewHolder(h: ViewHolder, pos: Int) {
+            val i = items[pos]; h.title.text = i.title; h.description.text = i.description; h.icon.setImageResource(i.iconRes)
+            h.itemView.setOnClickListener { onSelect(i.sectionKey) }
         }
-
-        override fun onBindViewHolder(holder: ViewHolder, position: Int) {
-            val item = items[position]
-            holder.title.text = item.title
-            holder.description.text = item.description
-            holder.icon.setImageResource(item.iconRes)
-            holder.itemView.setOnClickListener { onSelect(item.sectionKey) }
-        }
-
         override fun getItemCount() = items.size
-        class ViewHolder(view: View) : RecyclerView.ViewHolder(view) {
-            val title: TextView = view.findViewById(R.id.tv_item_title)
-            val description: TextView = view.findViewById(R.id.tv_item_description)
-            val icon: ImageView = view.findViewById(R.id.iv_item_icon)
+        inner class ViewHolder(v: View) : RecyclerView.ViewHolder(v) {
+            val title: TextView = v.findViewById(R.id.tv_item_title)
+            val description: TextView = v.findViewById(R.id.tv_item_description)
+            val icon: ImageView = v.findViewById(R.id.iv_item_icon)
         }
     }
 
-    class ConfigAdapter(private val items: List<ConfigItem>, private val onAnyChange: () -> Unit) :
-        RecyclerView.Adapter<ConfigAdapter.ViewHolder>() {
-
-        override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder {
-            val view = LayoutInflater.from(parent.context).inflate(R.layout.item_config_row, parent, false)
-            return ViewHolder(view)
-        }
-
-        override fun onBindViewHolder(holder: ViewHolder, position: Int) {
-            val item = items[position]
-            holder.title.text = item.title
-            holder.summary.text = item.summary
-            
-            val chevron = holder.itemView.findViewById<View>(R.id.iv_chevron)
-
-            if (item.isToggle) {
-                holder.switch.visibility = View.VISIBLE
-                holder.switch.isChecked = item.isChecked
-                chevron.visibility = View.GONE
-            } else {
-                holder.switch.visibility = View.GONE
-                chevron.visibility = View.VISIBLE
-            }
-
-            holder.itemView.setOnClickListener { 
-                item.action()
-                if (item.isToggle) {
-                    item.isChecked = !item.isChecked
-                    holder.switch.isChecked = item.isChecked
-                }
+    inner class ConfigAdapter(private val items: List<ConfigItem>, private val onAnyChange: () -> Unit) : RecyclerView.Adapter<ConfigAdapter.ViewHolder>() {
+        override fun onCreateViewHolder(p: ViewGroup, v: Int) = ViewHolder(LayoutInflater.from(p.context).inflate(R.layout.item_config_row, p, false))
+        override fun onBindViewHolder(h: ViewHolder, pos: Int) {
+            val i = items[pos]; h.title.text = i.title; h.summary.text = i.summary
+            h.switch.visibility = if (i.isToggle) View.VISIBLE else View.GONE
+            h.switch.isChecked = i.isChecked; h.itemView.findViewById<View>(R.id.iv_chevron).visibility = if (i.isToggle) View.GONE else View.VISIBLE
+            h.itemView.setOnClickListener {
+                i.action()
+                if (i.isToggle) { i.isChecked = !i.isChecked; h.switch.isChecked = i.isChecked }
                 onAnyChange()
             }
         }
-
         override fun getItemCount() = items.size
-        class ViewHolder(view: View) : RecyclerView.ViewHolder(view) {
-            val title: TextView = view.findViewById(R.id.tv_config_title)
-            val summary: TextView = view.findViewById(R.id.tv_config_summary)
-            val switch: SwitchCompat = view.findViewById(R.id.sw_config_toggle)
+        inner class ViewHolder(v: View) : RecyclerView.ViewHolder(v) {
+            val title: TextView = v.findViewById(R.id.tv_config_title)
+            val summary: TextView = v.findViewById(R.id.tv_config_summary)
+            val switch: SwitchCompat = v.findViewById(R.id.sw_config_toggle)
         }
     }
 }

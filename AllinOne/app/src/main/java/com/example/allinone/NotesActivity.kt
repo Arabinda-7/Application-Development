@@ -71,6 +71,10 @@ class NotesActivity : AppCompatActivity() {
             btnCreate.backgroundTintList = android.content.res.ColorStateList.valueOf(DataManager.noteAddThemeColor)
         }
         btnCreate.setOnClickListener { showAddNoteDialog() }
+
+        if (intent.getBooleanExtra("SHOW_ADD_DIALOG", false)) {
+            showAddNoteDialog()
+        }
     }
 
     private fun toggleDeleteMode(enabled: Boolean) {

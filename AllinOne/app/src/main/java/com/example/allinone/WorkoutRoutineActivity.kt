@@ -98,6 +98,7 @@ class WorkoutRoutineActivity : AppCompatActivity() {
         updateSectionProgress()
 
         findViewById<View>(R.id.btn_back).setOnClickListener { finish() }
+        findViewById<View>(R.id.btn_back_history).setOnClickListener { finish() }
 
         findViewById<View>(R.id.btn_workout_settings).setOnClickListener {
             val inflater = LayoutInflater.from(this)

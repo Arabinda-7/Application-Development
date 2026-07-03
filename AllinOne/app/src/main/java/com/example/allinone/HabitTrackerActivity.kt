@@ -82,6 +82,7 @@ class HabitTrackerActivity : AppCompatActivity() {
         }
 
         findViewById<View>(R.id.btn_back).setOnClickListener { finish() }
+        findViewById<View>(R.id.btn_back_history).setOnClickListener { finish() }
 
         findViewById<View>(R.id.btn_habit_settings).setOnClickListener {
             val inflater = LayoutInflater.from(this)

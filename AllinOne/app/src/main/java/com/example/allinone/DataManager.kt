@@ -76,6 +76,11 @@ object DataManager {
     var projectRoadmapsEnabled: Boolean = true
     var isAppLockEnabled: Boolean = false
     var isOledThemeEnabled: Boolean = false
+    var isOnboardingCompleted: Boolean = false
+
+    var userName: String = "Arabi"
+    var userBio: String = "Professional Tier"
+    var userAvatarRes: Int = R.drawable.icons8_profile_100
 
     var recentActivities = mutableListOf<String>()
     var dailyMoods = mutableMapOf<String, String>() // DateString -> Emoji
@@ -159,8 +164,12 @@ object DataManager {
     private const val KEY_PROJ_ANALYTICS = "project_analytics_enabled"
     private const val KEY_APP_LOCK = "app_lock_enabled"
     private const val KEY_OLED_THEME = "oled_theme_enabled"
+    private const val KEY_ONBOARDING_COMPLETED = "onboarding_completed"
     private const val KEY_RECENT_ACT = "recent_activities_data"
     private const val KEY_DAILY_MOODS = "daily_moods_data"
+    private const val KEY_USER_NAME = "user_profile_name"
+    private const val KEY_USER_BIO = "user_profile_bio"
+    private const val KEY_USER_AVATAR = "user_profile_avatar"
     private const val KEY_CUSTOM_COLORS = "user_custom_colors_data"
     private const val KEY_PROJ_TAGS = "project_custom_tags_data"
     private const val KEY_PROJ_DUAL_EXIST = "project_dual_exist_enabled"
@@ -257,8 +266,12 @@ object DataManager {
             putBoolean(KEY_PROJ_IDEAS_ENABLED, projectIdeasEnabled)
             putBoolean(KEY_APP_LOCK, isAppLockEnabled)
             putBoolean(KEY_OLED_THEME, isOledThemeEnabled)
+            putBoolean(KEY_ONBOARDING_COMPLETED, isOnboardingCompleted)
             putString(KEY_RECENT_ACT, gson.toJson(recentActivities))
             putString(KEY_DAILY_MOODS, gson.toJson(dailyMoods))
+            putString(KEY_USER_NAME, userName)
+            putString(KEY_USER_BIO, userBio)
+            putInt(KEY_USER_AVATAR, userAvatarRes)
             putString(KEY_CUSTOM_COLORS, gson.toJson(userCustomColors))
             putString(KEY_PROJ_TAGS, gson.toJson(projectCustomTags))
 
@@ -443,6 +456,10 @@ object DataManager {
         projectIdeasEnabled = prefs.getBoolean(KEY_PROJ_IDEAS_ENABLED, true)
         isAppLockEnabled = prefs.getBoolean(KEY_APP_LOCK, false)
         isOledThemeEnabled = prefs.getBoolean(KEY_OLED_THEME, false)
+        isOnboardingCompleted = prefs.getBoolean(KEY_ONBOARDING_COMPLETED, false)
+        userName = prefs.getString(KEY_USER_NAME, "Arabi") ?: "Arabi"
+        userBio = prefs.getString(KEY_USER_BIO, "Professional Tier") ?: "Professional Tier"
+        userAvatarRes = prefs.getInt(KEY_USER_AVATAR, R.drawable.ic_habit_tracker)
 
         prefs.getString(KEY_RECENT_ACT, null)?.let {
             val type = object : TypeToken<MutableList<String>>() {}.type
@@ -581,34 +598,56 @@ object DataManager {
 
     fun importData(context: Context, json: String): Boolean {
         return try {
-            val allData = Gson().fromJson(json, AllAppData::class.java)
-            habits = allData.habits.toMutableList()
-            workouts = allData.workouts.toMutableList()
+            val allData = Gson().fromJson(json, AllAppData::class.java) ?: return false
+            
+            // Resilient Restoration with Null Safety
+            habits = allData.habits?.toMutableList() ?: mutableListOf()
+            workouts = allData.workouts?.toMutableList() ?: mutableListOf()
+            tasks = allData.tasks?.toMutableList() ?: mutableListOf()
+            notes = allData.notes?.toMutableList() ?: mutableListOf()
+            transactions = allData.transactions?.toMutableList() ?: mutableListOf()
+            history = allData.history?.toMutableMap() ?: mutableMapOf()
+            
+            monthlyBudget = allData.monthlyBudget
+            monthlySavingsGoal = allData.monthlySavingsGoal
+            
+            // Sanitization for nested fields (important for older backup versions)
+            habits.forEach { 
+                it.isExpanded = false
+                if (it.completedDates == null) it.completedDates = mutableListOf() 
+            }
+            
             workouts.forEach { workout ->
+                workout.isExpanded = false
+                if (workout.completedDates == null) workout.completedDates = mutableListOf()
                 @Suppress("SENSELESS_COMPARISON")
                 if (workout.muscleGroups == null) {
                     workout.muscleGroups = listOf("General")
                 }
             }
-            tasks = allData.tasks.toMutableList()
-            notes = allData.notes.toMutableList()
-            transactions = allData.transactions.toMutableList()
-            monthlyBudget = allData.monthlyBudget
-            monthlySavingsGoal = allData.monthlySavingsGoal
-            history = allData.history.toMutableMap()
-            
-            habits.forEach { 
-                it.isExpanded = false
-                if (it.completedDates == null) it.completedDates = mutableListOf() 
+
+            tasks.forEach { task ->
+                if (task.subtasks == null) {
+                    try {
+                        val field = task::class.java.getDeclaredField("subtasks")
+                        field.isAccessible = true
+                        field.set(task, mutableListOf<Subtask>())
+                    } catch (e: Exception) {}
+                }
+                @Suppress("SENSELESS_COMPARISON")
+                if (task.category == null) task.category = "General"
+                @Suppress("SENSELESS_COMPARISON")
+                if (task.section == null) task.section = "Tasks"
             }
-            workouts.forEach { 
-                it.isExpanded = false
-                if (it.completedDates == null) it.completedDates = mutableListOf() 
+
+            notes.forEach { note ->
+                sanitizeProjectNote(note)
             }
 
             saveData(context)
             true
         } catch (e: Exception) {
+            android.util.Log.e("DataManager", "Import Failed: ${e.message}", e)
             false
         }
     }

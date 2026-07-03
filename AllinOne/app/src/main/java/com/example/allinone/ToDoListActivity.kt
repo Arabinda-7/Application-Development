@@ -66,6 +66,10 @@ class ToDoListActivity : AppCompatActivity() {
             }
             showAddTaskDialog(null) 
         }
+
+        if (intent.getBooleanExtra("SHOW_ADD_DIALOG", false)) {
+            showAddTaskDialog(null)
+        }
     }
 
     private fun setupHeader() {
