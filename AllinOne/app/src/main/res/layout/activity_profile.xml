@@ -137,7 +137,7 @@
             android:layout_height="wrap_content"
             android:layout_marginStart="24dp"
             android:layout_marginTop="40dp"
-            android:text="SECURITY &amp; PRIVACY"
+            android:text="LOCK &amp; PRIVACY"
             android:textColor="@color/text_secondary"
             android:textSize="10sp"
             android:textStyle="bold"

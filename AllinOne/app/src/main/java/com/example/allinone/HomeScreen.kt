@@ -44,6 +44,7 @@ fun HomeScreen(
     onNavigateToFinance: () -> Unit,
     onNavigateToSettings: () -> Unit,
     onNavigateToProfile: () -> Unit = {},
+    onNavigateToPerformanceHistory: () -> Unit = {},
     onQuickAddTodo: () -> Unit = {},
     onQuickAddExpense: () -> Unit = {},
     onQuickAddNote: () -> Unit = {},
@@ -295,7 +296,14 @@ fun HomeScreen(
                 Column(modifier = Modifier.padding(24.dp)) {
                     Row(verticalAlignment = Alignment.CenterVertically) {
                         Column(modifier = Modifier.weight(1f)) {
-                            Text("DAILY PERFORMANCE", color = Color(0xFF1A73E8), fontSize = 10.sp, fontWeight = FontWeight.Black, letterSpacing = 1.sp)
+                            Text(
+                                "DAILY PERFORMANCE", 
+                                color = Color(0xFF1A73E8), 
+                                fontSize = 10.sp, 
+                                fontWeight = FontWeight.Black, 
+                                letterSpacing = 1.sp,
+                                modifier = Modifier.clickable { onNavigateToPerformanceHistory() }
+                            )
                             Text("${state.overallProgress}% Completed", color = Color.White, fontSize = 20.sp, fontWeight = FontWeight.Bold)
                         }
                         Column(horizontalAlignment = Alignment.End) {

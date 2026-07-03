@@ -24,5 +24,6 @@ data class DashboardState(
     val noteIcon: Int = R.drawable.ic_notes,
     val projectIcon: Int = R.drawable.ic_project,
     val financeIcon: Int = R.drawable.ic_finance,
-    val userAvatarRes: Int = R.drawable.icons8_profile_100
+    val userAvatarRes: Int = R.drawable.icons8_profile_100,
+    val isDataLoaded: Boolean = false
 )

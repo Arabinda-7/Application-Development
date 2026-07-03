@@ -54,6 +54,8 @@
         <activity android:name=".PersonalLedgerBookActivity" />
         <activity android:name=".ProfileActivity" />
         <activity android:name=".OnboardingActivity" />
+        <activity android:name=".PerformanceHistoryActivity" />
+        <activity android:name=".LockActivity" />
     </application>
 
 </manifest>

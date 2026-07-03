@@ -121,7 +121,7 @@ class SettingsActivity : AppCompatActivity() {
             SettingsHubItem("Notes", "Manage categories and writing templates", R.drawable.ic_notes, "NOTES"),
             SettingsHubItem("Finance", "Setup currency and budget goals", R.drawable.ic_finance, "FINANCE"),
             SettingsHubItem("Projects", "Advanced roadmap and project settings", R.drawable.ic_project, "PROJECTS"),
-            SettingsHubItem("App Security", "Biometric lock and privacy settings", R.drawable.baseline_settings_24, "SECURITY"),
+            SettingsHubItem("Lock & Security", "App PIN lock and privacy settings", R.drawable.baseline_settings_24, "SECURITY"),
             SettingsHubItem("Appearance Settings", "Manage section icons and colors", R.drawable.ic_habit_tracker, "APPEARANCE"),
             SettingsHubItem("Others", "Additional app configurations", R.drawable.baseline_tune_24, "OTHERS"),
             SettingsHubItem("Help & Guide", "Support and feature documentation", R.drawable.baseline_settings_24, "HELP")
@@ -301,9 +301,30 @@ class SettingsActivity : AppCompatActivity() {
                 })
             }
             "SECURITY" -> {
-                settings.add(ConfigItem("Biometric Lock", "Require Fingerprint/Face ID to enter", isToggle = true, isChecked = DataManager.isAppLockEnabled) {
-                    DataManager.isAppLockEnabled = !DataManager.isAppLockEnabled
+                settings.add(ConfigItem("App Access Lock", "Require PIN to open the app", isToggle = true, isChecked = DataManager.isAppLockEnabled) {
+                    if (!DataManager.isAppLockEnabled) {
+                        // Turning ON: If no PIN, go to setup
+                        if (DataManager.appLockPin == null) {
+                            val intent = Intent(this, LockActivity::class.java).apply { putExtra(LockActivity.EXTRA_MODE, LockActivity.MODE_SETUP) }
+                            startActivity(intent)
+                        } else {
+                            DataManager.isAppLockEnabled = true
+                        }
+                    } else {
+                        // Turning OFF
+                        DataManager.isAppLockEnabled = false
+                    }
+                    DataManager.saveData(this)
+                    showSectionSettings("SECURITY")
                 })
+                
+                if (DataManager.isAppLockEnabled && DataManager.appLockPin != null) {
+                    settings.add(ConfigItem("Change PIN", "Update your security code") {
+                        val intent = Intent(this, LockActivity::class.java).apply { putExtra(LockActivity.EXTRA_MODE, LockActivity.MODE_CHANGE) }
+                        startActivity(intent)
+                    })
+                }
+
                 settings.add(ConfigItem("OLED Mode", "Pure black theme for OLED screens", isToggle = true, isChecked = DataManager.isOledThemeEnabled) {
                     DataManager.isOledThemeEnabled = !DataManager.isOledThemeEnabled
                 })

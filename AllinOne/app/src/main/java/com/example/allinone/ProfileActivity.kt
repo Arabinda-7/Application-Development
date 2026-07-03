@@ -123,15 +123,23 @@ class ProfileActivity : AppCompatActivity() {
     }
 
     private fun setupSecurityHub() {
-        // Biometric Lock
+        // App Lock
         setupToggle(
             R.id.item_biometric_lock,
             R.drawable.baseline_settings_24,
-            "Biometric Lock",
+            "App Access Lock",
             DataManager.isAppLockEnabled
         ) { isChecked ->
-            DataManager.isAppLockEnabled = isChecked
-            DataManager.saveData(this)
+            if (isChecked && DataManager.appLockPin == null) {
+                // If turning ON but no PIN, go to setup
+                val intent = Intent(this, LockActivity::class.java).apply { 
+                    putExtra(LockActivity.EXTRA_MODE, LockActivity.MODE_SETUP) 
+                }
+                startActivity(intent)
+            } else {
+                DataManager.isAppLockEnabled = isChecked
+                DataManager.saveData(this)
+            }
         }
 
         // OLED Mode

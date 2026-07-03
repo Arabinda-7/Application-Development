@@ -10,10 +10,16 @@ import android.widget.ImageView
 import android.widget.TextView
 import android.widget.Toast
 import androidx.activity.compose.setContent
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AppCompatActivity
+import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
@@ -24,6 +30,16 @@ import java.util.*
 class MainActivity : AppCompatActivity() {
 
     private var dashboardState by mutableStateOf(DashboardState())
+    private var isAppUnlocked by mutableStateOf(false)
+
+    private val lockLauncher = registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
+        if (result.resultCode == RESULT_OK) {
+            isAppUnlocked = true
+            handleInitializationComplete()
+        } else {
+            finish() // Exit if authentication fails or is cancelled
+        }
+    }
 
     // Direct Access Dialogs for Speed Dial
     private fun quickAddTask() {
@@ -54,42 +70,69 @@ class MainActivity : AppCompatActivity() {
         lifecycleScope.launch {
             DataManager.loadData(this@MainActivity)
             
-            if (!DataManager.isOnboardingCompleted) {
-                startActivity(Intent(this@MainActivity, OnboardingActivity::class.java))
-                finish()
+            // Check Lock Requirement
+            if (DataManager.isAppLockEnabled && DataManager.appLockPin != null) {
+                val intent = Intent(this@MainActivity, LockActivity::class.java).apply {
+                    putExtra(LockActivity.EXTRA_MODE, LockActivity.MODE_AUTH)
+                }
+                lockLauncher.launch(intent)
             } else {
-                refreshState()
+                isAppUnlocked = true
+                handleInitializationComplete()
             }
         }
 
         setContent {
-            HomeScreen(
-                state = dashboardState,
-                onNavigateToHabits = { startActivity(Intent(this, HabitTrackerActivity::class.java)) },
-                onNavigateToWorkout = { startActivity(Intent(this, WorkoutRoutineActivity::class.java)) },
-                onNavigateToTodos = { startActivity(Intent(this, ToDoListActivity::class.java)) },
-                onNavigateToNotes = { startActivity(Intent(this, NotesActivity::class.java)) },
-                onNavigateToProjects = { startActivity(Intent(this, ProjectActivity::class.java)) },
-                onNavigateToFinance = { startActivity(Intent(this, FinanceActivity::class.java)) },
-                onNavigateToSettings = { startActivity(Intent(this, SettingsActivity::class.java)) },
-                onNavigateToProfile = { startActivity(Intent(this, ProfileActivity::class.java)) },
-                onQuickAddTodo = { quickAddTask() },
-                onQuickAddExpense = { quickAddExpense() },
-                onQuickAddNote = { quickAddNote() },
-                onColorSelected = { section, color ->
-                    updateSectionColor(section, color)
-                },
-                onMoodSelected = { emoji ->
-                    val today = DataManager.getTrackingDateString()
-                    DataManager.dailyMoods[today] = emoji
-                    DataManager.saveData(this)
-                    refreshState()
-                },
-                onSearchRequested = { query ->
-                    performUniversalSearch(query)
+            when {
+                !dashboardState.isDataLoaded -> {
+                    // Show pure black splash while loading
+                    Box(modifier = Modifier.fillMaxSize().background(Color.Black))
                 }
-            )
+                !isAppUnlocked -> {
+                    // Stay black while waiting for Biometric Prompt
+                    Box(modifier = Modifier.fillMaxSize().background(Color.Black))
+                }
+                else -> {
+                    HomeScreen(
+                        state = dashboardState,
+                        onNavigateToHabits = { startActivity(Intent(this, HabitTrackerActivity::class.java)) },
+                        onNavigateToWorkout = { startActivity(Intent(this, WorkoutRoutineActivity::class.java)) },
+                        onNavigateToTodos = { startActivity(Intent(this, ToDoListActivity::class.java)) },
+                        onNavigateToNotes = { startActivity(Intent(this, NotesActivity::class.java)) },
+                        onNavigateToProjects = { startActivity(Intent(this, ProjectActivity::class.java)) },
+                        onNavigateToFinance = { startActivity(Intent(this, FinanceActivity::class.java)) },
+                        onNavigateToSettings = { startActivity(Intent(this, SettingsActivity::class.java)) },
+                        onNavigateToProfile = { startActivity(Intent(this, ProfileActivity::class.java)) },
+                        onNavigateToPerformanceHistory = { startActivity(Intent(this, PerformanceHistoryActivity::class.java)) },
+                        onQuickAddTodo = { quickAddTask() },
+                        onQuickAddExpense = { quickAddExpense() },
+                        onQuickAddNote = { quickAddNote() },
+                        onColorSelected = { section, color ->
+                            updateSectionColor(section, color)
+                        },
+                        onMoodSelected = { emoji ->
+                            val today = DataManager.getTrackingDateString()
+                            DataManager.dailyMoods[today] = emoji
+                            DataManager.saveData(this)
+                            refreshState()
+                        },
+                        onSearchRequested = { query ->
+                            performUniversalSearch(query)
+                        }
+                    )
+                }
+            }
         }
+    }
+
+    private fun handleInitializationComplete() {
+        if (!DataManager.isOnboardingCompleted) {
+            startActivity(Intent(this@MainActivity, OnboardingActivity::class.java))
+            finish()
+            return
+        }
+        
+        refreshState()
     }
 
     private fun performUniversalSearch(query: String) {
@@ -184,7 +227,8 @@ class MainActivity : AppCompatActivity() {
             noteIcon = DataManager.globalNoteIcon,
             projectIcon = DataManager.globalProjectIcon,
             financeIcon = DataManager.globalFinanceIcon,
-            userAvatarRes = DataManager.userAvatarRes
+            userAvatarRes = DataManager.userAvatarRes,
+            isDataLoaded = true
         )
     }
 
@@ -203,7 +247,9 @@ class MainActivity : AppCompatActivity() {
 
     override fun onResume() {
         super.onResume()
-        refreshState()
+        if (dashboardState.isDataLoaded && isAppUnlocked) {
+            refreshState()
+        }
     }
 
     // --- Search Adapter ---

@@ -77,6 +77,7 @@ object DataManager {
     var isAppLockEnabled: Boolean = false
     var isOledThemeEnabled: Boolean = false
     var isOnboardingCompleted: Boolean = false
+    var appLockPin: String? = null
 
     var userName: String = "Arabi"
     var userBio: String = "Professional Tier"
@@ -163,6 +164,7 @@ object DataManager {
     private const val KEY_PROJ_ALERTS = "project_deadline_alerts"
     private const val KEY_PROJ_ANALYTICS = "project_analytics_enabled"
     private const val KEY_APP_LOCK = "app_lock_enabled"
+    private const val KEY_APP_LOCK_PIN = "app_lock_pin"
     private const val KEY_OLED_THEME = "oled_theme_enabled"
     private const val KEY_ONBOARDING_COMPLETED = "onboarding_completed"
     private const val KEY_RECENT_ACT = "recent_activities_data"
@@ -265,6 +267,7 @@ object DataManager {
             putBoolean(KEY_PROJ_DUAL_EXIST, projectDualExistEnabled)
             putBoolean(KEY_PROJ_IDEAS_ENABLED, projectIdeasEnabled)
             putBoolean(KEY_APP_LOCK, isAppLockEnabled)
+            putString(KEY_APP_LOCK_PIN, appLockPin)
             putBoolean(KEY_OLED_THEME, isOledThemeEnabled)
             putBoolean(KEY_ONBOARDING_COMPLETED, isOnboardingCompleted)
             putString(KEY_RECENT_ACT, gson.toJson(recentActivities))
@@ -455,6 +458,7 @@ object DataManager {
         projectDualExistEnabled = prefs.getBoolean(KEY_PROJ_DUAL_EXIST, false)
         projectIdeasEnabled = prefs.getBoolean(KEY_PROJ_IDEAS_ENABLED, true)
         isAppLockEnabled = prefs.getBoolean(KEY_APP_LOCK, false)
+        appLockPin = prefs.getString(KEY_APP_LOCK_PIN, null)
         isOledThemeEnabled = prefs.getBoolean(KEY_OLED_THEME, false)
         isOnboardingCompleted = prefs.getBoolean(KEY_ONBOARDING_COMPLETED, false)
         userName = prefs.getString(KEY_USER_NAME, "Arabi") ?: "Arabi"
