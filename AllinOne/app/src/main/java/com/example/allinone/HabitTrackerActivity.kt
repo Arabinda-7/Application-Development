@@ -2,6 +2,7 @@ package com.example.allinone
 
 import android.app.AlertDialog
 import android.app.Dialog
+import android.content.res.ColorStateList
 import android.graphics.Color
 import android.os.Bundle
 import android.view.Gravity
@@ -19,9 +20,12 @@ import android.widget.PopupWindow
 import android.widget.RadioButton
 import android.widget.RadioGroup
 import android.widget.TextView
+import androidx.activity.enableEdgeToEdge
 import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.widget.SwitchCompat
 import androidx.core.content.ContextCompat
+import androidx.core.view.ViewCompat
+import androidx.core.view.WindowInsetsCompat
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import androidx.viewpager2.widget.ViewPager2
@@ -42,8 +46,28 @@ class HabitTrackerActivity : AppCompatActivity() {
     private var currentGridCalendar = Calendar.getInstance()
 
     override fun onCreate(savedInstanceState: Bundle?) {
+        enableEdgeToEdge()
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_habit_tracker)
+
+        ViewCompat.setOnApplyWindowInsetsListener(findViewById(R.id.today_layout)) { v, insets ->
+            val topPadding = (8 * resources.displayMetrics.density).toInt()
+            v.setPadding(v.paddingLeft, topPadding, v.paddingRight, v.paddingBottom)
+            insets
+        }
+        
+        ViewCompat.setOnApplyWindowInsetsListener(findViewById(R.id.history_layout)) { v, insets ->
+            val topPadding = (8 * resources.displayMetrics.density).toInt()
+            val navBars = insets.getInsets(WindowInsetsCompat.Type.navigationBars())
+            v.setPadding(v.paddingLeft, topPadding, v.paddingRight, navBars.bottom)
+            insets
+        }
+
+        ViewCompat.setOnApplyWindowInsetsListener(findViewById(R.id.bottom_nav_mock)) { v, insets ->
+            val navBars = insets.getInsets(WindowInsetsCompat.Type.navigationBars())
+            v.setPadding(v.paddingLeft, v.paddingTop, v.paddingRight, navBars.bottom)
+            insets
+        }
 
         val dateTextView = findViewById<TextView>(R.id.tv_date)
         val sdf = SimpleDateFormat("MMM dd", Locale.getDefault())
@@ -350,46 +374,102 @@ class HabitTrackerActivity : AppCompatActivity() {
         val nameInput = dialog.findViewById<EditText>(R.id.habit_name_input)
         val btnClose = dialog.findViewById<View>(R.id.btn_close)
         val btnSave = dialog.findViewById<TextView>(R.id.btn_save)
-        if (DataManager.habitAddThemeColor != -1) {
-            btnSave.setTextColor(DataManager.habitAddThemeColor)
-        }
         val iconPreview = dialog.findViewById<ImageView>(R.id.icon_preview)
         val colorPreview = dialog.findViewById<View>(R.id.color_preview)
-        val cardRepeat = dialog.findViewById<View>(R.id.card_repeat)
-        val tvRepeatSummary = dialog.findViewById<TextView>(R.id.tv_repeat_summary)
+        val headerAccent = dialog.findViewById<View>(R.id.header_bg_accent)
+        val tvNameHint = dialog.findViewById<TextView>(R.id.tv_name_hint)
+        val tvScheduleHint = dialog.findViewById<TextView>(R.id.tv_schedule_hint)
 
-        val radioAnytime = dialog.findViewById<RadioButton>(R.id.radio_daily)
-        val radioMorning = dialog.findViewById<RadioButton>(R.id.radio_morning)
-        val radioAfternoon = dialog.findViewById<RadioButton>(R.id.radio_afternoon)
-        val radioEvening = dialog.findViewById<RadioButton>(R.id.radio_evening)
-        val frequencyRadios = listOf(radioAnytime, radioMorning, radioAfternoon, radioEvening)
+        // Day Selector Direct Logic
+        val dayViews = listOf(R.id.day_0_direct, R.id.day_1_direct, R.id.day_2_direct, R.id.day_3_direct, R.id.day_4_direct, R.id.day_5_direct, R.id.day_6_direct)
+            .map { dialog.findViewById<TextView>(it) }
+        
+        tempRepeatDays = existingHabit?.repeatDays?.toMutableList() ?: mutableListOf(0, 1, 2, 3, 4, 5, 6)
+        tempRepeatType = "SPECIFIC_DAYS"
 
-        frequencyRadios.forEach { rb -> rb.setOnClickListener { updateRadioSelection(frequencyRadios, rb) } }
+        fun validateInputs() {
+            val name = nameInput.text.toString().trim()
+            val isNameValid = name.isNotEmpty()
+            val isScheduleValid = tempRepeatDays.isNotEmpty()
+            val isAllValid = isNameValid && isScheduleValid
+
+            btnSave.alpha = if (isAllValid) 1.0f else 0.3f
+            btnSave.isEnabled = isAllValid
+            
+            tvNameHint.visibility = if (isNameValid) View.GONE else View.VISIBLE
+            tvScheduleHint.visibility = if (isScheduleValid) View.GONE else View.VISIBLE
+            
+            if (!isNameValid) startPulseAnimation(tvNameHint)
+            if (!isScheduleValid) startPulseAnimation(tvScheduleHint)
+        }
+
+        fun refreshDayButtons() {
+            dayViews.forEachIndexed { index, tv ->
+                val isSelected = tempRepeatDays.contains(index)
+                tv.backgroundTintList = ColorStateList.valueOf(if (isSelected) ContextCompat.getColor(this, R.color.chip_selected) else Color.parseColor("#1AFFFFFF"))
+                tv.alpha = if (isSelected) 1.0f else 0.5f
+            }
+            validateInputs()
+        }
+        refreshDayButtons()
+
+        dayViews.forEachIndexed { index, tv ->
+            tv.setOnClickListener {
+                if (tempRepeatDays.contains(index)) { if (tempRepeatDays.size > 1) tempRepeatDays.remove(index) }
+                else { tempRepeatDays.add(index) }
+                refreshDayButtons()
+            }
+        }
+
+        nameInput.addTextChangedListener(object : android.text.TextWatcher {
+            override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {}
+            override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) { validateInputs() }
+            override fun afterTextChanged(s: android.text.Editable?) {}
+        })
+
+        // Frequency Cards Logic
+        val cardMorning = dialog.findViewById<com.google.android.material.card.MaterialCardView>(R.id.card_morning)
+        val cardAfternoon = dialog.findViewById<com.google.android.material.card.MaterialCardView>(R.id.card_afternoon)
+        val cardEvening = dialog.findViewById<com.google.android.material.card.MaterialCardView>(R.id.card_evening)
+        val cardAnytime = dialog.findViewById<com.google.android.material.card.MaterialCardView>(R.id.card_anytime)
+        val freqCards = mapOf("Morning" to cardMorning, "Afternoon" to cardAfternoon, "Evening" to cardEvening, "Anytime" to cardAnytime)
+
+        var selectedFrequency = existingHabit?.frequency ?: "Anytime"
+
+        fun refreshFreqCards() {
+            freqCards.forEach { (type, card) ->
+                val isActive = type == selectedFrequency
+                card.setCardBackgroundColor(if (isActive) ContextCompat.getColor(this, R.color.chip_selected) else Color.parseColor("#1AFFFFFF"))
+                card.alpha = if (isActive) 1.0f else 0.6f
+            }
+        }
+        refreshFreqCards()
+
+        freqCards.forEach { (type, card) ->
+            card.setOnClickListener { selectedFrequency = type; refreshFreqCards() }
+        }
 
         val colors = listOf(ContextCompat.getColor(this, R.color.card_blue), ContextCompat.getColor(this, R.color.card_orange), ContextCompat.getColor(this, R.color.card_green), Color.MAGENTA, Color.RED, Color.CYAN, Color.YELLOW, Color.LTGRAY)
-
         var selectedColor = existingHabit?.color ?: colors[0]
         var selectedIcon = existingHabit?.iconResId ?: android.R.drawable.ic_menu_directions
-        
-        tempRepeatType = existingHabit?.repeatType ?: "SPECIFIC_DAYS"
-        tempRepeatDays = existingHabit?.repeatDays?.toMutableList() ?: mutableListOf(0, 1, 2, 3, 4, 5, 6)
-        tempRepeatCount = existingHabit?.repeatCount ?: 1
 
-        updateRepeatSummary(tvRepeatSummary)
+        fun updateThemeVisuals() {
+            iconPreview.backgroundTintList = ColorStateList.valueOf(selectedColor)
+            colorPreview.backgroundTintList = ColorStateList.valueOf(selectedColor)
+            headerAccent.backgroundTintList = ColorStateList.valueOf(selectedColor)
+            if (btnSave.isEnabled) btnSave.setTextColor(selectedColor) else btnSave.setTextColor(Color.GRAY)
+            tvNameHint.setTextColor(selectedColor)
+            tvScheduleHint.setTextColor(selectedColor)
+        }
 
         if (existingHabit != null) {
             nameInput.setText(existingHabit.name)
-            btnSave.text = "Save"
-            when (existingHabit.frequency) {
-                "Morning" -> updateRadioSelection(frequencyRadios, radioMorning)
-                "Afternoon" -> updateRadioSelection(frequencyRadios, radioAfternoon)
-                "Evening" -> updateRadioSelection(frequencyRadios, radioEvening)
-                else -> updateRadioSelection(frequencyRadios, radioAnytime)
-            }
+            btnSave.text = "Update"
             iconPreview.setImageResource(selectedIcon)
-            iconPreview.backgroundTintList = android.content.res.ColorStateList.valueOf(selectedColor)
-            colorPreview.backgroundTintList = android.content.res.ColorStateList.valueOf(selectedColor)
         }
+        
+        updateThemeVisuals()
+        validateInputs()
 
         dialog.findViewById<View>(R.id.card_habit_icon).setOnClickListener {
             showIconSelectionDialog { icon ->
@@ -401,63 +481,86 @@ class HabitTrackerActivity : AppCompatActivity() {
         colorPreview.setOnClickListener {
             val currentIndex = colors.indexOf(selectedColor)
             selectedColor = colors[(currentIndex + 1) % colors.size]
-            iconPreview.backgroundTintList = android.content.res.ColorStateList.valueOf(selectedColor)
-            colorPreview.backgroundTintList = android.content.res.ColorStateList.valueOf(selectedColor)
+            updateThemeVisuals()
         }
-
-        cardRepeat.setOnClickListener { showHabitDaysDialog { updateRepeatSummary(tvRepeatSummary) } }
 
         btnClose.setOnClickListener { dialog.dismiss() }
         
         btnSave.setOnClickListener {
-            val name = nameInput.text.toString()
-            if (name.isNotEmpty()) {
-                val frequency = when {
-                    radioMorning.isChecked -> "Morning"
-                    radioAfternoon.isChecked -> "Afternoon"
-                    radioEvening.isChecked -> "Evening"
-                    else -> "Anytime"
-                }
-                
-                if (existingHabit == null) {
-                    habits.add(Habit(name, false, frequency, color = selectedColor, iconResId = selectedIcon, repeatType = tempRepeatType, repeatDays = tempRepeatDays.toList(), repeatCount = tempRepeatCount))
-                } else {
-                    existingHabit.name = name
-                    existingHabit.frequency = frequency
-                    existingHabit.color = selectedColor
-                    existingHabit.iconResId = selectedIcon
-                    existingHabit.repeatType = tempRepeatType
-                    existingHabit.repeatDays = tempRepeatDays.toList()
-                    existingHabit.repeatCount = tempRepeatCount
-                }
-                habitAdapter.sortHabits()
-                DataManager.saveData(this)
-                dialog.dismiss()
+            val name = nameInput.text.toString().trim()
+            if (existingHabit == null) {
+                habits.add(Habit(name, false, selectedFrequency, color = selectedColor, iconResId = selectedIcon, repeatType = "SPECIFIC_DAYS", repeatDays = tempRepeatDays.toList(), repeatCount = 1))
+            } else {
+                existingHabit.name = name
+                existingHabit.frequency = selectedFrequency
+                existingHabit.color = selectedColor
+                existingHabit.iconResId = selectedIcon
+                existingHabit.repeatDays = tempRepeatDays.toList()
             }
+            habitAdapter.sortHabits()
+            DataManager.saveData(this)
+            dialog.dismiss()
         }
         dialog.show()
     }
 
+    private fun startPulseAnimation(view: View) {
+        if (view.tag == "pulsing") return
+        view.tag = "pulsing"
+        view.animate().alpha(0.4f).setDuration(800).withEndAction {
+            view.animate().alpha(1.0f).setDuration(800).withEndAction {
+                view.tag = null
+                if (view.visibility == View.VISIBLE) startPulseAnimation(view)
+            }
+        }.start()
+    }
+
     private fun showIconSelectionDialog(onSelected: (Int) -> Unit) {
-        val icons = listOf(R.drawable.ic_fitness, R.drawable.ic_water, R.drawable.ic_book, R.drawable.ic_sleep, R.drawable.ic_meditation, android.R.drawable.ic_menu_directions, android.R.drawable.ic_menu_edit, android.R.drawable.ic_menu_camera, android.R.drawable.ic_lock_idle_alarm)
-        val dialogView = LayoutInflater.from(this).inflate(R.layout.dialog_icon_picker, null)
-        val gridLayout = dialogView.findViewById<GridLayout>(R.id.icon_grid)
-        val pickerDialog = AlertDialog.Builder(this).setTitle("Select Icon").setView(dialogView).create()
+        val icons = listOf(
+            R.drawable.ic_habit_tracker, R.drawable.ic_water, R.drawable.ic_sleep,
+            R.drawable.ic_book, R.drawable.ic_meditation, R.drawable.ic_notes,
+            R.drawable.ic_fitness, R.drawable.ic_finance, R.drawable.icons8_coffee_100,
+            R.drawable.icons8_yoga_100, R.drawable.icons8_clock_100, R.drawable.icons8_laptop_100,
+            R.drawable.icons8_typing_100, R.drawable.icons8_sun_50_apng, R.drawable.icons8_health_100_3,
+            R.drawable.icons8_clock_100_2, R.drawable.icons8_search_100, R.drawable.icons8_income_100,
+            R.drawable.icons8_bookmark_100, R.drawable.icons8_coffee_100_2, R.drawable.icons8_coffee_100_3,
+            R.drawable.icons8_coffee_100_4, R.drawable.icons8_coffee_100_5, R.drawable.icons8_drinking_100,
+            R.drawable.icons8_drinking_50, R.drawable.icons8_health_100, R.drawable.icons8_health_100_4,
+            R.drawable.icons8_health_100_9, R.drawable.icons8_health_100_11, R.drawable.icons8_health_100_12,
+            R.drawable.icons8_health_100_13, R.drawable.icons8_heart_health_100, R.drawable.icons8_yoga_100_3,
+            R.drawable.icons8_pilates_100, R.drawable.icons8_artistic_gymnastics_100, R.drawable.icons8_walking_100_3
+        )
+        
+        val dialog = Dialog(this)
+        dialog.setContentView(R.layout.dialog_premium_icon_picker)
+        dialog.window?.setBackgroundDrawableResource(android.R.color.transparent)
+        dialog.window?.setLayout(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT)
+
+        val gridLayout = dialog.findViewById<GridLayout>(R.id.premium_icon_grid)
+        val btnClose = dialog.findViewById<View>(R.id.btn_close_picker)
 
         icons.forEach { iconRes ->
             val iconView = ImageView(this)
+            val s = (64 * resources.displayMetrics.density).toInt() // Slightly smaller for better grid fit
             val params = GridLayout.LayoutParams()
-            params.width = 120; params.height = 120; params.setMargins(16, 16, 16, 16)
+            params.width = s; params.height = s; params.setMargins(8, 8, 8, 8)
             iconView.layoutParams = params
+            
             iconView.setImageResource(iconRes)
-            iconView.setPadding(24, 24, 24, 24)
-            iconView.setBackgroundResource(R.drawable.circle_selected_bg)
-            iconView.backgroundTintList = ContextCompat.getColorStateList(this, R.color.chip_background)
-            iconView.imageTintList = ContextCompat.getColorStateList(this, R.color.white)
-            iconView.setOnClickListener { onSelected(iconRes); pickerDialog.dismiss() }
+            iconView.setPadding(16, 16, 16, 16)
+            iconView.background = ContextCompat.getDrawable(this, R.drawable.circle_selected_bg)
+            iconView.backgroundTintList = ColorStateList.valueOf(Color.parseColor("#22FFFFFF"))
+            iconView.imageTintList = ColorStateList.valueOf(Color.WHITE)
+            
+            iconView.setOnClickListener {
+                onSelected(iconRes)
+                dialog.dismiss()
+            }
             gridLayout.addView(iconView)
         }
-        pickerDialog.show()
+
+        btnClose.setOnClickListener { dialog.dismiss() }
+        dialog.show()
     }
 
     private fun updateRepeatSummary(textView: TextView) {

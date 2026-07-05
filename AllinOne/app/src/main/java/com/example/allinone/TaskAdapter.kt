@@ -101,6 +101,7 @@ class TaskAdapter(
                 if (holder.taskCompleted.isChecked) {
                     task.isCompleted = true
                     task.completedTimestamp = System.currentTimeMillis()
+                    DataManager.addActivity("Finished Task: ${task.name}")
                     updateDisplayList()
                     DataManager.saveData(context)
                     onProgressChanged()

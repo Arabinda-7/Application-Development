@@ -17,9 +17,12 @@ import android.widget.ImageView
 import android.widget.LinearLayout
 import android.widget.PopupWindow
 import android.widget.TextView
+import androidx.activity.enableEdgeToEdge
 import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.widget.SwitchCompat
 import androidx.core.content.ContextCompat
+import androidx.core.view.ViewCompat
+import androidx.core.view.WindowInsetsCompat
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import java.text.SimpleDateFormat
@@ -36,8 +39,21 @@ class NotesActivity : AppCompatActivity() {
     private var isDeleteMode = false
 
     override fun onCreate(savedInstanceState: Bundle?) {
+        enableEdgeToEdge()
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_notes)
+
+        ViewCompat.setOnApplyWindowInsetsListener(findViewById(R.id.notes_root_layout)) { v, insets ->
+            val topPadding = (8 * resources.displayMetrics.density).toInt()
+            v.setPadding(v.paddingLeft, topPadding, v.paddingRight, v.paddingBottom)
+            insets
+        }
+        
+        ViewCompat.setOnApplyWindowInsetsListener(findViewById(R.id.bottom_navigation_notes)) { v, insets ->
+            val navBars = insets.getInsets(WindowInsetsCompat.Type.navigationBars())
+            v.setPadding(v.paddingLeft, v.paddingTop, v.paddingRight, navBars.bottom)
+            insets
+        }
 
         applyAutoCleanup()
 
@@ -206,12 +222,10 @@ class NotesActivity : AppCompatActivity() {
         dialog.setContentView(R.layout.dialog_add_note)
 
         val titleInput = dialog.findViewById<EditText>(R.id.note_title_input)
+        val tvTitleHint = dialog.findViewById<TextView>(R.id.tv_title_hint_note)
         val contentInput = dialog.findViewById<EditText>(R.id.note_content_input)
         val colorPreview = dialog.findViewById<View>(R.id.note_color_preview)
         val btnSave = dialog.findViewById<TextView>(R.id.btn_save_note)
-        if (DataManager.noteAddThemeColor != -1) {
-            btnSave.setTextColor(DataManager.noteAddThemeColor)
-        }
         val btnClose = dialog.findViewById<View>(R.id.btn_close_note)
         val btnVoice = dialog.findViewById<View>(R.id.btn_voice_input)
         val btnReminder = dialog.findViewById<View>(R.id.btn_reminder)
@@ -219,6 +233,21 @@ class NotesActivity : AppCompatActivity() {
 
         var selectedColor = ContextCompat.getColor(this, R.color.card_blue)
         colorPreview.backgroundTintList = android.content.res.ColorStateList.valueOf(selectedColor)
+
+        fun validateInputs() {
+            val title = titleInput.text.toString().trim()
+            val isValid = title.isNotEmpty()
+            
+            btnSave.alpha = if (isValid) 1.0f else 0.3f
+            btnSave.isEnabled = isValid
+            
+            tvTitleHint.visibility = if (isValid) View.GONE else View.VISIBLE
+            if (!isValid) startPulseAnimation(tvTitleHint)
+            
+            val themeColor = if (DataManager.noteAddThemeColor != -1) DataManager.noteAddThemeColor else selectedColor
+            if (isValid) btnSave.setTextColor(themeColor) else btnSave.setTextColor(Color.GRAY)
+            tvTitleHint.setTextColor(themeColor)
+        }
 
         val sdf = SimpleDateFormat("dd MMMM h:mm a", Locale.getDefault())
         val currentDateStr = sdf.format(Date())
@@ -238,8 +267,11 @@ class NotesActivity : AppCompatActivity() {
 
         val textWatcher = object : TextWatcher {
             override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {}
-            override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {}
-            override fun afterTextChanged(s: Editable?) { updateMetadata() }
+            override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) { 
+                updateMetadata()
+                validateInputs()
+            }
+            override fun afterTextChanged(s: Editable?) {}
         }
         titleInput.addTextChangedListener(textWatcher)
         contentInput.addTextChangedListener(textWatcher)
@@ -248,9 +280,11 @@ class NotesActivity : AppCompatActivity() {
             val colors = listOf(ContextCompat.getColor(this, R.color.card_blue), ContextCompat.getColor(this, R.color.card_orange), ContextCompat.getColor(this, R.color.card_green), Color.MAGENTA, Color.RED, Color.CYAN)
             selectedColor = colors[(colors.indexOf(selectedColor) + 1) % colors.size]
             colorPreview.backgroundTintList = android.content.res.ColorStateList.valueOf(selectedColor)
+            validateInputs()
         }
 
         btnClose.setOnClickListener { dialog.dismiss() }
+        validateInputs()
         
         btnVoice.setOnClickListener {
             activeContentInput = contentInput
@@ -264,7 +298,7 @@ class NotesActivity : AppCompatActivity() {
         btnSave.setOnClickListener {
             val title = titleInput.text.toString()
             val content = contentInput.text.toString()
-            if (title.isNotEmpty() || content.isNotEmpty()) {
+            if (title.isNotEmpty()) {
                 allNotes.add(0, Note(title, content, color = selectedColor, category = currentCategory))
                 updateDisplayList()
                 noteAdapter.updateNotes(displayNotes)
@@ -285,12 +319,10 @@ class NotesActivity : AppCompatActivity() {
         dialog.setContentView(R.layout.dialog_add_note)
 
         val titleInput = dialog.findViewById<EditText>(R.id.note_title_input)
+        val tvTitleHint = dialog.findViewById<TextView>(R.id.tv_title_hint_note)
         val contentInput = dialog.findViewById<EditText>(R.id.note_content_input)
         val colorPreview = dialog.findViewById<View>(R.id.note_color_preview)
         val btnSave = dialog.findViewById<TextView>(R.id.btn_save_note)
-        if (DataManager.noteAddThemeColor != -1) {
-            btnSave.setTextColor(DataManager.noteAddThemeColor)
-        }
         val btnClose = dialog.findViewById<View>(R.id.btn_close_note)
         val btnVoice = dialog.findViewById<View>(R.id.btn_voice_input)
         val btnReminder = dialog.findViewById<View>(R.id.btn_reminder)
@@ -300,6 +332,21 @@ class NotesActivity : AppCompatActivity() {
         contentInput.setText(note.content)
         var selectedColor = if (note.color != -1) note.color else ContextCompat.getColor(this, R.color.card_blue)
         colorPreview.backgroundTintList = android.content.res.ColorStateList.valueOf(selectedColor)
+
+        fun validateInputs() {
+            val title = titleInput.text.toString().trim()
+            val isValid = title.isNotEmpty()
+            
+            btnSave.alpha = if (isValid) 1.0f else 0.3f
+            btnSave.isEnabled = isValid
+            
+            tvTitleHint.visibility = if (isValid) View.GONE else View.VISIBLE
+            if (!isValid) startPulseAnimation(tvTitleHint)
+            
+            val themeColor = if (DataManager.noteAddThemeColor != -1) DataManager.noteAddThemeColor else selectedColor
+            if (isValid) btnSave.setTextColor(themeColor) else btnSave.setTextColor(Color.GRAY)
+            tvTitleHint.setTextColor(themeColor)
+        }
 
         btnSave.text = "Save"
         val sdf = SimpleDateFormat("dd MMMM h:mm a", Locale.getDefault())
@@ -313,8 +360,11 @@ class NotesActivity : AppCompatActivity() {
 
         val textWatcher = object : TextWatcher {
             override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {}
-            override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {}
-            override fun afterTextChanged(s: Editable?) { updateMetadata() }
+            override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) { 
+                updateMetadata()
+                validateInputs()
+            }
+            override fun afterTextChanged(s: Editable?) {}
         }
         titleInput.addTextChangedListener(textWatcher)
         contentInput.addTextChangedListener(textWatcher)
@@ -323,9 +373,11 @@ class NotesActivity : AppCompatActivity() {
             val colors = listOf(ContextCompat.getColor(this, R.color.card_blue), ContextCompat.getColor(this, R.color.card_orange), ContextCompat.getColor(this, R.color.card_green), Color.MAGENTA, Color.RED, Color.CYAN)
             selectedColor = colors[(colors.indexOf(selectedColor) + 1) % colors.size]
             colorPreview.backgroundTintList = android.content.res.ColorStateList.valueOf(selectedColor)
+            validateInputs()
         }
 
         btnClose.setOnClickListener { dialog.dismiss() }
+        validateInputs()
         
         btnVoice.setOnClickListener {
             activeContentInput = contentInput
@@ -337,15 +389,28 @@ class NotesActivity : AppCompatActivity() {
         }
 
         btnSave.setOnClickListener {
-            note.title = titleInput.text.toString()
-            note.content = contentInput.text.toString()
-            note.color = selectedColor
-            updateDisplayList()
-            noteAdapter.updateNotes(displayNotes)
-            DataManager.saveData(this)
-            dialog.dismiss()
+            if (titleInput.text.toString().isNotEmpty()) {
+                note.title = titleInput.text.toString()
+                note.content = contentInput.text.toString()
+                note.color = selectedColor
+                updateDisplayList()
+                noteAdapter.updateNotes(displayNotes)
+                DataManager.saveData(this)
+                dialog.dismiss()
+            }
         }
         dialog.show()
+    }
+
+    private fun startPulseAnimation(view: View) {
+        if (view.tag == "pulsing") return
+        view.tag = "pulsing"
+        view.animate().alpha(0.4f).setDuration(800).withEndAction {
+            view.animate().alpha(1.0f).setDuration(800).withEndAction {
+                view.tag = null
+                if (view.visibility == View.VISIBLE) startPulseAnimation(view)
+            }
+        }.start()
     }
 
     private fun startVoiceInput() {

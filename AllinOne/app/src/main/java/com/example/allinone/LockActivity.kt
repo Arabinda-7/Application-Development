@@ -7,8 +7,11 @@ import android.os.Bundle
 import android.view.View
 import android.widget.TextView
 import android.widget.Toast
+import androidx.activity.enableEdgeToEdge
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.ContextCompat
+import androidx.core.view.ViewCompat
+import androidx.core.view.WindowInsetsCompat
 
 class LockActivity : AppCompatActivity() {
 
@@ -29,8 +32,15 @@ class LockActivity : AppCompatActivity() {
     private lateinit var dotViews: List<View>
 
     override fun onCreate(savedInstanceState: Bundle?) {
+        enableEdgeToEdge()
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_lock)
+
+        ViewCompat.setOnApplyWindowInsetsListener(findViewById(R.id.lock_root_layout)) { v, insets ->
+            val statusBars = insets.getInsets(WindowInsetsCompat.Type.statusBars())
+            v.setPadding(v.paddingLeft, statusBars.top, v.paddingRight, v.paddingBottom)
+            insets
+        }
 
         currentMode = intent.getIntExtra(EXTRA_MODE, MODE_AUTH)
 

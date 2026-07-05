@@ -74,6 +74,19 @@
         app:layout_constraintTop_toBottomOf="@id/btn_close_note" />
 
     <TextView
+        android:id="@+id/tv_title_hint_note"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="4dp"
+        android:text="Set a title to save your thoughts"
+        android:textColor="#FF5252"
+        android:textSize="11sp"
+        android:textStyle="bold"
+        android:visibility="gone"
+        app:layout_constraintTop_toBottomOf="@id/note_title_input"
+        app:layout_constraintStart_toStartOf="parent" />
+
+    <TextView
         android:id="@+id/tv_note_metadata"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"

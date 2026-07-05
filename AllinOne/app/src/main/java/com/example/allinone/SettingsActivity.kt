@@ -13,9 +13,12 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.*
 import androidx.activity.OnBackPressedCallback
+import androidx.activity.enableEdgeToEdge
 import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.widget.SwitchCompat
 import androidx.core.content.ContextCompat
+import androidx.core.view.ViewCompat
+import androidx.core.view.WindowInsetsCompat
 import androidx.recyclerview.widget.GridLayoutManager
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
@@ -68,8 +71,15 @@ class SettingsActivity : AppCompatActivity() {
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
+        enableEdgeToEdge()
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_settings)
+
+        ViewCompat.setOnApplyWindowInsetsListener(findViewById(R.id.settings_top_header)) { v, insets ->
+            val topPadding = (8 * resources.displayMetrics.density).toInt()
+            v.setPadding(v.paddingLeft, topPadding, v.paddingRight, v.paddingBottom)
+            insets
+        }
 
         settingsList = findViewById(R.id.settings_list)
         tvTitle = findViewById(R.id.tv_title)
@@ -110,8 +120,8 @@ class SettingsActivity : AppCompatActivity() {
         currentPath = "HUB"
         tvTitle.text = "APP SETTINGS"
         
-        // Show Profile Header in Hub
-        findViewById<View>(R.id.settings_top_header).visibility = View.VISIBLE
+        // Show Profile Hub in main settings
+        findViewById<View>(R.id.layout_profile_hub).visibility = View.VISIBLE
         updateMiniProfileUI()
 
         val menuItems = listOf(
@@ -156,8 +166,8 @@ class SettingsActivity : AppCompatActivity() {
         currentPath = section
         tvTitle.text = section.removePrefix("APPEARANCE_").replace("_", " ").uppercase()
         
-        // Hide Profile Header in sub-sections
-        findViewById<View>(R.id.settings_top_header).visibility = View.GONE
+        // Hide Profile Hub in sub-sections
+        findViewById<View>(R.id.layout_profile_hub).visibility = View.GONE
 
         val settings = mutableListOf<ConfigItem>()
         

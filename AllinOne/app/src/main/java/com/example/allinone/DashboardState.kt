@@ -9,7 +9,8 @@ data class DashboardState(
     val safeSpendAmount: Double = 0.0,
     val nextMilestone: String = "No upcoming milestones",
     val recentActions: List<String> = emptyList(),
-    val proTip: String = "Complete your morning habits before 10 AM for 20% more productivity.",
+    val growthAdvice: String = "Build consistency with daily rituals.",
+    val managementAdvice: String = "Organize your workflow for peak efficiency.",
     val currentMood: String? = null,
 
     val habitColor: Int = -1,

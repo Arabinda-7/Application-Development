@@ -50,6 +50,20 @@
         app:layout_constraintTop_toBottomOf="@id/tv_dialog_title" />
 
     <TextView
+        android:id="@+id/tv_amount_hint"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="4dp"
+        android:text="Enter an amount to save"
+        android:textColor="#FF5252"
+        android:textSize="11sp"
+        android:textStyle="bold"
+        android:visibility="gone"
+        app:layout_constraintTop_toBottomOf="@id/et_trans_amount"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent" />
+
+    <TextView
         android:id="@+id/tv_category_label"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"

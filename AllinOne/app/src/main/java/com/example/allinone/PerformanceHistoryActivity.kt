@@ -7,8 +7,11 @@ import android.view.View
 import android.widget.FrameLayout
 import android.widget.GridLayout
 import android.widget.TextView
+import androidx.activity.enableEdgeToEdge
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.ContextCompat
+import androidx.core.view.ViewCompat
+import androidx.core.view.WindowInsetsCompat
 import java.text.SimpleDateFormat
 import java.util.*
 
@@ -19,8 +22,15 @@ class PerformanceHistoryActivity : AppCompatActivity() {
     private lateinit var grid: GridLayout
 
     override fun onCreate(savedInstanceState: Bundle?) {
+        enableEdgeToEdge()
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_performance_history)
+
+        ViewCompat.setOnApplyWindowInsetsListener(findViewById(R.id.performance_root_layout)) { v, insets ->
+            val topPadding = (8 * resources.displayMetrics.density).toInt()
+            v.setPadding(v.paddingLeft, topPadding, v.paddingRight, v.paddingBottom)
+            insets
+        }
 
         tvMonthYear = findViewById(R.id.tv_month_year)
         grid = findViewById(R.id.history_grid)

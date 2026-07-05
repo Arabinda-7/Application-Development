@@ -18,9 +18,12 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.*
+import androidx.activity.enableEdgeToEdge
 import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.widget.SwitchCompat
 import androidx.core.content.ContextCompat
+import androidx.core.view.ViewCompat
+import androidx.core.view.WindowInsetsCompat
 import androidx.recyclerview.widget.ItemTouchHelper
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
@@ -39,8 +42,21 @@ class ToDoListActivity : AppCompatActivity() {
     private var currentSection = DataManager.taskDefaultSection
 
     override fun onCreate(savedInstanceState: Bundle?) {
+        enableEdgeToEdge()
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_to_do_list)
+
+        ViewCompat.setOnApplyWindowInsetsListener(findViewById(R.id.todo_root_layout)) { v, insets ->
+            val topPadding = (8 * resources.displayMetrics.density).toInt()
+            v.setPadding(v.paddingLeft, topPadding, v.paddingRight, v.paddingBottom)
+            insets
+        }
+        
+        ViewCompat.setOnApplyWindowInsetsListener(findViewById(R.id.bottom_navigation_tasks)) { v, insets ->
+            val navBars = insets.getInsets(WindowInsetsCompat.Type.navigationBars())
+            v.setPadding(v.paddingLeft, v.paddingTop, v.paddingRight, navBars.bottom)
+            insets
+        }
 
         val taskList = findViewById<RecyclerView>(R.id.task_list)
         taskList.layoutManager = LinearLayoutManager(this)
@@ -329,6 +345,7 @@ class ToDoListActivity : AppCompatActivity() {
         dialog.window?.setLayout(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT)
 
         val etName = view.findViewById<EditText>(R.id.task_name_input)
+        val tvNameHint = view.findViewById<TextView>(R.id.tv_name_hint)
         val rgPriority = view.findViewById<RadioGroup>(R.id.rg_priority)
         val chipGroupCat = view.findViewById<com.google.android.material.chip.ChipGroup>(R.id.category_chip_group)
         val containerSubtasks = view.findViewById<LinearLayout>(R.id.container_subtasks)
@@ -336,9 +353,27 @@ class ToDoListActivity : AppCompatActivity() {
         val btnAddSubtask = view.findViewById<ImageButton>(R.id.btn_add_subtask)
         val tvReminder = view.findViewById<TextView>(R.id.tv_reminder_summary)
         val btnSave = view.findViewById<TextView>(R.id.btn_save_task)
-        if (DataManager.taskAddThemeColor != -1) {
-            btnSave.setTextColor(DataManager.taskAddThemeColor)
+
+        fun validateInputs() {
+            val name = etName.text.toString().trim()
+            val isValid = name.isNotEmpty()
+            
+            btnSave.alpha = if (isValid) 1.0f else 0.3f
+            btnSave.isEnabled = isValid
+            
+            tvNameHint.visibility = if (isValid) View.GONE else View.VISIBLE
+            if (!isValid) startPulseAnimation(tvNameHint)
+            
+            val themeColor = if (DataManager.taskAddThemeColor != -1) DataManager.taskAddThemeColor else ContextCompat.getColor(this, R.color.primary_blue)
+            if (isValid) btnSave.setTextColor(themeColor) else btnSave.setTextColor(Color.GRAY)
+            tvNameHint.setTextColor(themeColor)
         }
+
+        etName.addTextChangedListener(object : TextWatcher {
+            override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {}
+            override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) { validateInputs() }
+            override fun afterTextChanged(s: Editable?) {}
+        })
 
         // Setup Category Chips
         val categories = DataManager.taskCustomCategories
@@ -375,6 +410,7 @@ class ToDoListActivity : AppCompatActivity() {
             })
         }
         renderSubtasks(containerSubtasks, tempSubtasks)
+        validateInputs()
 
         // Listeners
         rgPriority.setOnCheckedChangeListener { _, id ->
@@ -439,13 +475,21 @@ class ToDoListActivity : AppCompatActivity() {
                 } else {
                     dialog.dismiss()
                 }
-            } else {
-                Toast.makeText(this, "Task Name is required", Toast.LENGTH_SHORT).show()
-                etName.requestFocus()
             }
         }
 
         dialog.show()
+    }
+
+    private fun startPulseAnimation(view: View) {
+        if (view.tag == "pulsing") return
+        view.tag = "pulsing"
+        view.animate().alpha(0.4f).setDuration(800).withEndAction {
+            view.animate().alpha(1.0f).setDuration(800).withEndAction {
+                view.tag = null
+                if (view.visibility == View.VISIBLE) startPulseAnimation(view)
+            }
+        }.start()
     }
 
     private fun setupBottomNavigation() {

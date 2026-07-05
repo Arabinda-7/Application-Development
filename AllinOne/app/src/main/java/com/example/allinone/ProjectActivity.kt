@@ -12,9 +12,12 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.*
+import androidx.activity.enableEdgeToEdge
 import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.widget.SwitchCompat
 import androidx.core.content.ContextCompat
+import androidx.core.view.ViewCompat
+import androidx.core.view.WindowInsetsCompat
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import androidx.recyclerview.widget.StaggeredGridLayoutManager
@@ -31,8 +34,21 @@ class ProjectActivity : AppCompatActivity() {
     private var isProjectsTab = true
 
     override fun onCreate(savedInstanceState: Bundle?) {
+        enableEdgeToEdge()
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_projects)
+
+        ViewCompat.setOnApplyWindowInsetsListener(findViewById(R.id.project_root_layout)) { v, insets ->
+            val topPadding = (8 * resources.displayMetrics.density).toInt()
+            v.setPadding(v.paddingLeft, topPadding, v.paddingRight, v.paddingBottom)
+            insets
+        }
+        
+        ViewCompat.setOnApplyWindowInsetsListener(findViewById(R.id.bottom_navigation_projects)) { v, insets ->
+            val navBars = insets.getInsets(WindowInsetsCompat.Type.navigationBars())
+            v.setPadding(v.paddingLeft, v.paddingTop, v.paddingRight, navBars.bottom)
+            insets
+        }
 
         val projectList = findViewById<RecyclerView>(R.id.project_notes_list)
         projectList.layoutManager = StaggeredGridLayoutManager(2, StaggeredGridLayoutManager.VERTICAL)
@@ -199,6 +215,7 @@ class ProjectActivity : AppCompatActivity() {
         dialog.setContentView(R.layout.dialog_add_project_note)
 
         val titleInput = dialog.findViewById<EditText>(R.id.note_title_input)
+        val tvTitleHint = dialog.findViewById<TextView>(R.id.tv_title_hint_project)
         val contentInput = dialog.findViewById<EditText>(R.id.note_content_input)
 
         val rgStatus = dialog.findViewById<RadioGroup>(R.id.rg_status)
@@ -209,11 +226,6 @@ class ProjectActivity : AppCompatActivity() {
         val btnPin = dialog.findViewById<ImageView>(R.id.btn_pin)
         val colorPreview = dialog.findViewById<View>(R.id.note_color_preview)
         val btnSave = dialog.findViewById<TextView>(R.id.btn_save_note)
-        btnSave.text = if (existingNote == null) "SAVE" else "UPDATE"
-        if (DataManager.projectAddThemeColor != -1) {
-            btnSave.setTextColor(DataManager.projectAddThemeColor)
-        }
-        val btnClose = dialog.findViewById<View>(R.id.btn_close_note)
 
         val tvDeadlineDisplay = dialog.findViewById<TextView>(R.id.tv_deadline_display)
         val containerSubfeatures = dialog.findViewById<LinearLayout>(R.id.container_subfeatures)
@@ -226,6 +238,26 @@ class ProjectActivity : AppCompatActivity() {
         var selectedColor = existingNote?.color?.takeIf { it != -1 } ?: ContextCompat.getColor(this, R.color.card_blue)
         var selectedDeadline = existingNote?.deadline
         val tempSubFeatures = existingNote?.subFeatures?.toMutableList() ?: mutableListOf()
+
+        fun validateInputs() {
+            val title = titleInput.text.toString().trim()
+            val isValid = title.isNotEmpty()
+            
+            btnSave.alpha = if (isValid) 1.0f else 0.3f
+            btnSave.isEnabled = isValid
+            
+            tvTitleHint.visibility = if (isValid) View.GONE else View.VISIBLE
+            if (!isValid) startPulseAnimation(tvTitleHint)
+            
+            if (isValid) btnSave.setTextColor(selectedColor) else btnSave.setTextColor(Color.GRAY)
+            tvTitleHint.setTextColor(selectedColor)
+        }
+
+        titleInput.addTextChangedListener(object : android.text.TextWatcher {
+            override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {}
+            override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) { validateInputs() }
+            override fun afterTextChanged(s: android.text.Editable?) {}
+        })
 
         fun updateDeadlineUI() {
             tvDeadlineDisplay.text = selectedDeadline?.let {
@@ -406,6 +438,7 @@ class ProjectActivity : AppCompatActivity() {
 
         updateDeadlineUI()
         refreshSubFeatures()
+        validateInputs()
 
         // Listeners
         seekProgress.setOnSeekBarChangeListener(object : SeekBar.OnSeekBarChangeListener {
@@ -452,9 +485,10 @@ class ProjectActivity : AppCompatActivity() {
             val colors = listOf(ContextCompat.getColor(this, R.color.card_blue), ContextCompat.getColor(this, R.color.card_orange), ContextCompat.getColor(this, R.color.card_green), Color.MAGENTA, Color.RED, Color.CYAN)
             selectedColor = colors[(colors.indexOf(selectedColor) + 1) % colors.size]
             colorPreview.backgroundTintList = ColorStateList.valueOf(selectedColor)
+            validateInputs()
         }
 
-        btnClose.setOnClickListener { dialog.dismiss() }
+        dialog.findViewById<View>(R.id.btn_close_note).setOnClickListener { dialog.dismiss() }
 
         btnSave.setOnClickListener {
             val title = titleInput.text.toString()
@@ -525,6 +559,17 @@ class ProjectActivity : AppCompatActivity() {
             }
         }
         dialog.show()
+    }
+
+    private fun startPulseAnimation(view: View) {
+        if (view.tag == "pulsing") return
+        view.tag = "pulsing"
+        view.animate().alpha(0.4f).setDuration(800).withEndAction {
+            view.animate().alpha(1.0f).setDuration(800).withEndAction {
+                view.tag = null
+                if (view.visibility == View.VISIBLE) startPulseAnimation(view)
+            }
+        }.start()
     }
 
     private fun showEditSubFeatureDialog(sub: ProjectFeature, showNameField: Boolean = false, onSaved: () -> Unit) {
@@ -1324,9 +1369,32 @@ class ProjectActivity : AppCompatActivity() {
         dialog.setContentView(R.layout.dialog_add_note_project)
 
         val titleInput = dialog.findViewById<EditText>(R.id.note_title_input)
+        val tvTitleHint = dialog.findViewById<TextView>(R.id.tv_title_hint_note) ?: dialog.findViewById<TextView>(R.id.tv_name_hint) // Safety check for re-used layouts
         val contentInput = dialog.findViewById<EditText>(R.id.note_content_input)
         val btnSave = dialog.findViewById<TextView>(R.id.btn_save_note)
         val btnClose = dialog.findViewById<View>(R.id.btn_close_note)
+        
+        fun validateInputs() {
+            val title = titleInput.text.toString().trim()
+            val isValid = title.isNotEmpty()
+            
+            btnSave.alpha = if (isValid) 1.0f else 0.3f
+            btnSave.isEnabled = isValid
+            
+            tvTitleHint?.visibility = if (isValid) View.GONE else View.VISIBLE
+            if (!isValid) tvTitleHint?.let { startPulseAnimation(it) }
+            
+            val themeColor = if (DataManager.projectAddThemeColor != -1) DataManager.projectAddThemeColor else Color.parseColor("#1A73E8")
+            if (isValid) btnSave.setTextColor(themeColor) else btnSave.setTextColor(Color.GRAY)
+            tvTitleHint?.setTextColor(themeColor)
+        }
+
+        titleInput.addTextChangedListener(object : android.text.TextWatcher {
+            override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {}
+            override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) { validateInputs() }
+            override fun afterTextChanged(s: android.text.Editable?) {}
+        })
+
         val btnBullet = dialog.findViewById<ImageButton>(R.id.btn_bullet_list)
         val btnNumeric = dialog.findViewById<ImageButton>(R.id.btn_numeric_list)
         val btnConvert = dialog.findViewById<TextView>(R.id.btn_convert_project)
@@ -1433,10 +1501,6 @@ class ProjectActivity : AppCompatActivity() {
         }
         updatePriorityUI()
 
-        if (DataManager.projectAddThemeColor != -1) {
-            btnSave.setTextColor(DataManager.projectAddThemeColor)
-        }
-
         existingIdea?.let {
             titleInput.setText(it.title)
             contentInput.setText(it.content)
@@ -1445,6 +1509,8 @@ class ProjectActivity : AppCompatActivity() {
             tvCharCount.text = "${it.content.length} characters"
             refreshSubFeatures()
         }
+        
+        validateInputs()
 
         // Logic for auto-formatting and char count
         contentInput.addTextChangedListener(object : android.text.TextWatcher {
@@ -1479,7 +1545,7 @@ class ProjectActivity : AppCompatActivity() {
         }
 
         btnVoice.setOnClickListener {
-            currentVoiceInput = contentInput
+            currentVoiceInput = titleInput // Switch to title input for voice if preferred
             val intent = android.content.Intent(android.speech.RecognizerIntent.ACTION_RECOGNIZE_SPEECH).apply {
                 putExtra(android.speech.RecognizerIntent.EXTRA_LANGUAGE_MODEL, android.speech.RecognizerIntent.LANGUAGE_MODEL_FREE_FORM)
                 putExtra(android.speech.RecognizerIntent.EXTRA_PROMPT, "Speak your idea...")
@@ -1594,8 +1660,6 @@ class ProjectActivity : AppCompatActivity() {
                 DataManager.saveData(this)
                 updateDisplayList()
                 dialog.dismiss()
-            } else {
-                Toast.makeText(this, "Please enter a title", Toast.LENGTH_SHORT).show()
             }
         }
 

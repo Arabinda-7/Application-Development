@@ -10,6 +10,7 @@ import android.widget.ImageView
 import android.widget.TextView
 import android.widget.Toast
 import androidx.activity.compose.setContent
+import androidx.activity.enableEdgeToEdge
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AppCompatActivity
 import androidx.compose.foundation.background
@@ -64,6 +65,7 @@ class MainActivity : AppCompatActivity() {
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
+        enableEdgeToEdge()
         super.onCreate(savedInstanceState)
         
         // Background Data Loading
@@ -113,6 +115,7 @@ class MainActivity : AppCompatActivity() {
                         onMoodSelected = { emoji ->
                             val today = DataManager.getTrackingDateString()
                             DataManager.dailyMoods[today] = emoji
+                            DataManager.lastMoodTimestamp = System.currentTimeMillis()
                             DataManager.saveData(this)
                             refreshState()
                         },
@@ -197,6 +200,15 @@ class MainActivity : AppCompatActivity() {
 
     private fun refreshState() {
         val today = DataManager.getTrackingDateString()
+        
+        // Mood Expiration Logic (1 Hour)
+        val currentTime = System.currentTimeMillis()
+        if (DataManager.lastMoodTimestamp != 0L && (currentTime - DataManager.lastMoodTimestamp) > 3600000) {
+            DataManager.dailyMoods.remove(today)
+            DataManager.lastMoodTimestamp = 0L
+            DataManager.saveData(this)
+        }
+
         val nextMilestone = DataManager.notes
             .filter { it.category == "Project" }
             .flatMap { it.subFeatures }
@@ -214,6 +226,8 @@ class MainActivity : AppCompatActivity() {
             safeSpendAmount = DataManager.monthlyBudget - DataManager.getCurrentMonthExpenditure(),
             nextMilestone = nextMilestone,
             recentActions = DataManager.recentActivities,
+            growthAdvice = DataManager.getGrowthAdvice(DataManager.dailyMoods[today]),
+            managementAdvice = DataManager.getManagementAdvice(DataManager.dailyMoods[today]),
             currentMood = DataManager.dailyMoods[today],
             habitColor = DataManager.globalHabitColor,
             workoutColor = DataManager.globalWorkoutColor,

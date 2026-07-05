@@ -8,8 +8,11 @@ import android.widget.FrameLayout
 import android.widget.GridLayout
 import android.widget.ImageView
 import android.widget.TextView
+import androidx.activity.enableEdgeToEdge
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.ContextCompat
+import androidx.core.view.ViewCompat
+import androidx.core.view.WindowInsetsCompat
 import java.text.SimpleDateFormat
 import java.util.*
 
@@ -19,8 +22,15 @@ class HabitDetailActivity : AppCompatActivity() {
     private var currentCalendar = Calendar.getInstance()
 
     override fun onCreate(savedInstanceState: Bundle?) {
+        enableEdgeToEdge()
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_habit_detail)
+
+        ViewCompat.setOnApplyWindowInsetsListener(findViewById(R.id.habit_detail_root)) { v, insets ->
+            val topPadding = (8 * resources.displayMetrics.density).toInt()
+            v.setPadding(v.paddingLeft, topPadding, v.paddingRight, v.paddingBottom)
+            insets
+        }
 
         val habitId = intent.getLongExtra("HABIT_ID", -1L)
         habit = DataManager.habits.find { it.timestamp == habitId }

@@ -4,6 +4,7 @@ import androidx.compose.animation.core.animateFloat
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.updateTransition
 import androidx.compose.foundation.*
+import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
@@ -24,6 +25,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.StrokeCap
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
@@ -31,6 +33,7 @@ import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import java.text.SimpleDateFormat
 import java.util.*
 
 @Composable
@@ -55,6 +58,7 @@ fun HomeScreen(
     var showColorPicker by remember { mutableStateOf<String?>(null) }
     var searchQuery by remember { mutableStateOf("") }
     var showSpeedDial by remember { mutableStateOf(false) }
+    var isSearchVisible by remember { mutableStateOf(false) }
     
     // New Feature States
     var showNotificationsDialog by remember { mutableStateOf(false) }
@@ -63,23 +67,80 @@ fun HomeScreen(
     // Keyboard Controller
     val keyboardController = LocalSoftwareKeyboardController.current
 
-    val greeting = remember {
+    val smartGreeting = remember(state.overallProgress, state.userName) {
         val hour = Calendar.getInstance().get(Calendar.HOUR_OF_DAY)
-        when (hour) {
-            in 0..11 -> "Good Morning"
+        val timePrefix = when (hour) {
+            in 5..11 -> "Good Morning"
             in 12..16 -> "Good Afternoon"
             in 17..20 -> "Good Evening"
             else -> "Good Night"
         }
+        val icon = when (hour) {
+            in 5..11 -> "☕"
+            in 12..16 -> "🚀"
+            in 17..20 -> "🧘"
+            else -> "🌙"
+        }
+        val milestone = when {
+            state.overallProgress >= 100 -> "Elite Momentum! 🏆"
+            state.overallProgress >= 70 -> "Crushing it! 🔥"
+            state.overallProgress >= 30 -> "Great start! ⚡"
+            else -> icon
+        }
+        "$timePrefix, $milestone"
     }
 
     // Animation for Speed Dial
     val transition = updateTransition(targetState = showSpeedDial, label = "SpeedDial")
     val dialRotation by transition.animateFloat(label = "Rotation") { if (it) 45f else 0f }
 
+    val todayAgenda = remember(state) {
+        DataManager.getTodayAgendaNotifications()
+    }
+    val todayDateString = remember { SimpleDateFormat("yyyyMMdd", Locale.getDefault()).format(Date()) }
+    val showRedDot = DataManager.lastViewedNotificationDate != todayDateString
+
     Scaffold(
+        contentWindowInsets = WindowInsets(0, 0, 0, 0),
         floatingActionButton = {
             Box(contentAlignment = Alignment.BottomEnd) {
+                // --- Floating Notification Bell (Smart Visibility) ---
+                androidx.compose.animation.AnimatedVisibility(
+                    visible = !showSpeedDial && todayAgenda.isNotEmpty(),
+                    enter = androidx.compose.animation.fadeIn() + androidx.compose.animation.scaleIn(),
+                    exit = androidx.compose.animation.fadeOut() + androidx.compose.animation.scaleOut(),
+                    modifier = Modifier.offset(y = (-70).dp)
+                ) {
+                    Box(
+                        modifier = Modifier
+                            .size(40.dp)
+                            .clip(CircleShape)
+                            .background(Color.Black.copy(alpha = 0.5f))
+                            .clickable { 
+                                showNotificationsDialog = true
+                                DataManager.lastViewedNotificationDate = todayDateString
+                                DataManager.saveData(null) // Context-free save
+                            },
+                        contentAlignment = Alignment.Center
+                    ) {
+                        Icon(
+                            imageVector = Icons.Default.Notifications,
+                            contentDescription = "Alerts",
+                            tint = Color.White,
+                            modifier = Modifier.size(20.dp)
+                        )
+                        if (showRedDot) {
+                            Box(
+                                modifier = Modifier
+                                    .size(6.dp)
+                                    .background(Color.Red, CircleShape)
+                                    .align(Alignment.TopEnd)
+                                    .offset(x = (-4).dp, y = 4.dp)
+                            )
+                        }
+                    }
+                }
+
                 // 1. New Task Shortcut (Moves LEFT)
                 QuickActionItem(
                     label = "Task",
@@ -127,27 +188,6 @@ fun HomeScreen(
                     )
                 }
             }
-        },
-        bottomBar = {
-            Surface(
-                modifier = Modifier.fillMaxWidth(),
-                color = Color(0xFF1A1A1A)
-            ) {
-                Row(
-                    modifier = Modifier.padding(vertical = 8.dp, horizontal = 16.dp),
-                    verticalAlignment = Alignment.CenterVertically
-                ) {
-                    Icon(Icons.Default.Notifications, contentDescription = null, tint = Color(0xFFFFB800), modifier = Modifier.size(14.dp))
-                    Spacer(modifier = Modifier.width(8.dp))
-                    Text(
-                        text = "NEXT: ${state.nextMilestone}",
-                        color = Color.White.copy(alpha = 0.8f),
-                        fontSize = 11.sp,
-                        fontWeight = FontWeight.Bold,
-                        letterSpacing = 0.5.sp
-                    )
-                }
-            }
         }
     ) { padding ->
         Column(
@@ -155,6 +195,11 @@ fun HomeScreen(
                 .fillMaxSize()
                 .background(Color(0xFF000000))
                 .padding(padding)
+                .pointerInput(Unit) {
+                    detectTapGestures(onTap = {
+                        keyboardController?.hide()
+                    })
+                }
                 .verticalScroll(rememberScrollState())
         ) {
             // --- 1. Aura Header with Controls ---
@@ -166,48 +211,85 @@ fun HomeScreen(
                             colors = listOf(Color(0xFF1A73E8).copy(alpha = 0.6f), Color.Black)
                         )
                     )
-                    .padding(top = 24.dp, bottom = 12.dp, start = 24.dp, end = 24.dp)
+                    .statusBarsPadding()
+                    .padding(top = 0.dp, bottom = 12.dp, start = 24.dp, end = 24.dp)
             ) {
                 Column {
                     Row(
                         modifier = Modifier.fillMaxWidth(),
-                        verticalAlignment = Alignment.CenterVertically,
+                        verticalAlignment = Alignment.Top,
                         horizontalArrangement = Arrangement.SpaceBetween
                     ) {
-                        Box(contentAlignment = Alignment.BottomEnd) {
+                        // Profile + Personal Greeting Column
+                        Column(horizontalAlignment = Alignment.Start) {
                             Box(
-                                modifier = Modifier
-                                    .size(48.dp)
-                                    .clip(CircleShape)
-                                    .background(Color(0xFF1A1A1A))
-                                    .border(1.5.dp, Color.White.copy(alpha = 0.2f), CircleShape)
-                                    .clickable { onNavigateToProfile() },
-                                contentAlignment = Alignment.Center
+                                contentAlignment = Alignment.BottomEnd,
+                                modifier = Modifier.clickable { onNavigateToProfile() }
                             ) {
-                                Image(
-                                    painter = painterResource(id = state.userAvatarRes),
-                                    contentDescription = "Profile",
-                                    modifier = Modifier.fillMaxSize(),
-                                    contentScale = androidx.compose.ui.layout.ContentScale.Crop
+                                Box(
+                                    modifier = Modifier
+                                        .size(48.dp)
+                                        .clip(CircleShape)
+                                        .background(Color(0xFF1A1A1A))
+                                        .border(1.5.dp, Color.White.copy(alpha = 0.2f), CircleShape),
+                                    contentAlignment = Alignment.Center
+                                ) {
+                                    Image(
+                                        painter = painterResource(id = state.userAvatarRes),
+                                        contentDescription = "Profile",
+                                        modifier = Modifier.fillMaxSize(),
+                                        contentScale = androidx.compose.ui.layout.ContentScale.Crop
+                                    )
+                                }
+                                Box(modifier = Modifier.size(12.dp).background(Color(0xFF2EC4B6), CircleShape).border(2.dp, Color.Black, CircleShape))
+                            }
+                            
+                            Spacer(modifier = Modifier.height(12.dp))
+                            
+                            Text(
+                                text = smartGreeting.split(",")[0].uppercase() + ",", 
+                                color = Color.White.copy(alpha = 0.4f), 
+                                fontSize = 10.sp, 
+                                fontWeight = FontWeight.Medium, 
+                                letterSpacing = 1.sp
+                            )
+                            Text(
+                                text = state.userName.replaceFirstChar { if (it.isLowerCase()) it.titlecase(Locale.getDefault()) else it.toString() },
+                                color = Color.White, 
+                                fontSize = 24.sp, 
+                                fontWeight = FontWeight.Black, 
+                                letterSpacing = (-0.5).sp
+                            )
+                            
+                            val milestoneText = smartGreeting.split(",").getOrNull(1)?.trim() ?: ""
+                            if (milestoneText.length > 2) { // Ensure it's more than just an emoji
+                                Spacer(modifier = Modifier.height(4.dp))
+                                Text(
+                                    text = milestoneText,
+                                    color = Color(0xFF2EC4B6),
+                                    fontSize = 12.sp,
+                                    fontWeight = FontWeight.Bold,
+                                    letterSpacing = 0.5.sp
                                 )
                             }
-                            Box(modifier = Modifier.size(12.dp).background(Color(0xFF2EC4B6), CircleShape).border(2.dp, Color.Black, CircleShape))
                         }
 
+                        // Refined Action Row (Search Toggle + Smaller Settings)
                         Row(verticalAlignment = Alignment.CenterVertically) {
-                            Box {
-                                IconButton(onClick = { showNotificationsDialog = true }, modifier = Modifier.size(32.dp)) {
-                                    Icon(Icons.Default.Notifications, "Alerts", tint = Color.White, modifier = Modifier.size(18.dp))
-                                }
-                                Box(modifier = Modifier.size(7.dp).background(Color.Red, CircleShape).align(Alignment.TopEnd))
+                            IconButton(onClick = { isSearchVisible = !isSearchVisible }, modifier = Modifier.size(36.dp)) {
+                                Icon(
+                                    imageVector = if (isSearchVisible) Icons.Default.Close else Icons.Default.Search,
+                                    contentDescription = "Toggle Search",
+                                    tint = Color.White.copy(alpha = 0.8f),
+                                    modifier = Modifier.size(20.dp)
+                                )
                             }
-                            Spacer(modifier = Modifier.width(12.dp))
+                            Spacer(modifier = Modifier.width(8.dp))
                             Box(
                                 modifier = Modifier
-                                    .size(48.dp)
+                                    .size(32.dp)
                                     .clip(CircleShape)
-                                    .background(Color(0xFF1A1A1A))
-                                    .border(1.dp, Color.White.copy(alpha = 0.1f), CircleShape)
+                                    .background(Color.Black.copy(alpha = 0.5f))
                                     .clickable { onNavigateToSettings() },
                                 contentAlignment = Alignment.Center
                             ) {
@@ -215,59 +297,63 @@ fun HomeScreen(
                                     imageVector = Icons.Default.Settings,
                                     contentDescription = "Settings",
                                     tint = Color.White,
-                                    modifier = Modifier.size(24.dp)
+                                    modifier = Modifier.size(18.dp)
                                 )
                             }
                         }
                     }
 
-                    Spacer(modifier = Modifier.height(16.dp))
-                    Text(text = "$greeting,", color = Color.White.copy(alpha = 0.5f), fontSize = 14.sp, fontWeight = FontWeight.Bold, letterSpacing = 1.sp)
-                    Text(text = state.userName, color = Color.White, fontSize = 36.sp, fontWeight = FontWeight.Black, letterSpacing = (-1).sp)
-
-                    Spacer(modifier = Modifier.height(24.dp))
-
-                    // --- 2. Universal Command Bar (Search/Voice) ---
-                    OutlinedTextField(
-                        value = searchQuery,
-                        onValueChange = { searchQuery = it },
-                        placeholder = { Text("Ask or search anything...", color = Color.White.copy(alpha = 0.4f), fontSize = 14.sp) },
-                        modifier = Modifier.fillMaxWidth().height(56.dp).clip(RoundedCornerShape(16.dp)),
-                        colors = OutlinedTextFieldDefaults.colors(
-                            focusedBorderColor = Color(0xFF1A73E8),
-                            unfocusedBorderColor = Color(0xFF333333),
-                            focusedContainerColor = Color(0xFF1A1A1A),
-                            unfocusedContainerColor = Color(0xFF1A1A1A),
-                            cursorColor = Color(0xFF1A73E8),
-                            focusedTextColor = Color.White,
-                            unfocusedTextColor = Color.White
-                        ),
-                        leadingIcon = { Icon(Icons.Default.Search, "Search", tint = Color.White.copy(alpha = 0.5f)) },
-                        trailingIcon = { 
-                            IconButton(onClick = { 
-                                if (searchQuery.isNotEmpty()) {
-                                    onSearchRequested(searchQuery)
-                                    keyboardController?.hide()
-                                } else {
-                                    showVoiceComingSoon = true 
-                                }
-                            }) {
-                                Icon(
-                                    imageVector = if (searchQuery.isEmpty()) Icons.Default.Mic else Icons.AutoMirrored.Filled.Send, 
-                                    "Action", 
-                                    tint = Color(0xFF1A73E8)
-                                )
-                            }
-                        },
-                        keyboardOptions = KeyboardOptions(imeAction = ImeAction.Search),
-                        keyboardActions = KeyboardActions(onSearch = {
-                            if (searchQuery.isNotEmpty()) {
-                                onSearchRequested(searchQuery)
-                                keyboardController?.hide()
-                            }
-                        }),
-                        shape = RoundedCornerShape(16.dp)
-                    )
+                    // --- 2. Executive Command Bar (Etched Aesthetic - Optional) ---
+                    androidx.compose.animation.AnimatedVisibility(
+                        visible = isSearchVisible,
+                        enter = androidx.compose.animation.expandVertically() + androidx.compose.animation.fadeIn(),
+                        exit = androidx.compose.animation.shrinkVertically() + androidx.compose.animation.fadeOut()
+                    ) {
+                        Column {
+                            Spacer(modifier = Modifier.height(24.dp))
+                            OutlinedTextField(
+                                value = searchQuery,
+                                onValueChange = { searchQuery = it },
+                                placeholder = { Text("Search your ecosystem...", color = Color.White.copy(alpha = 0.3f), fontSize = 14.sp) },
+                                modifier = Modifier.fillMaxWidth().height(52.dp),
+                                colors = OutlinedTextFieldDefaults.colors(
+                                    focusedBorderColor = Color(0xFF1A73E8).copy(alpha = 0.4f),
+                                    unfocusedBorderColor = Color.White.copy(alpha = 0.08f),
+                                    focusedContainerColor = Color.White.copy(alpha = 0.03f),
+                                    unfocusedContainerColor = Color.White.copy(alpha = 0.03f),
+                                    cursorColor = Color(0xFF1A73E8),
+                                    focusedTextColor = Color.White,
+                                    unfocusedTextColor = Color.White
+                                ),
+                                leadingIcon = { Icon(Icons.Default.Search, "Search", tint = Color.White.copy(alpha = 0.4f), modifier = Modifier.size(18.dp)) },
+                                trailingIcon = { 
+                                    IconButton(onClick = { 
+                                        if (searchQuery.isNotEmpty()) {
+                                            onSearchRequested(searchQuery)
+                                            keyboardController?.hide()
+                                        } else {
+                                            showVoiceComingSoon = true 
+                                        }
+                                    }) {
+                                        Icon(
+                                            imageVector = if (searchQuery.isEmpty()) Icons.Default.Mic else Icons.AutoMirrored.Filled.Send, 
+                                            "Action", 
+                                            tint = Color(0xFF1A73E8),
+                                            modifier = Modifier.size(18.dp)
+                                        )
+                                    }
+                                },
+                                keyboardOptions = KeyboardOptions(imeAction = ImeAction.Search),
+                                keyboardActions = KeyboardActions(onSearch = {
+                                    if (searchQuery.isNotEmpty()) {
+                                        onSearchRequested(searchQuery)
+                                        keyboardController?.hide()
+                                    }
+                                }),
+                                shape = RoundedCornerShape(12.dp)
+                            )
+                        }
+                    }
                 }
             }
 
@@ -337,7 +423,7 @@ fun HomeScreen(
                 }
             }
 
-            // --- 5. Pulse Activity Feed ---
+            // --- 5. Pulse Activity Feed (Motivational Mindset) ---
             if (state.recentActions.isNotEmpty()) {
                 Spacer(modifier = Modifier.height(24.dp))
                 Text("PULSE ACTIVITY", modifier = Modifier.padding(horizontal = 24.dp), color = Color.White.copy(alpha = 0.4f), fontSize = 10.sp, fontWeight = FontWeight.Bold, letterSpacing = 1.sp)
@@ -346,41 +432,52 @@ fun HomeScreen(
                     contentPadding = PaddingValues(horizontal = 24.dp),
                     horizontalArrangement = Arrangement.spacedBy(12.dp)
                 ) {
+                    // Recent Actions History (Shown Finished)
                     items(state.recentActions) { action ->
                         Surface(color = Color(0xFF1A1A1A), shape = RoundedCornerShape(12.dp), modifier = Modifier.height(40.dp)) {
                             Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.padding(horizontal = 16.dp)) {
-                                Box(modifier = Modifier.size(6.dp).background(Color(0xFF1A73E8), CircleShape))
+                                Box(modifier = Modifier.size(6.dp).background(Color(0xFF1A73E8).copy(alpha = 0.5f), CircleShape))
                                 Spacer(modifier = Modifier.width(10.dp))
-                                Text(action, color = Color.White, fontSize = 13.sp)
+                                Text(action, color = Color.White.copy(alpha = 0.7f), fontSize = 13.sp)
                             }
                         }
                     }
                 }
             }
 
-            Spacer(modifier = Modifier.height(24.dp))
-
-            // --- 6. Pro-Insight Pill ---
-            Surface(
-                color = Color(0xFF1A73E8).copy(alpha = 0.1f),
-                shape = RoundedCornerShape(16.dp),
-                modifier = Modifier.padding(horizontal = 24.dp).fillMaxWidth()
-            ) {
-                Row(modifier = Modifier.padding(16.dp), verticalAlignment = Alignment.CenterVertically) {
-                    Icon(Icons.Default.Info, null, tint = Color(0xFF1A73E8), modifier = Modifier.size(16.dp))
-                    Spacer(modifier = Modifier.width(12.dp))
-                    Text(state.proTip, color = Color.White.copy(alpha = 0.8f), fontSize = 12.sp, lineHeight = 18.sp)
-                }
-            }
-
             // --- 7-12. Diversified Growth & Management Sections ---
-            Spacer(modifier = Modifier.height(32.dp))
+            Spacer(modifier = Modifier.height(24.dp))
             Text("GROWTH & DISCIPLINE", modifier = Modifier.padding(horizontal = 24.dp), color = Color.White.copy(alpha = 0.4f), fontSize = 10.sp, fontWeight = FontWeight.Bold, letterSpacing = 1.sp)
             Spacer(modifier = Modifier.height(16.dp))
             DashboardPair(
                 item1 = { HabitCard(progress = state.habitProgress, color = Color(if (state.habitColor == -1) 0xFFFF7A59 else state.habitColor.toLong()), icon = state.habitIcon, onClick = onNavigateToHabits, onColorClick = { showColorPicker = "HABIT" }) },
                 item2 = { WorkoutCard(progress = state.workoutProgress, color = Color(if (state.workoutColor == -1) 0xFFFFB800 else state.workoutColor.toLong()), icon = state.workoutIcon, onClick = onNavigateToWorkout, onColorClick = { showColorPicker = "WORKOUT" }) }
             )
+
+            Spacer(modifier = Modifier.height(16.dp))
+
+            // --- Growth Advice (Blue Card) ---
+            if (state.currentMood != null) {
+                Spacer(modifier = Modifier.height(16.dp))
+
+                Surface(
+                    color = Color(0xFF1A73E8).copy(alpha = 0.15f),
+                    shape = RoundedCornerShape(16.dp),
+                    border = BorderStroke(0.5.dp, Color(0xFF1A73E8).copy(alpha = 0.3f)),
+                    modifier = Modifier.padding(horizontal = 24.dp).fillMaxWidth()
+                ) {
+                    Row(modifier = Modifier.padding(16.dp), verticalAlignment = Alignment.CenterVertically) {
+                        Text("✨", fontSize = 16.sp)
+                        Spacer(modifier = Modifier.width(12.dp))
+                        Text(
+                            text = state.growthAdvice, 
+                            color = Color.White.copy(alpha = 0.8f), 
+                            fontSize = 12.sp, 
+                            lineHeight = 18.sp
+                        )
+                    }
+                }
+            }
 
             Spacer(modifier = Modifier.height(24.dp))
             Text("MANAGEMENT & NOTES", modifier = Modifier.padding(horizontal = 24.dp), color = Color.White.copy(alpha = 0.4f), fontSize = 10.sp, fontWeight = FontWeight.Bold, letterSpacing = 1.sp)
@@ -395,6 +492,31 @@ fun HomeScreen(
                 item1 = { ProjectCard(color = Color(if (state.projectColor == -1) 0xFF1A73E8 else state.projectColor.toLong()), icon = state.projectIcon, onClick = onNavigateToProjects, onColorClick = { showColorPicker = "PROJECT" }) },
                 item2 = { FinanceCard(amount = state.safeSpendAmount, color = Color(if (state.financeColor == -1) 0xFFE91E63 else state.financeColor.toLong()), icon = state.financeIcon, onClick = onNavigateToFinance, onColorClick = { showColorPicker = "FINANCE" }) }
             )
+
+            Spacer(modifier = Modifier.height(16.dp))
+
+            // --- Management Advice (Green Card) ---
+            if (state.currentMood != null) {
+                Spacer(modifier = Modifier.height(16.dp))
+
+                Surface(
+                    color = Color(0xFF2EC4B6).copy(alpha = 0.1f),
+                    shape = RoundedCornerShape(16.dp),
+                    border = BorderStroke(0.5.dp, Color(0xFF2EC4B6).copy(alpha = 0.2f)),
+                    modifier = Modifier.padding(horizontal = 24.dp).fillMaxWidth()
+                ) {
+                    Row(modifier = Modifier.padding(16.dp), verticalAlignment = Alignment.CenterVertically) {
+                        Icon(Icons.Default.Star, null, tint = Color(0xFF2EC4B6), modifier = Modifier.size(16.dp))
+                        Spacer(modifier = Modifier.width(12.dp))
+                        Text(
+                            text = state.managementAdvice, 
+                            color = Color.White.copy(alpha = 0.8f), 
+                            fontSize = 12.sp, 
+                            lineHeight = 18.sp
+                        )
+                    }
+                }
+            }
 
             Spacer(modifier = Modifier.height(40.dp))
         }
@@ -421,16 +543,41 @@ fun HomeScreen(
     if (showNotificationsDialog) {
         AlertDialog(
             onDismissRequest = { showNotificationsDialog = false },
-            title = { Text("Recent Alerts", color = Color.White, fontWeight = FontWeight.Bold) },
+            title = { Text("Today's Agenda", color = Color.White, fontWeight = FontWeight.Black, letterSpacing = 1.sp) },
             containerColor = Color(0xFF1A1A1A),
             text = {
-                Column {
-                    NotificationItem("Habit Streak", "5 days and counting! Keep it up.")
-                    NotificationItem("Finance", "You reached 70% of your budget.")
-                    NotificationItem("Projects", "Milestone 'UI Logic' is due tomorrow.")
+                Column(modifier = Modifier.verticalScroll(rememberScrollState())) {
+                    if (todayAgenda.isEmpty()) {
+                        Text("Your agenda is clear for today!", color = Color.White.copy(alpha = 0.6f), fontSize = 14.sp)
+                    } else {
+                        todayAgenda.forEach { (section, items) ->
+                            Text(
+                                text = section,
+                                color = Color(0xFF1A73E8),
+                                fontSize = 10.sp,
+                                fontWeight = FontWeight.Black,
+                                letterSpacing = 1.sp,
+                                modifier = Modifier.padding(top = 16.dp, bottom = 8.dp)
+                            )
+                            items.forEach { item ->
+                                Row(
+                                    verticalAlignment = Alignment.CenterVertically,
+                                    modifier = Modifier.padding(vertical = 4.dp)
+                                ) {
+                                    Box(modifier = Modifier.size(6.dp).background(Color.White.copy(alpha = 0.3f), CircleShape))
+                                    Spacer(modifier = Modifier.width(12.dp))
+                                    Text(text = item, color = Color.White, fontSize = 14.sp)
+                                }
+                            }
+                        }
+                    }
                 }
             },
-            confirmButton = { TextButton(onClick = { showNotificationsDialog = false }) { Text("DONE", color = Color(0xFF1A73E8)) } }
+            confirmButton = { 
+                TextButton(onClick = { showNotificationsDialog = false }) { 
+                    Text("DISMISS", color = Color(0xFF1A73E8), fontWeight = FontWeight.Bold) 
+                } 
+            }
         )
     }
 

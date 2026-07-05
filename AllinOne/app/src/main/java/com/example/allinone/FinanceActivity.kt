@@ -9,8 +9,11 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.*
+import androidx.activity.enableEdgeToEdge
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.ContextCompat
+import androidx.core.view.ViewCompat
+import androidx.core.view.WindowInsetsCompat
 import androidx.recyclerview.widget.ItemTouchHelper
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
@@ -42,8 +45,15 @@ class FinanceActivity : AppCompatActivity() {
     private var currentFilter = "All"
 
     override fun onCreate(savedInstanceState: Bundle?) {
+        enableEdgeToEdge()
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_finance)
+
+        ViewCompat.setOnApplyWindowInsetsListener(findViewById(R.id.finance_root_layout)) { v, insets ->
+            val topPadding = (8 * resources.displayMetrics.density).toInt()
+            v.setPadding(v.paddingLeft, topPadding, v.paddingRight, v.paddingBottom)
+            insets
+        }
 
         val summary = findViewById<View>(R.id.finance_summary)
         tvBudget = summary.findViewById(R.id.tv_monthly_budget)
@@ -201,17 +211,36 @@ class FinanceActivity : AppCompatActivity() {
         dialog.window?.setLayout(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT)
 
         val etAmount = dialog.findViewById<EditText>(R.id.et_trans_amount)
+        val tvAmountHint = dialog.findViewById<TextView>(R.id.tv_amount_hint)
         val chipGroup = dialog.findViewById<com.google.android.material.chip.ChipGroup>(R.id.cg_trans_category)
         val etCustomNote = dialog.findViewById<EditText>(R.id.et_trans_custom_category)
         val rgType = dialog.findViewById<RadioGroup>(R.id.rg_trans_type)
         val btnSave = dialog.findViewById<TextView>(R.id.btn_save_trans)
-        if (DataManager.financeAddThemeColor != -1) {
-            btnSave.setTextColor(DataManager.financeAddThemeColor)
-        }
         val btnClose = dialog.findViewById<View>(R.id.btn_close_trans)
         val titleText = dialog.findViewById<TextView>(R.id.tv_dialog_title)
         val tvDate = dialog.findViewById<TextView>(R.id.tv_trans_date)
         val tvTime = dialog.findViewById<TextView>(R.id.tv_trans_time)
+
+        fun validateInputs() {
+            val amount = etAmount.text.toString().toDoubleOrNull() ?: 0.0
+            val isValid = amount > 0
+            
+            btnSave.alpha = if (isValid) 1.0f else 0.3f
+            btnSave.isEnabled = isValid
+            
+            tvAmountHint.visibility = if (isValid) View.GONE else View.VISIBLE
+            if (!isValid) startPulseAnimation(tvAmountHint)
+            
+            val themeColor = if (DataManager.financeAddThemeColor != -1) DataManager.financeAddThemeColor else Color.parseColor("#1A73E8")
+            if (isValid) btnSave.setTextColor(themeColor) else btnSave.setTextColor(Color.GRAY)
+            tvAmountHint.setTextColor(themeColor)
+        }
+
+        etAmount.addTextChangedListener(object : android.text.TextWatcher {
+            override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {}
+            override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) { validateInputs() }
+            override fun afterTextChanged(s: android.text.Editable?) {}
+        })
 
         if (existingTransaction != null) {
             titleText?.text = "Edit Transaction"
@@ -282,6 +311,7 @@ class FinanceActivity : AppCompatActivity() {
         }
 
         btnClose.setOnClickListener { dialog.dismiss() }
+        validateInputs()
 
         btnSave.setOnClickListener {
             val amount = etAmount.text.toString().toDoubleOrNull() ?: 0.0
@@ -318,6 +348,17 @@ class FinanceActivity : AppCompatActivity() {
             }
         }
         dialog.show()
+    }
+
+    private fun startPulseAnimation(view: View) {
+        if (view.tag == "pulsing") return
+        view.tag = "pulsing"
+        view.animate().alpha(0.4f).setDuration(800).withEndAction {
+            view.animate().alpha(1.0f).setDuration(800).withEndAction {
+                view.tag = null
+                if (view.visibility == View.VISIBLE) startPulseAnimation(view)
+            }
+        }.start()
     }
 
     private fun filterCurrentMonthTransactions() {

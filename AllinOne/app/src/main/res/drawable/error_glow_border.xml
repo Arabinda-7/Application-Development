@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="utf-8"?>
+<layer-list xmlns:android="http://schemas.android.com/apk/res/android">
+    <!-- Outer Softer Glow -->
+    <item>
+        <shape android:shape="rectangle">
+            <solid android:color="@android:color/transparent" />
+            <stroke
+                android:width="4dp"
+                android:color="#40FF5252" />
+            <corners android:radius="14dp" />
+        </shape>
+    </item>
+    <!-- Inner Sharp Border -->
+    <item android:left="1dp" android:right="1dp" android:top="1dp" android:bottom="1dp">
+        <shape android:shape="rectangle">
+            <solid android:color="#0DFF5252" />
+            <stroke
+                android:width="1.5dp"
+                android:color="#FF5252" />
+            <corners android:radius="12dp" />
+        </shape>
+    </item>
+</layer-list>

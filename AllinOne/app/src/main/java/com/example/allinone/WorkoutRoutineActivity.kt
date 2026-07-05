@@ -4,6 +4,7 @@ import android.app.Activity
 import android.app.AlertDialog
 import android.app.Dialog
 import android.content.Intent
+import android.content.res.ColorStateList
 import android.graphics.Color
 import android.os.Bundle
 import android.view.Gravity
@@ -21,10 +22,13 @@ import android.widget.PopupWindow
 import android.widget.RadioButton
 import android.widget.RadioGroup
 import android.widget.TextView
+import androidx.activity.enableEdgeToEdge
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.widget.SwitchCompat
 import androidx.core.content.ContextCompat
+import androidx.core.view.ViewCompat
+import androidx.core.view.WindowInsetsCompat
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import androidx.viewpager2.widget.ViewPager2
@@ -52,7 +56,10 @@ class WorkoutRoutineActivity : AppCompatActivity() {
                 workout.isCompleted = true
                 workout.progress = workout.target
                 val today = SimpleDateFormat("yyyyMMdd", Locale.getDefault()).format(Date())
-                if (!workout.completedDates.contains(today)) workout.completedDates.add(today)
+                if (!workout.completedDates.contains(today)) {
+                    workout.completedDates.add(today)
+                    DataManager.addActivity("Finished Workout: ${workout.name}")
+                }
                 workoutAdapter.sortWorkouts()
                 DataManager.saveData(this)
                 currentlyTimingWorkoutPosition = -1
@@ -62,8 +69,28 @@ class WorkoutRoutineActivity : AppCompatActivity() {
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
+        enableEdgeToEdge()
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_workout_routine)
+
+        ViewCompat.setOnApplyWindowInsetsListener(findViewById(R.id.today_layout)) { v, insets ->
+            val topPadding = (8 * resources.displayMetrics.density).toInt()
+            v.setPadding(v.paddingLeft, topPadding, v.paddingRight, v.paddingBottom)
+            insets
+        }
+
+        ViewCompat.setOnApplyWindowInsetsListener(findViewById(R.id.history_layout)) { v, insets ->
+            val topPadding = (8 * resources.displayMetrics.density).toInt()
+            val navBars = insets.getInsets(WindowInsetsCompat.Type.navigationBars())
+            v.setPadding(v.paddingLeft, topPadding, v.paddingRight, navBars.bottom)
+            insets
+        }
+
+        ViewCompat.setOnApplyWindowInsetsListener(findViewById(R.id.bottom_nav_mock)) { v, insets ->
+            val navBars = insets.getInsets(WindowInsetsCompat.Type.navigationBars())
+            v.setPadding(v.paddingLeft, v.paddingTop, v.paddingRight, navBars.bottom)
+            insets
+        }
 
         val dateTextView = findViewById<TextView>(R.id.tv_date)
         val sdf = SimpleDateFormat("MMM dd", Locale.getDefault())
@@ -106,7 +133,6 @@ class WorkoutRoutineActivity : AppCompatActivity() {
             val popupWindow = PopupWindow(menuView, ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT, true)
             popupWindow.elevation = 10f
 
-            // Set Primary Action to Analytics/Balance
             val balanceBtn = menuView.findViewById<View>(R.id.menu_action_primary)
             balanceBtn.visibility = View.VISIBLE
             menuView.findViewById<TextView>(R.id.tv_action_primary).text = "MUSCLE BALANCE"
@@ -117,7 +143,6 @@ class WorkoutRoutineActivity : AppCompatActivity() {
                 popupWindow.dismiss()
             }
 
-            // Toggle Show/Hide Completed
             val menuToggle = menuView.findViewById<View>(R.id.menu_toggle_completed)
             val tvToggle = menuView.findViewById<TextView>(R.id.tv_toggle_completed)
             val ivToggle = menuView.findViewById<ImageView>(R.id.iv_toggle_completed)
@@ -133,7 +158,6 @@ class WorkoutRoutineActivity : AppCompatActivity() {
                 popupWindow.dismiss()
             }
 
-            // Hide task-specific items
             menuView.findViewById<View>(R.id.menu_clear_completed).visibility = View.GONE
 
             menuView.findViewById<View>(R.id.menu_activity_settings).setOnClickListener {
@@ -343,7 +367,6 @@ class WorkoutRoutineActivity : AppCompatActivity() {
         params.columnSpec = GridLayout.spec(GridLayout.UNDEFINED, 1f)
         frameLayout.layoutParams = params
 
-        // Circular Progress Bar
         val progressBar = android.widget.ProgressBar(this, null, android.R.attr.progressBarStyleHorizontal)
         val s = (32 * resources.displayMetrics.density).toInt()
         val pbParams = FrameLayout.LayoutParams(s, s)
@@ -352,7 +375,7 @@ class WorkoutRoutineActivity : AppCompatActivity() {
         progressBar.progressDrawable = ContextCompat.getDrawable(this, R.drawable.circular_history_progress)
         progressBar.max = 100
         progressBar.progress = progressPercent
-        progressBar.scaleX = -1f // Flip horizontally for anti-clockwise fill
+        progressBar.scaleX = -1f 
         frameLayout.addView(progressBar)
 
         val textView = TextView(this)
@@ -377,104 +400,169 @@ class WorkoutRoutineActivity : AppCompatActivity() {
     fun showAddWorkoutDialog(existingWorkout: Workout? = null) {
         val dialog = Dialog(this, android.R.style.Theme_Black_NoTitleBar_Fullscreen)
         dialog.setContentView(R.layout.dialog_add_workout)
+
         val nameInput = dialog.findViewById<EditText>(R.id.workout_name_input)
-        val trackingGroup = dialog.findViewById<RadioGroup>(R.id.tracking_mode_group)
         val targetInput = dialog.findViewById<EditText>(R.id.target_input)
         val chipGroup = dialog.findViewById<ChipGroup>(R.id.muscle_chip_group)
         val btnClose = dialog.findViewById<View>(R.id.btn_close_workout)
         val btnSave = dialog.findViewById<TextView>(R.id.btn_save_workout)
-        if (DataManager.workoutAddThemeColor != -1) {
-            btnSave.setTextColor(DataManager.workoutAddThemeColor)
-        }
+        val headerAccent = dialog.findViewById<View>(R.id.header_bg_accent_workout)
         val iconPreview = dialog.findViewById<ImageView>(R.id.icon_preview_workout)
         val colorPreview = dialog.findViewById<View>(R.id.color_preview_workout)
-        val cardRepeat = dialog.findViewById<View>(R.id.card_repeat_workout)
-        val tvRepeatSummary = dialog.findViewById<TextView>(R.id.tv_repeat_summary_workout)
+        val tvNameHint = dialog.findViewById<TextView>(R.id.tv_name_hint_workout)
+        val tvScheduleHint = dialog.findViewById<TextView>(R.id.tv_schedule_hint_workout)
+        val tvTargetHint = dialog.findViewById<TextView>(R.id.tv_target_hint_workout)
+
+        val dayViews = listOf(R.id.day_0_direct_workout, R.id.day_1_direct_workout, R.id.day_2_direct_workout, R.id.day_3_direct_workout, R.id.day_4_direct_workout, R.id.day_5_direct_workout, R.id.day_6_direct_workout)
+            .map { dialog.findViewById<TextView>(it) }
         
+        var tempRepeatDays = existingWorkout?.repeatDays?.toMutableList() ?: mutableListOf(0, 1, 2, 3, 4, 5, 6)
+
+        fun validateInputs() {
+            val name = nameInput.text.toString().trim()
+            val target = targetInput.text.toString().toIntOrNull() ?: 0
+            val isNameValid = name.isNotEmpty()
+            val isScheduleValid = tempRepeatDays.isNotEmpty()
+            val isTargetValid = target > 0
+            
+            val isAllValid = isNameValid && isScheduleValid && isTargetValid
+
+            btnSave.alpha = if (isAllValid) 1.0f else 0.3f
+            btnSave.isEnabled = isAllValid
+            
+            tvNameHint.visibility = if (isNameValid) View.GONE else View.VISIBLE
+            tvScheduleHint.visibility = if (isScheduleValid) View.GONE else View.VISIBLE
+            tvTargetHint.visibility = if (isTargetValid) View.GONE else View.VISIBLE
+
+            if (!isNameValid) startPulseAnimation(tvNameHint)
+            if (!isScheduleValid) startPulseAnimation(tvScheduleHint)
+            if (!isTargetValid) startPulseAnimation(tvTargetHint)
+        }
+        
+        fun refreshDayButtons() {
+            dayViews.forEachIndexed { index, tv ->
+                val isSelected = tempRepeatDays.contains(index)
+                tv.backgroundTintList = ColorStateList.valueOf(if (isSelected) ContextCompat.getColor(this, R.color.chip_selected) else Color.parseColor("#1AFFFFFF"))
+                tv.alpha = if (isSelected) 1.0f else 0.5f
+            }
+            validateInputs()
+        }
+        refreshDayButtons()
+        dayViews.forEachIndexed { index, tv ->
+            tv.setOnClickListener {
+                if (tempRepeatDays.contains(index)) { if (tempRepeatDays.size > 1) tempRepeatDays.remove(index) }
+                else { tempRepeatDays.add(index) }
+                refreshDayButtons()
+            }
+        }
+
+        nameInput.addTextChangedListener(object : android.text.TextWatcher {
+            override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {}
+            override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) { validateInputs() }
+            override fun afterTextChanged(s: android.text.Editable?) {}
+        })
+
+        targetInput.addTextChangedListener(object : android.text.TextWatcher {
+            override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {}
+            override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) { validateInputs() }
+            override fun afterTextChanged(s: android.text.Editable?) {}
+        })
+
+        val cardReps = dialog.findViewById<com.google.android.material.card.MaterialCardView>(R.id.card_mode_reps)
+        val cardSets = dialog.findViewById<com.google.android.material.card.MaterialCardView>(R.id.card_mode_sets)
+        val cardTimer = dialog.findViewById<com.google.android.material.card.MaterialCardView>(R.id.card_mode_timer)
+        val modeCards = mapOf("Reps" to cardReps, "Sets" to cardSets, "Timer" to cardTimer)
+        
+        var selectedMode = existingWorkout?.trackingMode ?: DataManager.workoutDefaultMode
+
+        fun refreshModeCards() {
+            modeCards.forEach { (mode, card) ->
+                val isActive = mode == selectedMode
+                card.setCardBackgroundColor(if (isActive) ContextCompat.getColor(this, R.color.chip_selected) else Color.parseColor("#1AFFFFFF"))
+                card.alpha = if (isActive) 1.0f else 0.6f
+            }
+        }
+        refreshModeCards()
+        modeCards.forEach { (mode, card) -> card.setOnClickListener { selectedMode = mode; refreshModeCards() } }
+
+        val cardMorning = dialog.findViewById<com.google.android.material.card.MaterialCardView>(R.id.card_morning_workout)
+        val cardAfternoon = dialog.findViewById<com.google.android.material.card.MaterialCardView>(R.id.card_afternoon_workout)
+        val cardEvening = dialog.findViewById<com.google.android.material.card.MaterialCardView>(R.id.card_evening_workout)
+        val cardAnytime = dialog.findViewById<com.google.android.material.card.MaterialCardView>(R.id.card_anytime_workout)
+        val freqCards = mapOf("Morning" to cardMorning, "Afternoon" to cardAfternoon, "Evening" to cardEvening, "Anytime" to cardAnytime)
+
+        var selectedFrequency = existingWorkout?.frequency ?: "Anytime"
+
+        fun refreshFreqCards() {
+            freqCards.forEach { (type, card) ->
+                val isActive = type == selectedFrequency
+                card.setCardBackgroundColor(if (isActive) ContextCompat.getColor(this, R.color.chip_selected) else Color.parseColor("#1AFFFFFF"))
+                card.alpha = if (isActive) 1.0f else 0.6f
+            }
+        }
+        refreshFreqCards()
+        freqCards.forEach { (type, card) -> card.setOnClickListener { selectedFrequency = type; refreshFreqCards() } }
+
         val muscleGroups = DataManager.workoutMuscleGroups
         val selectedMuscleGroups = existingWorkout?.muscleGroups?.toMutableList() ?: mutableListOf("General")
-
-        // Populate Muscle Group Chips
         muscleGroups.forEach { group ->
             val chip = com.google.android.material.chip.Chip(this)
-            chip.text = group
-            chip.isCheckable = true
-            chip.isChecked = selectedMuscleGroups.contains(group)
-            
-            // Style the chip for dark theme
-            chip.setChipBackgroundColorResource(R.color.chip_background)
-            chip.setTextColor(Color.WHITE)
-            chip.setCheckable(true)
-            chip.setCheckedIconVisible(true)
-            chip.setCheckedIconTintResource(R.color.white)
-            
-            chip.setOnCheckedChangeListener { _, isChecked ->
-                if (isChecked) {
-                    if (!selectedMuscleGroups.contains(group)) selectedMuscleGroups.add(group)
-                } else {
-                    selectedMuscleGroups.remove(group)
-                }
-            }
+            chip.text = group; chip.isCheckable = true; chip.isChecked = selectedMuscleGroups.contains(group)
+            chip.setChipBackgroundColorResource(R.color.chip_background); chip.setTextColor(Color.WHITE)
+            chip.setCheckedIconVisible(true); chip.setCheckedIconTintResource(R.color.white)
+            chip.setOnCheckedChangeListener { _, isChecked -> if (isChecked) { if (!selectedMuscleGroups.contains(group)) selectedMuscleGroups.add(group) } else { selectedMuscleGroups.remove(group) } }
             chipGroup.addView(chip)
         }
 
-        val radioAnytime = dialog.findViewById<RadioButton>(R.id.radio_anytime_workout)
-        val radioMorning = dialog.findViewById<RadioButton>(R.id.radio_morning_workout)
-        val radioAfternoon = dialog.findViewById<RadioButton>(R.id.radio_afternoon_workout)
-        val radioEvening = dialog.findViewById<RadioButton>(R.id.radio_evening_workout)
-        val frequencyRadios = listOf(radioAnytime, radioMorning, radioAfternoon, radioEvening)
-        frequencyRadios.forEach { rb -> rb.setOnClickListener { updateRadioSelection(frequencyRadios, rb) } }
         val colors = listOf(ContextCompat.getColor(this, R.color.card_blue), ContextCompat.getColor(this, R.color.card_orange), ContextCompat.getColor(this, R.color.card_green), Color.MAGENTA, Color.RED, Color.CYAN, Color.YELLOW, Color.LTGRAY)
         var selectedColor = existingWorkout?.color ?: colors[0]
         var selectedIcon = existingWorkout?.iconResId ?: android.R.drawable.ic_menu_directions
-        var tempRepeatType = existingWorkout?.repeatType ?: "SPECIFIC_DAYS"
-        var tempRepeatDays = existingWorkout?.repeatDays?.toMutableList() ?: mutableListOf(0, 1, 2, 3, 4, 5, 6)
-        var tempRepeatCount = existingWorkout?.repeatCount ?: 1
-        
-        fun updateSummary() {
-            tvRepeatSummary.text = when (tempRepeatType) {
-                "SPECIFIC_DAYS" -> if (tempRepeatDays.size == 7) "Everyday" else "Specific days"
-                "WEEKLY" -> "$tempRepeatCount days per week"
-                else -> "Everyday"
-            }
-        }
-        updateSummary()
 
-        if (existingWorkout == null) {
-            when(DataManager.workoutDefaultMode) {
-                "Sets" -> trackingGroup.check(R.id.radio_sets)
-                "Timer" -> trackingGroup.check(R.id.radio_timer)
-                else -> trackingGroup.check(R.id.radio_reps)
-            }
+        fun updateThemeVisuals() {
+            iconPreview.backgroundTintList = ColorStateList.valueOf(selectedColor)
+            colorPreview.backgroundTintList = ColorStateList.valueOf(selectedColor)
+            headerAccent.backgroundTintList = ColorStateList.valueOf(selectedColor)
+            if (btnSave.isEnabled) btnSave.setTextColor(selectedColor) else btnSave.setTextColor(Color.GRAY)
+            tvNameHint.setTextColor(selectedColor)
+            tvScheduleHint.setTextColor(selectedColor)
+            tvTargetHint.setTextColor(selectedColor)
         }
 
         if (existingWorkout != null) {
             nameInput.setText(existingWorkout.name); targetInput.setText(existingWorkout.target.toString())
-            btnSave.text = "Save"
-            when (existingWorkout.trackingMode) { "Sets" -> trackingGroup.check(R.id.radio_sets); "Reps" -> trackingGroup.check(R.id.radio_reps); "Timer" -> trackingGroup.check(R.id.radio_timer) }
-            when (existingWorkout.frequency) { "Morning" -> updateRadioSelection(frequencyRadios, radioMorning); "Afternoon" -> updateRadioSelection(frequencyRadios, radioAfternoon); "Evening" -> updateRadioSelection(frequencyRadios, radioEvening); else -> updateRadioSelection(frequencyRadios, radioAnytime) }
-            iconPreview.setImageResource(selectedIcon); iconPreview.backgroundTintList = android.content.res.ColorStateList.valueOf(selectedColor); colorPreview.backgroundTintList = android.content.res.ColorStateList.valueOf(selectedColor)
+            btnSave.text = "Update"; iconPreview.setImageResource(selectedIcon)
         }
+        
+        updateThemeVisuals()
+        validateInputs()
+
         dialog.findViewById<View>(R.id.card_workout_icon).setOnClickListener { showIconSelectionDialog { icon -> selectedIcon = icon; iconPreview.setImageResource(selectedIcon) } }
-        colorPreview.setOnClickListener { val currentIndex = colors.indexOf(selectedColor); selectedColor = colors[(currentIndex + 1) % colors.size]; iconPreview.backgroundTintList = android.content.res.ColorStateList.valueOf(selectedColor); colorPreview.backgroundTintList = android.content.res.ColorStateList.valueOf(selectedColor) }
-        cardRepeat.setOnClickListener { showWorkoutDaysDialog { updateSummary() } }
+        colorPreview.setOnClickListener { val currentIndex = colors.indexOf(selectedColor); selectedColor = colors[(currentIndex + 1) % colors.size]; updateThemeVisuals() }
         btnClose.setOnClickListener { dialog.dismiss() }
+
         btnSave.setOnClickListener {
-            val name = nameInput.text.toString()
-            if (name.isNotEmpty()) {
-                val trackingMode = when (trackingGroup.checkedRadioButtonId) { R.id.radio_sets -> "Sets"; R.id.radio_reps -> "Reps"; else -> "Timer" }
-                val frequency = when { radioMorning.isChecked -> "Morning"; radioAfternoon.isChecked -> "Afternoon"; radioEvening.isChecked -> "Evening"; else -> "Anytime" }
-                val target = targetInput.text.toString().toIntOrNull() ?: 0
-                
-                // Final selection check
-                val finalSelection = if (selectedMuscleGroups.isEmpty()) listOf("General") else selectedMuscleGroups.toList()
-                
-                if (existingWorkout == null) workouts.add(Workout(name, false, trackingMode, target, frequency = frequency, color = selectedColor, iconResId = selectedIcon, muscleGroups = finalSelection, repeatType = tempRepeatType, repeatDays = tempRepeatDays.toList(), repeatCount = tempRepeatCount))
-                else { existingWorkout.name = name; existingWorkout.target = target; existingWorkout.trackingMode = trackingMode; existingWorkout.frequency = frequency; existingWorkout.color = selectedColor; existingWorkout.iconResId = selectedIcon; existingWorkout.muscleGroups = finalSelection; existingWorkout.repeatType = tempRepeatType; existingWorkout.repeatDays = tempRepeatDays.toList(); existingWorkout.repeatCount = tempRepeatCount }
-                workoutAdapter.sortWorkouts(); DataManager.saveData(this); dialog.dismiss()
+            val name = nameInput.text.toString().trim()
+            val target = targetInput.text.toString().toIntOrNull() ?: 0
+            val finalMuscleSelection = if (selectedMuscleGroups.isEmpty()) listOf("General") else selectedMuscleGroups.toList()
+            if (existingWorkout == null) {
+                workouts.add(Workout(name, false, selectedMode, target, frequency = selectedFrequency, color = selectedColor, iconResId = selectedIcon, muscleGroups = finalMuscleSelection, repeatType = "SPECIFIC_DAYS", repeatDays = tempRepeatDays.toList(), repeatCount = 1))
+            } else {
+                existingWorkout.name = name; existingWorkout.target = target; existingWorkout.trackingMode = selectedMode; existingWorkout.frequency = selectedFrequency; existingWorkout.color = selectedColor; existingWorkout.iconResId = selectedIcon; existingWorkout.muscleGroups = finalMuscleSelection; existingWorkout.repeatDays = tempRepeatDays.toList()
             }
+            workoutAdapter.sortWorkouts(); DataManager.saveData(this); dialog.dismiss()
         }
         dialog.show()
+    }
+
+    private fun startPulseAnimation(view: View) {
+        if (view.tag == "pulsing") return
+        view.tag = "pulsing"
+        view.animate().alpha(0.4f).setDuration(800).withEndAction {
+            view.animate().alpha(1.0f).setDuration(800).withEndAction {
+                view.tag = null
+                if (view.visibility == View.VISIBLE) startPulseAnimation(view)
+            }
+        }.start()
     }
 
     private fun showIconSelectionDialog(onSelected: (Int) -> Unit) {
@@ -483,66 +571,57 @@ class WorkoutRoutineActivity : AppCompatActivity() {
             R.drawable.icons8_exercise_100_4, R.drawable.icons8_exercise_100_5, R.drawable.icons8_exercise_100_6,
             R.drawable.icons8_exercise_100_7, R.drawable.icons8_exercise_100_8, R.drawable.icons8_exercise_100_9,
             R.drawable.icons8_exercise_100_10, R.drawable.icons8_exercise_100_11, R.drawable.icons8_exercise_100_12,
-            R.drawable.icons8_dumbbell_100, R.drawable.icons8_deadlift_100, R.drawable.icons8_plank_100,
-            R.drawable.icons8_skipping_rope_100_2, R.drawable.icons8_treadmill_100_2, R.drawable.icons8_warm_up_100,
-            R.drawable.icons8_pilates_100, R.drawable.icons8_triceps_100, R.drawable.icons8_yoga_100
+            R.drawable.icons8_exercise_100_13, R.drawable.icons8_exercise_100_14, R.drawable.icons8_exercise_100_15,
+            R.drawable.icons8_exercise_100_16, R.drawable.icons8_exercise_100_17, R.drawable.icons8_exercise_100_18,
+            R.drawable.icons8_exercise_100_20, R.drawable.icons8_exercise_100_21, R.drawable.icons8_exercise_100_22,
+            R.drawable.icons8_exercise_100_23, R.drawable.icons8_exercise_100_25, R.drawable.icons8_exercise_100_26,
+            R.drawable.icons8_exercise_100_27, R.drawable.icons8_exercise_100_28, R.drawable.icons8_exercise_100_29,
+            R.drawable.icons8_exercise_100_30, R.drawable.icons8_exercise_100_31, R.drawable.icons8_exercise_100_32,
+            R.drawable.icons8_exercise_100_33, R.drawable.icons8_exercise_100_34, R.drawable.icons8_exercise_100_36,
+            R.drawable.icons8_exercise_100_37, R.drawable.icons8_exercise_100_38, R.drawable.icons8_exercise_100_39,
+            R.drawable.icons8_exercise_100_40, R.drawable.icons8_exercise_100_41, R.drawable.icons8_exercise_100_43,
+            R.drawable.icons8_exercise_100_44, R.drawable.icons8_exercise_100_45, R.drawable.icons8_exercise_100_47,
+            R.drawable.icons8_exercise_100_48, R.drawable.icons8_dumbbell_100, R.drawable.icons8_deadlift_100,
+            R.drawable.icons8_plank_100, R.drawable.icons8_skipping_rope_100_2, R.drawable.icons8_treadmill_100_2,
+            R.drawable.icons8_warm_up_100, R.drawable.icons8_pilates_100, R.drawable.icons8_triceps_100,
+            R.drawable.icons8_yoga_100, R.drawable.icons8_hand_grip_100_2, R.drawable.icons8_walking_100_3,
+            R.drawable.icons8_artistic_gymnastics_100, R.drawable.icons8_heart_health_100, R.drawable.icons8_dog_training_100
         )
-        val dialogView = LayoutInflater.from(this).inflate(R.layout.dialog_icon_picker, null)
-        val gridLayout = dialogView.findViewById<GridLayout>(R.id.icon_grid)
-        val pickerDialog = AlertDialog.Builder(this).setTitle("Select Exercise Icon").setView(dialogView).create()
-        icons.forEach { iconRes ->
-            val iconView = ImageView(this); val params = GridLayout.LayoutParams(); params.width = 120; params.height = 120; params.setMargins(16, 16, 16, 16); iconView.layoutParams = params; iconView.setImageResource(iconRes); iconView.setPadding(24, 24, 24, 24); iconView.setBackgroundResource(R.drawable.circle_selected_bg); iconView.backgroundTintList = ContextCompat.getColorStateList(this, R.color.chip_background); iconView.imageTintList = ContextCompat.getColorStateList(this, R.color.white); iconView.setOnClickListener { onSelected(iconRes); pickerDialog.dismiss() }; gridLayout.addView(iconView)
-        }
-        pickerDialog.show()
-    }
-
-    private fun showWorkoutDaysDialog(onDismiss: () -> Unit) {
-        val dialog = Dialog(this, android.R.style.Theme_Black_NoTitleBar_Fullscreen)
-        dialog.setContentView(R.layout.dialog_workout_days)
-        val btnBack = dialog.findViewById<ImageView>(R.id.btn_back_workout_days)
-        val cardSpecific = dialog.findViewById<View>(R.id.card_specific_days_workout)
-        val cardWeekly = dialog.findViewById<View>(R.id.card_days_per_week_workout)
-        val tvDaysPerWeek = dialog.findViewById<TextView>(R.id.tv_days_per_week_workout)
-        val ivCheckSpecific = dialog.findViewById<ImageView>(R.id.iv_check_specific_workout)
-        val ivRadioWeek = dialog.findViewById<ImageView>(R.id.iv_radio_week_workout)
-        val dayViews = listOf(R.id.day_0_workout, R.id.day_1_workout, R.id.day_2_workout, R.id.day_3_workout, R.id.day_4_workout, R.id.day_5_workout, R.id.day_6_workout).map { dialog.findViewById<TextView>(it) }
         
-        var tempRepeatType = "SPECIFIC_DAYS"
-        var tempRepeatDays = mutableListOf(0, 1, 2, 3, 4, 5, 6)
-        var tempRepeatCount = 1
+        val dialog = Dialog(this)
+        dialog.setContentView(R.layout.dialog_premium_icon_picker)
+        dialog.window?.setBackgroundDrawableResource(android.R.color.transparent)
+        dialog.window?.setLayout(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT)
 
-        fun refreshUI() {
-            ivCheckSpecific.visibility = if (tempRepeatType == "SPECIFIC_DAYS") View.VISIBLE else View.INVISIBLE
-            ivRadioWeek.setImageResource(if (tempRepeatType == "WEEKLY") android.R.drawable.radiobutton_on_background else android.R.drawable.radiobutton_off_background)
-            tvDaysPerWeek.text = "$tempRepeatCount day${if (tempRepeatCount > 1) "s" else ""} per week"
-            dayViews.forEachIndexed { index, tv ->
-                val isSelected = tempRepeatType == "SPECIFIC_DAYS" && tempRepeatDays.contains(index)
-                tv.backgroundTintList = android.content.res.ColorStateList.valueOf(if (isSelected) ContextCompat.getColor(this, R.color.chip_selected) else Color.TRANSPARENT)
-                tv.setTextColor(if (isSelected) Color.WHITE else Color.GRAY)
+        val gridLayout = dialog.findViewById<GridLayout>(R.id.premium_icon_grid)
+        val title = dialog.findViewById<TextView>(R.id.tv_picker_title)
+        val btnClose = dialog.findViewById<View>(R.id.btn_close_picker)
+
+        title.text = "SELECT WORKOUT ICON"
+
+        icons.forEach { iconRes ->
+            val iconView = ImageView(this)
+            val s = (64 * resources.displayMetrics.density).toInt()
+            val params = GridLayout.LayoutParams()
+            params.width = s; params.height = s; params.setMargins(8, 8, 8, 8)
+            iconView.layoutParams = params
+            
+            iconView.setImageResource(iconRes)
+            iconView.setPadding(16, 16, 16, 16)
+            iconView.background = ContextCompat.getDrawable(this, R.drawable.circle_selected_bg)
+            iconView.backgroundTintList = ColorStateList.valueOf(Color.parseColor("#22FFFFFF"))
+            iconView.imageTintList = ColorStateList.valueOf(Color.WHITE)
+            
+            iconView.setOnClickListener {
+                onSelected(iconRes)
+                dialog.dismiss()
             }
+            gridLayout.addView(iconView)
         }
-        refreshUI()
-        cardSpecific.setOnClickListener { tempRepeatType = "SPECIFIC_DAYS"; refreshUI() }
-        dayViews.forEachIndexed { index, tv ->
-            tv.setOnClickListener {
-                if (tempRepeatType != "SPECIFIC_DAYS") { tempRepeatType = "SPECIFIC_DAYS"; tempRepeatDays.clear() }
-                if (tempRepeatDays.contains(index)) { if (tempRepeatDays.size > 1) tempRepeatDays.remove(index) } else tempRepeatDays.add(index)
-                refreshUI()
-            }
-        }
-        cardWeekly.setOnClickListener {
-            if (tempRepeatType == "WEEKLY") {
-                val pickerDialogView = LayoutInflater.from(this).inflate(R.layout.dialog_number_picker, null)
-                val numberPicker = pickerDialogView.findViewById<NumberPicker>(R.id.number_picker)
-                numberPicker.minValue = 1; numberPicker.maxValue = 7; numberPicker.value = tempRepeatCount
-                AlertDialog.Builder(this).setTitle("Select days per week").setView(pickerDialogView).setPositiveButton("OK") { _, _ -> tempRepeatCount = numberPicker.value; refreshUI() }.setNegativeButton("Cancel", null).show()
-            } else { tempRepeatType = "WEEKLY"; refreshUI() }
-        }
-        btnBack.setOnClickListener { onDismiss(); dialog.dismiss() }
+
+        btnClose.setOnClickListener { dialog.dismiss() }
         dialog.show()
     }
-
-    private fun updateRadioSelection(list: List<RadioButton>, selected: RadioButton) { list.forEach { it.isChecked = false }; selected.isChecked = true }
 
     private fun showWorkoutSettingsDialog() {
         val dialog = Dialog(this)
@@ -570,13 +649,11 @@ class WorkoutRoutineActivity : AppCompatActivity() {
         val itemRestDuration = view.findViewById<View>(R.id.item_sound)
         val btnClose = view.findViewById<View>(R.id.btn_close_settings)
 
-        // Hide unused rows
         view.findViewById<View>(R.id.item_haptics)?.visibility = View.GONE
         view.findViewById<View>(R.id.item_grace_period)?.visibility = View.GONE
 
         title.text = "Workout Settings"
         
-        // Find labels via tags or index safely
         fun setLabel(container: View?, text: String) {
             (container as? ViewGroup)?.let { vg ->
                 for (i in 0 until vg.childCount) {

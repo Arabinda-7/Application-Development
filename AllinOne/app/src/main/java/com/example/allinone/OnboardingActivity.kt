@@ -7,16 +7,26 @@ import android.widget.EditText
 import android.widget.ImageView
 import android.widget.TextView
 import android.widget.Toast
+import androidx.activity.enableEdgeToEdge
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.ContextCompat
+import androidx.core.view.ViewCompat
+import androidx.core.view.WindowInsetsCompat
 
 class OnboardingActivity : AppCompatActivity() {
 
     private var selectedAvatarRes: Int = R.drawable.boy_avatar_profile
 
     override fun onCreate(savedInstanceState: Bundle?) {
+        enableEdgeToEdge()
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_onboarding)
+
+        ViewCompat.setOnApplyWindowInsetsListener(findViewById(R.id.onboarding_root_layout)) { v, insets ->
+            val statusBars = insets.getInsets(WindowInsetsCompat.Type.statusBars())
+            v.setPadding(v.paddingLeft, statusBars.top, v.paddingRight, v.paddingBottom)
+            insets
+        }
 
         val etName = findViewById<EditText>(R.id.et_onboarding_name)
         val ivAvatar1 = findViewById<ImageView>(R.id.iv_avatar_1)

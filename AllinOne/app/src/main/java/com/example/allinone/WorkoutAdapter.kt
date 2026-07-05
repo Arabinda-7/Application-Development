@@ -177,6 +177,7 @@ class WorkoutAdapter(
                             workout.isExpanded = false
                             if (!workout.completedDates.contains(todayDateString)) {
                                 workout.completedDates.add(todayDateString)
+                                DataManager.addActivity("Finished Workout: ${workout.name}")
                             }
                         }
                         TransitionManager.beginDelayedTransition(holder.itemView as ViewGroup)
@@ -194,6 +195,7 @@ class WorkoutAdapter(
                     
                     if (!workout.completedDates.contains(todayDateString)) {
                         workout.completedDates.add(todayDateString)
+                        DataManager.addActivity("Finished Workout: ${workout.name}")
                     }
                     
                     applyFilterAndSort()

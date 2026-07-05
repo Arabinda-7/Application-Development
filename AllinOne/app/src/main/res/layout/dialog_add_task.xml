@@ -66,6 +66,17 @@
                 android:inputType="textCapSentences" />
 
             <TextView
+                android:id="@+id/tv_name_hint"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="4dp"
+                android:text="Give your task a name to continue"
+                android:textColor="#FF5252"
+                android:textSize="11sp"
+                android:textStyle="bold"
+                android:visibility="gone" />
+
+            <TextView
                 android:id="@+id/tv_priority_label"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
