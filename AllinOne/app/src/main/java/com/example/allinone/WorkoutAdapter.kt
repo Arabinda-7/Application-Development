@@ -68,7 +68,7 @@ class WorkoutAdapter(
         if (holder is HeaderViewHolder) {
             val headerText = displayItems[position] as String
             holder.title.text = headerText
-            holder.chevron.rotation = if (isCompletedExpanded) 0f else 180f
+            holder.chevron.rotation = if (isCompletedExpanded) 180f else 0f
             holder.itemView.setOnClickListener {
                 isCompletedExpanded = !isCompletedExpanded
                 applyFilterAndSort()
@@ -90,12 +90,26 @@ class WorkoutAdapter(
                 holder.workoutDetails.text = details
             }
 
-            val cardColor = if (workout.color != -1) {
-                workout.color
-            } else {
-                ContextCompat.getColor(context, R.color.card_blue)
-            }
-            holder.workoutCard.setCardBackgroundColor(cardColor)
+            // Advanced Design Binding
+            val themeColor = if (workout.color != -1) workout.color else android.graphics.Color.parseColor("#1A73E8")
+            
+            // 1. Accent Bar Color
+            holder.itemView.findViewById<View>(R.id.accent_bar_workout).backgroundTintList = android.content.res.ColorStateList.valueOf(themeColor)
+            
+            // 2. Icon Container Tint
+            holder.itemView.findViewById<View>(R.id.icon_container_workout).backgroundTintList = android.content.res.ColorStateList.valueOf(themeColor).withAlpha(20)
+
+            // 3. Card Styling (Glassmorphic)
+            holder.workoutCard.setCardBackgroundColor(android.graphics.Color.parseColor("#1A1A1A"))
+            holder.workoutCard.strokeColor = themeColor
+            holder.workoutCard.strokeWidth = (1.5 * context.resources.displayMetrics.density).toInt()
+
+            // 4. Action Panel Dynamic Styling
+            holder.itemView.findViewById<com.google.android.material.card.MaterialCardView>(R.id.card_roller_container).strokeColor = themeColor
+            holder.btnFinishSelection.setCardBackgroundColor(android.graphics.Color.argb(30, android.graphics.Color.red(themeColor), android.graphics.Color.green(themeColor), android.graphics.Color.blue(themeColor)))
+            holder.btnFinishSelection.strokeColor = themeColor
+            holder.tvSelectedNumCircle.backgroundTintList = android.content.res.ColorStateList.valueOf(themeColor)
+            holder.btnFinishAll.setCardBackgroundColor(themeColor)
 
             if (workout.iconResId != -1) {
                 holder.workoutIcon.setImageResource(workout.iconResId)
@@ -104,7 +118,7 @@ class WorkoutAdapter(
             // Expansion Logic with Smooth Transition
             val shouldShowControls = workout.isExpanded && !isCompleted && selectedDateString == todayDateString
             holder.expandableControls.visibility = if (shouldShowControls) View.VISIBLE else View.GONE
-            holder.expandChevron.rotation = if (workout.isExpanded) 270f else 90f
+            holder.expandChevron.rotation = if (workout.isExpanded) 180f else 0f
 
             holder.workoutCard.setOnClickListener {
                 if (isCompleted || selectedDateString != todayDateString) {
@@ -118,6 +132,11 @@ class WorkoutAdapter(
                     workout.isExpanded = !workout.isExpanded
                     notifyItemChanged(position)
                 }
+            }
+
+            holder.workoutCard.setOnLongClickListener {
+                showCustomMenu(it, workout)
+                true
             }
             
             holder.workoutName.setOnClickListener {
@@ -203,16 +222,14 @@ class WorkoutAdapter(
                 }
             }
 
-            holder.editButton.setOnClickListener { showCustomMenu(it, workout) }
-            
             updateVisuals(holder, isCompleted)
         }
     }
 
     private fun updateFinishSelectionUI(holder: WorkoutViewHolder, value: Int, mode: String) {
         holder.tvSelectedNumCircle.text = value.toString()
-        val unit = if (mode == "Reps") DataManager.workoutWeightUnit else mode
-        holder.tvFinishRepsLabel.text = "$value ${unit.uppercase()}"
+        val unit = if (mode == "Reps") "REPS" else if (mode == "Sets") "SETS" else mode
+        holder.tvFinishRepsLabel.text = "FINISH $value ${unit.uppercase()}"
     }
 
     private fun showCustomMenu(anchor: View, workout: Workout) {
@@ -318,7 +335,7 @@ class WorkoutAdapter(
     private fun updateVisuals(holder: WorkoutViewHolder, isCompleted: Boolean) {
         if (isCompleted) {
             holder.workoutName.paintFlags = holder.workoutName.paintFlags or Paint.STRIKE_THRU_TEXT_FLAG
-            holder.mainContainer.alpha = 0.6f
+            holder.mainContainer.alpha = 0.5f
         } else {
             holder.workoutName.paintFlags = holder.workoutName.paintFlags and Paint.STRIKE_THRU_TEXT_FLAG.inv()
             holder.mainContainer.alpha = 1.0f
@@ -334,7 +351,6 @@ class WorkoutAdapter(
         val workoutName: TextView = itemView.findViewById(R.id.workout_name)
         val workoutDetails: TextView = itemView.findViewById(R.id.workout_details)
         val workoutIcon: ImageView = itemView.findViewById(R.id.workout_icon)
-        val editButton: ImageButton = itemView.findViewById(R.id.edit_workout_button)
         
         val expandableControls: LinearLayout = itemView.findViewById(R.id.expandable_controls)
         val layoutRepsControls: LinearLayout = itemView.findViewById(R.id.layout_reps_controls)

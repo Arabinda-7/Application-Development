@@ -3,138 +3,100 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:orientation="horizontal"
-    android:paddingHorizontal="12dp"
-    android:paddingVertical="8dp"
-    android:background="@color/dark_background">
+    android:orientation="vertical"
+    android:paddingHorizontal="16dp"
+    android:paddingVertical="6dp"
+    android:background="@android:color/transparent">
 
-    <ImageView
-        android:id="@+id/iv_expand_chevron_habit"
-        android:layout_width="24dp"
-        android:layout_height="24dp"
-        android:layout_marginTop="24dp"
-        android:src="@android:drawable/ic_menu_more"
-        android:rotation="90"
-        app:tint="#66FFFFFF"
-        android:contentDescription="Expand" />
-
-    <LinearLayout
-        android:layout_width="0dp"
+    <com.google.android.material.card.MaterialCardView
+        android:id="@+id/habit_card"
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_weight="1"
-        android:orientation="vertical"
-        android:layout_marginStart="8dp">
+        app:cardCornerRadius="20dp"
+        app:cardElevation="0dp"
+        app:strokeWidth="1.5dp"
+        app:strokeColor="#1AFFFFFF"
+        app:cardBackgroundColor="#1A1A1A">
 
-        <com.google.android.material.card.MaterialCardView
-            android:id="@+id/habit_card"
+        <androidx.constraintlayout.widget.ConstraintLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            app:cardCornerRadius="28dp"
-            app:cardElevation="0dp"
-            app:strokeWidth="0dp"
-            app:cardBackgroundColor="@color/card_blue">
+            android:paddingVertical="12dp"
+            android:paddingHorizontal="12dp">
 
-            <RelativeLayout
-                android:layout_width="match_parent"
+            <!-- Vertical Accent Bar -->
+            <View
+                android:id="@+id/accent_bar"
+                android:layout_width="4dp"
+                android:layout_height="0dp"
+                android:background="@color/primary_blue"
+                android:alpha="0.8"
+                app:layout_constraintTop_toTopOf="@id/icon_container"
+                app:layout_constraintBottom_toBottomOf="@id/icon_container"
+                app:layout_constraintStart_toStartOf="parent" />
+
+            <!-- Icon in Tinted Circle -->
+            <FrameLayout
+                android:id="@+id/icon_container"
+                android:layout_width="48dp"
+                android:layout_height="48dp"
+                android:layout_marginStart="12dp"
+                android:background="@drawable/circle_selected_bg"
+                android:backgroundTint="#0DFFFFFF"
+                app:layout_constraintTop_toTopOf="parent"
+                app:layout_constraintStart_toEndOf="@id/accent_bar">
+                <ImageView
+                    android:id="@+id/habit_icon"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:padding="12dp"
+                    android:src="@android:drawable/ic_menu_directions"
+                    app:tint="@color/white" />
+            </FrameLayout>
+
+            <!-- Text Content -->
+            <LinearLayout
+                android:id="@+id/text_container"
+                android:layout_width="0dp"
                 android:layout_height="wrap_content"
-                android:padding="16dp">
+                android:layout_marginStart="16dp"
+                android:layout_marginEnd="8dp"
+                android:orientation="vertical"
+                app:layout_constraintTop_toTopOf="@id/icon_container"
+                app:layout_constraintBottom_toBottomOf="@id/icon_container"
+                app:layout_constraintStart_toEndOf="@id/icon_container"
+                app:layout_constraintEnd_toStartOf="@id/action_group">
+
+                <TextView
+                    android:id="@+id/habit_name"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:textSize="16sp"
+                    android:textStyle="bold"
+                    android:letterSpacing="0.01"
+                    android:textColor="@color/white"
+                    android:text="Habit Name" />
+            </LinearLayout>
+
+            <!-- Action Group (Checkbox) -->
+            <LinearLayout
+                android:id="@+id/action_group"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:gravity="center_vertical"
+                app:layout_constraintTop_toTopOf="parent"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintEnd_toEndOf="parent">
 
                 <CheckBox
                     android:id="@+id/habit_completed"
-                    android:layout_width="28dp"
-                    android:layout_height="28dp"
-                    android:layout_centerVertical="true"
+                    android:layout_width="32dp"
+                    android:layout_height="32dp"
                     android:button="@android:color/transparent"
                     android:background="@drawable/custom_checkbox_selector" />
+            </LinearLayout>
 
-                <ImageView
-                    android:id="@+id/habit_icon"
-                    android:layout_width="48dp"
-                    android:layout_height="48dp"
-                    android:layout_toEndOf="@id/habit_completed"
-                    android:layout_marginStart="12dp"
-                    android:src="@android:drawable/ic_menu_directions"
-                    android:padding="8dp"
-                    app:tint="@color/white" />
-
-                <LinearLayout
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_toEndOf="@id/habit_icon"
-                    android:layout_marginStart="12dp"
-                    android:layout_centerVertical="true"
-                    android:orientation="vertical">
-
-                    <TextView
-                        android:id="@+id/habit_name"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:textSize="18sp"
-                        android:textStyle="bold"
-                        android:textColor="@color/white"
-                        android:text="Habit Name" />
-
-                    <TextView
-                        android:id="@+id/habit_frequency"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:textSize="14sp"
-                        android:textColor="#CCFFFFFF"
-                        android:text="Anytime" />
-                </LinearLayout>
-
-                <ImageButton
-                    android:id="@+id/edit_habit_button"
-                    android:layout_width="24dp"
-                    android:layout_height="24dp"
-                    android:layout_alignParentEnd="true"
-                    android:layout_centerVertical="true"
-                    android:src="@android:drawable/ic_menu_more"
-                    app:tint="@color/white"
-                    android:background="?attr/selectableItemBackgroundBorderless" />
-
-            </RelativeLayout>
-        </com.google.android.material.card.MaterialCardView>
-
-        <LinearLayout
-            android:id="@+id/expandable_controls_habit"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:orientation="vertical"
-            android:layout_marginTop="8dp"
-            android:visibility="gone">
-
-            <com.google.android.material.card.MaterialCardView
-                android:id="@+id/btn_start_timer_habit"
-                android:layout_width="match_parent"
-                android:layout_height="60dp"
-                app:cardBackgroundColor="#333A42"
-                app:cardCornerRadius="16dp"
-                app:cardElevation="0dp"
-                android:clickable="true"
-                android:focusable="true">
-
-                <LinearLayout
-                    android:layout_width="match_parent"
-                    android:layout_height="match_parent"
-                    android:gravity="center"
-                    android:orientation="horizontal">
-
-                    <ImageView
-                        android:layout_width="24dp"
-                        android:layout_height="24dp"
-                        android:src="@android:drawable/ic_media_play"
-                        app:tint="@color/white" />
-
-                    <TextView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:layout_marginStart="12dp"
-                        android:text="START TIMER"
-                        android:textColor="@color/white"
-                        android:textStyle="bold" />
-                </LinearLayout>
-            </com.google.android.material.card.MaterialCardView>
-        </LinearLayout>
-    </LinearLayout>
+        </androidx.constraintlayout.widget.ConstraintLayout>
+    </com.google.android.material.card.MaterialCardView>
 </LinearLayout>

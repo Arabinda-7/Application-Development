@@ -19,12 +19,12 @@
 
     <style name="NumberPickerTheme" parent="Theme.AppCompat.DayNight">
         <item name="android:editTextColor">@color/white</item>
-        <item name="android:textSize">16sp</item>
+        <item name="android:textSize">20sp</item>
         <item name="android:textColorPrimary">@color/white</item>
-        <item name="android:textColorSecondary">#80FFFFFF</item>
+        <item name="android:textColorSecondary">#4DFFFFFF</item>
         <item name="android:textColor">@color/white</item>
-        <item name="colorControlNormal">@color/white</item>
-        <item name="android:selectionDividerHeight">1dp</item>
+        <item name="colorControlNormal">@android:color/transparent</item>
+        <item name="android:selectionDividerHeight">0dp</item>
     </style>
 
     <style name="CalendarDayLabel">
