@@ -28,7 +28,12 @@ import kotlinx.coroutines.launch
 import java.text.SimpleDateFormat
 import java.util.*
 
-class MainActivity : AppCompatActivity() {
+import androidx.compose.runtime.CompositionLocalProvider
+import androidx.compose.runtime.remember
+import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.ui.unit.Density
+
+class MainActivity : BaseActivity() {
 
     private var dashboardState by mutableStateOf(DashboardState())
     private var isAppUnlocked by mutableStateOf(false)
@@ -95,34 +100,51 @@ class MainActivity : AppCompatActivity() {
                     Box(modifier = Modifier.fillMaxSize().background(Color.Black))
                 }
                 else -> {
-                    HomeScreen(
-                        state = dashboardState,
-                        onNavigateToHabits = { startActivity(Intent(this, HabitTrackerActivity::class.java)) },
-                        onNavigateToWorkout = { startActivity(Intent(this, WorkoutRoutineActivity::class.java)) },
-                        onNavigateToTodos = { startActivity(Intent(this, ToDoListActivity::class.java)) },
-                        onNavigateToNotes = { startActivity(Intent(this, NotesActivity::class.java)) },
-                        onNavigateToProjects = { startActivity(Intent(this, ProjectActivity::class.java)) },
-                        onNavigateToFinance = { startActivity(Intent(this, FinanceActivity::class.java)) },
-                        onNavigateToSettings = { startActivity(Intent(this, SettingsActivity::class.java)) },
-                        onNavigateToProfile = { startActivity(Intent(this, ProfileActivity::class.java)) },
-                        onNavigateToPerformanceHistory = { startActivity(Intent(this, PerformanceHistoryActivity::class.java)) },
-                        onQuickAddTodo = { quickAddTask() },
-                        onQuickAddExpense = { quickAddExpense() },
-                        onQuickAddNote = { quickAddNote() },
-                        onColorSelected = { section, color ->
-                            updateSectionColor(section, color)
-                        },
-                        onMoodSelected = { emoji ->
-                            val today = DataManager.getTrackingDateString()
-                            DataManager.dailyMoods[today] = emoji
-                            DataManager.lastMoodTimestamp = System.currentTimeMillis()
-                            DataManager.saveData(this)
-                            refreshState()
-                        },
-                        onSearchRequested = { query ->
-                            performUniversalSearch(query)
+                    val currentDensity = LocalDensity.current
+                    val customDensity = remember(DataManager.homeDisplaySize, DataManager.fontSize) {
+                        val dScale = when(DataManager.homeDisplaySize) {
+                            "XS" -> 0.85f
+                            "L" -> 1.15f
+                            else -> 1.0f
                         }
-                    )
+                        val fScale = when(DataManager.fontSize) {
+                            "XS" -> 0.85f
+                            "L" -> 1.25f
+                            else -> 1.0f
+                        }
+                        Density(density = currentDensity.density * dScale, fontScale = currentDensity.fontScale * fScale)
+                    }
+
+                    CompositionLocalProvider(LocalDensity provides customDensity) {
+                        HomeScreen(
+                            state = dashboardState,
+                            onNavigateToHabits = { startActivity(Intent(this, HabitTrackerActivity::class.java)) },
+                            onNavigateToWorkout = { startActivity(Intent(this, WorkoutRoutineActivity::class.java)) },
+                            onNavigateToTodos = { startActivity(Intent(this, ToDoListActivity::class.java)) },
+                            onNavigateToNotes = { startActivity(Intent(this, NotesActivity::class.java)) },
+                            onNavigateToProjects = { startActivity(Intent(this, ProjectActivity::class.java)) },
+                            onNavigateToFinance = { startActivity(Intent(this, FinanceActivity::class.java)) },
+                            onNavigateToSettings = { startActivity(Intent(this, SettingsActivity::class.java)) },
+                            onNavigateToProfile = { startActivity(Intent(this, ProfileActivity::class.java)) },
+                            onNavigateToPerformanceHistory = { startActivity(Intent(this, PerformanceHistoryActivity::class.java)) },
+                            onQuickAddTodo = { quickAddTask() },
+                            onQuickAddExpense = { quickAddExpense() },
+                            onQuickAddNote = { quickAddNote() },
+                            onColorSelected = { section, color ->
+                                updateSectionColor(section, color)
+                            },
+                            onMoodSelected = { emoji ->
+                                val today = DataManager.getTrackingDateString()
+                                DataManager.dailyMoods[today] = emoji
+                                DataManager.lastMoodTimestamp = System.currentTimeMillis()
+                                DataManager.saveData(this)
+                                refreshState()
+                            },
+                            onSearchRequested = { query ->
+                                performUniversalSearch(query)
+                            }
+                        )
+                    }
                 }
             }
         }
@@ -201,13 +223,10 @@ class MainActivity : AppCompatActivity() {
     private fun refreshState() {
         val today = DataManager.getTrackingDateString()
         
-        // Mood Expiration Logic (1 Hour)
+        // Virtual Mood Expiration (1 Hour Window)
         val currentTime = System.currentTimeMillis()
-        if (DataManager.lastMoodTimestamp != 0L && (currentTime - DataManager.lastMoodTimestamp) > 3600000) {
-            DataManager.dailyMoods.remove(today)
-            DataManager.lastMoodTimestamp = 0L
-            DataManager.saveData(this)
-        }
+        val isMoodExpired = DataManager.lastMoodTimestamp != 0L && (currentTime - DataManager.lastMoodTimestamp) > 3600000
+        val effectiveMood = if (isMoodExpired) null else DataManager.dailyMoods[today]
 
         val nextMilestone = DataManager.notes
             .filter { it.category == "Project" }
@@ -226,9 +245,9 @@ class MainActivity : AppCompatActivity() {
             safeSpendAmount = DataManager.monthlyBudget - DataManager.getCurrentMonthExpenditure(),
             nextMilestone = nextMilestone,
             recentActions = DataManager.recentActivities,
-            growthAdvice = DataManager.getGrowthAdvice(DataManager.dailyMoods[today]),
-            managementAdvice = DataManager.getManagementAdvice(DataManager.dailyMoods[today]),
-            currentMood = DataManager.dailyMoods[today],
+            growthAdvice = DataManager.getGrowthAdvice(effectiveMood),
+            managementAdvice = DataManager.getManagementAdvice(effectiveMood),
+            currentMood = effectiveMood,
             habitColor = DataManager.globalHabitColor,
             workoutColor = DataManager.globalWorkoutColor,
             taskColor = DataManager.globalTaskColor,

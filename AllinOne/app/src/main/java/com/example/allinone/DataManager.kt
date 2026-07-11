@@ -87,6 +87,9 @@ object DataManager {
     var recentActivities = mutableListOf<String>()
     var dailyMoods = mutableMapOf<String, String>() // DateString -> Emoji
     var lastMoodTimestamp: Long = 0L
+    var displaySize: String = "S" // Options: XS, S, L
+    var homeDisplaySize: String = "S" // Options: XS, S, L
+    var fontSize: String = "S" // Options: XS, S, L
 
     // User Custom Colors
     var userCustomColors = mutableListOf<Int>()
@@ -179,6 +182,9 @@ object DataManager {
     private const val KEY_PROJ_DUAL_EXIST = "project_dual_exist_enabled"
     private const val KEY_PROJ_IDEAS_ENABLED = "project_ideas_enabled"
     private const val KEY_LAST_MOOD_TIMESTAMP = "last_mood_timestamp"
+    private const val KEY_DISPLAY_SIZE = "app_display_size"
+    private const val KEY_HOME_DISPLAY_SIZE = "home_display_size"
+    private const val KEY_FONT_SIZE = "app_font_size"
 
     private const val KEY_GLOBAL_HABIT_COLOR = "global_habit_color"
     private const val KEY_GLOBAL_WORKOUT_COLOR = "global_workout_color"
@@ -276,6 +282,9 @@ object DataManager {
             putString(KEY_RECENT_ACT, gson.toJson(recentActivities))
             putString(KEY_DAILY_MOODS, gson.toJson(dailyMoods))
             putLong(KEY_LAST_MOOD_TIMESTAMP, lastMoodTimestamp)
+            putString(KEY_DISPLAY_SIZE, displaySize)
+            putString(KEY_HOME_DISPLAY_SIZE, homeDisplaySize)
+            putString(KEY_FONT_SIZE, fontSize)
             putString(KEY_USER_NAME, userName)
             putString(KEY_USER_BIO, userBio)
             putInt(KEY_USER_AVATAR, userAvatarRes)
@@ -480,6 +489,9 @@ object DataManager {
         }
 
         lastMoodTimestamp = prefs.getLong(KEY_LAST_MOOD_TIMESTAMP, 0L)
+        displaySize = prefs.getString(KEY_DISPLAY_SIZE, "S") ?: "S"
+        homeDisplaySize = prefs.getString(KEY_HOME_DISPLAY_SIZE, "S") ?: "S"
+        fontSize = prefs.getString(KEY_FONT_SIZE, "S") ?: "S"
 
         prefs.getString(KEY_CUSTOM_COLORS, null)?.let {
             val type = object : TypeToken<MutableList<Int>>() {}.type
@@ -933,25 +945,25 @@ object DataManager {
 
     fun getGrowthAdvice(mood: String?): String {
         return when (mood) {
-            "🔥" -> "Momentum is a flywheel. Every rep today makes tomorrow's start easier."
-            "⚡" -> "Channel this energy. A high-intensity workout today will sharpen your mental clarity."
-            "🧘" -> "Discipline is quiet. Your consistency in small rituals builds unbreakable character."
-            "💼" -> "Don't let the grind stop the growth. 15 minutes of movement is better than zero."
-            "😴" -> "Active recovery is still progress. Stretching or a light walk keeps the streak alive."
-            "🧠" -> "Mind-muscle connection: focus deeply on each movement to maximize habit retention."
-            else -> "Growth is the result of daily discipline. Start a ritual to build your foundation."
+            "🔥" -> "Momentum is a flywheel. Keep pushing."
+            "⚡" -> "Channel this energy into high-intensity work."
+            "🧘" -> "Consistency in small rituals builds character."
+            "💼" -> "15 minutes of movement is better than zero."
+            "😴" -> "Active recovery keeps the streak alive."
+            "🧠" -> "Focus deeply on each movement for growth."
+            else -> "Daily discipline is your foundation."
         }
     }
 
     fun getManagementAdvice(mood: String?): String {
         return when (mood) {
-            "🔥" -> "Strike while the iron is hot. Tackle your most complex projects now."
-            "⚡" -> "Speed requires direction. Review your task priorities before diving into deep work."
-            "🧘" -> "Organize with intent. A clean workspace and a clear note-bank reduce cognitive load."
-            "💼" -> "Execution mode: Archive finished tasks immediately to keep your roadmap lean."
-            "😴" -> "Low energy? Use this time for admin work, sorting notes, or budget planning."
-            "🧠" -> "Knowledge is only power when applied. Convert your best notes into project milestones."
-            else -> "Efficiency begins with organization. Categorize your tasks to reclaim your time."
+            "🔥" -> "Tackle your complex projects now."
+            "⚡" -> "Review priorities before diving into deep work."
+            "🧘" -> "A clear workspace reduces cognitive load."
+            "💼" -> "Archive finished tasks to keep roadmaps lean."
+            "😴" -> "Use low energy for sorting notes or admin."
+            "🧠" -> "Convert your best notes into project milestones."
+            else -> "Categorize tasks to reclaim your time."
         }
     }
 

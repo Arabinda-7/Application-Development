@@ -28,7 +28,7 @@ import androidx.recyclerview.widget.RecyclerView
 import java.text.SimpleDateFormat
 import java.util.*
 
-class NotesActivity : AppCompatActivity() {
+class NotesActivity : BaseActivity() {
 
     private val VOICE_CODE = 1001
     private var activeContentInput: EditText? = null
@@ -44,8 +44,9 @@ class NotesActivity : AppCompatActivity() {
         setContentView(R.layout.activity_notes)
 
         ViewCompat.setOnApplyWindowInsetsListener(findViewById(R.id.notes_root_layout)) { v, insets ->
-            val topPadding = (8 * resources.displayMetrics.density).toInt()
-            v.setPadding(v.paddingLeft, topPadding, v.paddingRight, v.paddingBottom)
+            val statusBars = insets.getInsets(WindowInsetsCompat.Type.statusBars())
+            val offset = (12 * resources.displayMetrics.density).toInt()
+            v.setPadding(v.paddingLeft, statusBars.top - offset, v.paddingRight, v.paddingBottom)
             insets
         }
         
@@ -128,7 +129,6 @@ class NotesActivity : AppCompatActivity() {
         val btnMultiDelete = menuView.findViewById<View>(R.id.menu_clear_completed)
         btnMultiDelete.visibility = View.VISIBLE
         
-        // Use recursive search or specific child index to find the text
         val tvLabel = if (btnMultiDelete is ViewGroup && btnMultiDelete.childCount > 1) {
             btnMultiDelete.getChildAt(1) as? TextView
         } else null
@@ -154,23 +154,19 @@ class NotesActivity : AppCompatActivity() {
         val navStories = findViewById<View>(R.id.nav_stories)
         val footer = findViewById<View>(R.id.bottom_navigation_notes)
 
-        // Visibility based on settings
         navNotes.visibility = if (DataManager.noteVisibleSections.contains("Notes")) View.VISIBLE else View.GONE
         navQuestions.visibility = if (DataManager.noteVisibleSections.contains("Questions")) View.VISIBLE else View.GONE
         navDaily.visibility = if (DataManager.noteVisibleSections.contains("Daily")) View.VISIBLE else View.GONE
         navStories.visibility = if (DataManager.noteVisibleSections.contains("Stories")) View.VISIBLE else View.GONE
 
-        // Dynamic Visibility: Hide the entire footer if only one section is enabled
         if (DataManager.noteVisibleSections.size > 1) {
             footer.visibility = View.VISIBLE
         } else {
             footer.visibility = View.GONE
-            // If only one is visible, ensure we switch to it
             val onlyVisible = DataManager.noteVisibleSections.firstOrNull() ?: "Notes"
             if (currentCategory != onlyVisible) switchCategory(onlyVisible)
         }
 
-        // If current is hidden, switch
         if (!DataManager.noteVisibleSections.contains(currentCategory)) {
             val firstVisible = DataManager.noteVisibleSections.firstOrNull() ?: "Notes"
             switchCategory(firstVisible)
@@ -222,7 +218,6 @@ class NotesActivity : AppCompatActivity() {
         dialog.setContentView(R.layout.dialog_add_note)
 
         val titleInput = dialog.findViewById<EditText>(R.id.note_title_input)
-        val tvTitleHint = dialog.findViewById<TextView>(R.id.tv_title_hint_note)
         val contentInput = dialog.findViewById<EditText>(R.id.note_content_input)
         val colorPreview = dialog.findViewById<View>(R.id.note_color_preview)
         val btnSave = dialog.findViewById<TextView>(R.id.btn_save_note)
@@ -230,29 +225,18 @@ class NotesActivity : AppCompatActivity() {
         val btnVoice = dialog.findViewById<View>(R.id.btn_voice_input)
         val btnReminder = dialog.findViewById<View>(R.id.btn_reminder)
         val tvMetadata = dialog.findViewById<TextView>(R.id.tv_note_metadata)
+        
+        dialog.findViewById<View>(R.id.tv_title_hint_note).visibility = View.GONE
 
         var selectedColor = ContextCompat.getColor(this, R.color.card_blue)
         colorPreview.backgroundTintList = android.content.res.ColorStateList.valueOf(selectedColor)
-
-        fun validateInputs() {
-            val title = titleInput.text.toString().trim()
-            val isValid = title.isNotEmpty()
-            
-            btnSave.alpha = if (isValid) 1.0f else 0.3f
-            btnSave.isEnabled = isValid
-            
-            tvTitleHint.visibility = if (isValid) View.GONE else View.VISIBLE
-            if (!isValid) startPulseAnimation(tvTitleHint)
-            
-            val themeColor = if (DataManager.noteAddThemeColor != -1) DataManager.noteAddThemeColor else selectedColor
-            if (isValid) btnSave.setTextColor(themeColor) else btnSave.setTextColor(Color.GRAY)
-            tvTitleHint.setTextColor(themeColor)
-        }
+        
+        btnSave.alpha = 1.0f
+        btnSave.isEnabled = true
 
         val sdf = SimpleDateFormat("dd MMMM h:mm a", Locale.getDefault())
         val currentDateStr = sdf.format(Date())
         
-        // Apply Template
         val template = DataManager.noteTemplates[currentCategory] ?: ""
         if (template.isNotEmpty()) {
             contentInput.setText(template)
@@ -269,7 +253,6 @@ class NotesActivity : AppCompatActivity() {
             override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {}
             override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) { 
                 updateMetadata()
-                validateInputs()
             }
             override fun afterTextChanged(s: Editable?) {}
         }
@@ -280,11 +263,9 @@ class NotesActivity : AppCompatActivity() {
             val colors = listOf(ContextCompat.getColor(this, R.color.card_blue), ContextCompat.getColor(this, R.color.card_orange), ContextCompat.getColor(this, R.color.card_green), Color.MAGENTA, Color.RED, Color.CYAN)
             selectedColor = colors[(colors.indexOf(selectedColor) + 1) % colors.size]
             colorPreview.backgroundTintList = android.content.res.ColorStateList.valueOf(selectedColor)
-            validateInputs()
         }
 
         btnClose.setOnClickListener { dialog.dismiss() }
-        validateInputs()
         
         btnVoice.setOnClickListener {
             activeContentInput = contentInput
@@ -319,7 +300,6 @@ class NotesActivity : AppCompatActivity() {
         dialog.setContentView(R.layout.dialog_add_note)
 
         val titleInput = dialog.findViewById<EditText>(R.id.note_title_input)
-        val tvTitleHint = dialog.findViewById<TextView>(R.id.tv_title_hint_note)
         val contentInput = dialog.findViewById<EditText>(R.id.note_content_input)
         val colorPreview = dialog.findViewById<View>(R.id.note_color_preview)
         val btnSave = dialog.findViewById<TextView>(R.id.btn_save_note)
@@ -327,28 +307,18 @@ class NotesActivity : AppCompatActivity() {
         val btnVoice = dialog.findViewById<View>(R.id.btn_voice_input)
         val btnReminder = dialog.findViewById<View>(R.id.btn_reminder)
         val tvMetadata = dialog.findViewById<TextView>(R.id.tv_note_metadata)
+        
+        dialog.findViewById<View>(R.id.tv_title_hint_note).visibility = View.GONE
 
         titleInput.setText(note.title)
         contentInput.setText(note.content)
         var selectedColor = if (note.color != -1) note.color else ContextCompat.getColor(this, R.color.card_blue)
         colorPreview.backgroundTintList = android.content.res.ColorStateList.valueOf(selectedColor)
 
-        fun validateInputs() {
-            val title = titleInput.text.toString().trim()
-            val isValid = title.isNotEmpty()
-            
-            btnSave.alpha = if (isValid) 1.0f else 0.3f
-            btnSave.isEnabled = isValid
-            
-            tvTitleHint.visibility = if (isValid) View.GONE else View.VISIBLE
-            if (!isValid) startPulseAnimation(tvTitleHint)
-            
-            val themeColor = if (DataManager.noteAddThemeColor != -1) DataManager.noteAddThemeColor else selectedColor
-            if (isValid) btnSave.setTextColor(themeColor) else btnSave.setTextColor(Color.GRAY)
-            tvTitleHint.setTextColor(themeColor)
-        }
-
+        btnSave.alpha = 1.0f
+        btnSave.isEnabled = true
         btnSave.text = "Save"
+        
         val sdf = SimpleDateFormat("dd MMMM h:mm a", Locale.getDefault())
         val dateStr = sdf.format(Date(note.timestamp))
         
@@ -362,7 +332,6 @@ class NotesActivity : AppCompatActivity() {
             override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {}
             override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) { 
                 updateMetadata()
-                validateInputs()
             }
             override fun afterTextChanged(s: Editable?) {}
         }
@@ -373,11 +342,9 @@ class NotesActivity : AppCompatActivity() {
             val colors = listOf(ContextCompat.getColor(this, R.color.card_blue), ContextCompat.getColor(this, R.color.card_orange), ContextCompat.getColor(this, R.color.card_green), Color.MAGENTA, Color.RED, Color.CYAN)
             selectedColor = colors[(colors.indexOf(selectedColor) + 1) % colors.size]
             colorPreview.backgroundTintList = android.content.res.ColorStateList.valueOf(selectedColor)
-            validateInputs()
         }
 
         btnClose.setOnClickListener { dialog.dismiss() }
-        validateInputs()
         
         btnVoice.setOnClickListener {
             activeContentInput = contentInput
@@ -400,17 +367,6 @@ class NotesActivity : AppCompatActivity() {
             }
         }
         dialog.show()
-    }
-
-    private fun startPulseAnimation(view: View) {
-        if (view.tag == "pulsing") return
-        view.tag = "pulsing"
-        view.animate().alpha(0.4f).setDuration(800).withEndAction {
-            view.animate().alpha(1.0f).setDuration(800).withEndAction {
-                view.tag = null
-                if (view.visibility == View.VISIBLE) startPulseAnimation(view)
-            }
-        }.start()
     }
 
     private fun startVoiceInput() {
@@ -450,7 +406,7 @@ class NotesActivity : AppCompatActivity() {
             
             val intent = Intent(this, ReminderReceiver::class.java).apply {
                 putExtra("TASK_NAME", "Note: $title")
-                putExtra("TASK_TIMESTAMP", System.currentTimeMillis()) // Using current as a unique ID
+                putExtra("TASK_TIMESTAMP", System.currentTimeMillis()) 
             }
             
             val pendingIntent = android.app.PendingIntent.getBroadcast(this, title.hashCode(), intent, android.app.PendingIntent.FLAG_UPDATE_CURRENT or android.app.PendingIntent.FLAG_IMMUTABLE)
@@ -505,7 +461,7 @@ class NotesActivity : AppCompatActivity() {
             DataManager.noteVisibleSections.clear()
             DataManager.noteVisibleSections.addAll(tempSelection)
             DataManager.saveData(this)
-            setupBottomNavigation() // Refresh current screen
+            setupBottomNavigation() 
             dialog.dismiss()
         }
         dialog.show()
@@ -516,7 +472,7 @@ class NotesActivity : AppCompatActivity() {
         if (days <= 0) return
         
         val cutoff = System.currentTimeMillis() - (days.toLong() * 24 * 60 * 60 * 1000)
-        val removed = DataManager.notes.removeAll { it.timestamp < cutoff && it.category != "Stories" } // Keep stories safe
+        val removed = DataManager.notes.removeAll { it.timestamp < cutoff && it.category != "Stories" } 
         if (removed) {
             DataManager.saveData(this)
             updateDisplayList()
@@ -563,7 +519,6 @@ class NotesActivity : AppCompatActivity() {
         itemTemplates.setOnClickListener { showTemplateEditorDialog() }
         itemBulk.setOnClickListener { showBulkMoveDialog() }
         
-        // Customize Navigation (NEW)
         itemExport.setOnClickListener { 
             showManageSectionsDialog("NOTE")
             dialog.dismiss()
@@ -580,7 +535,7 @@ class NotesActivity : AppCompatActivity() {
 
     private fun showTemplateEditorDialog() {
         val dialog = Dialog(this)
-        dialog.setContentView(R.layout.dialog_manage_categories) // Re-use layout structure
+        dialog.setContentView(R.layout.dialog_manage_categories) 
         dialog.window?.setBackgroundDrawableResource(android.R.color.transparent)
         dialog.window?.setLayout(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT)
 
@@ -591,7 +546,7 @@ class NotesActivity : AppCompatActivity() {
 
         title.text = "Edit Templates"
         etInput.hint = "Select a category to edit..."
-        etInput.isEnabled = false // User selects category first
+        etInput.isEnabled = false 
         btnAdd.visibility = View.GONE
 
         val categories = listOf("Daily", "Questions", "Stories")
@@ -611,7 +566,7 @@ class NotesActivity : AppCompatActivity() {
 
     private fun showEditSingleTemplateDialog(category: String) {
         val dialog = Dialog(this)
-        dialog.setContentView(R.layout.dialog_set_budget) // Re-use input layout
+        dialog.setContentView(R.layout.dialog_set_budget) 
         dialog.window?.setBackgroundDrawableResource(android.R.color.transparent)
         dialog.window?.setLayout(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT)
 
@@ -654,36 +609,12 @@ class NotesActivity : AppCompatActivity() {
             itemView.setOnClickListener {
                 allNotes.forEach { if (it.category == currentCategory) it.category = target }
                 DataManager.saveData(this)
-                switchCategory(currentCategory) // Refresh
+                switchCategory(currentCategory) 
                 dialog.dismiss()
                 android.widget.Toast.makeText(this, "Moved all notes to $target", android.widget.Toast.LENGTH_SHORT).show()
             }
             container.addView(itemView)
         }
         dialog.show()
-    }
-
-    private fun exportCategoryToText() {
-        val notesToExport = allNotes.filter { it.category == currentCategory }
-        if (notesToExport.isEmpty()) {
-            android.widget.Toast.makeText(this, "No notes to export in $currentCategory", android.widget.Toast.LENGTH_SHORT).show()
-            return
-        }
-
-        val builder = StringBuilder()
-        builder.append("=== $currentCategory EXPORT ===\n\n")
-        notesToExport.forEach { note ->
-            builder.append("Title: ${note.title}\n")
-            builder.append("Date: ${SimpleDateFormat("MMM dd, yyyy", Locale.getDefault()).format(Date(note.timestamp))}\n")
-            builder.append("Content:\n${note.content}\n")
-            builder.append("---------------------------\n\n")
-        }
-
-        val intent = Intent(Intent.ACTION_SEND).apply {
-            type = "text/plain"
-            putExtra(Intent.EXTRA_SUBJECT, "$currentCategory Export")
-            putExtra(Intent.EXTRA_TEXT, builder.toString())
-        }
-        startActivity(Intent.createChooser(intent, "Export Notes"))
     }
 }

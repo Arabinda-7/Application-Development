@@ -78,7 +78,7 @@ class WorkoutAdapter(
             val context = holder.itemView.context
             val isCompleted = isWorkoutCompletedOnSelectedDate(workout)
 
-            holder.workoutName.text = workout.name
+            holder.workoutName.text = UIUtils.formatTitleCase(workout.name)
             
             if (workout.isDayOff && selectedDateString == todayDateString) {
                 holder.workoutDetails.text = "DAY OFF"

@@ -54,7 +54,7 @@ class ProfileActivity : AppCompatActivity() {
     }
 
     private fun setupIdentity() {
-        findViewById<TextView>(R.id.tv_user_name).text = DataManager.userName
+        findViewById<TextView>(R.id.tv_user_name).text = UIUtils.formatTitleCase(DataManager.userName)
         findViewById<TextView>(R.id.tv_user_tier).text = DataManager.userBio.uppercase()
         findViewById<ImageView>(R.id.iv_profile_avatar).setImageResource(DataManager.userAvatarRes)
 

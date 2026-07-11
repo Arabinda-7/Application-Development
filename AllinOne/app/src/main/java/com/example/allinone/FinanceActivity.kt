@@ -23,7 +23,7 @@ import com.google.android.material.chip.ChipGroup
 import java.text.SimpleDateFormat
 import java.util.*
 
-class FinanceActivity : AppCompatActivity() {
+class FinanceActivity : BaseActivity() {
 
     private var allMonthTransactions = mutableListOf<Transaction>()
     private var filteredTransactions = mutableListOf<Transaction>()
@@ -50,8 +50,9 @@ class FinanceActivity : AppCompatActivity() {
         setContentView(R.layout.activity_finance)
 
         ViewCompat.setOnApplyWindowInsetsListener(findViewById(R.id.finance_root_layout)) { v, insets ->
-            val topPadding = (8 * resources.displayMetrics.density).toInt()
-            v.setPadding(v.paddingLeft, topPadding, v.paddingRight, v.paddingBottom)
+            val statusBars = insets.getInsets(WindowInsetsCompat.Type.statusBars())
+            val offset = (12 * resources.displayMetrics.density).toInt()
+            v.setPadding(v.paddingLeft, statusBars.top - offset, v.paddingRight, v.paddingBottom)
             insets
         }
 

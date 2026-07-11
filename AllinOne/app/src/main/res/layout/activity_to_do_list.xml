@@ -63,14 +63,16 @@
 
     <ImageButton
         android:id="@+id/btn_task_settings"
-        android:layout_width="48dp"
-        android:layout_height="48dp"
-        android:background="?attr/selectableItemBackgroundBorderless"
+        android:layout_width="40dp"
+        android:layout_height="40dp"
+        android:background="@drawable/circle_selected_bg"
+        android:backgroundTint="#1AFFFFFF"
         android:src="@drawable/baseline_tune_24"
+        android:padding="8dp"
+        android:scaleType="centerInside"
         app:tint="@color/white"
-        app:layout_constraintBottom_toBottomOf="@id/btn_back"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintTop_toTopOf="@id/btn_back" />
+        app:layout_constraintTop_toTopOf="parent" />
 
     <TextView
         android:id="@+id/tv_date"
@@ -95,7 +97,7 @@
             android:id="@+id/category_filter_group"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:paddingHorizontal="16dp"
+            android:paddingHorizontal="0dp"
             android:orientation="horizontal" />
     </HorizontalScrollView>
 
@@ -126,10 +128,11 @@
     <LinearLayout
         android:id="@+id/bottom_navigation_tasks"
         android:layout_width="match_parent"
-        android:layout_height="72dp"
+        android:layout_height="wrap_content"
+        android:minHeight="72dp"
+        android:paddingVertical="12dp"
         android:background="#121212"
         android:orientation="horizontal"
-        android:gravity="center_vertical"
         app:layout_constraintBottom_toBottomOf="parent">
 
         <LinearLayout

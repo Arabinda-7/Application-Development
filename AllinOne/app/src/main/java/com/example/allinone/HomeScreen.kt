@@ -1,5 +1,7 @@
 package com.example.allinone
 
+import androidx.compose.animation.animateContentSize
+import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.animation.core.animateFloat
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.updateTransition
@@ -63,11 +65,25 @@ fun HomeScreen(
     // New Feature States
     var showNotificationsDialog by remember { mutableStateOf(false) }
     var showVoiceComingSoon by remember { mutableStateOf(false) }
+    var isMessageExpanded by remember { mutableStateOf(false) }
 
     // Keyboard Controller
     val keyboardController = LocalSoftwareKeyboardController.current
+    val interactionSource = remember { MutableInteractionSource() }
 
-    val smartGreeting = remember(state.overallProgress, state.userName) {
+    val moodTheme = remember(state.currentMood) {
+        when (state.currentMood) {
+            "🔥" -> Color(0xFFFFB800) to "Unstoppable mode active."
+            "⚡" -> Color(0xFF2EC4B6) to "High energy detected."
+            "🧘" -> Color(0xFF673AB7) to "Mindful progress only."
+            "💼" -> Color(0xFF1A73E8) to "Execution mode: ON."
+            "😴" -> Color(0xFF9E9E9E) to "Rest well. Momentum stays."
+            "🧠" -> Color(0xFF3F51B5) to "Deep focus engaged."
+            else -> Color(0xFF1A73E8) to ""
+        }
+    }
+
+    val smartGreeting = remember(state.overallProgress, state.userName, state.currentMood) {
         val hour = Calendar.getInstance().get(Calendar.HOUR_OF_DAY)
         val timePrefix = when (hour) {
             in 5..11 -> "Good Morning"
@@ -75,19 +91,24 @@ fun HomeScreen(
             in 17..20 -> "Good Evening"
             else -> "Good Night"
         }
-        val icon = when (hour) {
-            in 5..11 -> "☕"
-            in 12..16 -> "🚀"
-            in 17..20 -> "🧘"
-            else -> "🌙"
+        
+        if (state.currentMood != null && moodTheme.second.isNotEmpty()) {
+            moodTheme.second
+        } else {
+            val icon = when (hour) {
+                in 5..11 -> "☕"
+                in 12..16 -> "🚀"
+                in 17..20 -> "🧘"
+                else -> "🌙"
+            }
+            val milestone = when {
+                state.overallProgress >= 100 -> "Elite Momentum! 🏆"
+                state.overallProgress >= 70 -> "Crushing it! 🔥"
+                state.overallProgress >= 30 -> "Great start! ⚡"
+                else -> icon
+            }
+            "$timePrefix, $milestone"
         }
-        val milestone = when {
-            state.overallProgress >= 100 -> "Elite Momentum! 🏆"
-            state.overallProgress >= 70 -> "Crushing it! 🔥"
-            state.overallProgress >= 30 -> "Great start! ⚡"
-            else -> icon
-        }
-        "$timePrefix, $milestone"
     }
 
     // Animation for Speed Dial
@@ -198,6 +219,7 @@ fun HomeScreen(
                 .pointerInput(Unit) {
                     detectTapGestures(onTap = {
                         keyboardController?.hide()
+                        isMessageExpanded = false
                     })
                 }
                 .verticalScroll(rememberScrollState())
@@ -208,7 +230,7 @@ fun HomeScreen(
                     .fillMaxWidth()
                     .background(
                         Brush.verticalGradient(
-                            colors = listOf(Color(0xFF1A73E8).copy(alpha = 0.6f), Color.Black)
+                            colors = listOf(moodTheme.first.copy(alpha = 0.6f), Color.Black)
                         )
                     )
                     .statusBarsPadding()
@@ -221,17 +243,26 @@ fun HomeScreen(
                         horizontalArrangement = Arrangement.SpaceBetween
                     ) {
                         // Profile + Personal Greeting Column
-                        Column(horizontalAlignment = Alignment.Start) {
+                        Column(
+                            modifier = Modifier
+                                .weight(1f)
+                                .animateContentSize()
+                                .clickable(
+                                    interactionSource = interactionSource,
+                                    indication = null
+                                ) { isMessageExpanded = !isMessageExpanded },
+                            horizontalAlignment = Alignment.Start
+                        ) {
                             Box(
                                 contentAlignment = Alignment.BottomEnd,
-                                modifier = Modifier.clickable { onNavigateToProfile() }
+                                modifier = Modifier.clickable { onNavigateToProfile(); isMessageExpanded = false }
                             ) {
                                 Box(
                                     modifier = Modifier
                                         .size(48.dp)
                                         .clip(CircleShape)
                                         .background(Color(0xFF1A1A1A))
-                                        .border(1.5.dp, Color.White.copy(alpha = 0.2f), CircleShape),
+                                        .border(1.5.dp, moodTheme.first.copy(alpha = 0.4f), CircleShape),
                                     contentAlignment = Alignment.Center
                                 ) {
                                     Image(
@@ -247,26 +278,30 @@ fun HomeScreen(
                             Spacer(modifier = Modifier.height(12.dp))
                             
                             Text(
-                                text = smartGreeting.split(",")[0].uppercase() + ",", 
+                                text = if (state.currentMood != null) "Current Vibe" else UIUtils.formatTitleCase(smartGreeting.split(",")[0]), 
                                 color = Color.White.copy(alpha = 0.4f), 
                                 fontSize = 10.sp, 
                                 fontWeight = FontWeight.Medium, 
                                 letterSpacing = 1.sp
                             )
                             Text(
-                                text = state.userName.replaceFirstChar { if (it.isLowerCase()) it.titlecase(Locale.getDefault()) else it.toString() },
+                                text = if (state.currentMood != null) UIUtils.formatTitleCase(smartGreeting) else UIUtils.formatTitleCase(state.userName),
                                 color = Color.White, 
                                 fontSize = 24.sp, 
                                 fontWeight = FontWeight.Black, 
-                                letterSpacing = (-0.5).sp
+                                letterSpacing = (-0.5).sp,
+                                maxLines = if (isMessageExpanded) Int.MAX_VALUE else 1,
+                                overflow = if (isMessageExpanded) androidx.compose.ui.text.style.TextOverflow.Visible else androidx.compose.ui.text.style.TextOverflow.Ellipsis
                             )
                             
-                            val milestoneText = smartGreeting.split(",").getOrNull(1)?.trim() ?: ""
+                            val formattedName = UIUtils.formatTitleCase(state.userName)
+                            val rawMilestone = smartGreeting.split(",").getOrNull(1)?.trim() ?: ""
+                            val milestoneText = if (state.currentMood != null) formattedName else UIUtils.formatTitleCase(rawMilestone)
                             if (milestoneText.length > 2) { // Ensure it's more than just an emoji
                                 Spacer(modifier = Modifier.height(4.dp))
                                 Text(
-                                    text = milestoneText,
-                                    color = Color(0xFF2EC4B6),
+                                    text = if (state.currentMood != null) "Active: $formattedName" else milestoneText,
+                                    color = moodTheme.first,
                                     fontSize = 12.sp,
                                     fontWeight = FontWeight.Bold,
                                     letterSpacing = 0.5.sp
@@ -274,23 +309,34 @@ fun HomeScreen(
                             }
                         }
 
+                        Spacer(modifier = Modifier.width(16.dp))
+
                         // Refined Action Row (Search Toggle + Smaller Settings)
                         Row(verticalAlignment = Alignment.CenterVertically) {
-                            IconButton(onClick = { isSearchVisible = !isSearchVisible }, modifier = Modifier.size(36.dp)) {
+                            Box(
+                                modifier = Modifier
+                                    .size(36.dp)
+                                    .clip(CircleShape)
+                                    .background(Color.White.copy(alpha = 0.08f))
+                                    .clickable { isSearchVisible = !isSearchVisible; isMessageExpanded = false },
+                                contentAlignment = Alignment.Center
+                            ) {
                                 Icon(
                                     imageVector = if (isSearchVisible) Icons.Default.Close else Icons.Default.Search,
                                     contentDescription = "Toggle Search",
                                     tint = Color.White.copy(alpha = 0.8f),
-                                    modifier = Modifier.size(20.dp)
+                                    modifier = Modifier.size(18.dp)
                                 )
                             }
+                            
                             Spacer(modifier = Modifier.width(8.dp))
+                            
                             Box(
                                 modifier = Modifier
-                                    .size(32.dp)
+                                    .size(36.dp)
                                     .clip(CircleShape)
-                                    .background(Color.Black.copy(alpha = 0.5f))
-                                    .clickable { onNavigateToSettings() },
+                                    .background(Color.White.copy(alpha = 0.08f))
+                                    .clickable { onNavigateToSettings(); isMessageExpanded = false },
                                 contentAlignment = Alignment.Center
                             ) {
                                 Icon(
@@ -365,7 +411,7 @@ fun HomeScreen(
                 verticalAlignment = Alignment.CenterVertically,
                 horizontalArrangement = Arrangement.SpaceBetween
             ) {
-                Text("CURRENT FOCUS", color = Color.White.copy(alpha = 0.4f), fontSize = 9.sp, fontWeight = FontWeight.Black, letterSpacing = 1.sp)
+                Text("Current Focus", color = Color.White.copy(alpha = 0.4f), fontSize = 9.sp, fontWeight = FontWeight.Black, letterSpacing = 1.sp)
                 Text(state.dateString, color = Color.White.copy(alpha = 0.4f), fontSize = 9.sp)
             }
             Spacer(modifier = Modifier.height(12.dp))
@@ -378,7 +424,7 @@ fun HomeScreen(
                     val isSelected = state.currentMood == mood
                     Box(
                         modifier = Modifier.size(48.dp).clip(CircleShape).background(if (isSelected) Color(0xFF1A73E8) else Color(0xFF1A1A1A))
-                            .clickable { onMoodSelected(mood) },
+                            .clickable { onMoodSelected(mood); isMessageExpanded = false },
                         contentAlignment = Alignment.Center
                     ) {
                         Text(mood, fontSize = 20.sp)
@@ -398,7 +444,7 @@ fun HomeScreen(
                     Row(verticalAlignment = Alignment.CenterVertically) {
                         Column(modifier = Modifier.weight(1f)) {
                             Text(
-                                "DAILY PERFORMANCE", 
+                                "Daily Performance", 
                                 color = Color(0xFF1A73E8), 
                                 fontSize = 10.sp, 
                                 fontWeight = FontWeight.Black, 
@@ -408,7 +454,7 @@ fun HomeScreen(
                             Text("${state.overallProgress}% Completed", color = Color.White, fontSize = 20.sp, fontWeight = FontWeight.Bold)
                         }
                         Column(horizontalAlignment = Alignment.End) {
-                            Text("SAFE SPEND", color = Color.White.copy(alpha = 0.5f), fontSize = 10.sp, fontWeight = FontWeight.Bold)
+                            Text("Safe Spend", color = Color.White.copy(alpha = 0.5f), fontSize = 10.sp, fontWeight = FontWeight.Bold)
                             Text(String.format(Locale.getDefault(), "₹%.0f", state.safeSpendAmount), color = Color(0xFF2EC4B6), fontSize = 18.sp, fontWeight = FontWeight.Black)
                         }
                     }
@@ -426,7 +472,7 @@ fun HomeScreen(
             // --- 5. Pulse Activity Feed (Motivational Mindset) ---
             if (state.recentActions.isNotEmpty()) {
                 Spacer(modifier = Modifier.height(24.dp))
-                Text("PULSE ACTIVITY", modifier = Modifier.padding(horizontal = 24.dp), color = Color.White.copy(alpha = 0.4f), fontSize = 10.sp, fontWeight = FontWeight.Bold, letterSpacing = 1.sp)
+                Text("Pulse Activity", modifier = Modifier.padding(horizontal = 24.dp), color = Color.White.copy(alpha = 0.4f), fontSize = 10.sp, fontWeight = FontWeight.Bold, letterSpacing = 1.sp)
                 Spacer(modifier = Modifier.height(12.dp))
                 LazyRow(
                     contentPadding = PaddingValues(horizontal = 24.dp),
@@ -447,72 +493,72 @@ fun HomeScreen(
 
             // --- 7-12. Diversified Growth & Management Sections ---
             Spacer(modifier = Modifier.height(24.dp))
-            Text("GROWTH & DISCIPLINE", modifier = Modifier.padding(horizontal = 24.dp), color = Color.White.copy(alpha = 0.4f), fontSize = 10.sp, fontWeight = FontWeight.Bold, letterSpacing = 1.sp)
+            Text("Growth & Discipline", modifier = Modifier.padding(horizontal = 24.dp), color = Color.White.copy(alpha = 0.4f), fontSize = 10.sp, fontWeight = FontWeight.Bold, letterSpacing = 1.sp)
             Spacer(modifier = Modifier.height(16.dp))
             DashboardPair(
-                item1 = { HabitCard(progress = state.habitProgress, color = Color(if (state.habitColor == -1) 0xFFFF7A59 else state.habitColor.toLong()), icon = state.habitIcon, onClick = onNavigateToHabits, onColorClick = { showColorPicker = "HABIT" }) },
-                item2 = { WorkoutCard(progress = state.workoutProgress, color = Color(if (state.workoutColor == -1) 0xFFFFB800 else state.workoutColor.toLong()), icon = state.workoutIcon, onClick = onNavigateToWorkout, onColorClick = { showColorPicker = "WORKOUT" }) }
+                item1 = { HabitCard(progress = state.habitProgress, color = Color(if (state.habitColor == -1) 0xFFFF7A59 else state.habitColor.toLong()), icon = state.habitIcon, onClick = { onNavigateToHabits(); isMessageExpanded = false }, onColorClick = { showColorPicker = "HABIT" }) },
+                item2 = { WorkoutCard(progress = state.workoutProgress, color = Color(if (state.workoutColor == -1) 0xFFFFB800 else state.workoutColor.toLong()), icon = state.workoutIcon, onClick = { onNavigateToWorkout(); isMessageExpanded = false }, onColorClick = { showColorPicker = "WORKOUT" }) }
             )
 
             Spacer(modifier = Modifier.height(16.dp))
 
             // --- Growth Advice (Blue Card) ---
             if (state.currentMood != null) {
-                Spacer(modifier = Modifier.height(16.dp))
+                Spacer(modifier = Modifier.height(12.dp))
 
                 Surface(
                     color = Color(0xFF1A73E8).copy(alpha = 0.15f),
-                    shape = RoundedCornerShape(16.dp),
+                    shape = RoundedCornerShape(12.dp),
                     border = BorderStroke(0.5.dp, Color(0xFF1A73E8).copy(alpha = 0.3f)),
                     modifier = Modifier.padding(horizontal = 24.dp).fillMaxWidth()
                 ) {
-                    Row(modifier = Modifier.padding(16.dp), verticalAlignment = Alignment.CenterVertically) {
-                        Text("✨", fontSize = 16.sp)
-                        Spacer(modifier = Modifier.width(12.dp))
+                    Row(modifier = Modifier.padding(12.dp).clickable { isMessageExpanded = false }, verticalAlignment = Alignment.CenterVertically) {
+                        Text("✨", fontSize = 14.sp)
+                        Spacer(modifier = Modifier.width(10.dp))
                         Text(
                             text = state.growthAdvice, 
                             color = Color.White.copy(alpha = 0.8f), 
-                            fontSize = 12.sp, 
-                            lineHeight = 18.sp
+                            fontSize = 11.sp, 
+                            lineHeight = 15.sp
                         )
                     }
                 }
             }
 
             Spacer(modifier = Modifier.height(24.dp))
-            Text("MANAGEMENT & NOTES", modifier = Modifier.padding(horizontal = 24.dp), color = Color.White.copy(alpha = 0.4f), fontSize = 10.sp, fontWeight = FontWeight.Bold, letterSpacing = 1.sp)
+            Text("Management & Notes", modifier = Modifier.padding(horizontal = 24.dp), color = Color.White.copy(alpha = 0.4f), fontSize = 10.sp, fontWeight = FontWeight.Bold, letterSpacing = 1.sp)
             Spacer(modifier = Modifier.height(16.dp))
             DashboardPair(
-                item1 = { TaskCard(color = Color(if (state.taskColor == -1) 0xFF2EC4B6 else state.taskColor.toLong()), icon = state.taskIcon, onClick = onNavigateToTodos, onColorClick = { showColorPicker = "TASK" }) },
-                item2 = { NoteCard(color = Color(if (state.noteColor == -1) 0xFF3A86F0 else state.noteColor.toLong()), icon = state.noteIcon, onClick = onNavigateToNotes, onColorClick = { showColorPicker = "NOTE" }) }
+                item1 = { TaskCard(color = Color(if (state.taskColor == -1) 0xFF2EC4B6 else state.taskColor.toLong()), icon = state.taskIcon, onClick = { onNavigateToTodos(); isMessageExpanded = false }, onColorClick = { showColorPicker = "TASK" }) },
+                item2 = { NoteCard(color = Color(if (state.noteColor == -1) 0xFF3A86F0 else state.noteColor.toLong()), icon = state.noteIcon, onClick = { onNavigateToNotes(); isMessageExpanded = false }, onColorClick = { showColorPicker = "NOTE" }) }
             )
 
             Spacer(modifier = Modifier.height(24.dp))
             DashboardPair(
-                item1 = { ProjectCard(color = Color(if (state.projectColor == -1) 0xFF1A73E8 else state.projectColor.toLong()), icon = state.projectIcon, onClick = onNavigateToProjects, onColorClick = { showColorPicker = "PROJECT" }) },
-                item2 = { FinanceCard(amount = state.safeSpendAmount, color = Color(if (state.financeColor == -1) 0xFFE91E63 else state.financeColor.toLong()), icon = state.financeIcon, onClick = onNavigateToFinance, onColorClick = { showColorPicker = "FINANCE" }) }
+                item1 = { ProjectCard(color = Color(if (state.projectColor == -1) 0xFF1A73E8 else state.projectColor.toLong()), icon = state.projectIcon, onClick = { onNavigateToProjects(); isMessageExpanded = false }, onColorClick = { showColorPicker = "PROJECT" }) },
+                item2 = { FinanceCard(amount = state.safeSpendAmount, color = Color(if (state.financeColor == -1) 0xFFE91E63 else state.financeColor.toLong()), icon = state.financeIcon, onClick = { onNavigateToFinance(); isMessageExpanded = false }, onColorClick = { showColorPicker = "FINANCE" }) }
             )
 
             Spacer(modifier = Modifier.height(16.dp))
 
             // --- Management Advice (Green Card) ---
             if (state.currentMood != null) {
-                Spacer(modifier = Modifier.height(16.dp))
+                Spacer(modifier = Modifier.height(12.dp))
 
                 Surface(
                     color = Color(0xFF2EC4B6).copy(alpha = 0.1f),
-                    shape = RoundedCornerShape(16.dp),
+                    shape = RoundedCornerShape(12.dp),
                     border = BorderStroke(0.5.dp, Color(0xFF2EC4B6).copy(alpha = 0.2f)),
                     modifier = Modifier.padding(horizontal = 24.dp).fillMaxWidth()
                 ) {
-                    Row(modifier = Modifier.padding(16.dp), verticalAlignment = Alignment.CenterVertically) {
-                        Icon(Icons.Default.Star, null, tint = Color(0xFF2EC4B6), modifier = Modifier.size(16.dp))
-                        Spacer(modifier = Modifier.width(12.dp))
+                    Row(modifier = Modifier.padding(12.dp), verticalAlignment = Alignment.CenterVertically) {
+                        Icon(Icons.Default.Star, null, tint = Color(0xFF2EC4B6), modifier = Modifier.size(14.dp))
+                        Spacer(modifier = Modifier.width(10.dp))
                         Text(
                             text = state.managementAdvice, 
                             color = Color.White.copy(alpha = 0.8f), 
-                            fontSize = 12.sp, 
-                            lineHeight = 18.sp
+                            fontSize = 11.sp, 
+                            lineHeight = 15.sp
                         )
                     }
                 }
@@ -700,7 +746,7 @@ fun NoteCard(color: Color, icon: Int, onClick: () -> Unit, onColorClick: () -> U
         onClick = onClick,
         shape = RoundedCornerShape(24.dp),
         colors = CardDefaults.cardColors(containerColor = Color(0xFF1A1A1A)),
-        modifier = Modifier.fillMaxWidth().height(140.dp).graphicsLayer(rotationZ = -2f).border(1.dp, color.copy(alpha = 0.1f), RoundedCornerShape(24.dp))
+        modifier = Modifier.fillMaxWidth().height(140.dp).border(1.dp, color.copy(alpha = 0.1f), RoundedCornerShape(24.dp))
     ) {
         Column(modifier = Modifier.padding(16.dp)) {
             Text("IDEAS", color = color, fontSize = 10.sp, fontWeight = FontWeight.Black, letterSpacing = 1.sp)

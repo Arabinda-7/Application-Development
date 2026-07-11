@@ -31,7 +31,7 @@ import com.google.android.material.chip.ChipGroup
 import java.text.SimpleDateFormat
 import java.util.*
 
-class ToDoListActivity : AppCompatActivity() {
+class ToDoListActivity : BaseActivity() {
 
     private val allTasks = DataManager.tasks
     private lateinit var taskAdapter: TaskAdapter
@@ -47,8 +47,9 @@ class ToDoListActivity : AppCompatActivity() {
         setContentView(R.layout.activity_to_do_list)
 
         ViewCompat.setOnApplyWindowInsetsListener(findViewById(R.id.todo_root_layout)) { v, insets ->
-            val topPadding = (8 * resources.displayMetrics.density).toInt()
-            v.setPadding(v.paddingLeft, topPadding, v.paddingRight, v.paddingBottom)
+            val statusBars = insets.getInsets(WindowInsetsCompat.Type.statusBars())
+            val offset = (12 * resources.displayMetrics.density).toInt()
+            v.setPadding(v.paddingLeft, statusBars.top - offset, v.paddingRight, v.paddingBottom)
             insets
         }
         
@@ -313,14 +314,8 @@ class ToDoListActivity : AppCompatActivity() {
             Toast.makeText(this, "Default tab set to $next", Toast.LENGTH_SHORT).show()
         }
 
-        // Customize Navigation (NEW)
-        val itemCustomize = view.findViewById<View>(R.id.item_categories) // Re-using an existing icon row logic
-        (itemCustomize as? ViewGroup)?.let { vg ->
-            for (i in 0 until vg.childCount) {
-                (vg.getChildAt(i) as? TextView)?.let { if (it.id != R.id.tv_sort_label) it.text = "Customize Navigation" }
-            }
-        }
-        itemCustomize.setOnClickListener {
+        // Customize Navigation (FIXED)
+        view.findViewById<View>(R.id.item_customize_navigation).setOnClickListener {
             showManageSectionsDialog("TASK")
             dialog.dismiss()
         }

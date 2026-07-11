@@ -77,7 +77,7 @@ class HabitAdapter(
             val context = holder.itemView.context
             val isCompleted = isHabitCompletedOnSelectedDate(habit)
 
-            holder.habitName.text = habit.name
+            holder.habitName.text = UIUtils.formatTitleCase(habit.name)
             holder.habitCompleted.isChecked = isCompleted
             
             // Advanced Design Binding

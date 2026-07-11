@@ -25,7 +25,7 @@ class TransactionAdapter(
 
     override fun onBindViewHolder(holder: TransactionViewHolder, position: Int) {
         val transaction = transactions[position]
-        holder.title.text = transaction.title
+        holder.title.text = UIUtils.formatTitleCase(transaction.title)
         
         val sdf = SimpleDateFormat("MMM dd, h:mm a", Locale.getDefault())
         holder.category.text = sdf.format(Date(transaction.timestamp))

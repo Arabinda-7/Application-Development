@@ -66,7 +66,7 @@ class TaskAdapter(
             val task = displayItems[position] as Task
             val context = holder.itemView.context
             
-            holder.taskName.text = task.name
+            holder.taskName.text = UIUtils.formatTitleCase(task.name)
             holder.taskCompleted.isChecked = task.isCompleted
             
             // Selection for delete mode

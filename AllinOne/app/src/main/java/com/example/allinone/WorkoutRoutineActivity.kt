@@ -36,7 +36,7 @@ import com.google.android.material.chip.ChipGroup
 import java.text.SimpleDateFormat
 import java.util.*
 
-class WorkoutRoutineActivity : AppCompatActivity() {
+class WorkoutRoutineActivity : BaseActivity() {
 
     private val workouts = DataManager.workouts
     private lateinit var workoutAdapter: WorkoutAdapter
@@ -74,15 +74,17 @@ class WorkoutRoutineActivity : AppCompatActivity() {
         setContentView(R.layout.activity_workout_routine)
 
         ViewCompat.setOnApplyWindowInsetsListener(findViewById(R.id.today_layout)) { v, insets ->
-            val topPadding = (8 * resources.displayMetrics.density).toInt()
-            v.setPadding(v.paddingLeft, topPadding, v.paddingRight, v.paddingBottom)
+            val statusBars = insets.getInsets(WindowInsetsCompat.Type.statusBars())
+            val offset = (12 * resources.displayMetrics.density).toInt()
+            v.setPadding(v.paddingLeft, statusBars.top - offset, v.paddingRight, v.paddingBottom)
             insets
         }
 
         ViewCompat.setOnApplyWindowInsetsListener(findViewById(R.id.history_layout)) { v, insets ->
-            val topPadding = (8 * resources.displayMetrics.density).toInt()
+            val statusBars = insets.getInsets(WindowInsetsCompat.Type.statusBars())
             val navBars = insets.getInsets(WindowInsetsCompat.Type.navigationBars())
-            v.setPadding(v.paddingLeft, topPadding, v.paddingRight, navBars.bottom)
+            val offset = (12 * resources.displayMetrics.density).toInt()
+            v.setPadding(v.paddingLeft, statusBars.top - offset, v.paddingRight, navBars.bottom)
             insets
         }
 
@@ -112,9 +114,9 @@ class WorkoutRoutineActivity : AppCompatActivity() {
         }, { workout, position -> startTimerForWorkout(workout, position) })
         workoutList.adapter = workoutAdapter
 
-        val btnCreate = findViewById<androidx.appcompat.widget.AppCompatButton>(R.id.btn_create_new_workout)
+        val btnCreate = findViewById<com.google.android.material.card.MaterialCardView>(R.id.btn_create_new_workout)
         if (DataManager.workoutAddThemeColor != -1) {
-            btnCreate.backgroundTintList = android.content.res.ColorStateList.valueOf(DataManager.workoutAddThemeColor)
+            btnCreate.strokeColor = DataManager.workoutAddThemeColor
         }
         btnCreate.setOnClickListener { showAddWorkoutDialog(null) }
 
@@ -516,7 +518,7 @@ class WorkoutRoutineActivity : AppCompatActivity() {
 
         val colors = listOf(ContextCompat.getColor(this, R.color.card_blue), ContextCompat.getColor(this, R.color.card_orange), ContextCompat.getColor(this, R.color.card_green), Color.MAGENTA, Color.RED, Color.CYAN, Color.YELLOW, Color.LTGRAY)
         var selectedColor = existingWorkout?.color ?: colors[0]
-        var selectedIcon = existingWorkout?.iconResId ?: android.R.drawable.ic_menu_directions
+        var selectedIcon = existingWorkout?.iconResId ?: R.drawable.icons8_exercise_100
 
         fun updateThemeVisuals() {
             iconPreview.backgroundTintList = ColorStateList.valueOf(selectedColor)
@@ -594,6 +596,7 @@ class WorkoutRoutineActivity : AppCompatActivity() {
         dialog.window?.setLayout(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT)
 
         val gridLayout = dialog.findViewById<GridLayout>(R.id.premium_icon_grid)
+        gridLayout.columnCount = 5
         val title = dialog.findViewById<TextView>(R.id.tv_picker_title)
         val btnClose = dialog.findViewById<View>(R.id.btn_close_picker)
 
@@ -601,13 +604,13 @@ class WorkoutRoutineActivity : AppCompatActivity() {
 
         icons.forEach { iconRes ->
             val iconView = ImageView(this)
-            val s = (64 * resources.displayMetrics.density).toInt()
+            val s = (52 * resources.displayMetrics.density).toInt()
             val params = GridLayout.LayoutParams()
-            params.width = s; params.height = s; params.setMargins(8, 8, 8, 8)
+            params.width = s; params.height = s; params.setMargins(6, 6, 6, 6)
             iconView.layoutParams = params
             
             iconView.setImageResource(iconRes)
-            iconView.setPadding(16, 16, 16, 16)
+            iconView.setPadding(12, 12, 12, 12)
             iconView.background = ContextCompat.getDrawable(this, R.drawable.circle_selected_bg)
             iconView.backgroundTintList = ColorStateList.valueOf(Color.parseColor("#22FFFFFF"))
             iconView.imageTintList = ColorStateList.valueOf(Color.WHITE)

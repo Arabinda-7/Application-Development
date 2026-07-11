@@ -27,7 +27,7 @@ class NoteAdapter(
 
     override fun onBindViewHolder(holder: NoteViewHolder, position: Int) {
         val note = notes[position]
-        holder.noteTitle.text = note.title
+        holder.noteTitle.text = UIUtils.formatTitleCase(note.title)
         holder.noteContent.text = note.content
         
         val context = holder.itemView.context

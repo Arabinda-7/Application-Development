@@ -31,7 +31,7 @@ class ProjectNoteAdapter(
         val context = holder.itemView.context
         val isCompleted = note.status == "Completed"
 
-        holder.title.text = note.title
+        holder.title.text = UIUtils.formatTitleCase(note.title)
         holder.content.text = note.content
 
         // Visual Completion Feedback

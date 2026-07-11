@@ -81,10 +81,11 @@
     <LinearLayout
         android:id="@+id/bottom_navigation_notes"
         android:layout_width="match_parent"
-        android:layout_height="72dp"
+        android:layout_height="wrap_content"
+        android:minHeight="72dp"
+        android:paddingVertical="12dp"
         android:background="#121212"
         android:orientation="horizontal"
-        android:gravity="center_vertical"
         app:layout_constraintBottom_toBottomOf="parent">
 
         <LinearLayout

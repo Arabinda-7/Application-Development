@@ -24,7 +24,7 @@ import androidx.recyclerview.widget.StaggeredGridLayoutManager
 import java.text.SimpleDateFormat
 import java.util.*
 
-class ProjectActivity : AppCompatActivity() {
+class ProjectActivity : BaseActivity() {
 
     private val allNotes = DataManager.notes
     private lateinit var projectAdapter: ProjectNoteAdapter
@@ -39,8 +39,9 @@ class ProjectActivity : AppCompatActivity() {
         setContentView(R.layout.activity_projects)
 
         ViewCompat.setOnApplyWindowInsetsListener(findViewById(R.id.project_root_layout)) { v, insets ->
-            val topPadding = (8 * resources.displayMetrics.density).toInt()
-            v.setPadding(v.paddingLeft, topPadding, v.paddingRight, v.paddingBottom)
+            val statusBars = insets.getInsets(WindowInsetsCompat.Type.statusBars())
+            val offset = (12 * resources.displayMetrics.density).toInt()
+            v.setPadding(v.paddingLeft, statusBars.top - offset, v.paddingRight, v.paddingBottom)
             insets
         }
         

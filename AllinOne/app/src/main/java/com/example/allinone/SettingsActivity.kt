@@ -28,7 +28,7 @@ import java.util.*
 import androidx.activity.result.contract.ActivityResultContracts
 import java.io.FileOutputStream
 
-class SettingsActivity : AppCompatActivity() {
+class SettingsActivity : BaseActivity() {
 
     private lateinit var settingsList: RecyclerView
     private lateinit var tvTitle: TextView
@@ -76,8 +76,8 @@ class SettingsActivity : AppCompatActivity() {
         setContentView(R.layout.activity_settings)
 
         ViewCompat.setOnApplyWindowInsetsListener(findViewById(R.id.settings_top_header)) { v, insets ->
-            val topPadding = (8 * resources.displayMetrics.density).toInt()
-            v.setPadding(v.paddingLeft, topPadding, v.paddingRight, v.paddingBottom)
+            val statusBars = insets.getInsets(WindowInsetsCompat.Type.statusBars())
+            v.setPadding(v.paddingLeft, statusBars.top, v.paddingRight, v.paddingBottom)
             insets
         }
 
@@ -143,7 +143,7 @@ class SettingsActivity : AppCompatActivity() {
     }
 
     private fun updateMiniProfileUI() {
-        findViewById<TextView>(R.id.tv_mini_name).text = DataManager.userName
+        findViewById<TextView>(R.id.tv_mini_name).text = UIUtils.formatTitleCase(DataManager.userName)
         findViewById<ImageView>(R.id.iv_profile_pic).setImageResource(DataManager.userAvatarRes)
         
         // Handle Profile Click
@@ -173,7 +173,7 @@ class SettingsActivity : AppCompatActivity() {
         
         when(section) {
             "HABITS" -> {
-                settings.add(ConfigItem("Icons", "No features added yet") { showSectionSettings("HABITS_ICONS") })
+                settings.add(ConfigItem("Icons", "No features added yet") { showUpcomingFeatureDialog("Advanced Habit Icons") })
                 settings.add(ConfigItem("Theme Color", "Customize creating habits theme") { showColorPickerDialog("ADD_HABIT") })
                 settings.add(ConfigItem("Behavioral Insights", "Peak performance analytics") { showBehavioralInsightsDialog() })
                 settings.add(ConfigItem("Default Startup Tab", "Current: ${DataManager.habitDefaultTab}") {
@@ -209,7 +209,7 @@ class SettingsActivity : AppCompatActivity() {
                 })
             }
             "WORKOUTS" -> {
-                settings.add(ConfigItem("Icons", "No features added yet") { showSectionSettings("WORKOUTS_ICONS") })
+                settings.add(ConfigItem("Icons", "No features added yet") { showUpcomingFeatureDialog("Advanced Workout Icons") })
                 settings.add(ConfigItem("Theme Color", "Customize creating workouts theme") { showColorPickerDialog("ADD_WORKOUT") })
                 settings.add(ConfigItem("Manage Muscle Groups", "Add or remove body part tags") { showManageMuscleGroupsDialog() })
                 settings.add(ConfigItem("Workout Readiness", "Check your energy levels") { showWorkoutReadinessDialog() })
@@ -340,6 +340,27 @@ class SettingsActivity : AppCompatActivity() {
                 })
             }
             "OTHERS" -> {
+                settings.add(ConfigItem("Global Display Size", "Icons and margins for all sub-sections (Current: ${DataManager.displaySize})") {
+                    val sizes = listOf("XS", "S", "L")
+                    DataManager.displaySize = sizes[(sizes.indexOf(DataManager.displaySize) + 1) % sizes.size]
+                    DataManager.saveData(this)
+                    showSectionSettings("OTHERS")
+                    Toast.makeText(this, "Restart app to fully apply scale changes", Toast.LENGTH_SHORT).show()
+                })
+                settings.add(ConfigItem("Home Page Display Size", "Dedicated scale for the main dashboard (Current: ${DataManager.homeDisplaySize})") {
+                    val sizes = listOf("XS", "S", "L")
+                    DataManager.homeDisplaySize = sizes[(sizes.indexOf(DataManager.homeDisplaySize) + 1) % sizes.size]
+                    DataManager.saveData(this)
+                    showSectionSettings("OTHERS")
+                    Toast.makeText(this, "Restart app to fully apply home changes", Toast.LENGTH_SHORT).show()
+                })
+                settings.add(ConfigItem("Text Font Size", "Scaling for titles and content (Current: ${DataManager.fontSize})") {
+                    val sizes = listOf("XS", "S", "L")
+                    DataManager.fontSize = sizes[(sizes.indexOf(DataManager.fontSize) + 1) % sizes.size]
+                    DataManager.saveData(this)
+                    showSectionSettings("OTHERS")
+                    Toast.makeText(this, "Restart app to fully apply font changes", Toast.LENGTH_SHORT).show()
+                })
                 settings.add(ConfigItem("Export Backup", "Save all data to a local JSON file") { exportBackup() })
                 settings.add(ConfigItem("Import Backup", "Restore data from a JSON file") { importBackup() })
                 settings.add(ConfigItem("System Deep Clean", "Clear old history and cache") {
@@ -360,10 +381,14 @@ class SettingsActivity : AppCompatActivity() {
                     SettingsHubItem("Section Colors", "Manage section theme colors", R.drawable.ic_project, "APPEARANCE_COLORS"),
                     SettingsHubItem("Add Feature", "Custom section features", R.drawable.ic_habit_tracker, "APPEARANCE_ADD_FEATURE"),
                     SettingsHubItem("Color Management", "Custom section colors", R.drawable.ic_project, "APPEARANCE_COLOR"),
-                    SettingsHubItem("Icon Management", "Custom section icons", R.drawable.ic_habit_tracker, "APPEARANCE_ICON")
+                    SettingsHubItem("Icon Management", "Custom section icons", R.drawable.ic_habit_tracker, "UPCOMING_ICON_MGMT")
                 )
                 settingsList.adapter = SettingsHubAdapter(menuItems) { section ->
-                    showSectionSettings(section)
+                    if (section == "UPCOMING_ICON_MGMT") {
+                        showUpcomingFeatureDialog("Custom Icon Management")
+                    } else {
+                        showSectionSettings(section)
+                    }
                 }
                 return
             }
@@ -442,6 +467,25 @@ class SettingsActivity : AppCompatActivity() {
 
     private fun importBackup() {
         importLauncher.launch(arrayOf("application/json", "application/octet-stream", "*/*"))
+    }
+
+    private fun showUpcomingFeatureDialog(featureName: String) {
+        val dialog = Dialog(this)
+        dialog.setContentView(R.layout.dialog_set_budget)
+        dialog.window?.setBackgroundDrawableResource(android.R.color.transparent)
+        dialog.window?.setLayout(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT)
+
+        val title = dialog.findViewById<TextView>(R.id.tv_dialog_title)
+        val etInput = dialog.findViewById<View>(R.id.et_budget_amount)
+        val subtext = dialog.findViewById<TextView>(R.id.tv_dialog_subtext)
+        val btnClose = dialog.findViewById<TextView>(R.id.btn_save_budget)
+
+        title.text = "UPCOMING FEATURE"
+        etInput.visibility = View.GONE
+        subtext.text = "The \"$featureName\" system is currently under development for the next executive update. Stay tuned!"
+        btnClose.text = "UNDERSTOOD"
+        btnClose.setOnClickListener { dialog.dismiss() }
+        dialog.show()
     }
 
     private fun showAvatarOptionsDialog() {

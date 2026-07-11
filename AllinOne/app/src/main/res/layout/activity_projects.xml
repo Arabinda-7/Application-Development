@@ -4,14 +4,14 @@
     android:id="@+id/project_root_layout"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="#000000"
-    android:paddingHorizontal="16dp">
+    android:background="#000000">
 
     <ImageButton
         android:id="@+id/btn_back"
         android:layout_width="48dp"
         android:layout_height="48dp"
         android:layout_marginTop="0dp"
+        android:layout_marginStart="16dp"
         android:background="?attr/selectableItemBackgroundBorderless"
         android:src="@drawable/ic_back"
         app:tint="@color/white"
@@ -23,6 +23,7 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginTop="4dp"
+        android:layout_marginStart="16dp"
         android:text="PROJECTS"
         android:textColor="@color/white"
         android:textSize="20sp"
@@ -35,6 +36,7 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginTop="2dp"
+        android:layout_marginStart="16dp"
         android:text="Mar 01"
         android:textColor="@color/text_secondary"
         android:textSize="14sp"
@@ -45,6 +47,7 @@
         android:id="@+id/btn_project_settings"
         android:layout_width="48dp"
         android:layout_height="48dp"
+        android:layout_marginEnd="16dp"
         android:background="?attr/selectableItemBackgroundBorderless"
         android:src="@drawable/baseline_settings_24"
         app:tint="@color/white"
@@ -57,6 +60,7 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginTop="4dp"
+        android:layout_marginStart="16dp"
         android:text="Manage your project notes and progress"
         android:textColor="@color/text_secondary"
         android:textSize="12sp"
@@ -89,11 +93,11 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginEnd="24dp"
-        android:layout_marginBottom="24dp"
+        android:layout_marginBottom="32dp"
         android:src="@android:drawable/ic_input_add"
         app:backgroundTint="#1A73E8"
         app:fabSize="normal"
-        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintBottom_toTopOf="@id/bottom_navigation_projects"
         app:layout_constraintEnd_toEndOf="parent"
         app:tint="@color/white" />
 
@@ -101,10 +105,11 @@
     <LinearLayout
         android:id="@+id/bottom_navigation_projects"
         android:layout_width="match_parent"
-        android:layout_height="72dp"
+        android:layout_height="wrap_content"
+        android:minHeight="72dp"
+        android:paddingVertical="12dp"
         android:background="#121212"
         android:orientation="horizontal"
-        android:gravity="center_vertical"
         app:layout_constraintBottom_toBottomOf="parent">
 
         <LinearLayout
