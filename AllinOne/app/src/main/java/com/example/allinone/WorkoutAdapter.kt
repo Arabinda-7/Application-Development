@@ -34,8 +34,8 @@ class WorkoutAdapter(
     private var displayItems = mutableListOf<Any>()
     private var currentFilter = "All"
     private var selectedDayIndex = 0
-    private var selectedDateString = SimpleDateFormat("yyyyMMdd", Locale.getDefault()).format(Date())
-    private val todayDateString = SimpleDateFormat("yyyyMMdd", Locale.getDefault()).format(Date())
+    private var selectedDateString = DataManager.getTrackingDateString()
+    private val todayDateString get() = DataManager.getTrackingDateString()
     private var showCompleted = DataManager.workoutShowCompleted
 
     init {
@@ -80,14 +80,26 @@ class WorkoutAdapter(
 
             holder.workoutName.text = UIUtils.formatTitleCase(workout.name)
             
-            if (workout.isDayOff && selectedDateString == todayDateString) {
-                holder.workoutDetails.text = "DAY OFF"
-            } else {
-                val details = when (workout.trackingMode) {
-                    "Timer" -> "${workout.target}s"
-                    else -> "${workout.progress}/${workout.target} ${workout.trackingMode}"
+            if (selectedDateString == todayDateString) {
+                if (workout.isDayOff) {
+                    holder.workoutDetails.text = "DAY OFF"
+                } else {
+                    val details = when (workout.trackingMode) {
+                        "Timer" -> "${workout.target}s"
+                        else -> "${workout.progress}/${workout.target} ${workout.trackingMode}"
+                    }
+                    holder.workoutDetails.text = details
                 }
-                holder.workoutDetails.text = details
+            } else {
+                if (isCompleted) {
+                    holder.workoutDetails.text = "COMPLETED"
+                } else {
+                    val unit = when (workout.trackingMode) {
+                        "Timer" -> "s"
+                        else -> " ${workout.trackingMode}"
+                    }
+                    holder.workoutDetails.text = "0/${workout.target}$unit"
+                }
             }
 
             // Advanced Design Binding
@@ -148,7 +160,9 @@ class WorkoutAdapter(
             }
 
             holder.expandChevron.setOnClickListener {
-                if (!isCompleted && selectedDateString == todayDateString) {
+                if (selectedDateString != todayDateString) {
+                    android.widget.Toast.makeText(context, "You can only track workouts for today!", android.widget.Toast.LENGTH_SHORT).show()
+                } else if (!isCompleted) {
                     TransitionManager.beginDelayedTransition(holder.itemView as ViewGroup)
                     workout.isExpanded = !workout.isExpanded
                     notifyItemChanged(position)

@@ -75,6 +75,9 @@ class SettingsActivity : BaseActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_settings)
 
+        // Restore navigation path if activity was recreated
+        currentPath = savedInstanceState?.getString("current_path") ?: "HUB"
+
         ViewCompat.setOnApplyWindowInsetsListener(findViewById(R.id.settings_top_header)) { v, insets ->
             val statusBars = insets.getInsets(WindowInsetsCompat.Type.statusBars())
             v.setPadding(v.paddingLeft, statusBars.top, v.paddingRight, v.paddingBottom)
@@ -95,7 +98,16 @@ class SettingsActivity : BaseActivity() {
             }
         })
 
-        showHub()
+        if (currentPath == "HUB") {
+            showHub()
+        } else {
+            showSectionSettings(currentPath)
+        }
+    }
+
+    override fun onSaveInstanceState(outState: Bundle) {
+        super.onSaveInstanceState(outState)
+        outState.putString("current_path", currentPath)
     }
 
     override fun onResume() {
@@ -144,7 +156,13 @@ class SettingsActivity : BaseActivity() {
 
     private fun updateMiniProfileUI() {
         findViewById<TextView>(R.id.tv_mini_name).text = UIUtils.formatTitleCase(DataManager.userName)
-        findViewById<ImageView>(R.id.iv_profile_pic).setImageResource(DataManager.userAvatarRes)
+        val ivProfile = findViewById<ImageView>(R.id.iv_profile_pic)
+        
+        if (DataManager.userProfileImageUri != null) {
+            ivProfile.setImageURI(Uri.parse(DataManager.userProfileImageUri))
+        } else {
+            ivProfile.setImageResource(DataManager.userAvatarRes)
+        }
         
         // Handle Profile Click
         findViewById<View>(R.id.card_profile_entry).setOnClickListener {
@@ -344,22 +362,19 @@ class SettingsActivity : BaseActivity() {
                     val sizes = listOf("XS", "S", "L")
                     DataManager.displaySize = sizes[(sizes.indexOf(DataManager.displaySize) + 1) % sizes.size]
                     DataManager.saveData(this)
-                    showSectionSettings("OTHERS")
-                    Toast.makeText(this, "Restart app to fully apply scale changes", Toast.LENGTH_SHORT).show()
+                    recreate()
                 })
                 settings.add(ConfigItem("Home Page Display Size", "Dedicated scale for the main dashboard (Current: ${DataManager.homeDisplaySize})") {
                     val sizes = listOf("XS", "S", "L")
                     DataManager.homeDisplaySize = sizes[(sizes.indexOf(DataManager.homeDisplaySize) + 1) % sizes.size]
                     DataManager.saveData(this)
-                    showSectionSettings("OTHERS")
-                    Toast.makeText(this, "Restart app to fully apply home changes", Toast.LENGTH_SHORT).show()
+                    recreate()
                 })
                 settings.add(ConfigItem("Text Font Size", "Scaling for titles and content (Current: ${DataManager.fontSize})") {
                     val sizes = listOf("XS", "S", "L")
                     DataManager.fontSize = sizes[(sizes.indexOf(DataManager.fontSize) + 1) % sizes.size]
                     DataManager.saveData(this)
-                    showSectionSettings("OTHERS")
-                    Toast.makeText(this, "Restart app to fully apply font changes", Toast.LENGTH_SHORT).show()
+                    recreate()
                 })
                 settings.add(ConfigItem("Export Backup", "Save all data to a local JSON file") { exportBackup() })
                 settings.add(ConfigItem("Import Backup", "Restore data from a JSON file") { importBackup() })

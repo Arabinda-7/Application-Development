@@ -26,5 +26,9 @@ data class DashboardState(
     val projectIcon: Int = R.drawable.ic_project,
     val financeIcon: Int = R.drawable.ic_finance,
     val userAvatarRes: Int = R.drawable.icons8_profile_100,
+    val userProfileImageUri: String? = null,
+    val homeDisplaySize: String = "S",
+    val globalDisplaySize: String = "S",
+    val fontSize: String = "S",
     val isDataLoaded: Boolean = false
 )

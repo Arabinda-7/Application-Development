@@ -33,8 +33,8 @@ class HabitAdapter(
     private var displayItems = mutableListOf<Any>()
     private var currentFilter = "All"
     private var selectedDayIndex = 6
-    private var selectedDateString = SimpleDateFormat("yyyyMMdd", Locale.getDefault()).format(Date())
-    private val todayDateString = SimpleDateFormat("yyyyMMdd", Locale.getDefault()).format(Date())
+    private var selectedDateString = DataManager.getTrackingDateString()
+    private val todayDateString get() = DataManager.getTrackingDateString()
     private var showCompleted = DataManager.habitShowCompleted
 
     init {
@@ -122,6 +122,12 @@ class HabitAdapter(
             updateVisuals(holder, isCompleted)
 
             holder.habitCompleted.setOnClickListener {
+                if (selectedDateString != todayDateString) {
+                    holder.habitCompleted.isChecked = isCompleted
+                    android.widget.Toast.makeText(context, "You can only mark habits for today!", android.widget.Toast.LENGTH_SHORT).show()
+                    return@setOnClickListener
+                }
+
                 if (isCompleted) {
                     holder.habitCompleted.isChecked = true
                     return@setOnClickListener

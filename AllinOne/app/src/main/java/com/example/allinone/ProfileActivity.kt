@@ -16,9 +16,29 @@ import androidx.appcompat.widget.SwitchCompat
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
+import android.app.Activity
+import android.net.Uri
+import android.provider.MediaStore
 import java.util.*
 
-class ProfileActivity : AppCompatActivity() {
+class ProfileActivity : BaseActivity() {
+
+    private val imagePickerLauncher = registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
+        if (result.resultCode == Activity.RESULT_OK) {
+            val imageUri: Uri? = result.data?.data
+            imageUri?.let {
+                // Persist permission to access this URI across reboots
+                try {
+                    contentResolver.takePersistableUriPermission(it, Intent.FLAG_GRANT_READ_URI_PERMISSION)
+                } catch (e: Exception) {}
+                
+                DataManager.userProfileImageUri = it.toString()
+                DataManager.saveData(this)
+                setupIdentity()
+                Toast.makeText(this, "Profile Picture Updated", Toast.LENGTH_SHORT).show()
+            }
+        }
+    }
 
     private val exportLauncher = registerForActivityResult(ActivityResultContracts.CreateDocument("application/json")) { uri ->
         uri?.let {
@@ -48,23 +68,65 @@ class ProfileActivity : AppCompatActivity() {
         findViewById<View>(R.id.btn_back).setOnClickListener { finish() }
 
         setupIdentity()
+        setupEditProfileSection()
         setupImpactSummary()
         setupSecurityHub()
         setupDataGovernance()
     }
 
+    private fun setupEditProfileSection() {
+        val etName = findViewById<EditText>(R.id.et_profile_name)
+        val etBio = findViewById<EditText>(R.id.et_profile_bio)
+        val btnSave = findViewById<View>(R.id.btn_save_profile_changes)
+
+        etName.setText(DataManager.userName)
+        etBio.setText(DataManager.userBio)
+
+        btnSave.setOnClickListener {
+            val newName = etName.text.toString().trim()
+            val newBio = etBio.text.toString().trim()
+
+            if (newName.isNotEmpty()) {
+                DataManager.userName = newName
+                DataManager.userBio = newBio
+                DataManager.saveData(this)
+                setupIdentity() // Refresh header visuals
+                Toast.makeText(this, "Profile Updated Successfully", Toast.LENGTH_SHORT).show()
+                
+                // Clear focus to hide keyboard
+                etName.clearFocus()
+                etBio.clearFocus()
+                val imm = getSystemService(android.content.Context.INPUT_METHOD_SERVICE) as android.view.inputmethod.InputMethodManager
+                imm.hideSoftInputFromWindow(btnSave.windowToken, 0)
+            } else {
+                Toast.makeText(this, "Name cannot be empty", Toast.LENGTH_SHORT).show()
+            }
+        }
+    }
+
     private fun setupIdentity() {
         findViewById<TextView>(R.id.tv_user_name).text = UIUtils.formatTitleCase(DataManager.userName)
         findViewById<TextView>(R.id.tv_user_tier).text = DataManager.userBio.uppercase()
-        findViewById<ImageView>(R.id.iv_profile_avatar).setImageResource(DataManager.userAvatarRes)
+        
+        val ivProfile = findViewById<ImageView>(R.id.iv_profile_avatar)
+        
+        if (DataManager.userProfileImageUri != null) {
+            ivProfile.setImageURI(Uri.parse(DataManager.userProfileImageUri))
+        } else {
+            ivProfile.setImageResource(DataManager.userAvatarRes)
+        }
 
         // Feature: Edit Profile - FIXED CLICK LISTENER
         findViewById<View>(R.id.container_avatar).setOnClickListener {
-            showEditProfileDialog()
+            val intent = Intent(Intent.ACTION_OPEN_DOCUMENT).apply {
+                addCategory(Intent.CATEGORY_OPENABLE)
+                type = "image/*"
+            }
+            imagePickerLauncher.launch(intent)
         }
 
         findViewById<ImageView>(R.id.iv_profile_avatar).setOnLongClickListener {
-            // Toggle between two profile icons
+            // Toggle between two profile icons and CLEAR custom image
             val current = DataManager.userAvatarRes
             val next = if (current == R.drawable.boy_avatar_profile) {
                 R.drawable.girl_avatar_profile
@@ -72,10 +134,11 @@ class ProfileActivity : AppCompatActivity() {
                 R.drawable.boy_avatar_profile
             }
             
+            DataManager.userProfileImageUri = null
             DataManager.userAvatarRes = next
             DataManager.saveData(this)
             setupIdentity()
-            Toast.makeText(this, "Profile Style Toggled", Toast.LENGTH_SHORT).show()
+            Toast.makeText(this, "Switched to Default Avatar", Toast.LENGTH_SHORT).show()
             true
         }
         

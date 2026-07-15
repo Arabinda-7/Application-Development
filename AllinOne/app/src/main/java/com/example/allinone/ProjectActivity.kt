@@ -29,6 +29,7 @@ class ProjectActivity : BaseActivity() {
     private val allNotes = DataManager.notes
     private lateinit var projectAdapter: ProjectNoteAdapter
     private lateinit var ideaAdapter: NoteAdapter
+    private lateinit var gestureDetector: android.view.GestureDetector
     private var displayNotes = mutableListOf<Note>()
     private var displayIdeas = mutableListOf<Note>()
     private var isProjectsTab = true
@@ -85,6 +86,7 @@ class ProjectActivity : BaseActivity() {
 
         setupBottomNavigation()
         updateUI(true) // Set Projects as default on launch
+        setupGestureDetector()
     }
 
     private lateinit var ivProjects: ImageView
@@ -165,6 +167,23 @@ class ProjectActivity : BaseActivity() {
             tvNotes.setTextColor(activeColor)
             tvNotes.setTypeface(null, android.graphics.Typeface.BOLD)
         }
+    }
+
+    private fun setupGestureDetector() {
+        gestureDetector = android.view.GestureDetector(this, object : SwipeGestureListener() {
+            override fun onSwipeLeft() {
+                if (isProjectsTab && DataManager.projectIdeasEnabled) updateUI(false)
+            }
+
+            override fun onSwipeRight() {
+                if (!isProjectsTab && DataManager.projectRoadmapsEnabled) updateUI(true)
+            }
+        })
+    }
+
+    override fun dispatchTouchEvent(ev: android.view.MotionEvent?): Boolean {
+        if (ev != null) gestureDetector.onTouchEvent(ev)
+        return super.dispatchTouchEvent(ev)
     }
 
     private fun updateDisplayList() {

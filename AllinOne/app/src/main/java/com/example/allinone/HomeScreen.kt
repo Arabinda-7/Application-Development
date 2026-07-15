@@ -1,5 +1,8 @@
 package com.example.allinone
 
+import androidx.compose.ui.graphics.asImageBitmap
+import android.graphics.BitmapFactory
+import android.net.Uri
 import androidx.compose.animation.animateContentSize
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.animation.core.animateFloat
@@ -265,12 +268,40 @@ fun HomeScreen(
                                         .border(1.5.dp, moodTheme.first.copy(alpha = 0.4f), CircleShape),
                                     contentAlignment = Alignment.Center
                                 ) {
-                                    Image(
-                                        painter = painterResource(id = state.userAvatarRes),
-                                        contentDescription = "Profile",
-                                        modifier = Modifier.fillMaxSize(),
-                                        contentScale = androidx.compose.ui.layout.ContentScale.Crop
-                                    )
+                                    if (state.userProfileImageUri != null) {
+                                        val context = androidx.compose.ui.platform.LocalContext.current
+                                        val bitmap = remember(state.userProfileImageUri) {
+                                            try {
+                                                context.contentResolver.openInputStream(Uri.parse(state.userProfileImageUri))?.use {
+                                                    BitmapFactory.decodeStream(it)
+                                                }
+                                            } catch (e: Exception) {
+                                                null
+                                            }
+                                        }
+                                        if (bitmap != null) {
+                                            Image(
+                                                bitmap = bitmap.asImageBitmap(),
+                                                contentDescription = "Profile",
+                                                modifier = Modifier.fillMaxSize(),
+                                                contentScale = androidx.compose.ui.layout.ContentScale.Crop
+                                            )
+                                        } else {
+                                            Image(
+                                                painter = painterResource(id = state.userAvatarRes),
+                                                contentDescription = "Profile",
+                                                modifier = Modifier.fillMaxSize(),
+                                                contentScale = androidx.compose.ui.layout.ContentScale.Crop
+                                            )
+                                        }
+                                    } else {
+                                        Image(
+                                            painter = painterResource(id = state.userAvatarRes),
+                                            contentDescription = "Profile",
+                                            modifier = Modifier.fillMaxSize(),
+                                            contentScale = androidx.compose.ui.layout.ContentScale.Crop
+                                        )
+                                    }
                                 }
                                 Box(modifier = Modifier.size(12.dp).background(Color(0xFF2EC4B6), CircleShape).border(2.dp, Color.Black, CircleShape))
                             }

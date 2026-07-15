@@ -100,19 +100,21 @@ class MainActivity : BaseActivity() {
                     Box(modifier = Modifier.fillMaxSize().background(Color.Black))
                 }
                 else -> {
-                    val currentDensity = LocalDensity.current
-                    val customDensity = remember(DataManager.homeDisplaySize, DataManager.fontSize) {
-                        val dScale = when(DataManager.homeDisplaySize) {
+                    val customDensity = remember(dashboardState.homeDisplaySize, dashboardState.fontSize) {
+                        val currentDensity = this.resources.displayMetrics.density
+                        val currentFontScale = this.resources.configuration.fontScale
+                        
+                        val dScale = when(dashboardState.homeDisplaySize) {
                             "XS" -> 0.85f
                             "L" -> 1.15f
                             else -> 1.0f
                         }
-                        val fScale = when(DataManager.fontSize) {
+                        val fScale = when(dashboardState.fontSize) {
                             "XS" -> 0.85f
                             "L" -> 1.25f
                             else -> 1.0f
                         }
-                        Density(density = currentDensity.density * dScale, fontScale = currentDensity.fontScale * fScale)
+                        Density(density = currentDensity * dScale, fontScale = currentFontScale * fScale)
                     }
 
                     CompositionLocalProvider(LocalDensity provides customDensity) {
@@ -261,6 +263,10 @@ class MainActivity : BaseActivity() {
             projectIcon = DataManager.globalProjectIcon,
             financeIcon = DataManager.globalFinanceIcon,
             userAvatarRes = DataManager.userAvatarRes,
+            userProfileImageUri = DataManager.userProfileImageUri,
+            homeDisplaySize = DataManager.homeDisplaySize,
+            globalDisplaySize = DataManager.displaySize,
+            fontSize = DataManager.fontSize,
             isDataLoaded = true
         )
     }

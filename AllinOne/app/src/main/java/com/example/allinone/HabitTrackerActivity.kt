@@ -40,10 +40,12 @@ class HabitTrackerActivity : BaseActivity() {
     private lateinit var weekAdapter: CalendarWeekAdapter
     private lateinit var sectionProgressBar: android.widget.ProgressBar
     private lateinit var sectionProgressText: TextView
+    private lateinit var gestureDetector: android.view.GestureDetector
     private var selectedTimeFilter: String = "All"
     private var selectedDateString: String = DataManager.getTrackingDateString()
     
     private var currentGridCalendar = Calendar.getInstance()
+    private var currentTab = "TODAY"
 
     override fun onCreate(savedInstanceState: Bundle?) {
         enableEdgeToEdge()
@@ -99,12 +101,11 @@ class HabitTrackerActivity : BaseActivity() {
         setupGridNavigation()
         setupCalendarViewPager()
         updateSectionProgress()
+        setupGestureDetector()
 
         // Apply Default Startup Tab
         if (DataManager.habitDefaultTab == "HISTORY") {
-            findViewById<View>(R.id.today_layout).visibility = View.GONE
-            findViewById<View>(R.id.history_layout).visibility = View.VISIBLE
-            updateNavUI("HISTORY")
+            switchTab("HISTORY")
         }
 
         findViewById<View>(R.id.btn_back).setOnClickListener { finish() }
@@ -225,33 +226,42 @@ class HabitTrackerActivity : BaseActivity() {
     }
 
     private fun setupFooterLogic() {
+        findViewById<View>(R.id.nav_today).setOnClickListener { switchTab("TODAY") }
+        findViewById<View>(R.id.nav_history).setOnClickListener { switchTab("HISTORY") }
+    }
+
+    private fun switchTab(tab: String) {
+        currentTab = tab
         val todayLayout = findViewById<View>(R.id.today_layout)
         val historyLayout = findViewById<View>(R.id.history_layout)
-        val navToday = findViewById<View>(R.id.nav_today)
-        val navHistory = findViewById<View>(R.id.nav_history)
-        val ivToday = findViewById<ImageView>(R.id.iv_today)
-        val tvTodayNav = findViewById<TextView>(R.id.tv_today_nav)
-        val ivHistory = findViewById<ImageView>(R.id.iv_history)
-        val tvHistoryNav = findViewById<TextView>(R.id.tv_history_nav)
-
-        navToday.setOnClickListener {
+        
+        if (tab == "TODAY") {
             todayLayout.visibility = View.VISIBLE
             historyLayout.visibility = View.GONE
-            ivToday.imageTintList = ContextCompat.getColorStateList(this, R.color.chip_selected)
-            tvTodayNav.setTextColor(ContextCompat.getColor(this, R.color.chip_selected))
-            ivHistory.imageTintList = ContextCompat.getColorStateList(this, R.color.text_secondary)
-            tvHistoryNav.setTextColor(ContextCompat.getColor(this, R.color.text_secondary))
-        }
-
-        navHistory.setOnClickListener {
+            updateNavUI("TODAY")
+        } else {
             todayLayout.visibility = View.GONE
             historyLayout.visibility = View.VISIBLE
-            ivHistory.imageTintList = ContextCompat.getColorStateList(this, R.color.chip_selected)
-            tvHistoryNav.setTextColor(ContextCompat.getColor(this, R.color.chip_selected))
-            ivToday.imageTintList = ContextCompat.getColorStateList(this, R.color.text_secondary)
-            tvTodayNav.setTextColor(ContextCompat.getColor(this, R.color.text_secondary))
+            updateNavUI("HISTORY")
             updateHistoryUI()
         }
+    }
+
+    private fun setupGestureDetector() {
+        gestureDetector = android.view.GestureDetector(this, object : SwipeGestureListener() {
+            override fun onSwipeLeft() {
+                if (currentTab == "TODAY") switchTab("HISTORY")
+            }
+
+            override fun onSwipeRight() {
+                if (currentTab == "HISTORY") switchTab("TODAY")
+            }
+        })
+    }
+
+    override fun dispatchTouchEvent(ev: android.view.MotionEvent?): Boolean {
+        if (ev != null) gestureDetector.onTouchEvent(ev)
+        return super.dispatchTouchEvent(ev)
     }
 
     private fun setupGridNavigation() {

@@ -83,6 +83,7 @@ object DataManager {
     var userName: String = "Arabi"
     var userBio: String = "Professional Tier"
     var userAvatarRes: Int = R.drawable.boy_avatar_profile
+    var userProfileImageUri: String? = null
 
     var recentActivities = mutableListOf<String>()
     var dailyMoods = mutableMapOf<String, String>() // DateString -> Emoji
@@ -177,6 +178,7 @@ object DataManager {
     private const val KEY_USER_NAME = "user_profile_name"
     private const val KEY_USER_BIO = "user_profile_bio"
     private const val KEY_USER_AVATAR = "user_profile_avatar"
+    private const val KEY_USER_IMAGE_URI = "user_profile_image_uri"
     private const val KEY_CUSTOM_COLORS = "user_custom_colors_data"
     private const val KEY_PROJ_TAGS = "project_custom_tags_data"
     private const val KEY_PROJ_DUAL_EXIST = "project_dual_exist_enabled"
@@ -288,6 +290,7 @@ object DataManager {
             putString(KEY_USER_NAME, userName)
             putString(KEY_USER_BIO, userBio)
             putInt(KEY_USER_AVATAR, userAvatarRes)
+            putString(KEY_USER_IMAGE_URI, userProfileImageUri)
             putString(KEY_CUSTOM_COLORS, gson.toJson(userCustomColors))
             putString(KEY_PROJ_TAGS, gson.toJson(projectCustomTags))
 
@@ -477,6 +480,7 @@ object DataManager {
         userName = prefs.getString(KEY_USER_NAME, "Arabi") ?: "Arabi"
         userBio = prefs.getString(KEY_USER_BIO, "Professional Tier") ?: "Professional Tier"
         userAvatarRes = prefs.getInt(KEY_USER_AVATAR, R.drawable.ic_habit_tracker)
+        userProfileImageUri = prefs.getString(KEY_USER_IMAGE_URI, null)
 
         prefs.getString(KEY_RECENT_ACT, null)?.let {
             val type = object : TypeToken<MutableList<String>>() {}.type

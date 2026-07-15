@@ -36,6 +36,7 @@ class ToDoListActivity : BaseActivity() {
     private val allTasks = DataManager.tasks
     private lateinit var taskAdapter: TaskAdapter
     private var isDeleteMode = false
+    private lateinit var gestureDetector: android.view.GestureDetector
     
     private var currentCategoryFilter = "All"
     private var currentSearchQuery = ""
@@ -72,6 +73,7 @@ class ToDoListActivity : BaseActivity() {
         setupFilters()
         setupBottomNavigation()
         setupSwipeActions(taskList)
+        setupGestureDetector()
 
         val btnCreate = findViewById<com.google.android.material.floatingactionbutton.FloatingActionButton>(R.id.btn_create_new_task)
         if (DataManager.taskAddThemeColor != -1) {
@@ -175,6 +177,31 @@ class ToDoListActivity : BaseActivity() {
 
     private fun applyFilters() {
         taskAdapter.filter(currentCategoryFilter, currentSearchQuery)
+    }
+
+    private fun setupGestureDetector() {
+        gestureDetector = android.view.GestureDetector(this, object : SwipeGestureListener() {
+            override fun onSwipeLeft() {
+                if (DataManager.taskVisibleSections.size > 1) {
+                    val currentIndex = DataManager.taskVisibleSections.indexOf(currentSection)
+                    val nextIndex = (currentIndex + 1) % DataManager.taskVisibleSections.size
+                    switchSection(DataManager.taskVisibleSections[nextIndex])
+                }
+            }
+
+            override fun onSwipeRight() {
+                if (DataManager.taskVisibleSections.size > 1) {
+                    val currentIndex = DataManager.taskVisibleSections.indexOf(currentSection)
+                    val prevIndex = if (currentIndex <= 0) DataManager.taskVisibleSections.size - 1 else currentIndex - 1
+                    switchSection(DataManager.taskVisibleSections[prevIndex])
+                }
+            }
+        })
+    }
+
+    override fun dispatchTouchEvent(ev: android.view.MotionEvent?): Boolean {
+        if (ev != null) gestureDetector.onTouchEvent(ev)
+        return super.dispatchTouchEvent(ev)
     }
 
     private fun setupSwipeActions(recyclerView: RecyclerView) {

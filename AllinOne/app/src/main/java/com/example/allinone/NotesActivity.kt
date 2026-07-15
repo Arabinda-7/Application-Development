@@ -37,6 +37,7 @@ class NotesActivity : BaseActivity() {
     private var currentCategory = DataManager.noteDefaultCategory
     private var displayNotes = mutableListOf<Note>()
     private var isDeleteMode = false
+    private lateinit var gestureDetector: android.view.GestureDetector
 
     override fun onCreate(savedInstanceState: Bundle?) {
         enableEdgeToEdge()
@@ -73,6 +74,7 @@ class NotesActivity : BaseActivity() {
         }
 
         setupBottomNavigation()
+        setupGestureDetector()
 
         findViewById<View>(R.id.btn_notes_settings).setOnClickListener {
             if (isDeleteMode) {
@@ -185,6 +187,31 @@ class NotesActivity : BaseActivity() {
         updateDisplayList()
         noteAdapter.updateNotes(displayNotes)
         updateNavUI()
+    }
+
+    private fun setupGestureDetector() {
+        gestureDetector = android.view.GestureDetector(this, object : SwipeGestureListener() {
+            override fun onSwipeLeft() {
+                if (DataManager.noteVisibleSections.size > 1) {
+                    val currentIndex = DataManager.noteVisibleSections.indexOf(currentCategory)
+                    val nextIndex = (currentIndex + 1) % DataManager.noteVisibleSections.size
+                    switchCategory(DataManager.noteVisibleSections[nextIndex])
+                }
+            }
+
+            override fun onSwipeRight() {
+                if (DataManager.noteVisibleSections.size > 1) {
+                    val currentIndex = DataManager.noteVisibleSections.indexOf(currentCategory)
+                    val prevIndex = if (currentIndex <= 0) DataManager.noteVisibleSections.size - 1 else currentIndex - 1
+                    switchCategory(DataManager.noteVisibleSections[prevIndex])
+                }
+            }
+        })
+    }
+
+    override fun dispatchTouchEvent(ev: android.view.MotionEvent?): Boolean {
+        if (ev != null) gestureDetector.onTouchEvent(ev)
+        return super.dispatchTouchEvent(ev)
     }
 
     private fun updateNavUI() {
