@@ -30,5 +30,13 @@ data class DashboardState(
     val homeDisplaySize: String = "S",
     val globalDisplaySize: String = "S",
     val fontSize: String = "S",
+
+    val showHabitSection: Boolean = true,
+    val showWorkoutSection: Boolean = true,
+    val showTaskSection: Boolean = true,
+    val showNoteSection: Boolean = true,
+    val showProjectSection: Boolean = true,
+    val showFinanceSection: Boolean = true,
+
     val isDataLoaded: Boolean = false
 )

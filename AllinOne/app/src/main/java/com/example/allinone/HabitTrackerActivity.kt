@@ -513,7 +513,7 @@ class HabitTrackerActivity : BaseActivity() {
             DataManager.saveData(this)
             dialog.dismiss()
         }
-        dialog.show()
+        showDialogSafe(dialog)
     }
 
     private fun startPulseAnimation(view: View) {
@@ -573,7 +573,7 @@ class HabitTrackerActivity : BaseActivity() {
         }
 
         btnClose.setOnClickListener { dialog.dismiss() }
-        dialog.show()
+        showDialogSafe(dialog)
     }
 
     private fun updateRepeatSummary(textView: TextView) {
@@ -623,7 +623,7 @@ class HabitTrackerActivity : BaseActivity() {
             } else { tempRepeatType = "WEEKLY"; refreshUI() }
         }
         btnBack.setOnClickListener { onDismiss(); dialog.dismiss() }
-        dialog.show()
+        showDialogSafe(dialog)
     }
 
     private fun updateRadioSelection(list: List<RadioButton>, selected: RadioButton) {
@@ -752,7 +752,7 @@ class HabitTrackerActivity : BaseActivity() {
         }
 
         btnClose.setOnClickListener { dialog.dismiss() }
-        dialog.show()
+        showDialogSafe(dialog)
     }
 
     private fun showBehavioralInsightsDialog() {
@@ -787,7 +787,7 @@ class HabitTrackerActivity : BaseActivity() {
         
         (btnSave as? TextView)?.text = "CLOSE"
         btnSave.setOnClickListener { dialog.dismiss() }
-        dialog.show()
+        showDialogSafe(dialog)
     }
 
     override fun onResume() {

@@ -491,7 +491,7 @@ class NotesActivity : BaseActivity() {
             setupBottomNavigation() 
             dialog.dismiss()
         }
-        dialog.show()
+        showDialogSafe(dialog)
     }
 
     private fun applyAutoCleanup() {
@@ -557,7 +557,7 @@ class NotesActivity : BaseActivity() {
         }
 
         btnClose.setOnClickListener { dialog.dismiss() }
-        dialog.show()
+        showDialogSafe(dialog)
     }
 
     private fun showTemplateEditorDialog() {
@@ -588,7 +588,7 @@ class NotesActivity : BaseActivity() {
             }
             container.addView(itemView)
         }
-        dialog.show()
+        showDialogSafe(dialog)
     }
 
     private fun showEditSingleTemplateDialog(category: String) {
@@ -613,7 +613,7 @@ class NotesActivity : BaseActivity() {
             DataManager.saveData(this)
             dialog.dismiss()
         }
-        dialog.show()
+        showDialogSafe(dialog)
     }
 
     private fun showBulkMoveDialog() {
@@ -642,6 +642,6 @@ class NotesActivity : BaseActivity() {
             }
             container.addView(itemView)
         }
-        dialog.show()
+        showDialogSafe(dialog)
     }
 }

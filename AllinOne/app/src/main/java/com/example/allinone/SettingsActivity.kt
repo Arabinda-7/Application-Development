@@ -358,6 +358,27 @@ class SettingsActivity : BaseActivity() {
                 })
             }
             "OTHERS" -> {
+                settings.add(ConfigItem("--- HOME PAGE VISIBILITY ---", "") {})
+                settings.add(ConfigItem("Show Habits", "Display habit tracker on home", isToggle = true, isChecked = DataManager.showHabitSection) {
+                    DataManager.showHabitSection = !DataManager.showHabitSection
+                })
+                settings.add(ConfigItem("Show Workouts", "Display workout routine on home", isToggle = true, isChecked = DataManager.showWorkoutSection) {
+                    DataManager.showWorkoutSection = !DataManager.showWorkoutSection
+                })
+                settings.add(ConfigItem("Show Tasks", "Display to-do list on home", isToggle = true, isChecked = DataManager.showTaskSection) {
+                    DataManager.showTaskSection = !DataManager.showTaskSection
+                })
+                settings.add(ConfigItem("Show Notes", "Display idea bank on home", isToggle = true, isChecked = DataManager.showNoteSection) {
+                    DataManager.showNoteSection = !DataManager.showNoteSection
+                })
+                settings.add(ConfigItem("Show Projects", "Display roadmap boards on home", isToggle = true, isChecked = DataManager.showProjectSection) {
+                    DataManager.showProjectSection = !DataManager.showProjectSection
+                })
+                settings.add(ConfigItem("Show Finance", "Display vault on home", isToggle = true, isChecked = DataManager.showFinanceSection) {
+                    DataManager.showFinanceSection = !DataManager.showFinanceSection
+                })
+
+                settings.add(ConfigItem("--- GLOBAL SCALING ---", "") {})
                 settings.add(ConfigItem("Global Display Size", "Icons and margins for all sub-sections (Current: ${DataManager.displaySize})") {
                     val sizes = listOf("XS", "S", "L")
                     DataManager.displaySize = sizes[(sizes.indexOf(DataManager.displaySize) + 1) % sizes.size]

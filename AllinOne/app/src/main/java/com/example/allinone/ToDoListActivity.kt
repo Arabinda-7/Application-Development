@@ -349,7 +349,7 @@ class ToDoListActivity : BaseActivity() {
 
         view.findViewById<View>(R.id.btn_close_settings).setOnClickListener { dialog.dismiss() }
         
-        dialog.show()
+        showDialogSafe(dialog)
     }
 
     private fun toggleDeleteMode(enabled: Boolean) {
@@ -500,7 +500,7 @@ class ToDoListActivity : BaseActivity() {
             }
         }
 
-        dialog.show()
+        showDialogSafe(dialog)
     }
 
     private fun startPulseAnimation(view: View) {
@@ -614,7 +614,7 @@ class ToDoListActivity : BaseActivity() {
         }
 
         render()
-        dialog.show()
+        showDialogSafe(dialog)
     }
 
     private fun showTaskAnalyticsDialog() {
@@ -642,7 +642,7 @@ class ToDoListActivity : BaseActivity() {
         view.findViewById<TextView>(R.id.tv_analytics_content).text = message
         view.findViewById<View>(R.id.btn_close_analytics).setOnClickListener { dialog.dismiss() }
 
-        dialog.show()
+        showDialogSafe(dialog)
     }
 
     private fun showManageSectionsDialog(type: String) {
@@ -693,7 +693,7 @@ class ToDoListActivity : BaseActivity() {
             setupBottomNavigation() // Refresh current screen
             dialog.dismiss()
         }
-        dialog.show()
+        showDialogSafe(dialog)
     }
 
     private fun scheduleReminder(task: Task) {
@@ -755,15 +755,17 @@ class ToDoListActivity : BaseActivity() {
 
     private fun showReminderPicker(onTimeSelected: (Long) -> Unit) {
         val calendar = Calendar.getInstance()
-        DatePickerDialog(this, { _, y, m, d ->
+        val datePicker = DatePickerDialog(this, { _, y, m, d ->
             calendar.set(Calendar.YEAR, y)
             calendar.set(Calendar.MONTH, m)
             calendar.set(Calendar.DAY_OF_MONTH, d)
-            TimePickerDialog(this, { _, h, min ->
+            val timePicker = TimePickerDialog(this, { _, h, min ->
                 calendar.set(Calendar.HOUR_OF_DAY, h)
                 calendar.set(Calendar.MINUTE, min)
                 onTimeSelected(calendar.timeInMillis)
-            }, calendar.get(Calendar.HOUR_OF_DAY), calendar.get(Calendar.MINUTE), false).show()
-        }, calendar.get(Calendar.YEAR), calendar.get(Calendar.MONTH), calendar.get(Calendar.DAY_OF_MONTH)).show()
+            }, calendar.get(Calendar.HOUR_OF_DAY), calendar.get(Calendar.MINUTE), false)
+            showDialogSafe(timePicker)
+        }, calendar.get(Calendar.YEAR), calendar.get(Calendar.MONTH), calendar.get(Calendar.DAY_OF_MONTH))
+        showDialogSafe(datePicker)
     }
 }

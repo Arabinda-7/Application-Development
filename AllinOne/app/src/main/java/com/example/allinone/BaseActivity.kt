@@ -1,5 +1,6 @@
 package com.example.allinone
 
+import android.app.Dialog
 import android.content.Context
 import android.os.Bundle
 import androidx.appcompat.app.AppCompatActivity
@@ -7,6 +8,13 @@ import androidx.appcompat.app.AppCompatActivity
 open class BaseActivity : AppCompatActivity() {
     private var appliedDisplaySize: String = ""
     private var appliedFontSize: String = ""
+    private var activeDialog: Dialog? = null
+
+    fun showDialogSafe(dialog: Dialog) {
+        if (activeDialog?.isShowing == true) return
+        activeDialog = dialog
+        dialog.show()
+    }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         appliedDisplaySize = DataManager.displaySize

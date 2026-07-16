@@ -61,6 +61,9 @@ class WorkoutRoutineActivity : BaseActivity() {
                 if (!workout.completedDates.contains(today)) {
                     workout.completedDates.add(today)
                     DataManager.addActivity("Finished Workout: ${workout.name}")
+                    if (DataManager.addXP(this@WorkoutRoutineActivity, 25)) {
+                        android.widget.Toast.makeText(this@WorkoutRoutineActivity, "LEVEL UP! You are now Level ${DataManager.userLevel}", android.widget.Toast.LENGTH_LONG).show()
+                    }
                 }
                 workoutAdapter.sortWorkouts()
                 DataManager.saveData(this)
@@ -565,7 +568,7 @@ class WorkoutRoutineActivity : BaseActivity() {
             }
             workoutAdapter.sortWorkouts(); DataManager.saveData(this); dialog.dismiss()
         }
-        dialog.show()
+        showDialogSafe(dialog)
     }
 
     private fun startPulseAnimation(view: View) {
@@ -742,7 +745,7 @@ class WorkoutRoutineActivity : BaseActivity() {
         }
 
         btnClose?.setOnClickListener { dialog.dismiss() }
-        dialog.show()
+        showDialogSafe(dialog)
     }
 
     private fun showManageMuscleGroupsDialog() {
@@ -785,7 +788,7 @@ class WorkoutRoutineActivity : BaseActivity() {
         }
 
         refresh()
-        dialog.show()
+        showDialogSafe(dialog)
     }
 
     private fun showWorkoutStatsDialog() {
@@ -825,7 +828,7 @@ class WorkoutRoutineActivity : BaseActivity() {
         subtext.text = sb.toString()
         btnClose.text = "CLOSE"
         btnClose.setOnClickListener { dialog.dismiss() }
-        dialog.show()
+        showDialogSafe(dialog)
     }
 
     private fun showWorkoutReadinessDialog() {
@@ -876,7 +879,7 @@ class WorkoutRoutineActivity : BaseActivity() {
                 else -> dialog.dismiss()
             }
         }
-        dialog.show()
+        showDialogSafe(dialog)
     }
 
     private fun startRestTimer() {
@@ -908,7 +911,7 @@ class WorkoutRoutineActivity : BaseActivity() {
         timer.start()
 
         btnClose.setOnClickListener { timer.cancel(); dialog.dismiss() }
-        dialog.show()
+        showDialogSafe(dialog)
     }
 
     private fun updateNavUI(active: String) {

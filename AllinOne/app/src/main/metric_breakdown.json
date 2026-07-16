@@ -1,0 +1,4 @@
+{
+  "metric": "getLastSevenDaysBreakdown",
+  "data_class": "DayBreakdown(val hDone: Int, val hTotal: Int, val wDone: Int, val wTotal: Int)"
+}

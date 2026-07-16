@@ -523,18 +523,43 @@ fun HomeScreen(
             }
 
             // --- 7-12. Diversified Growth & Management Sections ---
-            Spacer(modifier = Modifier.height(24.dp))
-            Text("Growth & Discipline", modifier = Modifier.padding(horizontal = 24.dp), color = Color.White.copy(alpha = 0.4f), fontSize = 10.sp, fontWeight = FontWeight.Bold, letterSpacing = 1.sp)
-            Spacer(modifier = Modifier.height(16.dp))
-            DashboardPair(
-                item1 = { HabitCard(progress = state.habitProgress, color = Color(if (state.habitColor == -1) 0xFFFF7A59 else state.habitColor.toLong()), icon = state.habitIcon, onClick = { onNavigateToHabits(); isMessageExpanded = false }, onColorClick = { showColorPicker = "HABIT" }) },
-                item2 = { WorkoutCard(progress = state.workoutProgress, color = Color(if (state.workoutColor == -1) 0xFFFFB800 else state.workoutColor.toLong()), icon = state.workoutIcon, onClick = { onNavigateToWorkout(); isMessageExpanded = false }, onColorClick = { showColorPicker = "WORKOUT" }) }
-            )
-
-            Spacer(modifier = Modifier.height(16.dp))
+            if (state.showHabitSection || state.showWorkoutSection) {
+                Spacer(modifier = Modifier.height(24.dp))
+                Text(
+                    "Growth & Discipline",
+                    modifier = Modifier.padding(horizontal = 24.dp),
+                    color = Color.White.copy(alpha = 0.4f),
+                    fontSize = 10.sp,
+                    fontWeight = FontWeight.Bold,
+                    letterSpacing = 1.sp
+                )
+                Spacer(modifier = Modifier.height(16.dp))
+                DashboardPair(
+                    item1 = if (state.showHabitSection) {
+                        {
+                            HabitCard(
+                                progress = state.habitProgress,
+                                color = Color(if (state.habitColor == -1) 0xFFFF7A59 else state.habitColor.toLong()),
+                                icon = state.habitIcon,
+                                onClick = { onNavigateToHabits(); isMessageExpanded = false },
+                                onColorClick = { showColorPicker = "HABIT" })
+                        }
+                    } else null,
+                    item2 = if (state.showWorkoutSection) {
+                        {
+                            WorkoutCard(
+                                progress = state.workoutProgress,
+                                color = Color(if (state.workoutColor == -1) 0xFFFFB800 else state.workoutColor.toLong()),
+                                icon = state.workoutIcon,
+                                onClick = { onNavigateToWorkout(); isMessageExpanded = false },
+                                onColorClick = { showColorPicker = "WORKOUT" })
+                        }
+                    } else null
+                )
+            }
 
             // --- Growth Advice (Blue Card) ---
-            if (state.currentMood != null) {
+            if (state.currentMood != null && (state.showHabitSection || state.showWorkoutSection)) {
                 Spacer(modifier = Modifier.height(12.dp))
 
                 Surface(
@@ -556,24 +581,67 @@ fun HomeScreen(
                 }
             }
 
-            Spacer(modifier = Modifier.height(24.dp))
-            Text("Management & Notes", modifier = Modifier.padding(horizontal = 24.dp), color = Color.White.copy(alpha = 0.4f), fontSize = 10.sp, fontWeight = FontWeight.Bold, letterSpacing = 1.sp)
-            Spacer(modifier = Modifier.height(16.dp))
-            DashboardPair(
-                item1 = { TaskCard(color = Color(if (state.taskColor == -1) 0xFF2EC4B6 else state.taskColor.toLong()), icon = state.taskIcon, onClick = { onNavigateToTodos(); isMessageExpanded = false }, onColorClick = { showColorPicker = "TASK" }) },
-                item2 = { NoteCard(color = Color(if (state.noteColor == -1) 0xFF3A86F0 else state.noteColor.toLong()), icon = state.noteIcon, onClick = { onNavigateToNotes(); isMessageExpanded = false }, onColorClick = { showColorPicker = "NOTE" }) }
-            )
+            if (state.showTaskSection || state.showNoteSection || state.showProjectSection || state.showFinanceSection) {
+                Spacer(modifier = Modifier.height(24.dp))
+                Text(
+                    "Management & Notes",
+                    modifier = Modifier.padding(horizontal = 24.dp),
+                    color = Color.White.copy(alpha = 0.4f),
+                    fontSize = 10.sp,
+                    fontWeight = FontWeight.Bold,
+                    letterSpacing = 1.sp
+                )
+                Spacer(modifier = Modifier.height(16.dp))
+                DashboardPair(
+                    item1 = if (state.showTaskSection) {
+                        {
+                            TaskCard(
+                                color = Color(if (state.taskColor == -1) 0xFF2EC4B6 else state.taskColor.toLong()),
+                                icon = state.taskIcon,
+                                onClick = { onNavigateToTodos(); isMessageExpanded = false },
+                                onColorClick = { showColorPicker = "TASK" })
+                        }
+                    } else null,
+                    item2 = if (state.showNoteSection) {
+                        {
+                            NoteCard(
+                                color = Color(if (state.noteColor == -1) 0xFF3A86F0 else state.noteColor.toLong()),
+                                icon = state.noteIcon,
+                                onClick = { onNavigateToNotes(); isMessageExpanded = false },
+                                onColorClick = { showColorPicker = "NOTE" })
+                        }
+                    } else null
+                )
 
-            Spacer(modifier = Modifier.height(24.dp))
-            DashboardPair(
-                item1 = { ProjectCard(color = Color(if (state.projectColor == -1) 0xFF1A73E8 else state.projectColor.toLong()), icon = state.projectIcon, onClick = { onNavigateToProjects(); isMessageExpanded = false }, onColorClick = { showColorPicker = "PROJECT" }) },
-                item2 = { FinanceCard(amount = state.safeSpendAmount, color = Color(if (state.financeColor == -1) 0xFFE91E63 else state.financeColor.toLong()), icon = state.financeIcon, onClick = { onNavigateToFinance(); isMessageExpanded = false }, onColorClick = { showColorPicker = "FINANCE" }) }
-            )
+                if ((state.showTaskSection || state.showNoteSection) && (state.showProjectSection || state.showFinanceSection)) {
+                    Spacer(modifier = Modifier.height(24.dp))
+                }
 
-            Spacer(modifier = Modifier.height(16.dp))
+                DashboardPair(
+                    item1 = if (state.showProjectSection) {
+                        {
+                            ProjectCard(
+                                color = Color(if (state.projectColor == -1) 0xFF1A73E8 else state.projectColor.toLong()),
+                                icon = state.projectIcon,
+                                onClick = { onNavigateToProjects(); isMessageExpanded = false },
+                                onColorClick = { showColorPicker = "PROJECT" })
+                        }
+                    } else null,
+                    item2 = if (state.showFinanceSection) {
+                        {
+                            FinanceCard(
+                                amount = state.safeSpendAmount,
+                                color = Color(if (state.financeColor == -1) 0xFFE91E63 else state.financeColor.toLong()),
+                                icon = state.financeIcon,
+                                onClick = { onNavigateToFinance(); isMessageExpanded = false },
+                                onColorClick = { showColorPicker = "FINANCE" })
+                        }
+                    } else null
+                )
+            }
 
             // --- Management Advice (Green Card) ---
-            if (state.currentMood != null) {
+            if (state.currentMood != null && (state.showTaskSection || state.showNoteSection || state.showProjectSection || state.showFinanceSection)) {
                 Spacer(modifier = Modifier.height(12.dp))
 
                 Surface(
@@ -867,10 +935,20 @@ fun NotificationItem(title: String, body: String) {
 }
 
 @Composable
-fun DashboardPair(item1: @Composable () -> Unit, item2: @Composable () -> Unit) {
+fun DashboardPair(item1: (@Composable () -> Unit)?, item2: (@Composable () -> Unit)?) {
+    if (item1 == null && item2 == null) return
+    
     Row(modifier = Modifier.padding(horizontal = 24.dp).fillMaxWidth()) {
-        Box(modifier = Modifier.weight(1f)) { item1() }
-        Spacer(modifier = Modifier.width(16.dp))
-        Box(modifier = Modifier.weight(1f)) { item2() }
+        if (item1 != null) {
+            Box(modifier = Modifier.weight(1f)) { item1() }
+        }
+        
+        if (item1 != null && item2 != null) {
+            Spacer(modifier = Modifier.width(16.dp))
+        }
+        
+        if (item2 != null) {
+            Box(modifier = Modifier.weight(1f)) { item2() }
+        }
     }
 }

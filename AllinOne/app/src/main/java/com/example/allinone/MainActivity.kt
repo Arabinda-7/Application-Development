@@ -267,6 +267,12 @@ class MainActivity : BaseActivity() {
             homeDisplaySize = DataManager.homeDisplaySize,
             globalDisplaySize = DataManager.displaySize,
             fontSize = DataManager.fontSize,
+            showHabitSection = DataManager.showHabitSection,
+            showWorkoutSection = DataManager.showWorkoutSection,
+            showTaskSection = DataManager.showTaskSection,
+            showNoteSection = DataManager.showNoteSection,
+            showProjectSection = DataManager.showProjectSection,
+            showFinanceSection = DataManager.showFinanceSection,
             isDataLoaded = true
         )
     }

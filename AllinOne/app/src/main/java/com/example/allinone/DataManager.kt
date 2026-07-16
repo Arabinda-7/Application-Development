@@ -80,6 +80,9 @@ object DataManager {
     var appLockPin: String? = null
     var lastViewedNotificationDate: String = ""
 
+    var userXP: Int = 0
+    var userLevel: Int = 1
+
     var userName: String = "Arabi"
     var userBio: String = "Professional Tier"
     var userAvatarRes: Int = R.drawable.boy_avatar_profile
@@ -91,6 +94,14 @@ object DataManager {
     var displaySize: String = "S" // Options: XS, S, L
     var homeDisplaySize: String = "S" // Options: XS, S, L
     var fontSize: String = "S" // Options: XS, S, L
+
+    // Home Page Section Visibility
+    var showHabitSection: Boolean = true
+    var showWorkoutSection: Boolean = true
+    var showTaskSection: Boolean = true
+    var showNoteSection: Boolean = true
+    var showProjectSection: Boolean = true
+    var showFinanceSection: Boolean = true
 
     // User Custom Colors
     var userCustomColors = mutableListOf<Int>()
@@ -187,6 +198,15 @@ object DataManager {
     private const val KEY_DISPLAY_SIZE = "app_display_size"
     private const val KEY_HOME_DISPLAY_SIZE = "home_display_size"
     private const val KEY_FONT_SIZE = "app_font_size"
+    private const val KEY_USER_XP = "user_xp_data"
+    private const val KEY_USER_LEVEL = "user_level_data"
+
+    private const val KEY_SHOW_HABITS = "show_habit_section"
+    private const val KEY_SHOW_WORKOUTS = "show_workout_section"
+    private const val KEY_SHOW_TASKS = "show_task_section"
+    private const val KEY_SHOW_NOTES = "show_note_section"
+    private const val KEY_SHOW_PROJECTS = "show_project_section"
+    private const val KEY_SHOW_FINANCE = "show_finance_section"
 
     private const val KEY_GLOBAL_HABIT_COLOR = "global_habit_color"
     private const val KEY_GLOBAL_WORKOUT_COLOR = "global_workout_color"
@@ -287,6 +307,16 @@ object DataManager {
             putString(KEY_DISPLAY_SIZE, displaySize)
             putString(KEY_HOME_DISPLAY_SIZE, homeDisplaySize)
             putString(KEY_FONT_SIZE, fontSize)
+            putInt(KEY_USER_XP, userXP)
+            putInt(KEY_USER_LEVEL, userLevel)
+
+            putBoolean(KEY_SHOW_HABITS, showHabitSection)
+            putBoolean(KEY_SHOW_WORKOUTS, showWorkoutSection)
+            putBoolean(KEY_SHOW_TASKS, showTaskSection)
+            putBoolean(KEY_SHOW_NOTES, showNoteSection)
+            putBoolean(KEY_SHOW_PROJECTS, showProjectSection)
+            putBoolean(KEY_SHOW_FINANCE, showFinanceSection)
+
             putString(KEY_USER_NAME, userName)
             putString(KEY_USER_BIO, userBio)
             putInt(KEY_USER_AVATAR, userAvatarRes)
@@ -345,6 +375,8 @@ object DataManager {
             habits.forEach { habit ->
                 habit.isExpanded = false
                 if (habit.completedDates == null) habit.completedDates = mutableListOf()
+                if (habit.repeatDays == null) habit.repeatDays = listOf(0, 1, 2, 3, 4, 5, 6)
+                if (habit.repeatType == null) habit.repeatType = "SPECIFIC_DAYS"
             }
         }
 
@@ -354,6 +386,10 @@ object DataManager {
             workouts.forEach { workout ->
                 workout.isExpanded = false
                 if (workout.completedDates == null) workout.completedDates = mutableListOf()
+                if (workout.repeatDays == null) workout.repeatDays = listOf(0, 1, 2, 3, 4, 5, 6)
+                if (workout.muscleGroups == null) workout.muscleGroups = listOf("General")
+                if (workout.repeatType == null) workout.repeatType = "SPECIFIC_DAYS"
+                if (workout.frequency == null) workout.frequency = "Anytime"
             }
         }
 
@@ -496,6 +532,15 @@ object DataManager {
         displaySize = prefs.getString(KEY_DISPLAY_SIZE, "S") ?: "S"
         homeDisplaySize = prefs.getString(KEY_HOME_DISPLAY_SIZE, "S") ?: "S"
         fontSize = prefs.getString(KEY_FONT_SIZE, "S") ?: "S"
+        userXP = prefs.getInt(KEY_USER_XP, 0)
+        userLevel = prefs.getInt(KEY_USER_LEVEL, 1)
+
+        showHabitSection = prefs.getBoolean(KEY_SHOW_HABITS, true)
+        showWorkoutSection = prefs.getBoolean(KEY_SHOW_WORKOUTS, true)
+        showTaskSection = prefs.getBoolean(KEY_SHOW_TASKS, true)
+        showNoteSection = prefs.getBoolean(KEY_SHOW_NOTES, true)
+        showProjectSection = prefs.getBoolean(KEY_SHOW_PROJECTS, true)
+        showFinanceSection = prefs.getBoolean(KEY_SHOW_FINANCE, true)
 
         prefs.getString(KEY_CUSTOM_COLORS, null)?.let {
             val type = object : TypeToken<MutableList<Int>>() {}.type
@@ -565,14 +610,34 @@ object DataManager {
         val lastResetDate = prefs.getString(KEY_LAST_RESET_DATE, "") ?: ""
 
         if (lastResetDate.isNotEmpty() && today != lastResetDate) {
-            val prevHabitsCompleted = habits.count { it.isCompleted }
-            val prevWorkoutsCompleted = workouts.count { it.isCompleted }
+            // Fix: Calculate scheduled count for the PREVIOUS date (lastResetDate)
+            val sdf = SimpleDateFormat("yyyyMMdd", Locale.getDefault())
+            val prevCal = Calendar.getInstance()
+            try {
+                sdf.parse(lastResetDate)?.let { prevCal.time = it }
+            } catch (e: Exception) {}
+            
+            val dayOfWeek = (prevCal.get(Calendar.DAY_OF_WEEK) - 1) // 0=Sun
+            
+            val scheduledHabits = habits.filter { 
+                it.repeatType != "SPECIFIC_DAYS" || it.repeatDays.contains(dayOfWeek) 
+            }
+            val scheduledWorkouts = workouts.filter { 
+                it.repeatType != "SPECIFIC_DAYS" || it.repeatDays.contains(dayOfWeek) 
+            }
+
+            val prevHabitsCompleted = habits.count { h -> 
+                h.completedDates.contains(lastResetDate) || (h.isCompleted && lastResetDate == today) 
+            }
+            val prevWorkoutsCompleted = workouts.count { w -> 
+                w.completedDates.contains(lastResetDate) || (w.isCompleted && lastResetDate == today) 
+            }
             
             history[lastResetDate] = DayHistory(
                 prevHabitsCompleted,
-                habits.size,
+                scheduledHabits.size,
                 prevWorkoutsCompleted,
-                workouts.size
+                scheduledWorkouts.size
             )
 
             habits.forEach { 
@@ -808,6 +873,86 @@ object DataManager {
         }
     }
 
+    fun getTaskPerformanceByCategory(): Map<String, Int> {
+        val categories = taskCustomCategories
+        return categories.associateWith { cat ->
+            val catTasks = tasks.filter { it.category == cat }
+            if (catTasks.isEmpty()) -1
+            else {
+                (catTasks.count { it.isCompleted } * 100) / catTasks.size
+            }
+        }
+    }
+
+    fun getWorkoutPerformanceByMuscleGroup(): Map<String, Int> {
+        val groups = workoutMuscleGroups
+        return groups.associateWith { group ->
+            val groupWorkouts = workouts.filter { it.muscleGroups.contains(group) }
+            if (groupWorkouts.isEmpty()) -1
+            else {
+                (groupWorkouts.count { it.isCompleted } * 100) / groupWorkouts.size
+            }
+        }
+    }
+
+    fun getWorkoutPerformanceByFrequency(): Map<String, Int> {
+        val frequencies = listOf("Morning", "Afternoon", "Evening", "Anytime")
+        return frequencies.associateWith { freq ->
+            val freqWorkouts = workouts.filter { it.frequency == freq }
+            if (freqWorkouts.isEmpty()) -1
+            else {
+                (freqWorkouts.count { it.isCompleted } * 100) / freqWorkouts.size
+            }
+        }
+    }
+
+    fun getLastSevenDaysProgress(): List<Int> {
+        val sdf = SimpleDateFormat("yyyyMMdd", Locale.getDefault())
+        val cal = getTrackingCalendar()
+        val results = mutableListOf<Int>()
+        val todayStr = getTrackingDateString()
+
+        for (i in 0 until 7) {
+            val dateKey = sdf.format(cal.time)
+            val progress = if (dateKey == todayStr) {
+                getTotalDailyProgress()
+            } else {
+                val dayData = history[dateKey]
+                if (dayData != null) {
+                    val total = dayData.totalHabits + dayData.totalWorkouts
+                    if (total > 0) ((dayData.habitsCompleted + dayData.workoutsCompleted) * 100) / total else 0
+                } else 0
+            }
+            results.add(0, progress) // Oldest first
+            cal.add(Calendar.DAY_OF_YEAR, -1)
+        }
+        return results
+    }
+
+    fun getLastSevenDaysDetailedProgress(): List<Pair<Int, Int>> {
+        val sdf = SimpleDateFormat("yyyyMMdd", Locale.getDefault())
+        val cal = getTrackingCalendar()
+        val results = mutableListOf<Pair<Int, Int>>()
+        val todayStr = getTrackingDateString()
+
+        for (i in 0 until 7) {
+            val dateKey = sdf.format(cal.time)
+            val progress = if (dateKey == todayStr) {
+                Pair(getHabitProgress(), getWorkoutProgress())
+            } else {
+                val dayData = history[dateKey]
+                if (dayData != null) {
+                    val hProgress = if (dayData.totalHabits > 0) (dayData.habitsCompleted * 100) / dayData.totalHabits else 0
+                    val wProgress = if (dayData.totalWorkouts > 0) (dayData.workoutsCompleted * 100) / dayData.totalWorkouts else 0
+                    Pair(hProgress, wProgress)
+                } else Pair(0, 0)
+            }
+            results.add(0, progress)
+            cal.add(Calendar.DAY_OF_YEAR, -1)
+        }
+        return results
+    }
+
     fun getTrackingDateString(): String {
         return SimpleDateFormat("yyyyMMdd", Locale.getDefault()).format(getTrackingCalendar().time)
     }
@@ -1010,5 +1155,112 @@ object DataManager {
         }
 
         return agenda
+    }
+
+    // --- LIFE ARCHITECTURE LOGIC ---
+
+    fun addXP(context: Context, amount: Int): Boolean {
+        userXP += amount
+        val xpRequired = getXPForNextLevel()
+        if (userXP >= xpRequired) {
+            userXP -= xpRequired
+            userLevel++
+            saveData(context)
+            return true // Level Up!
+        }
+        saveData(context)
+        return false
+    }
+
+    fun getXPForNextLevel(): Int {
+        return (userLevel * userLevel) * 100
+    }
+
+    fun calculateHabitStrength(): Int {
+        val sdf = SimpleDateFormat("yyyyMMdd", Locale.getDefault())
+        val cal = Calendar.getInstance()
+        var totalProgress = 0
+        var daysCount = 0
+        
+        for (i in 0 until 30) {
+            val dateStr = sdf.format(cal.time)
+            val dayData = history[dateStr]
+            if (dayData != null) {
+                val total = dayData.totalHabits + dayData.totalWorkouts
+                if (total > 0) {
+                    totalProgress += ((dayData.habitsCompleted + dayData.workoutsCompleted) * 100) / total
+                }
+                daysCount++
+            }
+            cal.add(Calendar.DAY_OF_YEAR, -1)
+        }
+        
+        // Add current day
+        totalProgress += getTotalDailyProgress()
+        daysCount++
+
+        return if (daysCount == 0) 0 else totalProgress / daysCount
+    }
+
+    fun getBounceBackRate(): Int {
+        val sortedDates = history.keys.sortedDescending()
+        if (sortedDates.isEmpty()) return 100
+        
+        var misses = 0
+        var recoveries = 0
+        
+        for (i in 0 until sortedDates.size - 1) {
+            val dateStr = sortedDates[i+1] // Older day
+            val dayData = history[dateStr] ?: continue
+            val total = dayData.totalHabits + dayData.totalWorkouts
+            if (total == 0) continue
+            
+            val progress = ((dayData.habitsCompleted + dayData.workoutsCompleted) * 100) / total
+            if (progress < 100) {
+                misses++
+                // Check if next chronological day (sortedDates[i]) was a recovery
+                val nextDayData = history[sortedDates[i]] ?: continue
+                val nextTotal = nextDayData.totalHabits + nextDayData.totalWorkouts
+                if (nextTotal > 0 && ((nextDayData.habitsCompleted + nextDayData.workoutsCompleted) * 100) / nextTotal >= 100) {
+                    recoveries++
+                }
+            }
+        }
+        
+        if (misses == 0) return 100
+        return (recoveries * 100) / misses
+    }
+
+    fun getKeystoneHabit(): String? {
+        val successDays = history.filter { (date, data) ->
+            val total = data.totalHabits + data.totalWorkouts
+            total > 0 && ((data.habitsCompleted + data.workoutsCompleted) * 100) / total >= 100
+        }
+        
+        if (successDays.isEmpty()) return null
+
+        // This is complex because historical data doesn't store WHICH habits were completed, only the count.
+        // We'll approximate using CURRENT habits that have high streaks.
+        return habits.maxByOrNull { it.completedDates.size }?.name
+    }
+
+    fun getMoodCorrelationData(): String? {
+        val todayStr = getTrackingDateString()
+        val successMoods = mutableMapOf<String, Int>()
+        
+        history.forEach { (date, data) ->
+            val total = data.totalHabits + data.totalWorkouts
+            if (total > 0 && ((data.habitsCompleted + data.workoutsCompleted) * 100) / total >= 100) {
+                val mood = dailyMoods[date]
+                if (mood != null) {
+                    successMoods[mood] = successMoods.getOrDefault(mood, 0) + 1
+                }
+            }
+        }
+        
+        val bestMood = successMoods.maxByOrNull { it.value }?.key ?: return null
+        val percent = (successMoods[bestMood]!! * 100) / history.size.coerceAtLeast(1)
+        
+        return "You're most productive when feeling $bestMood"
     }
 }

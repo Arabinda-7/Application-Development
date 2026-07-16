@@ -472,11 +472,12 @@ class ProjectActivity : BaseActivity() {
         dialog.findViewById<View>(R.id.btn_set_deadline).setOnClickListener {
             val cal = Calendar.getInstance()
             selectedDeadline?.let { cal.timeInMillis = it }
-            DatePickerDialog(this, { _, y, m, d ->
+            val datePicker = DatePickerDialog(this, { _, y, m, d ->
                 cal.set(y, m, d)
                 selectedDeadline = cal.timeInMillis
                 updateDeadlineUI()
-            }, cal.get(Calendar.YEAR), cal.get(Calendar.MONTH), cal.get(Calendar.DAY_OF_MONTH)).show()
+            }, cal.get(Calendar.YEAR), cal.get(Calendar.MONTH), cal.get(Calendar.DAY_OF_MONTH))
+            showDialogSafe(datePicker)
         }
 
         btnAddSubfeature.setOnClickListener {
@@ -578,7 +579,7 @@ class ProjectActivity : BaseActivity() {
                 dialog.dismiss()
             }
         }
-        dialog.show()
+        showDialogSafe(dialog)
     }
 
     private fun startPulseAnimation(view: View) {
@@ -667,11 +668,12 @@ class ProjectActivity : BaseActivity() {
         tvDeadline.setOnClickListener {
             val cal = Calendar.getInstance()
             sub.dueDate?.let { cal.timeInMillis = it }
-            DatePickerDialog(this, { _, y, m, d ->
+            val datePicker = DatePickerDialog(this, { _, y, m, d ->
                 cal.set(y, m, d)
                 sub.dueDate = cal.timeInMillis
                 updateSubDeadlineUI()
-            }, cal.get(Calendar.YEAR), cal.get(Calendar.MONTH), cal.get(Calendar.DAY_OF_MONTH)).show()
+            }, cal.get(Calendar.YEAR), cal.get(Calendar.MONTH), cal.get(Calendar.DAY_OF_MONTH))
+            showDialogSafe(datePicker)
         }
 
         btnSave.setOnClickListener {
@@ -704,7 +706,7 @@ class ProjectActivity : BaseActivity() {
             onSelected(picker.value)
             dialog.dismiss()
         }
-        dialog.show()
+        showDialogSafe(dialog)
     }
 
     fun showProjectHistoryDialog(note: Note) {
@@ -734,7 +736,7 @@ class ProjectActivity : BaseActivity() {
         historyList.adapter = adapter
 
         btnClose.setOnClickListener { dialog.dismiss() }
-        dialog.show()
+        showDialogSafe(dialog)
     }
 
     private fun showSelectSubfeatureDialog(note: Note, pending: List<ProjectFeature>, parentDialog: Dialog) {
@@ -1031,7 +1033,7 @@ class ProjectActivity : BaseActivity() {
 
         btnClose.setOnClickListener { dialog.dismiss() }
 
-        dialog.show()
+        showDialogSafe(dialog)
     }
 
     private fun showProjectSettingsDialog() {
@@ -1107,7 +1109,7 @@ class ProjectActivity : BaseActivity() {
             updateDisplayList()
             dialog.dismiss()
         }
-        dialog.show()
+        showDialogSafe(dialog)
     }
 
     private fun showManageTemplatesDialog() {
@@ -1248,7 +1250,7 @@ class ProjectActivity : BaseActivity() {
         }
 
         refresh()
-        dialog.show()
+        showDialogSafe(dialog)
     }
 
     private fun showCreateTemplateStepsDialog(templateName: String, onComplete: () -> Unit) {
@@ -1317,7 +1319,7 @@ class ProjectActivity : BaseActivity() {
         }
 
         refreshSteps()
-        dialog.show()
+        showDialogSafe(dialog)
     }
 
     fun showProjectMenu(anchor: View, note: Note) {
@@ -1627,7 +1629,7 @@ class ProjectActivity : BaseActivity() {
                     Toast.makeText(this, "Successfully converted!", Toast.LENGTH_SHORT).show()
                 }
             }
-            confirmDialog.show()
+            showDialogSafe(confirmDialog)
         }
 
         btnConvertIcon.setOnClickListener { performConversion() }
@@ -1684,6 +1686,6 @@ class ProjectActivity : BaseActivity() {
         }
 
         btnClose.setOnClickListener { dialog.dismiss() }
-        dialog.show()
+        showDialogSafe(dialog)
     }
 }

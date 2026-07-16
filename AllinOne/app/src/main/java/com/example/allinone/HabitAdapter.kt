@@ -143,6 +143,11 @@ class HabitAdapter(
                         habit.completedDates.add(selectedDateString)
                         triggerCompletionEffects(context)
                         DataManager.addActivity("Finished Ritual: ${habit.name}")
+                        
+                        // Award XP
+                        if (DataManager.addXP(context, 10)) {
+                            android.widget.Toast.makeText(context, "LEVEL UP! You are now Level ${DataManager.userLevel}", android.widget.Toast.LENGTH_LONG).show()
+                        }
                     }
                     
                     applyFilterAndSort()
@@ -170,6 +175,9 @@ class HabitAdapter(
             
             if (!habit.completedDates.contains(todayDateString)) {
                 habit.completedDates.add(todayDateString)
+                if (DataManager.addXP(context, 5)) {
+                    android.widget.Toast.makeText(context, "LEVEL UP! You are now Level ${DataManager.userLevel}", android.widget.Toast.LENGTH_LONG).show()
+                }
             }
             
             applyFilterAndSort()

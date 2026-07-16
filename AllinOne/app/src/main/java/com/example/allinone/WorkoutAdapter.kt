@@ -211,6 +211,9 @@ class WorkoutAdapter(
                             if (!workout.completedDates.contains(todayDateString)) {
                                 workout.completedDates.add(todayDateString)
                                 DataManager.addActivity("Finished Workout: ${workout.name}")
+                                if (DataManager.addXP(context, 25)) {
+                                    android.widget.Toast.makeText(context, "LEVEL UP! You are now Level ${DataManager.userLevel}", android.widget.Toast.LENGTH_LONG).show()
+                                }
                             }
                         }
                         TransitionManager.beginDelayedTransition(holder.itemView as ViewGroup)
@@ -229,6 +232,9 @@ class WorkoutAdapter(
                     if (!workout.completedDates.contains(todayDateString)) {
                         workout.completedDates.add(todayDateString)
                         DataManager.addActivity("Finished Workout: ${workout.name}")
+                        if (DataManager.addXP(context, 25)) {
+                            android.widget.Toast.makeText(context, "LEVEL UP! You are now Level ${DataManager.userLevel}", android.widget.Toast.LENGTH_LONG).show()
+                        }
                     }
                     
                     applyFilterAndSort()
@@ -264,6 +270,9 @@ class WorkoutAdapter(
             
             if (!workout.completedDates.contains(todayDateString)) {
                 workout.completedDates.add(todayDateString)
+                if (DataManager.addXP(context, 10)) {
+                    android.widget.Toast.makeText(context, "LEVEL UP! You are now Level ${DataManager.userLevel}", android.widget.Toast.LENGTH_LONG).show()
+                }
             }
             
             applyFilterAndSort()

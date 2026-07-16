@@ -298,17 +298,19 @@ class FinanceActivity : BaseActivity() {
         }
 
         tvDate.setOnClickListener {
-            DatePickerDialog(this, { _, y, m, d ->
+            val datePicker = DatePickerDialog(this, { _, y, m, d ->
                 calendar.set(Calendar.YEAR, y); calendar.set(Calendar.MONTH, m); calendar.set(Calendar.DAY_OF_MONTH, d)
                 tvDate.text = dateSdf.format(calendar.time)
-            }, calendar.get(Calendar.YEAR), calendar.get(Calendar.MONTH), calendar.get(Calendar.DAY_OF_MONTH)).show()
+            }, calendar.get(Calendar.YEAR), calendar.get(Calendar.MONTH), calendar.get(Calendar.DAY_OF_MONTH))
+            showDialogSafe(datePicker)
         }
 
         tvTime.setOnClickListener {
-            TimePickerDialog(this, { _, h, min ->
+            val timePicker = TimePickerDialog(this, { _, h, min ->
                 calendar.set(Calendar.HOUR_OF_DAY, h); calendar.set(Calendar.MINUTE, min)
                 tvTime.text = timeSdf.format(calendar.time)
-            }, calendar.get(Calendar.HOUR_OF_DAY), calendar.get(Calendar.MINUTE), false).show()
+            }, calendar.get(Calendar.HOUR_OF_DAY), calendar.get(Calendar.MINUTE), false)
+            showDialogSafe(timePicker)
         }
 
         btnClose.setOnClickListener { dialog.dismiss() }
@@ -348,7 +350,7 @@ class FinanceActivity : BaseActivity() {
                 }
             }
         }
-        dialog.show()
+        showDialogSafe(dialog)
     }
 
     private fun startPulseAnimation(view: View) {
@@ -495,7 +497,7 @@ class FinanceActivity : BaseActivity() {
 
         btnClose.setOnClickListener { dialog.dismiss() }
 
-        dialog.show()
+        showDialogSafe(dialog)
     }
 
     private fun showManageFinanceCategoriesDialog() {
@@ -594,7 +596,7 @@ class FinanceActivity : BaseActivity() {
             dialog.dismiss()
         }
 
-        dialog.show()
+        showDialogSafe(dialog)
     }
 
     private fun showSetSavingsGoalDialog() {
@@ -637,6 +639,6 @@ class FinanceActivity : BaseActivity() {
             dialog.dismiss()
         }
 
-        dialog.show()
+        showDialogSafe(dialog)
     }
 }
