@@ -848,7 +848,7 @@ fun NoteCard(color: Color, icon: Int, onClick: () -> Unit, onColorClick: () -> U
         modifier = Modifier.fillMaxWidth().height(140.dp).border(1.dp, color.copy(alpha = 0.1f), RoundedCornerShape(24.dp))
     ) {
         Column(modifier = Modifier.padding(16.dp)) {
-            Text("IDEAS", color = color, fontSize = 10.sp, fontWeight = FontWeight.Black, letterSpacing = 1.sp)
+            Text("NOTES", color = color, fontSize = 10.sp, fontWeight = FontWeight.Black, letterSpacing = 1.sp)
             Spacer(modifier = Modifier.height(4.dp))
             Text("Canvas", color = Color.White.copy(alpha = 0.4f), fontSize = 9.sp)
             Spacer(modifier = Modifier.weight(1f))

@@ -61,7 +61,7 @@
         android:layout_height="wrap_content"
         android:layout_marginTop="4dp"
         android:layout_marginStart="16dp"
-        android:text="Manage your project notes and progress"
+        android:text="Manage your project ideas and progress"
         android:textColor="@color/text_secondary"
         android:textSize="12sp"
         app:layout_constraintStart_toStartOf="parent"
@@ -164,7 +164,7 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="4dp"
-                android:text="Notes"
+                android:text="Ideas"
                 android:textColor="@color/text_secondary"
                 android:textSize="10sp"
                 android:textStyle="bold" />
