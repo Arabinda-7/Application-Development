@@ -205,7 +205,8 @@ class WorkoutRoutineActivity : BaseActivity() {
                     dayName = sdfDayName.format(calendar.time),
                     dayNumber = sdfDayNum.format(calendar.time),
                     dateString = dateStr,
-                    isSelected = isSelected
+                    isSelected = isSelected,
+                    isToday = dateStr == todayStr
                 ))
                 calendar.add(Calendar.DAY_OF_YEAR, 1)
             }
@@ -222,11 +223,20 @@ class WorkoutRoutineActivity : BaseActivity() {
         vpCalendar.adapter = weekAdapter
         vpCalendar.setCurrentItem(initialPageIndex, false)
 
+        val dateHeader = findViewById<TextView>(R.id.tv_date)
+        dateHeader.setOnClickListener {
+            selectedDateString = todayStr
+            weeks.flatten().forEach { it.isSelected = (it.dateString == todayStr) }
+            vpCalendar.setCurrentItem(initialPageIndex, true)
+            weekAdapter.notifyDataSetChanged()
+            applyFilters()
+        }
+
         vpCalendar.registerOnPageChangeCallback(object : ViewPager2.OnPageChangeCallback() {
             override fun onPageSelected(position: Int) {
                 val firstDay = weeks[position][0]
                 val sdfMonth = SimpleDateFormat("MMMM yyyy", Locale.getDefault())
-                findViewById<TextView>(R.id.tv_date).text = sdfMonth.format(firstDay.date)
+                dateHeader.text = sdfMonth.format(firstDay.date)
             }
         })
     }

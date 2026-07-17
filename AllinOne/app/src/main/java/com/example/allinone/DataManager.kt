@@ -319,7 +319,7 @@ object DataManager {
 
             putString(KEY_USER_NAME, userName)
             putString(KEY_USER_BIO, userBio)
-            putInt(KEY_USER_AVATAR, userAvatarRes)
+            putString(KEY_USER_AVATAR, getResourceName(context, userAvatarRes))
             putString(KEY_USER_IMAGE_URI, userProfileImageUri)
             putString(KEY_CUSTOM_COLORS, gson.toJson(userCustomColors))
             putString(KEY_PROJ_TAGS, gson.toJson(projectCustomTags))
@@ -338,12 +338,12 @@ object DataManager {
             putInt(KEY_PROJECT_ADD_COLOR, projectAddThemeColor)
             putInt(KEY_FINANCE_ADD_COLOR, financeAddThemeColor)
 
-            putInt(KEY_GLOBAL_HABIT_ICON, globalHabitIcon)
-            putInt(KEY_GLOBAL_WORKOUT_ICON, globalWorkoutIcon)
-            putInt(KEY_GLOBAL_TASK_ICON, globalTaskIcon)
-            putInt(KEY_GLOBAL_PROJECT_ICON, globalProjectIcon)
-            putInt(KEY_GLOBAL_NOTE_ICON, globalNoteIcon)
-            putInt(KEY_GLOBAL_FINANCE_ICON, globalFinanceIcon)
+            putString(KEY_GLOBAL_HABIT_ICON, getResourceName(context, globalHabitIcon))
+            putString(KEY_GLOBAL_WORKOUT_ICON, getResourceName(context, globalWorkoutIcon))
+            putString(KEY_GLOBAL_TASK_ICON, getResourceName(context, globalTaskIcon))
+            putString(KEY_GLOBAL_PROJECT_ICON, getResourceName(context, globalProjectIcon))
+            putString(KEY_GLOBAL_NOTE_ICON, getResourceName(context, globalNoteIcon))
+            putString(KEY_GLOBAL_FINANCE_ICON, getResourceName(context, globalFinanceIcon))
 
             putString(KEY_PROJ_TEMPLATES, gson.toJson(projectTemplates))
             putString(KEY_HABIT_DEFAULT_TAB, habitDefaultTab)
@@ -369,123 +369,153 @@ object DataManager {
         val prefs = getPrefs(context)
         val gson = Gson()
 
-        prefs.getString(KEY_HABITS, null)?.let {
-            val type = object : TypeToken<MutableList<Habit>>() {}.type
-            habits = gson.fromJson(it, type) ?: mutableListOf()
-            habits.forEach { habit ->
-                habit.isExpanded = false
-                if (habit.completedDates == null) habit.completedDates = mutableListOf()
-                if (habit.repeatDays == null) habit.repeatDays = listOf(0, 1, 2, 3, 4, 5, 6)
-                if (habit.repeatType == null) habit.repeatType = "SPECIFIC_DAYS"
+        try {
+            prefs.getString(KEY_HABITS, null)?.let {
+                val type = object : TypeToken<MutableList<Habit>>() {}.type
+                habits = gson.fromJson(it, type) ?: mutableListOf()
+                habits.forEach { habit ->
+                    habit.isExpanded = false
+                    if (habit.completedDates == null) habit.completedDates = mutableListOf()
+                    if (habit.repeatDays == null) habit.repeatDays = listOf(0, 1, 2, 3, 4, 5, 6)
+                    if (habit.repeatType == null) habit.repeatType = "SPECIFIC_DAYS"
+                }
             }
-        }
+        } catch (e: Exception) { android.util.Log.e("DataManager", "Failed to load habits", e) }
 
-        prefs.getString(KEY_WORKOUTS, null)?.let {
-            val type = object : TypeToken<MutableList<Workout>>() {}.type
-            workouts = gson.fromJson(it, type) ?: mutableListOf()
-            workouts.forEach { workout ->
-                workout.isExpanded = false
-                if (workout.completedDates == null) workout.completedDates = mutableListOf()
-                if (workout.repeatDays == null) workout.repeatDays = listOf(0, 1, 2, 3, 4, 5, 6)
-                if (workout.muscleGroups == null) workout.muscleGroups = listOf("General")
-                if (workout.repeatType == null) workout.repeatType = "SPECIFIC_DAYS"
-                if (workout.frequency == null) workout.frequency = "Anytime"
+        try {
+            prefs.getString(KEY_WORKOUTS, null)?.let {
+                val type = object : TypeToken<MutableList<Workout>>() {}.type
+                workouts = gson.fromJson(it, type) ?: mutableListOf()
+                workouts.forEach { workout ->
+                    workout.isExpanded = false
+                    if (workout.completedDates == null) workout.completedDates = mutableListOf()
+                    if (workout.repeatDays == null) workout.repeatDays = listOf(0, 1, 2, 3, 4, 5, 6)
+                    if (workout.muscleGroups == null) workout.muscleGroups = listOf("General")
+                    if (workout.repeatType == null) workout.repeatType = "SPECIFIC_DAYS"
+                    if (workout.frequency == null) workout.frequency = "Anytime"
+                }
             }
-        }
+        } catch (e: Exception) { android.util.Log.e("DataManager", "Failed to load workouts", e) }
 
-        prefs.getString(KEY_TASKS, null)?.let {
-            val type = object : TypeToken<MutableList<Task>>() {}.type
-            tasks = gson.fromJson(it, type) ?: mutableListOf()
-            tasks = tasks.map { oldTask ->
-                if (oldTask.subtasks == null || oldTask.category == null) {
-                    oldTask.copy(
-                        subtasks = oldTask.subtasks ?: mutableListOf(),
-                        category = oldTask.category ?: "General",
-                        section = oldTask.section ?: "Tasks"
-                    )
-                } else oldTask
-            }.toMutableList()
-        }
-
-        prefs.getString(KEY_NOTES, null)?.let {
-            val type = object : TypeToken<MutableList<Note>>() {}.type
-            notes = gson.fromJson(it, type) ?: mutableListOf()
-            // Sanitize for new fields
-            notes.forEach { note ->
-                if (note.status == null) note.status = "Not Started"
-                if (note.category == null) note.category = "Notes"
-                
-                sanitizeProjectNote(note)
+        try {
+            prefs.getString(KEY_TASKS, null)?.let {
+                val type = object : TypeToken<MutableList<Task>>() {}.type
+                tasks = gson.fromJson(it, type) ?: mutableListOf()
+                tasks = tasks.map { oldTask ->
+                    if (oldTask.subtasks == null || oldTask.category == null) {
+                        oldTask.copy(
+                            subtasks = oldTask.subtasks ?: mutableListOf(),
+                            category = oldTask.category ?: "General",
+                            section = oldTask.section ?: "Tasks"
+                        )
+                    } else oldTask
+                }.toMutableList()
             }
-        }
+        } catch (e: Exception) { android.util.Log.e("DataManager", "Failed to load tasks", e) }
 
-        prefs.getString(KEY_TRANSACTIONS, null)?.let {
-            val type = object : TypeToken<MutableList<Transaction>>() {}.type
-            transactions = gson.fromJson(it, type) ?: mutableListOf()
-        }
-
-        prefs.getString(KEY_LEDGER, null)?.let {
-            val type = object : TypeToken<MutableList<LedgerEntry>>() {}.type
-            ledgerEntries = gson.fromJson(it, type) ?: mutableListOf()
-            ledgerEntries.forEach { entry ->
-                if (entry.paymentHistory == null) entry.paymentHistory = mutableListOf()
+        try {
+            prefs.getString(KEY_NOTES, null)?.let {
+                val type = object : TypeToken<MutableList<Note>>() {}.type
+                notes = gson.fromJson(it, type) ?: mutableListOf()
+                // Sanitize for new fields
+                notes.forEach { note ->
+                    if (note.status == null) note.status = "Not Started"
+                    if (note.category == null) note.category = "Notes"
+                    
+                    sanitizeProjectNote(note)
+                }
             }
-        }
+        } catch (e: Exception) { android.util.Log.e("DataManager", "Failed to load notes", e) }
 
-        prefs.getString(KEY_PERSONAL_LEDGER, null)?.let {
-            val type = object : TypeToken<MutableList<PersonalLedger>>() {}.type
-            personalLedgers = gson.fromJson(it, type) ?: mutableListOf()
-            personalLedgers.forEach { ledger ->
-                ledger.entries.forEach { entry ->
+        try {
+            prefs.getString(KEY_TRANSACTIONS, null)?.let {
+                val type = object : TypeToken<MutableList<Transaction>>() {}.type
+                transactions = gson.fromJson(it, type) ?: mutableListOf()
+            }
+        } catch (e: Exception) { android.util.Log.e("DataManager", "Failed to load transactions", e) }
+
+        try {
+            prefs.getString(KEY_LEDGER, null)?.let {
+                val type = object : TypeToken<MutableList<LedgerEntry>>() {}.type
+                ledgerEntries = gson.fromJson(it, type) ?: mutableListOf()
+                ledgerEntries.forEach { entry ->
                     if (entry.paymentHistory == null) entry.paymentHistory = mutableListOf()
                 }
             }
-        }
+        } catch (e: Exception) { android.util.Log.e("DataManager", "Failed to load ledgerEntries", e) }
+
+        try {
+            prefs.getString(KEY_PERSONAL_LEDGER, null)?.let {
+                val type = object : TypeToken<MutableList<PersonalLedger>>() {}.type
+                personalLedgers = gson.fromJson(it, type) ?: mutableListOf()
+                personalLedgers.forEach { ledger ->
+                    ledger.entries.forEach { entry ->
+                        if (entry.paymentHistory == null) entry.paymentHistory = mutableListOf()
+                    }
+                }
+            }
+        } catch (e: Exception) { android.util.Log.e("DataManager", "Failed to load personalLedgers", e) }
 
         monthlyBudget = prefs.getFloat(KEY_BUDGET, 0.0f).toDouble()
         monthlySavingsGoal = prefs.getFloat(KEY_SAVINGS_GOAL, 0.0f).toDouble()
 
-        prefs.getString(KEY_MONTHLY_BUDGETS, null)?.let {
-            val type = object : TypeToken<MutableMap<String, Double>>() {}.type
-            monthlyBudgets = gson.fromJson(it, type) ?: mutableMapOf()
-        }
+        try {
+            prefs.getString(KEY_MONTHLY_BUDGETS, null)?.let {
+                val type = object : TypeToken<MutableMap<String, Double>>() {}.type
+                monthlyBudgets = gson.fromJson(it, type) ?: mutableMapOf()
+            }
+        } catch (e: Exception) { android.util.Log.e("DataManager", "Failed to load monthlyBudgets", e) }
 
-        prefs.getString(KEY_MONTHLY_SAVINGS_GOALS, null)?.let {
-            val type = object : TypeToken<MutableMap<String, Double>>() {}.type
-            monthlySavingsGoals = gson.fromJson(it, type) ?: mutableMapOf()
-        }
+        try {
+            prefs.getString(KEY_MONTHLY_SAVINGS_GOALS, null)?.let {
+                val type = object : TypeToken<MutableMap<String, Double>>() {}.type
+                monthlySavingsGoals = gson.fromJson(it, type) ?: mutableMapOf()
+            }
+        } catch (e: Exception) { android.util.Log.e("DataManager", "Failed to load monthlySavingsGoals", e) }
 
-        prefs.getString(KEY_HISTORY, null)?.let {
-            val type = object : TypeToken<MutableMap<String, DayHistory>>() {}.type
-            history = gson.fromJson(it, type) ?: mutableMapOf()
-        }
+        try {
+            prefs.getString(KEY_HISTORY, null)?.let {
+                val type = object : TypeToken<MutableMap<String, DayHistory>>() {}.type
+                history = gson.fromJson(it, type) ?: mutableMapOf()
+            }
+        } catch (e: Exception) { android.util.Log.e("DataManager", "Failed to load history", e) }
 
         taskShowCompleted = prefs.getBoolean(KEY_TASK_SHOW_COMPLETED, true)
         taskShowHidden = prefs.getBoolean(KEY_TASK_SHOW_HIDDEN, false)
         taskSortOrder = prefs.getString(KEY_TASK_SORT_ORDER, "Priority") ?: "Priority"
-        prefs.getString(KEY_TASK_CUSTOM_CATEGORIES, null)?.let {
-            val type = object : TypeToken<MutableList<String>>() {}.type
-            taskCustomCategories = gson.fromJson(it, type) ?: mutableListOf("General", "Personal", "Work", "Shopping")
-        }
+        try {
+            prefs.getString(KEY_TASK_CUSTOM_CATEGORIES, null)?.let {
+                val type = object : TypeToken<MutableList<String>>() {}.type
+                taskCustomCategories = gson.fromJson(it, type) ?: mutableListOf("General", "Personal", "Work", "Shopping")
+            }
+        } catch (e: Exception) {}
         taskAutoArchive = prefs.getBoolean(KEY_TASK_AUTO_ARCHIVE, false)
         taskDefaultSection = prefs.getString(KEY_TASK_DEFAULT_SECTION, "Tasks") ?: "Tasks"
-        prefs.getString(KEY_TASK_VISIBLE_SECTIONS, null)?.let {
-            val type = object : TypeToken<MutableList<String>>() {}.type
-            taskVisibleSections = gson.fromJson(it, type) ?: mutableListOf("Tasks", "List")
-        }
+        try {
+            prefs.getString(KEY_TASK_VISIBLE_SECTIONS, null)?.let {
+                val type = object : TypeToken<MutableList<String>>() {}.type
+                taskVisibleSections = gson.fromJson(it, type) ?: mutableListOf("Tasks", "List")
+            }
+        } catch (e: Exception) {}
 
-        prefs.getString(KEY_FINANCE_CUSTOM_CATEGORIES, null)?.let {
-            val type = object : TypeToken<MutableList<String>>() {}.type
-            financeCustomCategories = gson.fromJson(it, type) ?: mutableListOf("Food", "Rent", "Transport", "Shopping", "Entertainment", "Health", "Other")
-        }
-        prefs.getString(KEY_FINANCE_CATEGORY_ICONS, null)?.let {
-            val type = object : TypeToken<MutableMap<String, Int>>() {}.type
-            financeCategoryIcons = gson.fromJson(it, type) ?: mutableMapOf()
-        }
-        prefs.getString(KEY_FINANCE_CATEGORY_COLORS, null)?.let {
-            val type = object : TypeToken<MutableMap<String, Int>>() {}.type
-            financeCategoryColors = gson.fromJson(it, type) ?: mutableMapOf()
-        }
+        try {
+            prefs.getString(KEY_FINANCE_CUSTOM_CATEGORIES, null)?.let {
+                val type = object : TypeToken<MutableList<String>>() {}.type
+                financeCustomCategories = gson.fromJson(it, type) ?: mutableListOf("Food", "Rent", "Transport", "Shopping", "Entertainment", "Health", "Other")
+            }
+        } catch (e: Exception) {}
+        try {
+            prefs.getString(KEY_FINANCE_CATEGORY_ICONS, null)?.let {
+                val type = object : TypeToken<MutableMap<String, Int>>() {}.type
+                financeCategoryIcons = gson.fromJson(it, type) ?: mutableMapOf()
+            }
+        } catch (e: Exception) {}
+        try {
+            prefs.getString(KEY_FINANCE_CATEGORY_COLORS, null)?.let {
+                val type = object : TypeToken<MutableMap<String, Int>>() {}.type
+                financeCategoryColors = gson.fromJson(it, type) ?: mutableMapOf()
+            }
+        } catch (e: Exception) {}
         financeCurrency = prefs.getString(KEY_FINANCE_CURRENCY, "₹") ?: "₹"
         financeGraphStartMonth = prefs.getInt(KEY_FINANCE_GRAPH_START_MONTH, 0)
         financeGraphColor = prefs.getInt(KEY_FINANCE_GRAPH_COLOR, -1)
@@ -494,15 +524,19 @@ object DataManager {
         isFinanceLedgerEnabled = prefs.getBoolean(KEY_FINANCE_LEDGER_ENABLED, true)
         noteAutoCleanupDays = prefs.getInt(KEY_NOTE_AUTO_CLEANUP, 0)
         noteShowHidden = prefs.getBoolean(KEY_NOTE_SHOW_HIDDEN, false)
-        prefs.getString(KEY_NOTE_VISIBLE_SECTIONS, null)?.let {
-            val type = object : TypeToken<MutableList<String>>() {}.type
-            noteVisibleSections = gson.fromJson(it, type) ?: mutableListOf("Notes", "Questions", "Daily", "Stories")
-        }
+        try {
+            prefs.getString(KEY_NOTE_VISIBLE_SECTIONS, null)?.let {
+                val type = object : TypeToken<MutableList<String>>() {}.type
+                noteVisibleSections = gson.fromJson(it, type) ?: mutableListOf("Notes", "Questions", "Daily", "Stories")
+            }
+        } catch (e: Exception) {}
         noteDefaultCategory = prefs.getString(KEY_NOTE_DEFAULT_CAT, "Notes") ?: "Notes"
-        prefs.getString(KEY_NOTE_TEMPLATES, null)?.let {
-            val type = object : TypeToken<MutableMap<String, String>>() {}.type
-            noteTemplates = gson.fromJson(it, type) ?: noteTemplates
-        }
+        try {
+            prefs.getString(KEY_NOTE_TEMPLATES, null)?.let {
+                val type = object : TypeToken<MutableMap<String, String>>() {}.type
+                noteTemplates = gson.fromJson(it, type) ?: noteTemplates
+            }
+        } catch (e: Exception) {}
         projectAutoArchive = prefs.getBoolean(KEY_PROJ_ARCHIVE, false)
         projectSynergySync = prefs.getBoolean(KEY_PROJ_SYNC, false)
         projectDeadlineAlerts = prefs.getBoolean(KEY_PROJ_ALERTS, true)
@@ -515,18 +549,22 @@ object DataManager {
         isOnboardingCompleted = prefs.getBoolean(KEY_ONBOARDING_COMPLETED, false)
         userName = prefs.getString(KEY_USER_NAME, "Arabi") ?: "Arabi"
         userBio = prefs.getString(KEY_USER_BIO, "Professional Tier") ?: "Professional Tier"
-        userAvatarRes = prefs.getInt(KEY_USER_AVATAR, R.drawable.ic_habit_tracker)
+        userAvatarRes = getSavedDrawable(prefs, context, KEY_USER_AVATAR, R.drawable.boy_avatar_profile)
         userProfileImageUri = prefs.getString(KEY_USER_IMAGE_URI, null)
 
-        prefs.getString(KEY_RECENT_ACT, null)?.let {
-            val type = object : TypeToken<MutableList<String>>() {}.type
-            recentActivities = gson.fromJson(it, type) ?: mutableListOf()
-        }
+        try {
+            prefs.getString(KEY_RECENT_ACT, null)?.let {
+                val type = object : TypeToken<MutableList<String>>() {}.type
+                recentActivities = gson.fromJson(it, type) ?: mutableListOf()
+            }
+        } catch (e: Exception) {}
 
-        prefs.getString(KEY_DAILY_MOODS, null)?.let {
-            val type = object : TypeToken<MutableMap<String, String>>() {}.type
-            dailyMoods = gson.fromJson(it, type) ?: mutableMapOf()
-        }
+        try {
+            prefs.getString(KEY_DAILY_MOODS, null)?.let {
+                val type = object : TypeToken<MutableMap<String, String>>() {}.type
+                dailyMoods = gson.fromJson(it, type) ?: mutableMapOf()
+            }
+        } catch (e: Exception) {}
 
         lastMoodTimestamp = prefs.getLong(KEY_LAST_MOOD_TIMESTAMP, 0L)
         displaySize = prefs.getString(KEY_DISPLAY_SIZE, "S") ?: "S"
@@ -542,15 +580,19 @@ object DataManager {
         showProjectSection = prefs.getBoolean(KEY_SHOW_PROJECTS, true)
         showFinanceSection = prefs.getBoolean(KEY_SHOW_FINANCE, true)
 
-        prefs.getString(KEY_CUSTOM_COLORS, null)?.let {
-            val type = object : TypeToken<MutableList<Int>>() {}.type
-            userCustomColors = gson.fromJson(it, type) ?: mutableListOf()
-        }
+        try {
+            prefs.getString(KEY_CUSTOM_COLORS, null)?.let {
+                val type = object : TypeToken<MutableList<Int>>() {}.type
+                userCustomColors = gson.fromJson(it, type) ?: mutableListOf()
+            }
+        } catch (e: Exception) {}
 
-        prefs.getString(KEY_PROJ_TAGS, null)?.let {
-            val type = object : TypeToken<MutableList<String>>() {}.type
-            projectCustomTags = gson.fromJson(it, type) ?: mutableListOf("UI", "LOGIC", "BUG")
-        }
+        try {
+            prefs.getString(KEY_PROJ_TAGS, null)?.let {
+                val type = object : TypeToken<MutableList<String>>() {}.type
+                projectCustomTags = gson.fromJson(it, type) ?: mutableListOf("UI", "LOGIC", "BUG")
+            }
+        } catch (e: Exception) {}
 
         globalHabitColor = prefs.getInt(KEY_GLOBAL_HABIT_COLOR, -1)
         globalWorkoutColor = prefs.getInt(KEY_GLOBAL_WORKOUT_COLOR, -1)
@@ -566,17 +608,19 @@ object DataManager {
         projectAddThemeColor = prefs.getInt(KEY_PROJECT_ADD_COLOR, -1)
         financeAddThemeColor = prefs.getInt(KEY_FINANCE_ADD_COLOR, -1)
 
-        globalHabitIcon = prefs.getInt(KEY_GLOBAL_HABIT_ICON, R.drawable.ic_habit_tracker)
-        globalWorkoutIcon = prefs.getInt(KEY_GLOBAL_WORKOUT_ICON, R.drawable.ic_workout_routine)
-        globalTaskIcon = prefs.getInt(KEY_GLOBAL_TASK_ICON, R.drawable.ic_todo_list)
-        globalProjectIcon = prefs.getInt(KEY_GLOBAL_PROJECT_ICON, R.drawable.ic_project)
-        globalNoteIcon = prefs.getInt(KEY_GLOBAL_NOTE_ICON, R.drawable.ic_notes)
-        globalFinanceIcon = prefs.getInt(KEY_GLOBAL_FINANCE_ICON, R.drawable.ic_finance)
+        globalHabitIcon = getSavedDrawable(prefs, context, KEY_GLOBAL_HABIT_ICON, R.drawable.ic_habit_tracker)
+        globalWorkoutIcon = getSavedDrawable(prefs, context, KEY_GLOBAL_WORKOUT_ICON, R.drawable.ic_workout_routine)
+        globalTaskIcon = getSavedDrawable(prefs, context, KEY_GLOBAL_TASK_ICON, R.drawable.ic_todo_list)
+        globalProjectIcon = getSavedDrawable(prefs, context, KEY_GLOBAL_PROJECT_ICON, R.drawable.ic_project)
+        globalNoteIcon = getSavedDrawable(prefs, context, KEY_GLOBAL_NOTE_ICON, R.drawable.ic_notes)
+        globalFinanceIcon = getSavedDrawable(prefs, context, KEY_GLOBAL_FINANCE_ICON, R.drawable.ic_finance)
 
-        prefs.getString(KEY_PROJ_TEMPLATES, null)?.let {
-            val type = object : TypeToken<MutableMap<String, List<String>>>() {}.type
-            projectTemplates = gson.fromJson(it, type) ?: projectTemplates
-        }
+        try {
+            prefs.getString(KEY_PROJ_TEMPLATES, null)?.let {
+                val type = object : TypeToken<MutableMap<String, List<String>>>() {}.type
+                projectTemplates = gson.fromJson(it, type) ?: projectTemplates
+            }
+        } catch (e: Exception) {}
 
         habitDefaultTab = prefs.getString(KEY_HABIT_DEFAULT_TAB, "TODAY") ?: "TODAY"
         habitVacationMode = prefs.getBoolean(KEY_HABIT_VACATION_MODE, false)
@@ -587,10 +631,12 @@ object DataManager {
         habitBulkMode = prefs.getBoolean(KEY_HABIT_BULK_MODE, false)
         habitGraceDaysAllowed = prefs.getInt(KEY_HABIT_GRACE_DAYS, 1)
 
-        prefs.getString(KEY_WORKOUT_MUSCLE_GROUPS, null)?.let {
-            val type = object : TypeToken<MutableList<String>>() {}.type
-            workoutMuscleGroups = gson.fromJson(it, type) ?: workoutMuscleGroups
-        }
+        try {
+            prefs.getString(KEY_WORKOUT_MUSCLE_GROUPS, null)?.let {
+                val type = object : TypeToken<MutableList<String>>() {}.type
+                workoutMuscleGroups = gson.fromJson(it, type) ?: workoutMuscleGroups
+            }
+        } catch (e: Exception) {}
         workoutAutoRestTimer = prefs.getBoolean(KEY_WORKOUT_AUTO_REST, false)
         workoutWeightUnit = prefs.getString(KEY_WORKOUT_UNIT, "Kg") ?: "Kg"
         workoutDefaultMode = prefs.getString(KEY_WORKOUT_DEFAULT_MODE, "Reps") ?: "Reps"
@@ -619,18 +665,27 @@ object DataManager {
             
             val dayOfWeek = (prevCal.get(Calendar.DAY_OF_WEEK) - 1) // 0=Sun
             
+            // Calculate the end of that previous day in milliseconds
+            val prevDayEnd = prevCal.apply { 
+                set(Calendar.HOUR_OF_DAY, 23)
+                set(Calendar.MINUTE, 59)
+                set(Calendar.SECOND, 59)
+            }.timeInMillis
+
             val scheduledHabits = habits.filter { 
-                it.repeatType != "SPECIFIC_DAYS" || it.repeatDays.contains(dayOfWeek) 
+                (it.repeatType != "SPECIFIC_DAYS" || it.repeatDays.contains(dayOfWeek)) &&
+                it.timestamp <= prevDayEnd
             }
             val scheduledWorkouts = workouts.filter { 
-                it.repeatType != "SPECIFIC_DAYS" || it.repeatDays.contains(dayOfWeek) 
+                (it.repeatType != "SPECIFIC_DAYS" || it.repeatDays.contains(dayOfWeek)) &&
+                it.timestamp <= prevDayEnd
             }
 
             val prevHabitsCompleted = habits.count { h -> 
-                h.completedDates.contains(lastResetDate) || (h.isCompleted && lastResetDate == today) 
+                h.completedDates.contains(lastResetDate)
             }
             val prevWorkoutsCompleted = workouts.count { w -> 
-                w.completedDates.contains(lastResetDate) || (w.isCompleted && lastResetDate == today) 
+                w.completedDates.contains(lastResetDate)
             }
             
             history[lastResetDate] = DayHistory(
@@ -666,8 +721,9 @@ object DataManager {
             monthlyBudgets[lastResetMonth] = monthlyBudget
             monthlySavingsGoals[lastResetMonth] = monthlySavingsGoal
             
-            monthlyBudget = 0.0
-            monthlySavingsGoal = 0.0
+            // Fix: Don't reset to zero, carry over previous budget/goal for consistency
+            // monthlyBudget = 0.0
+            // monthlySavingsGoal = 0.0
             saveData(context)
             prefs.edit().putString(KEY_LAST_MONTH_RESET, currentMonth).apply()
         } else if (lastResetMonth.isEmpty()) {
@@ -683,7 +739,12 @@ object DataManager {
     }
 
     fun exportData(): String {
-        val allData = AllAppData(habits, workouts, tasks, notes, history, transactions, monthlyBudget, monthlySavingsGoal)
+        val allData = AllAppData(
+            habits, workouts, tasks, notes, history, transactions,
+            ledgerEntries, personalLedgers,
+            monthlyBudget, monthlySavingsGoal,
+            monthlyBudgets, monthlySavingsGoals, dailyMoods
+        )
         return Gson().toJson(allData)
     }
 
@@ -699,6 +760,12 @@ object DataManager {
             transactions = allData.transactions?.toMutableList() ?: mutableListOf()
             history = allData.history?.toMutableMap() ?: mutableMapOf()
             
+            ledgerEntries = allData.ledgerEntries?.toMutableList() ?: mutableListOf()
+            personalLedgers = allData.personalLedgers?.toMutableList() ?: mutableListOf()
+            monthlyBudgets = allData.monthlyBudgets?.toMutableMap() ?: mutableMapOf()
+            monthlySavingsGoals = allData.monthlySavingsGoals?.toMutableMap() ?: mutableMapOf()
+            dailyMoods = allData.dailyMoods?.toMutableMap() ?: mutableMapOf()
+            
             monthlyBudget = allData.monthlyBudget
             monthlySavingsGoal = allData.monthlySavingsGoal
             
@@ -711,25 +778,18 @@ object DataManager {
             workouts.forEach { workout ->
                 workout.isExpanded = false
                 if (workout.completedDates == null) workout.completedDates = mutableListOf()
-                @Suppress("SENSELESS_COMPARISON")
                 if (workout.muscleGroups == null) {
                     workout.muscleGroups = listOf("General")
                 }
             }
 
-            tasks.forEach { task ->
-                if (task.subtasks == null) {
-                    try {
-                        val field = task::class.java.getDeclaredField("subtasks")
-                        field.isAccessible = true
-                        field.set(task, mutableListOf<Subtask>())
-                    } catch (e: Exception) {}
-                }
-                @Suppress("SENSELESS_COMPARISON")
-                if (task.category == null) task.category = "General"
-                @Suppress("SENSELESS_COMPARISON")
-                if (task.section == null) task.section = "Tasks"
-            }
+            tasks = tasks.map { task ->
+                task.copy(
+                    subtasks = task.subtasks ?: mutableListOf(),
+                    category = task.category ?: "General",
+                    section = task.section ?: "Tasks"
+                )
+            }.toMutableList()
 
             notes.forEach { note ->
                 sanitizeProjectNote(note)
@@ -957,6 +1017,16 @@ object DataManager {
         return SimpleDateFormat("yyyyMMdd", Locale.getDefault()).format(getTrackingCalendar().time)
     }
 
+    fun getTrackingDateString(timestamp: Long): String {
+        val calendar = Calendar.getInstance()
+        calendar.timeInMillis = timestamp
+        val hour = calendar.get(Calendar.HOUR_OF_DAY)
+        if (hour < habitDayResetHour) {
+            calendar.add(Calendar.DAY_OF_YEAR, -1)
+        }
+        return SimpleDateFormat("yyyyMMdd", Locale.getDefault()).format(calendar.time)
+    }
+
     fun getTrackingCalendar(): Calendar {
         val calendar = Calendar.getInstance()
         val hour = calendar.get(Calendar.HOUR_OF_DAY)
@@ -981,19 +1051,14 @@ object DataManager {
     }
 
     private fun sanitizeProjectNote(note: Note) {
-        @Suppress("SENSELESS_COMPARISON")
         if (note.title == null) note.title = "Untitled Project"
-        @Suppress("SENSELESS_COMPARISON")
         if (note.content == null) note.content = ""
-        @Suppress("SENSELESS_COMPARISON")
         if (note.status == null) note.status = "Not Started"
-        @Suppress("SENSELESS_COMPARISON")
         if (note.category == null) note.category = "Project"
 
-        @Suppress("SENSELESS_COMPARISON")
         if (note.subFeatures == null) {
             try {
-                val field = note::class.java.getDeclaredField("subFeatures")
+                val field = Note::class.java.getDeclaredField("subFeatures")
                 field.isAccessible = true
                 field.set(note, mutableListOf<ProjectFeature>())
             } catch (e: Exception) {}
@@ -1001,10 +1066,9 @@ object DataManager {
         
         note.subFeatures?.let { sanitizeProjectFeatures(it) }
 
-        @Suppress("SENSELESS_COMPARISON")
         if (note.changeHistory == null) {
             try {
-                val field = note::class.java.getDeclaredField("changeHistory")
+                val field = Note::class.java.getDeclaredField("changeHistory")
                 field.isAccessible = true
                 field.set(note, mutableListOf<ProjectHistory>())
             } catch (e: Exception) {}
@@ -1012,38 +1076,28 @@ object DataManager {
     }
 
     private fun sanitizeProjectFeatures(features: MutableList<ProjectFeature>) {
-        if (features == null) return // Extreme safety
-        
         features.forEach { feature ->
-            @Suppress("SENSELESS_COMPARISON")
             if (feature == null) return@forEach
 
-            @Suppress("SENSELESS_COMPARISON")
             if (feature.name == null) feature.name = "New Node"
-            @Suppress("SENSELESS_COMPARISON")
             if (feature.details == null) feature.details = ""
-            @Suppress("SENSELESS_COMPARISON")
             if (feature.resourceUrl == null) feature.resourceUrl = ""
-            @Suppress("SENSELESS_COMPARISON")
             if (feature.resourcePath == null) feature.resourcePath = ""
-            @Suppress("SENSELESS_COMPARISON")
             if (feature.blockedByNodeId == null) feature.blockedByNodeId = ""
 
-            @Suppress("SENSELESS_COMPARISON")
             if (feature.subFeatures == null) {
                 try {
-                    val field = feature::class.java.getDeclaredField("subFeatures")
+                    val field = ProjectFeature::class.java.getDeclaredField("subFeatures")
                     field.isAccessible = true
                     field.set(feature, mutableListOf<ProjectFeature>())
                 } catch (e: Exception) {}
             }
             
-            @Suppress("SENSELESS_COMPARISON")
             if (feature.id == null) {
                 try {
-                    val field = feature::class.java.getDeclaredField("id")
+                    val field = ProjectFeature::class.java.getDeclaredField("id")
                     field.isAccessible = true
-                    field.set(feature, java.util.UUID.randomUUID().toString())
+                    field.set(feature, UUID.randomUUID().toString())
                 } catch (e: Exception) {}
             }
 
@@ -1176,76 +1230,7 @@ object DataManager {
         return (userLevel * userLevel) * 100
     }
 
-    fun calculateHabitStrength(): Int {
-        val sdf = SimpleDateFormat("yyyyMMdd", Locale.getDefault())
-        val cal = Calendar.getInstance()
-        var totalProgress = 0
-        var daysCount = 0
-        
-        for (i in 0 until 30) {
-            val dateStr = sdf.format(cal.time)
-            val dayData = history[dateStr]
-            if (dayData != null) {
-                val total = dayData.totalHabits + dayData.totalWorkouts
-                if (total > 0) {
-                    totalProgress += ((dayData.habitsCompleted + dayData.workoutsCompleted) * 100) / total
-                }
-                daysCount++
-            }
-            cal.add(Calendar.DAY_OF_YEAR, -1)
-        }
-        
-        // Add current day
-        totalProgress += getTotalDailyProgress()
-        daysCount++
-
-        return if (daysCount == 0) 0 else totalProgress / daysCount
-    }
-
-    fun getBounceBackRate(): Int {
-        val sortedDates = history.keys.sortedDescending()
-        if (sortedDates.isEmpty()) return 100
-        
-        var misses = 0
-        var recoveries = 0
-        
-        for (i in 0 until sortedDates.size - 1) {
-            val dateStr = sortedDates[i+1] // Older day
-            val dayData = history[dateStr] ?: continue
-            val total = dayData.totalHabits + dayData.totalWorkouts
-            if (total == 0) continue
-            
-            val progress = ((dayData.habitsCompleted + dayData.workoutsCompleted) * 100) / total
-            if (progress < 100) {
-                misses++
-                // Check if next chronological day (sortedDates[i]) was a recovery
-                val nextDayData = history[sortedDates[i]] ?: continue
-                val nextTotal = nextDayData.totalHabits + nextDayData.totalWorkouts
-                if (nextTotal > 0 && ((nextDayData.habitsCompleted + nextDayData.workoutsCompleted) * 100) / nextTotal >= 100) {
-                    recoveries++
-                }
-            }
-        }
-        
-        if (misses == 0) return 100
-        return (recoveries * 100) / misses
-    }
-
-    fun getKeystoneHabit(): String? {
-        val successDays = history.filter { (date, data) ->
-            val total = data.totalHabits + data.totalWorkouts
-            total > 0 && ((data.habitsCompleted + data.workoutsCompleted) * 100) / total >= 100
-        }
-        
-        if (successDays.isEmpty()) return null
-
-        // This is complex because historical data doesn't store WHICH habits were completed, only the count.
-        // We'll approximate using CURRENT habits that have high streaks.
-        return habits.maxByOrNull { it.completedDates.size }?.name
-    }
-
     fun getMoodCorrelationData(): String? {
-        val todayStr = getTrackingDateString()
         val successMoods = mutableMapOf<String, Int>()
         
         history.forEach { (date, data) ->
@@ -1259,8 +1244,43 @@ object DataManager {
         }
         
         val bestMood = successMoods.maxByOrNull { it.value }?.key ?: return null
-        val percent = (successMoods[bestMood]!! * 100) / history.size.coerceAtLeast(1)
+        val count = successMoods[bestMood] ?: 0
         
-        return "You're most productive when feeling $bestMood"
+        return "You are most productive when feeling $bestMood (Detected $count times)"
+    }
+
+    private fun getResourceName(context: Context, resId: Int): String {
+        return try {
+            context.resources.getResourceEntryName(resId)
+        } catch (e: Exception) {
+            ""
+        }
+    }
+
+    private fun getDrawableIdByName(context: Context, name: String, fallbackId: Int): Int {
+        if (name.isEmpty()) return fallbackId
+        return try {
+            val resId = context.resources.getIdentifier(name, "drawable", context.packageName)
+            if (resId != 0) resId else fallbackId
+        } catch (e: Exception) {
+            fallbackId
+        }
+    }
+
+    private fun getSavedDrawable(prefs: SharedPreferences, context: Context, key: String, defaultResId: Int): Int {
+        return try {
+            val name = prefs.getString(key, null)
+            if (name != null) {
+                getDrawableIdByName(context, name, defaultResId)
+            } else {
+                prefs.getInt(key, defaultResId)
+            }
+        } catch (e: Exception) {
+            try {
+                prefs.getInt(key, defaultResId)
+            } catch (ex: Exception) {
+                defaultResId
+            }
+        }
     }
 }

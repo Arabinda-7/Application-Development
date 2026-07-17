@@ -15,7 +15,8 @@ data class DayModel(
     val dayName: String,
     val dayNumber: String,
     val dateString: String,
-    var isSelected: Boolean = false
+    var isSelected: Boolean = false,
+    var isToday: Boolean = false
 )
 
 class CalendarDayAdapter(
@@ -39,6 +40,7 @@ class CalendarDayAdapter(
         private val tvDayNumber: TextView = itemView.findViewById(R.id.tv_day_number)
         private val viewCircle: View = itemView.findViewById(R.id.view_selected_circle)
         private val viewLine: View = itemView.findViewById(R.id.view_selection_line)
+        private val viewTodayLine: View = itemView.findViewById(R.id.view_today_line)
 
         fun bind(day: DayModel) {
             tvDayNumber.text = day.dayNumber
@@ -52,6 +54,8 @@ class CalendarDayAdapter(
                 viewCircle.backgroundTintList = ContextCompat.getColorStateList(itemView.context, android.R.color.transparent)
                 viewLine.visibility = View.INVISIBLE
             }
+
+            viewTodayLine.visibility = if (day.isToday) View.VISIBLE else View.GONE
 
             itemView.setOnClickListener {
                 if (!day.isSelected) {

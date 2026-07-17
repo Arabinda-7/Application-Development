@@ -15,7 +15,6 @@ import com.google.android.material.floatingactionbutton.FloatingActionButton
 class PersonalLedgerHubActivity : AppCompatActivity() {
 
     private lateinit var adapter: PersonalLedgerAdapter
-    private val ledgers = DataManager.personalLedgers
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -26,7 +25,7 @@ class PersonalLedgerHubActivity : AppCompatActivity() {
         val rv = findViewById<RecyclerView>(R.id.rv_people_list)
         rv.layoutManager = LinearLayoutManager(this)
         
-        adapter = PersonalLedgerAdapter(ledgers) { ledger ->
+        adapter = PersonalLedgerAdapter(DataManager.personalLedgers) { ledger ->
             val intent = Intent(this, PersonalLedgerBookActivity::class.java)
             intent.putExtra("ledgerId", ledger.id)
             startActivity(intent)

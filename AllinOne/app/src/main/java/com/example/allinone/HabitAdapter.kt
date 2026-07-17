@@ -237,11 +237,21 @@ class HabitAdapter(
             } else {
                 true 
             }
-            matchesTime && matchesDay
+            val isAvailableOnDate = DataManager.getTrackingDateString(habit.timestamp) <= selectedDateString
+            matchesTime && matchesDay && isAvailableOnDate
         }
 
-        val activeHabits = filtered.filter { !isHabitCompletedOnSelectedDate(it) }.sortedByDescending { it.timestamp }
-        val completedHabits = filtered.filter { isHabitCompletedOnSelectedDate(it) }.sortedByDescending { it.timestamp }
+        val sorted = when (DataManager.habitSortOrder) {
+            "Streak" -> filtered.sortedByDescending { it.completedDates.size }
+            "Time" -> {
+                val order = listOf("Morning", "Afternoon", "Evening", "Anytime")
+                filtered.sortedBy { order.indexOf(it.frequency) }
+            }
+            else -> filtered.sortedByDescending { it.timestamp }
+        }
+
+        val activeHabits = sorted.filter { !isHabitCompletedOnSelectedDate(it) }
+        val completedHabits = sorted.filter { isHabitCompletedOnSelectedDate(it) }
 
         displayItems.addAll(activeHabits)
 

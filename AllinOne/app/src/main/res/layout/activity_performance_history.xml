@@ -24,9 +24,11 @@
 
             <ImageButton
                 android:id="@+id/btn_back"
-                android:layout_width="48dp"
-                android:layout_height="48dp"
-                android:background="?attr/selectableItemBackgroundBorderless"
+                android:layout_width="36dp"
+                android:layout_height="36dp"
+                android:padding="9dp"
+                android:scaleType="centerInside"
+                android:background="@drawable/blur_circle_bg"
                 android:src="@drawable/ic_back"
                 android:contentDescription="Back"
                 app:layout_constraintStart_toStartOf="parent"
@@ -37,7 +39,7 @@
                 android:id="@+id/tv_month_year"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="12dp"
+                android:layout_marginTop="16dp"
                 android:text="JANUARY 2024"
                 android:textColor="@color/white"
                 android:textSize="20sp"
@@ -48,8 +50,11 @@
 
             <ImageView
                 android:id="@+id/iv_calendar_icon"
-                android:layout_width="28dp"
-                android:layout_height="28dp"
+                android:layout_width="36dp"
+                android:layout_height="36dp"
+                android:padding="9dp"
+                android:scaleType="centerInside"
+                android:background="@drawable/blur_circle_bg"
                 android:src="@drawable/calendar_100"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintTop_toTopOf="@id/tv_month_year"

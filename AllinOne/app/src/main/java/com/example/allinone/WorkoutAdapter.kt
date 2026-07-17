@@ -332,7 +332,8 @@ class WorkoutAdapter(
             } else {
                 true 
             }
-            matchesTime && matchesDay
+            val isAvailableOnDate = DataManager.getTrackingDateString(workout.timestamp) <= selectedDateString
+            matchesTime && matchesDay && isAvailableOnDate
         }
 
         val activeWorkouts = filtered.filter { !isWorkoutCompletedOnSelectedDate(it) }.sortedByDescending { it.timestamp }
