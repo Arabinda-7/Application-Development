@@ -1,0 +1,142 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:layout_marginHorizontal="20dp"
+    android:background="@drawable/bg_dialog_rounded"
+    android:padding="20dp">
+
+    <ImageView
+        android:id="@+id/btn_close_subfeature"
+        android:layout_width="24dp"
+        android:layout_height="24dp"
+        android:src="@android:drawable/ic_menu_close_clear_cancel"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:tint="@color/white"
+        android:contentDescription="Close"
+        android:background="?attr/selectableItemBackgroundBorderless" />
+
+    <TextView
+        android:id="@+id/tv_dialog_title"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="16dp"
+        android:text="Edit Step"
+        android:textColor="@color/white"
+        android:textSize="18sp"
+        android:textStyle="bold"
+        app:layout_constraintBottom_toBottomOf="@id/btn_close_subfeature"
+        app:layout_constraintStart_toEndOf="@id/btn_close_subfeature"
+        app:layout_constraintTop_toTopOf="@id/btn_close_subfeature" />
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="20dp"
+        android:orientation="vertical"
+        app:layout_constraintTop_toBottomOf="@id/tv_dialog_title">
+
+        <EditText
+            android:id="@+id/et_name_input"
+            android:layout_width="match_parent"
+            android:layout_height="56dp"
+            android:background="@drawable/bg_finance_input"
+            android:backgroundTint="#11FFFFFF"
+            android:hint="Step Name"
+            android:textColor="@color/white"
+            android:textColorHint="#40FFFFFF"
+            android:textSize="16sp"
+            android:paddingHorizontal="16dp"
+            android:inputType="textCapSentences"
+            android:visibility="gone" />
+
+        <EditText
+            android:id="@+id/et_serial_input"
+            android:layout_width="match_parent"
+            android:layout_height="56dp"
+            android:background="@drawable/bg_finance_input"
+            android:backgroundTint="#11FFFFFF"
+            android:hint="Position (Serial No.)"
+            android:textColor="@color/white"
+            android:textColorHint="#40FFFFFF"
+            android:textSize="16sp"
+            android:paddingHorizontal="16dp"
+            android:inputType="number" />
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="16dp"
+            android:text="CATEGORY TAG"
+            android:textColor="#80FFFFFF"
+            android:textSize="10sp"
+            android:textStyle="bold" />
+
+        <HorizontalScrollView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="8dp"
+            android:scrollbars="none">
+            <LinearLayout
+                android:id="@+id/container_feature_tags"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal" />
+        </HorizontalScrollView>
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="16dp"
+            android:text="DEADLINE"
+            android:textColor="#80FFFFFF"
+            android:textSize="10sp"
+            android:textStyle="bold" />
+
+        <TextView
+            android:id="@+id/tv_feature_deadline"
+            android:layout_width="match_parent"
+            android:layout_height="56dp"
+            android:layout_marginTop="8dp"
+            android:background="@drawable/filter_chip_bg"
+            android:backgroundTint="#1AFFFFFF"
+            android:gravity="center"
+            android:text="Set Due Date"
+            android:textColor="@color/white"
+            android:textSize="14sp"
+            android:clickable="true"
+            android:focusable="true" />
+
+        <EditText
+            android:id="@+id/et_details_input"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="16dp"
+            android:background="@drawable/bg_finance_input"
+            android:backgroundTint="#11FFFFFF"
+            android:hint="Any details or notes..."
+            android:textColor="@color/white"
+            android:textColorHint="#40FFFFFF"
+            android:textSize="14sp"
+            android:padding="16dp"
+            android:minLines="3"
+            android:gravity="top" />
+
+        <TextView
+            android:id="@+id/btn_save_subfeature"
+            android:layout_width="match_parent"
+            android:layout_height="56dp"
+            android:layout_marginTop="20dp"
+            android:background="@drawable/bg_blue_oval_button"
+            android:gravity="center"
+            android:text="SAVE CHANGES"
+            android:textColor="@color/white"
+            android:textSize="14sp"
+            android:textStyle="bold"
+            android:clickable="true"
+            android:focusable="true" />
+    </LinearLayout>
+
+</androidx.constraintlayout.widget.ConstraintLayout>

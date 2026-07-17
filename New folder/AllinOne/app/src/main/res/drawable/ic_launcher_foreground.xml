@@ -1,0 +1,58 @@
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="108dp"
+    android:height="108dp"
+    android:viewportWidth="108"
+    android:viewportHeight="108">
+
+    <!-- Top Left: Task (Salmon) -->
+    <path
+        android:fillColor="@color/logo_salmon"
+        android:pathData="M14,14h40v40h-40z" />
+    <!-- Task Icon Mockup -->
+    <path
+        android:fillColor="#FFFFFF"
+        android:pathData="M24,24h20v4h-20z M24,32h20v4h-20z M24,40h20v4h-20z" />
+
+    <!-- Top Right: Workout (Yellow) -->
+    <path
+        android:fillColor="@color/logo_yellow"
+        android:pathData="M54,14h40v40h-40z" />
+    <!-- Dumbbell Mockup -->
+    <path
+        android:fillColor="#FFFFFF"
+        android:pathData="M64,30h4v10h-4z M86,30h4v10h-4z M68,34h18v2h-18z" />
+
+    <!-- Bottom Left: Notes (Teal) -->
+    <path
+        android:fillColor="@color/logo_teal"
+        android:pathData="M14,54h40v40h-40z" />
+    <!-- File Mockup -->
+    <path
+        android:fillColor="#FFFFFF"
+        android:pathData="M24,64h20v20h-20z M24,64l10,0l0,10z" />
+
+    <!-- Bottom Right: Finance (Blue) -->
+    <path
+        android:fillColor="@color/logo_blue"
+        android:pathData="M54,54h40v40h-40z" />
+    <!-- Dollar Circle Mockup -->
+    <path
+        android:fillColor="#FFFFFF"
+        android:pathData="M74,74m-12,0a12,12 0,1 1,24 0a12,12 0,1 1,-24 0" />
+    <path
+        android:fillColor="@color/logo_blue"
+        android:pathData="M74,68v12 M71,71h6 M71,77h6" />
+
+    <!-- Center: Checkmark (Cream Circle) -->
+    <path
+        android:fillColor="@color/logo_cream"
+        android:pathData="M54,54m-15,0a15,15 0,1 1,30 0a15,15 0,1 1,-30 0" />
+    <path
+        android:fillColor="@color/logo_yellow"
+        android:pathData="M48,54l4,4l8,-8"
+        android:strokeWidth="3"
+        android:strokeColor="@color/logo_yellow"
+        android:strokeLineCap="round"
+        android:strokeLineJoin="round" />
+
+</vector>

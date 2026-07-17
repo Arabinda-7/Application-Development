@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="60dp"
+    android:layout_height="wrap_content"
+    android:orientation="vertical"
+    android:gravity="center"
+    android:clickable="true"
+    android:focusable="true"
+    android:paddingVertical="8dp">
+
+    <TextView
+        android:id="@+id/tv_day_name"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="SUN"
+        android:textColor="@color/text_secondary"
+        android:textSize="10sp" />
+
+    <FrameLayout
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="4dp">
+
+        <View
+            android:id="@+id/view_selected_circle"
+            android:layout_width="36dp"
+            android:layout_height="36dp"
+            android:background="@drawable/circle_selected_bg"
+            android:backgroundTint="@android:color/transparent" />
+
+        <TextView
+            android:id="@+id/tv_day_number"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center"
+            android:text="22"
+            android:textColor="@color/white" />
+
+        <View
+            android:id="@+id/view_selection_line"
+            android:layout_width="16dp"
+            android:layout_height="3dp"
+            android:layout_gravity="bottom|center_horizontal"
+            android:layout_marginBottom="-6dp"
+            android:background="@color/chip_selected"
+            android:visibility="invisible" />
+    </FrameLayout>
+</LinearLayout>
