@@ -109,7 +109,7 @@ class ProjectNoteAdapter(
         holder.progressBar.progressTintList = ColorStateList.valueOf(statusColor)
 
         holder.itemView.setOnClickListener {
-            (context as? ProjectActivity)?.showProjectDetailsDialog(note)
+            (context as? ProjectActivity)?.onProjectItemClick(note)
         }
 
         holder.itemView.setOnLongClickListener {
