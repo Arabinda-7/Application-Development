@@ -32,7 +32,7 @@
         </activity>
         <activity android:name=".HabitTrackerActivity"
             tools:ignore="MissingClass" />
-        <activity android:name=".ToDoListActivity" />
+        <activity android:name=".TaskActivity" />
         <activity android:name=".WorkoutRoutineActivity" />
         <activity android:name=".TimerActivity" />
         <activity android:name=".NotesActivity"
@@ -56,6 +56,19 @@
         <activity android:name=".OnboardingActivity" />
         <activity android:name=".PerformanceHistoryActivity" />
         <activity android:name=".LockActivity" />
+        <activity android:name=".AddHabitActivity" android:windowSoftInputMode="adjustResize" />
+        <activity android:name=".AddWorkoutActivity" android:windowSoftInputMode="adjustResize" />
+        <activity android:name=".AddNoteActivity" android:windowSoftInputMode="adjustResize" />
+        <activity android:name=".AddProjectActivity" android:windowSoftInputMode="adjustResize" />
+        <activity android:name=".AddFinanceActivity" android:windowSoftInputMode="adjustResize" />
+        <activity android:name=".AddTaskActivity" android:windowSoftInputMode="adjustResize" />
+        <activity android:name=".AddSubFeatureActivity" android:windowSoftInputMode="adjustResize" />
+        <activity android:name=".HabitSettingsActivity" />
+        <activity android:name=".WorkoutSettingsActivity" />
+        <activity android:name=".TaskSettingsActivity" />
+        <activity android:name=".NoteSettingsActivity" />
+        <activity android:name=".FinanceSettingsActivity" />
+        <activity android:name=".ProjectSettingsActivity" />
     </application>
 
 </manifest>

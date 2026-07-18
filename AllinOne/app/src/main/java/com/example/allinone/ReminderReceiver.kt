@@ -47,14 +47,14 @@ class ReminderReceiver : BroadcastReceiver() {
             notificationManager.createNotificationChannel(channel)
         }
 
-        val mainIntent = Intent(context, ToDoListActivity::class.java)
+        val mainIntent = Intent(context, TaskActivity::class.java)
         val pendingIntent = PendingIntent.getActivity(context, 0, mainIntent, PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE)
 
         val soundUri = RingtoneManager.getDefaultUri(RingtoneManager.TYPE_ALARM) ?: 
                       RingtoneManager.getDefaultUri(RingtoneManager.TYPE_NOTIFICATION)
 
         val notification = NotificationCompat.Builder(context, channelId)
-            .setSmallIcon(R.drawable.ic_todo_list)
+            .setSmallIcon(R.drawable.ic_task)
             .setContentTitle("To-Do Reminder")
             .setContentText("Pending Task: $taskName")
             .setPriority(NotificationCompat.PRIORITY_HIGH)

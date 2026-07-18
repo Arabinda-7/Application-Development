@@ -2,6 +2,7 @@ package com.example.allinone
 
 import android.app.AlertDialog
 import android.app.Dialog
+import android.content.Intent
 import android.content.res.ColorStateList
 import android.graphics.Color
 import android.os.Bundle
@@ -55,16 +56,14 @@ class HabitTrackerActivity : BaseActivity() {
 
         ViewCompat.setOnApplyWindowInsetsListener(findViewById(R.id.today_layout)) { v, insets ->
             val statusBars = insets.getInsets(WindowInsetsCompat.Type.statusBars())
-            val offset = (12 * resources.displayMetrics.density).toInt()
-            v.setPadding(v.paddingLeft, statusBars.top - offset, v.paddingRight, v.paddingBottom)
+            v.setPadding(v.paddingLeft, statusBars.top, v.paddingRight, v.paddingBottom)
             insets
         }
         
         ViewCompat.setOnApplyWindowInsetsListener(findViewById(R.id.history_layout)) { v, insets ->
             val statusBars = insets.getInsets(WindowInsetsCompat.Type.statusBars())
             val navBars = insets.getInsets(WindowInsetsCompat.Type.navigationBars())
-            val offset = (12 * resources.displayMetrics.density).toInt()
-            v.setPadding(v.paddingLeft, statusBars.top - offset, v.paddingRight, navBars.bottom)
+            v.setPadding(v.paddingLeft, statusBars.top, v.paddingRight, navBars.bottom)
             insets
         }
 
@@ -95,7 +94,9 @@ class HabitTrackerActivity : BaseActivity() {
         if (DataManager.habitAddThemeColor != -1) {
             btnCreate.strokeColor = DataManager.habitAddThemeColor
         }
-        btnCreate.setOnClickListener { showAddHabitDialog(null) }
+        btnCreate.setOnClickListener {
+            startActivity(Intent(this, AddHabitActivity::class.java))
+        }
 
         setupHeaderLogic()
         setupFooterLogic()
@@ -734,107 +735,14 @@ class HabitTrackerActivity : BaseActivity() {
     }
 
     private fun showHabitSettingsDialog() {
-        val dialog = Dialog(this)
-        dialog.setContentView(R.layout.dialog_habit_settings)
-        dialog.window?.setBackgroundDrawableResource(android.R.color.transparent)
-        dialog.window?.setLayout(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT)
-
-        val itemDefaultTab = dialog.findViewById<View>(R.id.item_default_tab)
-        val tvDefaultTabSummary = dialog.findViewById<TextView>(R.id.tv_default_tab_summary)
-        
-        val itemSortOrder = dialog.findViewById<View>(R.id.item_sort_order)
-        val tvSortSummary = dialog.findViewById<TextView>(R.id.tv_sort_summary)
-        
-        val itemVacation = dialog.findViewById<View>(R.id.item_vacation_mode)
-        val swVacation = dialog.findViewById<SwitchCompat>(R.id.iv_vacation_check)
-        
-        val itemSound = dialog.findViewById<View>(R.id.item_sound)
-        val swSound = dialog.findViewById<SwitchCompat>(R.id.iv_sound_check)
-        
-        val itemHaptics = dialog.findViewById<View>(R.id.item_haptics)
-        val swHaptics = dialog.findViewById<SwitchCompat>(R.id.iv_haptics_check)
-        
-        val itemDayReset = dialog.findViewById<View>(R.id.item_day_reset)
-        val tvDayResetSummary = dialog.findViewById<TextView>(R.id.tv_day_reset_summary)
-        
-        val itemBulk = dialog.findViewById<View>(R.id.item_bulk_mode)
-        val swBulk = dialog.findViewById<SwitchCompat>(R.id.iv_bulk_check)
-        
-        val itemGrace = dialog.findViewById<View>(R.id.item_grace_period)
-        val tvGraceSummary = dialog.findViewById<TextView>(R.id.tv_grace_summary)
-        
-        val btnClose = dialog.findViewById<View>(R.id.btn_close_settings)
-
-        // Sync UI with DataManager
-        tvDefaultTabSummary.text = "Current: ${DataManager.habitDefaultTab}"
-        tvSortSummary.text = "Current: ${DataManager.habitSortOrder}"
-        swVacation.isChecked = DataManager.habitVacationMode
-        swSound.isChecked = DataManager.habitCompletionSound
-        swHaptics.isChecked = DataManager.habitCompletionHaptics
-        tvDayResetSummary.text = "Ends at: ${if(DataManager.habitDayResetHour == 0) "12:00 AM" else if(DataManager.habitDayResetHour < 12) "${DataManager.habitDayResetHour}:00 AM" else if(DataManager.habitDayResetHour == 12) "12:00 PM" else "${DataManager.habitDayResetHour - 12}:00 PM"}"
-        swBulk.isChecked = DataManager.habitBulkMode
-        tvGraceSummary.text = "Allowed misses: ${DataManager.habitGraceDaysAllowed} day"
-
-        itemDefaultTab.setOnClickListener {
-            DataManager.habitDefaultTab = if (DataManager.habitDefaultTab == "TODAY") "HISTORY" else "TODAY"
-            tvDefaultTabSummary.text = "Current: ${DataManager.habitDefaultTab}"
-            DataManager.saveData(this)
-        }
-
-        itemSortOrder.setOnClickListener {
-            val orders = listOf("Time", "Streak")
-            val next = orders[(orders.indexOf(DataManager.habitSortOrder).coerceAtLeast(0) + 1) % orders.size]
-            DataManager.habitSortOrder = next
-            tvSortSummary.text = "Current: $next"
-            DataManager.saveData(this)
-            habitAdapter.sortHabits()
-        }
-
-        itemVacation.setOnClickListener {
-            DataManager.habitVacationMode = !DataManager.habitVacationMode
-            swVacation.isChecked = DataManager.habitVacationMode
-            DataManager.saveData(this)
-        }
-
-        itemSound.setOnClickListener {
-            DataManager.habitCompletionSound = !DataManager.habitCompletionSound
-            swSound.isChecked = DataManager.habitCompletionSound
-            DataManager.saveData(this)
-        }
-
-        itemHaptics.setOnClickListener {
-            DataManager.habitCompletionHaptics = !DataManager.habitCompletionHaptics
-            swHaptics.isChecked = DataManager.habitCompletionHaptics
-            DataManager.saveData(this)
-        }
-
-        itemDayReset.setOnClickListener {
-            DataManager.habitDayResetHour = (DataManager.habitDayResetHour + 1) % 24
-            val h = DataManager.habitDayResetHour
-            tvDayResetSummary.text = "Ends at: ${if(h == 0) "12:00 AM" else if(h < 12) "$h:00 AM" else if(h == 12) "12:00 PM" else "${h - 12}:00 PM"}"
-            DataManager.saveData(this)
-        }
-
-        itemBulk.setOnClickListener {
-            DataManager.habitBulkMode = !DataManager.habitBulkMode
-            swBulk.isChecked = DataManager.habitBulkMode
-            DataManager.saveData(this)
-        }
-
-        itemGrace.setOnClickListener {
-            DataManager.habitGraceDaysAllowed = (DataManager.habitGraceDaysAllowed % 3) + 1
-            tvGraceSummary.text = "Allowed misses: ${DataManager.habitGraceDaysAllowed} day"
-            DataManager.saveData(this)
-        }
-
-        btnClose.setOnClickListener { dialog.dismiss() }
-        showDialogSafe(dialog)
+        startActivity(Intent(this, HabitSettingsActivity::class.java))
     }
 
     override fun onResume() {
         super.onResume()
         // Ensure sorting is applied if it changed in settings
         applyFilters()
+        updateSectionProgress()
     }
 
     private fun updateNavUI(active: String) {

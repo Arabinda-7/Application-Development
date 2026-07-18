@@ -3,6 +3,7 @@ package com.example.allinone
 import android.app.DatePickerDialog
 import android.app.Dialog
 import android.app.TimePickerDialog
+import android.content.Intent
 import android.graphics.Color
 import android.os.Bundle
 import android.view.LayoutInflater
@@ -51,8 +52,7 @@ class FinanceActivity : BaseActivity() {
 
         ViewCompat.setOnApplyWindowInsetsListener(findViewById(R.id.finance_root_layout)) { v, insets ->
             val statusBars = insets.getInsets(WindowInsetsCompat.Type.statusBars())
-            val offset = (12 * resources.displayMetrics.density).toInt()
-            v.setPadding(v.paddingLeft, statusBars.top - offset, v.paddingRight, v.paddingBottom)
+            v.setPadding(v.paddingLeft, statusBars.top, v.paddingRight, v.paddingBottom)
             insets
         }
 
@@ -76,7 +76,12 @@ class FinanceActivity : BaseActivity() {
         
         transactionAdapter = TransactionAdapter(
             filteredTransactions,
-            onEdit = { transaction, _ -> showAddTransactionDialog(transaction) },
+            onEdit = { transaction, _ -> 
+                val intent = Intent(this, AddFinanceActivity::class.java).apply {
+                    putExtra("TRANSACTION_INDEX", DataManager.transactions.indexOf(transaction))
+                }
+                startActivity(intent)
+            },
             onDelete = { transaction, _ -> 
                 val idx = filteredTransactions.indexOf(transaction)
                 if (idx != -1) deleteTransaction(idx)
@@ -130,7 +135,7 @@ class FinanceActivity : BaseActivity() {
             btnCreate.backgroundTintList = android.content.res.ColorStateList.valueOf(DataManager.financeAddThemeColor)
         }
         btnCreate.setOnClickListener {
-            showAddTransactionDialog()
+            startActivity(Intent(this, AddFinanceActivity::class.java))
         }
 
         findViewById<View>(R.id.finance_summary).findViewById<View>(R.id.card_budget).setOnClickListener {
@@ -146,8 +151,14 @@ class FinanceActivity : BaseActivity() {
         }
 
         if (intent.getBooleanExtra("SHOW_ADD_DIALOG", false)) {
-            showAddTransactionDialog()
+            startActivity(Intent(this, AddFinanceActivity::class.java))
         }
+    }
+
+    override fun onResume() {
+        super.onResume()
+        loadCurrentMonthTransactions()
+        updateSummary()
     }
 
     private fun setupFilters() {
@@ -446,58 +457,7 @@ class FinanceActivity : BaseActivity() {
     }
 
     private fun showFinanceSettingsDialog() {
-        val dialog = Dialog(this)
-        dialog.setContentView(R.layout.dialog_finance_settings)
-        dialog.window?.setBackgroundDrawableResource(android.R.color.transparent)
-        dialog.window?.setLayout(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT)
-
-        val itemCurrency = dialog.findViewById<View>(R.id.item_currency)
-        val itemCategories = dialog.findViewById<View>(R.id.item_categories)
-        val itemGoals = dialog.findViewById<View>(R.id.item_budget_goals)
-        val itemToggleLedger = dialog.findViewById<View>(R.id.item_toggle_ledger)
-        val switchLedger = dialog.findViewById<androidx.appcompat.widget.SwitchCompat>(R.id.switch_ledger_enabled)
-        val tvCurrencySummary = dialog.findViewById<TextView>(R.id.tv_currency_summary)
-        val btnClose = dialog.findViewById<View>(R.id.btn_close_settings)
-
-        tvCurrencySummary.text = "Tap to change (Current: ${DataManager.financeCurrency})"
-
-        switchLedger.isChecked = DataManager.isFinanceLedgerEnabled
-        itemToggleLedger.setOnClickListener {
-            switchLedger.toggle()
-            DataManager.isFinanceLedgerEnabled = switchLedger.isChecked
-            DataManager.saveData(this)
-            findViewById<View>(R.id.btn_finance_ledger).visibility = if (DataManager.isFinanceLedgerEnabled) View.VISIBLE else View.GONE
-        }
-        switchLedger.setOnCheckedChangeListener { _, isChecked ->
-            DataManager.isFinanceLedgerEnabled = isChecked
-            DataManager.saveData(this)
-            findViewById<View>(R.id.btn_finance_ledger).visibility = if (isChecked) View.VISIBLE else View.GONE
-        }
-
-        itemCurrency.setOnClickListener {
-            val symbols = listOf("₹", "$", "€", "£", "¥")
-            val currentIndex = symbols.indexOf(DataManager.financeCurrency)
-            val nextIndex = (currentIndex + 1) % symbols.size
-            val nextSymbol = symbols[nextIndex]
-
-            DataManager.financeCurrency = nextSymbol
-            DataManager.saveData(this)
-            tvCurrencySummary.text = "Tap to change (Current: $nextSymbol)"
-            updateSummary()
-            android.widget.Toast.makeText(this, "Currency changed to $nextSymbol", android.widget.Toast.LENGTH_SHORT).show()
-        }
-
-        itemCategories.setOnClickListener {
-            showManageFinanceCategoriesDialog()
-        }
-
-        itemGoals.setOnClickListener {
-            showSetBudgetDialog()
-        }
-
-        btnClose.setOnClickListener { dialog.dismiss() }
-
-        showDialogSafe(dialog)
+        startActivity(Intent(this, FinanceSettingsActivity::class.java))
     }
 
     private fun showManageFinanceCategoriesDialog() {

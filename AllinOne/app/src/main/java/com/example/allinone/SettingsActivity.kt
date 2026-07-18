@@ -139,7 +139,7 @@ class SettingsActivity : BaseActivity() {
         val menuItems = listOf(
             SettingsHubItem("Habit Tracker", "Manage your daily rituals and streaks", R.drawable.ic_habit_tracker, "HABITS"),
             SettingsHubItem("Workout Routine", "Configure exercises and rest timers", R.drawable.ic_workout_routine, "WORKOUTS"),
-            SettingsHubItem("To-Do List", "Organize tasks and prioritization", R.drawable.ic_todo_list, "TASKS"),
+            SettingsHubItem("To-Do List", "Organize tasks and prioritization", R.drawable.ic_task, "TASKS"),
             SettingsHubItem("Notes", "Manage categories and writing templates", R.drawable.ic_notes, "NOTES"),
             SettingsHubItem("Finance", "Setup currency and budget goals", R.drawable.ic_finance, "FINANCE"),
             SettingsHubItem("Projects", "Advanced roadmap and project settings", R.drawable.ic_project, "PROJECTS"),
@@ -150,7 +150,15 @@ class SettingsActivity : BaseActivity() {
         )
 
         settingsList.adapter = SettingsHubAdapter(menuItems) { section ->
-            showSectionSettings(section)
+            when (section) {
+                "HABITS" -> startActivity(Intent(this, HabitSettingsActivity::class.java))
+                "WORKOUTS" -> startActivity(Intent(this, WorkoutSettingsActivity::class.java))
+                "TASKS" -> startActivity(Intent(this, TaskSettingsActivity::class.java))
+                "NOTES" -> startActivity(Intent(this, NoteSettingsActivity::class.java))
+                "FINANCE" -> startActivity(Intent(this, FinanceSettingsActivity::class.java))
+                "PROJECTS" -> startActivity(Intent(this, ProjectSettingsActivity::class.java))
+                else -> showSectionSettings(section)
+            }
         }
     }
 
@@ -190,174 +198,7 @@ class SettingsActivity : BaseActivity() {
         val settings = mutableListOf<ConfigItem>()
         
         when(section) {
-            "HABITS" -> {
-                settings.add(ConfigItem("Icons", "No features added yet") { showUpcomingFeatureDialog("Advanced Habit Icons") })
-                settings.add(ConfigItem("Theme Color", "Customize creating habits theme") { showColorPickerDialog("ADD_HABIT") })
-                settings.add(ConfigItem("Behavioral Insights", "Peak performance analytics") { showBehavioralInsightsDialog() })
-                settings.add(ConfigItem("Default Startup Tab", "Current: ${DataManager.habitDefaultTab}") {
-                    val tabs = listOf("TODAY", "WEEK", "ALL")
-                    DataManager.habitDefaultTab = tabs[(tabs.indexOf(DataManager.habitDefaultTab) + 1) % tabs.size]
-                    showSectionSettings("HABITS")
-                })
-                settings.add(ConfigItem("Sort Order", "Current: ${DataManager.habitSortOrder}") {
-                    val orders = listOf("Time", "Streak")
-                    DataManager.habitSortOrder = orders[(orders.indexOf(DataManager.habitSortOrder) + 1) % orders.size]
-                    showSectionSettings("HABITS")
-                })
-                settings.add(ConfigItem("Vacation Mode", "Freeze streaks during breaks", isToggle = true, isChecked = DataManager.habitVacationMode) {
-                    DataManager.habitVacationMode = !DataManager.habitVacationMode
-                })
-                settings.add(ConfigItem("Completion Sound", "Play sound on habit finished", isToggle = true, isChecked = DataManager.habitCompletionSound) {
-                    DataManager.habitCompletionSound = !DataManager.habitCompletionSound
-                })
-                settings.add(ConfigItem("Haptic Feedback", "Vibrate on habit finished", isToggle = true, isChecked = DataManager.habitCompletionHaptics) {
-                    DataManager.habitCompletionHaptics = !DataManager.habitCompletionHaptics
-                })
-                settings.add(ConfigItem("Bulk Action Mode", "Fast multi-update mode", isToggle = true, isChecked = DataManager.habitBulkMode) {
-                    DataManager.habitBulkMode = !DataManager.habitBulkMode
-                })
-                settings.add(ConfigItem("Day Reset Hour", "Current: ${formatHour(DataManager.habitDayResetHour)}") {
-                    DataManager.habitDayResetHour = (DataManager.habitDayResetHour + 1) % 24
-                    showSectionSettings("HABITS")
-                })
-                settings.add(ConfigItem("Grace Period", "Allowed misses: ${DataManager.habitGraceDaysAllowed} days") {
-                    val options = listOf(0, 1, 2, 3)
-                    DataManager.habitGraceDaysAllowed = options[(options.indexOf(DataManager.habitGraceDaysAllowed) + 1) % options.size]
-                    showSectionSettings("HABITS")
-                })
-            }
-            "WORKOUTS" -> {
-                settings.add(ConfigItem("Icons", "No features added yet") { showUpcomingFeatureDialog("Advanced Workout Icons") })
-                settings.add(ConfigItem("Theme Color", "Customize creating workouts theme") { showColorPickerDialog("ADD_WORKOUT") })
-                settings.add(ConfigItem("Manage Muscle Groups", "Add or remove body part tags") { showManageMuscleGroupsDialog() })
-                settings.add(ConfigItem("Workout Readiness", "Check your energy levels") { showWorkoutReadinessDialog() })
-                settings.add(ConfigItem("Auto-Rest Timer", "Trigger timer after set", isToggle = true, isChecked = DataManager.workoutAutoRestTimer) {
-                    DataManager.workoutAutoRestTimer = !DataManager.workoutAutoRestTimer
-                })
-                settings.add(ConfigItem("Workout Weight Unit", "Current: ${DataManager.workoutWeightUnit}") {
-                    DataManager.workoutWeightUnit = if (DataManager.workoutWeightUnit == "Kg") "Lbs" else "Kg"
-                    showSectionSettings("WORKOUTS")
-                })
-                settings.add(ConfigItem("Default Tracking Mode", "Current: ${DataManager.workoutDefaultMode}") {
-                    val modes = listOf("Reps", "Timer", "Sets")
-                    DataManager.workoutDefaultMode = modes[(modes.indexOf(DataManager.workoutDefaultMode) + 1) % modes.size]
-                    showSectionSettings("WORKOUTS")
-                })
-                settings.add(ConfigItem("Rest Duration", "Current: ${DataManager.workoutRestDuration}s") {
-                    val durations = listOf(30, 60, 90, 120)
-                    DataManager.workoutRestDuration = durations[(durations.indexOf(DataManager.workoutRestDuration) + 1) % durations.size]
-                    showSectionSettings("WORKOUTS")
-                })
-            }
-            "TASKS" -> {
-                settings.add(ConfigItem("Manage Categories", "Customize your task tags") { showManageTaskCategoriesDialog() })
-                settings.add(ConfigItem("Task Analytics", "View completion totals") { showTaskAnalyticsDialog() })
-                settings.add(ConfigItem("Sorting Logic", "Current: ${DataManager.taskSortOrder}") {
-                    val orders = listOf("Priority", "Newest", "Alphabetical")
-                    DataManager.taskSortOrder = orders[(orders.indexOf(DataManager.taskSortOrder) + 1) % orders.size]
-                    showSectionSettings("TASKS")
-                })
-                settings.add(ConfigItem("Default Section", "Current: ${DataManager.taskDefaultSection}") {
-                    val sections = listOf("Tasks", "List")
-                    DataManager.taskDefaultSection = sections[(sections.indexOf(DataManager.taskDefaultSection) + 1) % sections.size]
-                    showSectionSettings("TASKS")
-                })
-                settings.add(ConfigItem("Auto-Archive Tasks", "Cleanup old completed items", isToggle = true, isChecked = DataManager.taskAutoArchive) {
-                    DataManager.taskAutoArchive = !DataManager.taskAutoArchive
-                })
-                settings.add(ConfigItem("Show Hidden Tasks", "Reveal private roadmap items", isToggle = true, isChecked = DataManager.taskShowHidden) {
-                    DataManager.taskShowHidden = !DataManager.taskShowHidden
-                })
-            }
-            "NOTES" -> {
-                settings.add(ConfigItem("Custom Templates", "Edit note pre-fill text") { showNoteTemplatesDialog() })
-                settings.add(ConfigItem("Bulk Category Move", "Move all notes at once") { showNoteBulkMoveDialog() })
-                settings.add(ConfigItem("Default Startup Tab", "Current: ${DataManager.noteDefaultCategory}") {
-                    val cats = DataManager.noteVisibleSections
-                    DataManager.noteDefaultCategory = cats[(cats.indexOf(DataManager.noteDefaultCategory) + 1) % cats.size]
-                    showSectionSettings("NOTES")
-                })
-                settings.add(ConfigItem("Show Hidden Notes", "Reveal your private logs", isToggle = true, isChecked = DataManager.noteShowHidden) {
-                    DataManager.noteShowHidden = !DataManager.noteShowHidden
-                })
-                settings.add(ConfigItem("Auto-Cleanup", "Days: ${if (DataManager.noteAutoCleanupDays > 0) DataManager.noteAutoCleanupDays else "Off"}") {
-                    val options = listOf(0, 7, 30, 90)
-                    DataManager.noteAutoCleanupDays = options[(options.indexOf(DataManager.noteAutoCleanupDays) + 1) % options.size]
-                    showSectionSettings("NOTES")
-                })
-            }
-            "FINANCE" -> {
-                settings.add(ConfigItem("Primary Currency", "Current: ${DataManager.financeCurrency}") {
-                    val symbols = listOf("₹", "$", "€", "£", "¥")
-                    DataManager.financeCurrency = symbols[(symbols.indexOf(DataManager.financeCurrency) + 1) % symbols.size]
-                    showSectionSettings("FINANCE")
-                })
-                settings.add(ConfigItem("Theme Color", "Customize creating finance theme") { showColorPickerDialog("ADD_FINANCE") })
-                settings.add(ConfigItem("Manage Categories", "Edit spending labels") { showManageFinanceCategoriesDialog() })
-                settings.add(ConfigItem("Monthly Budget", "Current: ${DataManager.financeCurrency}${DataManager.monthlyBudget}") { showSetBudgetDialog() })
-                settings.add(ConfigItem("Savings Goal", "Current: ${DataManager.financeCurrency}${DataManager.monthlySavingsGoal}") { showSetSavingsGoalDialog() })
-                settings.add(ConfigItem("Ledger System", "Enable person-based debt tracking", isToggle = true, isChecked = DataManager.isFinanceLedgerEnabled) {
-                    DataManager.isFinanceLedgerEnabled = !DataManager.isFinanceLedgerEnabled
-                })
-            }
-            "PROJECTS" -> {
-                settings.add(ConfigItem("Manage Templates", "Edit roadmap pre-sets") { showProjectTemplatesDialog() })
-                settings.add(ConfigItem("Manage Tags", "Customize UI, Logic, Bug tags") { showManageTagsDialog() })
-                settings.add(ConfigItem("Theme Color", "Customize creating projects theme") { showColorPickerDialog("ADD_PROJECT") })
-                settings.add(ConfigItem("Roadmaps Section", "Show/Hide Project Roadmaps", isToggle = true, isChecked = DataManager.projectRoadmapsEnabled) {
-                    if (DataManager.projectRoadmapsEnabled && !DataManager.projectIdeasEnabled) {
-                        Toast.makeText(this, "At least one section must be enabled", Toast.LENGTH_SHORT).show()
-                    } else {
-                        DataManager.projectRoadmapsEnabled = !DataManager.projectRoadmapsEnabled
-                    }
-                })
-                settings.add(ConfigItem("Ideas Section", "Show/Hide Idea brainstorming", isToggle = true, isChecked = DataManager.projectIdeasEnabled) {
-                    if (DataManager.projectIdeasEnabled && !DataManager.projectRoadmapsEnabled) {
-                        Toast.makeText(this, "At least one section must be enabled", Toast.LENGTH_SHORT).show()
-                    } else {
-                        DataManager.projectIdeasEnabled = !DataManager.projectIdeasEnabled
-                    }
-                })
-                settings.add(ConfigItem("Dual Exist", "Show projects in both tabs", isToggle = true, isChecked = DataManager.projectDualExistEnabled) {
-                    DataManager.projectDualExistEnabled = !DataManager.projectDualExistEnabled
-                })
-                settings.add(ConfigItem("Deadline Notifications", "Alerts for upcoming milestones", isToggle = true, isChecked = DataManager.projectDeadlineAlerts) {
-                    DataManager.projectDeadlineAlerts = !DataManager.projectDeadlineAlerts
-                })
-                settings.add(ConfigItem("Productivity Analytics", "Track completion velocity", isToggle = true, isChecked = DataManager.projectAnalyticsEnabled) {
-                    DataManager.projectAnalyticsEnabled = !DataManager.projectAnalyticsEnabled
-                })
-            }
             "SECURITY" -> {
-                settings.add(ConfigItem("App Access Lock", "Require PIN to open the app", isToggle = true, isChecked = DataManager.isAppLockEnabled) {
-                    if (!DataManager.isAppLockEnabled) {
-                        // Turning ON: If no PIN, go to setup
-                        if (DataManager.appLockPin == null) {
-                            val intent = Intent(this, LockActivity::class.java).apply { putExtra(LockActivity.EXTRA_MODE, LockActivity.MODE_SETUP) }
-                            startActivity(intent)
-                        } else {
-                            DataManager.isAppLockEnabled = true
-                        }
-                    } else {
-                        // Turning OFF
-                        DataManager.isAppLockEnabled = false
-                    }
-                    DataManager.saveData(this)
-                    showSectionSettings("SECURITY")
-                })
-                
-                if (DataManager.isAppLockEnabled && DataManager.appLockPin != null) {
-                    settings.add(ConfigItem("Change PIN", "Update your security code") {
-                        val intent = Intent(this, LockActivity::class.java).apply { putExtra(LockActivity.EXTRA_MODE, LockActivity.MODE_CHANGE) }
-                        startActivity(intent)
-                    })
-                }
-
-                settings.add(ConfigItem("OLED Mode", "Pure black theme for OLED screens", isToggle = true, isChecked = DataManager.isOledThemeEnabled) {
-                    DataManager.isOledThemeEnabled = !DataManager.isOledThemeEnabled
-                })
-            }
-            "OTHERS" -> {
                 settings.add(ConfigItem("--- HOME PAGE VISIBILITY ---", "") {})
                 settings.add(ConfigItem("Show Habits", "Display habit tracker on home", isToggle = true, isChecked = DataManager.showHabitSection) {
                     DataManager.showHabitSection = !DataManager.showHabitSection
@@ -379,24 +220,33 @@ class SettingsActivity : BaseActivity() {
                 })
 
                 settings.add(ConfigItem("--- GLOBAL SCALING ---", "") {})
-                settings.add(ConfigItem("Global Display Size", "Icons and margins for all sub-sections (Current: ${DataManager.displaySize})") {
-                    val sizes = listOf("XS", "S", "L")
-                    DataManager.displaySize = sizes[(sizes.indexOf(DataManager.displaySize) + 1) % sizes.size]
+                settings.add(ConfigItem("Follow System Settings", "Sync display and font size with phone", isToggle = true, isChecked = DataManager.isSystemAppearanceEnabled) {
+                    DataManager.isSystemAppearanceEnabled = !DataManager.isSystemAppearanceEnabled
                     DataManager.saveData(this)
                     recreate()
                 })
-                settings.add(ConfigItem("Home Page Display Size", "Dedicated scale for the main dashboard (Current: ${DataManager.homeDisplaySize})") {
-                    val sizes = listOf("XS", "S", "L")
-                    DataManager.homeDisplaySize = sizes[(sizes.indexOf(DataManager.homeDisplaySize) + 1) % sizes.size]
-                    DataManager.saveData(this)
-                    recreate()
-                })
-                settings.add(ConfigItem("Text Font Size", "Scaling for titles and content (Current: ${DataManager.fontSize})") {
-                    val sizes = listOf("XS", "S", "L")
-                    DataManager.fontSize = sizes[(sizes.indexOf(DataManager.fontSize) + 1) % sizes.size]
-                    DataManager.saveData(this)
-                    recreate()
-                })
+                
+                if (!DataManager.isSystemAppearanceEnabled) {
+                    settings.add(ConfigItem("Global Display Size", "Icons and margins for all sub-sections (Current: ${DataManager.displaySize})") {
+                        val sizes = listOf("XS", "S", "L")
+                        DataManager.displaySize = sizes[(sizes.indexOf(DataManager.displaySize) + 1) % sizes.size]
+                        DataManager.saveData(this)
+                        recreate()
+                    })
+                    settings.add(ConfigItem("Home Page Display Size", "Dedicated scale for the main dashboard (Current: ${DataManager.homeDisplaySize})") {
+                        val sizes = listOf("XS", "S", "L")
+                        DataManager.homeDisplaySize = sizes[(sizes.indexOf(DataManager.homeDisplaySize) + 1) % sizes.size]
+                        DataManager.saveData(this)
+                        recreate()
+                    })
+                    settings.add(ConfigItem("Text Font Size", "Scaling for titles and content (Current: ${DataManager.fontSize})") {
+                        val sizes = listOf("XS", "S", "L")
+                        DataManager.fontSize = sizes[(sizes.indexOf(DataManager.fontSize) + 1) % sizes.size]
+                        DataManager.saveData(this)
+                        recreate()
+                    })
+                }
+
                 settings.add(ConfigItem("Export Backup", "Save all data to a local JSON file") { exportBackup() })
                 settings.add(ConfigItem("Import Backup", "Restore data from a JSON file") { importBackup() })
                 settings.add(ConfigItem("System Deep Clean", "Clear old history and cache") {
@@ -649,7 +499,7 @@ class SettingsActivity : BaseActivity() {
         val dialog = Dialog(this); dialog.setContentView(R.layout.dialog_manage_categories)
         dialog.window?.setBackgroundDrawableResource(android.R.color.transparent)
         val container = dialog.findViewById<LinearLayout>(R.id.categories_container)
-        val icons = listOf(R.drawable.ic_habit_tracker, R.drawable.ic_workout_routine, R.drawable.ic_todo_list, R.drawable.ic_notes, R.drawable.ic_project, R.drawable.ic_finance)
+        val icons = listOf(R.drawable.ic_habit_tracker, R.drawable.ic_workout_routine, R.drawable.ic_task, R.drawable.ic_notes, R.drawable.ic_project, R.drawable.ic_finance)
         val rv = RecyclerView(this).apply {
             layoutManager = GridLayoutManager(this@SettingsActivity, 4)
             adapter = object : RecyclerView.Adapter<RecyclerView.ViewHolder>() {
@@ -869,7 +719,6 @@ class SettingsActivity : BaseActivity() {
     }
 
     data class SettingsHubItem(val title: String, val description: String, val iconRes: Int, val sectionKey: String)
-    data class ConfigItem(val title: String, val summary: String = "", val isToggle: Boolean = false, var isChecked: Boolean = false, val action: () -> Unit)
 
     inner class SettingsHubAdapter(private val items: List<SettingsHubItem>, private val onSelect: (String) -> Unit) : RecyclerView.Adapter<SettingsHubAdapter.ViewHolder>() {
         override fun onCreateViewHolder(p: ViewGroup, t: Int) = ViewHolder(LayoutInflater.from(p.context).inflate(R.layout.item_settings_hub, p, false))
@@ -882,26 +731,6 @@ class SettingsActivity : BaseActivity() {
             val title: TextView = v.findViewById(R.id.tv_item_title)
             val description: TextView = v.findViewById(R.id.tv_item_description)
             val icon: ImageView = v.findViewById(R.id.iv_item_icon)
-        }
-    }
-
-    inner class ConfigAdapter(private val items: List<ConfigItem>, private val onAnyChange: () -> Unit) : RecyclerView.Adapter<ConfigAdapter.ViewHolder>() {
-        override fun onCreateViewHolder(p: ViewGroup, v: Int) = ViewHolder(LayoutInflater.from(p.context).inflate(R.layout.item_config_row, p, false))
-        override fun onBindViewHolder(h: ViewHolder, pos: Int) {
-            val i = items[pos]; h.title.text = i.title; h.summary.text = i.summary
-            h.switch.visibility = if (i.isToggle) View.VISIBLE else View.GONE
-            h.switch.isChecked = i.isChecked; h.itemView.findViewById<View>(R.id.iv_chevron).visibility = if (i.isToggle) View.GONE else View.VISIBLE
-            h.itemView.setOnClickListener {
-                i.action()
-                if (i.isToggle) { i.isChecked = !i.isChecked; h.switch.isChecked = i.isChecked }
-                onAnyChange()
-            }
-        }
-        override fun getItemCount() = items.size
-        inner class ViewHolder(v: View) : RecyclerView.ViewHolder(v) {
-            val title: TextView = v.findViewById(R.id.tv_config_title)
-            val summary: TextView = v.findViewById(R.id.tv_config_summary)
-            val switch: SwitchCompat = v.findViewById(R.id.sw_config_toggle)
         }
     }
 }

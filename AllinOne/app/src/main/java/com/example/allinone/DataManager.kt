@@ -30,6 +30,7 @@ object DataManager {
     var taskAutoArchive: Boolean = false
     var taskDefaultSection: String = "Tasks"
     var taskVisibleSections = mutableListOf("Tasks")
+    var taskEditModeEnabled: Boolean = false
 
     // Finance Settings
     var financeCustomCategories = mutableListOf("Food", "Rent", "Transport", "Shopping", "Entertainment", "Health", "Other")
@@ -71,6 +72,10 @@ object DataManager {
     var projectDeadlineAlerts: Boolean = true
     var projectAnalyticsEnabled: Boolean = false
     var projectCustomTags = mutableListOf("UI", "LOGIC", "BUG")
+    var projectSortCompletedToBottom: Boolean = true
+    var projectActiveExpanded: Boolean = true
+    var projectCompletedExpanded: Boolean = false
+    var projectAutoSaveIdeas: Boolean = true
     var projectDualExistEnabled: Boolean = false
     var projectIdeasEnabled: Boolean = true
     var projectRoadmapsEnabled: Boolean = true
@@ -94,6 +99,7 @@ object DataManager {
     var displaySize: String = "S" // Options: XS, S, L
     var homeDisplaySize: String = "S" // Options: XS, S, L
     var fontSize: String = "S" // Options: XS, S, L
+    var isSystemAppearanceEnabled: Boolean = true
 
     // Home Page Section Visibility
     var showHabitSection: Boolean = true
@@ -123,7 +129,7 @@ object DataManager {
 
     var globalHabitIcon: Int = R.drawable.ic_habit_tracker
     var globalWorkoutIcon: Int = R.drawable.ic_workout_routine
-    var globalTaskIcon: Int = R.drawable.ic_todo_list
+    var globalTaskIcon: Int = R.drawable.ic_task
     var globalProjectIcon: Int = R.drawable.ic_project
     var globalNoteIcon: Int = R.drawable.ic_notes
     var globalFinanceIcon: Int = R.drawable.ic_finance
@@ -161,6 +167,7 @@ object DataManager {
     private const val KEY_TASK_SORT_ORDER = "task_sort_order"
     private const val KEY_TASK_CUSTOM_CATEGORIES = "task_custom_categories"
     private const val KEY_TASK_AUTO_ARCHIVE = "task_auto_archive"
+    private const val KEY_TASK_EDIT_MODE = "task_edit_mode_enabled"
     private const val KEY_TASK_DEFAULT_SECTION = "task_default_section"
     private const val KEY_TASK_VISIBLE_SECTIONS = "task_visible_sections"
     private const val KEY_FINANCE_CUSTOM_CATEGORIES = "finance_custom_categories"
@@ -179,6 +186,9 @@ object DataManager {
     private const val KEY_PROJ_ARCHIVE = "project_auto_archive"
     private const val KEY_PROJ_SYNC = "project_synergy_sync"
     private const val KEY_PROJ_ALERTS = "project_deadline_alerts"
+    private const val KEY_PROJ_SORT_BOTTOM = "project_sort_completed_bottom"
+    private const val KEY_PROJ_COMPLETED_EXP = "project_completed_expanded"
+    private const val KEY_PROJ_AUTOSAVE_IDEAS = "project_autosave_ideas"
     private const val KEY_PROJ_ANALYTICS = "project_analytics_enabled"
     private const val KEY_APP_LOCK = "app_lock_enabled"
     private const val KEY_APP_LOCK_PIN = "app_lock_pin"
@@ -198,6 +208,7 @@ object DataManager {
     private const val KEY_DISPLAY_SIZE = "app_display_size"
     private const val KEY_HOME_DISPLAY_SIZE = "home_display_size"
     private const val KEY_FONT_SIZE = "app_font_size"
+    private const val KEY_SYSTEM_APPEARANCE = "is_system_appearance_enabled"
     private const val KEY_USER_XP = "user_xp_data"
     private const val KEY_USER_LEVEL = "user_level_data"
 
@@ -276,6 +287,7 @@ object DataManager {
             putString(KEY_TASK_SORT_ORDER, taskSortOrder)
             putString(KEY_TASK_CUSTOM_CATEGORIES, gson.toJson(taskCustomCategories))
             putBoolean(KEY_TASK_AUTO_ARCHIVE, taskAutoArchive)
+            putBoolean(KEY_TASK_EDIT_MODE, taskEditModeEnabled)
             putString(KEY_TASK_DEFAULT_SECTION, taskDefaultSection)
             putString(KEY_TASK_VISIBLE_SECTIONS, gson.toJson(taskVisibleSections))
             putString(KEY_FINANCE_CUSTOM_CATEGORIES, gson.toJson(financeCustomCategories))
@@ -294,6 +306,10 @@ object DataManager {
             putBoolean(KEY_PROJ_ARCHIVE, projectAutoArchive)
             putBoolean(KEY_PROJ_SYNC, projectSynergySync)
             putBoolean(KEY_PROJ_ALERTS, projectDeadlineAlerts)
+            putBoolean(KEY_PROJ_SORT_BOTTOM, projectSortCompletedToBottom)
+            putBoolean("project_active_expanded", projectActiveExpanded)
+            putBoolean(KEY_PROJ_COMPLETED_EXP, projectCompletedExpanded)
+            putBoolean(KEY_PROJ_AUTOSAVE_IDEAS, projectAutoSaveIdeas)
             putBoolean(KEY_PROJ_ANALYTICS, projectAnalyticsEnabled)
             putBoolean(KEY_PROJ_DUAL_EXIST, projectDualExistEnabled)
             putBoolean(KEY_PROJ_IDEAS_ENABLED, projectIdeasEnabled)
@@ -307,6 +323,7 @@ object DataManager {
             putString(KEY_DISPLAY_SIZE, displaySize)
             putString(KEY_HOME_DISPLAY_SIZE, homeDisplaySize)
             putString(KEY_FONT_SIZE, fontSize)
+            putBoolean(KEY_SYSTEM_APPEARANCE, isSystemAppearanceEnabled)
             putInt(KEY_USER_XP, userXP)
             putInt(KEY_USER_LEVEL, userLevel)
 
@@ -490,6 +507,7 @@ object DataManager {
             }
         } catch (e: Exception) {}
         taskAutoArchive = prefs.getBoolean(KEY_TASK_AUTO_ARCHIVE, false)
+        taskEditModeEnabled = prefs.getBoolean(KEY_TASK_EDIT_MODE, false)
         taskDefaultSection = prefs.getString(KEY_TASK_DEFAULT_SECTION, "Tasks") ?: "Tasks"
         try {
             prefs.getString(KEY_TASK_VISIBLE_SECTIONS, null)?.let {
@@ -540,6 +558,10 @@ object DataManager {
         projectAutoArchive = prefs.getBoolean(KEY_PROJ_ARCHIVE, false)
         projectSynergySync = prefs.getBoolean(KEY_PROJ_SYNC, false)
         projectDeadlineAlerts = prefs.getBoolean(KEY_PROJ_ALERTS, true)
+        projectSortCompletedToBottom = prefs.getBoolean(KEY_PROJ_SORT_BOTTOM, true)
+        projectActiveExpanded = prefs.getBoolean("project_active_expanded", true)
+        projectCompletedExpanded = prefs.getBoolean(KEY_PROJ_COMPLETED_EXP, false)
+        projectAutoSaveIdeas = prefs.getBoolean(KEY_PROJ_AUTOSAVE_IDEAS, true)
         projectAnalyticsEnabled = prefs.getBoolean(KEY_PROJ_ANALYTICS, false)
         projectDualExistEnabled = prefs.getBoolean(KEY_PROJ_DUAL_EXIST, false)
         projectIdeasEnabled = prefs.getBoolean(KEY_PROJ_IDEAS_ENABLED, true)
@@ -570,6 +592,7 @@ object DataManager {
         displaySize = prefs.getString(KEY_DISPLAY_SIZE, "S") ?: "S"
         homeDisplaySize = prefs.getString(KEY_HOME_DISPLAY_SIZE, "S") ?: "S"
         fontSize = prefs.getString(KEY_FONT_SIZE, "S") ?: "S"
+        isSystemAppearanceEnabled = prefs.getBoolean(KEY_SYSTEM_APPEARANCE, true)
         userXP = prefs.getInt(KEY_USER_XP, 0)
         userLevel = prefs.getInt(KEY_USER_LEVEL, 1)
 
@@ -610,7 +633,7 @@ object DataManager {
 
         globalHabitIcon = getSavedDrawable(prefs, context, KEY_GLOBAL_HABIT_ICON, R.drawable.ic_habit_tracker)
         globalWorkoutIcon = getSavedDrawable(prefs, context, KEY_GLOBAL_WORKOUT_ICON, R.drawable.ic_workout_routine)
-        globalTaskIcon = getSavedDrawable(prefs, context, KEY_GLOBAL_TASK_ICON, R.drawable.ic_todo_list)
+        globalTaskIcon = getSavedDrawable(prefs, context, KEY_GLOBAL_TASK_ICON, R.drawable.ic_task)
         globalProjectIcon = getSavedDrawable(prefs, context, KEY_GLOBAL_PROJECT_ICON, R.drawable.ic_project)
         globalNoteIcon = getSavedDrawable(prefs, context, KEY_GLOBAL_NOTE_ICON, R.drawable.ic_notes)
         globalFinanceIcon = getSavedDrawable(prefs, context, KEY_GLOBAL_FINANCE_ICON, R.drawable.ic_finance)
@@ -1066,6 +1089,14 @@ object DataManager {
         
         note.subFeatures?.let { sanitizeProjectFeatures(it) }
 
+        if (note.journalEntries == null) {
+            try {
+                val field = Note::class.java.getDeclaredField("journalEntries")
+                field.isAccessible = true
+                field.set(note, mutableListOf<JournalEntry>())
+            } catch (e: Exception) {}
+        }
+
         if (note.changeHistory == null) {
             try {
                 val field = Note::class.java.getDeclaredField("changeHistory")
@@ -1110,7 +1141,7 @@ object DataManager {
     fun resetAppearanceIcons() {
         globalHabitIcon = R.drawable.ic_habit_tracker
         globalWorkoutIcon = R.drawable.ic_fitness
-        globalTaskIcon = R.drawable.ic_todo_list
+        globalTaskIcon = R.drawable.ic_task
         globalNoteIcon = R.drawable.ic_notes
         globalProjectIcon = R.drawable.ic_project
         globalFinanceIcon = R.drawable.ic_finance

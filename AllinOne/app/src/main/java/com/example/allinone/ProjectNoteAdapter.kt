@@ -73,6 +73,8 @@ class ProjectNoteAdapter(
 
         // Completion Check
         holder.ivCompletedCheck.visibility = if (note.status == "Completed") View.VISIBLE else View.GONE
+        holder.ivCompletedCheck.setImageResource(R.drawable.icons8_check_mark_100)
+        holder.ivCompletedCheck.imageTintList = ColorStateList.valueOf(Color.parseColor("#2EC4B6"))
 
         // Priority
         val priorityText = when (note.priority) {

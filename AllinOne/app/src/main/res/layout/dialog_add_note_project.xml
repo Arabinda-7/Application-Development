@@ -44,6 +44,32 @@
             app:layout_constraintTop_toTopOf="@id/btn_save_note" />
 
         <ImageButton
+            android:id="@+id/btn_share_idea"
+            android:layout_width="40dp"
+            android:layout_height="40dp"
+            android:layout_marginEnd="8dp"
+            android:src="@android:drawable/ic_menu_share"
+            android:background="?attr/selectableItemBackgroundBorderless"
+            app:tint="@color/white"
+            android:padding="10dp"
+            app:layout_constraintBottom_toBottomOf="@id/btn_save_note"
+            app:layout_constraintEnd_toStartOf="@id/btn_mind_map"
+            app:layout_constraintTop_toTopOf="@id/btn_save_note" />
+
+        <ImageButton
+            android:id="@+id/btn_mind_map"
+            android:layout_width="40dp"
+            android:layout_height="40dp"
+            android:layout_marginEnd="8dp"
+            android:src="@drawable/ic_habit_tracker"
+            android:background="?attr/selectableItemBackgroundBorderless"
+            app:tint="@color/white"
+            android:padding="8dp"
+            app:layout_constraintBottom_toBottomOf="@id/btn_save_note"
+            app:layout_constraintEnd_toStartOf="@id/btn_convert_project_icon"
+            app:layout_constraintTop_toTopOf="@id/btn_save_note" />
+
+        <ImageButton
             android:id="@+id/btn_convert_project_icon"
             android:layout_width="40dp"
             android:layout_height="40dp"
@@ -192,13 +218,150 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="16dp"
-                android:minHeight="150dp"
+                android:minHeight="100dp"
                 android:background="@null"
                 android:hint="Write your idea details here..."
                 android:textColor="@color/white"
                 android:textColorHint="#80FFFFFF"
                 android:gravity="top"
                 android:inputType="textMultiLine" />
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="24dp"
+                android:text="INSPIRATION &amp; MOOD"
+                android:textColor="@color/text_secondary"
+                android:textSize="10sp"
+                android:textStyle="bold"
+                android:letterSpacing="0.1" />
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="12dp"
+                android:orientation="horizontal"
+                android:gravity="center_vertical">
+
+                <com.google.android.material.imageview.ShapeableImageView
+                    android:id="@+id/iv_inspiration"
+                    android:layout_width="100dp"
+                    android:layout_height="100dp"
+                    android:background="#11FFFFFF"
+                    android:scaleType="centerCrop"
+                    app:shapeAppearanceOverlay="@style/ShapeAppearance.MaterialComponents.MediumComponent" />
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="16dp"
+                    android:orientation="vertical">
+
+                    <TextView
+                        android:id="@+id/btn_pick_image"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="PICK IMAGE"
+                        android:textColor="#1A73E8"
+                        android:textSize="12sp"
+                        android:textStyle="bold"
+                        android:padding="8dp" />
+
+                    <EditText
+                        android:id="@+id/et_inspiration_url"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="8dp"
+                        android:background="@drawable/bg_finance_input"
+                        android:backgroundTint="#11FFFFFF"
+                        android:hint="Website URL..."
+                        android:padding="12dp"
+                        android:textColor="@color/white"
+                        android:textColorHint="#40FFFFFF"
+                        android:textSize="12sp" />
+                </LinearLayout>
+            </LinearLayout>
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="24dp"
+                android:text="VIBE COLOR"
+                android:textColor="@color/text_secondary"
+                android:textSize="10sp"
+                android:textStyle="bold"
+                android:letterSpacing="0.1" />
+
+            <HorizontalScrollView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="12dp"
+                android:scrollbars="none">
+                <LinearLayout
+                    android:id="@+id/container_vibe_colors"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal" />
+            </HorizontalScrollView>
+
+            <View
+                android:layout_width="match_parent"
+                android:layout_height="1dp"
+                android:layout_marginVertical="24dp"
+                android:background="#22FFFFFF" />
+
+            <TextView
+                android:id="@+id/btn_toggle_journal"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="IDEA EVOLUTION JOURNAL ▼"
+                android:textColor="@color/white"
+                android:textSize="10sp"
+                android:textStyle="bold"
+                android:letterSpacing="0.1"
+                android:paddingVertical="8dp" />
+
+            <LinearLayout
+                android:id="@+id/container_journal"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:visibility="gone">
+
+                <LinearLayout
+                    android:id="@+id/journal_list"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical"
+                    android:layout_marginTop="8dp" />
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="12dp"
+                    android:orientation="horizontal"
+                    android:gravity="center_vertical">
+
+                    <EditText
+                        android:id="@+id/et_journal_input"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:background="@null"
+                        android:hint="Log a new thought..."
+                        android:textColor="@color/white"
+                        android:textColorHint="#40FFFFFF"
+                        android:textSize="14sp" />
+
+                    <ImageButton
+                        android:id="@+id/btn_add_journal"
+                        android:layout_width="40dp"
+                        android:layout_height="40dp"
+                        android:src="@android:drawable/ic_input_add"
+                        android:background="?attr/selectableItemBackgroundBorderless"
+                        app:tint="@color/white" />
+                </LinearLayout>
+            </LinearLayout>
 
             <View
                 android:layout_width="match_parent"

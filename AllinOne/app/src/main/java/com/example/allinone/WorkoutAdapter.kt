@@ -282,7 +282,10 @@ class WorkoutAdapter(
 
         menuView.findViewById<View>(R.id.menu_edit).setOnClickListener {
             popupWindow.dismiss()
-            (context as? WorkoutRoutineActivity)?.showAddWorkoutDialog(workout)
+            val intent = Intent(context, AddWorkoutActivity::class.java).apply {
+                putExtra("WORKOUT_INDEX", allWorkouts.indexOf(workout))
+            }
+            context.startActivity(intent)
         }
 
         menuView.findViewById<View>(R.id.menu_delete).setOnClickListener {

@@ -1,0 +1,9 @@
+- [x] Add `taskEditModeEnabled` setting to `DataManager`
+- [x] Persist `taskEditModeEnabled` in SharedPreferences
+- [x] Add "Fast Edit Mode" toggle to Task Advanced Settings UI
+- [x] Update `ToDoListActivity` to handle the new toggle
+- [x] Modify `TaskAdapter` item click logic:
+    - [x] Implement expand/collapse by default
+    - [x] Respect `taskEditModeEnabled` to open edit dialog
+- [x] Ensure expansion persists when subtasks are toggled
+- [x] Verify sequential completion logic (blocking main task if subtasks are pending)

@@ -46,8 +46,7 @@ class NotesActivity : BaseActivity() {
 
         ViewCompat.setOnApplyWindowInsetsListener(findViewById(R.id.notes_root_layout)) { v, insets ->
             val statusBars = insets.getInsets(WindowInsetsCompat.Type.statusBars())
-            val offset = (12 * resources.displayMetrics.density).toInt()
-            v.setPadding(v.paddingLeft, statusBars.top - offset, v.paddingRight, v.paddingBottom)
+            v.setPadding(v.paddingLeft, statusBars.top, v.paddingRight, v.paddingBottom)
             insets
         }
         
@@ -89,10 +88,26 @@ class NotesActivity : BaseActivity() {
         if (DataManager.noteAddThemeColor != -1) {
             btnCreate.backgroundTintList = android.content.res.ColorStateList.valueOf(DataManager.noteAddThemeColor)
         }
-        btnCreate.setOnClickListener { showAddNoteDialog() }
+        btnCreate.setOnClickListener {
+            val intent = Intent(this, AddNoteActivity::class.java).apply {
+                putExtra("CATEGORY", currentCategory)
+            }
+            startActivity(intent)
+        }
 
         if (intent.getBooleanExtra("SHOW_ADD_DIALOG", false)) {
-            showAddNoteDialog()
+            val intentAdd = Intent(this, AddNoteActivity::class.java).apply {
+                putExtra("CATEGORY", currentCategory)
+            }
+            startActivity(intentAdd)
+        }
+    }
+
+    override fun onResume() {
+        super.onResume()
+        updateDisplayList()
+        if (::noteAdapter.isInitialized) {
+            noteAdapter.updateNotes(displayNotes)
         }
     }
 
@@ -508,57 +523,7 @@ class NotesActivity : BaseActivity() {
     }
 
     private fun showNotesSettingsDialog() {
-        val dialog = Dialog(this)
-        dialog.setContentView(R.layout.dialog_notes_settings)
-        dialog.window?.setBackgroundDrawableResource(android.R.color.transparent)
-        dialog.window?.setLayout(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT)
-
-        val itemDefault = dialog.findViewById<View>(R.id.item_default_cat)
-        val itemCleanup = dialog.findViewById<View>(R.id.item_auto_cleanup)
-        val itemTemplates = dialog.findViewById<View>(R.id.item_templates)
-        val itemBulk = dialog.findViewById<View>(R.id.item_bulk_move)
-        val itemExport = dialog.findViewById<View>(R.id.item_export_notes)
-        val tvDefaultSummary = dialog.findViewById<TextView>(R.id.tv_default_cat_summary)
-        val tvCleanupSummary = dialog.findViewById<TextView>(R.id.tv_cleanup_summary)
-        val btnClose = dialog.findViewById<View>(R.id.btn_close_settings)
-
-        tvDefaultSummary.text = "Current: ${DataManager.noteDefaultCategory}"
-        tvCleanupSummary.text = if (DataManager.noteAutoCleanupDays > 0) "Cleanup after ${DataManager.noteAutoCleanupDays} days" else "Disabled"
-
-        itemDefault.setOnClickListener {
-            val categories = listOf("Notes", "Questions", "Daily", "Stories")
-            val next = categories[(categories.indexOf(DataManager.noteDefaultCategory) + 1) % categories.size]
-            DataManager.noteDefaultCategory = next
-            DataManager.saveData(this)
-            tvDefaultSummary.text = "Current: $next"
-            android.widget.Toast.makeText(this, "Default tab set to $next", android.widget.Toast.LENGTH_SHORT).show()
-        }
-
-        itemCleanup.setOnClickListener {
-            val options = listOf(0, 7, 30, 90)
-            val current = DataManager.noteAutoCleanupDays
-            val next = options[(options.indexOf(current).coerceAtLeast(0) + 1) % options.size]
-            DataManager.noteAutoCleanupDays = next
-            DataManager.saveData(this)
-            tvCleanupSummary.text = if (next > 0) "Cleanup after $next days" else "Disabled"
-            android.widget.Toast.makeText(this, "Auto-cleanup: ${if (next > 0) "$next days" else "Off"}", android.widget.Toast.LENGTH_SHORT).show()
-        }
-
-        itemTemplates.setOnClickListener { showTemplateEditorDialog() }
-        itemBulk.setOnClickListener { showBulkMoveDialog() }
-        
-        itemExport.setOnClickListener { 
-            showManageSectionsDialog("NOTE")
-            dialog.dismiss()
-        }
-        (itemExport as? ViewGroup)?.let { vg ->
-            for (i in 0 until vg.childCount) {
-                (vg.getChildAt(i) as? TextView)?.let { it.text = "Customize Navigation" }
-            }
-        }
-
-        btnClose.setOnClickListener { dialog.dismiss() }
-        showDialogSafe(dialog)
+        startActivity(Intent(this, NoteSettingsActivity::class.java))
     }
 
     private fun showTemplateEditorDialog() {

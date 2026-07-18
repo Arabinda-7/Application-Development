@@ -105,7 +105,7 @@
                 android:id="@+id/iv_notes_icon"
                 android:layout_width="24dp"
                 android:layout_height="24dp"
-                android:src="@drawable/ic_todo_list"
+                android:src="@drawable/ic_task"
                 app:tint="@color/chip_selected" />
             <TextView
                 android:id="@+id/tv_notes_label"

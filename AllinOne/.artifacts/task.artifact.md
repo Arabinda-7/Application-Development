@@ -1,0 +1,3 @@
+- [x] Initialize `etInspirationUrl` in `showAddIdeaDialog`
+- [x] Save `inspirationUrl` in `btnSave` click listener
+- [x] Verify build

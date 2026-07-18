@@ -6,6 +6,8 @@ import java.util.*
 
 object UIUtils {
     fun wrapContext(context: Context): Context {
+        if (DataManager.isSystemAppearanceEnabled) return context
+
         val displayScale = when(DataManager.displaySize) {
             "XS" -> 0.85f
             "L" -> 1.15f

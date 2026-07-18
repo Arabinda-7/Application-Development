@@ -1,5 +1,6 @@
 package com.example.allinone
 
+import android.content.Intent
 import android.graphics.Color
 import android.view.LayoutInflater
 import android.view.View
@@ -37,6 +38,26 @@ class NoteAdapter(
         holder.noteCard.setCardBackgroundColor(ContextCompat.getColor(context, R.color.chip_background))
         holder.noteTitle.setTextColor(color)
 
+        // Vibe Color Support
+        if (note.vibeColor != -1) {
+            holder.noteCard.strokeWidth = 2.dpToPx(context)
+            holder.noteCard.strokeColor = note.vibeColor
+        } else {
+            holder.noteCard.strokeWidth = 0
+        }
+
+        // Image Preview
+        if (!note.imageUri.isNullOrEmpty()) {
+            holder.imagePreview.visibility = View.VISIBLE
+            try {
+                holder.imagePreview.setImageURI(android.net.Uri.parse(note.imageUri))
+            } catch (e: Exception) {
+                holder.imagePreview.visibility = View.GONE
+            }
+        } else {
+            holder.imagePreview.visibility = View.GONE
+        }
+
         // Set date
         val sdf = SimpleDateFormat("MMMM dd, yyyy", Locale.getDefault())
         holder.noteDate.text = sdf.format(Date(note.timestamp))
@@ -59,7 +80,12 @@ class NoteAdapter(
                 notifyItemChanged(position)
             } else {
                 when (context) {
-                    is NotesActivity -> context.showEditNoteDialog(note)
+                    is NotesActivity -> {
+                        val intent = Intent(context, AddNoteActivity::class.java).apply {
+                            putExtra("NOTE_INDEX", DataManager.notes.indexOf(note))
+                        }
+                        context.startActivity(intent)
+                    }
                     is ProjectActivity -> context.showEditIdeaDialog(note)
                 }
             }
@@ -154,5 +180,8 @@ class NoteAdapter(
         val noteContent: TextView = itemView.findViewById(R.id.note_content)
         val noteDate: TextView = itemView.findViewById(R.id.note_date)
         val noteCard: MaterialCardView = itemView.findViewById(R.id.note_card)
+        val imagePreview: android.widget.ImageView = itemView.findViewById(R.id.note_image_preview)
     }
+
+    private fun Int.dpToPx(context: android.content.Context): Int = (this * context.resources.displayMetrics.density).toInt()
 }

@@ -1,15 +1,13 @@
 package com.example.allinone
 
 import android.content.Context
+import android.content.Intent
 import android.graphics.Color
 import android.graphics.Paint
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.widget.CheckBox
-import android.widget.ImageView
-import android.widget.PopupWindow
-import android.widget.TextView
+import android.widget.*
 import androidx.core.content.ContextCompat
 import androidx.recyclerview.widget.RecyclerView
 import com.google.android.material.card.MaterialCardView
@@ -29,6 +27,7 @@ class TaskAdapter(
     private var isDeleteMode = false
     private var showCompleted = true
     private val displayItems = mutableListOf<Any>()
+    private val expandedTasks = mutableSetOf<Task>()
     
     private var currentCategory = "All"
     private var currentSearchQuery = ""
@@ -95,13 +94,33 @@ class TaskAdapter(
             
             holder.ivReminder.visibility = if (task.reminderTime != null) View.VISIBLE else View.GONE
             
+            // Subtask expansion rendering
+            if (expandedTasks.contains(task)) {
+                holder.subtaskContainer.visibility = View.VISIBLE
+                renderSubtasks(holder.subtaskContainer, task, position)
+            } else {
+                holder.subtaskContainer.visibility = View.GONE
+            }
+
             updateVisuals(holder, task.isCompleted)
 
             holder.taskCompleted.setOnClickListener {
-                if (holder.taskCompleted.isChecked) {
+                val hasPendingSubtasks = task.subtasks.any { !it.isCompleted }
+                
+                if (hasPendingSubtasks && !task.isCompleted) {
+                    holder.taskCompleted.isChecked = false
+                    if (!expandedTasks.contains(task)) {
+                        expandedTasks.add(task)
+                        notifyItemChanged(position)
+                        Toast.makeText(context, "Finish all subtasks to complete this task", Toast.LENGTH_SHORT).show()
+                    } else {
+                        Toast.makeText(context, "Pending subtasks remain", Toast.LENGTH_SHORT).show()
+                    }
+                } else if (holder.taskCompleted.isChecked) {
                     task.isCompleted = true
                     task.completedTimestamp = System.currentTimeMillis()
                     DataManager.addActivity("Finished Task: ${task.name}")
+                    expandedTasks.remove(task)
                     updateDisplayList()
                     DataManager.saveData(context)
                     onProgressChanged()
@@ -114,8 +133,20 @@ class TaskAdapter(
                 if (isDeleteMode) {
                     task.isSelected = !task.isSelected
                     notifyItemChanged(position)
+                } else if (DataManager.taskEditModeEnabled) {
+                    val intent = Intent(context, AddTaskActivity::class.java).apply {
+                        putExtra("TASK_INDEX", allTasks.indexOf(task))
+                        putExtra("SECTION", currentSection)
+                    }
+                    context.startActivity(intent)
                 } else {
-                    (context as? ToDoListActivity)?.showAddTaskDialog(task)
+                    // Toggle expansion
+                    if (expandedTasks.contains(task)) {
+                        expandedTasks.remove(task)
+                    } else {
+                        expandedTasks.add(task)
+                    }
+                    notifyItemChanged(position)
                 }
             }
 
@@ -159,7 +190,7 @@ class TaskAdapter(
 
         menuView.findViewById<View>(R.id.menu_edit).setOnClickListener {
             popupWindow.dismiss()
-            (context as? ToDoListActivity)?.showAddTaskDialog(task)
+            (context as? TaskActivity)?.showAddTaskDialog(task)
         }
 
         menuView.findViewById<View>(R.id.menu_delete).setOnClickListener {
@@ -268,6 +299,30 @@ class TaskAdapter(
         }
     }
 
+    private fun renderSubtasks(container: LinearLayout, task: Task, parentPosition: Int) {
+        container.removeAllViews()
+        val context = container.context
+        
+        task.subtasks.forEach { subtask ->
+            val subView = LayoutInflater.from(context).inflate(android.R.layout.simple_list_item_multiple_choice, container, false)
+            val ctView = subView as CheckedTextView
+            ctView.text = subtask.name
+            ctView.setTextColor(Color.WHITE)
+            ctView.textSize = 14f
+            ctView.isChecked = subtask.isCompleted
+            ctView.setCheckMarkTintList(android.content.res.ColorStateList.valueOf(Color.WHITE))
+            ctView.setPadding(0, 16, 0, 16)
+            
+            ctView.setOnClickListener {
+                subtask.isCompleted = !subtask.isCompleted
+                ctView.isChecked = subtask.isCompleted
+                DataManager.saveData(context)
+                notifyItemChanged(parentPosition) // To update the "X/Y subtasks" progress text
+            }
+            container.addView(subView)
+        }
+    }
+
     override fun getItemCount() = displayItems.size
 
     class TaskViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
@@ -279,6 +334,7 @@ class TaskAdapter(
         val tvCategory: TextView = itemView.findViewById(R.id.tv_task_category)
         val tvSubtasks: TextView = itemView.findViewById(R.id.tv_subtask_progress)
         val ivReminder: ImageView = itemView.findViewById(R.id.iv_reminder_icon)
+        val subtaskContainer: LinearLayout = itemView.findViewById(R.id.subtask_list_container)
     }
 
     class HeaderViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {

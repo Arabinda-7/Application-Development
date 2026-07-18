@@ -1,0 +1,21 @@
+# Tasks - Rename Task Section Files
+
+- [x] Create new files with "task" naming
+    - [x] `TaskActivity.kt`
+    - [x] `activity_task.xml`
+    - [x] `ic_task.xml`
+- [x] Update code references
+    - [x] `AndroidManifest.xml`
+    - [x] `MainActivity.kt`
+    - [x] `DataManager.kt`
+    - [x] `SettingsActivity.kt`
+    - [x] `TaskAdapter.kt`
+    - [x] `ReminderReceiver.kt`
+    - [x] `DashboardState.kt`
+- [x] Update resource references in layouts
+    - [x] `activity_task.xml`
+    - [x] `activity_notes.xml`
+- [x] Delete old "todo" files
+    - [x] `ToDoListActivity.kt`
+    - [x] `activity_to_do_list.xml`
+    - [x] `ic_todo_list.xml`

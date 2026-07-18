@@ -187,7 +187,10 @@ class HabitAdapter(
 
         menuView.findViewById<View>(R.id.menu_edit).setOnClickListener {
             popupWindow.dismiss()
-            (context as? HabitTrackerActivity)?.showAddHabitDialog(habit)
+            val intent = Intent(context, AddHabitActivity::class.java).apply {
+                putExtra("HABIT_INDEX", allHabits.indexOf(habit))
+            }
+            context.startActivity(intent)
         }
 
         menuView.findViewById<View>(R.id.menu_delete).setOnClickListener {

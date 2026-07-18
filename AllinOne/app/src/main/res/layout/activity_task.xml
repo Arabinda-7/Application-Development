@@ -6,7 +6,7 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:background="#000000"
-    tools:context=".ToDoListActivity">
+    tools:context=".TaskActivity">
 
     <ImageButton
         android:id="@+id/btn_back"
@@ -180,7 +180,7 @@
                 android:id="@+id/iv_todo_icon"
                 android:layout_width="24dp"
                 android:layout_height="24dp"
-                android:src="@drawable/ic_todo_list"
+                android:src="@drawable/ic_task"
                 app:tint="@color/text_secondary" />
             <TextView
                 android:id="@+id/tv_todo_label"

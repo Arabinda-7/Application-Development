@@ -30,7 +30,7 @@
             android:layout_width="48dp"
             android:layout_height="48dp"
             android:background="?attr/selectableItemBackgroundBorderless"
-            android:src="@android:drawable/ic_menu_more"
+            android:src="@drawable/baseline_tune_24"
             app:tint="@color/white"
             android:contentDescription="Menu"
             app:layout_constraintBottom_toBottomOf="@id/btn_close_details"

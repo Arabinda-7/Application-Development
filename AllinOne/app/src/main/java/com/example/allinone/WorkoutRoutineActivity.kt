@@ -80,16 +80,14 @@ class WorkoutRoutineActivity : BaseActivity() {
 
         ViewCompat.setOnApplyWindowInsetsListener(findViewById(R.id.today_layout)) { v, insets ->
             val statusBars = insets.getInsets(WindowInsetsCompat.Type.statusBars())
-            val offset = (12 * resources.displayMetrics.density).toInt()
-            v.setPadding(v.paddingLeft, statusBars.top - offset, v.paddingRight, v.paddingBottom)
+            v.setPadding(v.paddingLeft, statusBars.top, v.paddingRight, v.paddingBottom)
             insets
         }
 
         ViewCompat.setOnApplyWindowInsetsListener(findViewById(R.id.history_layout)) { v, insets ->
             val statusBars = insets.getInsets(WindowInsetsCompat.Type.statusBars())
             val navBars = insets.getInsets(WindowInsetsCompat.Type.navigationBars())
-            val offset = (12 * resources.displayMetrics.density).toInt()
-            v.setPadding(v.paddingLeft, statusBars.top - offset, v.paddingRight, navBars.bottom)
+            v.setPadding(v.paddingLeft, statusBars.top, v.paddingRight, navBars.bottom)
             insets
         }
 
@@ -123,7 +121,9 @@ class WorkoutRoutineActivity : BaseActivity() {
         if (DataManager.workoutAddThemeColor != -1) {
             btnCreate.strokeColor = DataManager.workoutAddThemeColor
         }
-        btnCreate.setOnClickListener { showAddWorkoutDialog(null) }
+        btnCreate.setOnClickListener {
+            startActivity(Intent(this, AddWorkoutActivity::class.java))
+        }
 
         setupHeaderLogic()
         setupFooterLogic()
@@ -652,110 +652,7 @@ class WorkoutRoutineActivity : BaseActivity() {
     }
 
     private fun showWorkoutSettingsDialog() {
-        val dialog = Dialog(this)
-        val view = layoutInflater.inflate(R.layout.dialog_habit_settings, null)
-        dialog.setContentView(view)
-        dialog.window?.setBackgroundDrawableResource(android.R.color.transparent)
-        dialog.window?.setLayout(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT)
-
-        val title = view.findViewById<TextView>(R.id.tv_settings_title)
-        val itemMuscle = view.findViewById<View>(R.id.item_default_tab) 
-        val tvMuscleSummary = view.findViewById<TextView>(R.id.tv_default_tab_summary)
-        
-        val itemRest = view.findViewById<View>(R.id.item_vacation_mode)
-        val swRest = view.findViewById<SwitchCompat>(R.id.iv_vacation_check)
-        
-        val itemUnit = view.findViewById<View>(R.id.item_day_reset)
-        val tvUnitSummary = view.findViewById<TextView>(R.id.tv_day_reset_summary)
-        
-        val itemReadiness = view.findViewById<View>(R.id.item_bulk_mode)
-        val ivReadiness = view.findViewById<View>(R.id.iv_bulk_check)
-        
-        val itemDefaultMode = view.findViewById<View>(R.id.item_sort_order)
-        val tvDefaultModeSummary = view.findViewById<TextView>(R.id.tv_sort_summary)
-        
-        val itemRestDuration = view.findViewById<View>(R.id.item_sound)
-        val btnClose = view.findViewById<View>(R.id.btn_close_settings)
-
-        view.findViewById<View>(R.id.item_haptics)?.visibility = View.GONE
-        view.findViewById<View>(R.id.item_grace_period)?.visibility = View.GONE
-
-        title.text = "Workout Settings"
-        
-        fun setLabel(container: View?, text: String) {
-            (container as? ViewGroup)?.let { vg ->
-                for (i in 0 until vg.childCount) {
-                    val child = vg.getChildAt(i)
-                    if (child is TextView && child.id != R.id.tv_default_tab_summary && 
-                        child.id != R.id.tv_sort_summary && child.id != R.id.tv_day_reset_summary &&
-                        child.id != R.id.tv_grace_summary) {
-                        child.text = text
-                        return
-                    }
-                    if (child is ViewGroup) setLabel(child, text)
-                }
-            }
-        }
-
-        setLabel(itemMuscle, "Manage Muscle Groups")
-        tvMuscleSummary?.text = "Add or remove body part tags"
-        
-        setLabel(itemRest, "Auto-Rest Timer")
-        swRest?.isChecked = DataManager.workoutAutoRestTimer
-
-        setLabel(itemUnit, "Workout Unit")
-        tvUnitSummary?.text = "Current: ${DataManager.workoutWeightUnit} (Tap to change)"
-
-        setLabel(itemReadiness, "Workout Readiness")
-        ivReadiness?.visibility = View.GONE
-
-        setLabel(itemDefaultMode, "Default Tracking Mode")
-        tvDefaultModeSummary?.text = "Current: ${DataManager.workoutDefaultMode}"
-
-        setLabel(itemRestDuration, "Rest Duration")
-        val tvRestDurationSummary = (itemRestDuration as? ViewGroup)?.findViewById<TextView>(R.id.tv_sort_summary) 
-                                     ?: (itemRestDuration as? ViewGroup)?.findViewById<TextView>(R.id.tv_default_tab_summary)
-                                     ?: (itemRestDuration as? ViewGroup)?.getChildAt(0).let { (it as? ViewGroup)?.getChildAt(1) as? TextView }
-        
-        tvRestDurationSummary?.text = "Current: ${DataManager.workoutRestDuration}s (Tap to cycle)"
-        view.findViewById<View>(R.id.iv_sound_check)?.visibility = View.GONE
-
-        itemMuscle?.setOnClickListener { showManageMuscleGroupsDialog() }
-        
-        itemRest?.setOnClickListener {
-            DataManager.workoutAutoRestTimer = !DataManager.workoutAutoRestTimer
-            swRest?.isChecked = DataManager.workoutAutoRestTimer
-            DataManager.saveData(this)
-        }
-
-        itemUnit?.setOnClickListener {
-            DataManager.workoutWeightUnit = if (DataManager.workoutWeightUnit == "Kg") "Lb" else "Kg"
-            DataManager.saveData(this)
-            tvUnitSummary?.text = "Current: ${DataManager.workoutWeightUnit} (Tap to change)"
-            android.widget.Toast.makeText(this, "Unit changed to ${DataManager.workoutWeightUnit}", android.widget.Toast.LENGTH_SHORT).show()
-        }
-
-        itemReadiness?.setOnClickListener { showWorkoutReadinessDialog() }
-
-        itemDefaultMode?.setOnClickListener {
-            val modes = listOf("Reps", "Sets", "Timer")
-            val next = modes[(modes.indexOf(DataManager.workoutDefaultMode) + 1) % modes.size]
-            DataManager.workoutDefaultMode = next
-            tvDefaultModeSummary?.text = "Current: $next"
-            DataManager.saveData(this)
-        }
-
-        itemRestDuration?.setOnClickListener {
-            val durations = listOf(30, 60, 90, 120, 180)
-            val currentIdx = durations.indexOf(DataManager.workoutRestDuration)
-            val next = durations[(if (currentIdx == -1) 1 else currentIdx + 1) % durations.size]
-            DataManager.workoutRestDuration = next
-            tvRestDurationSummary?.text = "Current: ${next}s (Tap to cycle)"
-            DataManager.saveData(this)
-        }
-
-        btnClose?.setOnClickListener { dialog.dismiss() }
-        showDialogSafe(dialog)
+        startActivity(Intent(this, WorkoutSettingsActivity::class.java))
     }
 
     private fun showManageMuscleGroupsDialog() {
@@ -922,6 +819,12 @@ class WorkoutRoutineActivity : BaseActivity() {
 
         btnClose.setOnClickListener { timer.cancel(); dialog.dismiss() }
         showDialogSafe(dialog)
+    }
+
+    override fun onResume() {
+        super.onResume()
+        applyFilters()
+        updateSectionProgress()
     }
 
     private fun updateNavUI(active: String) {

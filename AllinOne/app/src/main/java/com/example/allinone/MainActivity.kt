@@ -49,7 +49,7 @@ class MainActivity : BaseActivity() {
 
     // Direct Access Dialogs for Speed Dial
     private fun quickAddTask() {
-        val intent = Intent(this, ToDoListActivity::class.java).apply {
+        val intent = Intent(this, TaskActivity::class.java).apply {
             putExtra("SHOW_ADD_DIALOG", true)
         }
         startActivity(intent)
@@ -122,7 +122,7 @@ class MainActivity : BaseActivity() {
                             state = dashboardState,
                             onNavigateToHabits = { startActivity(Intent(this, HabitTrackerActivity::class.java)) },
                             onNavigateToWorkout = { startActivity(Intent(this, WorkoutRoutineActivity::class.java)) },
-                            onNavigateToTodos = { startActivity(Intent(this, ToDoListActivity::class.java)) },
+                            onNavigateToTodos = { startActivity(Intent(this, TaskActivity::class.java)) },
                             onNavigateToNotes = { startActivity(Intent(this, NotesActivity::class.java)) },
                             onNavigateToProjects = { startActivity(Intent(this, ProjectActivity::class.java)) },
                             onNavigateToFinance = { startActivity(Intent(this, FinanceActivity::class.java)) },
@@ -175,8 +175,8 @@ class MainActivity : BaseActivity() {
 
         // 2. Search Tasks
         DataManager.tasks.filter { it.name.lowercase().contains(lowQuery) }.forEach { task ->
-            results.add(SearchResult(task.name, "TO-DO LIST", R.drawable.ic_todo_list) {
-                startActivity(Intent(this, ToDoListActivity::class.java))
+            results.add(SearchResult(task.name, "TO-DO LIST", R.drawable.ic_task) {
+                startActivity(Intent(this, TaskActivity::class.java))
             })
         }
 

@@ -31,7 +31,7 @@ import com.google.android.material.chip.ChipGroup
 import java.text.SimpleDateFormat
 import java.util.*
 
-class ToDoListActivity : BaseActivity() {
+class TaskActivity : BaseActivity() {
 
     private val allTasks = DataManager.tasks
     private lateinit var taskAdapter: TaskAdapter
@@ -45,12 +45,11 @@ class ToDoListActivity : BaseActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         enableEdgeToEdge()
         super.onCreate(savedInstanceState)
-        setContentView(R.layout.activity_to_do_list)
+        setContentView(R.layout.activity_task)
 
         ViewCompat.setOnApplyWindowInsetsListener(findViewById(R.id.todo_root_layout)) { v, insets ->
             val statusBars = insets.getInsets(WindowInsetsCompat.Type.statusBars())
-            val offset = (12 * resources.displayMetrics.density).toInt()
-            v.setPadding(v.paddingLeft, statusBars.top - offset, v.paddingRight, v.paddingBottom)
+            v.setPadding(v.paddingLeft, statusBars.top, v.paddingRight, v.paddingBottom)
             insets
         }
         
@@ -83,12 +82,23 @@ class ToDoListActivity : BaseActivity() {
             if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.TIRAMISU) {
                 requestPermissions(arrayOf(android.Manifest.permission.POST_NOTIFICATIONS), 101)
             }
-            showAddTaskDialog(null) 
+            val intent = Intent(this, AddTaskActivity::class.java).apply {
+                putExtra("SECTION", currentSection)
+            }
+            startActivity(intent)
         }
 
         if (intent.getBooleanExtra("SHOW_ADD_DIALOG", false)) {
-            showAddTaskDialog(null)
+            val intentAdd = Intent(this, AddTaskActivity::class.java).apply {
+                putExtra("SECTION", currentSection)
+            }
+            startActivity(intentAdd)
         }
+    }
+
+    override fun onResume() {
+        super.onResume()
+        applyFilters()
     }
 
     private fun setupHeader() {
@@ -153,7 +163,7 @@ class ToDoListActivity : BaseActivity() {
                 val padding = TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, 16f, resources.displayMetrics).toInt()
                 setPadding(padding, 0, padding, 0)
                 
-                background = ContextCompat.getDrawable(this@ToDoListActivity, R.drawable.filter_chip_bg)
+                background = ContextCompat.getDrawable(this@TaskActivity, R.drawable.filter_chip_bg)
                 buttonDrawable = null
                 gravity = Gravity.CENTER
                 text = category.uppercase()
@@ -215,12 +225,12 @@ class ToDoListActivity : BaseActivity() {
                     // Swipe Right -> Complete
                     task.isCompleted = true
                     taskAdapter.updateDisplayList()
-                    DataManager.saveData(this@ToDoListActivity)
+                    DataManager.saveData(this@TaskActivity)
                 } else {
                     // Swipe Left -> Delete
                     allTasks.remove(task)
                     taskAdapter.updateDisplayList()
-                    DataManager.saveData(this@ToDoListActivity)
+                    DataManager.saveData(this@TaskActivity)
                 }
             }
         }
@@ -267,89 +277,7 @@ class ToDoListActivity : BaseActivity() {
     }
 
     private fun showAdvancedSettingsDialog() {
-        val dialog = Dialog(this)
-        val view = layoutInflater.inflate(R.layout.dialog_task_advanced_settings, null)
-        dialog.setContentView(view)
-        dialog.window?.setBackgroundDrawableResource(android.R.color.transparent)
-        dialog.window?.setLayout(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT)
-
-        // Select and Delete
-        view.findViewById<View>(R.id.item_delete).setOnClickListener {
-            toggleDeleteMode(true)
-            dialog.dismiss()
-        }
-
-        // Sort Order
-        val tvSortLabel = view.findViewById<TextView>(R.id.tv_sort_label)
-        fun updateSortText() { tvSortLabel.text = "Sort Order: ${DataManager.taskSortOrder}" }
-        updateSortText()
-        
-        view.findViewById<View>(R.id.item_sort).setOnClickListener {
-            val orders = listOf("Priority", "Newest", "Alphabetical")
-            val currentIndex = orders.indexOf(DataManager.taskSortOrder)
-            DataManager.taskSortOrder = orders[(currentIndex + 1) % orders.size]
-            taskAdapter.setSortOrder(DataManager.taskSortOrder)
-            DataManager.saveData(this)
-            updateSortText()
-        }
-
-        // Auto Archive
-        val swArchive = view.findViewById<SwitchCompat>(R.id.iv_archive_check)
-        fun updateArchiveUI() {
-            swArchive.isChecked = DataManager.taskAutoArchive
-        }
-        updateArchiveUI()
-        
-        view.findViewById<View>(R.id.item_archive).setOnClickListener {
-            DataManager.taskAutoArchive = !DataManager.taskAutoArchive
-            DataManager.saveData(this)
-            updateArchiveUI()
-            Toast.makeText(this, "Auto-Archive ${if (DataManager.taskAutoArchive) "enabled" else "disabled"}", Toast.LENGTH_SHORT).show()
-        }
-
-        // Show Hidden Tasks
-        val swHidden = view.findViewById<SwitchCompat>(R.id.iv_hidden_check)
-        swHidden.isChecked = DataManager.taskShowHidden
-        
-        view.findViewById<View>(R.id.item_show_hidden).setOnClickListener {
-            DataManager.taskShowHidden = !DataManager.taskShowHidden
-            DataManager.saveData(this)
-            swHidden.isChecked = DataManager.taskShowHidden
-            taskAdapter.updateDisplayList()
-            Toast.makeText(this, "Hidden tasks ${if (DataManager.taskShowHidden) "visible" else "hidden"}", Toast.LENGTH_SHORT).show()
-        }
-
-        // Analytics
-        view.findViewById<View>(R.id.item_analytics).setOnClickListener {
-            showTaskAnalyticsDialog()
-        }
-
-        // Manage Categories
-        view.findViewById<View>(R.id.item_categories).setOnClickListener {
-            showManageCategoriesDialog()
-        }
-
-        // Default Section (NEW)
-        val tvDefaultSection = view.findViewById<TextView>(R.id.tv_default_section_summary)
-        tvDefaultSection.text = "Current: ${DataManager.taskDefaultSection}"
-        view.findViewById<View>(R.id.item_default_section).setOnClickListener {
-            val sections = listOf("Tasks", "Work List")
-            val next = sections[(sections.indexOf(DataManager.taskDefaultSection) + 1) % sections.size]
-            DataManager.taskDefaultSection = next
-            tvDefaultSection.text = "Current: $next"
-            DataManager.saveData(this)
-            Toast.makeText(this, "Default tab set to $next", Toast.LENGTH_SHORT).show()
-        }
-
-        // Customize Navigation (FIXED)
-        view.findViewById<View>(R.id.item_customize_navigation).setOnClickListener {
-            showManageSectionsDialog("TASK")
-            dialog.dismiss()
-        }
-
-        view.findViewById<View>(R.id.btn_close_settings).setOnClickListener { dialog.dismiss() }
-        
-        showDialogSafe(dialog)
+        startActivity(Intent(this, TaskSettingsActivity::class.java))
     }
 
     private fun toggleDeleteMode(enabled: Boolean) {
@@ -369,7 +297,7 @@ class ToDoListActivity : BaseActivity() {
         val etName = view.findViewById<EditText>(R.id.task_name_input)
         val tvNameHint = view.findViewById<TextView>(R.id.tv_name_hint)
         val rgPriority = view.findViewById<RadioGroup>(R.id.rg_priority)
-        val chipGroupCat = view.findViewById<com.google.android.material.chip.ChipGroup>(R.id.category_chip_group)
+        val chipGroupCat = view.findViewById<ChipGroup>(R.id.category_chip_group)
         val containerSubtasks = view.findViewById<LinearLayout>(R.id.container_subtasks)
         val etNewSubtask = view.findViewById<EditText>(R.id.et_new_subtask)
         val btnAddSubtask = view.findViewById<ImageButton>(R.id.btn_add_subtask)
@@ -674,7 +602,7 @@ class ToDoListActivity : BaseActivity() {
                             tempSelection.remove(option)
                         } else {
                             this.isChecked = true
-                            Toast.makeText(this@ToDoListActivity, "At least one section must be visible", Toast.LENGTH_SHORT).show()
+                            Toast.makeText(this@TaskActivity, "At least one section must be visible", Toast.LENGTH_SHORT).show()
                         }
                     }
                 }

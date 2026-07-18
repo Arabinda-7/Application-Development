@@ -89,6 +89,17 @@
                 app:tint="#80FFFFFF" />
         </LinearLayout>
 
+        <LinearLayout
+            android:id="@+id/subtask_list_container"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="12dp"
+            android:orientation="vertical"
+            android:visibility="gone"
+            app:layout_constraintEnd_toEndOf="@id/metadata_container"
+            app:layout_constraintStart_toStartOf="@id/metadata_container"
+            app:layout_constraintTop_toBottomOf="@id/metadata_container" />
+
         <CheckBox
             android:id="@+id/task_selection_checkbox"
             android:layout_width="24dp"
