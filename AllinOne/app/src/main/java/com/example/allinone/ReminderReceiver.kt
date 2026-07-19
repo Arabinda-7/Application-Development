@@ -17,7 +17,7 @@ class ReminderReceiver : BroadcastReceiver() {
         val taskName = intent.getStringExtra("TASK_NAME") ?: return
         val taskTimestamp = intent.getLongExtra("TASK_TIMESTAMP", -1L)
         
-        if (taskName.startsWith("Note:")) {
+        if (taskName.startsWith("Note:") || taskName.startsWith("Milestone:")) {
             triggerNotification(context, taskName)
             triggerVibration(context)
             return

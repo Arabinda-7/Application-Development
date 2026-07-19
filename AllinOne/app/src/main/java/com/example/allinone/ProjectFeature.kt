@@ -12,5 +12,8 @@ data class ProjectFeature(
     val id: String = java.util.UUID.randomUUID().toString(),
     var isExpanded: Boolean = false,
     var tag: String = "", // e.g., UI, LOGIC, BUG
-    var dueDate: Long? = null
+    var dueDate: Long? = null,
+    var weight: Int = 1,
+    var priority: Int = 0, // 0: Low, 1: Med, 2: High
+    var hasReminder: Boolean = false
 )

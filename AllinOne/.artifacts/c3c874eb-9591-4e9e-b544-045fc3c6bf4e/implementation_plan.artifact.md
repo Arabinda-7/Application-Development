@@ -1,54 +1,32 @@
-# Implementation Plan - Rename Task Section Files
+# Implementation Plan - Standardize Project Sub-feature UI & Behavior
 
-Rename all files in the "Task" section from "todo" or "todolist" variants to simply use "task".
+standardize the user interface and interaction model for project milestones (sub-features) across Project View, Project Edit, and Ideas.
+
+## User Review Required
+
+> [!IMPORTANT]
+> **Behavior Change**: Clicking a milestone in the **Roadmap Edit** (`AddProjectActivity`) or **Ideas section** will now toggle its description/details (`tvNote`). To open the full editor, you must tap the **Pencil icon** on the right. This unifies the behavior across the entire app.
 
 ## Proposed Changes
 
-### [File Renames]
+### [Component: UI Unification]
 
-- **Kotlin Source**:
-    - Rename [ToDoListActivity.kt](file:///C:/Users/arabi/OneDrive/Desktop/App Development/AllinOne/app/src/main/java/com/example/allinone/ToDoListActivity.kt) to `TaskActivity.kt`.
-- **Layout Resources**:
-    - Rename [activity_to_do_list.xml](file:///C:/Users/arabi/OneDrive/Desktop/App Development/AllinOne/app/src/main/res/layout/activity_to_do_list.xml) to `activity_task.xml`.
-- **Drawable Resources**:
-    - Rename [ic_todo_list.xml](file:///C:/Users/arabi/OneDrive/Desktop/App Development/AllinOne/app/src/main/res/drawable/ic_todo_list.xml) to `ic_task.xml`.
+#### [MODIFY] [ProjectActivity.kt](file:///C:/Users/arabi/OneDrive/Desktop/App Development/AllinOne/app/src/main/java/com/example/allinone/ProjectActivity.kt)
+- **Project View Spacing**: In `createSubFeatureViewItem`, add a bottom margin of `12.dpToPx()`. This gives items more breathing room.
+- **Category Tags**: Add right-aligned category tags (UI, LOGIC, BUG) to every milestone item in the View and Ideas section.
+- **Ideas Milestone Editor**: Update the "Pencil" click listener in the Idea dialog to open the full-screen `AddSubFeatureActivity` instead of a small dialog. This provides the "Advanced" features (Weight, Urgency, Blocked By) to ideas as well.
+- **Menu Unification**: Ensure long-press always opens the "Mark/Delete" professional menu.
 
-### [Code & Configuration Updates]
+#### [MODIFY] [AddProjectActivity.kt](file:///C:/Users/arabi/OneDrive/Desktop/App Development/AllinOne/app/src/main/java/com/example/allinone/AddProjectActivity.kt)
+- **Standard Layout**: Update `createSubFeatureItem` to include category tags on the right and a `12.dpToPx()` vertical gap.
+- **Behavior Sync**: Change single tap to toggle the description visibility. Use the Pencil icon as the trigger for the full editor.
 
-#### [MODIFY] [TaskActivity.kt](file:///C:/Users/arabi/OneDrive/Desktop/App Development/AllinOne/app/src/main/java/com/example/allinone/TaskActivity.kt) (formerly ToDoListActivity.kt)
-- Update class name from `ToDoListActivity` to `TaskActivity`.
-- Update `setContentView(R.layout.activity_to_do_list)` to `setContentView(R.layout.activity_task)`.
-- Update internal log tags or string references if applicable.
-
-#### [MODIFY] [AndroidManifest.xml](file:///C:/Users/arabi/OneDrive/Desktop/App Development/AllinOne/app/src/main/AndroidManifest.xml)
-- Update `.ToDoListActivity` entry to `.TaskActivity`.
-
-#### [MODIFY] [MainActivity.kt](file:///C:/Users/arabi/OneDrive/Desktop/App Development/AllinOne/app/src/main/java/com/example/allinone/MainActivity.kt)
-- Update all `Intent(this, ToDoListActivity::class.java)` to `Intent(this, TaskActivity::class.java)`.
-- Update `R.drawable.ic_todo_list` to `R.drawable.ic_task`.
-
-#### [MODIFY] [DataManager.kt](file:///C:/Users/arabi/OneDrive/Desktop/App Development/AllinOne/app/src/main/java/com/example/allinone/DataManager.kt)
-- Update `R.drawable.ic_todo_list` references to `R.drawable.ic_task`.
-
-#### [MODIFY] [SettingsActivity.kt](file:///C:/Users/arabi/OneDrive/Desktop/App Development/AllinOne/app/src/main/java/com/example/allinone/SettingsActivity.kt)
-- Update `R.drawable.ic_todo_list` and `ToDoListActivity` references.
-
-#### [MODIFY] [TaskAdapter.kt](file:///C:/Users/arabi/OneDrive/Desktop/App Development/AllinOne/app/src/main/java/com/example/allinone/TaskAdapter.kt)
-- Update cast from `ToDoListActivity` to `TaskActivity`.
-
-#### [MODIFY] Layout Files
-- Update any `tools:context=".ToDoListActivity"` to `tools:context=".TaskActivity"`.
-- Update any `@drawable/ic_todo_list` to `@drawable/ic_task`.
+---
 
 ## Verification Plan
 
-### Build & Run
-- Ensure the project builds successfully after renames.
-- Verify the Task section opens correctly from the Home screen.
-- Verify the Task icon is still visible in Settings and the Home screen.
-
 ### Manual Verification
-- Navigate to the Task section.
-- Add a new task.
-- Check if the layout is correct (no missing resources).
-- Open Settings and check if the Task icon is correct.
+1.  **Project Roadmap View**: Open a project's details. Verify items have 12dp spacing and show tags (e.g., "LOGIC") on the right.
+2.  **Project Roadmap Edit**: Go to edit a project. Verify that clicking a task name expands its details, and the category tag is visible. Verify the pencil icon opens the full editor.
+3.  **Project Ideas**: Create/Edit an idea. Verify the milestones section now has the tag filter bar, collapsible sections, and category tags. Verify the Pencil icon opens the advanced full-screen editor.
+4.  **Consistency Check**: Verify that "UI" (Pink), "LOGIC" (Purple), and "BUG" (Red) tags have consistent colors across all 3 screens.

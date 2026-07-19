@@ -6,30 +6,57 @@ import java.util.*
 
 object UIUtils {
     fun wrapContext(context: Context): Context {
-        if (DataManager.isSystemAppearanceEnabled) return context
-
-        val displayScale = when(DataManager.displaySize) {
-            "XS" -> 0.85f
-            "L" -> 1.15f
-            else -> 1.0f
-        }
-        
-        val fontScale = when(DataManager.fontSize) {
-            "XS" -> 0.85f
-            "L" -> 1.25f // Slightly larger font jump for accessibility
-            else -> 1.0f
-        }
-        
         val config = Configuration(context.resources.configuration)
-        
-        // 1. Scale layout components (Icons, Buttons, Margins)
-        val defaultMetrics = context.resources.displayMetrics
-        config.densityDpi = (defaultMetrics.densityDpi * displayScale).toInt()
-        
-        // 2. Scale Text independently
-        config.fontScale = fontScale
+
+        if (!DataManager.isSystemAppearanceEnabled) {
+            // 1. Scale layout components (Icons, Buttons, Margins)
+            val displayScale = when(DataManager.displaySize) {
+                "XS" -> 0.85f
+                "L" -> 1.15f
+                else -> 1.0f
+            }
+            val defaultMetrics = context.resources.displayMetrics
+            config.densityDpi = (defaultMetrics.densityDpi * displayScale).toInt()
+            
+            // 2. Scale Text independently
+            val fontScale = when(DataManager.fontSize) {
+                "XS" -> 0.85f
+                "L" -> 1.25f
+                else -> 1.0f
+            }
+            config.fontScale = fontScale
+
+            // 3. Theme Mode (Night/Light)
+            val nightMode = when(DataManager.appThemeMode) {
+                "LIGHT" -> Configuration.UI_MODE_NIGHT_NO
+                "DARK", "OLED" -> Configuration.UI_MODE_NIGHT_YES
+                else -> config.uiMode and Configuration.UI_MODE_NIGHT_MASK
+            }
+            config.uiMode = (config.uiMode and Configuration.UI_MODE_NIGHT_MASK.inv()) or nightMode
+        }
         
         return context.createConfigurationContext(config)
+    }
+
+    fun getAccentColor(context: Context): Int {
+        return if (DataManager.appAccentColor != -1) {
+            DataManager.appAccentColor
+        } else {
+            androidx.core.content.ContextCompat.getColor(context, R.color.primary_blue)
+        }
+    }
+
+    fun getCardBackgroundColor(context: Context): Int {
+        if (!DataManager.isSystemAppearanceEnabled && DataManager.appThemeMode == "OLED") return android.graphics.Color.BLACK
+        return if (isNightMode(context)) {
+            android.graphics.Color.parseColor("#1A1A1A")
+        } else {
+            android.graphics.Color.parseColor("#F5F5F5")
+        }
+    }
+
+    private fun isNightMode(context: Context): Boolean {
+        return (context.resources.configuration.uiMode and Configuration.UI_MODE_NIGHT_MASK) == Configuration.UI_MODE_NIGHT_YES
     }
     
     fun formatTitleCase(input: String?): String {

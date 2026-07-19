@@ -1,39 +1,45 @@
-# Walkthrough - Full-Screen Section Settings
+# Walkthrough - Advanced Project Sub-features
 
-I have refactored the settings for all 6 main sections (Habits, Workouts, Tasks, Notes, Finance, and Projects) into dedicated full-screen activities, providing a more immersive and professional experience.
+I have upgraded the Project milestones (sub-features) with advanced management logic, visual indicators, and automated reminders.
 
 ## Changes Made
 
-### 1. New Dedicated Activities
-Created 6 new activity classes to handle the settings logic for each major app section:
-- `HabitSettingsActivity.kt`
-- `WorkoutSettingsActivity.kt`
-- `TaskSettingsActivity.kt`
-- `NoteSettingsActivity.kt`
-- `FinanceSettingsActivity.kt`
-- `ProjectSettingsActivity.kt`
+### 1. Weighted Progress Logic
+- **Impact-Based Progress**: Each sub-feature now has a **Weight (1–10)**.
+- The project's overall progress bar no longer just counts tasks; it calculates the sum of weights.
+- *Example*: Completing one "High Weight" task will now move the progress bar significantly more than completing several "Low Weight" tasks.
 
-### 2. Immersive UI Design
-- **New Shared Layout**: Created `activity_section_settings.xml`, which provides a consistent, high-polish look with a black background and immersive header.
-- **Unified Row Component**: Leveraged the `item_config_row.xml` to display settings as clean, tappable rows with toggles or chevron indicators.
+### 2. Milestone Dependencies ("Blocked By")
+- **Locked Milestones**: You can now set one milestone to be "Blocked By" another.
+- In the project view, blocked milestones show a **🔒 Lock** icon and provide visual feedback that a prerequisite is pending.
 
-### 3. Integrated Navigation
-- **Section Triggers**: Updated the settings icon in each section (e.g., Habit Tracker, Finance) to launch its respective new full-screen settings page instead of a pop-up dialog.
-- **Settings Hub Launchpad**: Refactored the main App Settings hub. Tapping any of the 6 main categories now launches the same dedicated activity, ensuring a single source of truth for all configurations.
+### 3. Urgency & Resource Tracking
+- **Urgency Levels**: Set individual milestones to **Low, Medium, or High Urgency**. A color-coded dot appears next to the task name in the list.
+- **Resource Links**: Attach a URL directly to a milestone. A **🔗 Link** icon appears in the list for instant access to related documents or websites.
 
-### 4. Code Architecture
-- **Extracted Logic**: Moved `ConfigItem` and `ConfigAdapter` into a separate `ConfigAdapter.kt` file to allow for easy reuse across all settings activities.
-- **Persistent States**: Ensured all toggles and configurations correctly save to `DataManager` and reflect changes immediately upon returning to the main screens.
+### 4. Smart Milestone Reminders
+- **Individual Alerts**: You can now enable a reminder for specific sub-features.
+- The app will trigger a system notification when the sub-feature's due date is reached, helping you manage individual deadlines within a larger project.
+
+### 5. Enhanced Editor UI
+- Refactored the **Edit Sub-feature** screen with:
+    - A Weight slider.
+    - Urgency selection chips.
+    - A searchable dependency selector.
+    - A reminder toggle integrated with the date picker.
 
 ## Verification
 
-### Files Created/Modified
-- **Activities**: 6 New Settings Activities, `SettingsActivity.kt`, and the 6 main section activities.
-- **Layouts**: `activity_section_settings.xml`, `ConfigAdapter.kt`.
-- **Configuration**: `AndroidManifest.xml`.
+### Files Modified
+- [ProjectFeature.kt](file:///C:/Users/arabi/OneDrive/Desktop/App Development/AllinOne/app/src/main/java/com/example/allinone/ProjectFeature.kt)
+- [DataManager.kt](file:///C:/Users/arabi/OneDrive/Desktop/App Development/AllinOne/app/src/main/java/com/example/allinone/DataManager.kt)
+- [AddSubFeatureActivity.kt](file:///C:/Users/arabi/OneDrive/Desktop/App Development/AllinOne/app/src/main/java/com/example/allinone/AddSubFeatureActivity.kt)
+- [AddProjectActivity.kt](file:///C:/Users/arabi/OneDrive/Desktop/App Development/AllinOne/app/src/main/java/com/example/allinone/AddProjectActivity.kt)
+- [ProjectActivity.kt](file:///C:/Users/arabi/OneDrive/Desktop/App Development/AllinOne/app/src/main/java/com/example/allinone/ProjectActivity.kt)
+- [ReminderReceiver.kt](file:///C:/Users/arabi/OneDrive/Desktop/App Development/AllinOne/app/src/main/java/com/example/allinone/ReminderReceiver.kt)
 
 ### Manual Test Steps (for user)
-1.  **Launch Settings**: Open any section (e.g., **Finance**) and tap the settings icon. Verify it opens a new full-screen page.
-2.  **Test a Toggle**: In **Habit Settings**, toggle "Vacation Mode". Go back and then return to settings to ensure it stayed enabled.
-3.  **Check Hub**: Go to the main **App Settings** from the home screen. Tap "Workout Routine" and verify it opens the same full-screen page you saw earlier.
-4.  **Back Navigation**: Use the custom back button in the top-left header to ensure smooth navigation back to the previous screen.
+1.  **Test Weighting**: Edit a project. Set one sub-feature to Weight 10 and another to Weight 1. Mark the Weight 10 one complete. Observe the progress bar jump significantly.
+2.  **Test Dependency**: Edit a sub-feature and set it to be blocked by another. Check the project list to see the lock icon.
+3.  **Test Reminders**: Enable a reminder for a sub-feature and set the time to 1 minute from now.
+4.  **Test Links**: Add a URL to a sub-feature. Tap the link icon in the list to open it.

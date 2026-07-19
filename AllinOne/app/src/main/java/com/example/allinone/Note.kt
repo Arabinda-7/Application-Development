@@ -14,9 +14,6 @@ data class Note(
     var deadline: Long? = null,
     var isArchived: Boolean = false,
     var isDualExist: Boolean = false,
-    var imageUri: String? = null,
-    var inspirationUrl: String? = null,
-    var vibeColor: Int = -1,
     val journalEntries: MutableList<JournalEntry> = mutableListOf(),
     val subFeatures: MutableList<ProjectFeature> = mutableListOf(),
     val changeHistory: MutableList<ProjectHistory> = mutableListOf()

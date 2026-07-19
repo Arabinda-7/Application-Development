@@ -1,5 +1,7 @@
 package com.example.allinone
 
+import android.content.Context
+import android.content.Intent
 import android.app.DatePickerDialog
 import android.content.res.ColorStateList
 import android.graphics.Color
@@ -27,8 +29,18 @@ class AddSubFeatureActivity : BaseActivity() {
     private lateinit var btnSave: TextView
     private lateinit var btnDelete: Button
 
+    private lateinit var swReminder: androidx.appcompat.widget.SwitchCompat
+    private lateinit var seekWeight: SeekBar
+    private lateinit var tvWeightValue: TextView
+    private lateinit var rgPriority: RadioGroup
+    private lateinit var tvBlockedBy: TextView
+    private lateinit var etResourceUrl: EditText
+
     private var selectedTag: String = ""
     private var selectedDueDate: Long? = null
+    private var blockedByFeatureId: String = ""
+    private var selectedWeight: Int = 1
+    private var selectedPriority: Int = 0
 
     override fun onCreate(savedInstanceState: Bundle?) {
         enableEdgeToEdge()
@@ -50,8 +62,9 @@ class AddSubFeatureActivity : BaseActivity() {
                 val project = DataManager.notes.getOrNull(projectIndex)
                 targetFeature = project?.subFeatures?.find { it.id == subFeatureId }
             } else {
-                // Check temp list in AddProjectActivity
+                // Check temp list in AddProjectActivity or ProjectActivity (Ideas)
                 targetFeature = AddProjectActivity.currentEditingSubFeatures.find { it.id == subFeatureId }
+                    ?: ProjectActivity.currentEditingIdeaSubFeatures.find { it.id == subFeatureId }
             }
         }
 
@@ -73,6 +86,13 @@ class AddSubFeatureActivity : BaseActivity() {
         btnSave = findViewById(R.id.btn_save_subfeature)
         btnDelete = findViewById(R.id.btn_delete_subfeature)
 
+        swReminder = findViewById(R.id.sw_feature_reminder)
+        seekWeight = findViewById(R.id.seek_feature_weight)
+        tvWeightValue = findViewById(R.id.tv_weight_value)
+        rgPriority = findViewById(R.id.rg_feature_priority)
+        tvBlockedBy = findViewById(R.id.tv_blocked_by_selector)
+        etResourceUrl = findViewById(R.id.et_resource_url)
+
         findViewById<View>(R.id.btn_close_subfeature).setOnClickListener { finish() }
     }
 
@@ -83,8 +103,18 @@ class AddSubFeatureActivity : BaseActivity() {
             selectedTag = feature.tag
             selectedDueDate = feature.dueDate
             
+            // Milestone Enhancements
+            selectedWeight = feature.weight
+            selectedPriority = feature.priority
+            swReminder.isChecked = feature.hasReminder
+            blockedByFeatureId = feature.blockedByNodeId
+            etResourceUrl.setText(feature.resourceUrl)
+            
             updateDeadlineUI()
             refreshTagsUI()
+            updateWeightUI()
+            updatePriorityUI()
+            updateBlockedByUI()
         }
 
         tvDeadline.setOnClickListener {
@@ -97,9 +127,36 @@ class AddSubFeatureActivity : BaseActivity() {
             }, cal.get(Calendar.YEAR), cal.get(Calendar.MONTH), cal.get(Calendar.DAY_OF_MONTH)).show()
         }
 
+        seekWeight.setOnSeekBarChangeListener(object : SeekBar.OnSeekBarChangeListener {
+            override fun onProgressChanged(seekBar: SeekBar?, progress: Int, fromUser: Boolean) {
+                selectedWeight = progress.coerceAtLeast(1)
+                updateWeightUI()
+            }
+            override fun onStartTrackingTouch(seekBar: SeekBar?) {}
+            override fun onStopTrackingTouch(seekBar: SeekBar?) {}
+        })
+
+        rgPriority.setOnCheckedChangeListener { _, checkedId ->
+            selectedPriority = when (checkedId) {
+                R.id.rb_prio_med -> 1
+                R.id.rb_prio_high -> 2
+                else -> 0
+            }
+        }
+
+        tvBlockedBy.setOnClickListener {
+            showBlockedByDialog()
+        }
+
         btnDelete.setOnClickListener {
-            val project = DataManager.notes.getOrNull(projectIndex)
+            val project = if (projectIndex != -1) DataManager.notes.getOrNull(projectIndex) else null
             project?.subFeatures?.remove(targetFeature)
+            
+            if (projectIndex == -1) {
+                AddProjectActivity.currentEditingSubFeatures.remove(targetFeature)
+                ProjectActivity.currentEditingIdeaSubFeatures.remove(targetFeature)
+            }
+            
             DataManager.saveData(this)
             setResult(RESULT_OK)
             finish()
@@ -108,6 +165,50 @@ class AddSubFeatureActivity : BaseActivity() {
         btnSave.setOnClickListener {
             saveFeature()
         }
+    }
+
+    private fun updateWeightUI() {
+        tvWeightValue.text = "w$selectedWeight"
+        seekWeight.progress = selectedWeight
+    }
+
+    private fun updatePriorityUI() {
+        when (selectedPriority) {
+            1 -> rgPriority.check(R.id.rb_prio_med)
+            2 -> rgPriority.check(R.id.rb_prio_high)
+            else -> rgPriority.check(R.id.rb_prio_low)
+        }
+    }
+
+    private fun updateBlockedByUI() {
+        val otherFeatures = getOtherFeatures()
+        val blockedBy = otherFeatures.find { it.id == blockedByFeatureId }
+        tvBlockedBy.text = blockedBy?.name ?: "None (Click to set)"
+    }
+
+    private fun getOtherFeatures(): List<ProjectFeature> {
+        val project = if (projectIndex != -1) DataManager.notes.getOrNull(projectIndex) else null
+        val list = project?.subFeatures ?: (if (AddProjectActivity.currentEditingSubFeatures.isNotEmpty()) AddProjectActivity.currentEditingSubFeatures else ProjectActivity.currentEditingIdeaSubFeatures)
+        return list.filter { it.id != subFeatureId }
+    }
+
+    private fun showBlockedByDialog() {
+        val otherFeatures = getOtherFeatures()
+        if (otherFeatures.isEmpty()) {
+            Toast.makeText(this, "No other features to depend on", Toast.LENGTH_SHORT).show()
+            return
+        }
+
+        val names = mutableListOf("None")
+        names.addAll(otherFeatures.map { it.name })
+
+        android.app.AlertDialog.Builder(this)
+            .setTitle("Blocked By")
+            .setItems(names.toTypedArray()) { _, which ->
+                blockedByFeatureId = if (which == 0) "" else otherFeatures[which - 1].id
+                updateBlockedByUI()
+            }
+            .show()
     }
 
     private fun updateDeadlineUI() {
@@ -150,13 +251,9 @@ class AddSubFeatureActivity : BaseActivity() {
             return
         }
 
-        // Requirement 1: Prevent duplicate names in the same project
-        val project = DataManager.notes.getOrNull(projectIndex)
-        val isDuplicate = if (projectIndex != -1) {
-            project?.subFeatures?.any { it.id != subFeatureId && it.name.equals(name, ignoreCase = true) } == true
-        } else {
-            AddProjectActivity.currentEditingSubFeatures.any { it.id != subFeatureId && it.name.equals(name, ignoreCase = true) }
-        }
+        val project = if (projectIndex != -1) DataManager.notes.getOrNull(projectIndex) else null
+        val list = project?.subFeatures ?: (if (AddProjectActivity.currentEditingSubFeatures.isNotEmpty()) AddProjectActivity.currentEditingSubFeatures else ProjectActivity.currentEditingIdeaSubFeatures)
+        val isDuplicate = list.any { it.id != subFeatureId && it.name.equals(name, ignoreCase = true) }
 
         if (isDuplicate) {
             Toast.makeText(this, "A feature with this name already exists", Toast.LENGTH_SHORT).show()
@@ -168,11 +265,49 @@ class AddSubFeatureActivity : BaseActivity() {
             it.details = etDetails.text.toString().trim()
             it.tag = selectedTag
             it.dueDate = selectedDueDate
+            
+            // Milestone Enhancements
+            it.weight = selectedWeight
+            it.priority = selectedPriority
+            it.hasReminder = swReminder.isChecked
+            it.blockedByNodeId = blockedByFeatureId
+            it.resourceUrl = etResourceUrl.text.toString().trim()
         }
 
         DataManager.saveData(this)
+        
+        // Schedule Reminder
+        if (targetFeature?.hasReminder == true && targetFeature?.dueDate != null) {
+            val time = targetFeature?.dueDate!!
+            if (time > System.currentTimeMillis()) {
+                scheduleMilestoneReminder(targetFeature!!)
+            }
+        }
+
         setResult(RESULT_OK)
         finish()
+    }
+
+    private fun scheduleMilestoneReminder(feature: ProjectFeature) {
+        val alarmManager = getSystemService(Context.ALARM_SERVICE) as android.app.AlarmManager
+        
+        if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.S) {
+            if (!alarmManager.canScheduleExactAlarms()) {
+                val intent = Intent(android.provider.Settings.ACTION_REQUEST_SCHEDULE_EXACT_ALARM)
+                startActivity(intent)
+                return
+            }
+        }
+
+        val intent = Intent(this, ReminderReceiver::class.java).apply {
+            putExtra("TASK_NAME", "Milestone: ${feature.name}")
+            putExtra("TASK_TIMESTAMP", feature.dueDate)
+        }
+        
+        val requestCode = feature.id.hashCode()
+        val pendingIntent = android.app.PendingIntent.getBroadcast(this, requestCode, intent, android.app.PendingIntent.FLAG_UPDATE_CURRENT or android.app.PendingIntent.FLAG_IMMUTABLE)
+
+        alarmManager.setExactAndAllowWhileIdle(android.app.AlarmManager.RTC_WAKEUP, feature.dueDate!!, pendingIntent)
     }
 
     private fun Int.dpToPx(): Int = (this * resources.displayMetrics.density).toInt()

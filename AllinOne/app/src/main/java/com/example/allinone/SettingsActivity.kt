@@ -199,6 +199,33 @@ class SettingsActivity : BaseActivity() {
         
         when(section) {
             "SECURITY" -> {
+                settings.add(ConfigItem("App Access Lock", "Require PIN to open the app", isToggle = true, isChecked = DataManager.isAppLockEnabled) {
+                    if (!DataManager.isAppLockEnabled) {
+                        if (DataManager.appLockPin == null) {
+                            val intent = Intent(this, LockActivity::class.java).apply { putExtra(LockActivity.EXTRA_MODE, LockActivity.MODE_SETUP) }
+                            startActivity(intent)
+                        } else {
+                            DataManager.isAppLockEnabled = true
+                        }
+                    } else {
+                        DataManager.isAppLockEnabled = false
+                    }
+                    DataManager.saveData(this)
+                    showSectionSettings("SECURITY")
+                })
+                
+                if (DataManager.isAppLockEnabled && DataManager.appLockPin != null) {
+                    settings.add(ConfigItem("Change PIN", "Update your security code") {
+                        val intent = Intent(this, LockActivity::class.java).apply { putExtra(LockActivity.EXTRA_MODE, LockActivity.MODE_CHANGE) }
+                        startActivity(intent)
+                    })
+                }
+
+                settings.add(ConfigItem("OLED Mode", "Pure black theme for OLED screens", isToggle = true, isChecked = DataManager.isOledThemeEnabled) {
+                    DataManager.isOledThemeEnabled = !DataManager.isOledThemeEnabled
+                })
+            }
+            "OTHERS" -> {
                 settings.add(ConfigItem("--- HOME PAGE VISIBILITY ---", "") {})
                 settings.add(ConfigItem("Show Habits", "Display habit tracker on home", isToggle = true, isChecked = DataManager.showHabitSection) {
                     DataManager.showHabitSection = !DataManager.showHabitSection
@@ -227,6 +254,12 @@ class SettingsActivity : BaseActivity() {
                 })
                 
                 if (!DataManager.isSystemAppearanceEnabled) {
+                    settings.add(ConfigItem("Current Focus Size", "Circle scale for mood logging (Current: ${DataManager.homeFocusSize})") {
+                        val sizes = listOf("S", "M", "L")
+                        DataManager.homeFocusSize = sizes[(sizes.indexOf(DataManager.homeFocusSize) + 1) % sizes.size]
+                        DataManager.saveData(this)
+                        recreate()
+                    })
                     settings.add(ConfigItem("Global Display Size", "Icons and margins for all sub-sections (Current: ${DataManager.displaySize})") {
                         val sizes = listOf("XS", "S", "L")
                         DataManager.displaySize = sizes[(sizes.indexOf(DataManager.displaySize) + 1) % sizes.size]
@@ -244,6 +277,41 @@ class SettingsActivity : BaseActivity() {
                         DataManager.fontSize = sizes[(sizes.indexOf(DataManager.fontSize) + 1) % sizes.size]
                         DataManager.saveData(this)
                         recreate()
+                    })
+
+                    settings.add(ConfigItem("--- ADVANCED LOOK & FEEL ---", "") {})
+                    
+                    settings.add(ConfigItem("Theme Mode", "Override system theme (Current: ${DataManager.appThemeMode})") {
+                        val modes = listOf("LIGHT", "DARK", "OLED")
+                        DataManager.appThemeMode = modes[(modes.indexOf(DataManager.appThemeMode) + 1) % modes.size]
+                        DataManager.saveData(this)
+                        recreate()
+                    })
+
+                    settings.add(ConfigItem("Accent Color", "Custom highlights app-wide") {
+                        showColorPickerDialog("APP_ACCENT")
+                    })
+
+                    settings.add(ConfigItem("Border Radius", "Curvature for cards and buttons (Current: ${DataManager.appBorderRadius}dp)") {
+                        showBorderRadiusSliderDialog()
+                    })
+
+                    settings.add(ConfigItem("Card Style", "Surface appearance (Current: ${DataManager.appCardStyle})") {
+                        val styles = listOf("GLASS", "ELEVATED", "FLAT")
+                        DataManager.appCardStyle = styles[(styles.indexOf(DataManager.appCardStyle) + 1) % styles.size]
+                        DataManager.saveData(this)
+                        recreate()
+                    })
+
+                    settings.add(ConfigItem("Font Family", "Change typography style (Current: ${DataManager.appFontFamily})") {
+                        val fonts = listOf("DEFAULT", "SERIF", "SANS_SERIF", "MONOSPACE")
+                        DataManager.appFontFamily = fonts[(fonts.indexOf(DataManager.appFontFamily) + 1) % fonts.size]
+                        DataManager.saveData(this)
+                        recreate()
+                    })
+
+                    settings.add(ConfigItem("Show Shadows", "Toggle UI depth and elevation", isToggle = true, isChecked = DataManager.appShowShadows) {
+                        DataManager.appShowShadows = !DataManager.appShowShadows
                     })
                 }
 
@@ -455,7 +523,7 @@ class SettingsActivity : BaseActivity() {
         val grid = dialog.findViewById<GridLayout>(R.id.color_grid)
         val title = dialog.findViewById<TextView>(R.id.tv_picker_title)
         title.text = "SELECT COLOR: $section"
-        val colors = listOf(Color.parseColor("#FF7A59"), Color.parseColor("#FFB800"), Color.parseColor("#2EC4B6"), Color.parseColor("#1A73E8"), Color.parseColor("#E91E63"))
+        val colors = listOf(Color.parseColor("#FF7A59"), Color.parseColor("#FFB800"), Color.parseColor("#2EC4B6"), Color.parseColor("#1A73E8"), Color.parseColor("#E91E63"), Color.parseColor("#9C27B0"), Color.parseColor("#673AB7"), Color.parseColor("#4CAF50"))
         colors.forEach { color ->
             val v = View(this).apply {
                 val s = (48 * resources.displayMetrics.density).toInt()
@@ -476,6 +544,7 @@ class SettingsActivity : BaseActivity() {
                         "ADD_PROJECT" -> DataManager.projectAddThemeColor = color
                         "ADD_NOTE" -> DataManager.noteAddThemeColor = color
                         "ADD_FINANCE" -> DataManager.financeAddThemeColor = color
+                        "APP_ACCENT" -> DataManager.appAccentColor = color
                     }
                     DataManager.saveData(this@SettingsActivity); dialog.dismiss(); showSectionSettings(currentPath)
                 }
@@ -483,6 +552,36 @@ class SettingsActivity : BaseActivity() {
             grid.addView(v)
         }
         dialog.findViewById<View>(R.id.btn_cancel).setOnClickListener { dialog.dismiss() }; dialog.show()
+    }
+
+    private fun showBorderRadiusSliderDialog() {
+        val dialog = Dialog(this)
+        dialog.setContentView(R.layout.dialog_settings_slider)
+        dialog.window?.setBackgroundDrawableResource(android.R.color.transparent)
+        
+        val title = dialog.findViewById<TextView>(R.id.tv_slider_title)
+        val slider = dialog.findViewById<SeekBar>(R.id.settings_slider)
+        val valueText = dialog.findViewById<TextView>(R.id.tv_slider_value)
+        val btnSave = dialog.findViewById<TextView>(R.id.btn_save_slider)
+
+        title.text = "BORDER RADIUS"
+        slider.max = 32
+        slider.progress = DataManager.appBorderRadius
+        valueText.text = "${slider.progress}dp"
+
+        slider.setOnSeekBarChangeListener(object : SeekBar.OnSeekBarChangeListener {
+            override fun onProgressChanged(s: SeekBar?, p: Int, f: Boolean) { valueText.text = "${p}dp" }
+            override fun onStartTrackingTouch(s: SeekBar?) {}
+            override fun onStopTrackingTouch(s: SeekBar?) {}
+        })
+
+        btnSave.setOnClickListener {
+            DataManager.appBorderRadius = slider.progress
+            DataManager.saveData(this)
+            dialog.dismiss()
+            recreate()
+        }
+        dialog.show()
     }
 
     private fun showAddCustomColorDialog() {

@@ -1,21 +1,14 @@
-# Tasks - Rename Task Section Files
+# Tasks - Advanced Project Sub-features
 
-- [x] Create new files with "task" naming
-    - [x] `TaskActivity.kt`
-    - [x] `activity_task.xml`
-    - [x] `ic_task.xml`
-- [x] Update code references
-    - [x] `AndroidManifest.xml`
-    - [x] `MainActivity.kt`
-    - [x] `DataManager.kt`
-    - [x] `SettingsActivity.kt`
-    - [x] `TaskAdapter.kt`
-    - [x] `ReminderReceiver.kt`
-    - [x] `DashboardState.kt`
-- [x] Update resource references in layouts
-    - [x] `activity_task.xml`
-    - [x] `activity_notes.xml`
-- [x] Delete old "todo" files
-    - [x] `ToDoListActivity.kt`
-    - [x] `activity_to_do_list.xml`
-    - [x] `ic_todo_list.xml`
+- [x] Foundation
+    - [x] Update `ProjectFeature.kt` with new fields
+    - [x] Sanitize new fields in `DataManager.kt`
+- [x] Editor Implementation
+    - [x] Design new UI in `activity_add_sub_feature.xml`
+    - [x] Implement editing logic in `AddSubFeatureActivity.kt`
+- [x] Project View Enhancements
+    - [x] Update Weighted Progress logic in `AddProjectActivity.kt`
+    - [x] Add Lock, Link, and Urgency icons to list items
+- [x] System Integration
+    - [x] Update `ReminderReceiver.kt` for milestones
+    - [x] Implement Reminder scheduling in Activity

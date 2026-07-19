@@ -41,6 +41,20 @@ import androidx.compose.ui.unit.sp
 import java.text.SimpleDateFormat
 import java.util.*
 
+data class AppStyle(
+    val borderRadius: Dp = 16.dp,
+    val accentColor: Color = Color(0xFF1A73E8),
+    val surfaceColor: Color = Color(0xFF1A1A1A),
+    val backgroundColor: Color = Color.Black,
+    val isOled: Boolean = false,
+    val showShadows: Boolean = true,
+    val fontFamily: androidx.compose.ui.text.font.FontFamily = androidx.compose.ui.text.font.FontFamily.Default,
+    val cardStyle: String = "GLASS"
+)
+
+val LocalAppStyle = staticCompositionLocalOf { AppStyle() }
+
+
 @Composable
 fun HomeScreen(
     state: DashboardState,
@@ -72,17 +86,18 @@ fun HomeScreen(
 
     // Keyboard Controller
     val keyboardController = LocalSoftwareKeyboardController.current
+    val style = LocalAppStyle.current
     val interactionSource = remember { MutableInteractionSource() }
 
-    val moodTheme = remember(state.currentMood) {
+    val moodTheme = remember(state.currentMood, style.accentColor) {
         when (state.currentMood) {
             "🔥" -> Color(0xFFFFB800) to "Unstoppable mode active."
             "⚡" -> Color(0xFF2EC4B6) to "High energy detected."
             "🧘" -> Color(0xFF673AB7) to "Mindful progress only."
-            "💼" -> Color(0xFF1A73E8) to "Execution mode: ON."
+            "💼" -> style.accentColor to "Execution mode: ON."
             "😴" -> Color(0xFF9E9E9E) to "Rest well. Momentum stays."
             "🧠" -> Color(0xFF3F51B5) to "Deep focus engaged."
-            else -> Color(0xFF1A73E8) to ""
+            else -> style.accentColor to ""
         }
     }
 
@@ -200,7 +215,7 @@ fun HomeScreen(
 
                 FloatingActionButton(
                     onClick = { showSpeedDial = !showSpeedDial },
-                    containerColor = Color(0xFF1A73E8),
+                    containerColor = style.accentColor,
                     contentColor = Color.White,
                     shape = CircleShape,
                     modifier = Modifier.size(56.dp)
@@ -217,7 +232,7 @@ fun HomeScreen(
         Column(
             modifier = Modifier
                 .fillMaxSize()
-                .background(Color(0xFF000000))
+                .background(style.backgroundColor)
                 .padding(padding)
                 .pointerInput(Unit) {
                     detectTapGestures(onTap = {
@@ -264,7 +279,7 @@ fun HomeScreen(
                                     modifier = Modifier
                                         .size(48.dp)
                                         .clip(CircleShape)
-                                        .background(Color(0xFF1A1A1A))
+                                        .background(style.surfaceColor)
                                         .border(1.5.dp, moodTheme.first.copy(alpha = 0.4f), CircleShape),
                                     contentAlignment = Alignment.Center
                                 ) {
@@ -394,11 +409,11 @@ fun HomeScreen(
                                 placeholder = { Text("Search your ecosystem...", color = Color.White.copy(alpha = 0.3f), fontSize = 14.sp) },
                                 modifier = Modifier.fillMaxWidth().height(52.dp),
                                 colors = OutlinedTextFieldDefaults.colors(
-                                    focusedBorderColor = Color(0xFF1A73E8).copy(alpha = 0.4f),
+                                    focusedBorderColor = style.accentColor.copy(alpha = 0.4f),
                                     unfocusedBorderColor = Color.White.copy(alpha = 0.08f),
                                     focusedContainerColor = Color.White.copy(alpha = 0.03f),
                                     unfocusedContainerColor = Color.White.copy(alpha = 0.03f),
-                                    cursorColor = Color(0xFF1A73E8),
+                                    cursorColor = style.accentColor,
                                     focusedTextColor = Color.White,
                                     unfocusedTextColor = Color.White
                                 ),
@@ -415,7 +430,7 @@ fun HomeScreen(
                                         Icon(
                                             imageVector = if (searchQuery.isEmpty()) Icons.Default.Mic else Icons.AutoMirrored.Filled.Send, 
                                             "Action", 
-                                            tint = Color(0xFF1A73E8),
+                                            tint = style.accentColor,
                                             modifier = Modifier.size(18.dp)
                                         )
                                     }
@@ -446,19 +461,40 @@ fun HomeScreen(
                 Text(state.dateString, color = Color.White.copy(alpha = 0.4f), fontSize = 9.sp)
             }
             Spacer(modifier = Modifier.height(12.dp))
-            LazyRow(
-                contentPadding = PaddingValues(horizontal = 24.dp),
-                horizontalArrangement = Arrangement.spacedBy(16.dp)
-            ) {
-                val moods = listOf("🔥", "⚡", "🧘", "💼", "😴", "🧠")
-                items(moods) { mood ->
-                    val isSelected = state.currentMood == mood
-                    Box(
-                        modifier = Modifier.size(48.dp).clip(CircleShape).background(if (isSelected) Color(0xFF1A73E8) else Color(0xFF1A1A1A))
-                            .clickable { onMoodSelected(mood); isMessageExpanded = false },
-                        contentAlignment = Alignment.Center
-                    ) {
-                        Text(mood, fontSize = 20.sp)
+
+            // Wrapping in standard density to prevent global scaling from affecting this section
+            val systemDensity = androidx.compose.ui.platform.LocalContext.current.resources.displayMetrics.density
+            val standardDensity = androidx.compose.ui.unit.Density(density = systemDensity)
+            
+            CompositionLocalProvider(androidx.compose.ui.platform.LocalDensity provides standardDensity) {
+                Row(
+                    modifier = Modifier.fillMaxWidth().padding(horizontal = 24.dp),
+                    horizontalArrangement = Arrangement.SpaceBetween
+                ) {
+                    val moods = listOf("🔥", "⚡", "🧘", "💼", "😴", "🧠")
+                    val circleSize = when(state.homeFocusSize) {
+                        "S" -> 40.dp
+                        "L" -> 56.dp
+                        else -> 48.dp
+                    }
+                    val emojiSize = when(state.homeFocusSize) {
+                        "S" -> 16.sp
+                        "L" -> 24.sp
+                        else -> 20.sp
+                    }
+
+                    moods.forEach { mood ->
+                        val isSelected = state.currentMood == mood
+                        Box(
+                            modifier = Modifier
+                                .size(circleSize)
+                                .clip(CircleShape)
+                                .background(if (isSelected) style.accentColor else style.surfaceColor)
+                                .clickable { onMoodSelected(mood); isMessageExpanded = false },
+                            contentAlignment = Alignment.Center
+                        ) {
+                            Text(mood, fontSize = emojiSize)
+                        }
                     }
                 }
             }
@@ -467,8 +503,8 @@ fun HomeScreen(
 
             // --- 4. Executive Summary Card (Safe Spend & Performance) ---
             Card(
-                shape = RoundedCornerShape(28.dp),
-                colors = CardDefaults.cardColors(containerColor = Color(0xFF1A1A1A)),
+                shape = RoundedCornerShape(style.borderRadius),
+                colors = CardDefaults.cardColors(containerColor = style.surfaceColor),
                 modifier = Modifier.fillMaxWidth().padding(horizontal = 24.dp)
             ) {
                 Column(modifier = Modifier.padding(24.dp)) {
@@ -476,7 +512,7 @@ fun HomeScreen(
                         Column(modifier = Modifier.weight(1f)) {
                             Text(
                                 "Daily Performance", 
-                                color = Color(0xFF1A73E8), 
+                                color = style.accentColor, 
                                 fontSize = 10.sp, 
                                 fontWeight = FontWeight.Black, 
                                 letterSpacing = 1.sp,
@@ -493,7 +529,7 @@ fun HomeScreen(
                     LinearProgressIndicator(
                         progress = { state.overallProgress / 100f },
                         modifier = Modifier.fillMaxWidth().height(6.dp),
-                        color = Color(0xFF1A73E8),
+                        color = style.accentColor,
                         trackColor = Color.White.copy(alpha = 0.1f),
                         strokeCap = StrokeCap.Round
                     )
@@ -511,9 +547,9 @@ fun HomeScreen(
                 ) {
                     // Recent Actions History (Shown Finished)
                     items(state.recentActions) { action ->
-                        Surface(color = Color(0xFF1A1A1A), shape = RoundedCornerShape(12.dp), modifier = Modifier.height(40.dp)) {
+                        Surface(color = style.surfaceColor, shape = RoundedCornerShape(12.dp), modifier = Modifier.height(40.dp)) {
                             Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.padding(horizontal = 16.dp)) {
-                                Box(modifier = Modifier.size(6.dp).background(Color(0xFF1A73E8).copy(alpha = 0.5f), CircleShape))
+                                Box(modifier = Modifier.size(6.dp).background(style.accentColor.copy(alpha = 0.5f), CircleShape))
                                 Spacer(modifier = Modifier.width(10.dp))
                                 Text(action, color = Color.White.copy(alpha = 0.7f), fontSize = 13.sp)
                             }
@@ -563,9 +599,9 @@ fun HomeScreen(
                 Spacer(modifier = Modifier.height(12.dp))
 
                 Surface(
-                    color = Color(0xFF1A73E8).copy(alpha = 0.15f),
-                    shape = RoundedCornerShape(12.dp),
-                    border = BorderStroke(0.5.dp, Color(0xFF1A73E8).copy(alpha = 0.3f)),
+                    color = style.accentColor.copy(alpha = 0.15f),
+                    shape = RoundedCornerShape(style.borderRadius),
+                    border = BorderStroke(0.5.dp, style.accentColor.copy(alpha = 0.3f)),
                     modifier = Modifier.padding(horizontal = 24.dp).fillMaxWidth()
                 ) {
                     Row(modifier = Modifier.padding(12.dp).clickable { isMessageExpanded = false }, verticalAlignment = Alignment.CenterVertically) {
@@ -747,11 +783,17 @@ fun HomeScreen(
 
 @Composable
 fun HabitCard(progress: Int, color: Color, icon: Int, onClick: () -> Unit, onColorClick: () -> Unit) {
+    val style = LocalAppStyle.current
+    val cardBorder = if (style.cardStyle == "GLASS") BorderStroke(1.dp, Color.White.copy(alpha = 0.1f)) else null
+
+    val cardElevation = if (style.showShadows) CardDefaults.cardElevation(defaultElevation = 8.dp) else CardDefaults.cardElevation(defaultElevation = 0.dp)
+
     Card(
         onClick = onClick,
-        shape = RoundedCornerShape(24.dp),
-        colors = CardDefaults.cardColors(containerColor = Color(0xFF1A1A1A)),
-        modifier = Modifier.fillMaxWidth().height(160.dp).border(1.dp, Color.White.copy(alpha = 0.05f), RoundedCornerShape(24.dp))
+        shape = RoundedCornerShape(style.borderRadius),
+        colors = CardDefaults.cardColors(containerColor = style.surfaceColor),
+        elevation = cardElevation,
+        modifier = Modifier.fillMaxWidth().height(160.dp).then(if (cardBorder != null) Modifier.border(cardBorder, RoundedCornerShape(style.borderRadius)) else Modifier)
     ) {
         Row(modifier = Modifier.padding(16.dp).fillMaxSize(), verticalAlignment = Alignment.CenterVertically) {
             Column(modifier = Modifier.weight(1f)) {
@@ -779,11 +821,17 @@ fun HabitCard(progress: Int, color: Color, icon: Int, onClick: () -> Unit, onCol
 
 @Composable
 fun WorkoutCard(progress: Int, color: Color, icon: Int, onClick: () -> Unit, onColorClick: () -> Unit) {
+    val style = LocalAppStyle.current
+    val cardBorder = if (style.cardStyle == "GLASS") BorderStroke(1.dp, Color.White.copy(alpha = 0.1f)) else null
+
+    val cardElevation = if (style.showShadows) CardDefaults.cardElevation(defaultElevation = 8.dp) else CardDefaults.cardElevation(defaultElevation = 0.dp)
+
     Card(
         onClick = onClick,
-        shape = RoundedCornerShape(24.dp),
-        colors = CardDefaults.cardColors(containerColor = Color(0xFF1A1A1A)),
-        modifier = Modifier.fillMaxWidth().height(160.dp).border(1.dp, Color.White.copy(alpha = 0.05f), RoundedCornerShape(24.dp))
+        shape = RoundedCornerShape(style.borderRadius),
+        colors = CardDefaults.cardColors(containerColor = style.surfaceColor),
+        elevation = cardElevation,
+        modifier = Modifier.fillMaxWidth().height(160.dp).then(if (cardBorder != null) Modifier.border(cardBorder, RoundedCornerShape(style.borderRadius)) else Modifier)
     ) {
         Column(modifier = Modifier.padding(16.dp).fillMaxSize()) {
             Row(verticalAlignment = Alignment.CenterVertically) {
@@ -809,11 +857,17 @@ fun WorkoutCard(progress: Int, color: Color, icon: Int, onClick: () -> Unit, onC
 
 @Composable
 fun TaskCard(color: Color, icon: Int, onClick: () -> Unit, onColorClick: () -> Unit) {
+    val style = LocalAppStyle.current
+    val cardBorder = if (style.cardStyle == "GLASS") BorderStroke(1.dp, Color.White.copy(alpha = 0.1f)) else null
+
+    val cardElevation = if (style.showShadows) CardDefaults.cardElevation(defaultElevation = 8.dp) else CardDefaults.cardElevation(defaultElevation = 0.dp)
+
     Card(
         onClick = onClick,
-        shape = RoundedCornerShape(24.dp),
-        colors = CardDefaults.cardColors(containerColor = Color(0xFF1A1A1A)),
-        modifier = Modifier.fillMaxWidth().height(140.dp).border(1.dp, Color.White.copy(alpha = 0.05f), RoundedCornerShape(24.dp))
+        shape = RoundedCornerShape(style.borderRadius),
+        colors = CardDefaults.cardColors(containerColor = style.surfaceColor),
+        elevation = cardElevation,
+        modifier = Modifier.fillMaxWidth().height(140.dp).then(if (cardBorder != null) Modifier.border(cardBorder, RoundedCornerShape(style.borderRadius)) else Modifier)
     ) {
         Column(modifier = Modifier.padding(16.dp)) {
             Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
@@ -841,11 +895,17 @@ fun TaskCard(color: Color, icon: Int, onClick: () -> Unit, onColorClick: () -> U
 
 @Composable
 fun NoteCard(color: Color, icon: Int, onClick: () -> Unit, onColorClick: () -> Unit) {
+    val style = LocalAppStyle.current
+    val cardBorder = if (style.cardStyle == "GLASS") BorderStroke(1.dp, Color.White.copy(alpha = 0.1f)) else null
+
+    val cardElevation = if (style.showShadows) CardDefaults.cardElevation(defaultElevation = 8.dp) else CardDefaults.cardElevation(defaultElevation = 0.dp)
+
     Card(
         onClick = onClick,
-        shape = RoundedCornerShape(24.dp),
-        colors = CardDefaults.cardColors(containerColor = Color(0xFF1A1A1A)),
-        modifier = Modifier.fillMaxWidth().height(140.dp).border(1.dp, color.copy(alpha = 0.1f), RoundedCornerShape(24.dp))
+        shape = RoundedCornerShape(style.borderRadius),
+        colors = CardDefaults.cardColors(containerColor = style.surfaceColor),
+        elevation = cardElevation,
+        modifier = Modifier.fillMaxWidth().height(140.dp).then(if (cardBorder != null) Modifier.border(cardBorder, RoundedCornerShape(style.borderRadius)) else Modifier)
     ) {
         Column(modifier = Modifier.padding(16.dp)) {
             Text("NOTES", color = color, fontSize = 10.sp, fontWeight = FontWeight.Black, letterSpacing = 1.sp)
@@ -862,11 +922,17 @@ fun NoteCard(color: Color, icon: Int, onClick: () -> Unit, onColorClick: () -> U
 
 @Composable
 fun ProjectCard(color: Color, icon: Int, onClick: () -> Unit, onColorClick: () -> Unit) {
+    val style = LocalAppStyle.current
+    val cardBorder = if (style.cardStyle == "GLASS") BorderStroke(1.dp, Color.White.copy(alpha = 0.1f)) else null
+
+    val cardElevation = if (style.showShadows) CardDefaults.cardElevation(defaultElevation = 8.dp) else CardDefaults.cardElevation(defaultElevation = 0.dp)
+
     Card(
         onClick = onClick,
-        shape = RoundedCornerShape(24.dp),
-        colors = CardDefaults.cardColors(containerColor = Color(0xFF1A1A1A)),
-        modifier = Modifier.fillMaxWidth().height(130.dp).border(1.dp, Color.White.copy(alpha = 0.05f), RoundedCornerShape(24.dp))
+        shape = RoundedCornerShape(style.borderRadius),
+        colors = CardDefaults.cardColors(containerColor = style.surfaceColor),
+        elevation = cardElevation,
+        modifier = Modifier.fillMaxWidth().height(130.dp).then(if (cardBorder != null) Modifier.border(cardBorder, RoundedCornerShape(style.borderRadius)) else Modifier)
     ) {
         Column(modifier = Modifier.padding(16.dp)) {
             Row(verticalAlignment = Alignment.CenterVertically) {
@@ -888,11 +954,17 @@ fun ProjectCard(color: Color, icon: Int, onClick: () -> Unit, onColorClick: () -
 
 @Composable
 fun FinanceCard(amount: Double, color: Color, icon: Int, onClick: () -> Unit, onColorClick: () -> Unit) {
+    val style = LocalAppStyle.current
+    val cardBorder = if (style.cardStyle == "GLASS") BorderStroke(1.dp, Color.White.copy(alpha = 0.1f)) else null
+
+    val cardElevation = if (style.showShadows) CardDefaults.cardElevation(defaultElevation = 8.dp) else CardDefaults.cardElevation(defaultElevation = 0.dp)
+
     Card(
         onClick = onClick,
-        shape = RoundedCornerShape(24.dp),
+        shape = RoundedCornerShape(style.borderRadius),
         colors = CardDefaults.cardColors(containerColor = color.copy(alpha = 0.05f)),
-        modifier = Modifier.fillMaxWidth().height(130.dp).border(1.dp, color.copy(alpha = 0.2f), RoundedCornerShape(24.dp))
+        elevation = cardElevation,
+        modifier = Modifier.fillMaxWidth().height(130.dp).then(if (cardBorder != null) Modifier.border(cardBorder, RoundedCornerShape(style.borderRadius)) else Modifier)
     ) {
         Column(modifier = Modifier.padding(16.dp)) {
             Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {

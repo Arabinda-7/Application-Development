@@ -17,9 +17,27 @@ open class BaseActivity : AppCompatActivity() {
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
+        applyAppTheme()
         appliedDisplaySize = DataManager.displaySize
         appliedFontSize = DataManager.fontSize
         super.onCreate(savedInstanceState)
+    }
+
+    private fun applyAppTheme() {
+        if (DataManager.isSystemAppearanceEnabled) {
+            androidx.appcompat.app.AppCompatDelegate.setDefaultNightMode(androidx.appcompat.app.AppCompatDelegate.MODE_NIGHT_FOLLOW_SYSTEM)
+        } else {
+            val mode = when(DataManager.appThemeMode) {
+                "LIGHT" -> androidx.appcompat.app.AppCompatDelegate.MODE_NIGHT_NO
+                "DARK", "OLED" -> androidx.appcompat.app.AppCompatDelegate.MODE_NIGHT_YES
+                else -> androidx.appcompat.app.AppCompatDelegate.MODE_NIGHT_FOLLOW_SYSTEM
+            }
+            androidx.appcompat.app.AppCompatDelegate.setDefaultNightMode(mode)
+            
+            if (DataManager.appThemeMode == "OLED") {
+                window.decorView.setBackgroundColor(android.graphics.Color.BLACK)
+            }
+        }
     }
 
     override fun attachBaseContext(newBase: Context) {

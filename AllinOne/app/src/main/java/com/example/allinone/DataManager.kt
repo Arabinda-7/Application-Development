@@ -98,8 +98,17 @@ object DataManager {
     var lastMoodTimestamp: Long = 0L
     var displaySize: String = "S" // Options: XS, S, L
     var homeDisplaySize: String = "S" // Options: XS, S, L
+    var homeFocusSize: String = "M" // Options: S, M, L
     var fontSize: String = "S" // Options: XS, S, L
     var isSystemAppearanceEnabled: Boolean = true
+
+    // Advanced Look & Feel
+    var appThemeMode: String = "DARK" // LIGHT, DARK, OLED
+    var appAccentColor: Int = -1 // Default if -1
+    var appFontFamily: String = "DEFAULT" // DEFAULT, SERIF, MONO
+    var appBorderRadius: Int = 16 // 0 to 32 dp
+    var appCardStyle: String = "GLASS" // GLASS, ELEVATED, FLAT
+    var appShowShadows: Boolean = true
 
     // Home Page Section Visibility
     var showHabitSection: Boolean = true
@@ -321,9 +330,16 @@ object DataManager {
             putString(KEY_DAILY_MOODS, gson.toJson(dailyMoods))
             putLong(KEY_LAST_MOOD_TIMESTAMP, lastMoodTimestamp)
             putString(KEY_DISPLAY_SIZE, displaySize)
+            putString("home_focus_size", homeFocusSize)
             putString(KEY_HOME_DISPLAY_SIZE, homeDisplaySize)
             putString(KEY_FONT_SIZE, fontSize)
             putBoolean(KEY_SYSTEM_APPEARANCE, isSystemAppearanceEnabled)
+            putString("app_theme_mode", appThemeMode)
+            putInt("app_accent_color", appAccentColor)
+            putString("app_font_family", appFontFamily)
+            putInt("app_border_radius", appBorderRadius)
+            putString("app_card_style", appCardStyle)
+            putBoolean("app_show_shadows", appShowShadows)
             putInt(KEY_USER_XP, userXP)
             putInt(KEY_USER_LEVEL, userLevel)
 
@@ -590,9 +606,16 @@ object DataManager {
 
         lastMoodTimestamp = prefs.getLong(KEY_LAST_MOOD_TIMESTAMP, 0L)
         displaySize = prefs.getString(KEY_DISPLAY_SIZE, "S") ?: "S"
+        homeFocusSize = prefs.getString("home_focus_size", "M") ?: "M"
         homeDisplaySize = prefs.getString(KEY_HOME_DISPLAY_SIZE, "S") ?: "S"
         fontSize = prefs.getString(KEY_FONT_SIZE, "S") ?: "S"
         isSystemAppearanceEnabled = prefs.getBoolean(KEY_SYSTEM_APPEARANCE, true)
+        appThemeMode = prefs.getString("app_theme_mode", "DARK") ?: "DARK"
+        appAccentColor = prefs.getInt("app_accent_color", -1)
+        appFontFamily = prefs.getString("app_font_family", "DEFAULT") ?: "DEFAULT"
+        appBorderRadius = prefs.getInt("app_border_radius", 16)
+        appCardStyle = prefs.getString("app_card_style", "GLASS") ?: "GLASS"
+        appShowShadows = prefs.getBoolean("app_show_shadows", true)
         userXP = prefs.getInt(KEY_USER_XP, 0)
         userLevel = prefs.getInt(KEY_USER_LEVEL, 1)
 
@@ -1107,6 +1130,13 @@ object DataManager {
     }
 
     private fun sanitizeProjectFeatures(features: MutableList<ProjectFeature>) {
+        // De-duplication Logic: Remove items with the same ID
+        val uniqueFeatures = features.distinctBy { it.id }
+        if (uniqueFeatures.size != features.size) {
+            features.clear()
+            features.addAll(uniqueFeatures)
+        }
+
         features.forEach { feature ->
             if (feature == null) return@forEach
 
@@ -1115,6 +1145,12 @@ object DataManager {
             if (feature.resourceUrl == null) feature.resourceUrl = ""
             if (feature.resourcePath == null) feature.resourcePath = ""
             if (feature.blockedByNodeId == null) feature.blockedByNodeId = ""
+            
+            // New fields for milestone enhancements
+            // Since these are primitives with defaults in data class, Gson usually handles them, 
+            // but for safety if it was null in old version:
+            if (feature.weight == 0) feature.weight = 1 
+            // priority and hasReminder will default to 0/false if missing in JSON
 
             if (feature.subFeatures == null) {
                 try {

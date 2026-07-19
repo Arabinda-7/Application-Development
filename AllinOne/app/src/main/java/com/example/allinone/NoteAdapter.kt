@@ -37,26 +37,7 @@ class NoteAdapter(
         // Match the premium dark aesthetic from the pic
         holder.noteCard.setCardBackgroundColor(ContextCompat.getColor(context, R.color.chip_background))
         holder.noteTitle.setTextColor(color)
-
-        // Vibe Color Support
-        if (note.vibeColor != -1) {
-            holder.noteCard.strokeWidth = 2.dpToPx(context)
-            holder.noteCard.strokeColor = note.vibeColor
-        } else {
-            holder.noteCard.strokeWidth = 0
-        }
-
-        // Image Preview
-        if (!note.imageUri.isNullOrEmpty()) {
-            holder.imagePreview.visibility = View.VISIBLE
-            try {
-                holder.imagePreview.setImageURI(android.net.Uri.parse(note.imageUri))
-            } catch (e: Exception) {
-                holder.imagePreview.visibility = View.GONE
-            }
-        } else {
-            holder.imagePreview.visibility = View.GONE
-        }
+        holder.noteCard.strokeWidth = 0
 
         // Set date
         val sdf = SimpleDateFormat("MMMM dd, yyyy", Locale.getDefault())
@@ -180,8 +161,5 @@ class NoteAdapter(
         val noteContent: TextView = itemView.findViewById(R.id.note_content)
         val noteDate: TextView = itemView.findViewById(R.id.note_date)
         val noteCard: MaterialCardView = itemView.findViewById(R.id.note_card)
-        val imagePreview: android.widget.ImageView = itemView.findViewById(R.id.note_image_preview)
     }
-
-    private fun Int.dpToPx(context: android.content.Context): Int = (this * context.resources.displayMetrics.density).toInt()
 }

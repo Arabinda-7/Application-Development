@@ -73,7 +73,7 @@ class IdeaMindMapDialog(context: Context, private val note: Note) : Dialog(conte
             }
 
             // Draw center node
-            paint.color = if (note.vibeColor != -1) note.vibeColor else Color.parseColor("#FFB800")
+            paint.color = Color.parseColor("#FFB800")
             canvas.drawCircle(centerX, centerY, 80f, paint)
             
             paint.color = Color.BLACK
