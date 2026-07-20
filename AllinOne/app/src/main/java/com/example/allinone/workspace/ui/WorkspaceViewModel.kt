@@ -43,29 +43,39 @@ class WorkspaceViewModel(private val repository: WorkspaceRepository) : ViewMode
 
     fun selectProject(projectId: String) {
         viewModelScope.launch {
+            val projectFlow = repository.getProjectById(projectId)
+            val goalsFlow = repository.getGoalsForProject(projectId)
+            val tasksFlow = repository.getTasksForProject(projectId)
+            val featuresFlow = repository.getFeaturesForProject(projectId)
+            val bugsFlow = repository.getBugsForProject(projectId)
+            val ideasFlow = repository.getIdeasForProject(projectId)
+            val notesFlow = repository.getNotesForProject(projectId)
+            val resourcesFlow = repository.getResourcesForProject(projectId)
+            val logsFlow = repository.getActivityLogs(projectId)
+
             combine(
-                repository.getProjectById(projectId),
-                repository.getGoalsForProject(projectId),
-                repository.getTasksForProject(projectId),
-                repository.getFeaturesForProject(projectId),
-                repository.getBugsForProject(projectId),
-                repository.getIdeasForProject(projectId),
-                repository.getNotesForProject(projectId),
-                repository.getResourcesForProject(projectId),
-                repository.getActivityLogs(projectId)
-            ) { data ->
-                WorkspaceUIState(
-                    selectedProject = data[0] as ProjectEntity?,
-                    goals = data[1] as List<GoalEntity>,
-                    tasks = data[2] as List<TaskEntity>,
-                    features = data[3] as List<FeatureEntity>,
-                    bugs = data[4] as List<BugEntity>,
-                    ideas = data[5] as List<IdeaEntity>,
-                    notes = data[6] as List<NoteEntity>,
-                    resources = data[7] as List<ResourceEntity>,
-                    logs = data[8] as List<ActivityLogEntity>,
-                    projects = _uiState.value.projects
-                )
+                projectFlow, goalsFlow, tasksFlow, featuresFlow, bugsFlow, 
+                ideasFlow, notesFlow, resourcesFlow, logsFlow
+            ) { array ->
+                try {
+                    WorkspaceUIState(
+                        selectedProject = array[0] as? ProjectEntity,
+                        goals = array[1] as List<GoalEntity>,
+                        tasks = array[2] as List<TaskEntity>,
+                        features = array[3] as List<FeatureEntity>,
+                        bugs = array[4] as List<BugEntity>,
+                        ideas = array[5] as List<IdeaEntity>,
+                        notes = array[6] as List<NoteEntity>,
+                        resources = array[7] as List<ResourceEntity>,
+                        logs = array[8] as List<ActivityLogEntity>,
+                        projects = _uiState.value.projects
+                    )
+                } catch (e: Exception) {
+                    android.util.Log.e("WorkspaceViewModel", "Mapping error in combine", e)
+                    _uiState.value // Keep old state
+                }
+            }.catch { e ->
+                android.util.Log.e("WorkspaceViewModel", "Flow error in combine", e)
             }.collect { newState ->
                 _uiState.value = newState
             }
@@ -110,10 +120,44 @@ class WorkspaceViewModel(private val repository: WorkspaceRepository) : ViewMode
         }
     }
 
-    fun addFeature(title: String, projectId: String, description: String = "", complexity: String = "Medium") {
+    fun addFeature(
+        title: String,
+        projectId: String,
+        description: String = "",
+        complexity: String = "Medium",
+        effort: String = "M",
+        requirements: String = "",
+        version: String = "",
+        status: String = "Backlog"
+    ) {
         viewModelScope.launch {
-            repository.insertFeature(FeatureEntity(projectId = projectId, title = title, description = description, complexity = complexity))
+            repository.insertFeature(FeatureEntity(
+                projectId = projectId,
+                title = title,
+                description = description,
+                complexity = complexity,
+                effortSize = effort,
+                requirements = requirements,
+                targetVersion = version,
+                status = status
+            ))
         }
+    }
+
+    fun updateFeature(feature: FeatureEntity) {
+        viewModelScope.launch { repository.updateFeature(feature) }
+    }
+
+    fun deleteFeature(feature: FeatureEntity) {
+        viewModelScope.launch { repository.deleteFeature(feature) }
+    }
+
+    fun graduateIdea(idea: IdeaEntity) {
+        viewModelScope.launch { repository.convertIdeaToFeature(idea) }
+    }
+
+    fun quickTasks(feature: FeatureEntity) {
+        viewModelScope.launch { repository.generateFeatureTasks(feature) }
     }
 
     fun addBug(
@@ -121,6 +165,9 @@ class WorkspaceViewModel(private val repository: WorkspaceRepository) : ViewMode
         projectId: String,
         description: String = "",
         severity: String = "Medium",
+        priority: Int = 1,
+        environment: String = "Production",
+        version: String = "",
         steps: String = ""
     ) {
         viewModelScope.launch {
@@ -129,9 +176,16 @@ class WorkspaceViewModel(private val repository: WorkspaceRepository) : ViewMode
                 title = title,
                 description = description,
                 severity = severity,
+                priority = priority,
+                environment = environment,
+                version = version,
                 stepsToReproduce = steps
             ))
         }
+    }
+
+    fun updateBug(bug: BugEntity) {
+        viewModelScope.launch { repository.updateBug(bug) }
     }
 
     fun addIdea(

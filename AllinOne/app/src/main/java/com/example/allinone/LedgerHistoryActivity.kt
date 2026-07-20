@@ -29,6 +29,8 @@ class LedgerHistoryActivity : BaseActivity() {
         val historyList = findViewById<RecyclerView>(R.id.history_list)
         historyList.layoutManager = LinearLayoutManager(this)
 
+        setupKeyboardHandling(findViewById(R.id.ledger_history_root), findViewById(R.id.ledger_history_content_container))
+
         updateHistoryList()
         historyAdapter = HistoryAdapter(settledEntries, 
             onLongClick = { anchor, entry ->

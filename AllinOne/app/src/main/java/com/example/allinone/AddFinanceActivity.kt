@@ -35,16 +35,8 @@ class AddFinanceActivity : BaseActivity() {
     private val calendar = Calendar.getInstance()
 
     override fun onCreate(savedInstanceState: Bundle?) {
-        enableEdgeToEdge()
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_add_finance)
-
-        ViewCompat.setOnApplyWindowInsetsListener(findViewById(R.id.header_add_finance)) { v, insets ->
-            val statusBars = insets.getInsets(WindowInsetsCompat.Type.statusBars())
-            val basePadding = (24 * resources.displayMetrics.density).toInt()
-            v.setPadding(basePadding, statusBars.top + basePadding, basePadding, basePadding)
-            insets
-        }
 
         transactionIndex = intent.getIntExtra("TRANSACTION_INDEX", -1)
         if (transactionIndex != -1 && transactionIndex < DataManager.transactions.size) {
@@ -53,6 +45,7 @@ class AddFinanceActivity : BaseActivity() {
 
         initViews()
         setupLogic()
+        setupKeyboardHandling(findViewById(R.id.add_finance_root), findViewById(R.id.add_finance_content_container))
     }
 
     private fun initViews() {

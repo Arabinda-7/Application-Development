@@ -114,6 +114,10 @@ data class FeatureEntity(
     val title: String,
     val description: String = "",
     val complexity: String = "Medium", // Low, Medium, High
+    val effortSize: String = "M", // XS, S, M, L, XL
+    val requirements: String = "", // Must-haves / Checklist
+    val targetVersion: String = "", // e.g., v1.0, MVP
+    val successMetrics: String = "", // KPIs
     val status: String = "Backlog", // Backlog, Planning, Development, Testing, Shipped
     val lifecycleStage: String = "Proposal",
     val createdAt: Long = System.currentTimeMillis(),
@@ -138,7 +142,10 @@ data class BugEntity(
     val title: String,
     val description: String = "",
     val severity: String = "Medium", // Low, Medium, High, Critical
-    val status: String = "Open", // Open, Confirmed, In Progress, Fixed, Closed
+    val priority: Int = 1, // 0: Low, 1: Medium, 2: High
+    val status: String = "Open", // Open, Confirmed, Fixing, Fixed, Verified
+    val environment: String = "Production",
+    val version: String = "",
     val stepsToReproduce: String = "",
     val linkedTaskId: String? = null,
     val linkedFeatureId: String? = null,

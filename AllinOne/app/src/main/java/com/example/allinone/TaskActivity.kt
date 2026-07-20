@@ -43,21 +43,8 @@ class TaskActivity : BaseActivity() {
     private var currentSection = DataManager.taskDefaultSection
 
     override fun onCreate(savedInstanceState: Bundle?) {
-        enableEdgeToEdge()
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_task)
-
-        ViewCompat.setOnApplyWindowInsetsListener(findViewById(R.id.todo_root_layout)) { v, insets ->
-            val statusBars = insets.getInsets(WindowInsetsCompat.Type.statusBars())
-            v.setPadding(v.paddingLeft, statusBars.top, v.paddingRight, v.paddingBottom)
-            insets
-        }
-        
-        ViewCompat.setOnApplyWindowInsetsListener(findViewById(R.id.bottom_navigation_tasks)) { v, insets ->
-            val navBars = insets.getInsets(WindowInsetsCompat.Type.navigationBars())
-            v.setPadding(v.paddingLeft, v.paddingTop, v.paddingRight, navBars.bottom)
-            insets
-        }
 
         val taskList = findViewById<RecyclerView>(R.id.task_list)
         taskList.layoutManager = LinearLayoutManager(this)
@@ -73,6 +60,8 @@ class TaskActivity : BaseActivity() {
         setupBottomNavigation()
         setupSwipeActions(taskList)
         setupGestureDetector()
+        setupKeyboardHandling(findViewById(R.id.todo_root_layout), findViewById(R.id.task_content_container))
+        updateDynamicBackground()
 
         val btnCreate = findViewById<com.google.android.material.floatingactionbutton.FloatingActionButton>(R.id.btn_create_new_task)
         if (DataManager.taskAddThemeColor != -1) {
@@ -99,6 +88,29 @@ class TaskActivity : BaseActivity() {
     override fun onResume() {
         super.onResume()
         applyFilters()
+        updateDynamicBackground()
+    }
+
+    private fun updateDynamicBackground() {
+        val auraView = findViewById<View>(R.id.task_aura_background) ?: return
+        val taskColor = if (DataManager.globalTaskColor != -1) DataManager.globalTaskColor else Color.parseColor("#2EC4B6")
+        
+        val gradient = android.graphics.drawable.GradientDrawable(
+            android.graphics.drawable.GradientDrawable.Orientation.TOP_BOTTOM,
+            intArrayOf(
+                adjustAlpha(taskColor, 0.4f),
+                Color.BLACK
+            )
+        )
+        auraView.background = gradient
+    }
+
+    private fun adjustAlpha(color: Int, factor: Float): Int {
+        val alpha = Math.round(Color.alpha(color) * factor)
+        val red = Color.red(color)
+        val green = Color.green(color)
+        val blue = Color.blue(color)
+        return Color.argb(alpha, red, green, blue)
     }
 
     private fun setupHeader() {

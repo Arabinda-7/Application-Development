@@ -149,9 +149,9 @@ fun ProjectWorkspaceScreen(
                                         WorkspaceTab.Goals -> GoalsTree(uiState.goals)
                                         WorkspaceTab.Notes -> NotesView(uiState.notes)
                                         WorkspaceTab.Tasks -> TasksKanban(uiState.tasks, onUpdateTask = { viewModel.updateTask(it) })
-                                        WorkspaceTab.Features -> FeaturePlanner(uiState.features)
-                                        WorkspaceTab.Bugs -> BugTracker(uiState.bugs)
-                                        WorkspaceTab.Ideas -> IdeaBacklog(uiState.ideas, onConvert = { viewModel.convertIdeaToTask(it) })
+                                        WorkspaceTab.Features -> FeaturePlanner(uiState.features, viewModel, uiState.tasks)
+                                        WorkspaceTab.Bugs -> BugTracker(uiState.bugs, viewModel)
+                                        WorkspaceTab.Ideas -> IdeaBacklog(uiState.ideas, onConvert = { viewModel.graduateIdea(it) })
                                         WorkspaceTab.Resources -> ResourceDirectory(uiState.resources)
                                         WorkspaceTab.ActivityLog -> ActivityLogView(uiState.logs)
                                     }
@@ -267,6 +267,11 @@ fun WorkspaceCreationScreen(
     var resourceType by remember { mutableStateOf("URL") }
     var resourcePath by remember { mutableStateOf("") }
     var complexity by remember { mutableStateOf("Medium") }
+    var effort by remember { mutableStateOf("M") }
+    var requirements by remember { mutableStateOf("") }
+    var version by remember { mutableStateOf("") }
+    var env by remember { mutableStateOf("Production") }
+    var featureStatus by remember { mutableStateOf("Backlog") }
     var steps by remember { mutableStateOf("") }
 
     Column(
@@ -304,8 +309,26 @@ fun WorkspaceCreationScreen(
                         WorkspaceAction.AddProject -> viewModel.addProject(title, description, colorInt, iconName)
                         WorkspaceAction.AddTask -> viewModel.addTask(title, selectedProjectId, description, priority)
                         WorkspaceAction.AddGoal -> viewModel.addGoal(title, selectedProjectId, description)
-                        WorkspaceAction.AddFeature -> viewModel.addFeature(title, selectedProjectId, description, complexity)
-                        WorkspaceAction.AddBug -> viewModel.addBug(title, selectedProjectId, description, severity, steps)
+                        WorkspaceAction.AddFeature -> viewModel.addFeature(
+                            title = title, 
+                            projectId = selectedProjectId, 
+                            description = description, 
+                            complexity = complexity,
+                            effort = effort,
+                            requirements = requirements,
+                            version = version,
+                            status = featureStatus
+                        )
+                        WorkspaceAction.AddBug -> viewModel.addBug(
+                            title = title, 
+                            projectId = selectedProjectId, 
+                            description = description, 
+                            severity = severity, 
+                            priority = priority,
+                            environment = env,
+                            version = version,
+                            steps = steps
+                        )
                         WorkspaceAction.AddIdea -> viewModel.addIdea(title, selectedProjectId, description, impact.toInt(), difficulty.toInt())
                         WorkspaceAction.AddNote -> viewModel.addNote(title, description, selectedProjectId)
                         WorkspaceAction.AddResource -> viewModel.addResource(title, resourceType, resourcePath, selectedProjectId)
@@ -408,12 +431,62 @@ fun WorkspaceCreationScreen(
                             }
                         }
                     }
+
+                    Spacer(modifier = Modifier.height(24.dp))
+                    Text("Priority", color = style.accentColor, fontSize = 11.sp, fontWeight = FontWeight.Black, letterSpacing = 1.sp)
+                    Spacer(modifier = Modifier.height(12.dp))
+                    Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                        listOf("LOW", "MED", "HIGH").forEachIndexed { index, label ->
+                            val isSel = priority == index
+                            val color = when(index) {
+                                2 -> Color.Red
+                                1 -> Color(0xFFFFB800)
+                                else -> Color(0xFF2EC4B6)
+                            }
+                            Surface(
+                                onClick = { priority = index },
+                                shape = RoundedCornerShape(8.dp),
+                                color = if (isSel) color else color.copy(alpha = 0.1f),
+                                border = if (isSel) null else BorderStroke(1.dp, color.copy(alpha = 0.2f)),
+                                modifier = Modifier.weight(1f).height(40.dp)
+                            ) {
+                                Box(contentAlignment = Alignment.Center) {
+                                    Text(label, color = if (isSel) Color.Black else color, fontSize = 10.sp, fontWeight = FontWeight.Black)
+                                }
+                            }
+                        }
+                    }
+
+                    Spacer(modifier = Modifier.height(24.dp))
+                    Text("Environment", color = style.accentColor, fontSize = 11.sp, fontWeight = FontWeight.Black, letterSpacing = 1.sp)
+                    Spacer(modifier = Modifier.height(12.dp))
+                    Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                        listOf("Dev", "Beta", "Production").forEach { label ->
+                            val isSel = env == label
+                            FilterChip(
+                                selected = isSel,
+                                onClick = { env = label },
+                                label = { Text(label) },
+                                modifier = Modifier.weight(1f)
+                            )
+                        }
+                    }
+
+                    Spacer(modifier = Modifier.height(24.dp))
+                    OutlinedTextField(
+                        value = version,
+                        onValueChange = { version = it },
+                        label = { Text("App Version") },
+                        modifier = Modifier.fillMaxWidth(),
+                        colors = OutlinedTextFieldDefaults.colors(focusedTextColor = Color.White, unfocusedTextColor = Color.White)
+                    )
+
                     Spacer(modifier = Modifier.height(24.dp))
                     OutlinedTextField(
                         value = steps,
                         onValueChange = { steps = it },
                         label = { Text("Steps to Reproduce") },
-                        modifier = Modifier.fillMaxWidth().height(100.dp),
+                        modifier = Modifier.fillMaxWidth().height(120.dp),
                         colors = OutlinedTextFieldDefaults.colors(focusedTextColor = Color.White, unfocusedTextColor = Color.White)
                     )
                 }
@@ -465,6 +538,31 @@ fun WorkspaceCreationScreen(
                 }
                 WorkspaceAction.AddFeature -> {
                     Spacer(modifier = Modifier.height(32.dp))
+                    Text("Status", color = style.accentColor, fontSize = 11.sp, fontWeight = FontWeight.Black)
+                    Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(4.dp)) {
+                        listOf("Backlog", "Planning", "Development", "Testing").forEach { s ->
+                            FilterChip(
+                                selected = featureStatus == s,
+                                onClick = { featureStatus = s },
+                                label = { Text(s, fontSize = 10.sp) },
+                                modifier = Modifier.weight(1f)
+                            )
+                        }
+                    }
+
+                    Spacer(modifier = Modifier.height(24.dp))
+                    Text("Effort (T-Shirt Size)", color = style.accentColor, fontSize = 11.sp, fontWeight = FontWeight.Black)
+                    Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceEvenly) {
+                        listOf("XS", "S", "M", "L", "XL").forEach { size ->
+                            FilterChip(
+                                selected = effort == size,
+                                onClick = { effort = size },
+                                label = { Text(size) }
+                            )
+                        }
+                    }
+
+                    Spacer(modifier = Modifier.height(24.dp))
                     Text("Complexity", color = style.accentColor, fontSize = 11.sp, fontWeight = FontWeight.Black)
                     Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceEvenly) {
                         listOf("Low", "Medium", "High").forEach { c ->
@@ -475,6 +573,24 @@ fun WorkspaceCreationScreen(
                             )
                         }
                     }
+
+                    Spacer(modifier = Modifier.height(24.dp))
+                    OutlinedTextField(
+                        value = requirements,
+                        onValueChange = { requirements = it },
+                        label = { Text("Core Requirements (Checklist)") },
+                        modifier = Modifier.fillMaxWidth().heightIn(min = 100.dp),
+                        colors = OutlinedTextFieldDefaults.colors(focusedTextColor = Color.White, unfocusedTextColor = Color.White)
+                    )
+
+                    Spacer(modifier = Modifier.height(16.dp))
+                    OutlinedTextField(
+                        value = version,
+                        onValueChange = { version = it },
+                        label = { Text("Target Version / Milestone") },
+                        modifier = Modifier.fillMaxWidth(),
+                        colors = OutlinedTextFieldDefaults.colors(focusedTextColor = Color.White, unfocusedTextColor = Color.White)
+                    )
                 }
                 else -> {}
             }
@@ -582,7 +698,7 @@ fun WorkspaceSidebar(
                             .verticalScroll(rememberScrollState())
                             .weight(1f)
                     ) {
-                        WorkspaceTab.entries.forEach { tab ->
+                        WorkspaceTab.values().forEach { tab ->
                             val isSelected = selectedTab == tab
                             val contentColor = if (isSelected) style.accentColor else Color.White.copy(alpha = 0.5f)
                             
@@ -869,7 +985,9 @@ fun WorkspaceDashboard(state: WorkspaceUIState, viewModel: WorkspaceViewModel) {
                 }
                 Spacer(modifier = Modifier.width(16.dp))
                 Box(modifier = Modifier.weight(1f)) {
-                    MetricCard("Weighted", "${state.selectedProject?.weightedProgress ?: 0}%", Color(0xFF2EC4B6))
+                    val shipped = state.features.count { it.status == "Shipped" }
+                    val total = state.features.size
+                    MetricCard("Shipped", if (total > 0) "$shipped / $total" else "0/0", Color(0xFF2EC4B6))
                 }
             }
             Spacer(modifier = Modifier.height(16.dp))
@@ -1060,19 +1178,329 @@ fun TaskItem(task: TaskEntity, onUpdateTask: (TaskEntity) -> Unit) {
 }
 
 @Composable
-fun FeaturePlanner(features: List<FeatureEntity>) {
-    LazyColumn {
-        items(features) { feature ->
-            Text(feature.title, modifier = Modifier.padding(16.dp), color = Color.White)
+fun FeaturePlanner(features: List<FeatureEntity>, viewModel: WorkspaceViewModel, tasks: List<TaskEntity>) {
+    val style = LocalAppStyle.current
+    val statuses = listOf("Backlog", "Planning", "Development", "Testing", "Shipped")
+    
+    Column(modifier = Modifier.fillMaxSize()) {
+        // Summary Header
+        Row(
+            modifier = Modifier.fillMaxWidth().padding(bottom = 16.dp),
+            horizontalArrangement = Arrangement.spacedBy(12.dp)
+        ) {
+            val shipped = features.count { it.status == "Shipped" }
+            val total = features.size
+            MetricCard("In Progress", features.count { it.status == "Development" }.toString(), style.accentColor)
+            MetricCard("Shipped", "$shipped / $total", Color(0xFF2EC4B6))
+        }
+
+        Row(modifier = Modifier.fillMaxWidth().horizontalScroll(rememberScrollState())) {
+            statuses.forEach { status ->
+                Column(modifier = Modifier.width(280.dp).padding(8.dp)) {
+                    Text(
+                        status.uppercase(), 
+                        fontWeight = FontWeight.Black, 
+                        fontSize = 11.sp, 
+                        letterSpacing = 1.sp,
+                        color = if (status == "Shipped") Color(0xFF2EC4B6) else Color.White.copy(alpha = 0.4f)
+                    )
+                    Spacer(modifier = Modifier.height(12.dp))
+                    
+                    val statusFeatures = features.filter { it.status == status }
+                    if (statusFeatures.isEmpty()) {
+                        Box(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .height(100.dp)
+                                .border(1.dp, Color.White.copy(alpha = 0.05f), RoundedCornerShape(12.dp)),
+                            contentAlignment = Alignment.Center
+                        ) {
+                            Text("Empty", color = Color.White.copy(alpha = 0.1f), fontSize = 12.sp)
+                        }
+                    } else {
+                        statusFeatures.forEach { feature ->
+                            FeatureItemCard(
+                                feature = feature, 
+                                linkedTasks = tasks.filter { it.milestoneId == feature.id },
+                                onUpdate = { viewModel.updateFeature(it) },
+                                onQuickTasks = { viewModel.quickTasks(it) }
+                            )
+                            Spacer(modifier = Modifier.height(12.dp))
+                        }
+                    }
+                }
+            }
         }
     }
 }
 
 @Composable
-fun BugTracker(bugs: List<BugEntity>) {
-    LazyColumn {
-        items(bugs) { bug ->
-            Text(bug.title, modifier = Modifier.padding(16.dp), color = Color.Red)
+fun FeatureItemCard(
+    feature: FeatureEntity,
+    linkedTasks: List<TaskEntity>,
+    onUpdate: (FeatureEntity) -> Unit,
+    onQuickTasks: (FeatureEntity) -> Unit
+) {
+    val style = LocalAppStyle.current
+    val progress = if (linkedTasks.isNotEmpty()) {
+        linkedTasks.count { it.status == "Done" }.toFloat() / linkedTasks.size
+    } else 0f
+
+    Card(
+        shape = RoundedCornerShape(12.dp),
+        colors = CardDefaults.cardColors(containerColor = style.surfaceColor),
+        modifier = Modifier.fillMaxWidth()
+    ) {
+        Column(modifier = Modifier.padding(12.dp)) {
+            Row(verticalAlignment = Alignment.Top) {
+                Column(modifier = Modifier.weight(1f)) {
+                    Text(feature.title, fontWeight = FontWeight.Bold, color = Color.White, fontSize = 14.sp)
+                    if (feature.targetVersion.isNotBlank()) {
+                        Text(feature.targetVersion, color = style.accentColor, fontSize = 10.sp, fontWeight = FontWeight.Bold)
+                    }
+                }
+                
+                // Effort Badge
+                Surface(
+                    color = Color.White.copy(alpha = 0.1f),
+                    shape = RoundedCornerShape(4.dp)
+                ) {
+                    Text(
+                        feature.effortSize, 
+                        modifier = Modifier.padding(horizontal = 4.dp, vertical = 2.dp),
+                        color = Color.White, 
+                        fontSize = 9.sp, 
+                        fontWeight = FontWeight.Black
+                    )
+                }
+            }
+
+            if (feature.description.isNotBlank()) {
+                Spacer(modifier = Modifier.height(4.dp))
+                Text(
+                    feature.description, 
+                    fontSize = 12.sp, 
+                    color = Color.White.copy(alpha = 0.6f),
+                    maxLines = 2,
+                    overflow = androidx.compose.ui.text.style.TextOverflow.Ellipsis
+                )
+            }
+
+            Spacer(modifier = Modifier.height(12.dp))
+            
+            // Progress
+            Row(verticalAlignment = Alignment.CenterVertically) {
+                LinearProgressIndicator(
+                    progress = { progress },
+                    modifier = Modifier.weight(1f).height(4.dp).clip(CircleShape),
+                    color = if (progress == 1f) Color(0xFF2EC4B6) else style.accentColor,
+                    trackColor = Color.White.copy(alpha = 0.05f)
+                )
+                Spacer(modifier = Modifier.width(8.dp))
+                Text("${(progress * 100).toInt()}%", color = Color.White.copy(alpha = 0.5f), fontSize = 10.sp, fontWeight = FontWeight.Bold)
+            }
+
+            Spacer(modifier = Modifier.height(12.dp))
+
+            Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                if (linkedTasks.isEmpty() && feature.status != "Shipped") {
+                    TextButton(
+                        onClick = { onQuickTasks(feature) },
+                        modifier = Modifier.height(32.dp),
+                        contentPadding = PaddingValues(horizontal = 8.dp)
+                    ) {
+                        Icon(Icons.Default.AutoFixHigh, contentDescription = null, modifier = Modifier.size(14.dp))
+                        Spacer(modifier = Modifier.width(4.dp))
+                        Text("QUICK TASKS", fontSize = 10.sp, fontWeight = FontWeight.Bold)
+                    }
+                }
+                
+                Spacer(modifier = Modifier.weight(1f))
+
+                if (feature.status != "Shipped") {
+                    IconButton(
+                        onClick = { 
+                            val nextStatus = when(feature.status) {
+                                "Backlog" -> "Planning"
+                                "Planning" -> "Development"
+                                "Development" -> "Testing"
+                                "Testing" -> "Shipped"
+                                else -> "Shipped"
+                            }
+                            onUpdate(feature.copy(status = nextStatus))
+                        },
+                        modifier = Modifier.size(32.dp).background(style.accentColor.copy(alpha = 0.1f), CircleShape)
+                    ) {
+                        Icon(
+                            if (feature.status == "Testing") Icons.Default.RocketLaunch else Icons.Default.ChevronRight, 
+                            contentDescription = "Next", 
+                            tint = style.accentColor, 
+                            modifier = Modifier.size(16.dp)
+                        )
+                    }
+                }
+            }
+        }
+    }
+}
+
+@Composable
+fun BugTracker(bugs: List<BugEntity>, viewModel: WorkspaceViewModel) {
+    val style = LocalAppStyle.current
+    val statuses = listOf("Open", "Confirmed", "Fixing", "Fixed", "Verified")
+    
+    Column(modifier = Modifier.fillMaxSize()) {
+        // Bug Summary
+        Row(
+            modifier = Modifier.fillMaxWidth().padding(bottom = 16.dp),
+            horizontalArrangement = Arrangement.spacedBy(12.dp)
+        ) {
+            val criticalCount = bugs.count { it.severity == "Critical" }
+            val total = bugs.size
+            MetricCard("Critical", criticalCount.toString(), Color.Red)
+            MetricCard("Total Bugs", total.toString(), style.accentColor)
+        }
+
+        Row(modifier = Modifier.fillMaxWidth().horizontalScroll(rememberScrollState())) {
+            statuses.forEach { status ->
+                Column(modifier = Modifier.width(280.dp).padding(8.dp)) {
+                    Text(
+                        status.uppercase(), 
+                        fontWeight = FontWeight.Black, 
+                        fontSize = 11.sp, 
+                        letterSpacing = 1.sp,
+                        color = if (status == "Verified") Color(0xFF2EC4B6) else Color.White.copy(alpha = 0.4f)
+                    )
+                    Spacer(modifier = Modifier.height(12.dp))
+                    
+                    val statusBugs = bugs.filter { it.status == status }
+                    if (statusBugs.isEmpty()) {
+                        Box(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .height(100.dp)
+                                .border(1.dp, Color.White.copy(alpha = 0.05f), RoundedCornerShape(12.dp)),
+                            contentAlignment = Alignment.Center
+                        ) {
+                            Text("No bugs", color = Color.White.copy(alpha = 0.1f), fontSize = 12.sp)
+                        }
+                    } else {
+                        statusBugs.sortedByDescending { it.priority }.forEach { bug ->
+                            BugItemCard(
+                                bug = bug, 
+                                onUpdate = { viewModel.updateBug(it) }
+                            )
+                            Spacer(modifier = Modifier.height(12.dp))
+                        }
+                    }
+                }
+            }
+        }
+    }
+}
+
+@Composable
+fun BugItemCard(
+    bug: BugEntity,
+    onUpdate: (BugEntity) -> Unit
+) {
+    val style = LocalAppStyle.current
+    val severityColor = when (bug.severity) {
+        "Critical" -> Color.Red
+        "High" -> Color(0xFFFF5252)
+        "Medium" -> Color(0xFFFFB800)
+        else -> Color(0xFF2EC4B6)
+    }
+
+    // Critical bugs pulse or have a glow
+    val borderModifier = if (bug.severity == "Critical") {
+        Modifier.border(1.dp, severityColor.copy(alpha = 0.5f), RoundedCornerShape(12.dp))
+    } else {
+        Modifier.border(1.dp, Color.White.copy(alpha = 0.05f), RoundedCornerShape(12.dp))
+    }
+
+    Card(
+        shape = RoundedCornerShape(12.dp),
+        colors = CardDefaults.cardColors(containerColor = style.surfaceColor),
+        modifier = Modifier.fillMaxWidth().then(borderModifier)
+    ) {
+        Column(modifier = Modifier.padding(12.dp)) {
+            Row(verticalAlignment = Alignment.Top) {
+                Column(modifier = Modifier.weight(1f)) {
+                    Text(bug.title, fontWeight = FontWeight.Bold, color = Color.White, fontSize = 14.sp)
+                    Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.padding(top = 2.dp)) {
+                        Surface(color = severityColor.copy(alpha = 0.1f), shape = RoundedCornerShape(4.dp)) {
+                            Text(
+                                bug.severity.uppercase(), 
+                                modifier = Modifier.padding(horizontal = 4.dp, vertical = 2.dp),
+                                color = severityColor, 
+                                fontSize = 8.sp, 
+                                fontWeight = FontWeight.Black
+                            )
+                        }
+                        Spacer(modifier = Modifier.width(8.dp))
+                        Text(bug.environment, color = Color.White.copy(alpha = 0.4f), fontSize = 10.sp)
+                    }
+                }
+                
+                // Priority Icon
+                val priorityIcon = when(bug.priority) {
+                    2 -> Icons.Default.KeyboardDoubleArrowUp
+                    1 -> Icons.Default.KeyboardArrowUp
+                    else -> Icons.Default.KeyboardArrowDown
+                }
+                Icon(
+                    imageVector = priorityIcon, 
+                    contentDescription = null, 
+                    tint = severityColor,
+                    modifier = Modifier.size(18.dp)
+                )
+            }
+
+            if (bug.description.isNotBlank()) {
+                Spacer(modifier = Modifier.height(8.dp))
+                Text(
+                    bug.description, 
+                    fontSize = 12.sp, 
+                    color = Color.White.copy(alpha = 0.6f),
+                    maxLines = 3,
+                    overflow = androidx.compose.ui.text.style.TextOverflow.Ellipsis
+                )
+            }
+
+            if (bug.version.isNotBlank()) {
+                Spacer(modifier = Modifier.height(8.dp))
+                Text("v${bug.version}", color = style.accentColor, fontSize = 10.sp, fontWeight = FontWeight.Bold)
+            }
+
+            Spacer(modifier = Modifier.height(16.dp))
+
+            Row(horizontalArrangement = Arrangement.End, modifier = Modifier.fillMaxWidth()) {
+                if (bug.status != "Verified") {
+                    IconButton(
+                        onClick = { 
+                            val nextStatus = when(bug.status) {
+                                "Open" -> "Confirmed"
+                                "Confirmed" -> "Fixing"
+                                "Fixing" -> "Fixed"
+                                "Fixed" -> "Verified"
+                                else -> "Verified"
+                            }
+                            onUpdate(bug.copy(status = nextStatus))
+                        },
+                        modifier = Modifier.size(32.dp).background(style.accentColor.copy(alpha = 0.1f), CircleShape)
+                    ) {
+                        Icon(
+                            if (bug.status == "Fixed") Icons.Default.Verified else Icons.Default.ChevronRight, 
+                            contentDescription = "Next", 
+                            tint = style.accentColor, 
+                            modifier = Modifier.size(16.dp)
+                        )
+                    }
+                } else {
+                    Icon(Icons.Default.CheckCircle, null, tint = Color(0xFF2EC4B6), modifier = Modifier.size(24.dp))
+                }
+            }
         }
     }
 }
@@ -1081,10 +1509,26 @@ fun BugTracker(bugs: List<BugEntity>) {
 fun IdeaBacklog(ideas: List<IdeaEntity>, onConvert: (IdeaEntity) -> Unit) {
     LazyColumn {
         items(ideas) { idea ->
-            Row(modifier = Modifier.fillMaxWidth().padding(8.dp), horizontalArrangement = Arrangement.SpaceBetween) {
-                Text(idea.title, color = Color.White)
-                if (idea.status != "Converted") {
-                    Button(onClick = { onConvert(idea) }) { Text("Convert") }
+            Card(
+                modifier = Modifier.fillMaxWidth().padding(vertical = 6.dp),
+                colors = CardDefaults.cardColors(containerColor = Color.White.copy(alpha = 0.05f))
+            ) {
+                Row(modifier = Modifier.fillMaxWidth().padding(16.dp), verticalAlignment = Alignment.CenterVertically) {
+                    Column(modifier = Modifier.weight(1f)) {
+                        Text(idea.title, color = Color.White, fontWeight = FontWeight.Bold)
+                        if (idea.description.isNotBlank()) {
+                            Text(idea.description, color = Color.White.copy(alpha = 0.5f), fontSize = 12.sp, maxLines = 1)
+                        }
+                    }
+                    if (idea.status != "Converted") {
+                        Button(
+                            onClick = { onConvert(idea) },
+                            contentPadding = PaddingValues(horizontal = 12.dp, vertical = 4.dp),
+                            modifier = Modifier.height(32.dp)
+                        ) {
+                            Text("GRADUATE", fontSize = 10.sp, fontWeight = FontWeight.Black)
+                        }
+                    }
                 }
             }
         }
@@ -1102,9 +1546,89 @@ fun ResourceDirectory(resources: List<ResourceEntity>) {
 
 @Composable
 fun ActivityLogView(logs: List<ActivityLogEntity>) {
-    LazyColumn {
-        items(logs) { log ->
-            Text("${log.action}: ${log.description}", modifier = Modifier.padding(8.dp), color = Color.White.copy(alpha = 0.5f))
+    val sortedLogs = remember(logs) { logs.sortedByDescending { it.timestamp } }
+    
+    if (sortedLogs.isEmpty()) {
+        Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+            Text("No activity recorded yet.", color = Color.White.copy(alpha = 0.4f), fontSize = 14.sp)
+        }
+    } else {
+        LazyColumn(
+            modifier = Modifier.fillMaxSize(),
+            contentPadding = PaddingValues(vertical = 16.dp)
+        ) {
+            itemsIndexed(sortedLogs) { index, log ->
+                ActivityLogItem(
+                    log = log,
+                    isLast = index == sortedLogs.size - 1
+                )
+            }
+        }
+    }
+}
+
+@Composable
+fun ActivityLogItem(log: ActivityLogEntity, isLast: Boolean) {
+    val style = LocalAppStyle.current
+    val timeStr = remember(log.timestamp) {
+        java.text.SimpleDateFormat("MMM dd, h:mm a", java.util.Locale.getDefault()).format(java.util.Date(log.timestamp))
+    }
+
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .height(IntrinsicSize.Min) // Important for the vertical line to match height
+    ) {
+        // Timeline Column
+        Column(
+            modifier = Modifier.width(32.dp),
+            horizontalAlignment = Alignment.CenterHorizontally
+        ) {
+            Box(
+                modifier = Modifier
+                    .size(10.dp)
+                    .clip(CircleShape)
+                    .background(style.accentColor)
+            )
+            if (!isLast) {
+                Box(
+                    modifier = Modifier
+                        .fillMaxHeight()
+                        .width(1.dp)
+                        .background(Color.White.copy(alpha = 0.1f))
+                )
+            }
+        }
+
+        // Content Column
+        Column(
+            modifier = Modifier
+                .padding(start = 8.dp, bottom = 24.dp)
+                .weight(1f)
+        ) {
+            Text(
+                text = log.action.uppercase(),
+                color = Color.White,
+                fontSize = 13.sp,
+                fontWeight = FontWeight.Bold,
+                letterSpacing = 0.5.sp
+            )
+            
+            if (log.description.isNotEmpty()) {
+                Text(
+                    text = log.description,
+                    color = Color.White.copy(alpha = 0.6f),
+                    fontSize = 12.sp,
+                    modifier = Modifier.padding(top = 4.dp)
+                )
+            }
+
+            Text(
+                text = timeStr,
+                color = Color.White.copy(alpha = 0.3f),
+                fontSize = 10.sp,
+                modifier = Modifier.padding(top = 4.dp)
+            )
         }
     }
 }

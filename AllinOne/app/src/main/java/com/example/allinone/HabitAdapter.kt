@@ -90,7 +90,7 @@ class HabitAdapter(
             holder.itemView.findViewById<View>(R.id.icon_container).backgroundTintList = android.content.res.ColorStateList.valueOf(themeColor).withAlpha(20)
 
             // 3. Card Styling (Glassmorphic)
-            holder.habitCard.setCardBackgroundColor(android.graphics.Color.parseColor("#1A1A1A"))
+            holder.habitCard.setCardBackgroundColor(android.graphics.Color.TRANSPARENT)
             holder.habitCard.strokeColor = themeColor
             holder.habitCard.strokeWidth = (1.5 * context.resources.displayMetrics.density).toInt()
 

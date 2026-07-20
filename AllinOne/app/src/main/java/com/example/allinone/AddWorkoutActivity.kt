@@ -50,16 +50,8 @@ class AddWorkoutActivity : BaseActivity() {
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
-        enableEdgeToEdge()
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_add_workout)
-
-        ViewCompat.setOnApplyWindowInsetsListener(findViewById(R.id.toolbar_workout)) { v, insets ->
-            val statusBars = insets.getInsets(WindowInsetsCompat.Type.statusBars())
-            val basePadding = (24 * resources.displayMetrics.density).toInt()
-            v.setPadding(basePadding, statusBars.top + basePadding, basePadding, basePadding)
-            insets
-        }
 
         workoutIndex = intent.getIntExtra("WORKOUT_INDEX", -1)
         if (workoutIndex != -1 && workoutIndex < DataManager.workouts.size) {
@@ -68,6 +60,7 @@ class AddWorkoutActivity : BaseActivity() {
 
         initViews()
         setupLogic()
+        setupKeyboardHandling(findViewById(R.id.add_workout_root), findViewById(R.id.add_workout_content_container))
     }
 
     private fun initViews() {

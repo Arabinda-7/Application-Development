@@ -13,6 +13,7 @@ class AddPersonActivity : BaseActivity() {
         setContentView(R.layout.activity_add_person)
 
         val etName = findViewById<EditText>(R.id.et_person_name_input)
+        setupKeyboardHandling(findViewById(R.id.add_person_root), findViewById(R.id.add_person_content_container))
         
         findViewById<View>(R.id.btn_close_add_person).setOnClickListener { finish() }
         

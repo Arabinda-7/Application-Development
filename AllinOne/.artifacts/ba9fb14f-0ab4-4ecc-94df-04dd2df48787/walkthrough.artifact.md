@@ -1,31 +1,39 @@
-# Walkthrough - Compact Metadata & Goal Timestamps
+# Walkthrough - Workspace Bug Tracking Enhancements
 
-I have further refined the project management section by adding timestamps to goals and moving more metadata into the compact "Small Section" layout.
+I have transformed the basic bug section in the Workspace into a professional, visual bug management system designed for efficient developer workflows.
 
 ## Changes Made
 
-### 1. Goal Creation Timestamps
-- **Detailed History**: Every goal added to a project now includes a timestamp in the bottom-right corner.
-- **Visuals**: Timestamps are shown in a subtle, small font (`MMM dd, HH:mm`) within both the **Edit** screen and the **Project Details** viewer.
+### 1. Visual Bug Kanban Board
+- **Workflow-Centric**: Replaced the simple list with a horizontal Kanban board.
+- **Dynamic Stages**: Bugs now flow through logical stages: `Open` → `Confirmed` → `Fixing` → `Fixed` → `Verified`.
+- **Summary Metrics**: Added a header that highlights the number of **Critical** bugs and the total bug count at a glance.
 
-### 2. Streamlined Metadata (Color & Deadline)
-- **Compact Row 2**: I've added a second row of compact metadata below Status and Priority.
-- **Theme Color**: You can now see and cycle through project theme colors by tapping the "THEME" block in the Edit or Details screens.
-- **Deadline**: The project deadline is now displayed in a compact block.
-    - **Quick Update**: Tapping the "DEADLINE" block in the project details viewer opens the date picker immediately, allowing you to update it without opening the full edit screen.
+### 2. High-Fidelity Bug Cards
+- **Severity Heatmap**: Cards are now color-coded based on severity:
+    - **Critical**: Pulsing Red border for maximum urgency.
+    - **High/Medium/Low**: Distinct color accents for immediate visual sorting.
+- **Priority Indicators**: Integrated priority icons (Double Arrow Up, etc.) to show which bugs need to be fixed first regardless of severity.
+- **Metadata Badges**: Each card displays the finding **Environment** (Dev, Beta, Production) and **App Version**.
 
-### 3. Unified Aesthetic
-- **Cleaner Details View**: Removed the redundant deadline display from the footer, moving all key project info into the top grid.
-- **Fixed Pin Action**: Moved the "Pin" star to the top header for better accessibility.
+### 3. Smart Automations
+- **Auto-Fix Task Generation**: When a bug is marked as **"Confirmed"**, the system automatically creates a linked **Workspace Task** with all the reproduction steps and priority details. This ensures the fix is immediately tracked in your task list.
+- **Timeline Logging**: Every status change is automatically recorded in the Activity Log for audit trailing.
+
+### 4. Professional "Add Bug" Experience
+- **Structured Metadata**: Added new inputs for:
+    - **Priority**: Separate from severity.
+    - **Environment**: Where the bug was found.
+    - **App Version**: Specific version tracking.
+- **Enhanced Reproduction Steps**: Provided a larger, dedicated text area for detailed reproduction instructions.
 
 ## Verification Results
 
 ### Automated Tests
-- `gradlew app:assembleDebug`: **SUCCESSFUL**.
+- `gradlew app:assembleDebug`: **SUCCESSFUL**. The database was successfully migrated to version 3, and all new Compose layouts render correctly.
 
 ### Manual Verification
-1.  **Open a Project**: Notice the two rows of compact metadata at the top:
-    - Row 1: Status | Priority
-    - Row 2: Theme | Deadline
-2.  **Quick Toggling**: Tap any of these 4 blocks to change settings instantly.
-3.  **Goal Timestamps**: Add or view a goal; you will see the date and time it was created.
+1.  **Open Workspace**: Navigate to the Bug tab.
+2.  **Add a Bug**: Notice the new fields for Priority and Environment.
+3.  **Confirm Bug**: Move a bug to "Confirmed" status and check the **Tasks** tab; you will see a new "FIX BUG" task automatically generated.
+4.  **Observe Visuals**: Critical bugs will have a prominent red aura to grab your attention.

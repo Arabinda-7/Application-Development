@@ -1,36 +1,37 @@
-# Implementation Plan - App-Wide Keyboard Visibility Fixes
+# Implementation Plan - UI Sync for Task Section
 
-Standardize keyboard behavior across all input-heavy screens to ensure that the keyboard never obscures the text being typed.
+The user wants to apply the same UI improvements (uniform styling, unclipped borders, and theme-synced footer colors) to the Task section, matching the Habits and Workouts sections.
 
 ## User Review Required
 
-> [!IMPORTANT]
-> This will apply `adjustResize` to all "Add" and "Settings" activities in the app and increase the bottom padding in their respective scrollable areas. This ensures a consistent typing experience where the viewport always adjusts to the keyboard.
+> [!NOTE]
+> For the Task section, categories are dynamic and scrollable. I will update their styling to match the "capsule" look (38dp height, 1.5dp stroke) and ensure the borders are not clipped. The bottom navigation will also be synced with the global task theme color.
 
 ## Proposed Changes
 
-### Android Manifest
-#### [MODIFY] [AndroidManifest.xml](file:///C:/Users/arabi/OneDrive/Desktop/App%20Development/AllinOne/app/src/main/AndroidManifest.xml)
-- Add `android:windowSoftInputMode="adjustResize"` to the following activities:
-    - `AddPersonActivity`
-    - `LockActivity`
-    - All "Settings" activities (`HabitSettingsActivity`, `WorkoutSettingsActivity`, etc.)
+### UI Layouts
 
-### Layout Spacing (XML)
-#### [MODIFY] Multiple Layout Files
-Increase `paddingBottom` to at least `48dp` in the inner scrollable containers for:
-- `activity_add_finance.xml`
-- `activity_add_habit.xml`
-- `activity_add_note.xml`
-- `activity_add_person.xml`
-- `activity_add_project.xml`
-- `activity_add_sub_feature.xml`
-- `activity_add_task.xml`
-- `activity_add_workout.xml`
+#### [MODIFY] [activity_task.xml](file:///C:/Users/arabi/OneDrive/Desktop/App%20Development/AllinOne/app/src/main/res/layout/activity_task.xml)
+- Add `android:clipChildren="false"` and `android:clipToPadding="false"` to the `HorizontalScrollView` (`chip_scroll_categories`) and its child `RadioGroup` (`category_filter_group`).
+- This ensures the chip outlines are not cut off when scrolling or drawing.
+
+### Logic / Styling
+
+#### [MODIFY] [TaskActivity.kt](file:///C:/Users/arabi/OneDrive/Desktop/App%20Development/AllinOne/app/src/main/java/com/example/allinone/TaskActivity.kt)
+- **Implement `applySectionTheme()`**:
+    *   Apply the global task color (from `DataManager`) to the active footer navigation item.
+    *   Update `updateNavUI()` to use the dynamic theme color.
+    *   Call `applySectionTheme()` in `onCreate` and `onResume`.
+- **Refine `setupFilters()`**:
+    *   Increase chip height to `38dp`.
+    *   Apply the programmatic `GradientDrawable` (capsule shape, 1.5dp stroke) to the category chips.
+    *   Ensure unselected chips have the 1.5dp stroke and selected chips have the solid theme color.
+- **Immediate Startup Sync**: Ensure `updateNavUI()` is called within `applySectionTheme()` to prevent the "blue flicker" on activity start.
 
 ## Verification Plan
 
 ### Manual Verification
-1.  **Iterative Testing**: Open every "Add" section (Habit, Workout, Note, Task, Project, Finance, Person).
-2.  **Keyboard Trigger**: Scroll to the bottom and focus on the last input field.
-3.  **Visual Check**: Verify that the keyboard does not cover the cursor or the text being typed, and the screen is scrollable with the keyboard open.
+- Deploy the app and navigate to the Tasks section.
+- Verify that the category filter chips have the new "capsule" styling with clear 1.5dp borders.
+- Verify that the bottom navigation active state uses the global task color.
+- Check that there is no blue flicker when entering the Tasks page.

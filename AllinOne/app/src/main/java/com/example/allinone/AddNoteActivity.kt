@@ -33,16 +33,8 @@ class AddNoteActivity : BaseActivity() {
     private var selectedColor: Int = -1
 
     override fun onCreate(savedInstanceState: Bundle?) {
-        enableEdgeToEdge()
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_add_note)
-
-        ViewCompat.setOnApplyWindowInsetsListener(findViewById(R.id.header_add_note)) { v, insets ->
-            val statusBars = insets.getInsets(WindowInsetsCompat.Type.statusBars())
-            val basePadding = (24 * resources.displayMetrics.density).toInt()
-            v.setPadding(basePadding, statusBars.top + basePadding, basePadding, basePadding)
-            insets
-        }
 
         noteIndex = intent.getIntExtra("NOTE_INDEX", -1)
         currentCategory = intent.getStringExtra("CATEGORY") ?: "Notes"
@@ -53,6 +45,7 @@ class AddNoteActivity : BaseActivity() {
 
         initViews()
         setupLogic()
+        setupKeyboardHandling(findViewById(R.id.add_note_root), findViewById(R.id.add_note_content_container))
     }
 
     private fun initViews() {

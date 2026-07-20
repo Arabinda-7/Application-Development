@@ -74,28 +74,8 @@ class WorkoutRoutineActivity : BaseActivity() {
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
-        enableEdgeToEdge()
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_workout_routine)
-
-        ViewCompat.setOnApplyWindowInsetsListener(findViewById(R.id.today_layout)) { v, insets ->
-            val statusBars = insets.getInsets(WindowInsetsCompat.Type.statusBars())
-            v.setPadding(v.paddingLeft, statusBars.top, v.paddingRight, v.paddingBottom)
-            insets
-        }
-
-        ViewCompat.setOnApplyWindowInsetsListener(findViewById(R.id.history_layout)) { v, insets ->
-            val statusBars = insets.getInsets(WindowInsetsCompat.Type.statusBars())
-            val navBars = insets.getInsets(WindowInsetsCompat.Type.navigationBars())
-            v.setPadding(v.paddingLeft, statusBars.top, v.paddingRight, navBars.bottom)
-            insets
-        }
-
-        ViewCompat.setOnApplyWindowInsetsListener(findViewById(R.id.bottom_nav_mock)) { v, insets ->
-            val navBars = insets.getInsets(WindowInsetsCompat.Type.navigationBars())
-            v.setPadding(v.paddingLeft, v.paddingTop, v.paddingRight, navBars.bottom)
-            insets
-        }
 
         val dateTextView = findViewById<TextView>(R.id.tv_date)
         val sdf = SimpleDateFormat("MMM dd", Locale.getDefault())
@@ -129,8 +109,11 @@ class WorkoutRoutineActivity : BaseActivity() {
         setupFooterLogic()
         setupGridNavigation()
         setupCalendarViewPager()
+        applySectionTheme()
         updateSectionProgress()
         setupGestureDetector()
+        setupKeyboardHandling(findViewById(R.id.workout_root_layout), findViewById(R.id.workout_content_container))
+        updateDynamicBackground()
 
         findViewById<View>(R.id.btn_back).setOnClickListener { finish() }
         findViewById<View>(R.id.btn_back_history).setOnClickListener { finish() }
@@ -213,7 +196,8 @@ class WorkoutRoutineActivity : BaseActivity() {
             weeks.add(weekDays)
         }
 
-        weekAdapter = CalendarWeekAdapter(weeks) { day ->
+        val workoutColor = if (DataManager.globalWorkoutColor != -1) DataManager.globalWorkoutColor else Color.parseColor("#FFFFB800")
+        weekAdapter = CalendarWeekAdapter(weeks, workoutColor) { day ->
             selectedDateString = day.dateString
             weeks.flatten().forEach { it.isSelected = (it.dateString == day.dateString) }
             weekAdapter.notifyDataSetChanged()
@@ -824,12 +808,79 @@ class WorkoutRoutineActivity : BaseActivity() {
     override fun onResume() {
         super.onResume()
         applyFilters()
+        applySectionTheme()
         updateSectionProgress()
+        updateDynamicBackground()
+    }
+
+    private fun applySectionTheme() {
+        val workoutColor = if (DataManager.globalWorkoutColor != -1) DataManager.globalWorkoutColor else Color.parseColor("#FFFFB800")
+        
+        val chips = listOf<RadioButton>(
+            findViewById(R.id.chip_all),
+            findViewById(R.id.chip_morning),
+            findViewById(R.id.chip_afternoon),
+            findViewById(R.id.chip_evening)
+        )
+
+        chips.forEach { chip ->
+            val checkedDrawable = android.graphics.drawable.GradientDrawable().apply {
+                shape = android.graphics.drawable.GradientDrawable.RECTANGLE
+                cornerRadius = 19f * resources.displayMetrics.density
+                setColor(workoutColor)
+            }
+            
+            val uncheckedDrawable = android.graphics.drawable.GradientDrawable().apply {
+                shape = android.graphics.drawable.GradientDrawable.RECTANGLE
+                cornerRadius = 19f * resources.displayMetrics.density
+                setColor(Color.TRANSPARENT)
+                setStroke(Math.round(1.5f * resources.displayMetrics.density), workoutColor)
+            }
+
+            val stateListDrawable = android.graphics.drawable.StateListDrawable().apply {
+                addState(intArrayOf(android.R.attr.state_checked), checkedDrawable)
+                addState(intArrayOf(), uncheckedDrawable)
+            }
+            
+            chip.background = stateListDrawable
+        }
+
+        // Apply to Create Button
+        findViewById<com.google.android.material.card.MaterialCardView>(R.id.btn_create_new_workout).strokeColor = workoutColor
+        
+        // Apply to Progress Bar
+        sectionProgressBar.progressTintList = ColorStateList.valueOf(workoutColor)
+
+        // Sync Nav UI
+        updateNavUI(currentTab)
+    }
+
+    private fun updateDynamicBackground() {
+        val auraView = findViewById<View>(R.id.workout_aura_background) ?: return
+        val workoutColor = if (DataManager.globalWorkoutColor != -1) DataManager.globalWorkoutColor else Color.parseColor("#FFFFB800")
+        
+        val gradient = android.graphics.drawable.GradientDrawable(
+            android.graphics.drawable.GradientDrawable.Orientation.TOP_BOTTOM,
+            intArrayOf(
+                adjustAlpha(workoutColor, 0.4f),
+                Color.BLACK
+            )
+        )
+        auraView.background = gradient
+    }
+
+    private fun adjustAlpha(color: Int, factor: Float): Int {
+        val alpha = Math.round(Color.alpha(color) * factor)
+        val red = Color.red(color)
+        val green = Color.green(color)
+        val blue = Color.blue(color)
+        return Color.argb(alpha, red, green, blue)
     }
 
     private fun updateNavUI(active: String) {
-        val todayColor = if (active == "TODAY") ContextCompat.getColor(this, R.color.chip_selected) else ContextCompat.getColor(this, R.color.text_secondary)
-        val historyColor = if (active == "HISTORY") ContextCompat.getColor(this, R.color.chip_selected) else ContextCompat.getColor(this, R.color.text_secondary)
+        val workoutColor = if (DataManager.globalWorkoutColor != -1) DataManager.globalWorkoutColor else Color.parseColor("#FFFFB800")
+        val todayColor = if (active == "TODAY") workoutColor else ContextCompat.getColor(this, R.color.text_secondary)
+        val historyColor = if (active == "HISTORY") workoutColor else ContextCompat.getColor(this, R.color.text_secondary)
         
         findViewById<ImageView>(R.id.iv_today).imageTintList = android.content.res.ColorStateList.valueOf(todayColor)
         findViewById<TextView>(R.id.tv_today_nav).setTextColor(todayColor)

@@ -71,18 +71,13 @@ class SettingsActivity : BaseActivity() {
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
-        enableEdgeToEdge()
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_settings)
 
         // Restore navigation path if activity was recreated
         currentPath = savedInstanceState?.getString("current_path") ?: "HUB"
 
-        ViewCompat.setOnApplyWindowInsetsListener(findViewById(R.id.settings_top_header)) { v, insets ->
-            val statusBars = insets.getInsets(WindowInsetsCompat.Type.statusBars())
-            v.setPadding(v.paddingLeft, statusBars.top, v.paddingRight, v.paddingBottom)
-            insets
-        }
+        setupKeyboardHandling(findViewById(R.id.settings_root_layout), findViewById(R.id.settings_content_container))
 
         settingsList = findViewById(R.id.settings_list)
         tvTitle = findViewById(R.id.tv_title)

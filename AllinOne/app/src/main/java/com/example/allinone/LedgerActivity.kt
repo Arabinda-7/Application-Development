@@ -47,6 +47,7 @@ class LedgerActivity : BaseActivity() {
                 DataManager.saveData(this)
                 updateActiveEntries()
                 updateSummary()
+        setupKeyboardHandling(findViewById(R.id.ledger_root_layout))
             },
             onShowMenu = { anchor, entry, isHistory, onAction ->
                 showCustomLedgerMenu(anchor, entry, isHistory, onAction)
@@ -73,6 +74,7 @@ class LedgerActivity : BaseActivity() {
                         DataManager.saveData(this)
                         updateActiveEntries()
                         updateSummary()
+        setupKeyboardHandling(findViewById(R.id.ledger_root_layout))
                     }
                 )
             }
@@ -80,6 +82,7 @@ class LedgerActivity : BaseActivity() {
         ledgerList.adapter = ledgerAdapter
 
         updateSummary()
+        setupKeyboardHandling(findViewById(R.id.ledger_root_layout))
 
         findViewById<View>(R.id.btn_back).setOnClickListener { finish() }
 
@@ -94,6 +97,7 @@ class LedgerActivity : BaseActivity() {
         super.onResume()
         updateActiveEntries()
         updateSummary()
+        setupKeyboardHandling(findViewById(R.id.ledger_root_layout), findViewById(R.id.ledger_content_container))
     }
 
     private fun updateActiveEntries() {
@@ -144,6 +148,7 @@ class LedgerActivity : BaseActivity() {
             DataManager.saveData(this)
             updateActiveEntries()
             updateSummary()
+        setupKeyboardHandling(findViewById(R.id.ledger_root_layout))
             onAction()
             popupWindow.dismiss()
         }
@@ -194,6 +199,7 @@ class LedgerActivity : BaseActivity() {
             DataManager.saveData(this)
             updateActiveEntries()
             updateSummary()
+        setupKeyboardHandling(findViewById(R.id.ledger_root_layout))
             onAction()
             popupWindow.dismiss()
         }
@@ -242,6 +248,7 @@ class LedgerActivity : BaseActivity() {
                 DataManager.saveData(this)
                 updateActiveEntries()
                 updateSummary()
+        setupKeyboardHandling(findViewById(R.id.ledger_root_layout))
                 dialog.dismiss()
             }
         }
@@ -316,6 +323,7 @@ class LedgerActivity : BaseActivity() {
                 updateActiveEntries()
                 DataManager.saveData(this)
                 updateSummary()
+        setupKeyboardHandling(findViewById(R.id.ledger_root_layout))
                 dialog.dismiss()
             } else {
                 Toast.makeText(this, "Name and Amount required", Toast.LENGTH_SHORT).show()

@@ -22,15 +22,10 @@ class WorkoutDetailActivity : BaseActivity() {
     private var currentCalendar = Calendar.getInstance()
 
     override fun onCreate(savedInstanceState: Bundle?) {
-        enableEdgeToEdge()
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_workout_detail)
 
-        ViewCompat.setOnApplyWindowInsetsListener(findViewById(R.id.workout_detail_root)) { v, insets ->
-            val topPadding = (8 * resources.displayMetrics.density).toInt()
-            v.setPadding(v.paddingLeft, topPadding, v.paddingRight, v.paddingBottom)
-            insets
-        }
+        setupKeyboardHandling(findViewById(R.id.workout_detail_root), findViewById(R.id.workout_detail_content_container))
 
         val workoutId = intent.getLongExtra("WORKOUT_ID", -1L)
         workout = DataManager.workouts.find { it.timestamp == workoutId }

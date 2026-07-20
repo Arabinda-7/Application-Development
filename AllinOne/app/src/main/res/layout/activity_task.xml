@@ -8,191 +8,204 @@
     android:background="#000000"
     tools:context=".TaskActivity">
 
-    <ImageButton
-        android:id="@+id/btn_back"
-        android:layout_width="48dp"
-        android:layout_height="48dp"
-        android:layout_marginTop="0dp"
-        android:layout_marginStart="16dp"
-        android:background="?attr/selectableItemBackgroundBorderless"
-        android:src="@drawable/ic_back"
-        app:tint="@color/white"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent" />
-
-    <TextView
-        android:id="@+id/tv_title"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="4dp"
-        android:layout_marginStart="16dp"
-        android:text="TASKS"
-        android:textColor="@color/white"
-        android:textSize="20sp"
-        android:textStyle="bold"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/btn_back" />
-
-    <EditText
-        android:id="@+id/et_task_search"
-        android:layout_width="0dp"
-        android:layout_height="40dp"
-        android:layout_marginEnd="8dp"
-        android:layout_marginStart="16dp"
-        android:background="@drawable/filter_chip_bg"
-        android:backgroundTint="#22FFFFFF"
-        android:hint="Search tasks..."
-        android:paddingHorizontal="16dp"
-        android:textColor="@color/white"
-        android:textColorHint="#80FFFFFF"
-        android:textSize="14sp"
-        android:visibility="gone"
-        app:layout_constraintBottom_toBottomOf="@id/btn_task_search"
-        app:layout_constraintEnd_toStartOf="@id/btn_task_search"
-        app:layout_constraintStart_toEndOf="@id/btn_back"
-        app:layout_constraintTop_toTopOf="@id/btn_task_search" />
-
-    <ImageButton
-        android:id="@+id/btn_task_search"
-        android:layout_width="48dp"
-        android:layout_height="48dp"
-        android:background="?attr/selectableItemBackgroundBorderless"
-        android:src="@android:drawable/ic_menu_search"
-        app:layout_constraintBottom_toBottomOf="@id/btn_back"
-        app:layout_constraintEnd_toStartOf="@id/btn_task_settings"
-        app:layout_constraintTop_toTopOf="@id/btn_back"
-        app:tint="@color/white" />
-
-    <ImageButton
-        android:id="@+id/btn_task_settings"
-        android:layout_width="40dp"
-        android:layout_height="40dp"
-        android:layout_marginEnd="16dp"
-        android:background="@drawable/circle_selected_bg"
-        android:backgroundTint="#1AFFFFFF"
-        android:src="@drawable/baseline_tune_24"
-        android:padding="8dp"
-        android:scaleType="centerInside"
-        app:tint="@color/white"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintTop_toTopOf="parent" />
-
-    <TextView
-        android:id="@+id/tv_date"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="2dp"
-        android:layout_marginStart="16dp"
-        android:text="Mar 01"
-        android:textColor="@color/text_secondary"
-        android:textSize="14sp"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/tv_title" />
-
-    <HorizontalScrollView
-        android:id="@+id/chip_scroll_categories"
+    <!-- Immersive Background Layer -->
+    <View
+        android:id="@+id/task_aura_background"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="12dp"
-        android:scrollbars="none"
-        android:paddingHorizontal="16dp"
-        app:layout_constraintTop_toBottomOf="@id/tv_date">
+        android:layout_height="350dp"
+        app:layout_constraintTop_toTopOf="parent" />
 
-        <RadioGroup
-            android:id="@+id/category_filter_group"
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:id="@+id/task_content_container"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent">
+
+        <ImageButton
+            android:id="@+id/btn_back"
+            android:layout_width="48dp"
+            android:layout_height="48dp"
+            android:layout_marginTop="0dp"
+            android:layout_marginStart="16dp"
+            android:background="?attr/selectableItemBackgroundBorderless"
+            android:src="@drawable/ic_back"
+            app:tint="@color/white"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent" />
+
+        <TextView
+            android:id="@+id/tv_title"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:paddingHorizontal="0dp"
-            android:orientation="horizontal" />
-    </HorizontalScrollView>
+            android:layout_marginTop="4dp"
+            android:layout_marginStart="16dp"
+            android:text="TASKS"
+            android:textColor="@color/white"
+            android:textSize="20sp"
+            android:textStyle="bold"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/btn_back" />
 
-    <androidx.recyclerview.widget.RecyclerView
-        android:id="@+id/task_list"
-        android:layout_width="match_parent"
-        android:layout_height="0dp"
-        android:layout_marginTop="8dp"
-        android:clipToPadding="false"
-        android:paddingHorizontal="16dp"
-        android:paddingBottom="100dp"
-        app:layout_constraintBottom_toTopOf="@id/bottom_navigation_tasks"
-        app:layout_constraintTop_toBottomOf="@id/chip_scroll_categories" />
-
-    <com.google.android.material.floatingactionbutton.FloatingActionButton
-        android:id="@+id/btn_create_new_task"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginEnd="16dp"
-        android:layout_marginBottom="16dp"
-        android:src="@android:drawable/ic_input_add"
-        app:backgroundTint="@color/card_orange"
-        app:fabSize="normal"
-        app:layout_constraintBottom_toTopOf="@id/bottom_navigation_tasks"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:tint="@color/white" />
-
-    <!-- Custom Bottom Navigation -->
-    <LinearLayout
-        android:id="@+id/bottom_navigation_tasks"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:minHeight="64dp"
-        android:paddingVertical="8dp"
-        android:background="#1A1A1A"
-        android:orientation="horizontal"
-        app:layout_constraintBottom_toBottomOf="parent">
-
-        <LinearLayout
-            android:id="@+id/nav_tasks"
+        <EditText
+            android:id="@+id/et_task_search"
             android:layout_width="0dp"
+            android:layout_height="40dp"
+            android:layout_marginEnd="8dp"
+            android:layout_marginStart="16dp"
+            android:background="@drawable/filter_chip_bg"
+            android:backgroundTint="#22FFFFFF"
+            android:hint="Search tasks..."
+            android:paddingHorizontal="16dp"
+            android:textColor="@color/white"
+            android:textColorHint="#80FFFFFF"
+            android:textSize="14sp"
+            android:visibility="gone"
+            app:layout_constraintBottom_toBottomOf="@id/btn_task_search"
+            app:layout_constraintEnd_toStartOf="@id/btn_task_search"
+            app:layout_constraintStart_toEndOf="@id/btn_back"
+            app:layout_constraintTop_toTopOf="@id/btn_task_search" />
+
+        <ImageButton
+            android:id="@+id/btn_task_search"
+            android:layout_width="48dp"
+            android:layout_height="48dp"
+            android:background="?attr/selectableItemBackgroundBorderless"
+            android:src="@android:drawable/ic_menu_search"
+            app:layout_constraintBottom_toBottomOf="@id/btn_back"
+            app:layout_constraintEnd_toStartOf="@id/btn_task_settings"
+            app:layout_constraintTop_toTopOf="@id/btn_back"
+            app:tint="@color/white" />
+
+        <ImageButton
+            android:id="@+id/btn_task_settings"
+            android:layout_width="40dp"
+            android:layout_height="40dp"
+            android:layout_marginEnd="16dp"
+            android:background="@drawable/circle_selected_bg"
+            android:backgroundTint="#1AFFFFFF"
+            android:src="@drawable/baseline_tune_24"
+            android:padding="8dp"
+            android:scaleType="centerInside"
+            app:tint="@color/white"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintTop_toTopOf="parent" />
+
+        <TextView
+            android:id="@+id/tv_date"
+            android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_weight="1"
-            android:orientation="vertical"
-            android:gravity="center"
-            android:clickable="true"
-            android:focusable="true">
-            <ImageView
-                android:id="@+id/iv_tasks_icon"
-                android:layout_width="24dp"
-                android:layout_height="24dp"
-                android:src="@drawable/ic_habit_tracker"
-                app:tint="@color/chip_selected" />
-            <TextView
-                android:id="@+id/tv_tasks_label"
+            android:layout_marginTop="2dp"
+            android:layout_marginStart="16dp"
+            android:text="Mar 01"
+            android:textColor="@color/text_secondary"
+            android:textSize="14sp"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/tv_title" />
+
+        <HorizontalScrollView
+            android:id="@+id/chip_scroll_categories"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="12dp"
+            android:scrollbars="none"
+            android:paddingHorizontal="16dp"
+            app:layout_constraintTop_toBottomOf="@id/tv_date">
+
+            <RadioGroup
+                android:id="@+id/category_filter_group"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="4dp"
-                android:text="Tasks"
-                android:textColor="@color/chip_selected"
-                android:textSize="8sp"
-                android:textStyle="bold" />
-        </LinearLayout>
+                android:paddingHorizontal="0dp"
+                android:orientation="horizontal" />
+        </HorizontalScrollView>
 
-        <LinearLayout
-            android:id="@+id/nav_todo_list"
-            android:layout_width="0dp"
+        <androidx.recyclerview.widget.RecyclerView
+            android:id="@+id/task_list"
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
+            android:layout_marginTop="8dp"
+            android:clipToPadding="false"
+            android:paddingHorizontal="16dp"
+            android:paddingBottom="100dp"
+            app:layout_constraintBottom_toTopOf="@id/bottom_navigation_tasks"
+            app:layout_constraintTop_toBottomOf="@id/chip_scroll_categories" />
+
+        <com.google.android.material.floatingactionbutton.FloatingActionButton
+            android:id="@+id/btn_create_new_task"
+            android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_weight="1"
-            android:orientation="vertical"
-            android:gravity="center"
-            android:clickable="true"
-            android:focusable="true">
-            <ImageView
-                android:id="@+id/iv_todo_icon"
-                android:layout_width="24dp"
-                android:layout_height="24dp"
-                android:src="@drawable/ic_task"
-                app:tint="@color/text_secondary" />
-            <TextView
-                android:id="@+id/tv_todo_label"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="4dp"
-                android:text="List"
-                android:textColor="@color/text_secondary"
-                android:textSize="8sp"
-                android:textStyle="bold" />
-        </LinearLayout>
+            android:layout_marginEnd="16dp"
+            android:layout_marginBottom="16dp"
+            android:src="@android:drawable/ic_input_add"
+            app:backgroundTint="@color/card_orange"
+            app:fabSize="normal"
+            app:layout_constraintBottom_toTopOf="@id/bottom_navigation_tasks"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:tint="@color/white" />
 
-    </LinearLayout>
+        <!-- Custom Bottom Navigation -->
+        <LinearLayout
+            android:id="@+id/bottom_navigation_tasks"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:minHeight="64dp"
+            android:paddingVertical="8dp"
+            android:background="#1A1A1A"
+            android:orientation="horizontal"
+            app:layout_constraintBottom_toBottomOf="parent">
+
+            <LinearLayout
+                android:id="@+id/nav_tasks"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:orientation="vertical"
+                android:gravity="center"
+                android:clickable="true"
+                android:focusable="true">
+                <ImageView
+                    android:id="@+id/iv_tasks_icon"
+                    android:layout_width="24dp"
+                    android:layout_height="24dp"
+                    android:src="@drawable/ic_habit_tracker"
+                    app:tint="@color/chip_selected" />
+                <TextView
+                    android:id="@+id/tv_tasks_label"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="4dp"
+                    android:text="Tasks"
+                    android:textColor="@color/chip_selected"
+                    android:textSize="8sp"
+                    android:textStyle="bold" />
+            </LinearLayout>
+
+            <LinearLayout
+                android:id="@+id/nav_todo_list"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:orientation="vertical"
+                android:gravity="center"
+                android:clickable="true"
+                android:focusable="true">
+                <ImageView
+                    android:id="@+id/iv_todo_icon"
+                    android:layout_width="24dp"
+                    android:layout_height="24dp"
+                    android:src="@drawable/ic_task"
+                    app:tint="@color/text_secondary" />
+                <TextView
+                    android:id="@+id/tv_todo_label"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="4dp"
+                    android:text="List"
+                    android:textColor="@color/text_secondary"
+                    android:textSize="8sp"
+                    android:textStyle="bold" />
+            </LinearLayout>
+
+        </LinearLayout>
+    </androidx.constraintlayout.widget.ConstraintLayout>
 
 </androidx.constraintlayout.widget.ConstraintLayout>

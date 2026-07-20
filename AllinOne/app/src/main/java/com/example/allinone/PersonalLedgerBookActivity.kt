@@ -42,6 +42,8 @@ class PersonalLedgerBookActivity : BaseActivity() {
 
         updateSummary()
 
+        setupKeyboardHandling(findViewById(R.id.person_ledger_root), findViewById(R.id.person_ledger_content_container))
+
         findViewById<View>(R.id.btn_back).setOnClickListener { finish() }
         
         findViewById<View>(R.id.btn_person_settings).setOnClickListener {

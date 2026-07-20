@@ -18,7 +18,6 @@ import com.example.allinone.workspace.ui.WorkspaceViewModel
 class WorkspaceActivity : BaseActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
-        enableEdgeToEdge()
         super.onCreate(savedInstanceState)
 
         try {

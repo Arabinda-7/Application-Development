@@ -38,6 +38,8 @@ class AddIdeaActivity : BaseActivity() {
     private lateinit var etGoalInput: EditText
     private lateinit var btnAddGoal: View
     private lateinit var btnToggleGoals: TextView
+    private lateinit var btnToggleFeatures: TextView
+    private lateinit var layoutFeaturesContainer: View
     private lateinit var containerSubfeatures: LinearLayout
     private lateinit var etNewSubfeature: EditText
     private lateinit var btnAddSubfeature: View
@@ -50,16 +52,8 @@ class AddIdeaActivity : BaseActivity() {
     private var currentTagFilter = "ALL"
 
     override fun onCreate(savedInstanceState: Bundle?) {
-        enableEdgeToEdge()
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_add_idea)
-
-        ViewCompat.setOnApplyWindowInsetsListener(findViewById(R.id.sticky_header)) { v, insets ->
-            val statusBars = insets.getInsets(WindowInsetsCompat.Type.statusBars())
-            val basePadding = (16 * resources.displayMetrics.density).toInt()
-            v.setPadding(basePadding, statusBars.top + basePadding, basePadding, basePadding)
-            insets
-        }
 
         ideaIndex = intent.getIntExtra("IDEA_INDEX", -1)
         if (ideaIndex != -1 && ideaIndex < DataManager.notes.size) {
@@ -71,6 +65,7 @@ class AddIdeaActivity : BaseActivity() {
 
         initViews()
         setupLogic()
+        setupKeyboardHandling(findViewById(R.id.add_idea_root), findViewById(R.id.add_idea_content_container))
     }
 
     private fun initViews() {
@@ -87,6 +82,8 @@ class AddIdeaActivity : BaseActivity() {
         etGoalInput = findViewById(R.id.et_goal_input)
         btnAddGoal = findViewById(R.id.btn_add_goal)
         btnToggleGoals = findViewById(R.id.btn_toggle_goals)
+        btnToggleFeatures = findViewById(R.id.btn_toggle_subfeatures)
+        layoutFeaturesContainer = findViewById(R.id.layout_features_container)
         containerSubfeatures = findViewById(R.id.container_subfeatures)
         etNewSubfeature = findViewById(R.id.et_new_subfeature)
         btnAddSubfeature = findViewById(R.id.btn_add_subfeature)
@@ -121,6 +118,15 @@ class AddIdeaActivity : BaseActivity() {
                 containerGoals.visibility = View.VISIBLE
                 btnToggleGoals.text = "IDEA GOALS ▲"
             }
+
+            // Auto-expand if features exist
+            if (currentEditingIdeaSubFeatures.isNotEmpty()) {
+                layoutFeaturesContainer.visibility = View.VISIBLE
+                btnToggleFeatures.text = "FEATURES ▲"
+            } else {
+                layoutFeaturesContainer.visibility = View.GONE
+                btnToggleFeatures.text = "FEATURES ▼"
+            }
         }
 
         btnClose.setOnClickListener { finish() }
@@ -136,6 +142,12 @@ class AddIdeaActivity : BaseActivity() {
             val isVisible = containerGoals.visibility == View.VISIBLE
             containerGoals.visibility = if (isVisible) View.GONE else View.VISIBLE
             btnToggleGoals.text = if (isVisible) "IDEA GOALS ▼" else "IDEA GOALS ▲"
+        }
+
+        btnToggleFeatures.setOnClickListener {
+            val isVisible = layoutFeaturesContainer.visibility == View.VISIBLE
+            layoutFeaturesContainer.visibility = if (isVisible) View.GONE else View.VISIBLE
+            btnToggleFeatures.text = if (isVisible) "FEATURES ▼" else "FEATURES ▲"
         }
 
         btnAddGoal.setOnClickListener {

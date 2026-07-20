@@ -131,9 +131,66 @@ class WorkspaceRepository(private val dao: WorkspaceDao) {
         logActivity(feature.projectId, "FEATURE", feature.id, "CREATE", "Feature '${feature.title}' planned")
     }
 
+    suspend fun updateFeature(feature: FeatureEntity) {
+        dao.updateFeature(feature.copy(updatedAt = System.currentTimeMillis()))
+        logActivity(feature.projectId, "FEATURE", feature.id, "UPDATE", "Feature '${feature.title}' updated")
+    }
+
+    suspend fun deleteFeature(feature: FeatureEntity) {
+        dao.deleteFeature(feature)
+    }
+
+    suspend fun convertIdeaToFeature(idea: IdeaEntity) {
+        val feature = FeatureEntity(
+            projectId = idea.projectId,
+            title = idea.title,
+            description = idea.description,
+            status = "Backlog"
+        )
+        dao.insertFeature(feature)
+        dao.deleteIdea(idea)
+        logActivity(idea.projectId, "FEATURE", feature.id, "CONVERT", "Idea graduated to Feature: '${idea.title}'")
+    }
+
+    suspend fun generateFeatureTasks(feature: FeatureEntity) {
+        val tasks = listOf(
+            TaskEntity(projectId = feature.projectId, milestoneId = feature.id, title = "UI Design - ${feature.title}", description = "Design the user interface and interactions"),
+            TaskEntity(projectId = feature.projectId, milestoneId = feature.id, title = "Implementation - ${feature.title}", description = "Core logic and data integration"),
+            TaskEntity(projectId = feature.projectId, milestoneId = feature.id, title = "Testing & QA - ${feature.title}", description = "Unit tests and user acceptance testing")
+        )
+        tasks.forEach { dao.insertTask(it) }
+        logActivity(feature.projectId, "FEATURE", feature.id, "AUTOMATION", "Generated boilerplate tasks for '${feature.title}'")
+    }
+
     suspend fun insertBug(bug: BugEntity) {
         dao.insertBug(bug)
         logActivity(bug.projectId, "BUG", bug.id, "CREATE", "Bug '${bug.title}' reported")
+    }
+
+    suspend fun updateBug(bug: BugEntity) {
+        val oldBug = dao.getBugsForProject(bug.projectId).firstOrNull()?.find { it.id == bug.id }
+        val updatedBug = bug.copy(updatedAt = System.currentTimeMillis())
+        dao.updateBug(updatedBug)
+        
+        if (oldBug != null && oldBug.status != bug.status) {
+            logActivity(bug.projectId, "BUG", bug.id, "STATUS", "Bug '${bug.title}' status: ${bug.status}")
+            
+            // Automation: Auto-Task creation on Confirmation
+            if (bug.status == "Confirmed" && bug.linkedTaskId == null) {
+                val taskId = UUID.randomUUID().toString()
+                val task = TaskEntity(
+                    id = taskId,
+                    projectId = bug.projectId,
+                    title = "FIX BUG: ${bug.title}",
+                    description = "Resolution for Bug ID: ${bug.id}\n\nSteps: ${bug.stepsToReproduce}",
+                    priority = bug.priority
+                )
+                dao.insertTask(task)
+                // Link them
+                dao.updateBug(updatedBug.copy(linkedTaskId = taskId))
+                logActivity(bug.projectId, "BUG", bug.id, "AUTOMATION", "Auto-generated fix task")
+            }
+        }
     }
 
     suspend fun insertIdea(idea: IdeaEntity) {

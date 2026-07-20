@@ -21,6 +21,7 @@ data class DayModel(
 
 class CalendarDayAdapter(
     private val days: List<DayModel>,
+    private val habitColor: Int,
     private val onDaySelected: (DayModel) -> Unit
 ) : RecyclerView.Adapter<CalendarDayAdapter.DayViewHolder>() {
 
@@ -47,15 +48,25 @@ class CalendarDayAdapter(
             
             if (day.isSelected) {
                 tvDayNumber.setTypeface(null, android.graphics.Typeface.BOLD)
-                viewCircle.backgroundTintList = ContextCompat.getColorStateList(itemView.context, R.color.chip_background)
+                viewCircle.visibility = View.VISIBLE
                 viewLine.visibility = View.VISIBLE
+                
+                // Dynamic Border logic
+                val borderDrawable = android.graphics.drawable.GradientDrawable().apply {
+                    shape = android.graphics.drawable.GradientDrawable.OVAL
+                    setColor(Color.TRANSPARENT)
+                    setStroke((1.5 * itemView.context.resources.displayMetrics.density).toInt(), habitColor)
+                }
+                viewCircle.background = borderDrawable
+                viewLine.backgroundTintList = android.content.res.ColorStateList.valueOf(habitColor)
             } else {
                 tvDayNumber.setTypeface(null, android.graphics.Typeface.NORMAL)
-                viewCircle.backgroundTintList = ContextCompat.getColorStateList(itemView.context, android.R.color.transparent)
+                viewCircle.visibility = View.INVISIBLE
                 viewLine.visibility = View.INVISIBLE
             }
 
             viewTodayLine.visibility = if (day.isToday) View.VISIBLE else View.GONE
+            viewTodayLine.backgroundTintList = android.content.res.ColorStateList.valueOf(habitColor)
 
             itemView.setOnClickListener {
                 if (!day.isSelected) {

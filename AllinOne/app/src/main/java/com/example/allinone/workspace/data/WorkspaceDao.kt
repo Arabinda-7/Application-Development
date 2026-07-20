@@ -61,6 +61,9 @@ interface WorkspaceDao {
     @Update
     suspend fun updateFeature(feature: FeatureEntity)
 
+    @Delete
+    suspend fun deleteFeature(feature: FeatureEntity)
+
     // Bugs
     @Query("SELECT * FROM bugs WHERE projectId = :projectId")
     fun getBugsForProject(projectId: String): Flow<List<BugEntity>>

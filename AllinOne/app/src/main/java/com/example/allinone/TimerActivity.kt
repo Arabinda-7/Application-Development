@@ -22,6 +22,7 @@ class TimerActivity : BaseActivity() {
         timeLeftInMillis = timerDuration * 1000L
 
         val workoutNameTextView = findViewById<TextView>(R.id.workout_name_textview)
+        setupKeyboardHandling(findViewById(R.id.timer_root), findViewById(R.id.timer_content_container))
         val timerTextView = findViewById<TextView>(R.id.timer_textview)
         val timerProgressIndicator = findViewById<CircularProgressIndicator>(R.id.timer_progress_indicator)
         val startPauseButton = findViewById<Button>(R.id.start_pause_button)

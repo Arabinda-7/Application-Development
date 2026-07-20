@@ -33,6 +33,7 @@ class PersonalLedgerHubActivity : BaseActivity() {
         rv.adapter = adapter
 
         findViewById<View>(R.id.btn_back).setOnClickListener { finish() }
+        setupKeyboardHandling(findViewById(R.id.personal_ledger_hub_root), findViewById(R.id.personal_ledger_hub_content_container))
         findViewById<View>(R.id.btn_add_person_full).setOnClickListener {
             startActivity(Intent(this, AddPersonActivity::class.java))
         }

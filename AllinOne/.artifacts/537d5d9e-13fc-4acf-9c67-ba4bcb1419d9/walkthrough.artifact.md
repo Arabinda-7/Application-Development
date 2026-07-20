@@ -1,20 +1,28 @@
-# Walkthrough - Long-Press Workspace Gesture
+# Walkthrough - Redesigned Workspace Activity Section
 
-I have successfully added a new way to access your Workspace sections using a long-press gesture.
+The Workspace Activity section has been redesigned to use a professional timeline-based layout, bringing it in line with the Project History UI.
 
 ## Changes Made
 
-### 1. Gesture Integration
-- **Long-Press Activation**: Added a gesture detector to the background of the Workspace. You can now long-press on any empty area to instantly expand the navigation sidebar.
-- **Smart Conflict Handling**: The gesture is implemented at the root level, meaning it will only trigger if you're not interacting with a card, button, or list. This ensures your existing item interactions remain perfectly intact.
-- **Dual Navigation**: This feature works seamlessly alongside the existing "swipe from left" gesture and the floating menu icon.
+### 1. New Timeline UI
+- Replaced the simple text list with a structured `ActivityLogItem` component.
+- **Vertical Connection**: Added a vertical timeline line and a circular activity dot for each log entry.
+- **Improved Information Hierarchy**:
+    - **Action**: Displayed in bold uppercase (e.g., "CREATE", "UPDATE").
+    - **Description**: Detailed context about what happened.
+    - **Timestamp**: Clearly formatted (e.g., "Jul 20, 3:25 PM") at the bottom of each item.
+
+### 2. Data Organization
+- **Sorted View**: Activity logs are now automatically sorted with the most recent actions at the top.
+- **Empty State**: Added a clean placeholder message ("No activity recorded yet.") when the project has no history.
 
 ## Verification Results
 
 ### Manual Verification
-- **Background Long-Press**: Confirmed that long-pressing on the empty Dashboard area expands the sidebar immediately.
-- **Interactive Elements**: Verified that long-pressing on a project card or task does *not* trigger the sidebar, allowing elements to handle their own long-press logic if needed.
-- **Gesture Coexistence**: Confirmed that swiping from the left edge still works as expected without any interference from the long-press logic.
+- Navigated to the "Activity" tab in the Workspace.
+- Verified that logs appear in a timeline format with connecting lines.
+- Confirmed that performing actions (like adding a task or goal) generates new timeline entries instantly.
+- Verified that timestamps are correctly formatted and easy to read.
 
 > [!TIP]
-> Use the long-press shortcut when you're in the middle of a board and want to quickly switch sections without moving your thumb to the top corner!
+> This timeline view makes it much easier to track the progress of complex projects at a glance!

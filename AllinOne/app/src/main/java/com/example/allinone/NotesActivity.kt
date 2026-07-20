@@ -40,21 +40,8 @@ class NotesActivity : BaseActivity() {
     private lateinit var gestureDetector: android.view.GestureDetector
 
     override fun onCreate(savedInstanceState: Bundle?) {
-        enableEdgeToEdge()
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_notes)
-
-        ViewCompat.setOnApplyWindowInsetsListener(findViewById(R.id.notes_root_layout)) { v, insets ->
-            val statusBars = insets.getInsets(WindowInsetsCompat.Type.statusBars())
-            v.setPadding(v.paddingLeft, statusBars.top, v.paddingRight, v.paddingBottom)
-            insets
-        }
-        
-        ViewCompat.setOnApplyWindowInsetsListener(findViewById(R.id.bottom_navigation_notes)) { v, insets ->
-            val navBars = insets.getInsets(WindowInsetsCompat.Type.navigationBars())
-            v.setPadding(v.paddingLeft, v.paddingTop, v.paddingRight, navBars.bottom)
-            insets
-        }
 
         applyAutoCleanup()
 
@@ -74,6 +61,8 @@ class NotesActivity : BaseActivity() {
 
         setupBottomNavigation()
         setupGestureDetector()
+        setupKeyboardHandling(findViewById(R.id.notes_root_layout), findViewById(R.id.notes_content_container))
+        updateDynamicBackground()
 
         findViewById<View>(R.id.btn_notes_settings).setOnClickListener {
             if (isDeleteMode) {
@@ -109,6 +98,29 @@ class NotesActivity : BaseActivity() {
         if (::noteAdapter.isInitialized) {
             noteAdapter.updateNotes(displayNotes)
         }
+        updateDynamicBackground()
+    }
+
+    private fun updateDynamicBackground() {
+        val auraView = findViewById<View>(R.id.note_aura_background) ?: return
+        val noteColor = if (DataManager.globalNoteColor != -1) DataManager.globalNoteColor else Color.parseColor("#3A86F0")
+        
+        val gradient = android.graphics.drawable.GradientDrawable(
+            android.graphics.drawable.GradientDrawable.Orientation.TOP_BOTTOM,
+            intArrayOf(
+                adjustAlpha(noteColor, 0.4f),
+                Color.BLACK
+            )
+        )
+        auraView.background = gradient
+    }
+
+    private fun adjustAlpha(color: Int, factor: Float): Int {
+        val alpha = Math.round(Color.alpha(color) * factor)
+        val red = Color.red(color)
+        val green = Color.green(color)
+        val blue = Color.blue(color)
+        return Color.argb(alpha, red, green, blue)
     }
 
     private fun toggleDeleteMode(enabled: Boolean) {

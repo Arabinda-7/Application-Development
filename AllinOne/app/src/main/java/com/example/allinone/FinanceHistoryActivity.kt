@@ -9,6 +9,8 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.*
 import androidx.appcompat.app.AppCompatActivity
+import androidx.core.view.ViewCompat
+import androidx.core.view.WindowInsetsCompat
 import androidx.core.content.ContextCompat
 import androidx.recyclerview.widget.RecyclerView
 import androidx.viewpager2.widget.ViewPager2
@@ -25,6 +27,12 @@ class FinanceHistoryActivity : BaseActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_finance_history)
+
+        ViewCompat.setOnApplyWindowInsetsListener(findViewById(R.id.finance_history_root)) { v, insets ->
+            val systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars())
+            v.setPadding(v.paddingLeft, systemBars.top, v.paddingRight, v.paddingBottom)
+            insets
+        }
 
         tvSelectedYear = findViewById(R.id.tv_selected_year)
         tvSelectedYear.text = currentYear.toString()
@@ -48,6 +56,7 @@ class FinanceHistoryActivity : BaseActivity() {
         }
 
         updateYearlyAnalytics()
+        setupKeyboardHandling(findViewById(R.id.finance_history_root), findViewById(R.id.finance_history_content_container))
 
         onBackPressedDispatcher.addCallback(this, object : androidx.activity.OnBackPressedCallback(true) {
             override fun handleOnBackPressed() { finish() }
@@ -70,6 +79,7 @@ class FinanceHistoryActivity : BaseActivity() {
             currentYear = picker.value
             tvSelectedYear.text = currentYear.toString()
             updateYearlyAnalytics()
+        setupKeyboardHandling(findViewById(R.id.finance_history_root), findViewById(R.id.finance_history_content_container))
             dialog.dismiss()
         }
         
@@ -151,6 +161,7 @@ class FinanceHistoryActivity : BaseActivity() {
                 }
                 DataManager.saveData(this)
                 updateYearlyAnalytics()
+        setupKeyboardHandling(findViewById(R.id.finance_history_root), findViewById(R.id.finance_history_content_container))
                 dialog.dismiss()
             }
             grid.addView(colorView)
@@ -178,6 +189,7 @@ class FinanceHistoryActivity : BaseActivity() {
             DataManager.financeGraphStartMonth = picker.value
             DataManager.saveData(this)
             updateYearlyAnalytics()
+        setupKeyboardHandling(findViewById(R.id.finance_history_root), findViewById(R.id.finance_history_content_container))
             dialog.dismiss()
         }
         

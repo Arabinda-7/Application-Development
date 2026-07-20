@@ -42,6 +42,8 @@ class FinanceMonthHistoryActivity : BaseActivity() {
         setupMonthViewPager()
         setupMonthSelector()
 
+        setupKeyboardHandling(findViewById(R.id.month_history_root), findViewById(R.id.month_history_content_container))
+
         findViewById<View>(R.id.btn_back).setOnClickListener { finish() }
 
         // Default to current month or intent month

@@ -55,53 +55,18 @@ class ProfileActivity : BaseActivity() {
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
-        enableEdgeToEdge()
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_profile)
 
-        ViewCompat.setOnApplyWindowInsetsListener(findViewById(R.id.profile_scroll_view)) { v, insets ->
-            val topPadding = (8 * resources.displayMetrics.density).toInt()
-            v.setPadding(v.paddingLeft, topPadding, v.paddingRight, v.paddingBottom)
-            insets
-        }
+        setupKeyboardHandling(findViewById(R.id.profile_scroll_view), findViewById(R.id.profile_scroll_view))
 
         findViewById<View>(R.id.btn_back).setOnClickListener { finish() }
+        findViewById<View>(R.id.btn_edit_profile_top).setOnClickListener { showEditProfileDialog() }
 
         setupIdentity()
-        setupEditProfileSection()
         setupImpactSummary()
         setupSecurityHub()
         setupDataGovernance()
-    }
-
-    private fun setupEditProfileSection() {
-        val etName = findViewById<EditText>(R.id.et_profile_name)
-        val etBio = findViewById<EditText>(R.id.et_profile_bio)
-        val btnSave = findViewById<View>(R.id.btn_save_profile_changes)
-
-        etName.setText(DataManager.userName)
-        etBio.setText(DataManager.userBio)
-
-        btnSave.setOnClickListener {
-            val newName = etName.text.toString().trim()
-            val newBio = etBio.text.toString().trim()
-
-            if (newName.isNotEmpty()) {
-                DataManager.userName = newName
-                DataManager.userBio = newBio
-                DataManager.saveData(this)
-                setupIdentity() // Refresh header visuals
-                Toast.makeText(this, "Profile Updated Successfully", Toast.LENGTH_SHORT).show()
-                
-                // Clear focus to hide keyboard
-                etName.clearFocus()
-                etBio.clearFocus()
-                val imm = getSystemService(android.content.Context.INPUT_METHOD_SERVICE) as android.view.inputmethod.InputMethodManager
-                imm.hideSoftInputFromWindow(btnSave.windowToken, 0)
-            } else {
-                Toast.makeText(this, "Name cannot be empty", Toast.LENGTH_SHORT).show()
-            }
-        }
     }
 
     private fun setupIdentity() {
@@ -155,14 +120,18 @@ class ProfileActivity : BaseActivity() {
         dialog.window?.setLayout(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT)
         
         val etName = dialog.findViewById<EditText>(R.id.et_edit_name)
+        val etBio = dialog.findViewById<EditText>(R.id.et_edit_bio)
         val btnSave = dialog.findViewById<View>(R.id.btn_save_identity)
 
         etName.setText(DataManager.userName)
+        etBio.setText(DataManager.userBio)
         
         btnSave.setOnClickListener {
             val newName = etName.text.toString().trim()
+            val newBio = etBio.text.toString().trim()
             if (newName.isNotEmpty()) {
                 DataManager.userName = newName
+                DataManager.userBio = newBio
                 DataManager.saveData(this)
                 setupIdentity()
                 dialog.dismiss()

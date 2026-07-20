@@ -5,9 +5,13 @@ import android.content.Context
 import android.graphics.Rect
 import android.os.Bundle
 import android.view.MotionEvent
+import android.view.View
 import android.view.inputmethod.InputMethodManager
 import android.widget.EditText
+import androidx.activity.enableEdgeToEdge
 import androidx.appcompat.app.AppCompatActivity
+import androidx.core.view.ViewCompat
+import androidx.core.view.WindowInsetsCompat
 
 open class BaseActivity : AppCompatActivity() {
     private var appliedDisplaySize: String = ""
@@ -21,10 +25,26 @@ open class BaseActivity : AppCompatActivity() {
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
+        enableEdgeToEdge()
         applyAppTheme()
         appliedDisplaySize = DataManager.displaySize
         appliedFontSize = DataManager.fontSize
         super.onCreate(savedInstanceState)
+    }
+
+    protected fun setupKeyboardHandling(rootView: View, contentView: View? = null) {
+        ViewCompat.setOnApplyWindowInsetsListener(rootView) { v, insets ->
+            val imeInsets = insets.getInsets(WindowInsetsCompat.Type.ime())
+            val systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars())
+            
+            // Apply bottom padding to the root view (handles keyboard + navigation bar)
+            v.setPadding(v.paddingLeft, v.paddingTop, v.paddingRight, imeInsets.bottom.coerceAtLeast(systemBars.bottom))
+            
+            // Apply top padding to the content view only (handles status bar)
+            contentView?.setPadding(contentView.paddingLeft, systemBars.top, contentView.paddingRight, contentView.paddingBottom)
+            
+            insets
+        }
     }
 
     override fun dispatchTouchEvent(ev: MotionEvent?): Boolean {

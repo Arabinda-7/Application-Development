@@ -15,15 +15,8 @@ class FinanceSettingsActivity : BaseActivity() {
     private lateinit var tvTitle: TextView
 
     override fun onCreate(savedInstanceState: Bundle?) {
-        enableEdgeToEdge()
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_section_settings)
-
-        ViewCompat.setOnApplyWindowInsetsListener(findViewById(R.id.settings_header)) { v, insets ->
-            val statusBars = insets.getInsets(WindowInsetsCompat.Type.statusBars())
-            v.setPadding(v.paddingLeft, statusBars.top, v.paddingRight, v.paddingBottom)
-            insets
-        }
 
         settingsList = findViewById(R.id.settings_list)
         tvTitle = findViewById(R.id.tv_title)
@@ -32,6 +25,7 @@ class FinanceSettingsActivity : BaseActivity() {
         findViewById<View>(R.id.btn_back).setOnClickListener { finish() }
 
         settingsList.layoutManager = LinearLayoutManager(this)
+        setupKeyboardHandling(findViewById(R.id.section_settings_root), findViewById(R.id.section_settings_content_container))
         loadSettings()
     }
 

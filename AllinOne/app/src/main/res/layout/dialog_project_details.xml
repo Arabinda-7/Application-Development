@@ -287,16 +287,35 @@
                 android:background="#20FFFFFF"
                 app:layout_constraintTop_toBottomOf="@id/container_detail_goals" />
 
-            <TextView
-                android:id="@+id/tv_subfeatures_label"
+            <LinearLayout
+                android:id="@+id/layout_subfeatures_header_toggle"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="24dp"
-                android:text="SUB-FEATURES"
-                android:textColor="@color/white"
-                android:textSize="14sp"
-                android:textStyle="bold"
-                app:layout_constraintTop_toBottomOf="@id/detail_divider" />
+                android:orientation="horizontal"
+                android:gravity="center_vertical"
+                android:clickable="true"
+                android:focusable="true"
+                android:background="?attr/selectableItemBackground"
+                app:layout_constraintTop_toBottomOf="@id/detail_divider">
+
+                <TextView
+                    android:id="@+id/tv_subfeatures_label"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:text="SUB-FEATURES"
+                    android:textColor="@color/white"
+                    android:textSize="14sp"
+                    android:textStyle="bold" />
+
+                <ImageView
+                    android:id="@+id/iv_subfeatures_main_chevron"
+                    android:layout_width="16dp"
+                    android:layout_height="16dp"
+                    android:src="@android:drawable/arrow_up_float"
+                    app:tint="#80FFFFFF" />
+            </LinearLayout>
 
             <LinearLayout
                 android:id="@+id/container_detail_subfeatures"
@@ -304,7 +323,7 @@
                 android:layout_height="wrap_content"
                 android:layout_marginTop="12dp"
                 android:orientation="vertical"
-                app:layout_constraintTop_toBottomOf="@id/tv_subfeatures_label" />
+                app:layout_constraintTop_toBottomOf="@id/layout_subfeatures_header_toggle" />
 
             <LinearLayout
                 android:id="@+id/container_footer_metadata"

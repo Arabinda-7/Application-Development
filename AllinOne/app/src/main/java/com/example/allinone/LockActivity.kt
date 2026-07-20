@@ -32,15 +32,10 @@ class LockActivity : BaseActivity() {
     private lateinit var dotViews: List<View>
 
     override fun onCreate(savedInstanceState: Bundle?) {
-        enableEdgeToEdge()
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_lock)
 
-        ViewCompat.setOnApplyWindowInsetsListener(findViewById(R.id.lock_root_layout)) { v, insets ->
-            val statusBars = insets.getInsets(WindowInsetsCompat.Type.statusBars())
-            v.setPadding(v.paddingLeft, statusBars.top, v.paddingRight, v.paddingBottom)
-            insets
-        }
+        setupKeyboardHandling(findViewById(R.id.lock_root_layout), findViewById(R.id.lock_content_container))
 
         currentMode = intent.getIntExtra(EXTRA_MODE, MODE_AUTH)
 

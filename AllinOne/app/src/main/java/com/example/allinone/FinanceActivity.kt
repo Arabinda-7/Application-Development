@@ -46,15 +46,8 @@ class FinanceActivity : BaseActivity() {
     private var currentFilter = "All"
 
     override fun onCreate(savedInstanceState: Bundle?) {
-        enableEdgeToEdge()
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_finance)
-
-        ViewCompat.setOnApplyWindowInsetsListener(findViewById(R.id.finance_root_layout)) { v, insets ->
-            val statusBars = insets.getInsets(WindowInsetsCompat.Type.statusBars())
-            v.setPadding(v.paddingLeft, statusBars.top, v.paddingRight, v.paddingBottom)
-            insets
-        }
 
         val summary = findViewById<View>(R.id.finance_summary)
         tvBudget = summary.findViewById(R.id.tv_monthly_budget)
@@ -93,8 +86,9 @@ class FinanceActivity : BaseActivity() {
 
         // Feature 1: Category Filters Logic
         setupFilters()
-
         updateSummary()
+        setupKeyboardHandling(findViewById(R.id.finance_root_layout), findViewById(R.id.finance_content_container))
+        updateDynamicBackground()
 
         findViewById<View>(R.id.btn_finance_settings).setOnClickListener {
             val inflater = LayoutInflater.from(this)
@@ -159,6 +153,29 @@ class FinanceActivity : BaseActivity() {
         super.onResume()
         loadCurrentMonthTransactions()
         updateSummary()
+        updateDynamicBackground()
+    }
+
+    private fun updateDynamicBackground() {
+        val auraView = findViewById<View>(R.id.finance_aura_background) ?: return
+        val financeColor = if (DataManager.globalFinanceColor != -1) DataManager.globalFinanceColor else Color.parseColor("#E91E63")
+        
+        val gradient = android.graphics.drawable.GradientDrawable(
+            android.graphics.drawable.GradientDrawable.Orientation.TOP_BOTTOM,
+            intArrayOf(
+                adjustAlpha(financeColor, 0.4f),
+                Color.BLACK
+            )
+        )
+        auraView.background = gradient
+    }
+
+    private fun adjustAlpha(color: Int, factor: Float): Int {
+        val alpha = Math.round(Color.alpha(color) * factor)
+        val red = Color.red(color)
+        val green = Color.green(color)
+        val blue = Color.blue(color)
+        return Color.argb(alpha, red, green, blue)
     }
 
     private fun setupFilters() {

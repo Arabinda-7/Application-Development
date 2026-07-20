@@ -44,16 +44,8 @@ class AddHabitActivity : BaseActivity() {
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
-        enableEdgeToEdge()
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_add_habit)
-
-        ViewCompat.setOnApplyWindowInsetsListener(findViewById(R.id.toolbar_habit)) { v, insets ->
-            val statusBars = insets.getInsets(WindowInsetsCompat.Type.statusBars())
-            val basePadding = (24 * resources.displayMetrics.density).toInt()
-            v.setPadding(basePadding, statusBars.top + basePadding, basePadding, basePadding)
-            insets
-        }
 
         habitIndex = intent.getIntExtra("HABIT_INDEX", -1)
         if (habitIndex != -1 && habitIndex < DataManager.habits.size) {
@@ -62,6 +54,7 @@ class AddHabitActivity : BaseActivity() {
 
         initViews()
         setupLogic()
+        setupKeyboardHandling(findViewById(R.id.add_habit_root), findViewById(R.id.add_habit_content_container))
     }
 
     private fun initViews() {

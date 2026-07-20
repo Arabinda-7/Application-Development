@@ -45,16 +45,8 @@ class AddTaskActivity : BaseActivity() {
     private val tempSubtasks = mutableListOf<Subtask>()
 
     override fun onCreate(savedInstanceState: Bundle?) {
-        enableEdgeToEdge()
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_add_task)
-
-        ViewCompat.setOnApplyWindowInsetsListener(findViewById(R.id.header_add_task)) { v, insets ->
-            val statusBars = insets.getInsets(WindowInsetsCompat.Type.statusBars())
-            val basePadding = (24 * resources.displayMetrics.density).toInt()
-            v.setPadding(basePadding, statusBars.top + basePadding, basePadding, basePadding)
-            insets
-        }
 
         taskIndex = intent.getIntExtra("TASK_INDEX", -1)
         currentSection = intent.getStringExtra("SECTION") ?: "Tasks"
@@ -65,6 +57,7 @@ class AddTaskActivity : BaseActivity() {
 
         initViews()
         setupLogic()
+        setupKeyboardHandling(findViewById(R.id.add_task_root), findViewById(R.id.add_task_content_container))
     }
 
     private fun initViews() {

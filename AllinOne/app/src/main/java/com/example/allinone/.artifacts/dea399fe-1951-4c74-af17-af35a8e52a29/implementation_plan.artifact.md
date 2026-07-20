@@ -1,38 +1,54 @@
-# Implementation Plan - Global Keyboard Dismissal
+# Implementation Plan - Immersive Aura Headers
 
-Implement the "dismiss keyboard on tap outside" feature across all remaining sections of the app by ensuring all activities inherit from `BaseActivity` and properly handle touch events.
+Extend the "Aura" background effect into the system notification bar (status bar) across all major app sections, matching the immersive look of the Home and Habit screens.
 
 ## User Review Required
 
-> [!NOTE]
-> This change involves migrating several activities from `AppCompatActivity` to `BaseActivity`. This is safe as `BaseActivity` itself extends `AppCompatActivity` and provides additional global features like theme management and the new keyboard dismissal logic.
+> [!IMPORTANT]
+> This change involves modifying the root layout structure of several major screens to separate the "Background" layer from the "Content" layer. This is necessary to allow the background to draw behind the status bar while keeping buttons and text safely padded below it.
 
 ## Proposed Changes
 
-### [Activity Migration]
-
-The following activities will be updated to extend `BaseActivity` instead of `AppCompatActivity`. This will automatically enable the keyboard dismissal logic implemented in the previous task.
-
-#### [MODIFY] [FinanceHistoryActivity.kt](file:///C:/Users/arabi/OneDrive/Desktop/App Development/AllinOne/app/src/main/java/com/example/allinone/FinanceHistoryActivity.kt)
-#### [MODIFY] [FinanceMonthHistoryActivity.kt](file:///C:/Users/arabi/OneDrive/Desktop/App Development/AllinOne/app/src/main/java/com/example/allinone/FinanceMonthHistoryActivity.kt)
-#### [MODIFY] [HabitDetailActivity.kt](file:///C:/Users/arabi/OneDrive/Desktop/App Development/AllinOne/app/src/main/java/com/example/allinone/HabitDetailActivity.kt)
-#### [MODIFY] [LedgerHistoryActivity.kt](file:///C:/Users/arabi/OneDrive/Desktop/App Development/AllinOne/app/src/main/java/com/example/allinone/LedgerHistoryActivity.kt)
-#### [MODIFY] [LockActivity.kt](file:///C:/Users/arabi/OneDrive/Desktop/App Development/AllinOne/app/src/main/java/com/example/allinone/LockActivity.kt)
-#### [MODIFY] [PersonalLedgerBookActivity.kt](file:///C:/Users/arabi/OneDrive/Desktop/App Development/AllinOne/app/src/main/java/com/example/allinone/PersonalLedgerBookActivity.kt)
-#### [MODIFY] [PersonalLedgerHubActivity.kt](file:///C:/Users/arabi/OneDrive/Desktop/App Development/AllinOne/app/src/main/java/com/example/allinone/PersonalLedgerHubActivity.kt)
-#### [MODIFY] [TimerActivity.kt](file:///C:/Users/arabi/OneDrive/Desktop/App Development/AllinOne/app/src/main/java/com/example/allinone/TimerActivity.kt)
-#### [MODIFY] [WorkoutDetailActivity.kt](file:///C:/Users/arabi/OneDrive/Desktop/App Development/AllinOne/app/src/main/java/com/example/allinone/WorkoutDetailActivity.kt)
-
 ### [BaseActivity Refinement]
 
-I will double-check `BaseActivity` to ensure it doesn't have redundant imports and that the logic is robust.
+I will update the global keyboard and inset handler to support immersive backgrounds.
 
 #### [MODIFY] [BaseActivity.kt](file:///C:/Users/arabi/OneDrive/Desktop/App Development/AllinOne/app/src/main/java/com/example/allinone/BaseActivity.kt)
+- Update `setupKeyboardHandling(rootView: View, topPaddingView: View?)`:
+    - The `rootView` will handle the bottom insets (keyboard and navigation bar).
+    - The `topPaddingView` (e.g., your header or content container) will handle the status bar insets.
+    - This allows the background (which is a sibling to `topPaddingView`) to remain at the absolute top of the screen.
+
+### [Layout Enhancements]
+
+I will restructure the following layouts to support immersion:
+
+#### [MODIFY] [activity_task.xml](file:///C:/Users/arabi/OneDrive/Desktop/App Development/AllinOne/app/src/main/res/layout/activity_task.xml)
+- Wrap all content (except `task_aura_background`) in a new `ConstraintLayout` with id `task_content_container`.
+
+#### [MODIFY] [activity_notes.xml](file:///C:/Users/arabi/OneDrive/Desktop/App Development/AllinOne/app/src/main/res/layout/activity_notes.xml)
+- Wrap all content (except `note_aura_background`) in a new `ConstraintLayout` with id `notes_content_container`.
+
+#### [MODIFY] [activity_projects.xml](file:///C:/Users/arabi/OneDrive/Desktop/App Development/AllinOne/app/src/main/res/layout/activity_projects.xml)
+- Wrap all content (except `project_aura_background`) in a new `ConstraintLayout` with id `project_content_container`.
+
+#### [MODIFY] [activity_finance.xml](file:///C:/Users/arabi/OneDrive/Desktop/App Development/AllinOne/app/src/main/res/layout/activity_finance.xml)
+- Wrap all content (except `finance_aura_background`) in a new `ConstraintLayout` with id `finance_content_container`.
+
+### [Activity Logic Updates]
+
+I will update the activities to use the new immersive padding logic.
+
+#### [MODIFY] [TaskActivity.kt](file:///C:/Users/arabi/OneDrive/Desktop/App Development/AllinOne/app/src/main/java/com/example/allinone/TaskActivity.kt)
+#### [MODIFY] [NotesActivity.kt](file:///C:/Users/arabi/OneDrive/Desktop/App Development/AllinOne/app/src/main/java/com/example/allinone/NotesActivity.kt)
+#### [MODIFY] [ProjectActivity.kt](file:///C:/Users/arabi/OneDrive/Desktop/App Development/AllinOne/app/src/main/java/com/example/allinone/ProjectActivity.kt)
+#### [MODIFY] [FinanceActivity.kt](file:///C:/Users/arabi/OneDrive/Desktop/App Development/AllinOne/app/src/main/java/com/example/allinone/FinanceActivity.kt)
+#### [MODIFY] [WorkoutRoutineActivity.kt](file:///C:/Users/arabi/OneDrive/Desktop/App Development/AllinOne/app/src/main/java/com/example/allinone/WorkoutRoutineActivity.kt)
+- Update calls to `setupKeyboardHandling` to pass both the root and the new content container.
 
 ## Verification Plan
 
 ### Manual Verification
-- Deploy the app and navigate to different sections (e.g., Finance History, Ledger History).
-- Tap on any input field (if present) or any interactive area.
-- Verify that tapping outside the input field or on a "blank" area dismisses the keyboard.
-- Verify that standard click behaviors (buttons, list items) still work as expected.
+- **Visual Check**: Open each section and verify the background color extends to the very top, behind the time and battery icons.
+- **Usability Check**: Verify that the "Back" button and "Title" are not overlapping with the status bar icons.
+- **Keyboard Check**: Verify that the keyboard still correctly pushes the layout up without breaking the immersive header.

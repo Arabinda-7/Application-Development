@@ -22,15 +22,10 @@ class HabitDetailActivity : BaseActivity() {
     private var currentCalendar = Calendar.getInstance()
 
     override fun onCreate(savedInstanceState: Bundle?) {
-        enableEdgeToEdge()
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_habit_detail)
 
-        ViewCompat.setOnApplyWindowInsetsListener(findViewById(R.id.habit_detail_root)) { v, insets ->
-            val topPadding = (8 * resources.displayMetrics.density).toInt()
-            v.setPadding(v.paddingLeft, topPadding, v.paddingRight, v.paddingBottom)
-            insets
-        }
+        setupKeyboardHandling(findViewById(R.id.habit_detail_root), findViewById(R.id.habit_detail_content_container))
 
         val habitId = intent.getLongExtra("HABIT_ID", -1L)
         habit = DataManager.habits.find { it.timestamp == habitId }

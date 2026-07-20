@@ -44,16 +44,8 @@ class AddSubFeatureActivity : BaseActivity() {
     private var isIdeaMode: Boolean = false
 
     override fun onCreate(savedInstanceState: Bundle?) {
-        enableEdgeToEdge()
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_add_sub_feature)
-
-        ViewCompat.setOnApplyWindowInsetsListener(findViewById(R.id.header_sub_feature)) { v, insets ->
-            val statusBars = insets.getInsets(WindowInsetsCompat.Type.statusBars())
-            val basePadding = (24 * resources.displayMetrics.density).toInt()
-            v.setPadding(basePadding, statusBars.top + basePadding, basePadding, basePadding)
-            insets
-        }
 
         projectIndex = intent.getIntExtra("PROJECT_INDEX", -1)
         subFeatureId = intent.getStringExtra("SUB_FEATURE_ID")
@@ -79,6 +71,7 @@ class AddSubFeatureActivity : BaseActivity() {
         initViews()
         setupLogic()
         applyIdeaModeUI()
+        setupKeyboardHandling(findViewById(R.id.add_sub_feature_root), findViewById(R.id.add_sub_feature_content_container))
     }
 
     private fun applyIdeaModeUI() {

@@ -1,29 +1,27 @@
-# Implementation Plan - Workspace Sidebar Scrim & Blur
+# Implementation Plan - Redesign Workspace Activity Section
 
-This plan adds a glass-like blur effect to the background when the menu is expanded and allows users to dismiss the menu by tapping anywhere outside of it.
+This plan aims to redesign the "Activity" section of the Workspace to match the timeline-based "Project History" UI.
 
 ## Proposed Changes
 
 ### [Workspace Component]
 
 #### [MODIFY] [ProjectWorkspaceScreen.kt](file:///C:/Users/arabi/OneDrive/Desktop/App Development/AllinOne/app/src/main/java/com/example/allinone/workspace/ui/ProjectWorkspaceScreen.kt)
-- **Background Blur**:
-    - Use `animateDpAsState` for a `blurRadius` (0dp to 10dp).
-    - Apply `Modifier.blur(blurRadius)` to the main `Scaffold` content.
-- **Dismissible Scrim**:
-    - Insert an interactive layer (Scrim) between the content and the sidebar.
-    - This layer will be a `Box` with a semi-transparent background.
-    - Add a `clickable` modifier to this `Box` that triggers `isSidebarExpanded = false`.
-    - Use `AnimatedVisibility` for a smooth fade-in/out of the scrim.
-- **Visual Polish**:
-    - Ensure the scrim and blur animations are synchronized with the sidebar sliding out.
+- **Redesign `ActivityLogView`**:
+    - Use a `LazyColumn` to display logs.
+    - Sort logs by descending timestamp.
+    - Create a new `@Composable` function `ActivityLogItem` that replicates the `item_project_history.xml` layout:
+        - Left side: A vertical timeline line and a circular dot.
+        - Right side: Column containing Action (bold), Description, and Formatted Timestamp.
+    - Use `SimpleDateFormat("MMM dd, h:mm a")` for the timestamp formatting.
+    - Ensure the vertical line connects between items (except for the last one).
 
 ## Verification Plan
 
 ### Manual Verification
-1. Open the Workspace.
-2. Open the sidebar (via icon, swipe, or long-press).
-3. Verify that the background dashboard and cards become slightly blurred and darkened.
-4. Tap on the blurred dashboard area.
-5. Verify the sidebar collapses and the blur disappears.
-6. Verify clicking on the sidebar icons still works and doesn't close the sidebar (unless it's an action that navigates).
+1. Open the Workspace section.
+2. Navigate to the "Activity" tab.
+3. Verify that the logs are displayed in a timeline format.
+4. Check that the vertical lines and dots align correctly.
+5. Verify that the most recent activities are at the top.
+6. Perform some actions in the workspace (e.g., add a task) and verify they appear in the new activity timeline.

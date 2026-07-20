@@ -1,13 +1,9 @@
-# Tasks - Global Keyboard Dismissal
+# Tasks - Immersive Aura Headers
 
-- [x] Refine `BaseActivity.kt` to resolve linter warnings
-- [x] Migrate `FinanceHistoryActivity` to `BaseActivity`
-- [x] Migrate `FinanceMonthHistoryActivity` to `BaseActivity`
-- [x] Migrate `HabitDetailActivity` to `BaseActivity`
-- [x] Migrate `LedgerHistoryActivity` to `BaseActivity`
-- [x] Migrate `LockActivity` to `BaseActivity`
-- [x] Migrate `PersonalLedgerBookActivity` to `BaseActivity`
-- [x] Migrate `PersonalLedgerHubActivity` to `BaseActivity`
-- [x] Migrate `TimerActivity` to `BaseActivity`
-- [x] Migrate `WorkoutDetailActivity` to `BaseActivity`
-- [x] Final verification of `dispatchTouchEvent` overrides
+- [ ] Update `BaseActivity.kt` with split top/bottom inset handling
+- [ ] Refactor `activity_task.xml` and `TaskActivity.kt`
+- [ ] Refactor `activity_notes.xml` and `NotesActivity.kt`
+- [ ] Refactor `activity_projects.xml` and `ProjectActivity.kt`
+- [ ] Refactor `activity_finance.xml` and `FinanceActivity.kt`
+- [ ] Refactor `activity_workout_routine.xml` and `WorkoutRoutineActivity.kt`
+- [ ] Final visual verification

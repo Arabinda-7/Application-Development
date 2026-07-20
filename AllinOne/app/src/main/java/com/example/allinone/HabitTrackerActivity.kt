@@ -50,28 +50,8 @@ class HabitTrackerActivity : BaseActivity() {
     private var currentTab = "TODAY"
 
     override fun onCreate(savedInstanceState: Bundle?) {
-        enableEdgeToEdge()
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_habit_tracker)
-
-        ViewCompat.setOnApplyWindowInsetsListener(findViewById(R.id.today_layout)) { v, insets ->
-            val statusBars = insets.getInsets(WindowInsetsCompat.Type.statusBars())
-            v.setPadding(v.paddingLeft, statusBars.top, v.paddingRight, v.paddingBottom)
-            insets
-        }
-        
-        ViewCompat.setOnApplyWindowInsetsListener(findViewById(R.id.history_layout)) { v, insets ->
-            val statusBars = insets.getInsets(WindowInsetsCompat.Type.statusBars())
-            val navBars = insets.getInsets(WindowInsetsCompat.Type.navigationBars())
-            v.setPadding(v.paddingLeft, statusBars.top, v.paddingRight, navBars.bottom)
-            insets
-        }
-
-        ViewCompat.setOnApplyWindowInsetsListener(findViewById(R.id.bottom_nav_mock)) { v, insets ->
-            val navBars = insets.getInsets(WindowInsetsCompat.Type.navigationBars())
-            v.setPadding(v.paddingLeft, v.paddingTop, v.paddingRight, navBars.bottom)
-            insets
-        }
 
         val dateTextView = findViewById<TextView>(R.id.tv_date)
         val sdf = SimpleDateFormat("MMM dd", Locale.getDefault())
@@ -102,8 +82,11 @@ class HabitTrackerActivity : BaseActivity() {
         setupFooterLogic()
         setupGridNavigation()
         setupCalendarViewPager()
+        applySectionTheme()
         updateSectionProgress()
         setupGestureDetector()
+        setupKeyboardHandling(findViewById(R.id.habit_tracker_root), findViewById(R.id.habit_content_container))
+        updateDynamicBackground()
 
         // Apply Default Startup Tab
         if (DataManager.habitDefaultTab == "HISTORY") {
@@ -152,6 +135,8 @@ class HabitTrackerActivity : BaseActivity() {
         val weeks = mutableListOf<List<DayModel>>()
         val calendar = Calendar.getInstance()
         
+        val habitColor = if (DataManager.globalHabitColor != -1) DataManager.globalHabitColor else ContextCompat.getColor(this, R.color.primary_blue)
+
         // Start from 52 weeks ago to 52 weeks ahead (approx 2 years)
         calendar.add(Calendar.WEEK_OF_YEAR, -52)
         calendar.set(Calendar.DAY_OF_WEEK, Calendar.SUNDAY)
@@ -184,7 +169,7 @@ class HabitTrackerActivity : BaseActivity() {
             weeks.add(weekDays)
         }
 
-        weekAdapter = CalendarWeekAdapter(weeks) { day ->
+        weekAdapter = CalendarWeekAdapter(weeks, habitColor) { day ->
             selectedDateString = day.dateString
             weeks.flatten().forEach { it.isSelected = (it.dateString == day.dateString) }
             weekAdapter.notifyDataSetChanged()
@@ -742,12 +727,79 @@ class HabitTrackerActivity : BaseActivity() {
         super.onResume()
         // Ensure sorting is applied if it changed in settings
         applyFilters()
+        applySectionTheme()
         updateSectionProgress()
+        updateDynamicBackground()
+    }
+
+    private fun applySectionTheme() {
+        val habitColor = if (DataManager.globalHabitColor != -1) DataManager.globalHabitColor else ContextCompat.getColor(this, R.color.primary_blue)
+        
+        val chips = listOf<RadioButton>(
+            findViewById(R.id.chip_all),
+            findViewById(R.id.chip_morning),
+            findViewById(R.id.chip_afternoon),
+            findViewById(R.id.chip_evening)
+        )
+
+        chips.forEach { chip ->
+            val checkedDrawable = android.graphics.drawable.GradientDrawable().apply {
+                shape = android.graphics.drawable.GradientDrawable.RECTANGLE
+                cornerRadius = 19f * resources.displayMetrics.density
+                setColor(habitColor)
+            }
+            
+            val uncheckedDrawable = android.graphics.drawable.GradientDrawable().apply {
+                shape = android.graphics.drawable.GradientDrawable.RECTANGLE
+                cornerRadius = 19f * resources.displayMetrics.density
+                setColor(Color.TRANSPARENT)
+                setStroke(Math.round(1.5f * resources.displayMetrics.density), habitColor)
+            }
+
+            val stateListDrawable = android.graphics.drawable.StateListDrawable().apply {
+                addState(intArrayOf(android.R.attr.state_checked), checkedDrawable)
+                addState(intArrayOf(), uncheckedDrawable)
+            }
+            
+            chip.background = stateListDrawable
+        }
+
+        // Apply to Create Button
+        findViewById<com.google.android.material.card.MaterialCardView>(R.id.btn_create_new_habit).strokeColor = habitColor
+        
+        // Apply to Progress Bar
+        sectionProgressBar.progressTintList = ColorStateList.valueOf(habitColor)
+
+        // Sync Nav UI
+        updateNavUI(currentTab)
+    }
+
+    private fun updateDynamicBackground() {
+        val auraView = findViewById<View>(R.id.habit_aura_background) ?: return
+        val habitColor = if (DataManager.globalHabitColor != -1) DataManager.globalHabitColor else Color.parseColor("#FF7A59")
+        
+        val gradient = android.graphics.drawable.GradientDrawable(
+            android.graphics.drawable.GradientDrawable.Orientation.TOP_BOTTOM,
+            intArrayOf(
+                adjustAlpha(habitColor, 0.4f),
+                Color.BLACK
+            )
+        )
+        auraView.background = gradient
+    }
+
+    private fun adjustAlpha(color: Int, factor: Float): Int {
+        val alpha = Math.round(Color.alpha(color) * factor)
+        val red = Color.red(color)
+        val green = Color.green(color)
+        val blue = Color.blue(color)
+        return Color.argb(alpha, red, green, blue)
     }
 
     private fun updateNavUI(active: String) {
-        val todayColor = if (active == "TODAY") ContextCompat.getColor(this, R.color.chip_selected) else ContextCompat.getColor(this, R.color.text_secondary)
-        val historyColor = if (active == "HISTORY") ContextCompat.getColor(this, R.color.chip_selected) else ContextCompat.getColor(this, R.color.text_secondary)
+        val habitColor = if (DataManager.globalHabitColor != -1) DataManager.globalHabitColor else ContextCompat.getColor(this, R.color.primary_blue)
+        val todayColor = if (active == "TODAY") habitColor else ContextCompat.getColor(this, R.color.text_secondary)
+        val historyColor = if (active == "HISTORY") habitColor else ContextCompat.getColor(this, R.color.text_secondary)
         
         findViewById<ImageView>(R.id.iv_today).setColorFilter(todayColor)
         findViewById<TextView>(R.id.tv_today_nav).setTextColor(todayColor)

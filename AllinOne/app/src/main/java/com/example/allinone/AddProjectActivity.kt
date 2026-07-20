@@ -44,6 +44,11 @@ class AddProjectActivity : BaseActivity() {
     private lateinit var etNewSubfeature: EditText
     private lateinit var containerTemplates: LinearLayout
 
+    private lateinit var layoutSubfeaturesHeaderToggle: View
+    private lateinit var ivSubfeaturesMainChevron: ImageView
+    private lateinit var layoutSubfeaturesFullContainer: View
+    private var isSubfeaturesExpanded = true
+
     private lateinit var containerDescriptionHeader: View
     private lateinit var ivDescriptionChevron: ImageView
     private lateinit var containerGoals: View
@@ -77,16 +82,8 @@ class AddProjectActivity : BaseActivity() {
     private val tempSubFeatures = mutableListOf<ProjectFeature>()
 
     override fun onCreate(savedInstanceState: Bundle?) {
-        enableEdgeToEdge()
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_add_project)
-
-        ViewCompat.setOnApplyWindowInsetsListener(findViewById(R.id.sticky_header)) { v, insets ->
-            val statusBars = insets.getInsets(WindowInsetsCompat.Type.statusBars())
-            val basePadding = (24 * resources.displayMetrics.density).toInt()
-            v.setPadding(basePadding, statusBars.top + basePadding, basePadding, basePadding)
-            insets
-        }
 
         projectIndex = intent.getIntExtra("PROJECT_INDEX", -1)
         if (projectIndex != -1 && projectIndex < DataManager.notes.size) {
@@ -102,6 +99,7 @@ class AddProjectActivity : BaseActivity() {
 
         initViews()
         setupLogic()
+        setupKeyboardHandling(findViewById(R.id.add_project_root), findViewById(R.id.add_project_content_container))
     }
 
     private fun initViews() {
@@ -120,6 +118,10 @@ class AddProjectActivity : BaseActivity() {
         etNewSubfeature = findViewById(R.id.et_new_subfeature)
         containerTemplates = findViewById(R.id.container_templates)
         
+        layoutSubfeaturesHeaderToggle = findViewById(R.id.layout_subfeatures_header_toggle)
+        ivSubfeaturesMainChevron = findViewById(R.id.iv_subfeatures_main_chevron)
+        layoutSubfeaturesFullContainer = findViewById(R.id.layout_subfeatures_full_container)
+
         containerDescriptionHeader = findViewById(R.id.container_description_header)
         ivDescriptionChevron = findViewById(R.id.iv_description_chevron)
         containerGoals = findViewById(R.id.container_goals)
@@ -172,10 +174,24 @@ class AddProjectActivity : BaseActivity() {
             layoutEditCompact.visibility = View.VISIBLE
             layoutEditCompactRow2.visibility = View.VISIBLE
             updateCompactLabels()
+
+            // Auto-expand if sub-features exist
+            if (tempSubFeatures.isNotEmpty()) {
+                isSubfeaturesExpanded = true
+                layoutSubfeaturesFullContainer.visibility = View.VISIBLE
+                ivSubfeaturesMainChevron.setImageResource(android.R.drawable.arrow_up_float)
+            } else {
+                isSubfeaturesExpanded = false
+                layoutSubfeaturesFullContainer.visibility = View.GONE
+                ivSubfeaturesMainChevron.setImageResource(android.R.drawable.arrow_down_float)
+            }
         } else {
             layoutAddSelectors.visibility = View.VISIBLE
             layoutEditCompact.visibility = View.GONE
             layoutEditCompactRow2.visibility = View.GONE
+            
+            isSubfeaturesExpanded = true // Expanded by default for new projects
+            layoutSubfeaturesFullContainer.visibility = View.VISIBLE
         }
 
         colorPreview.backgroundTintList = ColorStateList.valueOf(selectedColor)
@@ -184,6 +200,12 @@ class AddProjectActivity : BaseActivity() {
         refreshGoalsUI()
 
         // Section Toggles
+        layoutSubfeaturesHeaderToggle.setOnClickListener {
+            isSubfeaturesExpanded = !isSubfeaturesExpanded
+            layoutSubfeaturesFullContainer.visibility = if (isSubfeaturesExpanded) View.VISIBLE else View.GONE
+            ivSubfeaturesMainChevron.setImageResource(if (isSubfeaturesExpanded) android.R.drawable.arrow_up_float else android.R.drawable.arrow_down_float)
+        }
+
         containerDescriptionHeader.setOnClickListener {
             isDescriptionExpanded = !isDescriptionExpanded
             contentInput.visibility = if (isDescriptionExpanded) View.VISIBLE else View.GONE

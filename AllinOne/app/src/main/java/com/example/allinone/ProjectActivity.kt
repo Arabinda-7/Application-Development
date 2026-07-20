@@ -37,21 +37,8 @@ class ProjectActivity : BaseActivity() {
     private var isEditMode = false
 
     override fun onCreate(savedInstanceState: Bundle?) {
-        enableEdgeToEdge()
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_projects)
-
-        ViewCompat.setOnApplyWindowInsetsListener(findViewById(R.id.project_root_layout)) { v, insets ->
-            val statusBars = insets.getInsets(WindowInsetsCompat.Type.statusBars())
-            v.setPadding(v.paddingLeft, statusBars.top, v.paddingRight, v.paddingBottom)
-            insets
-        }
-
-        ViewCompat.setOnApplyWindowInsetsListener(findViewById(R.id.bottom_navigation_projects)) { v, insets ->
-            val navBars = insets.getInsets(WindowInsetsCompat.Type.navigationBars())
-            v.setPadding(v.paddingLeft, v.paddingTop, v.paddingRight, navBars.bottom)
-            insets
-        }
 
         val projectList = findViewById<RecyclerView>(R.id.project_notes_list)
         projectList.layoutManager = StaggeredGridLayoutManager(2, StaggeredGridLayoutManager.VERTICAL)
@@ -92,11 +79,36 @@ class ProjectActivity : BaseActivity() {
         setupBottomNavigation()
         updateUI(false) // Set Ideas as default on launch
         setupGestureDetector()
+        setupKeyboardHandling(findViewById(R.id.project_root_layout), findViewById(R.id.project_content_container))
+        updateDynamicBackground()
     }
 
     override fun onResume() {
         super.onResume()
         updateDisplayList()
+        updateDynamicBackground()
+    }
+
+    private fun updateDynamicBackground() {
+        val auraView = findViewById<View>(R.id.project_aura_background) ?: return
+        val projectColor = if (DataManager.globalProjectColor != -1) DataManager.globalProjectColor else Color.parseColor("#1A73E8")
+        
+        val gradient = android.graphics.drawable.GradientDrawable(
+            android.graphics.drawable.GradientDrawable.Orientation.TOP_BOTTOM,
+            intArrayOf(
+                adjustAlpha(projectColor, 0.4f),
+                Color.BLACK
+            )
+        )
+        auraView.background = gradient
+    }
+
+    private fun adjustAlpha(color: Int, factor: Float): Int {
+        val alpha = Math.round(Color.alpha(color) * factor)
+        val red = Color.red(color)
+        val green = Color.green(color)
+        val blue = Color.blue(color)
+        return Color.argb(alpha, red, green, blue)
     }
 
     private lateinit var ivProjects: ImageView
@@ -404,6 +416,12 @@ class ProjectActivity : BaseActivity() {
         val headerGoals = dialog.findViewById<View>(R.id.container_goals_header)
         val ivGoalsChevron = dialog.findViewById<ImageView>(R.id.iv_goals_chevron)
 
+        val headerSubfeatures = dialog.findViewById<View>(R.id.layout_subfeatures_header_toggle)
+        val ivSubfeaturesChevron = dialog.findViewById<ImageView>(R.id.iv_subfeatures_main_chevron)
+        val layoutSubfeaturesContainer = containerSubfeatures
+        // Note: the chevron is not in the XML yet for the details dialog sub-features label
+        // Let's add it via code or just toggle.
+        
         val btnCycleColor = dialog.findViewById<View>(R.id.btn_detail_cycle_color)
         val colorPreviewComp = dialog.findViewById<View>(R.id.tv_detail_color_preview)
         val btnEditDeadline = dialog.findViewById<View>(R.id.btn_detail_edit_deadline)
@@ -411,6 +429,7 @@ class ProjectActivity : BaseActivity() {
 
         var isDescExpanded = true
         var isGoalsExpanded = true
+        var isSubfeaturesExpanded = note.subFeatures.isNotEmpty()
 
         headerDescription.setOnClickListener {
             isDescExpanded = !isDescExpanded
@@ -423,6 +442,15 @@ class ProjectActivity : BaseActivity() {
             containerGoals.visibility = if (isGoalsExpanded) View.VISIBLE else View.GONE
             ivGoalsChevron.setImageResource(if (isGoalsExpanded) android.R.drawable.arrow_up_float else android.R.drawable.arrow_down_float)
         }
+
+        headerSubfeatures.setOnClickListener {
+            isSubfeaturesExpanded = !isSubfeaturesExpanded
+            layoutSubfeaturesContainer.visibility = if (isSubfeaturesExpanded) View.VISIBLE else View.GONE
+            ivSubfeaturesChevron.setImageResource(if (isSubfeaturesExpanded) android.R.drawable.arrow_up_float else android.R.drawable.arrow_down_float)
+        }
+        
+        layoutSubfeaturesContainer.visibility = if (isSubfeaturesExpanded) View.VISIBLE else View.GONE
+        ivSubfeaturesChevron.setImageResource(if (isSubfeaturesExpanded) android.R.drawable.arrow_up_float else android.R.drawable.arrow_down_float)
 
         tvTitle.text = note.title
         
