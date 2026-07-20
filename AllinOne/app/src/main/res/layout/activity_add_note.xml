@@ -81,7 +81,7 @@
             android:layout_height="wrap_content"
             android:orientation="vertical"
             android:paddingHorizontal="24dp"
-            android:paddingBottom="24dp">
+            android:paddingBottom="48dp">
 
             <EditText
                 android:id="@+id/note_title_input"

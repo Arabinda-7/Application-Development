@@ -15,6 +15,7 @@ data class Note(
     var isArchived: Boolean = false,
     var isDualExist: Boolean = false,
     val journalEntries: MutableList<JournalEntry> = mutableListOf(),
+    val ideaGoals: MutableList<JournalEntry> = mutableListOf(),
     val subFeatures: MutableList<ProjectFeature> = mutableListOf(),
     val changeHistory: MutableList<ProjectHistory> = mutableListOf()
 )

@@ -16,7 +16,7 @@ import androidx.core.view.WindowInsetsCompat
 import java.text.SimpleDateFormat
 import java.util.*
 
-class HabitDetailActivity : AppCompatActivity() {
+class HabitDetailActivity : BaseActivity() {
 
     private var habit: Habit? = null
     private var currentCalendar = Calendar.getInstance()

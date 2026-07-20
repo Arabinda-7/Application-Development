@@ -40,7 +40,7 @@ class NoteAdapter(
         holder.noteCard.strokeWidth = 0
 
         // Set date
-        val sdf = SimpleDateFormat("MMMM dd, yyyy", Locale.getDefault())
+        val sdf = SimpleDateFormat("MMM dd, HH:mm", Locale.getDefault())
         holder.noteDate.text = sdf.format(Date(note.timestamp))
         
         // Selection UI

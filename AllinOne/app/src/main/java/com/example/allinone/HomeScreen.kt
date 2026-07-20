@@ -608,9 +608,9 @@ fun HomeScreen(
                         Text("✨", fontSize = 14.sp)
                         Spacer(modifier = Modifier.width(10.dp))
                         Text(
-                            text = state.growthAdvice, 
-                            color = Color.White.copy(alpha = 0.8f), 
-                            fontSize = 11.sp, 
+                            text = state.growthAdvice,
+                            color = Color.White.copy(alpha = 0.8f),
+                            fontSize = 11.sp,
                             lineHeight = 15.sp
                         )
                     }

@@ -41,6 +41,7 @@ class AddSubFeatureActivity : BaseActivity() {
     private var blockedByFeatureId: String = ""
     private var selectedWeight: Int = 1
     private var selectedPriority: Int = 0
+    private var isIdeaMode: Boolean = false
 
     override fun onCreate(savedInstanceState: Bundle?) {
         enableEdgeToEdge()
@@ -56,15 +57,16 @@ class AddSubFeatureActivity : BaseActivity() {
 
         projectIndex = intent.getIntExtra("PROJECT_INDEX", -1)
         subFeatureId = intent.getStringExtra("SUB_FEATURE_ID")
+        isIdeaMode = intent.getBooleanExtra("IS_IDEA", false)
 
         if (subFeatureId != null) {
             if (projectIndex != -1) {
                 val project = DataManager.notes.getOrNull(projectIndex)
                 targetFeature = project?.subFeatures?.find { it.id == subFeatureId }
             } else {
-                // Check temp list in AddProjectActivity or ProjectActivity (Ideas)
+                // Check temp list in AddProjectActivity or AddIdeaActivity
                 targetFeature = AddProjectActivity.currentEditingSubFeatures.find { it.id == subFeatureId }
-                    ?: ProjectActivity.currentEditingIdeaSubFeatures.find { it.id == subFeatureId }
+                    ?: AddIdeaActivity.currentEditingIdeaSubFeatures.find { it.id == subFeatureId }
             }
         }
 
@@ -76,6 +78,25 @@ class AddSubFeatureActivity : BaseActivity() {
 
         initViews()
         setupLogic()
+        applyIdeaModeUI()
+    }
+
+    private fun applyIdeaModeUI() {
+        if (isIdeaMode) {
+            findViewById<TextView>(R.id.label_tags).visibility = View.GONE
+            findViewById<View>(R.id.scroll_tags).visibility = View.GONE
+            findViewById<TextView>(R.id.label_due_date).visibility = View.GONE
+            findViewById<View>(R.id.container_due_date).visibility = View.GONE
+            findViewById<TextView>(R.id.label_weight).visibility = View.GONE
+            findViewById<View>(R.id.container_weight).visibility = View.GONE
+            findViewById<TextView>(R.id.label_urgency).visibility = View.GONE
+            findViewById<View>(R.id.rg_feature_priority).visibility = View.GONE
+            findViewById<TextView>(R.id.label_dependency).visibility = View.GONE
+            findViewById<View>(R.id.tv_blocked_by_selector).visibility = View.GONE
+            findViewById<TextView>(R.id.label_resource).visibility = View.GONE
+            findViewById<View>(R.id.et_resource_url).visibility = View.GONE
+            findViewById<View>(R.id.btn_delete_subfeature).visibility = View.GONE
+        }
     }
 
     private fun initViews() {
@@ -154,7 +175,7 @@ class AddSubFeatureActivity : BaseActivity() {
             
             if (projectIndex == -1) {
                 AddProjectActivity.currentEditingSubFeatures.remove(targetFeature)
-                ProjectActivity.currentEditingIdeaSubFeatures.remove(targetFeature)
+                AddIdeaActivity.currentEditingIdeaSubFeatures.remove(targetFeature)
             }
             
             DataManager.saveData(this)
@@ -188,7 +209,7 @@ class AddSubFeatureActivity : BaseActivity() {
 
     private fun getOtherFeatures(): List<ProjectFeature> {
         val project = if (projectIndex != -1) DataManager.notes.getOrNull(projectIndex) else null
-        val list = project?.subFeatures ?: (if (AddProjectActivity.currentEditingSubFeatures.isNotEmpty()) AddProjectActivity.currentEditingSubFeatures else ProjectActivity.currentEditingIdeaSubFeatures)
+        val list = project?.subFeatures ?: (if (AddProjectActivity.currentEditingSubFeatures.isNotEmpty()) AddProjectActivity.currentEditingSubFeatures else AddIdeaActivity.currentEditingIdeaSubFeatures)
         return list.filter { it.id != subFeatureId }
     }
 
@@ -252,7 +273,7 @@ class AddSubFeatureActivity : BaseActivity() {
         }
 
         val project = if (projectIndex != -1) DataManager.notes.getOrNull(projectIndex) else null
-        val list = project?.subFeatures ?: (if (AddProjectActivity.currentEditingSubFeatures.isNotEmpty()) AddProjectActivity.currentEditingSubFeatures else ProjectActivity.currentEditingIdeaSubFeatures)
+        val list = project?.subFeatures ?: (if (AddProjectActivity.currentEditingSubFeatures.isNotEmpty()) AddProjectActivity.currentEditingSubFeatures else AddIdeaActivity.currentEditingIdeaSubFeatures)
         val isDuplicate = list.any { it.id != subFeatureId && it.name.equals(name, ignoreCase = true) }
 
         if (isDuplicate) {

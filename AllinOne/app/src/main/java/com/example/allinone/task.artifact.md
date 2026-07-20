@@ -1,9 +1,9 @@
-- [x] Add `taskEditModeEnabled` setting to `DataManager`
-- [x] Persist `taskEditModeEnabled` in SharedPreferences
-- [x] Add "Fast Edit Mode" toggle to Task Advanced Settings UI
-- [x] Update `ToDoListActivity` to handle the new toggle
-- [x] Modify `TaskAdapter` item click logic:
-    - [x] Implement expand/collapse by default
-    - [x] Respect `taskEditModeEnabled` to open edit dialog
-- [x] Ensure expansion persists when subtasks are toggled
-- [x] Verify sequential completion logic (blocking main task if subtasks are pending)
+- `[x]` Implement `showAddIdeaDialog` in `ProjectActivity.kt`
+    - `[x]` Define the method signature
+    - `[x]` Inflate the dialog and set content view
+    - `[x]` Initialize UI components (Title, Content, Save, Close, MindMap, Priority)
+    - `[x]` Handle "New" vs "Edit" logic (Pre-fill data)
+    - `[x]` Implement Save logic (Update/Add Note, Save Data, Refresh UI)
+    - `[x]` Implement Close/Cancel logic
+- `[x]` Verify the fix
+    - `[x]` Compile the project

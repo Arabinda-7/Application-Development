@@ -130,86 +130,34 @@
             android:paddingHorizontal="16dp"
             android:paddingBottom="24dp">
 
-            <TextView
-                android:id="@+id/tv_note_metadata"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="8dp"
-                android:text="New Project Idea"
-                android:textColor="#80FFFFFF"
-                android:textSize="12sp" />
-
-            <TextView
-                android:id="@+id/tv_char_count"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="4dp"
-                android:text="0 characters"
-                android:textColor="#80FFFFFF"
-                android:textSize="12sp" />
-
             <LinearLayout
-                android:id="@+id/toolbar_formatting"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:orientation="horizontal"
+                android:layout_marginTop="8dp"
                 android:gravity="center_vertical"
-                android:layout_marginTop="16dp">
+                android:orientation="horizontal">
 
-                <ImageButton
-                    android:id="@+id/btn_bullet_list"
-                    android:layout_width="40dp"
-                    android:layout_height="40dp"
-                    android:src="@android:drawable/ic_menu_sort_by_size"
-                    android:background="?attr/selectableItemBackgroundBorderless"
-                    app:tint="@color/white"
-                    android:contentDescription="Bullet List" />
-
-                <ImageButton
-                    android:id="@+id/btn_numeric_list"
-                    android:layout_width="40dp"
-                    android:layout_height="40dp"
-                    android:layout_marginStart="12dp"
-                    android:src="@android:drawable/ic_menu_sort_alphabetically"
-                    android:background="?attr/selectableItemBackgroundBorderless"
-                    app:tint="@color/white"
-                    android:contentDescription="Numeric List" />
-
-                <View
-                    android:layout_width="1dp"
-                    android:layout_height="24dp"
-                    android:layout_marginStart="12dp"
-                    android:background="#44FFFFFF" />
-
-                <ImageButton
-                    android:id="@+id/btn_voice_input"
-                    android:layout_width="40dp"
-                    android:layout_height="40dp"
-                    android:layout_marginStart="12dp"
-                    android:src="@android:drawable/ic_btn_speak_now"
-                    android:background="?attr/selectableItemBackgroundBorderless"
-                    app:tint="@color/white"
-                    android:padding="8dp"
-                    android:scaleType="centerInside"
-                    android:contentDescription="Voice Input" />
-
-                <View
+                <TextView
+                    android:id="@+id/tv_char_count"
                     android:layout_width="0dp"
-                    android:layout_height="1dp"
-                    android:layout_weight="1" />
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:text="0 characters"
+                    android:textColor="#80FFFFFF"
+                    android:textSize="12sp" />
 
                 <TextView
                     android:id="@+id/btn_priority_tag"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
+                    android:background="@drawable/priority_chip_bg"
+                    android:backgroundTint="#2EC4B6"
+                    android:paddingHorizontal="12dp"
+                    android:paddingVertical="4dp"
                     android:text="LOW"
                     android:textColor="@color/white"
                     android:textSize="10sp"
-                    android:textStyle="bold"
-                    android:paddingHorizontal="12dp"
-                    android:paddingVertical="4dp"
-                    android:background="@drawable/priority_chip_bg"
-                    android:backgroundTint="#2EC4B6" />
+                    android:textStyle="bold" />
 
             </LinearLayout>
 

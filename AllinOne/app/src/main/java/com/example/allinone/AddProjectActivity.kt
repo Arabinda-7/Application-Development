@@ -44,6 +44,33 @@ class AddProjectActivity : BaseActivity() {
     private lateinit var etNewSubfeature: EditText
     private lateinit var containerTemplates: LinearLayout
 
+    private lateinit var containerDescriptionHeader: View
+    private lateinit var ivDescriptionChevron: ImageView
+    private lateinit var containerGoals: View
+    private lateinit var goalsList: LinearLayout
+    private lateinit var etGoalInput: EditText
+    private lateinit var btnAddGoal: View
+    private lateinit var btnToggleGoals: TextView
+    
+    private var isDescriptionExpanded = true
+    private var isGoalsExpanded = true
+    private val tempGoals = mutableListOf<JournalEntry>()
+
+    private lateinit var layoutAddSelectors: View
+    private lateinit var layoutEditCompact: View
+    private lateinit var layoutEditCompactRow2: View
+    private lateinit var tvEditStatusLabel: TextView
+    private lateinit var tvEditPriorityLabel: TextView
+    private lateinit var tvEditDeadlineLabel: TextView
+    private lateinit var tvEditColorLabel: View
+    private lateinit var btnCycleStatus: View
+    private lateinit var btnCyclePriority: View
+    private lateinit var btnEditColor: View
+    private lateinit var btnEditDeadline: View
+
+    private var currentStatusIdx = 0 // 0: TODO, 1: DOING, 2: DONE, 3: HOLD
+    private var currentPriorityIdx = 1 // 0: LOW, 1: MED, 2: HIGH
+
     private var isPinned = false
     private var selectedColor = -1
     private var selectedDeadline: Long? = null
@@ -70,6 +97,9 @@ class AddProjectActivity : BaseActivity() {
         tempSubFeatures.addAll(existingNote?.subFeatures ?: mutableListOf())
         currentEditingSubFeatures = tempSubFeatures
 
+        tempGoals.clear()
+        tempGoals.addAll(existingNote?.ideaGoals ?: mutableListOf())
+
         initViews()
         setupLogic()
     }
@@ -90,6 +120,26 @@ class AddProjectActivity : BaseActivity() {
         etNewSubfeature = findViewById(R.id.et_new_subfeature)
         containerTemplates = findViewById(R.id.container_templates)
         
+        containerDescriptionHeader = findViewById(R.id.container_description_header)
+        ivDescriptionChevron = findViewById(R.id.iv_description_chevron)
+        containerGoals = findViewById(R.id.container_goals)
+        goalsList = findViewById(R.id.goals_list)
+        etGoalInput = findViewById(R.id.et_goal_input)
+        btnAddGoal = findViewById(R.id.btn_add_goal)
+        btnToggleGoals = findViewById(R.id.btn_toggle_goals)
+
+        layoutAddSelectors = findViewById(R.id.layout_add_selectors)
+        layoutEditCompact = findViewById(R.id.layout_edit_compact)
+        layoutEditCompactRow2 = findViewById(R.id.layout_edit_compact_row2)
+        tvEditStatusLabel = findViewById(R.id.tv_edit_status_label)
+        tvEditPriorityLabel = findViewById(R.id.tv_edit_priority_label)
+        tvEditDeadlineLabel = findViewById(R.id.tv_edit_deadline_label)
+        tvEditColorLabel = findViewById(R.id.tv_edit_color_label)
+        btnCycleStatus = findViewById(R.id.btn_cycle_status)
+        btnCyclePriority = findViewById(R.id.btn_cycle_priority)
+        btnEditColor = findViewById(R.id.btn_edit_color)
+        btnEditDeadline = findViewById(R.id.btn_edit_deadline)
+
         findViewById<View>(R.id.btn_close_note).setOnClickListener { finish() }
     }
 
@@ -107,21 +157,53 @@ class AddProjectActivity : BaseActivity() {
             btnSave.text = "UPDATE"
             
             when (existingNote?.priority ?: 1) {
-                0 -> rgPriority.check(R.id.rb_priority_low)
-                1 -> rgPriority.check(R.id.rb_priority_med)
-                2 -> rgPriority.check(R.id.rb_priority_high)
+                0 -> { rgPriority.check(R.id.rb_priority_low); currentPriorityIdx = 0 }
+                1 -> { rgPriority.check(R.id.rb_priority_med); currentPriorityIdx = 1 }
+                2 -> { rgPriority.check(R.id.rb_priority_high); currentPriorityIdx = 2 }
             }
             when (existingNote?.status ?: "Not Started") {
-                "Not Started" -> rgStatus.check(R.id.rb_status_todo)
-                "In Progress" -> rgStatus.check(R.id.rb_status_progress)
-                "Completed" -> rgStatus.check(R.id.rb_status_completed)
-                "On Hold" -> rgStatus.check(R.id.rb_status_hold)
+                "Not Started", "TODO" -> { rgStatus.check(R.id.rb_status_todo); currentStatusIdx = 0 }
+                "In Progress", "DOING" -> { rgStatus.check(R.id.rb_status_progress); currentStatusIdx = 1 }
+                "Completed", "DONE" -> { rgStatus.check(R.id.rb_status_completed); currentStatusIdx = 2 }
+                "On Hold", "HOLD" -> { rgStatus.check(R.id.rb_status_hold); currentStatusIdx = 3 }
             }
+
+            layoutAddSelectors.visibility = View.GONE
+            layoutEditCompact.visibility = View.VISIBLE
+            layoutEditCompactRow2.visibility = View.VISIBLE
+            updateCompactLabels()
+        } else {
+            layoutAddSelectors.visibility = View.VISIBLE
+            layoutEditCompact.visibility = View.GONE
+            layoutEditCompactRow2.visibility = View.GONE
         }
 
         colorPreview.backgroundTintList = ColorStateList.valueOf(selectedColor)
         updateDeadlineUI()
         refreshSubFeatures()
+        refreshGoalsUI()
+
+        // Section Toggles
+        containerDescriptionHeader.setOnClickListener {
+            isDescriptionExpanded = !isDescriptionExpanded
+            contentInput.visibility = if (isDescriptionExpanded) View.VISIBLE else View.GONE
+            ivDescriptionChevron.setImageResource(if (isDescriptionExpanded) android.R.drawable.arrow_up_float else android.R.drawable.arrow_down_float)
+        }
+
+        btnToggleGoals.setOnClickListener {
+            isGoalsExpanded = !isGoalsExpanded
+            containerGoals.visibility = if (isGoalsExpanded) View.VISIBLE else View.GONE
+            btnToggleGoals.text = if (isGoalsExpanded) "PROJECT GOALS ▲" else "PROJECT GOALS ▼"
+        }
+
+        btnAddGoal.setOnClickListener {
+            val goalText = etGoalInput.text.toString().trim()
+            if (goalText.isNotEmpty()) {
+                tempGoals.add(JournalEntry(goalText))
+                etGoalInput.text.clear()
+                refreshGoalsUI()
+            }
+        }
         
         // Templates
         if (existingNote == null) {
@@ -146,6 +228,36 @@ class AddProjectActivity : BaseActivity() {
         }
 
         // Listeners
+        btnCycleStatus.setOnClickListener {
+            currentStatusIdx = (currentStatusIdx + 1) % 4
+            updateCompactLabels()
+        }
+        btnCyclePriority.setOnClickListener {
+            currentPriorityIdx = (currentPriorityIdx + 1) % 3
+            updateCompactLabels()
+        }
+        btnEditColor.setOnClickListener {
+            val colors = listOf(0xFFFF7A59, 0xFFFFB800, 0xFF2EC4B6, 0xFF3A86F0, 0xFF1A73E8, 0xFFE91E63, 0xFF9C27B0, 0xFF673AB7, 0xFF4CAF50)
+            var currentIdx = colors.map { it.toInt() }.indexOf(selectedColor)
+            if (currentIdx == -1) currentIdx = 0
+            val nextIdx = (currentIdx + 1) % colors.size
+            selectedColor = colors[nextIdx].toInt()
+            colorPreview.backgroundTintList = ColorStateList.valueOf(selectedColor)
+            tvEditColorLabel.backgroundTintList = ColorStateList.valueOf(selectedColor)
+            validateInputs()
+        }
+        btnEditDeadline.setOnClickListener {
+            val calendar = Calendar.getInstance()
+            selectedDeadline?.let { calendar.timeInMillis = it }
+            DatePickerDialog(this, { _, y, m, d ->
+                val newCal = Calendar.getInstance()
+                newCal.set(y, m, d)
+                selectedDeadline = newCal.timeInMillis
+                updateDeadlineUI()
+                updateCompactLabels()
+            }, calendar.get(Calendar.YEAR), calendar.get(Calendar.MONTH), calendar.get(Calendar.DAY_OF_MONTH)).show()
+        }
+
         seekProgress.setOnSeekBarChangeListener(object : SeekBar.OnSeekBarChangeListener {
             override fun onProgressChanged(seekBar: SeekBar?, progress: Int, fromUser: Boolean) { tvProgressValue.text = "$progress%" }
             override fun onStartTrackingTouch(seekBar: SeekBar?) {}
@@ -573,6 +685,70 @@ class AddProjectActivity : BaseActivity() {
         popupWindow.showAsDropDown(anchor, 100, 0)
     }
 
+    private fun refreshGoalsUI() {
+        goalsList.removeAllViews()
+        tempGoals.forEach { goal ->
+            val layout = LinearLayout(this).apply {
+                orientation = LinearLayout.VERTICAL
+                setPadding(12.dpToPx(), 12.dpToPx(), 12.dpToPx(), 8.dpToPx())
+                background = ContextCompat.getDrawable(this@AddProjectActivity, R.drawable.glass_card_bg)
+                backgroundTintList = ColorStateList.valueOf(Color.parseColor("#10FFFFFF"))
+                val params = LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT)
+                params.setMargins(0, 0, 0, 8.dpToPx())
+                layoutParams = params
+            }
+
+            val contentRow = LinearLayout(this).apply {
+                orientation = LinearLayout.HORIZONTAL
+                gravity = android.view.Gravity.CENTER_VERTICAL
+            }
+
+            val icon = ImageView(this).apply {
+                setImageResource(R.drawable.icons8_done_100)
+                imageTintList = ColorStateList.valueOf(Color.parseColor("#80FFFFFF"))
+                layoutParams = LinearLayout.LayoutParams(16.dpToPx(), 16.dpToPx())
+            }
+
+            val tvGoalContent = TextView(this).apply {
+                text = goal.text
+                setTextColor(Color.WHITE)
+                textSize = 14f
+                layoutParams = LinearLayout.LayoutParams(0, ViewGroup.LayoutParams.WRAP_CONTENT, 1f).apply {
+                    marginStart = 12.dpToPx()
+                }
+            }
+
+            val deleteBtn = ImageView(this).apply {
+                setImageResource(android.R.drawable.ic_menu_close_clear_cancel)
+                imageTintList = ColorStateList.valueOf(Color.parseColor("#40FFFFFF"))
+                layoutParams = LinearLayout.LayoutParams(20.dpToPx(), 20.dpToPx())
+                setOnClickListener {
+                    tempGoals.remove(goal)
+                    refreshGoalsUI()
+                }
+            }
+
+            contentRow.addView(icon)
+            contentRow.addView(tvGoalContent)
+            contentRow.addView(deleteBtn)
+            layout.addView(contentRow)
+
+            val timeStr = SimpleDateFormat("MMM dd, HH:mm", Locale.getDefault()).format(Date(goal.timestamp))
+            val tvTime = TextView(this).apply {
+                text = timeStr
+                setTextColor(Color.parseColor("#4DFFFFFF"))
+                setTextSize(android.util.TypedValue.COMPLEX_UNIT_SP, 9f)
+                gravity = android.view.Gravity.END
+                layoutParams = LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT).apply {
+                    topMargin = 4.dpToPx()
+                }
+            }
+            layout.addView(tvTime)
+            
+            goalsList.addView(layout)
+        }
+    }
+
     private fun updateProjectProgress() {
         // Weighted Progress Calculation
         val totalWeight = tempSubFeatures.sumOf { it.weight }.coerceAtLeast(1)
@@ -595,14 +771,23 @@ class AddProjectActivity : BaseActivity() {
         if (title.isNotEmpty()) {
             val note = existingNote ?: Note(title = title, content = "")
             note.title = title; note.content = contentInput.text.toString()
-            note.status = when (rgStatus.checkedRadioButtonId) {
-                R.id.rb_status_progress -> "In Progress"; R.id.rb_status_completed -> "Completed"; R.id.rb_status_hold -> "On Hold"; else -> "Not Started"
+            
+            if (existingNote == null) {
+                note.status = when (rgStatus.checkedRadioButtonId) {
+                    R.id.rb_status_progress -> "DOING"; R.id.rb_status_completed -> "DONE"; R.id.rb_status_hold -> "HOLD"; else -> "TODO"
+                }
+                note.priority = when (rgPriority.checkedRadioButtonId) {
+                    R.id.rb_priority_low -> 0; R.id.rb_priority_high -> 2; else -> 1
+                }
+            } else {
+                val statuses = listOf("TODO", "DOING", "DONE", "HOLD")
+                note.status = statuses[currentStatusIdx]
+                note.priority = currentPriorityIdx
             }
-            note.priority = when (rgPriority.checkedRadioButtonId) {
-                R.id.rb_priority_low -> 0; R.id.rb_priority_high -> 2; else -> 1
-            }
+            
             note.progress = seekProgress.progress; note.isPinned = isPinned; note.color = selectedColor; note.category = "Project"; note.deadline = selectedDeadline
             note.subFeatures.clear(); note.subFeatures.addAll(tempSubFeatures)
+            note.ideaGoals.clear(); note.ideaGoals.addAll(tempGoals)
 
             if (existingNote == null) DataManager.notes.add(0, note)
             DataManager.saveData(this); setResult(RESULT_OK); finish()
@@ -610,6 +795,25 @@ class AddProjectActivity : BaseActivity() {
     }
 
     private fun Int.dpToPx(): Int = (this * resources.displayMetrics.density).toInt()
+    private fun updateCompactLabels() {
+        val statuses = listOf("TODO", "DOING", "DONE", "HOLD")
+        val priorities = listOf("LOW", "MED", "HIGH")
+        
+        tvEditStatusLabel.text = statuses[currentStatusIdx]
+        
+        tvEditPriorityLabel.text = priorities[currentPriorityIdx]
+        tvEditPriorityLabel.setTextColor(when(currentPriorityIdx) {
+            2 -> Color.RED
+            1 -> Color.parseColor("#FFB800")
+            else -> Color.parseColor("#2EC4B6")
+        })
+
+        tvEditColorLabel.backgroundTintList = ColorStateList.valueOf(selectedColor)
+        tvEditDeadlineLabel.text = selectedDeadline?.let { 
+            SimpleDateFormat("MMM dd", Locale.getDefault()).format(Date(it)) 
+        } ?: "No Set"
+    }
+
     private fun startPulseAnimation(view: View) {
         if (view.tag == "pulsing") return
         view.tag = "pulsing"

@@ -7,7 +7,7 @@ import android.widget.TextView
 import androidx.appcompat.app.AppCompatActivity
 import com.google.android.material.progressindicator.CircularProgressIndicator
 
-class TimerActivity : AppCompatActivity() {
+class TimerActivity : BaseActivity() {
 
     private lateinit var countDownTimer: CountDownTimer
     private var timeLeftInMillis: Long = 0

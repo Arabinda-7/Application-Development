@@ -15,7 +15,7 @@ import androidx.viewpager2.widget.ViewPager2
 import java.text.SimpleDateFormat
 import java.util.*
 
-class FinanceHistoryActivity : AppCompatActivity() {
+class FinanceHistoryActivity : BaseActivity() {
 
     private lateinit var tvSelectedYear: TextView
     private val availableYears = (2020..2030).toList()

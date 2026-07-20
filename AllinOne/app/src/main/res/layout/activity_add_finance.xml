@@ -69,7 +69,7 @@
             android:layout_height="wrap_content"
             android:orientation="vertical"
             android:paddingHorizontal="24dp"
-            android:paddingBottom="24dp">
+            android:paddingBottom="48dp">
 
             <EditText
                 android:id="@+id/et_trans_amount"

@@ -13,7 +13,7 @@ import androidx.core.content.ContextCompat
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
 
-class LockActivity : AppCompatActivity() {
+class LockActivity : BaseActivity() {
 
     companion object {
         const val MODE_AUTH = 1

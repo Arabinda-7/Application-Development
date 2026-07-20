@@ -14,7 +14,7 @@ import androidx.viewpager2.widget.ViewPager2
 import java.text.SimpleDateFormat
 import java.util.*
 
-class FinanceMonthHistoryActivity : AppCompatActivity() {
+class FinanceMonthHistoryActivity : BaseActivity() {
 
     private lateinit var vpMonthDetails: ViewPager2
     private lateinit var rgMonthSelector: RadioGroup

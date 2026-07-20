@@ -15,7 +15,7 @@ import androidx.recyclerview.widget.RecyclerView
 import java.text.SimpleDateFormat
 import java.util.*
 
-class LedgerHistoryActivity : AppCompatActivity() {
+class LedgerHistoryActivity : BaseActivity() {
 
     private val allEntries = DataManager.ledgerEntries
     private val settledEntries = mutableListOf<LedgerEntry>()

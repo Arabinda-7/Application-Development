@@ -4,7 +4,8 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:background="#000000"
-    android:padding="16dp">
+    android:padding="16dp"
+    android:paddingBottom="48dp">
 
     <ImageButton
         android:id="@+id/btn_close_add_person"
@@ -33,28 +34,41 @@
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintTop_toTopOf="@id/btn_close_add_person" />
 
-    <EditText
-        android:id="@+id/et_person_name_input"
+    <androidx.core.widget.NestedScrollView
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="48dp"
-        android:background="@null"
-        android:hint="Person's Name"
-        android:textColor="@color/white"
-        android:textColorHint="#4DFFFFFF"
-        android:textSize="32sp"
-        android:textStyle="normal"
-        android:inputType="textCapWords"
-        app:layout_constraintTop_toBottomOf="@id/btn_close_add_person" />
+        android:layout_height="0dp"
+        android:fillViewport="true"
+        app:layout_constraintTop_toBottomOf="@id/btn_close_add_person"
+        app:layout_constraintBottom_toBottomOf="parent">
 
-    <TextView
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="8dp"
-        android:text="Enter the name to create a new ledger unit"
-        android:textColor="@color/text_secondary"
-        android:textSize="12sp"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/et_person_name_input" />
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:paddingBottom="48dp">
+
+            <EditText
+                android:id="@+id/et_person_name_input"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="48dp"
+                android:background="@null"
+                android:hint="Person's Name"
+                android:textColor="@color/white"
+                android:textColorHint="#4DFFFFFF"
+                android:textSize="32sp"
+                android:textStyle="normal"
+                android:inputType="textCapWords" />
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="8dp"
+                android:text="Enter the name to create a new ledger unit"
+                android:textColor="@color/text_secondary"
+                android:textSize="12sp" />
+
+        </LinearLayout>
+    </androidx.core.widget.NestedScrollView>
 
 </androidx.constraintlayout.widget.ConstraintLayout>

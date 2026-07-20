@@ -20,7 +20,7 @@ import androidx.recyclerview.widget.RecyclerView
 import java.text.SimpleDateFormat
 import java.util.*
 
-class LedgerActivity : AppCompatActivity() {
+class LedgerActivity : BaseActivity() {
 
     private val allEntries = DataManager.ledgerEntries
     private val activeEntries = mutableListOf<LedgerEntry>()

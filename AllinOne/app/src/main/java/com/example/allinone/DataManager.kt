@@ -75,6 +75,8 @@ object DataManager {
     var projectSortCompletedToBottom: Boolean = true
     var projectActiveExpanded: Boolean = true
     var projectCompletedExpanded: Boolean = false
+    var ideaActiveExpanded: Boolean = true
+    var ideaCompletedExpanded: Boolean = false
     var projectAutoSaveIdeas: Boolean = true
     var projectDualExistEnabled: Boolean = false
     var projectIdeasEnabled: Boolean = true
@@ -198,6 +200,8 @@ object DataManager {
     private const val KEY_PROJ_SORT_BOTTOM = "project_sort_completed_bottom"
     private const val KEY_PROJ_COMPLETED_EXP = "project_completed_expanded"
     private const val KEY_PROJ_AUTOSAVE_IDEAS = "project_autosave_ideas"
+    private const val KEY_IDEA_ACTIVE_EXP = "idea_active_expanded"
+    private const val KEY_IDEA_COMPLETED_EXP = "idea_completed_expanded"
     private const val KEY_PROJ_ANALYTICS = "project_analytics_enabled"
     private const val KEY_APP_LOCK = "app_lock_enabled"
     private const val KEY_APP_LOCK_PIN = "app_lock_pin"
@@ -318,6 +322,8 @@ object DataManager {
             putBoolean(KEY_PROJ_SORT_BOTTOM, projectSortCompletedToBottom)
             putBoolean("project_active_expanded", projectActiveExpanded)
             putBoolean(KEY_PROJ_COMPLETED_EXP, projectCompletedExpanded)
+            putBoolean(KEY_IDEA_ACTIVE_EXP, ideaActiveExpanded)
+            putBoolean(KEY_IDEA_COMPLETED_EXP, ideaCompletedExpanded)
             putBoolean(KEY_PROJ_AUTOSAVE_IDEAS, projectAutoSaveIdeas)
             putBoolean(KEY_PROJ_ANALYTICS, projectAnalyticsEnabled)
             putBoolean(KEY_PROJ_DUAL_EXIST, projectDualExistEnabled)
@@ -577,6 +583,8 @@ object DataManager {
         projectSortCompletedToBottom = prefs.getBoolean(KEY_PROJ_SORT_BOTTOM, true)
         projectActiveExpanded = prefs.getBoolean("project_active_expanded", true)
         projectCompletedExpanded = prefs.getBoolean(KEY_PROJ_COMPLETED_EXP, false)
+        ideaActiveExpanded = prefs.getBoolean(KEY_IDEA_ACTIVE_EXP, true)
+        ideaCompletedExpanded = prefs.getBoolean(KEY_IDEA_COMPLETED_EXP, false)
         projectAutoSaveIdeas = prefs.getBoolean(KEY_PROJ_AUTOSAVE_IDEAS, true)
         projectAnalyticsEnabled = prefs.getBoolean(KEY_PROJ_ANALYTICS, false)
         projectDualExistEnabled = prefs.getBoolean(KEY_PROJ_DUAL_EXIST, false)
@@ -1115,6 +1123,14 @@ object DataManager {
         if (note.journalEntries == null) {
             try {
                 val field = Note::class.java.getDeclaredField("journalEntries")
+                field.isAccessible = true
+                field.set(note, mutableListOf<JournalEntry>())
+            } catch (e: Exception) {}
+        }
+
+        if (note.ideaGoals == null) {
+            try {
+                val field = Note::class.java.getDeclaredField("ideaGoals")
                 field.isAccessible = true
                 field.set(note, mutableListOf<JournalEntry>())
             } catch (e: Exception) {}

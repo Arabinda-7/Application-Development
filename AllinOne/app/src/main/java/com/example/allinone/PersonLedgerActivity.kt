@@ -16,7 +16,7 @@ import com.google.android.material.floatingactionbutton.FloatingActionButton
 import java.text.SimpleDateFormat
 import java.util.*
 
-class PersonLedgerActivity : AppCompatActivity() {
+class PersonLedgerActivity : BaseActivity() {
 
     private lateinit var personName: String
     private lateinit var personEntries: MutableList<LedgerEntry>

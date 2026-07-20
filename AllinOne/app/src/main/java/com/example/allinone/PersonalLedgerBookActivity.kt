@@ -14,7 +14,7 @@ import androidx.recyclerview.widget.RecyclerView
 import java.text.SimpleDateFormat
 import java.util.*
 
-class PersonalLedgerBookActivity : AppCompatActivity() {
+class PersonalLedgerBookActivity : BaseActivity() {
 
     private lateinit var ledger: PersonalLedger
     private lateinit var adapter: PersonalBookAdapter

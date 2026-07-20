@@ -49,13 +49,13 @@
         <activity android:name=".LedgerHistoryActivity" />
         <activity android:name=".FinanceMonthHistoryActivity" />
         <activity android:name=".PersonLedgerActivity" />
-        <activity android:name=".AddPersonActivity" />
+        <activity android:name=".AddPersonActivity" android:windowSoftInputMode="adjustResize" />
         <activity android:name=".PersonalLedgerHubActivity" />
         <activity android:name=".PersonalLedgerBookActivity" />
         <activity android:name=".ProfileActivity" />
         <activity android:name=".OnboardingActivity" />
         <activity android:name=".PerformanceHistoryActivity" />
-        <activity android:name=".LockActivity" />
+        <activity android:name=".LockActivity" android:windowSoftInputMode="adjustResize" />
         <activity android:name=".AddHabitActivity" android:windowSoftInputMode="adjustResize" />
         <activity android:name=".AddWorkoutActivity" android:windowSoftInputMode="adjustResize" />
         <activity android:name=".AddNoteActivity" android:windowSoftInputMode="adjustResize" />
@@ -63,12 +63,16 @@
         <activity android:name=".AddFinanceActivity" android:windowSoftInputMode="adjustResize" />
         <activity android:name=".AddTaskActivity" android:windowSoftInputMode="adjustResize" />
         <activity android:name=".AddSubFeatureActivity" android:windowSoftInputMode="adjustResize" />
-        <activity android:name=".HabitSettingsActivity" />
-        <activity android:name=".WorkoutSettingsActivity" />
-        <activity android:name=".TaskSettingsActivity" />
-        <activity android:name=".NoteSettingsActivity" />
-        <activity android:name=".FinanceSettingsActivity" />
-        <activity android:name=".ProjectSettingsActivity" />
+        <activity android:name=".AddIdeaActivity" android:windowSoftInputMode="adjustResize" />
+        <activity android:name=".HabitSettingsActivity" android:windowSoftInputMode="adjustResize" />
+        <activity android:name=".WorkoutSettingsActivity" android:windowSoftInputMode="adjustResize" />
+        <activity android:name=".TaskSettingsActivity" android:windowSoftInputMode="adjustResize" />
+        <activity android:name=".NoteSettingsActivity" android:windowSoftInputMode="adjustResize" />
+        <activity android:name=".FinanceSettingsActivity" android:windowSoftInputMode="adjustResize" />
+        <activity android:name=".ProjectSettingsActivity" android:windowSoftInputMode="adjustResize" />
+        <activity
+            android:name=".workspace.ui.activity.WorkspaceActivity"
+            android:windowSoftInputMode="adjustResize" />
     </application>
 
 </manifest>

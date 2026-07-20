@@ -16,7 +16,7 @@ import androidx.core.view.WindowInsetsCompat
 import java.text.SimpleDateFormat
 import java.util.*
 
-class WorkoutDetailActivity : AppCompatActivity() {
+class WorkoutDetailActivity : BaseActivity() {
 
     private var workout: Workout? = null
     private var currentCalendar = Calendar.getInstance()

@@ -27,10 +27,6 @@ import java.util.*
 
 class ProjectActivity : BaseActivity() {
 
-    companion object {
-        var currentEditingIdeaSubFeatures: MutableList<ProjectFeature> = mutableListOf()
-    }
-
     private val allNotes = DataManager.notes
     private lateinit var projectAdapter: ProjectNoteAdapter
     private lateinit var ideaAdapter: NoteAdapter
@@ -89,12 +85,12 @@ class ProjectActivity : BaseActivity() {
             if (isProjectsTab) {
                 startActivity(Intent(this, AddProjectActivity::class.java))
             } else {
-                showAddIdeaDialog()
+                startActivity(Intent(this, AddIdeaActivity::class.java))
             }
         }
 
         setupBottomNavigation()
-        updateUI(true) // Set Projects as default on launch
+        updateUI(false) // Set Ideas as default on launch
         setupGestureDetector()
     }
 
@@ -108,6 +104,8 @@ class ProjectActivity : BaseActivity() {
     private lateinit var ivNotes: ImageView
     private lateinit var tvNotes: TextView
     private lateinit var btnAdd: View
+    private lateinit var btnEditMode: View
+    private lateinit var btnWorkspace: View
 
     private fun setupBottomNavigation() {
         val navProjects = findViewById<View>(R.id.nav_projects)
@@ -118,11 +116,12 @@ class ProjectActivity : BaseActivity() {
         ivNotes = findViewById(R.id.iv_notes_icon)
         tvNotes = findViewById(R.id.tv_notes_label)
         btnAdd = findViewById(R.id.btn_add_project_note)
+        btnEditMode = findViewById(R.id.btn_edit_mode)
+        btnWorkspace = findViewById(R.id.btn_workspace)
 
         navProjects.setOnClickListener { updateUI(true) }
         navNotes.setOnClickListener { updateUI(false) }
 
-        val btnEditMode = findViewById<ImageButton>(R.id.btn_edit_mode)
         btnEditMode.setOnClickListener {
             isEditMode = !isEditMode
             val activeColor = ContextCompat.getColor(this, R.color.chip_selected)
@@ -130,13 +129,18 @@ class ProjectActivity : BaseActivity() {
             val activeBg = Color.parseColor("#33FFFFFF")
             val inactiveBg = Color.parseColor("#11FFFFFF")
 
-            btnEditMode.imageTintList = ColorStateList.valueOf(if (isEditMode) activeColor else inactiveColor)
+            (btnEditMode as ImageButton).imageTintList = ColorStateList.valueOf(if (isEditMode) activeColor else inactiveColor)
             btnEditMode.backgroundTintList = ColorStateList.valueOf(if (isEditMode) activeBg else inactiveBg)
 
             Toast.makeText(this, if (isEditMode) "Edit Mode: ON" else "Edit Mode: OFF", Toast.LENGTH_SHORT).show()
         }
 
-        findViewById<View>(R.id.btn_project_settings).setOnClickListener { showProjectSettingsDialog() }
+        findViewById<View>(R.id.btn_project_settings).setOnClickListener { 
+            startActivity(Intent(this, ProjectSettingsActivity::class.java))
+        }
+        findViewById<View>(R.id.btn_workspace).setOnClickListener {
+            startActivity(Intent(this, com.example.allinone.workspace.ui.activity.WorkspaceActivity::class.java))
+        }
     }
 
     fun onProjectItemClick(note: Note) {
@@ -186,6 +190,9 @@ class ProjectActivity : BaseActivity() {
 
         // Highlight Active Section
         if (targetIsProjects) {
+            btnEditMode.visibility = View.VISIBLE
+            btnWorkspace.visibility = View.VISIBLE
+            
             ivProjects.imageTintList = ColorStateList.valueOf(activeColor)
             ivProjects.backgroundTintList = ColorStateList.valueOf(activeBg)
             tvProjects.setTextColor(activeColor)
@@ -196,6 +203,9 @@ class ProjectActivity : BaseActivity() {
             tvNotes.setTextColor(inactiveColor)
             tvNotes.setTypeface(null, android.graphics.Typeface.NORMAL)
         } else {
+            btnEditMode.visibility = View.GONE
+            btnWorkspace.visibility = View.GONE
+
             ivProjects.imageTintList = ColorStateList.valueOf(inactiveColor)
             ivProjects.backgroundTintList = ColorStateList.valueOf(inactiveBg)
             tvProjects.setTextColor(inactiveColor)
@@ -257,10 +267,6 @@ class ProjectActivity : BaseActivity() {
         }
     }
 
-    fun showAddProjectNoteDialog() {
-        startActivity(Intent(this, AddProjectActivity::class.java))
-    }
-
     fun showEditProjectNoteDialog(note: Note) {
         val intent = Intent(this, AddProjectActivity::class.java).apply {
             putExtra("PROJECT_INDEX", allNotes.indexOf(note))
@@ -269,7 +275,10 @@ class ProjectActivity : BaseActivity() {
     }
 
     fun showEditIdeaDialog(note: Note) {
-        showAddIdeaDialog(note)
+        val intent = Intent(this, AddIdeaActivity::class.java).apply {
+            putExtra("IDEA_INDEX", allNotes.indexOf(note))
+        }
+        startActivity(intent)
     }
 
     private fun startPulseAnimation(view: View) {
@@ -281,114 +290,6 @@ class ProjectActivity : BaseActivity() {
                 if (view.visibility == View.VISIBLE) startPulseAnimation(view)
             }
         }.start()
-    }
-
-    private fun showEditSubFeatureDialog(sub: ProjectFeature, onSaved: () -> Unit) {
-        val dialog = Dialog(this, R.style.SeamlessDialog)
-        dialog.setContentView(R.layout.dialog_edit_subfeature)
-        dialog.window?.setBackgroundDrawableResource(android.R.color.transparent)
-        dialog.window?.setLayout(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT)
-
-        val btnClose = dialog.findViewById<View>(R.id.btn_close_subfeature)
-        val etSerial = dialog.findViewById<EditText>(R.id.et_serial_input)
-        val etName = dialog.findViewById<EditText>(R.id.et_name_input)
-        val etDetails = dialog.findViewById<EditText>(R.id.et_details_input)
-        val btnSave = dialog.findViewById<TextView>(R.id.btn_save_subfeature)
-
-        val containerTags = dialog.findViewById<LinearLayout>(R.id.container_feature_tags)
-        val tvDeadline = dialog.findViewById<TextView>(R.id.tv_feature_deadline)
-
-        var selectedTag = sub.tag
-
-        fun refreshTagsUI() {
-            containerTags.removeAllViews()
-            DataManager.projectCustomTags.forEach { tagName ->
-                val chip = TextView(this).apply {
-                    text = tagName
-                    setTextColor(Color.WHITE)
-                    textSize = 12f
-                    setTypeface(null, android.graphics.Typeface.BOLD)
-                    setPadding(24.dpToPx(), 12.dpToPx(), 24.dpToPx(), 12.dpToPx())
-
-                    val isSelected = selectedTag == tagName
-                    background = ContextCompat.getDrawable(this@ProjectActivity, R.drawable.priority_chip_bg)
-                    backgroundTintList = ColorStateList.valueOf(if (isSelected) Color.parseColor("#1A73E8") else Color.parseColor("#33FFFFFF"))
-
-                    val params = LinearLayout.LayoutParams(ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT)
-                    params.marginEnd = 8.dpToPx()
-                    layoutParams = params
-
-                    setOnClickListener {
-                        selectedTag = if (selectedTag == tagName) "" else tagName
-                        refreshTagsUI()
-                    }
-                }
-                containerTags.addView(chip)
-            }
-        }
-
-        btnClose.setOnClickListener { dialog.dismiss() }
-
-        etName.setText(sub.name)
-        etSerial.setText(sub.position.toString())
-        etSerial.isFocusable = false
-        etSerial.isClickable = true
-        etSerial.setOnClickListener {
-            showNumberRollerDialog(sub.position) { newPos ->
-                etSerial.setText(newPos.toString())
-            }
-        }
-
-        etDetails.setText(sub.details)
-        etDetails.setSelection(etDetails.text.length)
-
-        refreshTagsUI()
-
-        // Feature: Due Dates
-        fun updateSubDeadlineUI() {
-            tvDeadline.text = sub.dueDate?.let { SimpleDateFormat("MMM dd, yyyy", Locale.getDefault()).format(Date(it)) } ?: "Set Due Date"
-        }
-        updateSubDeadlineUI()
-
-        tvDeadline.setOnClickListener {
-            val cal = Calendar.getInstance()
-            sub.dueDate?.let { cal.timeInMillis = it }
-            val datePicker = DatePickerDialog(this, { _, y, m, d ->
-                cal.set(y, m, d)
-                sub.dueDate = cal.timeInMillis
-                updateSubDeadlineUI()
-            }, cal.get(Calendar.YEAR), cal.get(Calendar.MONTH), cal.get(Calendar.DAY_OF_MONTH))
-            showDialogSafe(datePicker)
-        }
-
-        btnSave.setOnClickListener {
-            sub.name = etName.text.toString().trim()
-            val newPos = etSerial.text.toString().toIntOrNull()
-            if (newPos != null) sub.position = newPos
-            sub.details = etDetails.text.toString().trim()
-            sub.tag = selectedTag
-
-            onSaved()
-            dialog.dismiss()
-        }
-        dialog.show()
-    }
-
-    private fun showNumberRollerDialog(currentVal: Int, onSelected: (Int) -> Unit) {
-        val dialog = Dialog(this)
-        dialog.setContentView(R.layout.dialog_number_picker)
-        dialog.window?.setBackgroundDrawableResource(android.R.color.transparent)
-        
-        val picker = dialog.findViewById<NumberPicker>(R.id.number_picker)
-        picker.minValue = 1
-        picker.maxValue = 100
-        picker.value = currentVal
-        
-        dialog.findViewById<View>(R.id.btn_confirm_picker).setOnClickListener {
-            onSelected(picker.value)
-            dialog.dismiss()
-        }
-        showDialogSafe(dialog)
     }
 
     fun showProjectHistoryDialog(note: Note) {
@@ -492,14 +393,47 @@ class ProjectActivity : BaseActivity() {
         val tvStatus = dialog.findViewById<TextView>(R.id.tv_detail_status)
         val tvPriority = dialog.findViewById<TextView>(R.id.tv_detail_priority)
         val tvContent = dialog.findViewById<TextView>(R.id.tv_detail_content)
-        val tvDeadline = dialog.findViewById<TextView>(R.id.tv_detail_deadline)
         val tvTimestamps = dialog.findViewById<TextView>(R.id.tv_detail_timestamps)
         val containerSubfeatures = dialog.findViewById<LinearLayout>(R.id.container_detail_subfeatures)
+        val containerGoals = dialog.findViewById<LinearLayout>(R.id.container_detail_goals)
         val btnClose = dialog.findViewById<View>(R.id.btn_close_details)
         val btnMenu = dialog.findViewById<ImageButton>(R.id.btn_detail_menu)
 
+        val headerDescription = dialog.findViewById<View>(R.id.container_description_header)
+        val ivDescChevron = dialog.findViewById<ImageView>(R.id.iv_description_chevron)
+        val headerGoals = dialog.findViewById<View>(R.id.container_goals_header)
+        val ivGoalsChevron = dialog.findViewById<ImageView>(R.id.iv_goals_chevron)
+
+        val btnCycleColor = dialog.findViewById<View>(R.id.btn_detail_cycle_color)
+        val colorPreviewComp = dialog.findViewById<View>(R.id.tv_detail_color_preview)
+        val btnEditDeadline = dialog.findViewById<View>(R.id.btn_detail_edit_deadline)
+        val tvDeadlineComp = dialog.findViewById<TextView>(R.id.tv_detail_deadline_compact)
+
+        var isDescExpanded = true
+        var isGoalsExpanded = true
+
+        headerDescription.setOnClickListener {
+            isDescExpanded = !isDescExpanded
+            tvContent.visibility = if (isDescExpanded) View.VISIBLE else View.GONE
+            ivDescChevron.setImageResource(if (isDescExpanded) android.R.drawable.arrow_up_float else android.R.drawable.arrow_down_float)
+        }
+
+        headerGoals.setOnClickListener {
+            isGoalsExpanded = !isGoalsExpanded
+            containerGoals.visibility = if (isGoalsExpanded) View.VISIBLE else View.GONE
+            ivGoalsChevron.setImageResource(if (isGoalsExpanded) android.R.drawable.arrow_up_float else android.R.drawable.arrow_down_float)
+        }
+
         tvTitle.text = note.title
-        tvStatus.text = note.status.uppercase()
+        
+        val statusText = when(note.status) {
+            "DOING", "In Progress" -> "DOING"
+            "DONE", "Completed" -> "DONE"
+            "HOLD", "On Hold" -> "HOLD"
+            else -> "TODO"
+        }
+        tvStatus.text = statusText
+        
         tvContent.text = if (note.content.isEmpty()) "No description provided." else note.content
 
         btnMenu.setOnClickListener { view ->
@@ -574,15 +508,143 @@ class ProjectActivity : BaseActivity() {
         tvPriority.text = priorityText
         tvPriority.setTextColor(priorityColor)
 
-        tvDeadline.text = note.deadline?.let {
-            SimpleDateFormat("MMM dd, yyyy", Locale.getDefault()).format(Date(it))
-        } ?: "No Deadline Set"
+        // Simple Clicking logic for Details Dialog
+        val statusContainer = dialog.findViewById<View>(R.id.tv_detail_status).parent as View
+        val priorityContainer = dialog.findViewById<View>(R.id.tv_detail_priority).parent as View
+
+        statusContainer.setOnClickListener {
+            val statuses = listOf("TODO", "DOING", "DONE", "HOLD")
+            val currentStatus = when(note.status) {
+                "DOING", "In Progress" -> "DOING"
+                "DONE", "Completed" -> "DONE"
+                "HOLD", "On Hold" -> "HOLD"
+                else -> "TODO"
+            }
+            val nextIdx = (statuses.indexOf(currentStatus) + 1) % 4
+            note.status = statuses[nextIdx]
+            tvStatus.text = statuses[nextIdx]
+            
+            addHistoryLog(note, "Quick Change", "Status updated to ${note.status}")
+            DataManager.saveData(this)
+            updateDisplayList()
+        }
+
+        priorityContainer.setOnClickListener {
+            val nextPriority = (note.priority + 1) % 3
+            note.priority = nextPriority
+            
+            val newPText = when(nextPriority) {
+                2 -> "HIGH"
+                1 -> "MED"
+                else -> "LOW"
+            }
+            val newPColor = when(nextPriority) {
+                2 -> Color.RED
+                1 -> Color.parseColor("#FFB800")
+                else -> Color.parseColor("#2EC4B6")
+            }
+            tvPriority.text = newPText
+            tvPriority.setTextColor(newPColor)
+            
+            addHistoryLog(note, "Quick Change", "Priority updated to $newPText")
+            DataManager.saveData(this)
+            updateDisplayList()
+        }
+
+        // Compact Meta Row 2 Logic
+        colorPreviewComp.backgroundTintList = ColorStateList.valueOf(note.color.takeIf { it != -1 } ?: Color.BLUE)
+        
+        val updateDeadlineUIComp = {
+            tvDeadlineComp.text = note.deadline?.let {
+                SimpleDateFormat("MMM dd", Locale.getDefault()).format(Date(it))
+            } ?: "No Set"
+        }
+        updateDeadlineUIComp()
+
+        btnCycleColor.setOnClickListener {
+            val colors = listOf(0xFFFF7A59, 0xFFFFB800, 0xFF2EC4B6, 0xFF3A86F0, 0xFF1A73E8, 0xFFE91E63, 0xFF9C27B0, 0xFF673AB7, 0xFF4CAF50)
+            var currentIdx = colors.map { it.toInt() }.indexOf(note.color)
+            if (currentIdx == -1) currentIdx = 0
+            val nextIdx = (currentIdx + 1) % colors.size
+            note.color = colors[nextIdx].toInt()
+            colorPreviewComp.backgroundTintList = ColorStateList.valueOf(note.color)
+            DataManager.saveData(this)
+            updateDisplayList()
+        }
+
+        btnEditDeadline.setOnClickListener {
+            val calendar = Calendar.getInstance()
+            note.deadline?.let { calendar.timeInMillis = it }
+            DatePickerDialog(this, { _, y, m, d ->
+                val newCal = Calendar.getInstance()
+                newCal.set(y, m, d)
+                note.deadline = newCal.timeInMillis
+                updateDeadlineUIComp()
+                DataManager.saveData(this)
+                updateDisplayList()
+            }, calendar.get(Calendar.YEAR), calendar.get(Calendar.MONTH), calendar.get(Calendar.DAY_OF_MONTH)).show()
+        }
+
 
         val sdfMeta = SimpleDateFormat("MMM dd", Locale.getDefault())
         val createdStr = sdfMeta.format(Date(note.timestamp))
         val lastUpdate = note.changeHistory.maxByOrNull { it.timestamp }?.timestamp ?: note.timestamp
         val updatedStr = sdfMeta.format(Date(lastUpdate))
         tvTimestamps.text = "Created: $createdStr | Updated: $updatedStr"
+
+        // Populate Goals
+        containerGoals.removeAllViews()
+        if (note.ideaGoals.isEmpty()) {
+            val emptyTv = TextView(this).apply {
+                text = "No goals added yet."
+                setTextColor(Color.parseColor("#4DFFFFFF"))
+                textSize = 12f
+                setPadding(8.dpToPx(), 0, 0, 0)
+            }
+            containerGoals.addView(emptyTv)
+        } else {
+            note.ideaGoals.forEach { goal ->
+                val goalLayout = LinearLayout(this).apply {
+                    orientation = LinearLayout.VERTICAL
+                    setPadding(12.dpToPx(), 8.dpToPx(), 12.dpToPx(), 6.dpToPx())
+                }
+                
+                val contentRow = LinearLayout(this).apply {
+                    orientation = LinearLayout.HORIZONTAL
+                    gravity = android.view.Gravity.CENTER_VERTICAL
+                }
+
+                val bullet = TextView(this).apply {
+                    text = "•"
+                    setTextColor(Color.parseColor("#80FFFFFF"))
+                    textSize = 14f
+                    layoutParams = LinearLayout.LayoutParams(ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT).apply { marginEnd = 8.dpToPx() }
+                }
+                val goalTv = TextView(this).apply {
+                    text = goal.text
+                    setTextColor(Color.WHITE)
+                    textSize = 14f
+                    layoutParams = LinearLayout.LayoutParams(0, ViewGroup.LayoutParams.WRAP_CONTENT, 1f)
+                }
+                contentRow.addView(bullet)
+                contentRow.addView(goalTv)
+                goalLayout.addView(contentRow)
+
+                val timeStr = SimpleDateFormat("MMM dd, HH:mm", Locale.getDefault()).format(Date(goal.timestamp))
+                val tvTime = TextView(this).apply {
+                    text = timeStr
+                    setTextColor(Color.parseColor("#4DFFFFFF"))
+                    setTextSize(android.util.TypedValue.COMPLEX_UNIT_SP, 9f)
+                    gravity = android.view.Gravity.END
+                    layoutParams = LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT).apply {
+                        topMargin = 2.dpToPx()
+                    }
+                }
+                goalLayout.addView(tvTime)
+
+                containerGoals.addView(goalLayout)
+            }
+        }
 
         fun refreshDetailsSubFeatures() {
             containerSubfeatures.removeAllViews()
@@ -919,298 +981,6 @@ class ProjectActivity : BaseActivity() {
         popupWindow.showAsDropDown(anchor, 100, 0)
     }
 
-    private fun showProjectSettingsDialog() {
-        val dialog = Dialog(this)
-        dialog.setContentView(R.layout.dialog_project_settings)
-        dialog.window?.setBackgroundDrawableResource(android.R.color.transparent)
-        dialog.window?.setLayout(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT)
-
-        val swArchive = dialog.findViewById<SwitchCompat>(R.id.sw_auto_archive)
-        val swSync = dialog.findViewById<SwitchCompat>(R.id.sw_synergy_sync)
-        val swAlerts = dialog.findViewById<SwitchCompat>(R.id.sw_deadline_alerts)
-        val swAnalytics = dialog.findViewById<SwitchCompat>(R.id.sw_analytics)
-        val swDualExist = dialog.findViewById<SwitchCompat>(R.id.sw_dual_exist)
-        val swAutoSave = dialog.findViewById<SwitchCompat>(R.id.sw_auto_save_ideas) ?: SwitchCompat(this) // Safety
-        val swRoadmapsEnabled = dialog.findViewById<SwitchCompat>(R.id.sw_roadmaps_enabled)
-        val swIdeasEnabled = dialog.findViewById<SwitchCompat>(R.id.sw_ideas_enabled)
-
-        swArchive.isChecked = DataManager.projectAutoArchive
-        swSync.isChecked = DataManager.projectSynergySync
-        swAlerts.isChecked = DataManager.projectDeadlineAlerts
-        swAnalytics.isChecked = DataManager.projectAnalyticsEnabled
-        swDualExist.isChecked = DataManager.projectDualExistEnabled
-        swAutoSave.isChecked = DataManager.projectAutoSaveIdeas
-        swRoadmapsEnabled.isChecked = DataManager.projectRoadmapsEnabled
-        swIdeasEnabled.isChecked = DataManager.projectIdeasEnabled
-
-        dialog.findViewById<View>(R.id.item_auto_save_ideas)?.setOnClickListener {
-            DataManager.projectAutoSaveIdeas = !DataManager.projectAutoSaveIdeas
-            swAutoSave.isChecked = DataManager.projectAutoSaveIdeas
-        }
-
-        dialog.findViewById<View>(R.id.item_auto_archive).setOnClickListener {
-            DataManager.projectAutoArchive = !DataManager.projectAutoArchive
-            swArchive.isChecked = DataManager.projectAutoArchive
-        }
-        dialog.findViewById<View>(R.id.item_synergy_sync).setOnClickListener {
-            DataManager.projectSynergySync = !DataManager.projectSynergySync
-            swSync.isChecked = DataManager.projectSynergySync
-        }
-        dialog.findViewById<View>(R.id.item_deadline_alerts).setOnClickListener {
-            DataManager.projectDeadlineAlerts = !DataManager.projectDeadlineAlerts
-            swAlerts.isChecked = DataManager.projectDeadlineAlerts
-        }
-        dialog.findViewById<View>(R.id.item_analytics).setOnClickListener {
-            DataManager.projectAnalyticsEnabled = !DataManager.projectAnalyticsEnabled
-            swAnalytics.isChecked = DataManager.projectAnalyticsEnabled
-        }
-        dialog.findViewById<View>(R.id.item_dual_exist).setOnClickListener {
-            DataManager.projectDualExistEnabled = !DataManager.projectDualExistEnabled
-            swDualExist.isChecked = DataManager.projectDualExistEnabled
-        }
-        dialog.findViewById<View>(R.id.item_toggle_roadmaps).setOnClickListener {
-            if (DataManager.projectRoadmapsEnabled && !DataManager.projectIdeasEnabled) {
-                Toast.makeText(this, "At least one section must be enabled", Toast.LENGTH_SHORT).show()
-            } else {
-                DataManager.projectRoadmapsEnabled = !DataManager.projectRoadmapsEnabled
-                swRoadmapsEnabled.isChecked = DataManager.projectRoadmapsEnabled
-            }
-        }
-        dialog.findViewById<View>(R.id.item_toggle_ideas).setOnClickListener {
-            if (DataManager.projectIdeasEnabled && !DataManager.projectRoadmapsEnabled) {
-                Toast.makeText(this, "At least one section must be enabled", Toast.LENGTH_SHORT).show()
-            } else {
-                DataManager.projectIdeasEnabled = !DataManager.projectIdeasEnabled
-                swIdeasEnabled.isChecked = DataManager.projectIdeasEnabled
-            }
-        }
-
-        dialog.findViewById<View>(R.id.item_manage_templates).setOnClickListener {
-            showManageTemplatesDialog()
-        }
-
-        dialog.findViewById<View>(R.id.item_manage_tags).setOnClickListener {
-            showManageTagsDialog()
-        }
-
-        dialog.findViewById<View>(R.id.btn_close_settings).setOnClickListener {
-            DataManager.saveData(this)
-            updateUI(isProjectsTab)
-            updateDisplayList()
-            dialog.dismiss()
-        }
-        showDialogSafe(dialog)
-    }
-
-    private fun showManageTemplatesDialog() {
-        val dialog = Dialog(this)
-        dialog.setContentView(R.layout.dialog_manage_categories)
-        dialog.window?.setBackgroundDrawableResource(android.R.color.transparent)
-        dialog.window?.setLayout(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT)
-
-        val container = dialog.findViewById<LinearLayout>(R.id.categories_container)
-        val etNew = dialog.findViewById<EditText>(R.id.et_new_category)
-        val btnAdd = dialog.findViewById<View>(R.id.btn_add_category)
-        val title = dialog.findViewById<TextView>(R.id.tv_categories_title)
-        val btnDeleteMode = dialog.findViewById<ImageButton>(R.id.btn_toggle_delete_mode)
-
-        title.text = "Project Templates"
-        etNew.hint = "Template Name..."
-
-        var isDeleteMode = false
-
-        fun refresh() {
-            container.removeAllViews()
-
-            // Visual feedback for Delete Mode
-            btnDeleteMode.imageTintList = ColorStateList.valueOf(if (isDeleteMode) Color.RED else Color.WHITE)
-
-            DataManager.projectTemplates.keys.forEach { templateName ->
-                val itemView = LayoutInflater.from(this).inflate(R.layout.item_category_manage, container, false)
-                itemView.findViewById<TextView>(R.id.tv_category_name).text = templateName
-
-                val btnRemove = itemView.findViewById<View>(R.id.btn_remove_category)
-                btnRemove.visibility = if (isDeleteMode) View.VISIBLE else View.GONE
-
-                itemView.setOnClickListener {
-                    if (isDeleteMode) {
-                        isDeleteMode = false
-                        refresh()
-                    } else {
-                        Toast.makeText(this, "Steps: ${DataManager.projectTemplates[templateName]?.joinToString(", ")}", Toast.LENGTH_LONG).show()
-                    }
-                }
-
-                btnRemove.setOnClickListener {
-                    if (DataManager.projectTemplates.size > 1) {
-                        DataManager.projectTemplates.remove(templateName)
-                        DataManager.saveData(this)
-                        refresh()
-                    } else {
-                        Toast.makeText(this, "At least one template required", Toast.LENGTH_SHORT).show()
-                    }
-                }
-                container.addView(itemView)
-            }
-        }
-
-        btnDeleteMode.setOnClickListener {
-            isDeleteMode = !isDeleteMode
-            refresh()
-        }
-
-        btnAdd.setOnClickListener {
-            val name = etNew.text.toString().trim()
-            if (name.isNotEmpty() && !DataManager.projectTemplates.containsKey(name)) {
-                showCreateTemplateStepsDialog(name) {
-                    refresh()
-                    etNew.text.clear()
-                }
-            }
-        }
-
-        refresh()
-        dialog.show()
-    }
-
-    private fun showManageTagsDialog() {
-        val dialog = Dialog(this)
-        dialog.setContentView(R.layout.dialog_manage_categories)
-        dialog.window?.setBackgroundDrawableResource(android.R.color.transparent)
-        dialog.window?.setLayout(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT)
-
-        val container = dialog.findViewById<LinearLayout>(R.id.categories_container)
-        val etNew = dialog.findViewById<EditText>(R.id.et_new_category)
-        val btnAdd = dialog.findViewById<View>(R.id.btn_add_category)
-        val title = dialog.findViewById<TextView>(R.id.tv_categories_title)
-        val btnDeleteMode = dialog.findViewById<ImageButton>(R.id.btn_toggle_delete_mode)
-
-        title.text = "Project Tags"
-        etNew.hint = "Tag Name (e.g. UI)..."
-
-        var isDeleteMode = false
-
-        fun refresh() {
-            container.removeAllViews()
-
-            // Visual feedback for Delete Mode
-            btnDeleteMode.imageTintList = ColorStateList.valueOf(if (isDeleteMode) Color.RED else Color.WHITE)
-
-            DataManager.projectCustomTags.forEach { tagName ->
-                val itemView = LayoutInflater.from(this).inflate(R.layout.item_category_manage, container, false)
-                itemView.findViewById<TextView>(R.id.tv_category_name).text = tagName
-
-                val btnRemove = itemView.findViewById<View>(R.id.btn_remove_category)
-                btnRemove.visibility = if (isDeleteMode) View.VISIBLE else View.GONE
-
-                itemView.setOnClickListener {
-                    if (isDeleteMode) {
-                        isDeleteMode = false
-                        refresh()
-                    }
-                }
-
-                btnRemove.setOnClickListener {
-                    if (DataManager.projectCustomTags.size > 1) {
-                        DataManager.projectCustomTags.remove(tagName)
-                        DataManager.saveData(this)
-                        refresh()
-                    } else {
-                        Toast.makeText(this, "At least one tag required", Toast.LENGTH_SHORT).show()
-                    }
-                }
-                container.addView(itemView)
-            }
-        }
-
-        btnDeleteMode.setOnClickListener {
-            isDeleteMode = !isDeleteMode
-            refresh()
-        }
-
-        btnAdd.setOnClickListener {
-            val name = etNew.text.toString().trim().uppercase()
-            if (name.isNotEmpty() && !DataManager.projectCustomTags.contains(name)) {
-                DataManager.projectCustomTags.add(name)
-                DataManager.saveData(this)
-                refresh()
-                etNew.text.clear()
-            }
-        }
-
-        refresh()
-        showDialogSafe(dialog)
-    }
-
-    private fun showCreateTemplateStepsDialog(templateName: String, onComplete: () -> Unit) {
-        val dialog = Dialog(this)
-        dialog.setContentView(R.layout.dialog_manage_categories)
-        dialog.window?.setBackgroundDrawableResource(android.R.color.transparent)
-        dialog.window?.setLayout(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT)
-
-        val container = dialog.findViewById<LinearLayout>(R.id.categories_container)
-        val etStep = dialog.findViewById<EditText>(R.id.et_new_category)
-        val btnAddStep = dialog.findViewById<View>(R.id.btn_add_category)
-        val title = dialog.findViewById<TextView>(R.id.tv_categories_title)
-
-        // Add a "SAVE TEMPLATE" button at the bottom
-        val btnSave = TextView(this).apply {
-            text = "SAVE TEMPLATE"
-            setTextColor(Color.parseColor("#1A73E8"))
-            textSize = 16f
-            setTypeface(null, android.graphics.Typeface.BOLD)
-            gravity = android.view.Gravity.CENTER
-            setPadding(0, 40, 0, 40)
-            isClickable = true
-            isFocusable = true
-            val outValue = android.util.TypedValue()
-            context.theme.resolveAttribute(android.R.attr.selectableItemBackground, outValue, true)
-            setBackgroundResource(outValue.resourceId)
-        }
-
-        title.text = "Add Steps for: $templateName"
-        etStep.hint = "Step name (e.g. Design)..."
-
-        val steps = mutableListOf<String>()
-
-        fun refreshSteps() {
-            container.removeAllViews()
-            steps.forEach { step ->
-                val itemView = LayoutInflater.from(this).inflate(R.layout.item_category_manage, container, false)
-                itemView.findViewById<TextView>(R.id.tv_category_name).text = step
-                itemView.findViewById<View>(R.id.btn_remove_category).setOnClickListener {
-                    steps.remove(step)
-                    refreshSteps()
-                }
-                container.addView(itemView)
-            }
-            container.addView(btnSave)
-        }
-
-        btnAddStep.setOnClickListener {
-            val stepName = etStep.text.toString().trim()
-            if (stepName.isNotEmpty()) {
-                steps.add(stepName)
-                etStep.text.clear()
-                refreshSteps()
-            }
-        }
-
-        btnSave.setOnClickListener {
-            if (steps.isNotEmpty()) {
-                DataManager.projectTemplates[templateName] = steps
-                DataManager.saveData(this)
-                onComplete()
-                dialog.dismiss()
-            } else {
-                Toast.makeText(this, "Add at least one step", Toast.LENGTH_SHORT).show()
-            }
-        }
-
-        refreshSteps()
-        showDialogSafe(dialog)
-    }
-
     fun showProjectMenu(anchor: View, note: Note) {
         val inflater = LayoutInflater.from(this)
         val menuView = inflater.inflate(R.layout.layout_custom_menu, null)
@@ -1258,409 +1028,5 @@ class ProjectActivity : BaseActivity() {
         }
 
         popupWindow.showAsDropDown(anchor, 150, -100)
-    }
-
-    private var currentVoiceInput: EditText? = null
-
-    override fun onActivityResult(requestCode: Int, resultCode: Int, data: android.content.Intent?) {
-        super.onActivityResult(requestCode, resultCode, data)
-        if (requestCode == 201 && resultCode == RESULT_OK) {
-            val results = data?.getStringArrayListExtra(android.speech.RecognizerIntent.EXTRA_RESULTS)
-            val spokenText = results?.get(0) ?: ""
-            currentVoiceInput?.let {
-                val start = it.selectionStart
-                val end = it.selectionEnd
-                it.text.replace(Math.min(start, end), Math.max(start, end), spokenText, 0, spokenText.length)
-            }
-        }
-    }
-
-    private fun showAddIdeaDialog(existingIdea: Note? = null) {
-        val dialog = Dialog(this, android.R.style.Theme_Black_NoTitleBar_Fullscreen)
-        dialog.setContentView(R.layout.dialog_add_note_project)
-
-        val titleInput = dialog.findViewById<EditText>(R.id.note_title_input)
-        val tvTitleHint = dialog.findViewById<TextView>(R.id.tv_title_hint_note) ?: dialog.findViewById<TextView>(R.id.tv_name_hint)
-        val contentInput = dialog.findViewById<EditText>(R.id.note_content_input)
-        val btnSave = dialog.findViewById<TextView>(R.id.btn_save_note)
-        if (existingIdea != null) btnSave.text = "UPDATE"
-        val btnClose = dialog.findViewById<View>(R.id.btn_close_note)
-        
-        // Journal Section
-        val btnToggleJournal = dialog.findViewById<TextView>(R.id.btn_toggle_journal)
-        val containerJournal = dialog.findViewById<View>(R.id.container_journal)
-        val journalList = dialog.findViewById<LinearLayout>(R.id.journal_list)
-        val etJournalInput = dialog.findViewById<EditText>(R.id.et_journal_input)
-        val btnAddJournal = dialog.findViewById<View>(R.id.btn_add_journal)
-
-        val tempJournal = existingIdea?.journalEntries?.toMutableList() ?: mutableListOf()
-
-        fun refreshJournalUI() {
-            journalList.removeAllViews()
-            tempJournal.sortedByDescending { it.timestamp }.forEach { entry ->
-                val tv = TextView(this).apply {
-                    val date = SimpleDateFormat("MMM dd, HH:mm", Locale.getDefault()).format(Date(entry.timestamp))
-                    text = "[$date] ${entry.text}"
-                    setTextColor(Color.GRAY)
-                    textSize = 12f
-                    setPadding(0, 4.dpToPx(), 0, 4.dpToPx())
-                }
-                journalList.addView(tv)
-            }
-        }
-        refreshJournalUI()
-
-        btnToggleJournal.setOnClickListener {
-            val isVisible = containerJournal.visibility == View.VISIBLE
-            containerJournal.visibility = if (isVisible) View.GONE else View.VISIBLE
-            btnToggleJournal.text = if (isVisible) "IDEA EVOLUTION JOURNAL ▼" else "IDEA EVOLUTION JOURNAL ▲"
-        }
-
-        btnAddJournal.setOnClickListener {
-            val text = etJournalInput.text.toString().trim()
-            if (text.isNotEmpty()) {
-                tempJournal.add(JournalEntry(text))
-                etJournalInput.text.clear()
-                refreshJournalUI()
-            }
-        }
-
-        // Share & Mind Map
-        dialog.findViewById<View>(R.id.btn_share_idea).setOnClickListener {
-            val pitch = "PROJECT IDEA: ${titleInput.text}\n\nDESCRIPTION: ${contentInput.text}\n\nSUB-FEATURES:\n" + 
-                        existingIdea?.subFeatures?.joinToString("\n") { "• ${it.name}" }
-            val intent = Intent(Intent.ACTION_SEND).apply {
-                type = "text/plain"
-                putExtra(Intent.EXTRA_SUBJECT, "New Project Idea")
-                putExtra(Intent.EXTRA_TEXT, pitch)
-            }
-            startActivity(Intent.createChooser(intent, "Share Idea Pitch"))
-        }
-
-        dialog.findViewById<View>(R.id.btn_mind_map).setOnClickListener {
-            IdeaMindMapDialog(this, existingIdea ?: Note(titleInput.text.toString(), contentInput.text.toString())).show()
-        }
-
-        fun validateInputs() {
-            val title = titleInput.text.toString().trim()
-            val isValid = title.isNotEmpty()
-            btnSave.alpha = if (isValid) 1.0f else 0.3f
-            btnSave.isEnabled = isValid
-            tvTitleHint?.visibility = if (isValid) View.GONE else View.VISIBLE
-            if (!isValid) tvTitleHint?.let { startPulseAnimation(it) }
-            val themeColor = if (DataManager.projectAddThemeColor != -1) DataManager.projectAddThemeColor else Color.parseColor("#1A73E8")
-            if (isValid) btnSave.setTextColor(themeColor) else btnSave.setTextColor(Color.GRAY)
-            tvTitleHint?.setTextColor(themeColor)
-        }
-
-        titleInput.addTextChangedListener(object : android.text.TextWatcher {
-            override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {}
-            override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) { validateInputs() }
-            override fun afterTextChanged(s: android.text.Editable?) {}
-        })
-
-        val btnBullet = dialog.findViewById<ImageButton>(R.id.btn_bullet_list)
-        val btnNumeric = dialog.findViewById<ImageButton>(R.id.btn_numeric_list)
-        val btnConvert = dialog.findViewById<TextView>(R.id.btn_convert_project)
-        val btnConvertIcon = dialog.findViewById<View>(R.id.btn_convert_project_icon)
-        val btnVoice = dialog.findViewById<View>(R.id.btn_voice_input)
-        val btnPriority = dialog.findViewById<TextView>(R.id.btn_priority_tag)
-        val tvCharCount = dialog.findViewById<TextView>(R.id.tv_char_count)
-
-        val containerSubfeatures = dialog.findViewById<LinearLayout>(R.id.container_subfeatures)
-        val etNewSubfeature = dialog.findViewById<EditText>(R.id.et_new_subfeature)
-        val btnAddSubfeature = dialog.findViewById<View>(R.id.btn_add_subfeature)
-
-        var currentPriority = existingIdea?.priority ?: 0
-        currentEditingIdeaSubFeatures.clear()
-        currentEditingIdeaSubFeatures.addAll(existingIdea?.subFeatures ?: mutableListOf())
-        val tempSubfeatures = currentEditingIdeaSubFeatures
-        var currentTagFilter = "ALL"
-
-        fun refreshSubFeatures() {
-            containerSubfeatures.removeAllViews()
-
-            // Tag Filtering UI
-            val chipContainer = HorizontalScrollView(this).apply {
-                layoutParams = LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT)
-                setPadding(0, 0, 0, 16.dpToPx())
-                scrollBarSize = 0
-                isHorizontalScrollBarEnabled = false
-            }
-            val rgFilters = RadioGroup(this).apply {
-                orientation = LinearLayout.HORIZONTAL
-                layoutParams = FrameLayout.LayoutParams(ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT)
-            }
-            val tags = mutableListOf("ALL")
-            tags.addAll(DataManager.projectCustomTags)
-            if (!tags.contains("GENERAL")) tags.add("GENERAL")
-
-            tags.forEach { tag ->
-                val rb = RadioButton(this).apply {
-                    text = tag.uppercase(); setTextSize(android.util.TypedValue.COMPLEX_UNIT_SP, 10f)
-                    setTextColor(Color.WHITE); setTypeface(null, android.graphics.Typeface.BOLD)
-                    gravity = android.view.Gravity.CENTER; buttonDrawable = null
-                    background = ContextCompat.getDrawable(this@ProjectActivity, R.drawable.filter_chip_bg)
-                    val height = 32.dpToPx()
-                    val params = RadioGroup.LayoutParams(ViewGroup.LayoutParams.WRAP_CONTENT, height).apply { setMargins(0, 0, 8.dpToPx(), 0) }
-                    layoutParams = params; setPadding(20.dpToPx(), 0, 20.dpToPx(), 0)
-                    isChecked = tag == currentTagFilter
-                    setOnClickListener { currentTagFilter = tag; refreshSubFeatures() }
-                }
-                rgFilters.addView(rb)
-            }
-            chipContainer.addView(rgFilters)
-            containerSubfeatures.addView(chipContainer)
-
-            val filtered = if (currentTagFilter == "ALL") tempSubfeatures else tempSubfeatures.filter { (it.tag.ifEmpty { "GENERAL" }).equals(currentTagFilter, ignoreCase = true) }
-            val active = filtered.filter { !it.isCompleted }.sortedBy { it.position }
-            val completed = filtered.filter { it.isCompleted }.sortedByDescending { it.position }
-
-            fun createItem(sub: ProjectFeature): View {
-                val layout = LinearLayout(this).apply {
-                    orientation = LinearLayout.VERTICAL
-                    setPadding(0, 2.dpToPx(), 0, 2.dpToPx())
-                    val params = LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT)
-                    params.setMargins(0, 0, 0, 4.dpToPx())
-                    layoutParams = params
-                }
-                val header = LinearLayout(this).apply {
-                    orientation = LinearLayout.HORIZONTAL
-                    gravity = android.view.Gravity.CENTER_VERTICAL
-                }
-
-                // Left: Serial & Urgency
-                val tvSerial = TextView(this).apply {
-                    text = "${sub.position}."
-                    setTextColor(Color.GRAY)
-                    setTextSize(android.util.TypedValue.COMPLEX_UNIT_SP, 13f)
-                    setPadding(0, 0, 8.dpToPx(), 0)
-                }
-                val vUrgency = View(this).apply {
-                    val size = 6.dpToPx()
-                    layoutParams = LinearLayout.LayoutParams(size, size).apply { marginEnd = 12.dpToPx() }
-                    val color = when(sub.priority) {
-                        2 -> Color.RED; 1 -> Color.parseColor("#FFB800"); else -> Color.TRANSPARENT
-                    }
-                    background = ContextCompat.getDrawable(this@ProjectActivity, R.drawable.circle_selected_bg)
-                    backgroundTintList = ColorStateList.valueOf(color)
-                    visibility = if (sub.priority > 0) View.VISIBLE else View.GONE
-                }
-
-                val tvName = TextView(this).apply {
-                    text = sub.name; setTextColor(Color.WHITE)
-                    setTextSize(android.util.TypedValue.COMPLEX_UNIT_SP, 15f)
-                    layoutParams = LinearLayout.LayoutParams(0, ViewGroup.LayoutParams.WRAP_CONTENT, 1f)
-                    if (sub.isCompleted) { paintFlags = paintFlags or Paint.STRIKE_THRU_TEXT_FLAG; alpha = 0.5f }
-                }
-
-                val tvNote = TextView(this).apply {
-                    text = sub.details; setTextColor(Color.GRAY)
-                    setTextSize(android.util.TypedValue.COMPLEX_UNIT_SP, 12f)
-                    setPadding(32.dpToPx(), 4.dpToPx(), 32.dpToPx(), 8.dpToPx())
-                    visibility = View.GONE
-                }
-
-                // Right: Tag & Metadata Icons
-                val containerRight = LinearLayout(this).apply {
-                    orientation = LinearLayout.HORIZONTAL
-                    gravity = android.view.Gravity.CENTER_VERTICAL
-                }
-
-                if (sub.tag.isNotEmpty()) {
-                    containerRight.addView(TextView(this).apply {
-                        text = sub.tag.uppercase()
-                        setTextColor(Color.WHITE)
-                        setTextSize(android.util.TypedValue.COMPLEX_UNIT_SP, 8f)
-                        setTypeface(null, android.graphics.Typeface.BOLD)
-                        setPadding(8.dpToPx(), 2.dpToPx(), 8.dpToPx(), 2.dpToPx())
-                        val tagColor = when(sub.tag.uppercase()) {
-                            "UI" -> Color.parseColor("#E91E63")
-                            "LOGIC" -> Color.parseColor("#673AB7")
-                            "BUG" -> Color.RED
-                            else -> Color.parseColor("#33FFFFFF")
-                        }
-                        background = ContextCompat.getDrawable(this@ProjectActivity, R.drawable.priority_chip_bg)
-                        backgroundTintList = ColorStateList.valueOf(tagColor)
-                        layoutParams = LinearLayout.LayoutParams(ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT).apply { marginEnd = 8.dpToPx() }
-                    })
-                }
-
-                if (sub.weight > 1) {
-                    containerRight.addView(TextView(this).apply {
-                        text = "w${sub.weight}"; setTextColor(Color.parseColor("#80FFFFFF"))
-                        setTextSize(android.util.TypedValue.COMPLEX_UNIT_SP, 9f)
-                        setPadding(4.dpToPx(), 0, 8.dpToPx(), 0)
-                    })
-                }
-
-                if (sub.resourceUrl.isNotEmpty()) {
-                    containerRight.addView(ImageView(this).apply {
-                        setImageResource(R.drawable.icons8_connect_100)
-                        imageTintList = ColorStateList.valueOf(Color.parseColor("#1A73E8"))
-                        layoutParams = LinearLayout.LayoutParams(16.dpToPx(), 16.dpToPx()).apply { marginEnd = 8.dpToPx() }
-                    })
-                }
-
-                val btnEdit = ImageButton(this).apply {
-                    setImageResource(R.drawable.icons8_edit_pencil_100); background = ContextCompat.getDrawable(this@ProjectActivity, android.R.color.transparent)
-                    imageTintList = ColorStateList.valueOf(Color.GRAY); layoutParams = LinearLayout.LayoutParams(24.dpToPx(), 24.dpToPx())
-                    scaleType = ImageView.ScaleType.FIT_CENTER; setPadding(4.dpToPx(), 4.dpToPx(), 4.dpToPx(), 4.dpToPx())
-                    setOnClickListener { 
-                        val intent = Intent(this@ProjectActivity, AddSubFeatureActivity::class.java).apply {
-                            putExtra("PROJECT_INDEX", allNotes.indexOf(existingIdea))
-                            putExtra("SUB_FEATURE_ID", sub.id)
-                        }
-                        startActivity(intent)
-                    }
-                }
-
-                header.addView(tvSerial); header.addView(vUrgency); header.addView(tvName); header.addView(containerRight); header.addView(btnEdit)
-                layout.addView(header); layout.addView(tvNote)
-
-                layout.setOnClickListener {
-                    if (sub.details.isNotEmpty()) {
-                        tvNote.visibility = if (tvNote.visibility == View.VISIBLE) View.GONE else View.VISIBLE
-                    }
-                }
-                layout.setOnLongClickListener {
-                    // Custom menu for idea context
-                    val inflater = LayoutInflater.from(this@ProjectActivity)
-                    val menuView = inflater.inflate(R.layout.layout_custom_menu, null)
-                    val popupWindow = PopupWindow(menuView, ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT, true)
-                    popupWindow.elevation = 20f
-
-                    val btnMark = menuView.findViewById<View>(R.id.menu_take_day_off)
-                    val tvMark = menuView.findViewById<TextView>(R.id.tv_action_text)
-                    val ivMark = menuView.findViewById<ImageView>(R.id.iv_action_icon)
-                    btnMark.visibility = View.VISIBLE
-                    tvMark.text = if (sub.isCompleted) "MARK INCOMPLETE" else "MARK COMPLETE"
-                    ivMark.setImageResource(if (sub.isCompleted) R.drawable.icons8_refresh_100 else R.drawable.icons8_check_mark_100)
-                    ivMark.imageTintList = ColorStateList.valueOf(Color.WHITE)
-                    
-                    val ivEditMenu = menuView.findViewById<ImageView>(R.id.iv_edit_icon)
-                    ivEditMenu.setImageResource(R.drawable.icons8_edit_pencil_100)
-                    val ivDeleteMenu = menuView.findViewById<ImageView>(R.id.iv_delete_icon)
-                    ivDeleteMenu.setImageResource(R.drawable.icons8_trash_100)
-                    
-                    btnMark.setOnClickListener { sub.isCompleted = !sub.isCompleted; refreshSubFeatures(); popupWindow.dismiss() }
-                    menuView.findViewById<View>(R.id.menu_edit).setOnClickListener { 
-                        popupWindow.dismiss()
-                        val intent = Intent(this@ProjectActivity, AddSubFeatureActivity::class.java).apply {
-                            putExtra("PROJECT_INDEX", allNotes.indexOf(existingIdea))
-                            putExtra("SUB_FEATURE_ID", sub.id)
-                        }
-                        startActivity(intent)
-                    }
-                    menuView.findViewById<View>(R.id.menu_delete).setOnClickListener { tempSubfeatures.remove(sub); refreshSubFeatures(); popupWindow.dismiss() }
-                    
-                    menuView.findViewById<View>(R.id.menu_hide_unhide).visibility = View.GONE
-                    menuView.findViewById<View>(R.id.menu_undo).visibility = View.GONE
-
-                    popupWindow.showAsDropDown(it, 100, 0)
-                    true
-                }
-
-                return layout
-            }
-
-            // Sectioning
-            if (active.isNotEmpty()) {
-                val header = LinearLayout(this).apply {
-                    orientation = LinearLayout.HORIZONTAL; gravity = android.view.Gravity.CENTER_VERTICAL
-                    setPadding(8.dpToPx(), 8.dpToPx(), 8.dpToPx(), 12.dpToPx())
-                }
-                header.addView(TextView(this).apply {
-                    text = "ACTIVE (${active.size})"; setTextColor(Color.parseColor("#80FFFFFF"))
-                    setTextSize(android.util.TypedValue.COMPLEX_UNIT_SP, 11f); setTypeface(null, android.graphics.Typeface.BOLD)
-                })
-                containerSubfeatures.addView(header)
-                active.forEach { containerSubfeatures.addView(createItem(it)) }
-            }
-
-            if (completed.isNotEmpty()) {
-                val header = LinearLayout(this).apply {
-                    orientation = LinearLayout.HORIZONTAL; gravity = android.view.Gravity.CENTER_VERTICAL
-                    setPadding(8.dpToPx(), 8.dpToPx(), 8.dpToPx(), 12.dpToPx())
-                }
-                header.addView(TextView(this).apply {
-                    text = "COMPLETED (${completed.size})"; setTextColor(Color.parseColor("#4DFFFFFF"))
-                    setTextSize(android.util.TypedValue.COMPLEX_UNIT_SP, 11f); setTypeface(null, android.graphics.Typeface.BOLD)
-                })
-                containerSubfeatures.addView(header)
-                completed.forEach { containerSubfeatures.addView(createItem(it)) }
-            }
-        }
-
-        btnAddSubfeature.setOnClickListener {
-            val name = etNewSubfeature.text.toString().trim()
-            if (name.isNotEmpty()) {
-                val nextPos = if (tempSubfeatures.isEmpty()) 1 else tempSubfeatures.maxOf { it.position } + 1
-                tempSubfeatures.add(ProjectFeature(name = name, position = nextPos))
-                etNewSubfeature.text.clear()
-                refreshSubFeatures()
-            }
-        }
-
-        fun updatePriorityUI() {
-            val (text, color) = when(currentPriority) {
-                2 -> "HIGH" to Color.RED
-                1 -> "MED" to Color.parseColor("#FFB800")
-                else -> "LOW" to Color.parseColor("#2EC4B6")
-            }
-            btnPriority.text = text; btnPriority.backgroundTintList = ColorStateList.valueOf(color)
-        }
-        updatePriorityUI()
-
-        existingIdea?.let {
-            titleInput.setText(it.title); contentInput.setText(it.content); btnSave.text = "UPDATE"
-            btnConvertIcon.visibility = View.VISIBLE; tvCharCount.text = "${it.content.length} characters"
-            refreshSubFeatures()
-        }
-        
-        validateInputs()
-
-        contentInput.addTextChangedListener(object : android.text.TextWatcher {
-            override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {}
-            override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {
-                tvCharCount.text = "${s?.length ?: 0} characters"
-                if (DataManager.projectAutoSaveIdeas && existingIdea != null) { existingIdea.content = s.toString(); DataManager.saveData(this@ProjectActivity) }
-                if (count == 1 && s?.get(start) == '\n') {
-                    val textBefore = s.subSequence(0, start).toString()
-                    val lines = textBefore.split("\n")
-                    if (lines.isNotEmpty()) {
-                        val lastLine = lines.last()
-                        if (lastLine.trim().startsWith("•")) { contentInput.text.insert(start + 1, "• ") }
-                        else {
-                            val match = Regex("^(\\d+)\\. ").find(lastLine.trim())
-                            if (match != null) { val nextNum = match.groupValues[1].toInt() + 1; contentInput.text.insert(start + 1, "$nextNum. ") }
-                        }
-                    }
-                }
-            }
-            override fun afterTextChanged(s: android.text.Editable?) {}
-        })
-
-        btnPriority.setOnClickListener { currentPriority = (currentPriority + 1) % 3; updatePriorityUI() }
-
-        btnSave.setOnClickListener {
-            val title = titleInput.text.toString()
-            if (title.isNotEmpty()) {
-                val idea = existingIdea ?: Note(title = title, content = contentInput.text.toString(), category = "ProjectIdea")
-                idea.title = title
-                idea.content = contentInput.text.toString()
-                idea.priority = currentPriority
-                idea.subFeatures.clear()
-                idea.subFeatures.addAll(tempSubfeatures)
-                idea.journalEntries.clear()
-                idea.journalEntries.addAll(tempJournal)
-
-                if (existingIdea == null) DataManager.notes.add(0, idea)
-                DataManager.saveData(this); updateDisplayList(); dialog.dismiss()
-            }
-        }
-
-        btnClose.setOnClickListener { dialog.dismiss() }
-        showDialogSafe(dialog)
     }
 }
