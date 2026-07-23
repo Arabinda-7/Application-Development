@@ -25,6 +25,9 @@ import android.widget.TextView
 import androidx.activity.enableEdgeToEdge
 import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.widget.SwitchCompat
+import androidx.compose.runtime.*
+import androidx.compose.ui.graphics.Color as ComposeColor
+import androidx.compose.ui.platform.ComposeView
 import androidx.core.content.ContextCompat
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
@@ -49,9 +52,26 @@ class HabitTrackerActivity : BaseActivity() {
     private var currentGridCalendar = Calendar.getInstance()
     private var currentTab = "TODAY"
 
+    private lateinit var todayLayout: View
+    private lateinit var historyLayout: View
+    private lateinit var historyComposeView: ComposeView
+    private lateinit var ivToday: ImageView
+    private lateinit var tvTodayNav: TextView
+    private lateinit var ivHistory: ImageView
+    private lateinit var tvHistoryNav: TextView
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_habit_tracker)
+
+        todayLayout = findViewById(R.id.today_layout)
+        historyLayout = findViewById(R.id.history_layout)
+        historyComposeView = findViewById(R.id.history_compose_view)
+        
+        ivToday = findViewById(R.id.iv_today)
+        tvTodayNav = findViewById(R.id.tv_today_nav)
+        ivHistory = findViewById(R.id.iv_history)
+        tvHistoryNav = findViewById(R.id.tv_history_nav)
 
         val dateTextView = findViewById<TextView>(R.id.tv_date)
         val sdf = SimpleDateFormat("MMM dd", Locale.getDefault())
@@ -80,13 +100,13 @@ class HabitTrackerActivity : BaseActivity() {
 
         setupHeaderLogic()
         setupFooterLogic()
-        setupGridNavigation()
         setupCalendarViewPager()
         applySectionTheme()
         updateSectionProgress()
         setupGestureDetector()
-        setupKeyboardHandling(findViewById(R.id.habit_tracker_root), findViewById(R.id.habit_content_container))
+        setupKeyboardHandling(findViewById(R.id.habit_tracker_root))
         updateDynamicBackground()
+        setupComposeHistory()
 
         // Apply Default Startup Tab
         if (DataManager.habitDefaultTab == "HISTORY") {
@@ -118,6 +138,14 @@ class HabitTrackerActivity : BaseActivity() {
                 popupWindow.dismiss()
             }
 
+            // History Option
+            val historyBtn = menuView.findViewById<View>(R.id.menu_action_primary)
+            historyBtn.visibility = View.VISIBLE
+            historyBtn.setOnClickListener {
+                switchTab("HISTORY")
+                popupWindow.dismiss()
+            }
+
             // Hide task-specific items
             menuView.findViewById<View>(R.id.menu_clear_completed).visibility = View.GONE
 
@@ -135,7 +163,7 @@ class HabitTrackerActivity : BaseActivity() {
         val weeks = mutableListOf<List<DayModel>>()
         val calendar = Calendar.getInstance()
         
-        val habitColor = if (DataManager.globalHabitColor != -1) DataManager.globalHabitColor else ContextCompat.getColor(this, R.color.primary_blue)
+        val habitColor = if (DataManager.globalHabitColor != -1) DataManager.globalHabitColor else android.graphics.Color.parseColor("#FF7A59")
 
         // Start from 52 weeks ago to 52 weeks ahead (approx 2 years)
         calendar.add(Calendar.WEEK_OF_YEAR, -52)
@@ -228,19 +256,20 @@ class HabitTrackerActivity : BaseActivity() {
     }
 
     private fun switchTab(tab: String) {
+        val root = findViewById<ViewGroup>(R.id.habit_content_container)
+        androidx.transition.TransitionManager.beginDelayedTransition(root, androidx.transition.AutoTransition())
         currentTab = tab
-        val todayLayout = findViewById<View>(R.id.today_layout)
-        val historyLayout = findViewById<View>(R.id.history_layout)
         
         if (tab == "TODAY") {
             todayLayout.visibility = View.VISIBLE
             historyLayout.visibility = View.GONE
+            historyComposeView.visibility = View.GONE
             updateNavUI("TODAY")
         } else {
             todayLayout.visibility = View.GONE
-            historyLayout.visibility = View.VISIBLE
+            historyLayout.visibility = View.GONE
+            historyComposeView.visibility = View.VISIBLE
             updateNavUI("HISTORY")
-            updateHistoryUI()
         }
     }
 
@@ -261,22 +290,12 @@ class HabitTrackerActivity : BaseActivity() {
         return super.dispatchTouchEvent(ev)
     }
 
-    private fun setupGridNavigation() {
-        val historyLayout = findViewById<View>(R.id.history_layout)
-        historyLayout.findViewById<View>(R.id.btn_prev_month).setOnClickListener {
-            currentGridCalendar.add(Calendar.MONTH, -1)
-            setupDynamicHistoryGrid()
-        }
-        historyLayout.findViewById<View>(R.id.btn_next_month).setOnClickListener {
-            currentGridCalendar.add(Calendar.MONTH, 1)
-            setupDynamicHistoryGrid()
-        }
-    }
-
     private fun updateHistoryUI() {
+        findViewById<TextView>(R.id.history_current_streak)?.text = DataManager.getCurrentStreak().toString()
+        findViewById<TextView>(R.id.history_workouts_finished)?.text = DataManager.getTotalHabitsFinished().toString()
+        findViewById<TextView>(R.id.history_efficiency)?.text = "${DataManager.getGlobalCompletionRate()}%"
         setupDynamicHistoryGrid()
-        updateTrendChart()
-        updatePerformanceCard(SimpleDateFormat("yyyyMMdd", Locale.getDefault()).format(Date()))
+        updateSectionProgress()
     }
 
     private fun updateSectionProgress() {
@@ -285,14 +304,71 @@ class HabitTrackerActivity : BaseActivity() {
         sectionProgressText.text = "$progress%"
     }
 
+    private fun setupComposeHistory() {
+        val composeView = findViewById<ComposeView>(R.id.history_compose_view) ?: return
+        composeView.setContent {
+            var selectedDate by remember { mutableStateOf(DataManager.getTrackingDateString()) }
+            var currentMonth by remember { 
+                mutableStateOf(Calendar.getInstance().apply { 
+                    try {
+                        val date = SimpleDateFormat("yyyyMMdd", Locale.getDefault()).parse(selectedDate)
+                        if (date != null) time = date
+                    } catch (e: Exception) {}
+                }) 
+            }
+            
+            val performanceData = remember(selectedDate) {
+                DataManager.getDayHistory(selectedDate)
+            }
+            
+            val trendData = remember { DataManager.getLastSevenDaysDetailedProgress() }
+            val habitColor = if (DataManager.globalHabitColor != -1) ComposeColor(DataManager.globalHabitColor) else ComposeColor(0xFFFF7A59)
+
+            PerformanceDashboardScreen(
+                onBack = { switchTab("TODAY") },
+                title = "HABIT HISTORY",
+                onDateSelected = { selectedDate = it },
+                selectedDate = selectedDate,
+                currentMonth = currentMonth,
+                onMonthChanged = { currentMonth = it.clone() as Calendar },
+                onShowPicker = {
+                    val dialog = android.app.DatePickerDialog(
+                        this,
+                        { _, year, month, day ->
+                            val cal = Calendar.getInstance()
+                            cal.set(year, month, day)
+                            currentMonth = cal.clone() as Calendar
+                            selectedDate = SimpleDateFormat("yyyyMMdd", Locale.getDefault()).format(cal.time)
+                        },
+                        currentMonth.get(Calendar.YEAR),
+                        currentMonth.get(Calendar.MONTH),
+                        currentMonth.get(Calendar.DAY_OF_MONTH)
+                    )
+                    dialog.show()
+                },
+                performanceData = performanceData,
+                trendData = trendData,
+                currentMood = null,
+                overrideColor = habitColor,
+                isWorkoutContext = false,
+                showPerformanceCard = false,
+                showTrendCard = false,
+                showBackgroundAura = false
+            )
+        }
+    }
+
     private fun setupDynamicHistoryGrid() {
         val grid = findViewById<GridLayout>(R.id.history_dynamic_grid) ?: return
         val tvMonth = findViewById<TextView>(R.id.tv_grid_month) ?: return
         
-        grid.removeAllViews()
+        val childCount = grid.childCount
+        if (childCount > 7) {
+            grid.removeViews(7, childCount - 7)
+        }
 
         val sdfMonth = SimpleDateFormat("MMMM yyyy", Locale.getDefault())
-        tvMonth.text = sdfMonth.format(currentGridCalendar.time).uppercase()
+        tvMonth.text = sdfMonth.format(currentGridCalendar.time)
         
         val displayMonth = currentGridCalendar.get(Calendar.MONTH)
         val displayYear = currentGridCalendar.get(Calendar.YEAR)
@@ -308,7 +384,7 @@ class HabitTrackerActivity : BaseActivity() {
         for (i in 0 until firstDayOfWeek) {
             grid.addView(createSpacerView())
         }
-        
+
         for (day in 1..daysInMonth) {
             val dayCalendar = Calendar.getInstance()
             dayCalendar.set(displayYear, displayMonth, day)
@@ -404,7 +480,7 @@ class HabitTrackerActivity : BaseActivity() {
         val overallPercent = if (totalItems > 0) (totalCompleted * 100) / totalItems else 0
 
         findViewById<TextView>(R.id.tv_overall_percentage)?.text = "$overallPercent%"
-        
+
         findViewById<TextView>(R.id.tv_habits_stat_label)?.text = "[H] Habits (${historyData.habitsCompleted}/${historyData.totalHabits})"
         val hPercent = if (historyData.totalHabits > 0) (historyData.habitsCompleted * 100) / historyData.totalHabits else 0
         findViewById<TextView>(R.id.tv_habits_stat_percent)?.text = "$hPercent%"
@@ -420,263 +496,7 @@ class HabitTrackerActivity : BaseActivity() {
         findViewById<ProgressBar>(R.id.pb_total_history)?.progress = overallPercent
     }
 
-    private fun updateTrendChart() {
-        val container = findViewById<LinearLayout>(R.id.trend_chart_container) ?: return
-        container.removeAllViews()
 
-        val last7Days = DataManager.getLastSevenDaysDetailedProgress() // List<Pair<H%, W%>>
-        val cal = Calendar.getInstance()
-        val dayLetters = mutableListOf<String>()
-        for (i in 0 until 7) {
-            val dayName = SimpleDateFormat("E", Locale.getDefault()).format(cal.time)
-            dayLetters.add(0, dayName.take(1).uppercase())
-            cal.add(Calendar.DAY_OF_YEAR, -1)
-        }
-
-        last7Days.forEachIndexed { index, pair ->
-            val barLayout = LinearLayout(this)
-            val params = LinearLayout.LayoutParams(0, ViewGroup.LayoutParams.MATCH_PARENT, 1f)
-            barLayout.layoutParams = params
-            barLayout.orientation = LinearLayout.VERTICAL
-            barLayout.gravity = Gravity.BOTTOM or Gravity.CENTER_HORIZONTAL
-
-            val barsContainer = LinearLayout(this)
-            barsContainer.layoutParams = LinearLayout.LayoutParams(ViewGroup.LayoutParams.WRAP_CONTENT, 0, 1f)
-            barsContainer.orientation = LinearLayout.HORIZONTAL
-            barsContainer.gravity = Gravity.BOTTOM
-
-            // Habit Bar
-            val habitBar = View(this)
-            val hHeight = (pair.first * 1.5 * resources.displayMetrics.density).toInt().coerceAtLeast(10)
-            val hParams = LinearLayout.LayoutParams((14 * resources.displayMetrics.density).toInt(), hHeight)
-            hParams.setMargins(6, 0, 6, 0)
-            habitBar.layoutParams = hParams
-            habitBar.background = ContextCompat.getDrawable(this, R.drawable.bar_habit)
-            barsContainer.addView(habitBar)
-
-            // Workout Bar
-            val workoutBar = View(this)
-            val wHeight = (pair.second * 1.5 * resources.displayMetrics.density).toInt().coerceAtLeast(10)
-            val wParams = LinearLayout.LayoutParams((14 * resources.displayMetrics.density).toInt(), wHeight)
-            wParams.setMargins(6, 0, 6, 0)
-            workoutBar.layoutParams = wParams
-            workoutBar.background = ContextCompat.getDrawable(this, R.drawable.bar_workout)
-            barsContainer.addView(workoutBar)
-
-            barLayout.addView(barsContainer)
-
-            val tvDay = TextView(this)
-            tvDay.text = dayLetters[index]
-            tvDay.setTextColor(Color.parseColor("#4DFFFFFF"))
-            tvDay.textSize = 10f
-            tvDay.gravity = Gravity.CENTER
-            tvDay.setPadding(0, 8, 0, 0)
-            barLayout.addView(tvDay)
-
-            container.addView(barLayout)
-        }
-    }
-
-    private var tempRepeatType = "SPECIFIC_DAYS"
-    private var tempRepeatDays = mutableListOf(0, 1, 2, 3, 4, 5, 6)
-    private var tempRepeatCount = 1
-
-    fun showAddHabitDialog(existingHabit: Habit? = null) {
-        val dialog = Dialog(this, android.R.style.Theme_Black_NoTitleBar_Fullscreen)
-        dialog.setContentView(R.layout.dialog_add_habit)
-
-        val nameInput = dialog.findViewById<EditText>(R.id.habit_name_input)
-        val btnClose = dialog.findViewById<View>(R.id.btn_close)
-        val btnSave = dialog.findViewById<TextView>(R.id.btn_save)
-        val iconPreview = dialog.findViewById<ImageView>(R.id.icon_preview)
-        val colorPreview = dialog.findViewById<View>(R.id.color_preview)
-        val headerAccent = dialog.findViewById<View>(R.id.header_bg_accent)
-        val tvNameHint = dialog.findViewById<TextView>(R.id.tv_name_hint)
-        val tvScheduleHint = dialog.findViewById<TextView>(R.id.tv_schedule_hint)
-
-        // Day Selector Direct Logic
-        val dayViews = listOf(R.id.day_0_direct, R.id.day_1_direct, R.id.day_2_direct, R.id.day_3_direct, R.id.day_4_direct, R.id.day_5_direct, R.id.day_6_direct)
-            .map { dialog.findViewById<TextView>(it) }
-        
-        tempRepeatDays = existingHabit?.repeatDays?.toMutableList() ?: mutableListOf(0, 1, 2, 3, 4, 5, 6)
-        tempRepeatType = "SPECIFIC_DAYS"
-
-        fun validateInputs() {
-            val name = nameInput.text.toString().trim()
-            val isNameValid = name.isNotEmpty()
-            val isScheduleValid = tempRepeatDays.isNotEmpty()
-            val isAllValid = isNameValid && isScheduleValid
-
-            btnSave.alpha = if (isAllValid) 1.0f else 0.3f
-            btnSave.isEnabled = isAllValid
-            
-            tvNameHint.visibility = if (isNameValid) View.GONE else View.VISIBLE
-            tvScheduleHint.visibility = if (isScheduleValid) View.GONE else View.VISIBLE
-            
-            if (!isNameValid) startPulseAnimation(tvNameHint)
-            if (!isScheduleValid) startPulseAnimation(tvScheduleHint)
-        }
-
-        fun refreshDayButtons() {
-            dayViews.forEachIndexed { index, tv ->
-                val isSelected = tempRepeatDays.contains(index)
-                tv.backgroundTintList = ColorStateList.valueOf(if (isSelected) ContextCompat.getColor(this, R.color.chip_selected) else Color.parseColor("#1AFFFFFF"))
-                tv.alpha = if (isSelected) 1.0f else 0.5f
-            }
-            validateInputs()
-        }
-        refreshDayButtons()
-
-        dayViews.forEachIndexed { index, tv ->
-            tv.setOnClickListener {
-                if (tempRepeatDays.contains(index)) { if (tempRepeatDays.size > 1) tempRepeatDays.remove(index) }
-                else { tempRepeatDays.add(index) }
-                refreshDayButtons()
-            }
-        }
-
-        nameInput.addTextChangedListener(object : android.text.TextWatcher {
-            override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {}
-            override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) { validateInputs() }
-            override fun afterTextChanged(s: android.text.Editable?) {}
-        })
-
-        // Frequency Cards Logic
-        val cardMorning = dialog.findViewById<com.google.android.material.card.MaterialCardView>(R.id.card_morning)
-        val cardAfternoon = dialog.findViewById<com.google.android.material.card.MaterialCardView>(R.id.card_afternoon)
-        val cardEvening = dialog.findViewById<com.google.android.material.card.MaterialCardView>(R.id.card_evening)
-        val cardAnytime = dialog.findViewById<com.google.android.material.card.MaterialCardView>(R.id.card_anytime)
-        val freqCards = mapOf("Morning" to cardMorning, "Afternoon" to cardAfternoon, "Evening" to cardEvening, "Anytime" to cardAnytime)
-
-        var selectedFrequency = existingHabit?.frequency ?: "Anytime"
-
-        fun refreshFreqCards() {
-            freqCards.forEach { (type, card) ->
-                val isActive = type == selectedFrequency
-                card.setCardBackgroundColor(if (isActive) ContextCompat.getColor(this, R.color.chip_selected) else Color.parseColor("#1AFFFFFF"))
-                card.alpha = if (isActive) 1.0f else 0.6f
-            }
-        }
-        refreshFreqCards()
-
-        freqCards.forEach { (type, card) ->
-            card.setOnClickListener { selectedFrequency = type; refreshFreqCards() }
-        }
-
-        val colors = listOf(ContextCompat.getColor(this, R.color.card_blue), ContextCompat.getColor(this, R.color.card_orange), ContextCompat.getColor(this, R.color.card_green), Color.MAGENTA, Color.RED, Color.CYAN, Color.YELLOW, Color.LTGRAY)
-        var selectedColor = existingHabit?.color ?: colors[0]
-        var selectedIcon = existingHabit?.iconResId ?: R.drawable.ic_habit_tracker
-
-        fun updateThemeVisuals() {
-            iconPreview.backgroundTintList = ColorStateList.valueOf(selectedColor)
-            colorPreview.backgroundTintList = ColorStateList.valueOf(selectedColor)
-            headerAccent.backgroundTintList = ColorStateList.valueOf(selectedColor)
-            if (btnSave.isEnabled) btnSave.setTextColor(selectedColor) else btnSave.setTextColor(Color.GRAY)
-            tvNameHint.setTextColor(selectedColor)
-            tvScheduleHint.setTextColor(selectedColor)
-        }
-
-        if (existingHabit != null) {
-            nameInput.setText(existingHabit.name)
-            btnSave.text = "Update"
-            iconPreview.setImageResource(selectedIcon)
-        }
-        
-        updateThemeVisuals()
-        validateInputs()
-
-        dialog.findViewById<View>(R.id.card_habit_icon).setOnClickListener {
-            showIconSelectionDialog { icon ->
-                selectedIcon = icon
-                iconPreview.setImageResource(selectedIcon)
-            }
-        }
-
-        colorPreview.setOnClickListener {
-            val currentIndex = colors.indexOf(selectedColor)
-            selectedColor = colors[(currentIndex + 1) % colors.size]
-            updateThemeVisuals()
-        }
-
-        btnClose.setOnClickListener { dialog.dismiss() }
-        
-        btnSave.setOnClickListener {
-            val name = nameInput.text.toString().trim()
-            if (existingHabit == null) {
-                habits.add(Habit(name, false, selectedFrequency, color = selectedColor, iconResId = selectedIcon, repeatType = "SPECIFIC_DAYS", repeatDays = tempRepeatDays.toList(), repeatCount = 1))
-            } else {
-                existingHabit.name = name
-                existingHabit.frequency = selectedFrequency
-                existingHabit.color = selectedColor
-                existingHabit.iconResId = selectedIcon
-                existingHabit.repeatDays = tempRepeatDays.toList()
-            }
-            habitAdapter.sortHabits()
-            DataManager.saveData(this)
-            dialog.dismiss()
-        }
-        showDialogSafe(dialog)
-    }
-
-    private fun startPulseAnimation(view: View) {
-        if (view.tag == "pulsing") return
-        view.tag = "pulsing"
-        view.animate().alpha(0.4f).setDuration(800).withEndAction {
-            view.animate().alpha(1.0f).setDuration(800).withEndAction {
-                view.tag = null
-                if (view.visibility == View.VISIBLE) startPulseAnimation(view)
-            }
-        }.start()
-    }
-
-    private fun showIconSelectionDialog(onSelected: (Int) -> Unit) {
-        val icons = listOf(
-            R.drawable.ic_habit_tracker, R.drawable.ic_water, R.drawable.ic_sleep,
-            R.drawable.ic_book, R.drawable.ic_meditation, R.drawable.ic_notes,
-            R.drawable.ic_fitness, R.drawable.ic_finance, R.drawable.icons8_coffee_100,
-            R.drawable.icons8_yoga_100, R.drawable.icons8_clock_100, R.drawable.icons8_laptop_100,
-            R.drawable.icons8_typing_100, R.drawable.icons8_sun_50_apng, R.drawable.icons8_health_100_3,
-            R.drawable.icons8_clock_100_2, R.drawable.icons8_search_100, R.drawable.icons8_income_100,
-            R.drawable.icons8_bookmark_100, R.drawable.icons8_coffee_100_2, R.drawable.icons8_coffee_100_3,
-            R.drawable.icons8_coffee_100_4, R.drawable.icons8_coffee_100_5, R.drawable.icons8_drinking_100,
-            R.drawable.icons8_drinking_50, R.drawable.icons8_health_100, R.drawable.icons8_health_100_4,
-            R.drawable.icons8_health_100_9, R.drawable.icons8_health_100_11, R.drawable.icons8_health_100_12,
-            R.drawable.icons8_health_100_13, R.drawable.icons8_heart_health_100, R.drawable.icons8_yoga_100_3,
-            R.drawable.icons8_pilates_100, R.drawable.icons8_artistic_gymnastics_100, R.drawable.icons8_walking_100_3
-        )
-        
-        val dialog = Dialog(this)
-        dialog.setContentView(R.layout.dialog_premium_icon_picker)
-        dialog.window?.setBackgroundDrawableResource(android.R.color.transparent)
-        dialog.window?.setLayout(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT)
-
-        val gridLayout = dialog.findViewById<GridLayout>(R.id.premium_icon_grid)
-        gridLayout.columnCount = 5
-        val btnClose = dialog.findViewById<View>(R.id.btn_close_picker)
-
-        icons.forEach { iconRes ->
-            val iconView = ImageView(this)
-            val s = (52 * resources.displayMetrics.density).toInt() // Slightly smaller for 5 columns
-            val params = GridLayout.LayoutParams()
-            params.width = s; params.height = s; params.setMargins(6, 6, 6, 6)
-            iconView.layoutParams = params
-            
-            iconView.setImageResource(iconRes)
-            iconView.setPadding(12, 12, 12, 12)
-            iconView.background = ContextCompat.getDrawable(this, R.drawable.circle_selected_bg)
-            iconView.backgroundTintList = ColorStateList.valueOf(Color.parseColor("#22FFFFFF"))
-            iconView.imageTintList = ColorStateList.valueOf(Color.WHITE)
-            
-            iconView.setOnClickListener {
-                onSelected(iconRes)
-                dialog.dismiss()
-            }
-            gridLayout.addView(iconView)
-        }
-
-        btnClose.setOnClickListener { dialog.dismiss() }
-        showDialogSafe(dialog)
-    }
 
     private fun showBehavioralInsightsDialog() {
         val dialog = Dialog(this)
@@ -733,7 +553,7 @@ class HabitTrackerActivity : BaseActivity() {
     }
 
     private fun applySectionTheme() {
-        val habitColor = if (DataManager.globalHabitColor != -1) DataManager.globalHabitColor else ContextCompat.getColor(this, R.color.primary_blue)
+        val habitColor = if (DataManager.globalHabitColor != -1) DataManager.globalHabitColor else android.graphics.Color.parseColor("#FF7A59")
         
         val chips = listOf<RadioButton>(
             findViewById(R.id.chip_all),
@@ -762,6 +582,13 @@ class HabitTrackerActivity : BaseActivity() {
             }
             
             chip.background = stateListDrawable
+
+            // Synchronize Text Color
+            val textColorStateList = android.content.res.ColorStateList(
+                arrayOf(intArrayOf(android.R.attr.state_checked), intArrayOf()),
+                intArrayOf(Color.WHITE, habitColor)
+            )
+            chip.setTextColor(textColorStateList)
         }
 
         // Apply to Create Button
@@ -776,7 +603,7 @@ class HabitTrackerActivity : BaseActivity() {
 
     private fun updateDynamicBackground() {
         val auraView = findViewById<View>(R.id.habit_aura_background) ?: return
-        val habitColor = if (DataManager.globalHabitColor != -1) DataManager.globalHabitColor else Color.parseColor("#FF7A59")
+        val habitColor = if (DataManager.globalHabitColor != -1) DataManager.globalHabitColor else android.graphics.Color.parseColor("#FF7A59")
         
         val gradient = android.graphics.drawable.GradientDrawable(
             android.graphics.drawable.GradientDrawable.Orientation.TOP_BOTTOM,
@@ -797,13 +624,13 @@ class HabitTrackerActivity : BaseActivity() {
     }
 
     private fun updateNavUI(active: String) {
-        val habitColor = if (DataManager.globalHabitColor != -1) DataManager.globalHabitColor else ContextCompat.getColor(this, R.color.primary_blue)
+        val habitColor = if (DataManager.globalHabitColor != -1) DataManager.globalHabitColor else android.graphics.Color.parseColor("#FF7A59")
         val todayColor = if (active == "TODAY") habitColor else ContextCompat.getColor(this, R.color.text_secondary)
         val historyColor = if (active == "HISTORY") habitColor else ContextCompat.getColor(this, R.color.text_secondary)
         
-        findViewById<ImageView>(R.id.iv_today).setColorFilter(todayColor)
-        findViewById<TextView>(R.id.tv_today_nav).setTextColor(todayColor)
-        findViewById<ImageView>(R.id.iv_history).setColorFilter(historyColor)
-        findViewById<TextView>(R.id.tv_history_nav).setTextColor(historyColor)
+        ivToday.setColorFilter(todayColor)
+        tvTodayNav.setTextColor(todayColor)
+        ivHistory.setColorFilter(historyColor)
+        tvHistoryNav.setTextColor(historyColor)
     }
 }

@@ -1,48 +1,38 @@
-# Walkthrough - Fix Unresolved reference 'etInspirationUrl'
+# Walkthrough - Styled Workspace Option Sections
 
-I have resolved the build error `Unresolved reference 'etInspirationUrl'` in `ProjectActivity.kt`. The issue was caused by a missing variable declaration for the inspiration URL input field in the Project Idea dialog.
+I have updated the Workspace option sections (context menus and dropdowns) to perfectly match the app's overall UI design, ensuring a consistent dark/glass aesthetic across all project interactions.
 
 ## Changes Made
 
-### ProjectActivity.kt
+### UI Components Refinement
 
-I updated the `showAddIdeaDialog` method to:
-- Properly initialize `etInspirationUrl` by finding it in the dialog layout.
-- Ensure that the `inspirationUrl` is saved to the `Note` object when the "Save" or "Update" button is clicked.
+#### [CommonWorkspaceComponents.kt](file:///C:/Users/arabi/OneDrive/Desktop/App Development/AllinOne/app/src/main/java/com/example/allinone/workspace/ui/sections/CommonWorkspaceComponents.kt)
+- **`WorkspaceDropdown`**: Created a central, reusable styled dropdown wrapper.
+    - Uses the app's `surfaceColor` for the background.
+    - Applies the app's `borderRadius` (16dp) to the menu shape.
+    - Adds a subtle 10% white border to match the app's "Glass" card style.
+- **`WorkspaceDropdownItem`**: Created a standardized menu item component.
+    - Consistent typography and icon sizing (20dp).
+    - Uses the app's `accentColor` for standard icons.
+    - Automatically handles "Destructive" styling (Red text/icons) for delete actions.
 
-```diff
-<<<<
-        val btnPriority = dialog.findViewById<TextView>(R.id.btn_priority_tag)
-        val tvCharCount = dialog.findViewById<TextView>(R.id.tv_char_count)
+### Board & Section Updates
+I have migrated all workspace sections to use the new styled components:
+- **Tasks Section**: Long-press menu now matches the UI.
+- **Bugs Section**: Card-based dropdowns updated.
+- **Features Section**: Card-based dropdowns updated.
+- **Goals, Ideas, Notes, Resources**: All item menus now consistent.
 
-        val containerSubfeatures = dialog.findViewById<LinearLayout>(R.id.container_subfeatures)
-====
-        val btnPriority = dialog.findViewById<TextView>(R.id.btn_priority_tag)
-        val tvCharCount = dialog.findViewById<TextView>(R.id.tv_char_count)
-        val etInspirationUrl = dialog.findViewById<EditText>(R.id.et_inspiration_url)
-
-        val containerSubfeatures = dialog.findViewById<LinearLayout>(R.id.container_subfeatures)
->>>>
-<<<<
-                idea.title = title
-                idea.content = contentInput.text.toString()
-                idea.priority = currentPriority
-                idea.vibeColor = selectedVibeColor
-                idea.subFeatures.clear()
-====
-                idea.title = title
-                idea.content = contentInput.text.toString()
-                idea.priority = currentPriority
-                idea.vibeColor = selectedVibeColor
-                idea.inspirationUrl = etInspirationUrl.text.toString()
-                idea.subFeatures.clear()
->>>>
-```
+### Header Updates
+- **Project Selection**: The project switcher dropdown in the `WorkspaceHeader` now uses the new glass styling, including the rounded corners and destructive delete icons.
 
 ## Verification Results
 
-### Automated Tests
-- Ran `./gradlew :app:compileDebugKotlin` and it finished successfully.
-
 ### Manual Verification
-- You can now add and edit inspiration URLs in the Project Idea dialog, and they will be correctly persisted.
+- Verified that long-pressing any item (e.g., a Task or Note) shows a menu that looks like the app's cards.
+- Verified that the menu corners match the rounded corners used throughout the app.
+- Verified that the "Delete" option correctly displays red text and icons.
+- Verified the Project Switcher dropdown in the header is also styled correctly.
+
+> [!TIP]
+> The context menus now feel like an integrated part of the "Glass" theme, making the Workspace experience much more immersive!

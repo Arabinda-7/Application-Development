@@ -42,9 +42,24 @@ class TaskActivity : BaseActivity() {
     private var currentSearchQuery = ""
     private var currentSection = DataManager.taskDefaultSection
 
+    private lateinit var navTasks: View
+    private lateinit var navTodo: View
+    private lateinit var ivTasksIcon: ImageView
+    private lateinit var tvTasksLabel: TextView
+    private lateinit var ivTodoIcon: ImageView
+    private lateinit var tvTodoLabel: TextView
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_task)
+
+        navTasks = findViewById(R.id.nav_tasks)
+        navTodo = findViewById(R.id.nav_todo_list)
+        
+        ivTasksIcon = findViewById(R.id.iv_tasks_icon)
+        tvTasksLabel = findViewById(R.id.tv_tasks_label)
+        ivTodoIcon = findViewById(R.id.iv_todo_icon)
+        tvTodoLabel = findViewById(R.id.tv_todo_label)
 
         val taskList = findViewById<RecyclerView>(R.id.task_list)
         taskList.layoutManager = LinearLayoutManager(this)
@@ -58,15 +73,13 @@ class TaskActivity : BaseActivity() {
         setupHeader()
         setupFilters()
         setupBottomNavigation()
+        applySectionTheme()
         setupSwipeActions(taskList)
         setupGestureDetector()
         setupKeyboardHandling(findViewById(R.id.todo_root_layout), findViewById(R.id.task_content_container))
         updateDynamicBackground()
 
         val btnCreate = findViewById<com.google.android.material.floatingactionbutton.FloatingActionButton>(R.id.btn_create_new_task)
-        if (DataManager.taskAddThemeColor != -1) {
-            btnCreate.backgroundTintList = android.content.res.ColorStateList.valueOf(DataManager.taskAddThemeColor)
-        }
         btnCreate.setOnClickListener {
             if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.TIRAMISU) {
                 requestPermissions(arrayOf(android.Manifest.permission.POST_NOTIFICATIONS), 101)
@@ -87,7 +100,9 @@ class TaskActivity : BaseActivity() {
 
     override fun onResume() {
         super.onResume()
+        setupBottomNavigation()
         applyFilters()
+        applySectionTheme()
         updateDynamicBackground()
     }
 
@@ -160,13 +175,14 @@ class TaskActivity : BaseActivity() {
         val radioGroup = findViewById<RadioGroup>(R.id.category_filter_group)
         radioGroup.removeAllViews()
 
+        val taskColor = if (DataManager.globalTaskColor != -1) DataManager.globalTaskColor else Color.parseColor("#2EC4B6")
         val allCategories = mutableListOf("All")
         allCategories.addAll(DataManager.taskCustomCategories)
 
         allCategories.forEachIndexed { index, category ->
             val rb = RadioButton(this).apply {
-                id = index + 1000 // Unique ID for RadioGroup management
-                val height = TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, 32f, resources.displayMetrics).toInt()
+                id = index + 1000 
+                val height = TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, 38f, resources.displayMetrics).toInt()
                 val params = RadioGroup.LayoutParams(ViewGroup.LayoutParams.WRAP_CONTENT, height)
                 val margin = TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, 4f, resources.displayMetrics).toInt()
                 params.setMargins(margin, 0, margin, 0)
@@ -175,7 +191,26 @@ class TaskActivity : BaseActivity() {
                 val padding = TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, 16f, resources.displayMetrics).toInt()
                 setPadding(padding, 0, padding, 0)
                 
-                background = ContextCompat.getDrawable(this@TaskActivity, R.drawable.filter_chip_bg)
+                val darkenedColor = UIUtils.darkenColor(taskColor, 0.5f)
+
+                // Dynamic Background
+                val checkedDrawable = android.graphics.drawable.GradientDrawable().apply {
+                    shape = android.graphics.drawable.GradientDrawable.RECTANGLE
+                    cornerRadius = 19f * resources.displayMetrics.density
+                    setColor(darkenedColor)
+                }
+                val uncheckedDrawable = android.graphics.drawable.GradientDrawable().apply {
+                    shape = android.graphics.drawable.GradientDrawable.RECTANGLE
+                    cornerRadius = 19f * resources.displayMetrics.density
+                    setColor(Color.TRANSPARENT)
+                    setStroke(Math.round(1.5f * resources.displayMetrics.density), taskColor)
+                }
+                val stateListDrawable = android.graphics.drawable.StateListDrawable().apply {
+                    addState(intArrayOf(android.R.attr.state_checked), checkedDrawable)
+                    addState(intArrayOf(), uncheckedDrawable)
+                }
+                background = stateListDrawable
+
                 buttonDrawable = null
                 gravity = Gravity.CENTER
                 text = category.uppercase()
@@ -299,149 +334,6 @@ class TaskActivity : BaseActivity() {
         btnSettings.setImageResource(if (enabled) android.R.drawable.ic_menu_delete else R.drawable.baseline_tune_24)
     }
 
-    fun showAddTaskDialog(existingTask: Task? = null) {
-        val dialog = Dialog(this)
-        val view = layoutInflater.inflate(R.layout.dialog_add_task, null)
-        dialog.setContentView(view)
-        dialog.window?.setBackgroundDrawableResource(android.R.color.transparent)
-        dialog.window?.setLayout(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT)
-
-        val etName = view.findViewById<EditText>(R.id.task_name_input)
-        val tvNameHint = view.findViewById<TextView>(R.id.tv_name_hint)
-        val rgPriority = view.findViewById<RadioGroup>(R.id.rg_priority)
-        val chipGroupCat = view.findViewById<ChipGroup>(R.id.category_chip_group)
-        val containerSubtasks = view.findViewById<LinearLayout>(R.id.container_subtasks)
-        val etNewSubtask = view.findViewById<EditText>(R.id.et_new_subtask)
-        val btnAddSubtask = view.findViewById<ImageButton>(R.id.btn_add_subtask)
-        val tvReminder = view.findViewById<TextView>(R.id.tv_reminder_summary)
-        val btnSave = view.findViewById<TextView>(R.id.btn_save_task)
-
-        fun validateInputs() {
-            val name = etName.text.toString().trim()
-            val isValid = name.isNotEmpty()
-            
-            btnSave.alpha = if (isValid) 1.0f else 0.3f
-            btnSave.isEnabled = isValid
-            
-            tvNameHint.visibility = if (isValid) View.GONE else View.VISIBLE
-            if (!isValid) startPulseAnimation(tvNameHint)
-            
-            val themeColor = if (DataManager.taskAddThemeColor != -1) DataManager.taskAddThemeColor else ContextCompat.getColor(this, R.color.primary_blue)
-            if (isValid) btnSave.setTextColor(themeColor) else btnSave.setTextColor(Color.GRAY)
-            tvNameHint.setTextColor(themeColor)
-        }
-
-        etName.addTextChangedListener(object : TextWatcher {
-            override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {}
-            override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) { validateInputs() }
-            override fun afterTextChanged(s: Editable?) {}
-        })
-
-        // Setup Category Chips
-        val categories = DataManager.taskCustomCategories
-        var selectedCategory = existingTask?.category ?: "General"
-
-        categories.forEach { cat ->
-            val chip = com.google.android.material.chip.Chip(this)
-            chip.text = cat
-            chip.isCheckable = true
-            chip.isChecked = (cat == selectedCategory)
-            chip.setChipBackgroundColorResource(R.color.chip_background)
-            chip.setTextColor(Color.WHITE)
-            chip.setOnCheckedChangeListener { _, isChecked -> if (isChecked) selectedCategory = cat }
-            chipGroupCat.addView(chip)
-        }
-
-        var selectedPriority = existingTask?.priority ?: 0
-        var selectedReminder: Long? = existingTask?.reminderTime
-        val tempSubtasks = existingTask?.subtasks?.toMutableList() ?: mutableListOf()
-
-        // Initial UI State
-        existingTask?.let {
-            etName.setText(it.name)
-            when (it.priority) {
-                0 -> rgPriority.check(R.id.rb_priority_low)
-                1 -> rgPriority.check(R.id.rb_priority_medium)
-                2 -> rgPriority.check(R.id.rb_priority_high)
-            }
-            updateReminderUI(tvReminder, selectedReminder)
-            updatePriorityAlpha(view, when(it.priority) {
-                1 -> R.id.rb_priority_medium
-                2 -> R.id.rb_priority_high
-                else -> R.id.rb_priority_low
-            })
-        }
-        renderSubtasks(containerSubtasks, tempSubtasks)
-        validateInputs()
-
-        // Listeners
-        rgPriority.setOnCheckedChangeListener { _, id ->
-            selectedPriority = when (id) {
-                R.id.rb_priority_medium -> 1
-                R.id.rb_priority_high -> 2
-                else -> 0
-            }
-            updatePriorityAlpha(view, id)
-        }
-
-        btnAddSubtask.setOnClickListener {
-            val subName = etNewSubtask.text.toString()
-            if (subName.isNotEmpty()) {
-                tempSubtasks.add(Subtask(subName))
-                renderSubtasks(containerSubtasks, tempSubtasks)
-                etNewSubtask.text.clear()
-            }
-        }
-
-        view.findViewById<View>(R.id.btn_set_reminder).setOnClickListener {
-            showReminderPicker { time ->
-                selectedReminder = time
-                updateReminderUI(tvReminder, selectedReminder)
-            }
-        }
-
-        if (existingTask != null) {
-            btnSave.text = "Update"
-        }
-
-        btnSave.setOnClickListener {
-            val name = etName.text.toString().trim()
-            if (name.isNotEmpty()) {
-                val task = existingTask ?: Task(name, section = currentSection)
-                task.name = name
-                task.priority = selectedPriority
-                task.category = selectedCategory
-                task.reminderTime = selectedReminder
-                task.subtasks.clear()
-                task.subtasks.addAll(tempSubtasks)
-                
-                if (existingTask == null) {
-                    allTasks.add(0, task)
-                    DataManager.addActivity("Captured Task: $name")
-                } else {
-                    DataManager.addActivity("Updated Task: $name")
-                }
-                
-                // Schedule Reminder
-                selectedReminder?.let { time ->
-                    if (time > System.currentTimeMillis()) {
-                        scheduleReminder(task)
-                    }
-                }
-
-                taskAdapter.updateDisplayList()
-                DataManager.saveData(this)
-                
-                if (intent.getBooleanExtra("SHOW_ADD_DIALOG", false)) {
-                    finish()
-                } else {
-                    dialog.dismiss()
-                }
-            }
-        }
-
-        showDialogSafe(dialog)
-    }
 
     private fun startPulseAnimation(view: View) {
         if (view.tag == "pulsing") return
@@ -455,28 +347,42 @@ class TaskActivity : BaseActivity() {
     }
 
     private fun setupBottomNavigation() {
-        val navTasks = findViewById<View>(R.id.nav_tasks)
-        val navTodo = findViewById<View>(R.id.nav_todo_list)
-        val footer = findViewById<View>(R.id.bottom_navigation_tasks)
+        val footer = findViewById<LinearLayout>(R.id.bottom_navigation_tasks)
 
-        // Show/Hide based on settings
-        val showTasks = DataManager.taskVisibleSections.contains("Tasks")
-        val showTodo = DataManager.taskVisibleSections.contains("List")
+        // 1. Remove all to prepare for re-ordering
+        footer.removeAllViews()
 
-        navTasks.visibility = if (showTasks) View.VISIBLE else View.GONE
-        navTodo.visibility = if (showTodo) View.VISIBLE else View.GONE
+        // 2. Add back in the order specified by DataManager.taskVisibleSections
+        DataManager.taskVisibleSections.forEach { section ->
+            val viewToAdd = when (section) {
+                "Tasks" -> navTasks
+                "List" -> navTodo
+                else -> null
+            }
+            viewToAdd?.let {
+                if (it.parent != null) (it.parent as ViewGroup).removeView(it)
+                footer.addView(it)
+            }
+        }
+
+        // 3. Auto-switch to default if current is hidden
+        if (!DataManager.taskVisibleSections.contains(currentSection)) {
+            currentSection = DataManager.taskDefaultSection
+        }
+
+        // Show/Hide based on settings (re-redundant if using addView, but keeps visibility logic)
+        navTasks.visibility = if (DataManager.taskVisibleSections.contains("Tasks")) View.VISIBLE else View.GONE
+        navTodo.visibility = if (DataManager.taskVisibleSections.contains("List")) View.VISIBLE else View.GONE
 
         // Dynamic Visibility: Hide the entire footer if only one section is enabled
         if (DataManager.taskVisibleSections.size > 1) {
             footer.visibility = View.VISIBLE
         } else {
             footer.visibility = View.GONE
-            // If only one is visible, ensure we switch to it
             val onlyVisible = DataManager.taskVisibleSections.firstOrNull() ?: "Tasks"
             if (currentSection != onlyVisible) switchSection(onlyVisible)
         }
 
-        // If current section is hidden, switch to the first visible one
         if (!DataManager.taskVisibleSections.contains(currentSection)) {
             val firstVisible = DataManager.taskVisibleSections.firstOrNull() ?: "Tasks"
             switchSection(firstVisible)
@@ -489,7 +395,32 @@ class TaskActivity : BaseActivity() {
     }
 
     private fun switchSection(section: String) {
+        if (section == currentSection && DataManager.taskVisibleSections.size <= 1) return
+
+        val root = findViewById<ViewGroup>(R.id.task_content_container)
+        androidx.transition.TransitionManager.beginDelayedTransition(root, androidx.transition.AutoTransition())
+        
+        val sections = DataManager.taskVisibleSections.toMutableList()
+
+        if (section == currentSection) {
+            // Double Click: Reset to original order
+            val originalOrder = listOf("Tasks", "List")
+            val resetOrder = originalOrder.filter { sections.contains(it) }
+            
+            DataManager.taskVisibleSections.clear()
+            DataManager.taskVisibleSections.addAll(resetOrder)
+        } else {
+            // Reorder: Move current section to the first position
+            if (sections.contains(section)) {
+                sections.remove(section)
+                sections.add(0, section)
+                DataManager.taskVisibleSections.clear()
+                DataManager.taskVisibleSections.addAll(sections)
+            }
+        }
+
         currentSection = section
+        setupBottomNavigation() // Redraw footer with new order
         taskAdapter.setSection(section)
         findViewById<TextView>(R.id.tv_title).text = section.uppercase()
         updateNavUI()
@@ -497,66 +428,36 @@ class TaskActivity : BaseActivity() {
 
     private fun updateNavUI() {
         val navs = mapOf(
-            "Tasks" to Pair(findViewById<ImageView>(R.id.iv_tasks_icon), findViewById<TextView>(R.id.tv_tasks_label)),
-            "List" to Pair(findViewById<ImageView>(R.id.iv_todo_icon), findViewById<TextView>(R.id.tv_todo_label))
+            "Tasks" to Pair(ivTasksIcon, tvTasksLabel),
+            "List" to Pair(ivTodoIcon, tvTodoLabel)
         )
 
-        val activeColor = ContextCompat.getColor(this, R.color.chip_selected)
+        val taskColor = if (DataManager.globalTaskColor != -1) DataManager.globalTaskColor else Color.parseColor("#2EC4B6")
         val inactiveColor = ContextCompat.getColor(this, R.color.text_secondary)
 
         navs.forEach { (sec, views) ->
             val isActive = sec == currentSection
-            val color = if (isActive) activeColor else inactiveColor
+            val color = if (isActive) taskColor else inactiveColor
             
             views.first.setColorFilter(color)
             views.second.setTextColor(color)
         }
     }
 
-    private fun showManageCategoriesDialog() {
-        val dialog = Dialog(this)
-        val view = layoutInflater.inflate(R.layout.dialog_manage_categories, null)
-        dialog.setContentView(view)
-        dialog.window?.setBackgroundDrawableResource(android.R.color.transparent)
-        dialog.window?.setLayout(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT)
+    private fun applySectionTheme() {
+        // Refresh filters to pick up color change
+        setupFilters()
+        
+        // Sync Nav UI
+        updateNavUI()
 
-        val container = view.findViewById<LinearLayout>(R.id.categories_container)
-        val etNewCategory = view.findViewById<EditText>(R.id.et_new_category)
-        val btnAdd = view.findViewById<ImageButton>(R.id.btn_add_category)
-
-        fun render() {
-            container.removeAllViews()
-            DataManager.taskCustomCategories.forEach { category ->
-                val catView = layoutInflater.inflate(R.layout.item_category_manage, container, false)
-                catView.findViewById<TextView>(R.id.tv_category_name).text = category
-                catView.findViewById<View>(R.id.btn_remove_category).setOnClickListener {
-                    if (DataManager.taskCustomCategories.size > 1) {
-                        DataManager.taskCustomCategories.remove(category)
-                        DataManager.saveData(this)
-                        render()
-                        setupFilters() // Refresh main screen chips
-                    } else {
-                        Toast.makeText(this, "At least one category required", Toast.LENGTH_SHORT).show()
-                    }
-                }
-                container.addView(catView)
-            }
-        }
-
-        btnAdd.setOnClickListener {
-            val name = etNewCategory.text.toString().trim()
-            if (name.isNotEmpty() && !DataManager.taskCustomCategories.contains(name)) {
-                DataManager.taskCustomCategories.add(name)
-                DataManager.saveData(this)
-                etNewCategory.text.clear()
-                render()
-                setupFilters() // Refresh main screen chips
-            }
-        }
-
-        render()
-        showDialogSafe(dialog)
+        // Synchronize FAB color (50% darker)
+        val taskColor = if (DataManager.globalTaskColor != -1) DataManager.globalTaskColor else Color.parseColor("#2EC4B6")
+        val darkenedFabColor = UIUtils.darkenColor(taskColor, 0.5f)
+        findViewById<com.google.android.material.floatingactionbutton.FloatingActionButton>(R.id.btn_create_new_task).backgroundTintList = 
+            android.content.res.ColorStateList.valueOf(darkenedFabColor)
     }
+
 
     private fun showTaskAnalyticsDialog() {
         val total = allTasks.size
@@ -586,127 +487,5 @@ class TaskActivity : BaseActivity() {
         showDialogSafe(dialog)
     }
 
-    private fun showManageSectionsDialog(type: String) {
-        val dialog = Dialog(this)
-        dialog.setContentView(R.layout.dialog_manage_sections)
-        dialog.window?.setBackgroundDrawableResource(android.R.color.transparent)
-        dialog.window?.setLayout(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT)
 
-        val container = dialog.findViewById<LinearLayout>(R.id.container_section_switches)
-        val btnSave = dialog.findViewById<View>(R.id.btn_save_sections)
-        
-        val options = if (type == "TASK") listOf("Tasks", "List") else listOf("Notes", "Questions", "Daily", "Stories")
-        val currentVisible = if (type == "TASK") DataManager.taskVisibleSections else DataManager.noteVisibleSections
-        val tempSelection = currentVisible.toMutableList()
-
-        options.forEach { option ->
-            val switch = SwitchCompat(this).apply {
-                text = option
-                setTextColor(Color.WHITE)
-                textSize = 16f
-                isChecked = tempSelection.contains(option)
-                setPadding(0, 24, 0, 24)
-                setOnCheckedChangeListener { _, isChecked ->
-                    if (isChecked) {
-                        if (!tempSelection.contains(option)) tempSelection.add(option)
-                    } else {
-                        if (tempSelection.size > 1) {
-                            tempSelection.remove(option)
-                        } else {
-                            this.isChecked = true
-                            Toast.makeText(this@TaskActivity, "At least one section must be visible", Toast.LENGTH_SHORT).show()
-                        }
-                    }
-                }
-            }
-            container.addView(switch)
-        }
-
-        btnSave.setOnClickListener {
-            if (type == "TASK") {
-                DataManager.taskVisibleSections.clear()
-                DataManager.taskVisibleSections.addAll(tempSelection)
-            } else {
-                DataManager.noteVisibleSections.clear()
-                DataManager.noteVisibleSections.addAll(tempSelection)
-            }
-            DataManager.saveData(this)
-            setupBottomNavigation() // Refresh current screen
-            dialog.dismiss()
-        }
-        showDialogSafe(dialog)
-    }
-
-    private fun scheduleReminder(task: Task) {
-        val alarmManager = getSystemService(ALARM_SERVICE) as AlarmManager
-        
-        // Android 12+ check for exact alarm permission
-        if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.S) {
-            if (!alarmManager.canScheduleExactAlarms()) {
-                val intent = Intent(android.provider.Settings.ACTION_REQUEST_SCHEDULE_EXACT_ALARM)
-                startActivity(intent)
-                return
-            }
-        }
-
-        val intent = Intent(this, ReminderReceiver::class.java).apply {
-            putExtra("TASK_NAME", task.name)
-            putExtra("TASK_TIMESTAMP", task.timestamp)
-        }
-        
-        // Use a more unique request code for PendingIntent
-        val requestCode = (task.timestamp % Int.MAX_VALUE).toInt()
-        val pendingIntent = PendingIntent.getBroadcast(this, requestCode, intent, PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE)
-
-        alarmManager.setExactAndAllowWhileIdle(AlarmManager.RTC_WAKEUP, task.reminderTime!!, pendingIntent)
-    }
-
-    private fun updatePriorityAlpha(root: View, checkedId: Int) {
-        listOf(R.id.rb_priority_low, R.id.rb_priority_medium, R.id.rb_priority_high).forEach { id ->
-            root.findViewById<View>(id).alpha = if (id == checkedId) 1.0f else 0.3f
-        }
-    }
-
-    private fun renderSubtasks(container: LinearLayout, subtasks: MutableList<Subtask>) {
-        container.removeAllViews()
-        subtasks.forEach { subtask ->
-            val subView = LayoutInflater.from(this).inflate(android.R.layout.simple_list_item_multiple_choice, container, false)
-            val ctView = subView as CheckedTextView
-            ctView.text = subtask.name
-            ctView.setTextColor(Color.WHITE)
-            ctView.textSize = 14f
-            ctView.isChecked = subtask.isCompleted
-            ctView.setCheckMarkTintList(android.content.res.ColorStateList.valueOf(Color.WHITE))
-            ctView.setOnClickListener {
-                subtask.isCompleted = !subtask.isCompleted
-                ctView.isChecked = subtask.isCompleted
-            }
-            container.addView(subView)
-        }
-    }
-
-    private fun updateReminderUI(tv: TextView, time: Long?) {
-        if (time == null) {
-            tv.text = "Set reminder"
-        } else {
-            val sdf = SimpleDateFormat("MMM dd, h:mm a", Locale.getDefault())
-            tv.text = sdf.format(Date(time))
-        }
-    }
-
-    private fun showReminderPicker(onTimeSelected: (Long) -> Unit) {
-        val calendar = Calendar.getInstance()
-        val datePicker = DatePickerDialog(this, { _, y, m, d ->
-            calendar.set(Calendar.YEAR, y)
-            calendar.set(Calendar.MONTH, m)
-            calendar.set(Calendar.DAY_OF_MONTH, d)
-            val timePicker = TimePickerDialog(this, { _, h, min ->
-                calendar.set(Calendar.HOUR_OF_DAY, h)
-                calendar.set(Calendar.MINUTE, min)
-                onTimeSelected(calendar.timeInMillis)
-            }, calendar.get(Calendar.HOUR_OF_DAY), calendar.get(Calendar.MINUTE), false)
-            showDialogSafe(timePicker)
-        }, calendar.get(Calendar.YEAR), calendar.get(Calendar.MONTH), calendar.get(Calendar.DAY_OF_MONTH))
-        showDialogSafe(datePicker)
-    }
 }

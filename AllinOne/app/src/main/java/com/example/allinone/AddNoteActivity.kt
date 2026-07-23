@@ -80,6 +80,10 @@ class AddNoteActivity : BaseActivity() {
         fun updateMetadata() {
             val count = (titleInput.text.length + contentInput.text.length)
             tvMetadata.text = "$dateStr | $count characters"
+            
+            val hasTitle = titleInput.text.toString().trim().isNotEmpty()
+            btnSave.isEnabled = hasTitle
+            btnSave.alpha = if (hasTitle) 1.0f else 0.5f
         }
         updateMetadata()
 
@@ -161,15 +165,22 @@ class AddNoteActivity : BaseActivity() {
             if (existingNote == null) {
                 DataManager.notes.add(0, Note(title, content, color = selectedColor, category = currentCategory))
             } else {
-                existingNote?.let {
-                    it.title = title
-                    it.content = content
-                    it.color = selectedColor
+                val index = DataManager.notes.indexOf(existingNote)
+                if (index != -1) {
+                    val updatedNote = existingNote!!.copy(
+                        title = title,
+                        content = content,
+                        color = selectedColor
+                    )
+                    DataManager.notes[index] = updatedNote
                 }
             }
             DataManager.saveData(this)
             setResult(RESULT_OK)
             finish()
+        } else {
+            titleInput.error = "Title is required"
+            Toast.makeText(this, "Please enter a title for your note", Toast.LENGTH_SHORT).show()
         }
     }
 }

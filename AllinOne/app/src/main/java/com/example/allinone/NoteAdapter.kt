@@ -8,16 +8,18 @@ import android.view.ViewGroup
 import android.widget.PopupWindow
 import android.widget.TextView
 import androidx.core.content.ContextCompat
+import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.RecyclerView
 import com.google.android.material.card.MaterialCardView
 import java.text.SimpleDateFormat
 import java.util.*
 
 class NoteAdapter(
-    private var notes: MutableList<Note>,
+    initialNotes: List<Note>,
     private val onProgressChanged: () -> Unit
 ) : RecyclerView.Adapter<NoteAdapter.NoteViewHolder>() {
 
+    private var notes = initialNotes.toMutableList()
     private var isDeleteMode = false
     private val selectedNotes = mutableSetOf<Note>()
 
@@ -34,10 +36,14 @@ class NoteAdapter(
         val context = holder.itemView.context
         val color = if (note.color != -1) note.color else ContextCompat.getColor(context, R.color.primary_blue)
         
-        // Match the premium dark aesthetic from the pic
-        holder.noteCard.setCardBackgroundColor(ContextCompat.getColor(context, R.color.chip_background))
+        // Transparent Aesthetic with Dynamic Stroke
+        holder.noteCard.setCardBackgroundColor(Color.TRANSPARENT)
         holder.noteTitle.setTextColor(color)
-        holder.noteCard.strokeWidth = 0
+        holder.accentBar.backgroundTintList = android.content.res.ColorStateList.valueOf(color)
+        
+        val standardStrokeWidth = (1.5 * context.resources.displayMetrics.density).toInt()
+        holder.noteCard.strokeColor = color
+        holder.noteCard.strokeWidth = standardStrokeWidth
 
         // Set date
         val sdf = SimpleDateFormat("MMM dd, HH:mm", Locale.getDefault())
@@ -45,10 +51,12 @@ class NoteAdapter(
         
         // Selection UI
         if (isDeleteMode) {
-            holder.noteCard.strokeWidth = if (selectedNotes.contains(note)) 4 else 0
+            holder.noteCard.strokeWidth = if (selectedNotes.contains(note)) (4 * context.resources.displayMetrics.density).toInt() else 0
             holder.noteCard.strokeColor = Color.RED
         } else {
-            holder.noteCard.strokeWidth = 0
+            // Ensure stroke stays visible when not in delete mode
+            holder.noteCard.strokeWidth = standardStrokeWidth
+            holder.noteCard.strokeColor = color
         }
 
         holder.itemView.setOnClickListener { 
@@ -152,8 +160,12 @@ class NoteAdapter(
     override fun getItemCount() = notes.size
 
     fun updateNotes(newNotes: List<Note>) {
-        notes = newNotes.toMutableList()
-        notifyDataSetChanged()
+        val oldNotes = notes.toList() // Create a copy for DiffUtil
+        val diffCallback = NoteDiffCallback(oldNotes, newNotes)
+        val diffResult = DiffUtil.calculateDiff(diffCallback)
+        notes.clear()
+        notes.addAll(newNotes)
+        diffResult.dispatchUpdatesTo(this)
     }
 
     class NoteViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
@@ -161,5 +173,19 @@ class NoteAdapter(
         val noteContent: TextView = itemView.findViewById(R.id.note_content)
         val noteDate: TextView = itemView.findViewById(R.id.note_date)
         val noteCard: MaterialCardView = itemView.findViewById(R.id.note_card)
+        val accentBar: View = itemView.findViewById(R.id.accent_bar_note)
+    }
+
+    private class NoteDiffCallback(private val oldList: List<Note>, private val newList: List<Note>) : DiffUtil.Callback() {
+        override fun getOldListSize(): Int = oldList.size
+        override fun getNewListSize(): Int = newList.size
+
+        override fun areItemsTheSame(oldItemPosition: Int, newItemPosition: Int): Boolean {
+            return oldList[oldItemPosition].timestamp == newList[newItemPosition].timestamp
+        }
+
+        override fun areContentsTheSame(oldItemPosition: Int, newItemPosition: Int): Boolean {
+            return oldList[oldItemPosition] == newList[newItemPosition]
+        }
     }
 }

@@ -1,0 +1,4 @@
+- `[x]` Update `DataManager.kt` with `SharedFlow` signal
+- `[x]` Update `MainActivity.kt` to listen for data changes
+- `[x]` Fix reactivity in `WorkspaceViewModel.kt`
+- `[ ]` Verify real-time updates

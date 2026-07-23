@@ -1,0 +1,3 @@
+- [x] Refine Workspace creation/detail transitions in `ProjectWorkspaceScreen.kt`
+- [x] Refine Workspace tab switching transitions in `ProjectWorkspaceScreen.kt`
+- [x] Verify smoothness on device/emulator

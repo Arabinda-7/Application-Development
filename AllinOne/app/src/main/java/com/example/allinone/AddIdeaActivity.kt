@@ -1,5 +1,6 @@
 package com.example.allinone
 
+import android.app.Dialog
 import android.content.Intent
 import android.content.res.ColorStateList
 import android.graphics.Color
@@ -46,6 +47,7 @@ class AddIdeaActivity : BaseActivity() {
     private lateinit var btnConvert: TextView
     private lateinit var btnConvertIcon: View
     private lateinit var tvCreatedAt: TextView
+    private lateinit var headerBgAccent: View
 
     private var currentPriority = 0
     private val tempGoals = mutableListOf<JournalEntry>()
@@ -56,8 +58,8 @@ class AddIdeaActivity : BaseActivity() {
         setContentView(R.layout.activity_add_idea)
 
         ideaIndex = intent.getIntExtra("IDEA_INDEX", -1)
-        if (ideaIndex != -1 && ideaIndex < DataManager.notes.size) {
-            existingIdea = DataManager.notes[ideaIndex]
+        if (ideaIndex != -1 && ideaIndex < DataManager.projects.size) {
+            existingIdea = DataManager.projects[ideaIndex]
         }
 
         currentEditingIdeaSubFeatures.clear()
@@ -66,6 +68,11 @@ class AddIdeaActivity : BaseActivity() {
         initViews()
         setupLogic()
         setupKeyboardHandling(findViewById(R.id.add_idea_root), findViewById(R.id.add_idea_content_container))
+    }
+
+    override fun onResume() {
+        super.onResume()
+        refreshSubFeatures()
     }
 
     private fun initViews() {
@@ -90,6 +97,7 @@ class AddIdeaActivity : BaseActivity() {
         btnConvert = findViewById(R.id.btn_convert_project)
         btnConvertIcon = findViewById(R.id.btn_convert_project_icon)
         tvCreatedAt = findViewById(R.id.tv_created_at)
+        headerBgAccent = findViewById(R.id.header_bg_accent)
     }
 
     private fun setupLogic() {
@@ -161,12 +169,13 @@ class AddIdeaActivity : BaseActivity() {
 
         btnAddSubfeature.setOnClickListener {
             val name = etNewSubfeature.text.toString().trim()
-            if (name.isNotEmpty()) {
-                val nextPos = if (currentEditingIdeaSubFeatures.isEmpty()) 1 else currentEditingIdeaSubFeatures.maxOf { it.position } + 1
-                currentEditingIdeaSubFeatures.add(ProjectFeature(name = name, position = nextPos))
-                etNewSubfeature.text.clear()
-                refreshSubFeatures()
-            }
+            val baseName = name.ifEmpty { "New Feature" }
+            val finalName = DataManager.getUniqueFeatureName(baseName, currentEditingIdeaSubFeatures)
+            
+            val nextPos = if (currentEditingIdeaSubFeatures.isEmpty()) 1 else currentEditingIdeaSubFeatures.maxOf { it.position } + 1
+            currentEditingIdeaSubFeatures.add(ProjectFeature(name = finalName, position = nextPos))
+            etNewSubfeature.text.clear()
+            refreshSubFeatures()
         }
 
         btnPriority.setOnClickListener {
@@ -174,8 +183,8 @@ class AddIdeaActivity : BaseActivity() {
             updatePriorityUI()
         }
 
-        btnConvert.setOnClickListener { convertToProject() }
-        btnConvertIcon.setOnClickListener { convertToProject() }
+        btnConvert.setOnClickListener { showConvertConfirmationDialog() }
+        btnConvertIcon.setOnClickListener { showConvertConfirmationDialog() }
 
         titleInput.addTextChangedListener(object : android.text.TextWatcher {
             override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {}
@@ -288,7 +297,7 @@ class AddIdeaActivity : BaseActivity() {
             layoutParams = LinearLayout.LayoutParams(s, s)
             setOnClickListener {
                 val intent = Intent(this@AddIdeaActivity, AddSubFeatureActivity::class.java).apply {
-                    putExtra("PROJECT_INDEX", DataManager.notes.indexOf(existingIdea))
+                    putExtra("PROJECT_INDEX", DataManager.projects.indexOf(existingIdea))
                     putExtra("SUB_FEATURE_ID", sub.id)
                     putExtra("IS_IDEA", true)
                 }
@@ -339,14 +348,14 @@ class AddIdeaActivity : BaseActivity() {
             popupWindow.dismiss()
         }
 
-        btnEdit.setOnClickListener {
-            popupWindow.dismiss()
-            val intent = Intent(this, AddSubFeatureActivity::class.java).apply {
-                putExtra("PROJECT_INDEX", DataManager.notes.indexOf(existingIdea))
-                putExtra("SUB_FEATURE_ID", sub.id)
+            btnEdit.setOnClickListener {
+                popupWindow.dismiss()
+                val intent = Intent(this, AddSubFeatureActivity::class.java).apply {
+                    putExtra("PROJECT_INDEX", DataManager.projects.indexOf(existingIdea))
+                    putExtra("SUB_FEATURE_ID", sub.id)
+                }
+                startActivity(intent)
             }
-            startActivity(intent)
-        }
 
         btnDelete.setOnClickListener {
             currentEditingIdeaSubFeatures.remove(sub)
@@ -362,12 +371,18 @@ class AddIdeaActivity : BaseActivity() {
 
     private fun updatePriorityUI() {
         val (text, color) = when(currentPriority) {
-            2 -> "HIGH" to Color.RED
+            2 -> "HIGH" to Color.parseColor("#FF5252")
             1 -> "MED" to Color.parseColor("#FFB800")
             else -> "LOW" to Color.parseColor("#2EC4B6")
         }
         btnPriority.text = text
         btnPriority.backgroundTintList = ColorStateList.valueOf(color)
+        headerBgAccent.backgroundTintList = ColorStateList.valueOf(color)
+        
+        // Update save button color if valid
+        if (btnSave.isEnabled) {
+            btnSave.setTextColor(color)
+        }
     }
 
     private fun validateInputs() {
@@ -375,8 +390,32 @@ class AddIdeaActivity : BaseActivity() {
         val isValid = title.isNotEmpty()
         btnSave.alpha = if (isValid) 1.0f else 0.3f
         btnSave.isEnabled = isValid
-        val themeColor = if (DataManager.projectAddThemeColor != -1) DataManager.projectAddThemeColor else Color.parseColor("#1A73E8")
-        if (isValid) btnSave.setTextColor(themeColor) else btnSave.setTextColor(Color.GRAY)
+        
+        val priorityColor = when(currentPriority) {
+            2 -> Color.parseColor("#FF5252")
+            1 -> Color.parseColor("#FFB800")
+            else -> Color.parseColor("#2EC4B6")
+        }
+        
+        if (isValid) btnSave.setTextColor(priorityColor) else btnSave.setTextColor(Color.GRAY)
+    }
+
+    private fun showConvertConfirmationDialog() {
+        val dialog = Dialog(this)
+        dialog.setContentView(R.layout.dialog_custom_confirm)
+        dialog.window?.setBackgroundDrawableResource(android.R.color.transparent)
+        dialog.window?.setLayout(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT)
+
+        val btnCancel = dialog.findViewById<TextView>(R.id.btn_confirm_cancel)
+        val btnAction = dialog.findViewById<TextView>(R.id.btn_confirm_action)
+
+        btnCancel.setOnClickListener { dialog.dismiss() }
+        btnAction.setOnClickListener {
+            dialog.dismiss()
+            convertToProject()
+        }
+
+        showDialogSafe(dialog)
     }
 
     private fun convertToProject() {
@@ -386,6 +425,7 @@ class AddIdeaActivity : BaseActivity() {
             idea.title = title
             idea.content = contentInput.text.toString()
             idea.category = "Project"
+            idea.isDualExist = false
             idea.status = "In Progress"
             idea.priority = currentPriority
             idea.subFeatures.clear()
@@ -393,8 +433,9 @@ class AddIdeaActivity : BaseActivity() {
             idea.ideaGoals.clear()
             idea.ideaGoals.addAll(tempGoals)
 
-            if (existingIdea == null) DataManager.notes.add(0, idea)
+            if (existingIdea == null) DataManager.projects.add(0, idea)
             DataManager.saveData(this)
+            currentEditingIdeaSubFeatures.clear()
             Toast.makeText(this, "Converted to Project Roadmap!", Toast.LENGTH_SHORT).show()
             finish()
         }
@@ -412,10 +453,16 @@ class AddIdeaActivity : BaseActivity() {
             idea.ideaGoals.clear()
             idea.ideaGoals.addAll(tempGoals)
 
-            if (existingIdea == null) DataManager.notes.add(0, idea)
+            if (existingIdea == null) DataManager.projects.add(0, idea)
             DataManager.saveData(this)
+            currentEditingIdeaSubFeatures.clear()
             finish()
         }
+    }
+
+    override fun onDestroy() {
+        super.onDestroy()
+        currentEditingIdeaSubFeatures.clear()
     }
 
     private fun Int.dpToPx(): Int = (this * resources.displayMetrics.density).toInt()

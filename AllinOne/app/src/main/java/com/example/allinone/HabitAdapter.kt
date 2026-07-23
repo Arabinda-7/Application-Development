@@ -30,6 +30,7 @@ class HabitAdapter(
     }
 
     private var isCompletedExpanded = true
+    private var isDayOffExpanded = true
     private var displayItems = mutableListOf<Any>()
     private var currentFilter = "All"
     private var selectedDayIndex = 6
@@ -67,9 +68,16 @@ class HabitAdapter(
         if (holder is HeaderViewHolder) {
             val headerText = displayItems[position] as String
             holder.title.text = headerText
-            holder.chevron.rotation = if (isCompletedExpanded) 180f else 0f
+            
+            val isExpanded = if (headerText.startsWith("Day Off")) isDayOffExpanded else isCompletedExpanded
+            holder.chevron.rotation = if (isExpanded) 180f else 0f
+            
             holder.itemView.setOnClickListener {
-                isCompletedExpanded = !isCompletedExpanded
+                if (headerText.startsWith("Day Off")) {
+                    isDayOffExpanded = !isDayOffExpanded
+                } else {
+                    isCompletedExpanded = !isCompletedExpanded
+                }
                 applyFilterAndSort()
             }
         } else if (holder is HabitViewHolder) {
@@ -93,6 +101,9 @@ class HabitAdapter(
             holder.habitCard.setCardBackgroundColor(android.graphics.Color.TRANSPARENT)
             holder.habitCard.strokeColor = themeColor
             holder.habitCard.strokeWidth = (1.5 * context.resources.displayMetrics.density).toInt()
+
+            // 4. Checkbox Tint (Always themed for border/fill)
+            holder.habitCompleted.backgroundTintList = android.content.res.ColorStateList.valueOf(themeColor)
 
             if (habit.iconResId != -1) {
                 holder.habitIcon.setImageResource(habit.iconResId)
@@ -131,27 +142,26 @@ class HabitAdapter(
                 if (isCompleted) {
                     holder.habitCompleted.isChecked = true
                     return@setOnClickListener
-                }
-                
-                if (holder.habitCompleted.isChecked) {
-                    if (selectedDateString == todayDateString) {
+                } else {
+                    // Marking logic
+                    if (holder.habitCompleted.isChecked) {
                         habit.isCompleted = true
                         habit.progress = habit.target
-                    }
-                    
-                    if (!habit.completedDates.contains(selectedDateString)) {
-                        habit.completedDates.add(selectedDateString)
-                        triggerCompletionEffects(context)
-                        DataManager.addActivity("Finished Ritual: ${habit.name}")
                         
-                        // Award XP
-                        if (DataManager.addXP(context, 10)) {
-                            android.widget.Toast.makeText(context, "LEVEL UP! You are now Level ${DataManager.userLevel}", android.widget.Toast.LENGTH_LONG).show()
+                        if (!habit.completedDates.contains(selectedDateString)) {
+                            habit.completedDates.add(selectedDateString)
+                            triggerCompletionEffects(context)
+                            DataManager.addActivity("Finished Ritual: ${habit.name}")
+                            
+                            // Award XP
+                            if (DataManager.addXP(context, 10)) {
+                                android.widget.Toast.makeText(context, "LEVEL UP! You are now Level ${DataManager.userLevel}", android.widget.Toast.LENGTH_LONG).show()
+                            }
                         }
+                        
+                        applyFilterAndSort()
+                        onProgressChanged()
                     }
-                    
-                    applyFilterAndSort()
-                    onProgressChanged()
                 }
             }
         }
@@ -167,6 +177,9 @@ class HabitAdapter(
         popupWindow.elevation = 10f
 
         val dayOffBtn = menuView.findViewById<View>(R.id.menu_take_day_off)
+        val actionText = menuView.findViewById<TextView>(R.id.tv_action_text)
+        actionText.text = "TAKE DAY OFF"
+        
         dayOffBtn.visibility = if (isCompleted || selectedDateString != todayDateString) View.GONE else View.VISIBLE
         dayOffBtn.setOnClickListener {
             habit.isCompleted = true
@@ -188,7 +201,7 @@ class HabitAdapter(
         menuView.findViewById<View>(R.id.menu_edit).setOnClickListener {
             popupWindow.dismiss()
             val intent = Intent(context, AddHabitActivity::class.java).apply {
-                putExtra("HABIT_INDEX", allHabits.indexOf(habit))
+                putExtra("HABIT_ID", habit.timestamp)
             }
             context.startActivity(intent)
         }
@@ -254,14 +267,24 @@ class HabitAdapter(
         }
 
         val activeHabits = sorted.filter { !isHabitCompletedOnSelectedDate(it) }
-        val completedHabits = sorted.filter { isHabitCompletedOnSelectedDate(it) }
+        val allCompleted = sorted.filter { isHabitCompletedOnSelectedDate(it) }
+        
+        val dayOffHabits = allCompleted.filter { it.isDayOff }
+        val strictlyCompleted = allCompleted.filter { !it.isDayOff }
 
         displayItems.addAll(activeHabits)
 
-        if (showCompleted && completedHabits.isNotEmpty()) {
-            displayItems.add("Completed ${completedHabits.size}")
+        if (dayOffHabits.isNotEmpty()) {
+            displayItems.add("Day Off ${dayOffHabits.size}")
+            if (isDayOffExpanded) {
+                displayItems.addAll(dayOffHabits)
+            }
+        }
+
+        if (showCompleted && strictlyCompleted.isNotEmpty()) {
+            displayItems.add("Completed ${strictlyCompleted.size}")
             if (isCompletedExpanded) {
-                displayItems.addAll(completedHabits)
+                displayItems.addAll(strictlyCompleted)
             }
         }
 

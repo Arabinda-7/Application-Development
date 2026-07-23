@@ -1,0 +1,5 @@
+- `[x]` Update `BaseActivity.kt` to decouple theme from `isSystemAppearanceEnabled`
+- `[x]` Update `UIUtils.kt` to decouple theme from `isSystemAppearanceEnabled`
+- `[x]` Update `SettingsActivity.kt` to show theme settings regardless of `isSystemAppearanceEnabled`
+- `[x]` Update `DataManager.kt` to ensure default is dark and clarify comments
+- `[x]` Verify changes manually (conceptually since I can't run the app)

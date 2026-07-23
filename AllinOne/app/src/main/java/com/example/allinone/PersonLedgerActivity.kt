@@ -10,6 +10,7 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.*
 import androidx.appcompat.app.AppCompatActivity
+import androidx.core.content.ContextCompat
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.google.android.material.floatingactionbutton.FloatingActionButton
@@ -94,6 +95,49 @@ class PersonLedgerActivity : BaseActivity() {
         findViewById<FloatingActionButton>(R.id.btn_add_to_person).setOnClickListener {
             showAddLedgerDialog(null)
         }
+        applySectionTheme()
+        updateDynamicBackground()
+    }
+
+    override fun onResume() {
+        super.onResume()
+        updateEntries()
+        updateSummary()
+        applySectionTheme()
+        updateDynamicBackground()
+    }
+
+    private fun applySectionTheme() {
+        val financeColor = if (DataManager.globalFinanceColor != -1) DataManager.globalFinanceColor else Color.parseColor("#E91E63")
+        val darkenedFabColor = UIUtils.darkenColor(financeColor, 0.5f)
+        
+        findViewById<FloatingActionButton>(R.id.btn_add_to_person).backgroundTintList = 
+            android.content.res.ColorStateList.valueOf(darkenedFabColor)
+            
+        findViewById<com.google.android.material.card.MaterialCardView>(R.id.card_person_owe).strokeColor = Color.parseColor("#FF5252")
+        findViewById<com.google.android.material.card.MaterialCardView>(R.id.card_person_owed).strokeColor = Color.parseColor("#4CAF50")
+    }
+
+    private fun updateDynamicBackground() {
+        val auraView = findViewById<View>(R.id.person_ledger_aura_background) ?: return
+        val financeColor = if (DataManager.globalFinanceColor != -1) DataManager.globalFinanceColor else Color.parseColor("#E91E63")
+        
+        val gradient = android.graphics.drawable.GradientDrawable(
+            android.graphics.drawable.GradientDrawable.Orientation.TOP_BOTTOM,
+            intArrayOf(
+                adjustAlpha(financeColor, 0.4f),
+                Color.BLACK
+            )
+        )
+        auraView.background = gradient
+    }
+
+    private fun adjustAlpha(color: Int, factor: Float): Int {
+        val alpha = Math.round(Color.alpha(color) * factor)
+        val red = Color.red(color)
+        val green = Color.green(color)
+        val blue = Color.blue(color)
+        return Color.argb(alpha, red, green, blue)
     }
 
     private fun showPersonSettingsMenu(anchor: View) {

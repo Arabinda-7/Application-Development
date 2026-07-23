@@ -39,11 +39,38 @@ class NotesActivity : BaseActivity() {
     private var isDeleteMode = false
     private lateinit var gestureDetector: android.view.GestureDetector
 
+    private lateinit var navNotes: View
+    private lateinit var navQuestions: View
+    private lateinit var navDaily: View
+    private lateinit var navStories: View
+    private lateinit var ivNotesIcon: ImageView
+    private lateinit var tvNotesLabel: TextView
+    private lateinit var ivQuestionsIcon: ImageView
+    private lateinit var tvQuestionsLabel: TextView
+    private lateinit var ivDailyIcon: ImageView
+    private lateinit var tvDailyLabel: TextView
+    private lateinit var ivStoriesIcon: ImageView
+    private lateinit var tvStoriesLabel: TextView
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_notes)
 
         applyAutoCleanup()
+
+        navNotes = findViewById(R.id.nav_notes)
+        navQuestions = findViewById(R.id.nav_questions)
+        navDaily = findViewById(R.id.nav_daily)
+        navStories = findViewById(R.id.nav_stories)
+        
+        ivNotesIcon = findViewById(R.id.iv_notes_icon)
+        tvNotesLabel = findViewById(R.id.tv_notes_label)
+        ivQuestionsIcon = findViewById(R.id.iv_questions_icon)
+        tvQuestionsLabel = findViewById(R.id.tv_questions_label)
+        ivDailyIcon = findViewById(R.id.iv_daily_icon)
+        tvDailyLabel = findViewById(R.id.tv_daily_label)
+        ivStoriesIcon = findViewById(R.id.iv_stories_icon)
+        tvStoriesLabel = findViewById(R.id.tv_stories_label)
 
         val notesList = findViewById<RecyclerView>(R.id.notes_list)
         notesList.layoutManager = LinearLayoutManager(this)
@@ -63,6 +90,7 @@ class NotesActivity : BaseActivity() {
         setupGestureDetector()
         setupKeyboardHandling(findViewById(R.id.notes_root_layout), findViewById(R.id.notes_content_container))
         updateDynamicBackground()
+        applySectionTheme()
 
         findViewById<View>(R.id.btn_notes_settings).setOnClickListener {
             if (isDeleteMode) {
@@ -74,9 +102,6 @@ class NotesActivity : BaseActivity() {
         }
 
         val btnCreate = findViewById<com.google.android.material.floatingactionbutton.FloatingActionButton>(R.id.btn_create_new_note)
-        if (DataManager.noteAddThemeColor != -1) {
-            btnCreate.backgroundTintList = android.content.res.ColorStateList.valueOf(DataManager.noteAddThemeColor)
-        }
         btnCreate.setOnClickListener {
             val intent = Intent(this, AddNoteActivity::class.java).apply {
                 putExtra("CATEGORY", currentCategory)
@@ -84,7 +109,7 @@ class NotesActivity : BaseActivity() {
             startActivity(intent)
         }
 
-        if (intent.getBooleanExtra("SHOW_ADD_DIALOG", false)) {
+        if (intent.getBooleanExtra("QUICK_ADD", false)) {
             val intentAdd = Intent(this, AddNoteActivity::class.java).apply {
                 putExtra("CATEGORY", currentCategory)
             }
@@ -94,11 +119,22 @@ class NotesActivity : BaseActivity() {
 
     override fun onResume() {
         super.onResume()
+        setupBottomNavigation()
         updateDisplayList()
         if (::noteAdapter.isInitialized) {
             noteAdapter.updateNotes(displayNotes)
         }
         updateDynamicBackground()
+        applySectionTheme()
+    }
+
+    private fun applySectionTheme() {
+        val noteColor = if (DataManager.globalNoteColor != -1) DataManager.globalNoteColor else Color.parseColor("#3A86F0")
+        val darkenedFabColor = UIUtils.darkenColor(noteColor, 0.5f)
+        findViewById<com.google.android.material.floatingactionbutton.FloatingActionButton>(R.id.btn_create_new_note).backgroundTintList = 
+            android.content.res.ColorStateList.valueOf(darkenedFabColor)
+        
+        updateNavUI()
     }
 
     private fun updateDynamicBackground() {
@@ -136,7 +172,7 @@ class NotesActivity : BaseActivity() {
         val menuView = inflater.inflate(R.layout.layout_activity_settings_menu, null)
         val popupWindow = PopupWindow(menuView, ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT, true)
         popupWindow.elevation = 10f
-        
+
         // Repurpose toggle_completed for SHOW/HIDE HIDDEN
         val btnToggleHidden = menuView.findViewById<View>(R.id.menu_toggle_completed)
         val tvToggleHidden = menuView.findViewById<TextView>(R.id.tv_toggle_completed)
@@ -150,7 +186,6 @@ class NotesActivity : BaseActivity() {
             DataManager.noteShowHidden = !DataManager.noteShowHidden
             DataManager.saveData(this)
             updateDisplayList()
-            noteAdapter.updateNotes(displayNotes)
             popupWindow.dismiss()
         }
 
@@ -177,11 +212,30 @@ class NotesActivity : BaseActivity() {
     }
 
     private fun setupBottomNavigation() {
-        val navNotes = findViewById<View>(R.id.nav_notes)
-        val navQuestions = findViewById<View>(R.id.nav_questions)
-        val navDaily = findViewById<View>(R.id.nav_daily)
-        val navStories = findViewById<View>(R.id.nav_stories)
-        val footer = findViewById<View>(R.id.bottom_navigation_notes)
+        val footer = findViewById<LinearLayout>(R.id.bottom_navigation_notes)
+
+        // 1. Remove all to prepare for re-ordering
+        footer.removeAllViews()
+
+        // 2. Add back in the order specified by DataManager.noteVisibleSections
+        DataManager.noteVisibleSections.forEach { category ->
+            val viewToAdd = when (category) {
+                "Notes" -> navNotes
+                "Questions" -> navQuestions
+                "Daily" -> navDaily
+                "Stories" -> navStories
+                else -> null
+            }
+            viewToAdd?.let {
+                if (it.parent != null) (it.parent as ViewGroup).removeView(it)
+                footer.addView(it)
+            }
+        }
+
+        // 3. Auto-switch to default if current is hidden or if we just returned from settings
+        if (!DataManager.noteVisibleSections.contains(currentCategory)) {
+            currentCategory = DataManager.noteDefaultCategory
+        }
 
         navNotes.visibility = if (DataManager.noteVisibleSections.contains("Notes")) View.VISIBLE else View.GONE
         navQuestions.visibility = if (DataManager.noteVisibleSections.contains("Questions")) View.VISIBLE else View.GONE
@@ -210,9 +264,33 @@ class NotesActivity : BaseActivity() {
     }
 
     private fun switchCategory(category: String) {
+        if (category == currentCategory && DataManager.noteVisibleSections.size <= 1) return
+
+        val root = findViewById<ViewGroup>(R.id.notes_content_container)
+        androidx.transition.TransitionManager.beginDelayedTransition(root, androidx.transition.AutoTransition())
+        
+        val sections = DataManager.noteVisibleSections.toMutableList()
+        
+        if (category == currentCategory) {
+            // Double Click: Reset to original order (while keeping only visible ones)
+            val originalOrder = listOf("Notes", "Questions", "Daily", "Stories")
+            val resetOrder = originalOrder.filter { sections.contains(it) }
+            
+            DataManager.noteVisibleSections.clear()
+            DataManager.noteVisibleSections.addAll(resetOrder)
+        } else {
+            // Reorder: Move current category to the first position
+            if (sections.contains(category)) {
+                sections.remove(category)
+                sections.add(0, category)
+                DataManager.noteVisibleSections.clear()
+                DataManager.noteVisibleSections.addAll(sections)
+            }
+        }
+        
         currentCategory = category
+        setupBottomNavigation() // Redraw footer with new order
         updateDisplayList()
-        noteAdapter.updateNotes(displayNotes)
         updateNavUI()
     }
 
@@ -243,10 +321,10 @@ class NotesActivity : BaseActivity() {
 
     private fun updateNavUI() {
         val navs = mapOf(
-            "Notes" to Pair(findViewById<ImageView>(R.id.iv_notes_icon), findViewById<TextView>(R.id.tv_notes_label)),
-            "Questions" to Pair(findViewById<ImageView>(R.id.iv_questions_icon), findViewById<TextView>(R.id.tv_questions_label)),
-            "Daily" to Pair(findViewById<ImageView>(R.id.iv_daily_icon), findViewById<TextView>(R.id.tv_daily_label)),
-            "Stories" to Pair(findViewById<ImageView>(R.id.iv_stories_icon), findViewById<TextView>(R.id.tv_stories_label))
+            "Notes" to Pair(ivNotesIcon, tvNotesLabel),
+            "Questions" to Pair(ivQuestionsIcon, tvQuestionsLabel),
+            "Daily" to Pair(ivDailyIcon, tvDailyLabel),
+            "Stories" to Pair(ivStoriesIcon, tvStoriesLabel)
         )
 
         val activeColor = ContextCompat.getColor(this, R.color.chip_selected)
@@ -262,10 +340,16 @@ class NotesActivity : BaseActivity() {
     }
 
     private fun updateDisplayList() {
-        displayNotes.clear()
-        displayNotes.addAll(allNotes.filter { 
+        val filtered = allNotes.filter { 
             it.category == currentCategory && (DataManager.noteShowHidden || !it.isHidden) 
-        }.sortedByDescending { it.timestamp })
+        }.sortedByDescending { it.timestamp }
+        
+        displayNotes.clear()
+        displayNotes.addAll(filtered)
+        
+        if (::noteAdapter.isInitialized) {
+            noteAdapter.updateNotes(filtered)
+        }
     }
 
     private fun showAddNoteDialog() {
@@ -335,12 +419,13 @@ class NotesActivity : BaseActivity() {
             val title = titleInput.text.toString()
             val content = contentInput.text.toString()
             if (title.isNotEmpty()) {
-                allNotes.add(0, Note(title, content, color = selectedColor, category = currentCategory))
+                val newNote = Note(title, content, color = selectedColor, category = currentCategory)
+                DataManager.notes.add(0, newNote)
                 updateDisplayList()
                 noteAdapter.updateNotes(displayNotes)
                 DataManager.saveData(this)
                 
-                if (intent.getBooleanExtra("SHOW_ADD_DIALOG", false)) {
+                if (intent.getBooleanExtra("QUICK_ADD", false)) {
                     finish()
                 } else {
                     dialog.dismiss()
@@ -411,10 +496,18 @@ class NotesActivity : BaseActivity() {
         }
 
         btnSave.setOnClickListener {
-            if (titleInput.text.toString().isNotEmpty()) {
-                note.title = titleInput.text.toString()
-                note.content = contentInput.text.toString()
-                note.color = selectedColor
+            val title = titleInput.text.toString()
+            val content = contentInput.text.toString()
+            if (title.isNotEmpty()) {
+                val index = DataManager.notes.indexOf(note)
+                if (index != -1) {
+                    val updatedNote = note.copy(
+                        title = title,
+                        content = content,
+                        color = selectedColor
+                    )
+                    DataManager.notes[index] = updatedNote
+                }
                 updateDisplayList()
                 noteAdapter.updateNotes(displayNotes)
                 DataManager.saveData(this)
@@ -477,50 +570,6 @@ class NotesActivity : BaseActivity() {
         }, calendar.get(Calendar.HOUR_OF_DAY), calendar.get(Calendar.MINUTE), false).show()
     }
 
-    private fun showManageSectionsDialog(type: String) {
-        val dialog = Dialog(this)
-        dialog.setContentView(R.layout.dialog_manage_sections)
-        dialog.window?.setBackgroundDrawableResource(android.R.color.transparent)
-        dialog.window?.setLayout(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT)
-
-        val container = dialog.findViewById<LinearLayout>(R.id.container_section_switches)
-        val btnSave = dialog.findViewById<View>(R.id.btn_save_sections)
-        
-        val options = listOf("Notes", "Questions", "Daily", "Stories")
-        val tempSelection = DataManager.noteVisibleSections.toMutableList()
-
-        options.forEach { option ->
-            val switch = SwitchCompat(this).apply {
-                text = option
-                setTextColor(Color.WHITE)
-                textSize = 16f
-                isChecked = tempSelection.contains(option)
-                setPadding(0, 24, 0, 24)
-                setOnCheckedChangeListener { _, isChecked ->
-                    if (isChecked) {
-                        if (!tempSelection.contains(option)) tempSelection.add(option)
-                    } else {
-                        if (tempSelection.size > 1) {
-                            tempSelection.remove(option)
-                        } else {
-                            this.isChecked = true
-                            android.widget.Toast.makeText(this@NotesActivity, "At least one section must be visible", android.widget.Toast.LENGTH_SHORT).show()
-                        }
-                    }
-                }
-            }
-            container.addView(switch)
-        }
-
-        btnSave.setOnClickListener {
-            DataManager.noteVisibleSections.clear()
-            DataManager.noteVisibleSections.addAll(tempSelection)
-            DataManager.saveData(this)
-            setupBottomNavigation() 
-            dialog.dismiss()
-        }
-        showDialogSafe(dialog)
-    }
 
     private fun applyAutoCleanup() {
         val days = DataManager.noteAutoCleanupDays

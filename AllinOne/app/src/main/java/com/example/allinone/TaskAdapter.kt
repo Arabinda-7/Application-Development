@@ -9,6 +9,7 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.*
 import androidx.core.content.ContextCompat
+import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.RecyclerView
 import com.google.android.material.card.MaterialCardView
 import java.util.*
@@ -80,6 +81,13 @@ class TaskAdapter(
             }
             holder.priorityIndicator.setBackgroundColor(priorityColor)
             
+            // Dynamic Card Styling
+            val taskColor = if (DataManager.globalTaskColor != -1) DataManager.globalTaskColor else ContextCompat.getColor(context, R.color.primary_blue)
+            holder.taskCard.setCardBackgroundColor(Color.TRANSPARENT)
+            holder.taskCard.strokeColor = taskColor
+            holder.taskCard.strokeWidth = (1.5 * context.resources.displayMetrics.density).toInt()
+            holder.taskCompleted.backgroundTintList = android.content.res.ColorStateList.valueOf(taskColor)
+            
             // Metadata
             holder.tvCategory.text = task.category ?: "General"
             
@@ -140,13 +148,15 @@ class TaskAdapter(
                     }
                     context.startActivity(intent)
                 } else {
-                    // Toggle expansion
-                    if (expandedTasks.contains(task)) {
-                        expandedTasks.remove(task)
-                    } else {
-                        expandedTasks.add(task)
+                    // Toggle expansion only if subtasks exist
+                    if (task.subtasks.isNotEmpty()) {
+                        if (expandedTasks.contains(task)) {
+                            expandedTasks.remove(task)
+                        } else {
+                            expandedTasks.add(task)
+                        }
+                        notifyItemChanged(position)
                     }
-                    notifyItemChanged(position)
                 }
             }
 
@@ -190,7 +200,11 @@ class TaskAdapter(
 
         menuView.findViewById<View>(R.id.menu_edit).setOnClickListener {
             popupWindow.dismiss()
-            (context as? TaskActivity)?.showAddTaskDialog(task)
+            val intent = Intent(context, AddTaskActivity::class.java).apply {
+                putExtra("TASK_INDEX", allTasks.indexOf(task))
+                putExtra("SECTION", currentSection)
+            }
+            context.startActivity(intent)
         }
 
         menuView.findViewById<View>(R.id.menu_delete).setOnClickListener {
@@ -234,7 +248,7 @@ class TaskAdapter(
     }
 
     fun updateDisplayList() {
-        displayItems.clear()
+        val newList = mutableListOf<Any>()
         
         val filtered = allTasks.filter { task ->
             val matchesCategory = if (currentCategory == "All") true else task.category == currentCategory
@@ -252,15 +266,21 @@ class TaskAdapter(
 
         val completedTasks = if (showCompleted) filtered.filter { it.isCompleted }.sortedByDescending { it.timestamp } else emptyList()
 
-        displayItems.addAll(activeTasks)
+        newList.addAll(activeTasks)
         
         if (completedTasks.isNotEmpty()) {
-            displayItems.add("Completed ${completedTasks.size}")
+            newList.add("Completed ${completedTasks.size}")
             if (isCompletedExpanded) {
-                displayItems.addAll(completedTasks)
+                newList.addAll(completedTasks)
             }
         }
-        notifyDataSetChanged()
+
+        val diffCallback = TaskDiffCallback(displayItems, newList)
+        val diffResult = DiffUtil.calculateDiff(diffCallback)
+        
+        displayItems.clear()
+        displayItems.addAll(newList)
+        diffResult.dispatchUpdatesTo(this)
     }
 
     fun setShowCompleted(show: Boolean) {
@@ -310,7 +330,9 @@ class TaskAdapter(
             ctView.setTextColor(Color.WHITE)
             ctView.textSize = 14f
             ctView.isChecked = subtask.isCompleted
-            ctView.setCheckMarkTintList(android.content.res.ColorStateList.valueOf(Color.WHITE))
+            
+            val taskColor = if (DataManager.globalTaskColor != -1) DataManager.globalTaskColor else ContextCompat.getColor(context, R.color.primary_blue)
+            ctView.setCheckMarkTintList(android.content.res.ColorStateList.valueOf(taskColor))
             ctView.setPadding(0, 16, 0, 16)
             
             ctView.setOnClickListener {
@@ -340,5 +362,26 @@ class TaskAdapter(
     class HeaderViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
         val title: TextView = itemView.findViewById(R.id.tv_header_title)
         val chevron: ImageView = itemView.findViewById(R.id.iv_header_chevron)
+    }
+
+    private class TaskDiffCallback(private val oldList: List<Any>, private val newList: List<Any>) : DiffUtil.Callback() {
+        override fun getOldListSize(): Int = oldList.size
+        override fun getNewListSize(): Int = newList.size
+
+        override fun areItemsTheSame(oldItemPosition: Int, newItemPosition: Int): Boolean {
+            val oldItem = oldList[oldItemPosition]
+            val newItem = newList[newItemPosition]
+            return if (oldItem is Task && newItem is Task) {
+                oldItem.timestamp == newItem.timestamp
+            } else if (oldItem is String && newItem is String) {
+                oldItem == newItem
+            } else false
+        }
+
+        override fun areContentsTheSame(oldItemPosition: Int, newItemPosition: Int): Boolean {
+            val oldItem = oldList[oldItemPosition]
+            val newItem = newList[newItemPosition]
+            return oldItem == newItem
+        }
     }
 }

@@ -1,0 +1,5 @@
+- [x] Fix Habit checkbox unmarking (disable clicking a completed habit checkbox)
+- [x] Remove checkbox from Workout section
+    - [x] Update `workout_list_item.xml`
+    - [x] Update `WorkoutAdapter.kt`
+- [x] Verify changes with a build

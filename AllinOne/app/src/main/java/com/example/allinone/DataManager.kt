@@ -2,16 +2,27 @@ package com.example.allinone
 
 import android.content.Context
 import android.content.SharedPreferences
+import com.example.allinone.workspace.data.WorkspaceDatabase
 import com.google.gson.Gson
 import com.google.gson.reflect.TypeToken
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.flow.MutableSharedFlow
+import kotlinx.coroutines.withContext
 import java.text.SimpleDateFormat
 import java.util.*
 
 object DataManager {
+    val dataChangeSignal = MutableSharedFlow<Unit>(extraBufferCapacity = 1)
+
+    fun notifyDataChanged() {
+        dataChangeSignal.tryEmit(Unit)
+    }
+
     var habits = mutableListOf<Habit>()
     var workouts = mutableListOf<Workout>()
     var tasks = mutableListOf<Task>()
     var notes = mutableListOf<Note>()
+    var projects = mutableListOf<Note>()
     var transactions = mutableListOf<Transaction>()
     var ledgerEntries = mutableListOf<LedgerEntry>()
     var personalLedgers = mutableListOf<PersonalLedger>()
@@ -71,7 +82,7 @@ object DataManager {
     var projectSynergySync: Boolean = false
     var projectDeadlineAlerts: Boolean = true
     var projectAnalyticsEnabled: Boolean = false
-    var projectCustomTags = mutableListOf("UI", "LOGIC", "BUG")
+    var projectCustomTags = mutableListOf("TASKS", "NOTES", "FEATURES", "BUGS", "RESOURCES")
     var projectSortCompletedToBottom: Boolean = true
     var projectActiveExpanded: Boolean = true
     var projectCompletedExpanded: Boolean = false
@@ -82,10 +93,144 @@ object DataManager {
     var projectIdeasEnabled: Boolean = true
     var projectRoadmapsEnabled: Boolean = true
     var isAppLockEnabled: Boolean = false
+    var isAppUnlocked: Boolean = false // Session-based lock state
     var isOledThemeEnabled: Boolean = false
     var isOnboardingCompleted: Boolean = false
     var appLockPin: String? = null
+    var appLockQuestion: String? = null
+    var appLockAnswer: String? = null
     var lastViewedNotificationDate: String = ""
+    var lastSummaryNotificationDate: String = ""
+    var workspaceTodayAgenda = mutableMapOf<String, List<AgendaItem>>()
+
+    val predefinedJourneys = listOf(
+        Journey(
+            title = "Energy-Boosting Morning Routine",
+            description = "Circadian rhythm alignment and mental clarity through a structured start.",
+            category = "HABIT",
+            bannerRes = R.drawable.ic_habit_tracker,
+            keyResults = listOf(
+                JourneyResult("Morning Vitality", "🌅"),
+                JourneyResult("Mental Clarity", "🧠"),
+                JourneyResult("Consistent Wake-up", "⏰")
+            ),
+            expectations = listOf("Improved morning energy", "Better focus throughout the day"),
+            phases = listOf(
+                JourneyPhase("Day 1-7", "Adaptation", "Focus on showing up and building the identity."),
+                JourneyPhase("Day 8-21", "Building", "Resist the urge to quit. Lock in the routine."),
+                JourneyPhase("Day 22-30", "Consolidation", "Standardize results and make it permanent.")
+            ),
+            habitsToCreate = listOf("Drink Water", "Meditation", "Morning Stretch")
+        ),
+        Journey(
+            title = "Walk Everyday for Health",
+            description = "Sustainable low-impact cardiovascular maintenance for long-term longevity.",
+            category = "HABIT",
+            bannerRes = R.drawable.icons8_walking_100_3,
+            keyResults = listOf(
+                JourneyResult("Daily Movement", "🚶"),
+                JourneyResult("Lower Cortisol", "🍃"),
+                JourneyResult("Joint Mobility", "🦴")
+            ),
+            expectations = listOf("Increased daily step count", "Reduced stress levels"),
+            phases = listOf(
+                JourneyPhase("Day 1-7", "Light Pacing", "Start with 15-minute walks daily."),
+                JourneyPhase("Day 8-21", "Establishing Flow", "Increase to 30 minutes. Find your favorite routes."),
+                JourneyPhase("Day 22-30", "Lifestyle Lock", "Walking becomes your default mode of transport.")
+            ),
+            habitsToCreate = listOf("30 Min Walk")
+        ),
+        Journey(
+            title = "Fasting for Metabolic Health",
+            description = "Intermittent fasting (16:8) for insulin sensitivity and metabolic flexibility.",
+            category = "HABIT",
+            bannerRes = R.drawable.ic_habit_tracker,
+            keyResults = listOf(
+                JourneyResult("Insulin Sensitivity", "🧪"),
+                JourneyResult("Fat Loss", "⚖️"),
+                JourneyResult("Cellular Cleaning", "🧹")
+            ),
+            expectations = listOf("Stable energy levels", "Improved body composition"),
+            phases = listOf(
+                JourneyPhase("Day 1-7", "The 12:12 Base", "Start with a 12-hour window to adapt."),
+                JourneyPhase("Day 8-21", "The 16:8 Shift", "Push to the standard intermittent fasting window."),
+                JourneyPhase("Day 22-30", "Deep Autophagy", "Consolidate the habit for long-term health.")
+            ),
+            habitsToCreate = listOf("Fasting Window")
+        ),
+        Journey(
+            title = "Self Confidence Booster",
+            description = "Rebuild your inner narrative through cognitive techniques and social proactive behavior.",
+            category = "HABIT",
+            bannerRes = R.drawable.icons8_idea_100,
+            keyResults = listOf(
+                JourneyResult("Positive Narrative", "🗣️"),
+                JourneyResult("Social Ease", "🤝"),
+                JourneyResult("Inner Strength", "🛡️")
+            ),
+            expectations = listOf("Higher self-regard", "Reduced social anxiety"),
+            phases = listOf(
+                JourneyPhase("Day 1-7", "Internal Audit", "Identify negative self-talk patterns."),
+                JourneyPhase("Day 8-21", "Social Exposure", "Small reach-outs to build social momentum."),
+                JourneyPhase("Day 22-30", "The New Identity", "Embody the confident version of yourself.")
+            ),
+            habitsToCreate = listOf("Daily Affirmation", "Social Reach-out")
+        ),
+        Journey(
+            title = "Relief Stress in Tough Situations",
+            description = "Parasympathetic nervous system activation for emotional regulation.",
+            category = "HABIT",
+            bannerRes = R.drawable.ic_habit_tracker,
+            keyResults = listOf(
+                JourneyResult("Heart Rate Control", "🫀"),
+                JourneyResult("Calm Response", "🧘"),
+                JourneyResult("Emotional Resilience", "⚓")
+            ),
+            expectations = listOf("Reduced physiological stress response", "Better emotional control"),
+            phases = listOf(
+                JourneyPhase("Day 1-7", "Breath Awareness", "Learn Box Breathing techniques."),
+                JourneyPhase("Day 8-21", "Trigger Mapping", "Apply breathing during mild stressors."),
+                JourneyPhase("Day 22-30", "Zen Mastery", "Maintain calm even in high-pressure scenarios.")
+            ),
+            habitsToCreate = listOf("Box Breathing", "Evening Wind-down")
+        ),
+        Journey(
+            title = "Increase Productivity at Work",
+            description = "Deep Work and time-blocking to reclaim your focus.",
+            category = "HABIT",
+            bannerRes = R.drawable.ic_task,
+            keyResults = listOf(
+                JourneyResult("Focus Recovery", "🎯"),
+                JourneyResult("Decision Efficiency", "⚡"),
+                JourneyResult("Time Freedom", "⏳")
+            ),
+            expectations = listOf("More high-value work completed", "Less evening fatigue"),
+            phases = listOf(
+                JourneyPhase("Day 1-7", "Noise Reduction", "Mute non-essential notifications."),
+                JourneyPhase("Day 8-21", "Deep Work Blocks", "Implement 90-minute focus sessions."),
+                JourneyPhase("Day 22-30", "The Flow State", "Work becomes a series of deliberate sprints.")
+            ),
+            habitsToCreate = listOf("Time Blocking", "Plan Tomorrow Tonight")
+        ),
+        Journey(
+            title = "Keep Fit at the Office",
+            description = "Posture correction and metabolic activation during long work hours.",
+            category = "WORKOUT",
+            bannerRes = R.drawable.ic_fitness,
+            keyResults = listOf(
+                JourneyResult("Back Health", "🦴"),
+                JourneyResult("Blood Flow", "🩸"),
+                JourneyResult("Posture Alignment", "📐")
+            ),
+            expectations = listOf("Reduced sitting fatigue", "Better posture"),
+            phases = listOf(
+                JourneyPhase("Day 1-7", "The 5-Min Reset", "Brief stretches every hour."),
+                JourneyPhase("Day 8-21", "Desk Drills", "Adding air squats and desk pushups."),
+                JourneyPhase("Day 22-30", "Active Professional", "Movement is integrated into your workday.")
+            ),
+            workoutsToCreate = listOf("Office Stretch Routine", "Hourly Micro-Workout")
+        )
+    )
 
     var userXP: Int = 0
     var userLevel: Int = 1
@@ -102,7 +247,7 @@ object DataManager {
     var homeDisplaySize: String = "S" // Options: XS, S, L
     var homeFocusSize: String = "M" // Options: S, M, L
     var fontSize: String = "S" // Options: XS, S, L
-    var isSystemAppearanceEnabled: Boolean = true
+    var isSystemAppearanceEnabled: Boolean = true // Syncs display and font size with system
 
     // Advanced Look & Feel
     var appThemeMode: String = "DARK" // LIGHT, DARK, OLED
@@ -111,6 +256,7 @@ object DataManager {
     var appBorderRadius: Int = 16 // 0 to 32 dp
     var appCardStyle: String = "GLASS" // GLASS, ELEVATED, FLAT
     var appShowShadows: Boolean = true
+    var startupLoadingTime: Int = 2000 // default 2 seconds (1000 to 5000 ms)
 
     // Home Page Section Visibility
     var showHabitSection: Boolean = true
@@ -162,6 +308,7 @@ object DataManager {
     private const val KEY_WORKOUTS = "workouts_data"
     private const val KEY_TASKS = "tasks_data"
     private const val KEY_NOTES = "notes_data"
+    private const val KEY_PROJECTS = "projects_data"
     private const val KEY_TRANSACTIONS = "transactions_data"
     private const val KEY_LEDGER = "ledger_data"
     private const val KEY_PERSONAL_LEDGER = "personal_ledger_data"
@@ -252,6 +399,7 @@ object DataManager {
     private const val KEY_GLOBAL_PROJECT_ICON = "global_project_icon"
     private const val KEY_GLOBAL_NOTE_ICON = "global_note_icon"
     private const val KEY_GLOBAL_FINANCE_ICON = "global_finance_icon"
+    private const val KEY_STARTUP_LOADING_TIME = "startup_loading_time"
 
     private const val KEY_PROJ_TEMPLATES = "project_templates_data"
     private const val KEY_PROJECT_AUTO_SYNC = "project_auto_task_sync"
@@ -286,6 +434,7 @@ object DataManager {
             putString(KEY_WORKOUTS, gson.toJson(workouts))
             putString(KEY_TASKS, gson.toJson(tasks))
             putString(KEY_NOTES, gson.toJson(notes))
+            putString(KEY_PROJECTS, gson.toJson(projects))
             putString(KEY_TRANSACTIONS, gson.toJson(transactions))
             putString(KEY_LEDGER, gson.toJson(ledgerEntries))
             putString(KEY_PERSONAL_LEDGER, gson.toJson(personalLedgers))
@@ -330,6 +479,8 @@ object DataManager {
             putBoolean(KEY_PROJ_IDEAS_ENABLED, projectIdeasEnabled)
             putBoolean(KEY_APP_LOCK, isAppLockEnabled)
             putString(KEY_APP_LOCK_PIN, appLockPin)
+            putString("app_lock_question", appLockQuestion)
+            putString("app_lock_answer", appLockAnswer)
             putBoolean(KEY_OLED_THEME, isOledThemeEnabled)
             putBoolean(KEY_ONBOARDING_COMPLETED, isOnboardingCompleted)
             putString(KEY_RECENT_ACT, gson.toJson(recentActivities))
@@ -346,6 +497,7 @@ object DataManager {
             putInt("app_border_radius", appBorderRadius)
             putString("app_card_style", appCardStyle)
             putBoolean("app_show_shadows", appShowShadows)
+            putInt(KEY_STARTUP_LOADING_TIME, startupLoadingTime)
             putInt(KEY_USER_XP, userXP)
             putInt(KEY_USER_LEVEL, userLevel)
 
@@ -402,6 +554,7 @@ object DataManager {
             putBoolean(KEY_WORKOUT_SHOW_COMPLETED, workoutShowCompleted)
             apply()
         }
+        notifyDataChanged()
     }
 
     fun loadData(context: Context) {
@@ -411,7 +564,9 @@ object DataManager {
         try {
             prefs.getString(KEY_HABITS, null)?.let {
                 val type = object : TypeToken<MutableList<Habit>>() {}.type
-                habits = gson.fromJson(it, type) ?: mutableListOf()
+                val loadedHabits: MutableList<Habit> = gson.fromJson(it, type) ?: mutableListOf()
+                habits.clear()
+                habits.addAll(loadedHabits)
                 habits.forEach { habit ->
                     habit.isExpanded = false
                     if (habit.completedDates == null) habit.completedDates = mutableListOf()
@@ -424,7 +579,9 @@ object DataManager {
         try {
             prefs.getString(KEY_WORKOUTS, null)?.let {
                 val type = object : TypeToken<MutableList<Workout>>() {}.type
-                workouts = gson.fromJson(it, type) ?: mutableListOf()
+                val loadedWorkouts: MutableList<Workout> = gson.fromJson(it, type) ?: mutableListOf()
+                workouts.clear()
+                workouts.addAll(loadedWorkouts)
                 workouts.forEach { workout ->
                     workout.isExpanded = false
                     if (workout.completedDates == null) workout.completedDates = mutableListOf()
@@ -439,8 +596,9 @@ object DataManager {
         try {
             prefs.getString(KEY_TASKS, null)?.let {
                 val type = object : TypeToken<MutableList<Task>>() {}.type
-                tasks = gson.fromJson(it, type) ?: mutableListOf()
-                tasks = tasks.map { oldTask ->
+                val loadedTasks: MutableList<Task> = gson.fromJson(it, type) ?: mutableListOf()
+                tasks.clear()
+                tasks.addAll(loadedTasks.map { oldTask ->
                     if (oldTask.subtasks == null || oldTask.category == null) {
                         oldTask.copy(
                             subtasks = oldTask.subtasks ?: mutableListOf(),
@@ -448,14 +606,16 @@ object DataManager {
                             section = oldTask.section ?: "Tasks"
                         )
                     } else oldTask
-                }.toMutableList()
+                })
             }
         } catch (e: Exception) { android.util.Log.e("DataManager", "Failed to load tasks", e) }
 
         try {
             prefs.getString(KEY_NOTES, null)?.let {
                 val type = object : TypeToken<MutableList<Note>>() {}.type
-                notes = gson.fromJson(it, type) ?: mutableListOf()
+                val loadedNotes: MutableList<Note> = gson.fromJson(it, type) ?: mutableListOf()
+                notes.clear()
+                notes.addAll(loadedNotes)
                 // Sanitize for new fields
                 notes.forEach { note ->
                     if (note.status == null) note.status = "Not Started"
@@ -467,9 +627,29 @@ object DataManager {
         } catch (e: Exception) { android.util.Log.e("DataManager", "Failed to load notes", e) }
 
         try {
+            prefs.getString(KEY_PROJECTS, null)?.let {
+                val type = object : TypeToken<MutableList<Note>>() {}.type
+                val loadedProjects: MutableList<Note> = gson.fromJson(it, type) ?: mutableListOf()
+                projects.clear()
+                projects.addAll(loadedProjects)
+                projects.forEach { sanitizeProjectNote(it) }
+            }
+            
+            // Migration: Move projects from notes to projects if first time
+            if (projects.isEmpty() && notes.any { it.category == "Project" || it.category == "ProjectIdea" }) {
+                val toMove = notes.filter { it.category == "Project" || it.category == "ProjectIdea" }
+                projects.addAll(toMove)
+                notes.removeAll(toMove)
+                saveData(context)
+            }
+        } catch (e: Exception) { android.util.Log.e("DataManager", "Failed to load projects", e) }
+
+        try {
             prefs.getString(KEY_TRANSACTIONS, null)?.let {
                 val type = object : TypeToken<MutableList<Transaction>>() {}.type
-                transactions = gson.fromJson(it, type) ?: mutableListOf()
+                val loadedTransactions: MutableList<Transaction> = gson.fromJson(it, type) ?: mutableListOf()
+                transactions.clear()
+                transactions.addAll(loadedTransactions)
             }
         } catch (e: Exception) { android.util.Log.e("DataManager", "Failed to load transactions", e) }
 
@@ -537,6 +717,9 @@ object DataManager {
                 taskVisibleSections = gson.fromJson(it, type) ?: mutableListOf("Tasks", "List")
             }
         } catch (e: Exception) {}
+        if (taskVisibleSections.isEmpty()) {
+            taskVisibleSections = mutableListOf("Tasks", "List")
+        }
 
         try {
             prefs.getString(KEY_FINANCE_CUSTOM_CATEGORIES, null)?.let {
@@ -570,6 +753,9 @@ object DataManager {
                 noteVisibleSections = gson.fromJson(it, type) ?: mutableListOf("Notes", "Questions", "Daily", "Stories")
             }
         } catch (e: Exception) {}
+        if (noteVisibleSections.isEmpty()) {
+            noteVisibleSections = mutableListOf("Notes", "Questions", "Daily", "Stories")
+        }
         noteDefaultCategory = prefs.getString(KEY_NOTE_DEFAULT_CAT, "Notes") ?: "Notes"
         try {
             prefs.getString(KEY_NOTE_TEMPLATES, null)?.let {
@@ -591,6 +777,8 @@ object DataManager {
         projectIdeasEnabled = prefs.getBoolean(KEY_PROJ_IDEAS_ENABLED, true)
         isAppLockEnabled = prefs.getBoolean(KEY_APP_LOCK, false)
         appLockPin = prefs.getString(KEY_APP_LOCK_PIN, null)
+        appLockQuestion = prefs.getString("app_lock_question", null)
+        appLockAnswer = prefs.getString("app_lock_answer", null)
         isOledThemeEnabled = prefs.getBoolean(KEY_OLED_THEME, false)
         isOnboardingCompleted = prefs.getBoolean(KEY_ONBOARDING_COMPLETED, false)
         userName = prefs.getString(KEY_USER_NAME, "Arabi") ?: "Arabi"
@@ -624,6 +812,7 @@ object DataManager {
         appBorderRadius = prefs.getInt("app_border_radius", 16)
         appCardStyle = prefs.getString("app_card_style", "GLASS") ?: "GLASS"
         appShowShadows = prefs.getBoolean("app_show_shadows", true)
+        startupLoadingTime = prefs.getInt(KEY_STARTUP_LOADING_TIME, 2000)
         userXP = prefs.getInt(KEY_USER_XP, 0)
         userLevel = prefs.getInt(KEY_USER_LEVEL, 1)
 
@@ -644,7 +833,7 @@ object DataManager {
         try {
             prefs.getString(KEY_PROJ_TAGS, null)?.let {
                 val type = object : TypeToken<MutableList<String>>() {}.type
-                projectCustomTags = gson.fromJson(it, type) ?: mutableListOf("UI", "LOGIC", "BUG")
+                projectCustomTags = gson.fromJson(it, type) ?: mutableListOf("TASKS", "NOTES", "FEATURES", "BUGS", "RESOURCES")
             }
         } catch (e: Exception) {}
 
@@ -792,33 +981,87 @@ object DataManager {
         }
     }
 
-    fun exportData(): String {
+    suspend fun exportData(context: Context): String = withContext(Dispatchers.IO) {
+        val dao = WorkspaceDatabase.getDatabase(context).workspaceDao()
         val allData = AllAppData(
-            habits, workouts, tasks, notes, history, transactions,
+            habits, workouts, tasks, notes, projects, history, transactions,
             ledgerEntries, personalLedgers,
             monthlyBudget, monthlySavingsGoal,
-            monthlyBudgets, monthlySavingsGoals, dailyMoods
+            monthlyBudgets, monthlySavingsGoals, dailyMoods,
+            
+            // Workspace Data
+            workspaceProjects = dao.getAllProjectsSync(),
+            workspaceGoals = dao.getAllGoalsSync(),
+            workspaceTasks = dao.getAllTasksSync(),
+            workspaceFeatures = dao.getAllFeaturesSync(),
+            workspaceBugs = dao.getAllBugsSync(),
+            workspaceIdeas = dao.getAllIdeasSync(),
+            workspaceNotes = dao.getAllNotesSync(),
+            workspaceResources = dao.getAllResourcesSync(),
+            workspaceLogs = dao.getAllActivityLogsSync(),
+            workspaceRefs = dao.getAllNoteCrossReferencesSync()
         )
-        return Gson().toJson(allData)
+        Gson().toJson(allData)
     }
 
-    fun importData(context: Context, json: String): Boolean {
-        return try {
-            val allData = Gson().fromJson(json, AllAppData::class.java) ?: return false
+    suspend fun importData(context: Context, json: String): Boolean = withContext(Dispatchers.IO) {
+        try {
+            val allData = Gson().fromJson(json, AllAppData::class.java) ?: return@withContext false
             
             // Resilient Restoration with Null Safety
-            habits = allData.habits?.toMutableList() ?: mutableListOf()
-            workouts = allData.workouts?.toMutableList() ?: mutableListOf()
-            tasks = allData.tasks?.toMutableList() ?: mutableListOf()
-            notes = allData.notes?.toMutableList() ?: mutableListOf()
-            transactions = allData.transactions?.toMutableList() ?: mutableListOf()
-            history = allData.history?.toMutableMap() ?: mutableMapOf()
+            val loadedHabits = allData.habits?.toMutableList() ?: mutableListOf()
+            habits.clear()
+            habits.addAll(loadedHabits)
+
+            val loadedWorkouts = allData.workouts?.toMutableList() ?: mutableListOf()
+            workouts.clear()
+            workouts.addAll(loadedWorkouts)
+
+            val loadedTasks = allData.tasks?.toMutableList() ?: mutableListOf()
+            tasks.clear()
+            tasks.addAll(loadedTasks)
+
+            val loadedNotes = allData.notes?.toMutableList() ?: mutableListOf()
+            notes.clear()
+            notes.addAll(loadedNotes)
+
+            val loadedProjects = allData.projects?.toMutableList() ?: mutableListOf()
+            projects.clear()
+            projects.addAll(loadedProjects)
+
+            val loadedTransactions = allData.transactions?.toMutableList() ?: mutableListOf()
+            transactions.clear()
+            transactions.addAll(loadedTransactions)
+
+            allData.history?.let { 
+                history.clear()
+                history.putAll(it)
+            }
             
-            ledgerEntries = allData.ledgerEntries?.toMutableList() ?: mutableListOf()
-            personalLedgers = allData.personalLedgers?.toMutableList() ?: mutableListOf()
-            monthlyBudgets = allData.monthlyBudgets?.toMutableMap() ?: mutableMapOf()
-            monthlySavingsGoals = allData.monthlySavingsGoals?.toMutableMap() ?: mutableMapOf()
-            dailyMoods = allData.dailyMoods?.toMutableMap() ?: mutableMapOf()
+            allData.ledgerEntries?.let {
+                ledgerEntries.clear()
+                ledgerEntries.addAll(it)
+            }
+
+            allData.personalLedgers?.let {
+                personalLedgers.clear()
+                personalLedgers.addAll(it)
+            }
+
+            allData.monthlyBudgets?.let {
+                monthlyBudgets.clear()
+                monthlyBudgets.putAll(it)
+            }
+
+            allData.monthlySavingsGoals?.let {
+                monthlySavingsGoals.clear()
+                monthlySavingsGoals.putAll(it)
+            }
+
+            allData.dailyMoods?.let {
+                dailyMoods.clear()
+                dailyMoods.putAll(it)
+            }
             
             monthlyBudget = allData.monthlyBudget
             monthlySavingsGoal = allData.monthlySavingsGoal
@@ -849,6 +1092,37 @@ object DataManager {
                 sanitizeProjectNote(note)
             }
 
+            projects.forEach { project ->
+                sanitizeProjectNote(project)
+            }
+
+            // Restore Workspace Data
+            val dao = WorkspaceDatabase.getDatabase(context).workspaceDao()
+            
+            // Clear existing workspace data
+            dao.deleteAllProjects()
+            dao.deleteAllGoals()
+            dao.deleteAllTasks()
+            dao.deleteAllFeatures()
+            dao.deleteAllBugs()
+            dao.deleteAllIdeas()
+            dao.deleteAllNotes()
+            dao.deleteAllResources()
+            dao.deleteAllActivityLogs()
+            dao.deleteAllNoteCrossReferences()
+
+            // Insert new workspace data
+            allData.workspaceProjects?.let { dao.insertAllProjects(it) }
+            allData.workspaceGoals?.let { dao.insertAllGoals(it) }
+            allData.workspaceTasks?.let { dao.insertAllTasks(it) }
+            allData.workspaceFeatures?.let { dao.insertAllFeatures(it) }
+            allData.workspaceBugs?.let { dao.insertAllBugs(it) }
+            allData.workspaceIdeas?.let { dao.insertAllIdeas(it) }
+            allData.workspaceNotes?.let { dao.insertAllNotes(it) }
+            allData.workspaceResources?.let { dao.insertAllResources(it) }
+            allData.workspaceLogs?.let { dao.insertAllActivityLogs(it) }
+            allData.workspaceRefs?.let { dao.insertAllNoteCrossReferences(it) }
+
             saveData(context)
             true
         } catch (e: Exception) {
@@ -877,11 +1151,11 @@ object DataManager {
 
     fun getTotalDailyProgress(): Int {
         val todayIndex = (getTrackingCalendar().get(Calendar.DAY_OF_WEEK) - 1)
-        val todaysHabits = habits.filter { 
-            it.repeatType != "SPECIFIC_DAYS" || it.repeatDays.contains(todayIndex) 
+        val todaysHabits = habits.filter {
+            it.repeatType != "SPECIFIC_DAYS" || it.repeatDays.contains(todayIndex)
         }
-        val todaysWorkouts = workouts.filter { 
-            it.repeatType != "SPECIFIC_DAYS" || it.repeatDays.contains(todayIndex) 
+        val todaysWorkouts = workouts.filter {
+            it.repeatType != "SPECIFIC_DAYS" || it.repeatDays.contains(todayIndex)
         }
         
         val totalItems = todaysHabits.size + todaysWorkouts.size
@@ -987,6 +1261,200 @@ object DataManager {
         }
     }
 
+    // --- ADVANCED ANALYTICS (DATA SCIENCE) ---
+
+    fun getHabitCorrelationMatrix(): List<Triple<String, String, Double>> {
+        if (habits.size < 2) return emptyList()
+        val correlations = mutableListOf<Triple<String, String, Double>>()
+        
+        // Use last 30 days for correlation
+        val sdf = SimpleDateFormat("yyyyMMdd", Locale.getDefault())
+        val cal = Calendar.getInstance()
+        val dates = (0 until 30).map {
+            val d = sdf.format(cal.time)
+            cal.add(Calendar.DAY_OF_YEAR, -1)
+            d
+        }
+
+        for (i in habits.indices) {
+            for (j in i + 1 until habits.size) {
+                val h1 = habits[i]
+                val h2 = habits[j]
+                
+                val vector1 = dates.map { if (h1.completedDates.contains(it)) 1.0 else 0.0 }
+                val vector2 = dates.map { if (h2.completedDates.contains(it)) 1.0 else 0.0 }
+                
+                val correlation = calculatePearsonCorrelation(vector1, vector2)
+                if (correlation > 0.3) { // Only significant positive correlations
+                    correlations.add(Triple(h1.name, h2.name, correlation))
+                }
+            }
+        }
+        return correlations.sortedByDescending { it.third }
+    }
+
+    private fun calculatePearsonCorrelation(x: List<Double>, y: List<Double>): Double {
+        if (x.size != y.size || x.isEmpty()) return 0.0
+        val n = x.size
+        val sumX = x.sum()
+        val sumY = y.sum()
+        val sumX2 = x.sumOf { it * it }
+        val sumY2 = y.sumOf { it * it }
+        val sumXY = x.zip(y).sumOf { it.first * it.second }
+
+        val numerator = n * sumXY - sumX * sumY
+        val denominator = Math.sqrt((n * sumX2 - sumX * sumX) * (n * sumY2 - sumY * sumY))
+
+        return if (denominator == 0.0) 0.0 else numerator / denominator
+    }
+
+    fun getTemporalDensityData(): Map<Int, Map<String, Int>> {
+        // DayOfWeek (0-6) -> Frequency (Morning/Afternoon/Evening/Anytime) -> Success Count
+        val density = mutableMapOf<Int, MutableMap<String, Int>>()
+        val sdf = SimpleDateFormat("yyyyMMdd", Locale.getDefault())
+        
+        // Initialize map
+        for (day in 0..6) {
+            density[day] = mutableMapOf("Morning" to 0, "Afternoon" to 0, "Evening" to 0, "Anytime" to 0)
+        }
+
+        habits.forEach { habit ->
+            habit.completedDates.forEach { dateStr ->
+                try {
+                    val date = sdf.parse(dateStr)
+                    val cal = Calendar.getInstance()
+                    if (date != null) {
+                        cal.time = date
+                        val dayOfWeek = cal.get(Calendar.DAY_OF_WEEK) - 1
+                        val freq = habit.frequency ?: "Anytime"
+                        density[dayOfWeek]?.let { it[freq] = it.getOrDefault(freq, 0) + 1 }
+                    }
+                } catch (e: Exception) {}
+            }
+        }
+        return density
+    }
+
+    fun getHeatmapData(month: Calendar): List<Int> {
+        val daysInMonth = month.getActualMaximum(Calendar.DAY_OF_MONTH)
+        val year = month.get(Calendar.YEAR)
+        val monthIdx = month.get(Calendar.MONTH)
+        val sdf = SimpleDateFormat("yyyyMMdd", Locale.getDefault())
+        val todayStr = getTrackingDateString()
+
+        return (1..daysInMonth).map { day ->
+            val cal = Calendar.getInstance()
+            cal.set(year, monthIdx, day)
+            val dateKey = sdf.format(cal.time)
+            
+            if (dateKey == todayStr) {
+                getTotalDailyProgress()
+            } else {
+                val dayData = history[dateKey]
+                if (dayData != null) {
+                    val total = dayData.totalHabits + dayData.totalWorkouts
+                    if (total > 0) ((dayData.habitsCompleted + dayData.workoutsCompleted) * 100) / total else 0
+                } else 0
+            }
+        }
+    }
+
+    fun getRollingAverageData(days: Int = 30): List<Double> {
+        val sdf = SimpleDateFormat("yyyyMMdd", Locale.getDefault())
+        val cal = Calendar.getInstance()
+        val dailyProgress = (0 until days + 7).map {
+            val dateKey = sdf.format(cal.time)
+            val progress = if (dateKey == getTrackingDateString()) {
+                getTotalDailyProgress()
+            } else {
+                val dayData = history[dateKey]
+                if (dayData != null) {
+                    val total = dayData.totalHabits + dayData.totalWorkouts
+                    if (total > 0) ((dayData.habitsCompleted + dayData.workoutsCompleted) * 100) / total else 0
+                } else 0
+            }
+            cal.add(Calendar.DAY_OF_YEAR, -1)
+            progress.toDouble()
+        }.reversed()
+
+        // 7-day rolling average
+        return (7 until dailyProgress.size).map { i ->
+            dailyProgress.subList(i - 7, i).average()
+        }
+    }
+
+    // --- WORKOUT ANALYTICS ---
+
+    fun getMuscleDistributionData(): Map<String, Int> {
+        val distribution = workoutMuscleGroups.associateWith { 0 }.toMutableMap()
+        val sdf = SimpleDateFormat("yyyyMMdd", Locale.getDefault())
+        val cal = Calendar.getInstance()
+        val last30Days = (0 until 30).map {
+            val d = sdf.format(cal.time)
+            cal.add(Calendar.DAY_OF_YEAR, -1)
+            d
+        }
+
+        workouts.forEach { workout ->
+            val count = workout.completedDates.count { last30Days.contains(it) }
+            if (count > 0) {
+                workout.muscleGroups.forEach { group ->
+                    distribution[group] = (distribution[group] ?: 0) + (count * workout.target)
+                }
+            }
+        }
+        return distribution
+    }
+
+    fun getMuscleRecoveryStatus(): Map<String, Float> {
+        val recoveryMap = workoutMuscleGroups.associateWith { 1f }.toMutableMap()
+        val sdf = SimpleDateFormat("yyyyMMdd", Locale.getDefault())
+        val now = System.currentTimeMillis()
+        val recoveryTimeMs = 48 * 60 * 60 * 1000L // 48 hours
+
+        workoutMuscleGroups.forEach { group ->
+            // Find the most recent completion date for any workout targeting this muscle
+            val lastCompletionDate = workouts
+                .filter { it.muscleGroups.contains(group) }
+                .flatMap { it.completedDates }
+                .mapNotNull { 
+                    try { sdf.parse(it)?.time } catch (e: Exception) { null } 
+                }
+                .maxOrNull() ?: 0L
+            
+            if (lastCompletionDate > 0) {
+                val timePassed = now - lastCompletionDate
+                val recovery = (timePassed.toFloat() / recoveryTimeMs).coerceIn(0f, 1f)
+                recoveryMap[group] = recovery
+            }
+        }
+        return recoveryMap
+    }
+
+    fun getVolumeWeightedHeatmap(month: Calendar): List<Int> {
+        val daysInMonth = month.getActualMaximum(Calendar.DAY_OF_MONTH)
+        val year = month.get(Calendar.YEAR)
+        val monthIdx = month.get(Calendar.MONTH)
+        val sdf = SimpleDateFormat("yyyyMMdd", Locale.getDefault())
+
+        val dailyVolume = mutableMapOf<String, Int>()
+        workouts.forEach { workout ->
+            workout.completedDates.forEach { date ->
+                dailyVolume[date] = (dailyVolume[date] ?: 0) + workout.target
+            }
+        }
+
+        val maxVolume = dailyVolume.values.maxOrNull()?.coerceAtLeast(1) ?: 1
+
+        return (1..daysInMonth).map { day ->
+            val cal = Calendar.getInstance()
+            cal.set(year, monthIdx, day)
+            val dateKey = sdf.format(cal.time)
+            val volume = dailyVolume[dateKey] ?: 0
+            (volume * 100) / maxVolume
+        }
+    }
+
     fun getTaskPerformanceByCategory(): Map<String, Int> {
         val categories = taskCustomCategories
         return categories.associateWith { cat ->
@@ -1041,6 +1509,52 @@ object DataManager {
             cal.add(Calendar.DAY_OF_YEAR, -1)
         }
         return results
+    }
+
+    fun getDayHistory(dateStr: String): DayHistory {
+        val sdf = SimpleDateFormat("yyyyMMdd", Locale.getDefault())
+        val todayStr = getTrackingDateString()
+
+        return if (dateStr == todayStr) {
+            val todayIndex = (getTrackingCalendar().get(Calendar.DAY_OF_WEEK) - 1)
+            val todaysHabits = habits.filter {
+                (it.repeatType != "SPECIFIC_DAYS" || it.repeatDays.contains(todayIndex))
+            }
+            val todaysWorkouts = workouts.filter {
+                (it.repeatType != "SPECIFIC_DAYS" || it.repeatDays.contains(todayIndex))
+            }
+            DayHistory(
+                habitsCompleted = todaysHabits.count { it.isCompleted },
+                totalHabits = todaysHabits.size,
+                workoutsCompleted = todaysWorkouts.count { it.isCompleted },
+                totalWorkouts = todaysWorkouts.size
+            )
+        } else {
+            val snapshot = history[dateStr]
+            if (snapshot != null) {
+                snapshot
+            } else {
+                val cal = Calendar.getInstance()
+                try {
+                    sdf.parse(dateStr)?.let { cal.time = it }
+                } catch (e: Exception) {}
+                val dayIndex = (cal.get(Calendar.DAY_OF_WEEK) - 1)
+
+                val activeHabits = habits.filter {
+                    it.timestamp <= cal.timeInMillis + 86400000 && (it.repeatType != "SPECIFIC_DAYS" || it.repeatDays.contains(dayIndex))
+                }
+                val activeWorkouts = workouts.filter {
+                    it.timestamp <= cal.timeInMillis + 86400000 && (it.repeatType != "SPECIFIC_DAYS" || it.repeatDays.contains(dayIndex))
+                }
+
+                DayHistory(
+                    habitsCompleted = activeHabits.count { it.completedDates.contains(dateStr) },
+                    totalHabits = activeHabits.size,
+                    workoutsCompleted = activeWorkouts.count { it.completedDates.contains(dateStr) },
+                    totalWorkouts = activeWorkouts.size
+                )
+            }
+        }
     }
 
     fun getLastSevenDaysDetailedProgress(): List<Pair<Int, Int>> {
@@ -1227,6 +1741,11 @@ object DataManager {
         if (recentActivities.size > 10) {
             recentActivities = recentActivities.take(10).toMutableList()
         }
+        notifyDataChanged()
+    }
+
+    suspend fun processDataForSmoothExecution() {
+        // High-performance indexing removed to optimize startup speed
     }
 
     fun getGrowthAdvice(mood: String?): String {
@@ -1253,8 +1772,86 @@ object DataManager {
         }
     }
 
-    fun getTodayAgendaNotifications(): Map<String, List<String>> {
-        val agenda = mutableMapOf<String, MutableList<String>>()
+    suspend fun updateWorkspaceAgenda(context: Context) {
+        val dao = com.example.allinone.workspace.data.WorkspaceDatabase.getDatabase(context).workspaceDao()
+        val calendar = Calendar.getInstance().apply {
+            set(Calendar.HOUR_OF_DAY, 0)
+            set(Calendar.MINUTE, 0)
+            set(Calendar.SECOND, 0)
+            set(Calendar.MILLISECOND, 0)
+        }
+        val start = calendar.timeInMillis
+        val end = start + (24 * 60 * 60 * 1000L)
+
+        val projectsDue = dao.getProjectsDueBetween(start, end)
+        val goalsDue = dao.getGoalsDueBetween(start, end)
+        val tasksDue = dao.getTasksDueBetween(start, end)
+        
+        val allProjectNames = dao.getAllProjectsSync().associate { it.id to it.name }
+
+        val agenda = mutableMapOf<String, MutableList<AgendaItem>>()
+        
+        if (projectsDue.isNotEmpty()) {
+            agenda["WORKSPACE PROJECTS"] = projectsDue.map { 
+                AgendaItem(
+                    title = it.name,
+                    details = "Health: ${it.health} | Progress: ${it.progress}%",
+                    path = "Workspace > ${it.name}",
+                    category = "PROJECT",
+                    navigationTarget = "WORKSPACE"
+                )
+            }.toMutableList()
+        }
+        if (goalsDue.isNotEmpty()) {
+            agenda["WORKSPACE GOALS"] = goalsDue.map { 
+                val pName = allProjectNames[it.projectId] ?: "Unknown"
+                AgendaItem(
+                    title = it.title,
+                    details = "Priority: ${when(it.priority){ 2 -> "High"; 1 -> "Medium"; else -> "Low" }}",
+                    path = "Workspace > $pName > Goals",
+                    category = "GOAL",
+                    navigationTarget = "WORKSPACE"
+                )
+            }.toMutableList()
+        }
+        if (tasksDue.isNotEmpty()) {
+            agenda["WORKSPACE TASKS"] = tasksDue.map { 
+                val pName = allProjectNames[it.projectId] ?: "Unknown"
+                AgendaItem(
+                    title = it.title,
+                    details = "Weight: ${it.weight} | Priority: ${when(it.priority){ 2 -> "High"; 1 -> "Medium"; else -> "Low" }}",
+                    path = "Workspace > $pName > Tasks",
+                    category = "TASK",
+                    navigationTarget = "WORKSPACE"
+                )
+            }.toMutableList()
+        }
+
+        workspaceTodayAgenda = agenda.mapValues { it.value.toList() }.toMutableMap()
+    }
+
+    private fun scanFeaturesForAgenda(projectName: String, features: List<ProjectFeature>, todayStart: Long, todayEnd: Long, result: MutableList<AgendaItem>) {
+        features.forEach { feature ->
+            if (!feature.isCompleted && feature.dueDate != null && 
+                feature.dueDate!! >= todayStart && feature.dueDate!! < todayEnd) {
+                result.add(
+                    AgendaItem(
+                        title = feature.name,
+                        details = "Priority: ${when(feature.priority){ 2 -> "High"; 1 -> "Medium"; else -> "Low" }}",
+                        path = "Projects > $projectName > Roadmap",
+                        category = "ROADMAP",
+                        navigationTarget = "PROJECT_ACTIVITY"
+                    )
+                )
+            }
+            if (feature.subFeatures.isNotEmpty()) {
+                scanFeaturesForAgenda(projectName, feature.subFeatures, todayStart, todayEnd, result)
+            }
+        }
+    }
+
+    fun getTodayAgendaNotifications(): Map<String, List<AgendaItem>> {
+        val agenda = mutableMapOf<String, MutableList<AgendaItem>>()
         val todayStr = SimpleDateFormat("yyyyMMdd", Locale.getDefault()).format(Date())
         val todayStart = Calendar.getInstance().apply {
             set(Calendar.HOUR_OF_DAY, 0)
@@ -1270,16 +1867,45 @@ object DataManager {
             task.reminderTime!! >= todayStart && task.reminderTime!! < todayEnd
         }
         if (todayTasks.isNotEmpty()) {
-            agenda["TASKS"] = todayTasks.map { it.name }.toMutableList()
+            agenda["TASKS"] = todayTasks.map { 
+                AgendaItem(
+                    title = it.name,
+                    details = "Priority: ${when(it.priority){ 2 -> "High"; 1 -> "Medium"; else -> "Low" }}",
+                    path = "To-Do > ${it.category}",
+                    category = "TASK",
+                    navigationTarget = "TASK_ACTIVITY"
+                )
+            }.toMutableList()
         }
 
         // 2. Scan Projects (Notes with deadline today)
-        val projectReminders = notes.filter { note ->
+        val projectReminders = projects.filter { note ->
             note.category == "Project" && note.status != "Completed" && note.deadline != null &&
             note.deadline!! >= todayStart && note.deadline!! < todayEnd
         }
         if (projectReminders.isNotEmpty()) {
-            agenda["PROJECTS"] = projectReminders.map { it.title }.toMutableList()
+            agenda["PROJECTS"] = projectReminders.map { 
+                AgendaItem(
+                    title = it.title,
+                    details = "Progress: ${it.progress}%",
+                    path = "Projects > ${it.title}",
+                    category = "PROJECT",
+                    navigationTarget = "PROJECT_ACTIVITY"
+                )
+            }.toMutableList()
+        }
+
+        // 2b. Scan Roadmaps (Recursive sub-features in projects)
+        val roadmapItems = mutableListOf<AgendaItem>()
+        projects.filter { it.category == "Project" && it.status != "Completed" }.forEach { project ->
+            scanFeaturesForAgenda(project.title, project.subFeatures, todayStart, todayEnd, roadmapItems)
+        }
+        if (roadmapItems.isNotEmpty()) {
+            if (agenda.containsKey("ROADMAP")) {
+                agenda["ROADMAP"]?.addAll(roadmapItems)
+            } else {
+                agenda["ROADMAP"] = roadmapItems.toMutableList()
+            }
         }
 
         // 3. Scan Lists & Notes (Other notes with deadline today)
@@ -1288,7 +1914,24 @@ object DataManager {
             note.deadline!! >= todayStart && note.deadline!! < todayEnd
         }
         if (otherReminders.isNotEmpty()) {
-            agenda["LISTS & NOTES"] = otherReminders.map { it.title }.toMutableList()
+            agenda["LISTS & NOTES"] = otherReminders.map { 
+                AgendaItem(
+                    title = it.title,
+                    details = "Category: ${it.category}",
+                    path = "Notes > ${it.category}",
+                    category = "NOTE",
+                    navigationTarget = "NOTE_ACTIVITY"
+                )
+            }.toMutableList()
+        }
+
+        // 4. Add Workspace Agenda
+        workspaceTodayAgenda.forEach { (key, value) ->
+            if (agenda.containsKey(key)) {
+                agenda[key]?.addAll(value)
+            } else {
+                agenda[key] = value.toMutableList()
+            }
         }
 
         return agenda
@@ -1303,9 +1946,11 @@ object DataManager {
             userXP -= xpRequired
             userLevel++
             saveData(context)
+            notifyDataChanged()
             return true // Level Up!
         }
         saveData(context)
+        notifyDataChanged()
         return false
     }
 
@@ -1365,5 +2010,17 @@ object DataManager {
                 defaultResId
             }
         }
+    }
+
+    fun getUniqueFeatureName(baseName: String, existingFeatures: List<ProjectFeature>): String {
+        var finalName = baseName
+        var counter = 1
+        
+        while (existingFeatures.any { it.name.equals(finalName, ignoreCase = true) }) {
+            finalName = "$baseName v$counter"
+            counter++
+        }
+        
+        return finalName
     }
 }

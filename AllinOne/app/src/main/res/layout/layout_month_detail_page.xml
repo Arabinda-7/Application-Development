@@ -17,10 +17,10 @@
             android:layout_height="wrap_content"
             android:layout_marginHorizontal="16dp"
             android:layout_marginTop="16dp"
-            app:cardBackgroundColor="#1A1A1A"
+            app:cardBackgroundColor="@android:color/transparent"
             app:cardCornerRadius="24dp"
             app:cardElevation="0dp"
-            app:strokeWidth="1dp"
+            app:strokeWidth="1.5dp"
             app:strokeColor="#1AFFFFFF">
 
             <LinearLayout
@@ -165,9 +165,11 @@
             android:layout_height="wrap_content"
             android:layout_marginHorizontal="16dp"
             android:layout_marginTop="8dp"
-            app:cardBackgroundColor="#0DFFFFFF"
+            app:cardBackgroundColor="@android:color/transparent"
             app:cardCornerRadius="20dp"
-            app:cardElevation="0dp">
+            app:cardElevation="0dp"
+            app:strokeWidth="1.5dp"
+            app:strokeColor="#1AFFFFFF">
 
             <LinearLayout
                 android:id="@+id/container_category_list"

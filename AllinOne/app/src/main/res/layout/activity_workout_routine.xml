@@ -27,7 +27,8 @@
             android:layout_height="0dp"
             android:background="@android:color/transparent"
             android:paddingHorizontal="16dp"
-            app:layout_constraintBottom_toTopOf="@id/bottom_nav_mock"
+            android:paddingTop="32dp"
+            app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintTop_toTopOf="parent">
 
             <ImageButton
@@ -231,7 +232,8 @@
                 android:layout_width="match_parent"
                 android:layout_height="0dp"
                 android:layout_marginTop="8dp"
-                app:layout_constraintBottom_toBottomOf="parent"
+                android:layout_marginBottom="8dp"
+                app:layout_constraintBottom_toTopOf="@id/btn_create_new_workout"
                 app:layout_constraintTop_toBottomOf="@id/filter_chips" />
 
             <com.google.android.material.card.MaterialCardView
@@ -240,7 +242,7 @@
                 android:layout_height="52dp"
                 android:layout_marginHorizontal="32dp"
                 android:layout_marginBottom="12dp"
-                app:cardBackgroundColor="#1AFFFFFF"
+                app:cardBackgroundColor="@android:color/transparent"
                 app:cardCornerRadius="26dp"
                 app:cardElevation="0dp"
                 app:strokeWidth="1.5dp"
@@ -262,14 +264,24 @@
 
         </androidx.constraintlayout.widget.ConstraintLayout>
 
+        <!-- History Layout (Compose) -->
+        <androidx.compose.ui.platform.ComposeView
+            android:id="@+id/history_compose_view"
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
+            android:visibility="gone"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintTop_toTopOf="parent" />
+
         <!-- History Layout -->
         <ScrollView
             android:id="@+id/history_layout"
             android:layout_width="match_parent"
             android:layout_height="0dp"
             android:background="@android:color/transparent"
+            android:paddingTop="32dp"
             android:visibility="gone"
-            app:layout_constraintBottom_toTopOf="@id/bottom_nav_mock"
+            app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintTop_toTopOf="parent">
 
             <LinearLayout
@@ -395,14 +407,6 @@
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content">
 
-                            <ImageView
-                                android:id="@+id/btn_prev_month"
-                                android:layout_width="32dp"
-                                android:layout_height="32dp"
-                                android:layout_alignParentStart="true"
-                                android:src="@android:drawable/ic_media_previous"
-                                app:tint="@color/white" />
-
                             <TextView
                                 android:id="@+id/tv_grid_month"
                                 android:layout_width="wrap_content"
@@ -411,14 +415,6 @@
                                 android:text="March 2026"
                                 android:textColor="@color/white"
                                 android:textStyle="bold" />
-
-                            <ImageView
-                                android:id="@+id/btn_next_month"
-                                android:layout_width="32dp"
-                                android:layout_height="32dp"
-                                android:layout_alignParentEnd="true"
-                                android:src="@android:drawable/ic_media_next"
-                                app:tint="@color/white" />
                         </RelativeLayout>
 
                         <GridLayout android:id="@+id/history_dynamic_grid" android:layout_width="match_parent" android:layout_height="wrap_content" android:layout_marginTop="16dp" android:columnCount="7">
@@ -445,6 +441,7 @@
             android:paddingVertical="8dp"
             android:background="#1A1A1A"
             android:orientation="horizontal"
+            android:visibility="gone"
             app:layout_constraintBottom_toBottomOf="parent">
 
             <LinearLayout

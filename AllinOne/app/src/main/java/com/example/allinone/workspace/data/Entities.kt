@@ -37,6 +37,9 @@ data class GoalEntity(
     val parentGoalId: String? = null,
     val title: String,
     val description: String = "",
+    val color: Int = -1,
+    val priority: Int = 1, // 0=Low, 1=Medium, 2=High
+    val deadline: Long? = null,
     val status: String = "Pending", // Pending, In Progress, Completed
     val createdAt: Long = System.currentTimeMillis(),
     val updatedAt: Long = System.currentTimeMillis()

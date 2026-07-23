@@ -20,6 +20,12 @@ open class BaseActivity : AppCompatActivity() {
 
     fun showDialogSafe(dialog: Dialog) {
         if (activeDialog?.isShowing == true) return
+        dialog.window?.let { window ->
+            window.addFlags(android.view.WindowManager.LayoutParams.FLAG_BLUR_BEHIND)
+            if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.S) {
+                window.attributes.blurBehindRadius = 20
+            }
+        }
         activeDialog = dialog
         dialog.show()
     }
@@ -64,19 +70,15 @@ open class BaseActivity : AppCompatActivity() {
     }
 
     private fun applyAppTheme() {
-        if (DataManager.isSystemAppearanceEnabled) {
-            androidx.appcompat.app.AppCompatDelegate.setDefaultNightMode(androidx.appcompat.app.AppCompatDelegate.MODE_NIGHT_FOLLOW_SYSTEM)
-        } else {
-            val mode = when(DataManager.appThemeMode) {
-                "LIGHT" -> androidx.appcompat.app.AppCompatDelegate.MODE_NIGHT_NO
-                "DARK", "OLED" -> androidx.appcompat.app.AppCompatDelegate.MODE_NIGHT_YES
-                else -> androidx.appcompat.app.AppCompatDelegate.MODE_NIGHT_FOLLOW_SYSTEM
-            }
-            androidx.appcompat.app.AppCompatDelegate.setDefaultNightMode(mode)
-            
-            if (DataManager.appThemeMode == "OLED") {
-                window.decorView.setBackgroundColor(android.graphics.Color.BLACK)
-            }
+        val mode = when(DataManager.appThemeMode) {
+            "LIGHT" -> androidx.appcompat.app.AppCompatDelegate.MODE_NIGHT_NO
+            "DARK", "OLED" -> androidx.appcompat.app.AppCompatDelegate.MODE_NIGHT_YES
+            else -> androidx.appcompat.app.AppCompatDelegate.MODE_NIGHT_FOLLOW_SYSTEM
+        }
+        androidx.appcompat.app.AppCompatDelegate.setDefaultNightMode(mode)
+        
+        if (DataManager.appThemeMode == "OLED") {
+            window.decorView.setBackgroundColor(android.graphics.Color.BLACK)
         }
     }
 

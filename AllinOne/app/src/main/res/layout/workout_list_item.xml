@@ -16,7 +16,7 @@
         app:cardElevation="0dp"
         app:strokeWidth="1.5dp"
         app:strokeColor="#1AFFFFFF"
-        app:cardBackgroundColor="#1A1A1A">
+        app:cardBackgroundColor="@android:color/transparent">
 
         <androidx.constraintlayout.widget.ConstraintLayout
             android:layout_width="match_parent"
@@ -88,7 +88,7 @@
                     android:text="0/100 reps" />
             </LinearLayout>
 
-            <!-- Action Group (Chevron + Edit/More) -->
+            <!-- Action Group (Chevron) -->
             <LinearLayout
                 android:id="@+id/action_group_workout"
                 android:layout_width="wrap_content"
@@ -103,7 +103,7 @@
                     android:id="@+id/iv_expand_chevron"
                     android:layout_width="24dp"
                     android:layout_height="24dp"
-                    android:layout_marginStart="4dp"
+                    android:layout_marginStart="8dp"
                     android:src="@android:drawable/ic_menu_more"
                     android:rotation="90"
                     app:tint="#4DFFFFFF" />

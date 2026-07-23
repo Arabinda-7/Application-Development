@@ -4,11 +4,9 @@ import androidx.compose.ui.graphics.asImageBitmap
 import android.graphics.BitmapFactory
 import android.net.Uri
 import androidx.compose.animation.animateContentSize
-import androidx.compose.foundation.interaction.MutableInteractionSource
-import androidx.compose.animation.core.animateFloat
-import androidx.compose.animation.core.animateFloatAsState
-import androidx.compose.animation.core.updateTransition
+import androidx.compose.animation.core.*
 import androidx.compose.foundation.*
+import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyRow
@@ -29,12 +27,18 @@ import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.StrokeCap
 import androidx.compose.ui.graphics.graphicsLayer
+import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.input.pointer.pointerInput
+import androidx.compose.ui.platform.LocalConfiguration
+import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.ImeAction
+import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.unit.Density
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -45,7 +49,7 @@ data class AppStyle(
     val borderRadius: Dp = 16.dp,
     val accentColor: Color = Color(0xFF1A73E8),
     val surfaceColor: Color = Color(0xFF1A1A1A),
-    val backgroundColor: Color = Color.Black,
+    val backgroundColor: Color = Color(0xFF121212),
     val isOled: Boolean = false,
     val showShadows: Boolean = true,
     val fontFamily: androidx.compose.ui.text.font.FontFamily = androidx.compose.ui.text.font.FontFamily.Default,
@@ -65,6 +69,7 @@ fun HomeScreen(
     onNavigateToProjects: () -> Unit,
     onNavigateToFinance: () -> Unit,
     onNavigateToSettings: () -> Unit,
+    onNavigateToWorkspace: () -> Unit = {},
     onNavigateToProfile: () -> Unit = {},
     onNavigateToPerformanceHistory: () -> Unit = {},
     onQuickAddTodo: () -> Unit = {},
@@ -84,21 +89,26 @@ fun HomeScreen(
     var showVoiceComingSoon by remember { mutableStateOf(false) }
     var isMessageExpanded by remember { mutableStateOf(false) }
 
+    // Aura Animation
+    val infiniteTransition = rememberInfiniteTransition(label = "Aura")
+    val auraAlpha by infiniteTransition.animateFloat(
+        initialValue = 0.4f,
+        targetValue = 0.8f,
+        animationSpec = infiniteRepeatable(
+            animation = tween(2500, easing = LinearEasing),
+            repeatMode = RepeatMode.Reverse
+        ),
+        label = "AuraAlpha"
+    )
+
     // Keyboard Controller
     val keyboardController = LocalSoftwareKeyboardController.current
     val style = LocalAppStyle.current
     val interactionSource = remember { MutableInteractionSource() }
 
     val moodTheme = remember(state.currentMood, style.accentColor) {
-        when (state.currentMood) {
-            "🔥" -> Color(0xFFFFB800) to "Unstoppable mode active."
-            "⚡" -> Color(0xFF2EC4B6) to "High energy detected."
-            "🧘" -> Color(0xFF673AB7) to "Mindful progress only."
-            "💼" -> style.accentColor to "Execution mode: ON."
-            "😴" -> Color(0xFF9E9E9E) to "Rest well. Momentum stays."
-            "🧠" -> Color(0xFF3F51B5) to "Deep focus engaged."
-            else -> style.accentColor to ""
-        }
+        val colorInt = UIUtils.getMoodColor(state.currentMood, style.accentColor.toArgb())
+        Color(colorInt) to UIUtils.getMoodMessage(state.currentMood)
     }
 
     val smartGreeting = remember(state.overallProgress, state.userName, state.currentMood) {
@@ -133,53 +143,13 @@ fun HomeScreen(
     val transition = updateTransition(targetState = showSpeedDial, label = "SpeedDial")
     val dialRotation by transition.animateFloat(label = "Rotation") { if (it) 45f else 0f }
 
-    val todayAgenda = remember(state) {
-        DataManager.getTodayAgendaNotifications()
-    }
     val todayDateString = remember { SimpleDateFormat("yyyyMMdd", Locale.getDefault()).format(Date()) }
-    val showRedDot = DataManager.lastViewedNotificationDate != todayDateString
+    val showRedDot = state.todayAgenda.isNotEmpty() && DataManager.lastViewedNotificationDate != todayDateString
 
     Scaffold(
         contentWindowInsets = WindowInsets(0, 0, 0, 0),
         floatingActionButton = {
             Box(contentAlignment = Alignment.BottomEnd) {
-                // --- Floating Notification Bell (Smart Visibility) ---
-                androidx.compose.animation.AnimatedVisibility(
-                    visible = !showSpeedDial && todayAgenda.isNotEmpty(),
-                    enter = androidx.compose.animation.fadeIn() + androidx.compose.animation.scaleIn(),
-                    exit = androidx.compose.animation.fadeOut() + androidx.compose.animation.scaleOut(),
-                    modifier = Modifier.offset(y = (-70).dp)
-                ) {
-                    Box(
-                        modifier = Modifier
-                            .size(40.dp)
-                            .clip(CircleShape)
-                            .background(Color.Black.copy(alpha = 0.5f))
-                            .clickable { 
-                                showNotificationsDialog = true
-                                DataManager.lastViewedNotificationDate = todayDateString
-                                DataManager.saveData(null) // Context-free save
-                            },
-                        contentAlignment = Alignment.Center
-                    ) {
-                        Icon(
-                            imageVector = Icons.Default.Notifications,
-                            contentDescription = "Alerts",
-                            tint = Color.White,
-                            modifier = Modifier.size(20.dp)
-                        )
-                        if (showRedDot) {
-                            Box(
-                                modifier = Modifier
-                                    .size(6.dp)
-                                    .background(Color.Red, CircleShape)
-                                    .align(Alignment.TopEnd)
-                                    .offset(x = (-4).dp, y = 4.dp)
-                            )
-                        }
-                    }
-                }
-
                 // 1. New Task Shortcut (Moves LEFT)
                 QuickActionItem(
                     label = "Task",
@@ -187,7 +157,7 @@ fun HomeScreen(
                     color = Color(0xFF2EC4B6),
                     isVisible = showSpeedDial,
                     offsetY = 0.dp,
-                    offsetX = (-100).dp,
+                    offsetX = (-85).dp, // Adjusted for 50.dp FAB
                     onClick = { onQuickAddTodo(); showSpeedDial = false }
                 )
 
@@ -197,8 +167,8 @@ fun HomeScreen(
                     icon = Icons.Default.ShoppingCart,
                     color = Color(0xFFE91E63),
                     isVisible = showSpeedDial,
-                    offsetY = (-70).dp,
-                    offsetX = (-70).dp,
+                    offsetY = (-60).dp, // Adjusted for 50.dp FAB
+                    offsetX = (-60).dp, // Adjusted for 50.dp FAB
                     onClick = { onQuickAddExpense(); showSpeedDial = false }
                 )
 
@@ -208,23 +178,34 @@ fun HomeScreen(
                     icon = Icons.Default.Edit,
                     color = Color(0xFF3A86F0),
                     isVisible = showSpeedDial,
-                    offsetY = (-100).dp,
+                    offsetY = (-85).dp, // Adjusted for 50.dp FAB
                     offsetX = 0.dp,
                     onClick = { onQuickAddNote(); showSpeedDial = false }
                 )
 
-                FloatingActionButton(
-                    onClick = { showSpeedDial = !showSpeedDial },
-                    containerColor = style.accentColor,
-                    contentColor = Color.White,
-                    shape = CircleShape,
-                    modifier = Modifier.size(56.dp)
-                ) {
-                    Icon(
-                        imageVector = if (showSpeedDial) Icons.Default.Close else Icons.Default.Add,
-                        contentDescription = "Quick Action",
-                        modifier = Modifier.graphicsLayer(rotationZ = dialRotation)
+                val context = LocalContext.current
+                val config = LocalConfiguration.current
+                val standardDensity = remember(context, config) { 
+                    Density(
+                        density = context.resources.displayMetrics.density,
+                        fontScale = config.fontScale
                     )
+                }
+
+                CompositionLocalProvider(LocalDensity provides standardDensity) {
+                    FloatingActionButton(
+                        onClick = { showSpeedDial = !showSpeedDial },
+                        containerColor = style.accentColor,
+                        contentColor = Color.White,
+                        shape = CircleShape,
+                        modifier = Modifier.size(50.dp) // Requested 50.dp
+                    ) {
+                        Icon(
+                            imageVector = if (showSpeedDial) Icons.Default.Close else Icons.Default.Add,
+                            contentDescription = "Quick Action",
+                            modifier = Modifier.size(26.dp).graphicsLayer(rotationZ = dialRotation) // Proportional to 50.dp
+                        )
+                    }
                 }
             }
         }
@@ -252,11 +233,11 @@ fun HomeScreen(
                         )
                     )
                     .statusBarsPadding()
-                    .padding(top = 0.dp, bottom = 12.dp, start = 24.dp, end = 24.dp)
+                    .padding(top = 0.dp, bottom = 12.dp)
             ) {
                 Column {
                     Row(
-                        modifier = Modifier.fillMaxWidth(),
+                        modifier = Modifier.fillMaxWidth().padding(horizontal = 20.dp),
                         verticalAlignment = Alignment.Top,
                         horizontalArrangement = Arrangement.SpaceBetween
                     ) {
@@ -273,7 +254,10 @@ fun HomeScreen(
                         ) {
                             Box(
                                 contentAlignment = Alignment.BottomEnd,
-                                modifier = Modifier.clickable { onNavigateToProfile(); isMessageExpanded = false }
+                                modifier = Modifier.clickable(
+                                    interactionSource = interactionSource,
+                                    indication = null
+                                ) { onNavigateToProfile(); isMessageExpanded = false }
                             ) {
                                 Box(
                                     modifier = Modifier
@@ -326,7 +310,7 @@ fun HomeScreen(
                             Text(
                                 text = if (state.currentMood != null) "Current Vibe" else UIUtils.formatTitleCase(smartGreeting.split(",")[0]), 
                                 color = Color.White.copy(alpha = 0.4f), 
-                                fontSize = 10.sp, 
+                                fontSize = 12.sp, 
                                 fontWeight = FontWeight.Medium, 
                                 letterSpacing = 1.sp
                             )
@@ -357,7 +341,7 @@ fun HomeScreen(
 
                         Spacer(modifier = Modifier.width(16.dp))
 
-                        // Refined Action Row (Search Toggle + Smaller Settings)
+                        // Refined Action Row (Search Toggle + Notifications + Settings)
                         Row(verticalAlignment = Alignment.CenterVertically) {
                             Box(
                                 modifier = Modifier
@@ -375,6 +359,39 @@ fun HomeScreen(
                                 )
                             }
                             
+                            Spacer(modifier = Modifier.width(8.dp))
+
+                            Box(
+                                modifier = Modifier
+                                    .size(36.dp)
+                                    .clip(CircleShape)
+                                    .background(Color.White.copy(alpha = 0.08f))
+                                    .clickable { 
+                                        showNotificationsDialog = true
+                                        DataManager.lastViewedNotificationDate = todayDateString
+                                        DataManager.saveData(null)
+                                        isMessageExpanded = false 
+                                    },
+                                contentAlignment = Alignment.Center
+                            ) {
+                                Icon(
+                                    imageVector = Icons.Default.Notifications,
+                                    contentDescription = "Notifications",
+                                    tint = Color.White,
+                                    modifier = Modifier.size(18.dp)
+                                )
+                                if (showRedDot) {
+                                    Box(
+                                        modifier = Modifier
+                                            .size(8.dp)
+                                            .background(Color.Red, CircleShape)
+                                            .border(1.5.dp, Color.Black, CircleShape)
+                                            .align(Alignment.TopEnd)
+                                            .offset(x = (2).dp, y = (-2).dp)
+                                    )
+                                }
+                            }
+
                             Spacer(modifier = Modifier.width(8.dp))
                             
                             Box(
@@ -401,8 +418,8 @@ fun HomeScreen(
                         enter = androidx.compose.animation.expandVertically() + androidx.compose.animation.fadeIn(),
                         exit = androidx.compose.animation.shrinkVertically() + androidx.compose.animation.fadeOut()
                     ) {
-                        Column {
-                            Spacer(modifier = Modifier.height(24.dp))
+                        Column(modifier = Modifier.padding(horizontal = 20.dp)) {
+                            Spacer(modifier = Modifier.height(16.dp))
                             OutlinedTextField(
                                 value = searchQuery,
                                 onValueChange = { searchQuery = it },
@@ -446,103 +463,122 @@ fun HomeScreen(
                             )
                         }
                     }
+
+                    Spacer(modifier = Modifier.height(16.dp))
+
+                    // --- 3. Sentiment Tracker (Mood Log) Header ---
+                    Row(
+                        modifier = Modifier.fillMaxWidth().padding(horizontal = 20.dp),
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.SpaceBetween
+                    ) {
+                        Text("Current Focus", color = Color.White.copy(alpha = 0.4f), fontSize = 9.sp, fontWeight = FontWeight.Black, letterSpacing = 1.sp)
+                        Text(state.dateString, color = Color.White.copy(alpha = 0.4f), fontSize = 9.sp)
+                    }
+                    Spacer(modifier = Modifier.height(6.dp))
+
+                    // Mood Icons Row
+                    val moodDensityValue = remember(state.isSystemAppearanceEnabled, state.globalDisplaySize, state.homeDisplaySize, state.homeFocusSize) {
+                        UIUtils.getIsolatedMoodDensity(state)
+                    }
+                    // Isolated from app-level font scaling as well
+                    val systemFontScale = android.content.res.Resources.getSystem().configuration.fontScale
+                    val moodDensity = remember(moodDensityValue, systemFontScale) {
+                        Density(density = moodDensityValue, fontScale = systemFontScale)
+                    }
+                    
+                    CompositionLocalProvider(LocalDensity provides moodDensity) {
+                        androidx.compose.foundation.lazy.LazyRow(
+                            modifier = Modifier.fillMaxWidth(),
+                            contentPadding = PaddingValues(horizontal = 20.dp),
+                            horizontalArrangement = Arrangement.spacedBy(16.dp)
+                        ) {
+                            val moods = listOf("🔥", "⚡", "🧘", "💼", "😴", "🧠")
+                            val circleSize = 50.dp
+                            val emojiSize = 22.sp
+
+                            items(moods.size) { index ->
+                                val mood = moods[index]
+                                val isSelected = state.currentMood == mood
+                                val backgroundColor = if (isSelected) {
+                                    Color(UIUtils.darkenColor(style.accentColor.toArgb(), 0.5f))
+                                } else {
+                                    style.surfaceColor
+                                }
+
+                                Box(
+                                    modifier = Modifier
+                                        .size(circleSize)
+                                        .clip(CircleShape)
+                                        .background(backgroundColor)
+                                        .clickable { onMoodSelected(mood); isMessageExpanded = false },
+                                    contentAlignment = Alignment.Center
+                                ) {
+                                    Text(mood, fontSize = emojiSize)
+                                }
+                            }
+                        }
+                    }
                 }
             }
 
             Spacer(modifier = Modifier.height(16.dp))
 
-            // --- 3. Sentiment Tracker (Mood Log) ---
-            Row(
-                modifier = Modifier.fillMaxWidth().padding(horizontal = 24.dp),
-                verticalAlignment = Alignment.CenterVertically,
-                horizontalArrangement = Arrangement.SpaceBetween
-            ) {
-                Text("Current Focus", color = Color.White.copy(alpha = 0.4f), fontSize = 9.sp, fontWeight = FontWeight.Black, letterSpacing = 1.sp)
-                Text(state.dateString, color = Color.White.copy(alpha = 0.4f), fontSize = 9.sp)
-            }
-            Spacer(modifier = Modifier.height(12.dp))
-
-            // Wrapping in standard density to prevent global scaling from affecting this section
-            val systemDensity = androidx.compose.ui.platform.LocalContext.current.resources.displayMetrics.density
-            val standardDensity = androidx.compose.ui.unit.Density(density = systemDensity)
-            
-            CompositionLocalProvider(androidx.compose.ui.platform.LocalDensity provides standardDensity) {
-                Row(
-                    modifier = Modifier.fillMaxWidth().padding(horizontal = 24.dp),
-                    horizontalArrangement = Arrangement.SpaceBetween
-                ) {
-                    val moods = listOf("🔥", "⚡", "🧘", "💼", "😴", "🧠")
-                    val circleSize = when(state.homeFocusSize) {
-                        "S" -> 40.dp
-                        "L" -> 56.dp
-                        else -> 48.dp
-                    }
-                    val emojiSize = when(state.homeFocusSize) {
-                        "S" -> 16.sp
-                        "L" -> 24.sp
-                        else -> 20.sp
-                    }
-
-                    moods.forEach { mood ->
-                        val isSelected = state.currentMood == mood
-                        Box(
-                            modifier = Modifier
-                                .size(circleSize)
-                                .clip(CircleShape)
-                                .background(if (isSelected) style.accentColor else style.surfaceColor)
-                                .clickable { onMoodSelected(mood); isMessageExpanded = false },
-                            contentAlignment = Alignment.Center
-                        ) {
-                            Text(mood, fontSize = emojiSize)
-                        }
-                    }
-                }
-            }
-
-            Spacer(modifier = Modifier.height(24.dp))
-
             // --- 4. Executive Summary Card (Safe Spend & Performance) ---
-            Card(
-                shape = RoundedCornerShape(style.borderRadius),
-                colors = CardDefaults.cardColors(containerColor = style.surfaceColor),
-                modifier = Modifier.fillMaxWidth().padding(horizontal = 24.dp)
-            ) {
-                Column(modifier = Modifier.padding(24.dp)) {
-                    Row(verticalAlignment = Alignment.CenterVertically) {
-                        Column(modifier = Modifier.weight(1f)) {
-                            Text(
-                                "Daily Performance", 
-                                color = style.accentColor, 
-                                fontSize = 10.sp, 
-                                fontWeight = FontWeight.Black, 
-                                letterSpacing = 1.sp,
-                                modifier = Modifier.clickable { onNavigateToPerformanceHistory() }
-                            )
-                            Text("${state.overallProgress}% Completed", color = Color.White, fontSize = 20.sp, fontWeight = FontWeight.Bold)
+            val showExecutiveCard = state.showHabitSection || state.showWorkoutSection || state.showFinanceSection
+            if (showExecutiveCard) {
+                Card(
+                    shape = RoundedCornerShape(style.borderRadius),
+                    colors = CardDefaults.cardColors(containerColor = style.surfaceColor),
+                    modifier = Modifier.fillMaxWidth().padding(horizontal = 20.dp)
+                ) {
+                    Column(modifier = Modifier.padding(24.dp)) {
+                        Row(verticalAlignment = Alignment.CenterVertically) {
+                            if (state.showHabitSection || state.showWorkoutSection) {
+                                Column(modifier = Modifier.weight(1f)) {
+                                    Text(
+                                        "Daily Performance", 
+                                        color = style.accentColor, 
+                                        fontSize = 10.sp, 
+                                        fontWeight = FontWeight.Black, 
+                                        letterSpacing = 1.sp,
+                                        modifier = Modifier.clickable { onNavigateToPerformanceHistory() }
+                                    )
+                                    Text("${state.overallProgress}% Completed", color = Color.White, fontSize = 20.sp, fontWeight = FontWeight.Bold)
+                                }
+                            } else {
+                                Spacer(modifier = Modifier.weight(1f))
+                            }
+                            
+                            if (state.showFinanceSection) {
+                                Column(horizontalAlignment = Alignment.End) {
+                                    Text("Safe Spend", color = Color.White.copy(alpha = 0.5f), fontSize = 10.sp, fontWeight = FontWeight.Bold)
+                                    Text(String.format(Locale.getDefault(), "₹%.0f", state.safeSpendAmount), color = Color(0xFF2EC4B6), fontSize = 18.sp, fontWeight = FontWeight.Black)
+                                }
+                            }
                         }
-                        Column(horizontalAlignment = Alignment.End) {
-                            Text("Safe Spend", color = Color.White.copy(alpha = 0.5f), fontSize = 10.sp, fontWeight = FontWeight.Bold)
-                            Text(String.format(Locale.getDefault(), "₹%.0f", state.safeSpendAmount), color = Color(0xFF2EC4B6), fontSize = 18.sp, fontWeight = FontWeight.Black)
+                        
+                        if (state.showHabitSection || state.showWorkoutSection) {
+                            Spacer(modifier = Modifier.height(16.dp))
+                            LinearProgressIndicator(
+                                progress = { state.overallProgress / 100f },
+                                modifier = Modifier.fillMaxWidth().height(6.dp),
+                                color = style.accentColor,
+                                trackColor = Color.White.copy(alpha = 0.1f),
+                                strokeCap = StrokeCap.Round
+                            )
                         }
                     }
-                    Spacer(modifier = Modifier.height(16.dp))
-                    LinearProgressIndicator(
-                        progress = { state.overallProgress / 100f },
-                        modifier = Modifier.fillMaxWidth().height(6.dp),
-                        color = style.accentColor,
-                        trackColor = Color.White.copy(alpha = 0.1f),
-                        strokeCap = StrokeCap.Round
-                    )
                 }
             }
 
             // --- 5. Pulse Activity Feed (Motivational Mindset) ---
             if (state.recentActions.isNotEmpty()) {
-                Spacer(modifier = Modifier.height(24.dp))
-                Text("Pulse Activity", modifier = Modifier.padding(horizontal = 24.dp), color = Color.White.copy(alpha = 0.4f), fontSize = 10.sp, fontWeight = FontWeight.Bold, letterSpacing = 1.sp)
-                Spacer(modifier = Modifier.height(12.dp))
+                Spacer(modifier = Modifier.height(16.dp))
+                Text("Pulse Activity", modifier = Modifier.padding(horizontal = 20.dp), color = Color.White.copy(alpha = 0.4f), fontSize = 10.sp, fontWeight = FontWeight.Bold, letterSpacing = 1.sp)
+                Spacer(modifier = Modifier.height(8.dp))
                 LazyRow(
-                    contentPadding = PaddingValues(horizontal = 24.dp),
+                    contentPadding = PaddingValues(horizontal = 20.dp),
                     horizontalArrangement = Arrangement.spacedBy(12.dp)
                 ) {
                     // Recent Actions History (Shown Finished)
@@ -560,16 +596,16 @@ fun HomeScreen(
 
             // --- 7-12. Diversified Growth & Management Sections ---
             if (state.showHabitSection || state.showWorkoutSection) {
-                Spacer(modifier = Modifier.height(24.dp))
+                Spacer(modifier = Modifier.height(16.dp))
                 Text(
                     "Growth & Discipline",
-                    modifier = Modifier.padding(horizontal = 24.dp),
+                    modifier = Modifier.padding(horizontal = 20.dp),
                     color = Color.White.copy(alpha = 0.4f),
                     fontSize = 10.sp,
                     fontWeight = FontWeight.Bold,
                     letterSpacing = 1.sp
                 )
-                Spacer(modifier = Modifier.height(16.dp))
+                Spacer(modifier = Modifier.height(12.dp))
                 DashboardPair(
                     item1 = if (state.showHabitSection) {
                         {
@@ -578,7 +614,8 @@ fun HomeScreen(
                                 color = Color(if (state.habitColor == -1) 0xFFFF7A59 else state.habitColor.toLong()),
                                 icon = state.habitIcon,
                                 onClick = { onNavigateToHabits(); isMessageExpanded = false },
-                                onColorClick = { showColorPicker = "HABIT" })
+                                onColorClick = { showColorPicker = "HABIT" },
+                                auraAlpha = auraAlpha)
                         }
                     } else null,
                     item2 = if (state.showWorkoutSection) {
@@ -588,7 +625,8 @@ fun HomeScreen(
                                 color = Color(if (state.workoutColor == -1) 0xFFFFB800 else state.workoutColor.toLong()),
                                 icon = state.workoutIcon,
                                 onClick = { onNavigateToWorkout(); isMessageExpanded = false },
-                                onColorClick = { showColorPicker = "WORKOUT" })
+                                onColorClick = { showColorPicker = "WORKOUT" },
+                                auraAlpha = auraAlpha)
                         }
                     } else null
                 )
@@ -602,7 +640,7 @@ fun HomeScreen(
                     color = style.accentColor.copy(alpha = 0.15f),
                     shape = RoundedCornerShape(style.borderRadius),
                     border = BorderStroke(0.5.dp, style.accentColor.copy(alpha = 0.3f)),
-                    modifier = Modifier.padding(horizontal = 24.dp).fillMaxWidth()
+                    modifier = Modifier.padding(horizontal = 20.dp).fillMaxWidth()
                 ) {
                     Row(modifier = Modifier.padding(12.dp).clickable { isMessageExpanded = false }, verticalAlignment = Alignment.CenterVertically) {
                         Text("✨", fontSize = 14.sp)
@@ -618,16 +656,16 @@ fun HomeScreen(
             }
 
             if (state.showTaskSection || state.showNoteSection || state.showProjectSection || state.showFinanceSection) {
-                Spacer(modifier = Modifier.height(24.dp))
+                Spacer(modifier = Modifier.height(16.dp))
                 Text(
                     "Management & Notes",
-                    modifier = Modifier.padding(horizontal = 24.dp),
+                    modifier = Modifier.padding(horizontal = 20.dp),
                     color = Color.White.copy(alpha = 0.4f),
                     fontSize = 10.sp,
                     fontWeight = FontWeight.Bold,
                     letterSpacing = 1.sp
                 )
-                Spacer(modifier = Modifier.height(16.dp))
+                Spacer(modifier = Modifier.height(12.dp))
                 DashboardPair(
                     item1 = if (state.showTaskSection) {
                         {
@@ -635,7 +673,8 @@ fun HomeScreen(
                                 color = Color(if (state.taskColor == -1) 0xFF2EC4B6 else state.taskColor.toLong()),
                                 icon = state.taskIcon,
                                 onClick = { onNavigateToTodos(); isMessageExpanded = false },
-                                onColorClick = { showColorPicker = "TASK" })
+                                onColorClick = { showColorPicker = "TASK" },
+                                auraAlpha = auraAlpha)
                         }
                     } else null,
                     item2 = if (state.showNoteSection) {
@@ -644,13 +683,14 @@ fun HomeScreen(
                                 color = Color(if (state.noteColor == -1) 0xFF3A86F0 else state.noteColor.toLong()),
                                 icon = state.noteIcon,
                                 onClick = { onNavigateToNotes(); isMessageExpanded = false },
-                                onColorClick = { showColorPicker = "NOTE" })
+                                onColorClick = { showColorPicker = "NOTE" },
+                                auraAlpha = auraAlpha)
                         }
                     } else null
                 )
 
                 if ((state.showTaskSection || state.showNoteSection) && (state.showProjectSection || state.showFinanceSection)) {
-                    Spacer(modifier = Modifier.height(24.dp))
+                    Spacer(modifier = Modifier.height(16.dp))
                 }
 
                 DashboardPair(
@@ -660,7 +700,8 @@ fun HomeScreen(
                                 color = Color(if (state.projectColor == -1) 0xFF1A73E8 else state.projectColor.toLong()),
                                 icon = state.projectIcon,
                                 onClick = { onNavigateToProjects(); isMessageExpanded = false },
-                                onColorClick = { showColorPicker = "PROJECT" })
+                                onColorClick = { showColorPicker = "PROJECT" },
+                                auraAlpha = auraAlpha)
                         }
                     } else null,
                     item2 = if (state.showFinanceSection) {
@@ -670,7 +711,8 @@ fun HomeScreen(
                                 color = Color(if (state.financeColor == -1) 0xFFE91E63 else state.financeColor.toLong()),
                                 icon = state.financeIcon,
                                 onClick = { onNavigateToFinance(); isMessageExpanded = false },
-                                onColorClick = { showColorPicker = "FINANCE" })
+                                onColorClick = { showColorPicker = "FINANCE" },
+                                auraAlpha = auraAlpha)
                         }
                     } else null
                 )
@@ -684,7 +726,7 @@ fun HomeScreen(
                     color = Color(0xFF2EC4B6).copy(alpha = 0.1f),
                     shape = RoundedCornerShape(12.dp),
                     border = BorderStroke(0.5.dp, Color(0xFF2EC4B6).copy(alpha = 0.2f)),
-                    modifier = Modifier.padding(horizontal = 24.dp).fillMaxWidth()
+                    modifier = Modifier.padding(horizontal = 20.dp).fillMaxWidth()
                 ) {
                     Row(modifier = Modifier.padding(12.dp), verticalAlignment = Alignment.CenterVertically) {
                         Icon(Icons.Default.Star, null, tint = Color(0xFF2EC4B6), modifier = Modifier.size(14.dp))
@@ -728,26 +770,68 @@ fun HomeScreen(
             containerColor = Color(0xFF1A1A1A),
             text = {
                 Column(modifier = Modifier.verticalScroll(rememberScrollState())) {
-                    if (todayAgenda.isEmpty()) {
+                    if (state.todayAgenda.isEmpty()) {
                         Text("Your agenda is clear for today!", color = Color.White.copy(alpha = 0.6f), fontSize = 14.sp)
                     } else {
-                        todayAgenda.forEach { (section, items) ->
+                        state.todayAgenda.forEach { (section, items) ->
                             Text(
                                 text = section,
-                                color = Color(0xFF1A73E8),
+                                color = style.accentColor,
                                 fontSize = 10.sp,
                                 fontWeight = FontWeight.Black,
                                 letterSpacing = 1.sp,
                                 modifier = Modifier.padding(top = 16.dp, bottom = 8.dp)
                             )
                             items.forEach { item ->
-                                Row(
-                                    verticalAlignment = Alignment.CenterVertically,
-                                    modifier = Modifier.padding(vertical = 4.dp)
+                                Surface(
+                                    onClick = {
+                                        when (item.navigationTarget) {
+                                            "TASK_ACTIVITY" -> onNavigateToTodos()
+                                            "PROJECT_ACTIVITY" -> onNavigateToProjects()
+                                            "WORKSPACE" -> onNavigateToWorkspace()
+                                            "NOTE_ACTIVITY" -> onNavigateToNotes()
+                                        }
+                                        showNotificationsDialog = false
+                                    },
+                                    color = Color.White.copy(alpha = 0.05f),
+                                    shape = RoundedCornerShape(12.dp),
+                                    modifier = Modifier.padding(vertical = 4.dp).fillMaxWidth()
                                 ) {
-                                    Box(modifier = Modifier.size(6.dp).background(Color.White.copy(alpha = 0.3f), CircleShape))
-                                    Spacer(modifier = Modifier.width(12.dp))
-                                    Text(text = item, color = Color.White, fontSize = 14.sp)
+                                    Column(modifier = Modifier.padding(12.dp)) {
+                                        Row(verticalAlignment = Alignment.CenterVertically) {
+                                            Box(modifier = Modifier.size(6.dp).background(style.accentColor, CircleShape))
+                                            Spacer(modifier = Modifier.width(12.dp))
+                                            Text(text = item.title, color = Color.White, fontSize = 15.sp, fontWeight = FontWeight.Bold)
+                                        }
+                                        if (item.details.isNotEmpty()) {
+                                            Text(
+                                                text = item.details,
+                                                color = Color.White.copy(alpha = 0.5f),
+                                                fontSize = 12.sp,
+                                                modifier = Modifier.padding(start = 18.dp, top = 2.dp)
+                                            )
+                                        }
+                                        if (item.path.isNotEmpty()) {
+                                            Row(
+                                                verticalAlignment = Alignment.CenterVertically,
+                                                modifier = Modifier.padding(start = 18.dp, top = 4.dp)
+                                            ) {
+                                                Icon(
+                                                    Icons.Default.Place,
+                                                    null,
+                                                    tint = style.accentColor.copy(alpha = 0.6f),
+                                                    modifier = Modifier.size(10.dp)
+                                                )
+                                                Spacer(modifier = Modifier.width(4.dp))
+                                                Text(
+                                                    text = item.path,
+                                                    color = style.accentColor.copy(alpha = 0.7f),
+                                                    fontSize = 10.sp,
+                                                    fontWeight = FontWeight.Bold
+                                                )
+                                            }
+                                        }
+                                    }
                                 }
                             }
                         }
@@ -782,9 +866,19 @@ fun HomeScreen(
 // --- Specialized Section Cards ---
 
 @Composable
-fun HabitCard(progress: Int, color: Color, icon: Int, onClick: () -> Unit, onColorClick: () -> Unit) {
+fun HabitCard(progress: Int, color: Color, icon: Int, onClick: () -> Unit, onColorClick: () -> Unit, auraAlpha: Float = 0.6f) {
     val style = LocalAppStyle.current
-    val cardBorder = if (style.cardStyle == "GLASS") BorderStroke(1.dp, Color.White.copy(alpha = 0.1f)) else null
+    val cardBorder = if (style.cardStyle == "GLASS") {
+        BorderStroke(1.5.dp, Brush.sweepGradient(
+            colors = listOf(
+                color.copy(alpha = auraAlpha),
+                Color.White.copy(alpha = 0.2f),
+                color.copy(alpha = auraAlpha * 0.7f),
+                Color.White.copy(alpha = 0.2f),
+                color.copy(alpha = auraAlpha)
+            )
+        ))
+    } else null
 
     val cardElevation = if (style.showShadows) CardDefaults.cardElevation(defaultElevation = 8.dp) else CardDefaults.cardElevation(defaultElevation = 0.dp)
 
@@ -793,36 +887,78 @@ fun HabitCard(progress: Int, color: Color, icon: Int, onClick: () -> Unit, onCol
         shape = RoundedCornerShape(style.borderRadius),
         colors = CardDefaults.cardColors(containerColor = style.surfaceColor),
         elevation = cardElevation,
-        modifier = Modifier.fillMaxWidth().height(160.dp).then(if (cardBorder != null) Modifier.border(cardBorder, RoundedCornerShape(style.borderRadius)) else Modifier)
+        modifier = Modifier
+            .fillMaxWidth()
+            .height(160.dp)
+            .then(
+                if (cardBorder != null) {
+                    Modifier.border(cardBorder, RoundedCornerShape(style.borderRadius))
+                } else Modifier
+            )
+            .graphicsLayer {
+                if (style.cardStyle == "GLASS") {
+                    shadowElevation = 12f
+                    ambientShadowColor = color.copy(alpha = 0.4f)
+                    spotShadowColor = color.copy(alpha = 0.1f)
+                }
+            }
     ) {
-        Row(modifier = Modifier.padding(16.dp).fillMaxSize(), verticalAlignment = Alignment.CenterVertically) {
-            Column(modifier = Modifier.weight(1f)) {
-                Icon(painter = painterResource(id = icon), contentDescription = null, tint = color, modifier = Modifier.size(24.dp))
-                Spacer(modifier = Modifier.height(8.dp))
+        Box(modifier = Modifier.padding(16.dp).fillMaxSize()) {
+            // Text Info at Top-Left
+            Column(modifier = Modifier.align(Alignment.TopStart)) {
                 Text("HABITS", color = color, fontSize = 10.sp, fontWeight = FontWeight.Black, letterSpacing = 1.sp)
                 Text("Daily Rituals", color = Color.White.copy(alpha = 0.5f), fontSize = 12.sp)
-                Spacer(modifier = Modifier.weight(1f))
-                Box(modifier = Modifier.size(12.dp).clip(CircleShape).background(color.copy(alpha = 0.2f)).border(1.dp, color, CircleShape).clickable { onColorClick() })
             }
-            Box(contentAlignment = Alignment.Center, modifier = Modifier.size(80.dp)) {
+
+            // Icon at Bottom-Left
+            Icon(
+                painter = painterResource(id = icon),
+                contentDescription = null,
+                tint = color,
+                modifier = Modifier.size(24.dp).align(Alignment.BottomStart)
+            )
+
+            // Progress Indicator at Bottom-Right
+            Box(contentAlignment = Alignment.Center, modifier = Modifier.size(72.dp).align(Alignment.BottomEnd)) {
                 CircularProgressIndicator(
                     progress = { progress / 100f },
                     modifier = Modifier.fillMaxSize().graphicsLayer(scaleX = -1f),
                     color = color,
-                    strokeWidth = 8.dp,
+                    strokeWidth = 6.dp,
                     trackColor = Color.White.copy(alpha = 0.05f),
                     strokeCap = StrokeCap.Round
                 )
-                Text("$progress%", color = Color.White, fontSize = 16.sp, fontWeight = FontWeight.Black)
+                Text("$progress%", color = Color.White, fontSize = 14.sp, fontWeight = FontWeight.Black)
             }
+
+            // Color Picker at Top-Right
+            Box(
+                modifier = Modifier
+                    .size(12.dp)
+                    .clip(CircleShape)
+                    .background(color.copy(alpha = 0.2f))
+                    .border(1.dp, color, CircleShape)
+                    .align(Alignment.TopEnd)
+                    .clickable { onColorClick() }
+            )
         }
     }
 }
 
 @Composable
-fun WorkoutCard(progress: Int, color: Color, icon: Int, onClick: () -> Unit, onColorClick: () -> Unit) {
+fun WorkoutCard(progress: Int, color: Color, icon: Int, onClick: () -> Unit, onColorClick: () -> Unit, auraAlpha: Float = 0.6f) {
     val style = LocalAppStyle.current
-    val cardBorder = if (style.cardStyle == "GLASS") BorderStroke(1.dp, Color.White.copy(alpha = 0.1f)) else null
+    val cardBorder = if (style.cardStyle == "GLASS") {
+        BorderStroke(1.5.dp, Brush.sweepGradient(
+            colors = listOf(
+                color.copy(alpha = auraAlpha),
+                Color.White.copy(alpha = 0.2f),
+                color.copy(alpha = auraAlpha * 0.7f),
+                Color.White.copy(alpha = 0.2f),
+                color.copy(alpha = auraAlpha)
+            )
+        ))
+    } else null
 
     val cardElevation = if (style.showShadows) CardDefaults.cardElevation(defaultElevation = 8.dp) else CardDefaults.cardElevation(defaultElevation = 0.dp)
 
@@ -831,7 +967,17 @@ fun WorkoutCard(progress: Int, color: Color, icon: Int, onClick: () -> Unit, onC
         shape = RoundedCornerShape(style.borderRadius),
         colors = CardDefaults.cardColors(containerColor = style.surfaceColor),
         elevation = cardElevation,
-        modifier = Modifier.fillMaxWidth().height(160.dp).then(if (cardBorder != null) Modifier.border(cardBorder, RoundedCornerShape(style.borderRadius)) else Modifier)
+        modifier = Modifier
+            .fillMaxWidth()
+            .height(160.dp)
+            .then(if (cardBorder != null) Modifier.border(cardBorder, RoundedCornerShape(style.borderRadius)) else Modifier)
+            .graphicsLayer {
+                if (style.cardStyle == "GLASS") {
+                    shadowElevation = 12f
+                    ambientShadowColor = color.copy(alpha = 0.4f)
+                    spotShadowColor = color.copy(alpha = 0.1f)
+                }
+            }
     ) {
         Column(modifier = Modifier.padding(16.dp).fillMaxSize()) {
             Row(verticalAlignment = Alignment.CenterVertically) {
@@ -856,9 +1002,19 @@ fun WorkoutCard(progress: Int, color: Color, icon: Int, onClick: () -> Unit, onC
 }
 
 @Composable
-fun TaskCard(color: Color, icon: Int, onClick: () -> Unit, onColorClick: () -> Unit) {
+fun TaskCard(color: Color, icon: Int, onClick: () -> Unit, onColorClick: () -> Unit, auraAlpha: Float = 0.6f) {
     val style = LocalAppStyle.current
-    val cardBorder = if (style.cardStyle == "GLASS") BorderStroke(1.dp, Color.White.copy(alpha = 0.1f)) else null
+    val cardBorder = if (style.cardStyle == "GLASS") {
+        BorderStroke(1.5.dp, Brush.sweepGradient(
+            colors = listOf(
+                color.copy(alpha = auraAlpha),
+                Color.White.copy(alpha = 0.2f),
+                color.copy(alpha = auraAlpha * 0.7f),
+                Color.White.copy(alpha = 0.2f),
+                color.copy(alpha = auraAlpha)
+            )
+        ))
+    } else null
 
     val cardElevation = if (style.showShadows) CardDefaults.cardElevation(defaultElevation = 8.dp) else CardDefaults.cardElevation(defaultElevation = 0.dp)
 
@@ -867,7 +1023,17 @@ fun TaskCard(color: Color, icon: Int, onClick: () -> Unit, onColorClick: () -> U
         shape = RoundedCornerShape(style.borderRadius),
         colors = CardDefaults.cardColors(containerColor = style.surfaceColor),
         elevation = cardElevation,
-        modifier = Modifier.fillMaxWidth().height(140.dp).then(if (cardBorder != null) Modifier.border(cardBorder, RoundedCornerShape(style.borderRadius)) else Modifier)
+        modifier = Modifier
+            .fillMaxWidth()
+            .height(140.dp)
+            .then(if (cardBorder != null) Modifier.border(cardBorder, RoundedCornerShape(style.borderRadius)) else Modifier)
+            .graphicsLayer {
+                if (style.cardStyle == "GLASS") {
+                    shadowElevation = 10f
+                    ambientShadowColor = color.copy(alpha = 0.3f)
+                    spotShadowColor = color.copy(alpha = 0.1f)
+                }
+            }
     ) {
         Column(modifier = Modifier.padding(16.dp)) {
             Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
@@ -894,9 +1060,19 @@ fun TaskCard(color: Color, icon: Int, onClick: () -> Unit, onColorClick: () -> U
 }
 
 @Composable
-fun NoteCard(color: Color, icon: Int, onClick: () -> Unit, onColorClick: () -> Unit) {
+fun NoteCard(color: Color, icon: Int, onClick: () -> Unit, onColorClick: () -> Unit, auraAlpha: Float = 0.6f) {
     val style = LocalAppStyle.current
-    val cardBorder = if (style.cardStyle == "GLASS") BorderStroke(1.dp, Color.White.copy(alpha = 0.1f)) else null
+    val cardBorder = if (style.cardStyle == "GLASS") {
+        BorderStroke(1.5.dp, Brush.sweepGradient(
+            colors = listOf(
+                color.copy(alpha = auraAlpha),
+                Color.White.copy(alpha = 0.2f),
+                color.copy(alpha = auraAlpha * 0.7f),
+                Color.White.copy(alpha = 0.2f),
+                color.copy(alpha = auraAlpha)
+            )
+        ))
+    } else null
 
     val cardElevation = if (style.showShadows) CardDefaults.cardElevation(defaultElevation = 8.dp) else CardDefaults.cardElevation(defaultElevation = 0.dp)
 
@@ -905,7 +1081,17 @@ fun NoteCard(color: Color, icon: Int, onClick: () -> Unit, onColorClick: () -> U
         shape = RoundedCornerShape(style.borderRadius),
         colors = CardDefaults.cardColors(containerColor = style.surfaceColor),
         elevation = cardElevation,
-        modifier = Modifier.fillMaxWidth().height(140.dp).then(if (cardBorder != null) Modifier.border(cardBorder, RoundedCornerShape(style.borderRadius)) else Modifier)
+        modifier = Modifier
+            .fillMaxWidth()
+            .height(140.dp)
+            .then(if (cardBorder != null) Modifier.border(cardBorder, RoundedCornerShape(style.borderRadius)) else Modifier)
+            .graphicsLayer {
+                if (style.cardStyle == "GLASS") {
+                    shadowElevation = 10f
+                    ambientShadowColor = color.copy(alpha = 0.3f)
+                    spotShadowColor = color.copy(alpha = 0.1f)
+                }
+            }
     ) {
         Column(modifier = Modifier.padding(16.dp)) {
             Text("NOTES", color = color, fontSize = 10.sp, fontWeight = FontWeight.Black, letterSpacing = 1.sp)
@@ -921,9 +1107,19 @@ fun NoteCard(color: Color, icon: Int, onClick: () -> Unit, onColorClick: () -> U
 }
 
 @Composable
-fun ProjectCard(color: Color, icon: Int, onClick: () -> Unit, onColorClick: () -> Unit) {
+fun ProjectCard(color: Color, icon: Int, onClick: () -> Unit, onColorClick: () -> Unit, auraAlpha: Float = 0.6f) {
     val style = LocalAppStyle.current
-    val cardBorder = if (style.cardStyle == "GLASS") BorderStroke(1.dp, Color.White.copy(alpha = 0.1f)) else null
+    val cardBorder = if (style.cardStyle == "GLASS") {
+        BorderStroke(1.5.dp, Brush.sweepGradient(
+            colors = listOf(
+                color.copy(alpha = auraAlpha),
+                Color.White.copy(alpha = 0.2f),
+                color.copy(alpha = auraAlpha * 0.7f),
+                Color.White.copy(alpha = 0.2f),
+                color.copy(alpha = auraAlpha)
+            )
+        ))
+    } else null
 
     val cardElevation = if (style.showShadows) CardDefaults.cardElevation(defaultElevation = 8.dp) else CardDefaults.cardElevation(defaultElevation = 0.dp)
 
@@ -932,7 +1128,17 @@ fun ProjectCard(color: Color, icon: Int, onClick: () -> Unit, onColorClick: () -
         shape = RoundedCornerShape(style.borderRadius),
         colors = CardDefaults.cardColors(containerColor = style.surfaceColor),
         elevation = cardElevation,
-        modifier = Modifier.fillMaxWidth().height(130.dp).then(if (cardBorder != null) Modifier.border(cardBorder, RoundedCornerShape(style.borderRadius)) else Modifier)
+        modifier = Modifier
+            .fillMaxWidth()
+            .height(130.dp)
+            .then(if (cardBorder != null) Modifier.border(cardBorder, RoundedCornerShape(style.borderRadius)) else Modifier)
+            .graphicsLayer {
+                if (style.cardStyle == "GLASS") {
+                    shadowElevation = 12f
+                    ambientShadowColor = color.copy(alpha = 0.4f)
+                    spotShadowColor = color.copy(alpha = 0.1f)
+                }
+            }
     ) {
         Column(modifier = Modifier.padding(16.dp)) {
             Row(verticalAlignment = Alignment.CenterVertically) {
@@ -953,9 +1159,19 @@ fun ProjectCard(color: Color, icon: Int, onClick: () -> Unit, onColorClick: () -
 }
 
 @Composable
-fun FinanceCard(amount: Double, color: Color, icon: Int, onClick: () -> Unit, onColorClick: () -> Unit) {
+fun FinanceCard(amount: Double, color: Color, icon: Int, onClick: () -> Unit, onColorClick: () -> Unit, auraAlpha: Float = 0.6f) {
     val style = LocalAppStyle.current
-    val cardBorder = if (style.cardStyle == "GLASS") BorderStroke(1.dp, Color.White.copy(alpha = 0.1f)) else null
+    val cardBorder = if (style.cardStyle == "GLASS") {
+        BorderStroke(1.5.dp, Brush.sweepGradient(
+            colors = listOf(
+                color.copy(alpha = auraAlpha),
+                Color.White.copy(alpha = 0.2f),
+                color.copy(alpha = auraAlpha * 0.7f),
+                Color.White.copy(alpha = 0.2f),
+                color.copy(alpha = auraAlpha)
+            )
+        ))
+    } else null
 
     val cardElevation = if (style.showShadows) CardDefaults.cardElevation(defaultElevation = 8.dp) else CardDefaults.cardElevation(defaultElevation = 0.dp)
 
@@ -964,7 +1180,17 @@ fun FinanceCard(amount: Double, color: Color, icon: Int, onClick: () -> Unit, on
         shape = RoundedCornerShape(style.borderRadius),
         colors = CardDefaults.cardColors(containerColor = color.copy(alpha = 0.05f)),
         elevation = cardElevation,
-        modifier = Modifier.fillMaxWidth().height(130.dp).then(if (cardBorder != null) Modifier.border(cardBorder, RoundedCornerShape(style.borderRadius)) else Modifier)
+        modifier = Modifier
+            .fillMaxWidth()
+            .height(130.dp)
+            .then(if (cardBorder != null) Modifier.border(cardBorder, RoundedCornerShape(style.borderRadius)) else Modifier)
+            .graphicsLayer {
+                if (style.cardStyle == "GLASS") {
+                    shadowElevation = 10f
+                    ambientShadowColor = color.copy(alpha = 0.3f)
+                    spotShadowColor = color.copy(alpha = 0.1f)
+                }
+            }
     ) {
         Column(modifier = Modifier.padding(16.dp)) {
             Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
@@ -981,16 +1207,55 @@ fun FinanceCard(amount: Double, color: Color, icon: Int, onClick: () -> Unit, on
 
 @Composable
 fun QuickActionItem(label: String, icon: ImageVector, color: Color, isVisible: Boolean, offsetY: Dp, offsetX: Dp, onClick: () -> Unit) {
+    val context = LocalContext.current
+    val config = LocalConfiguration.current
+    val standardDensity = remember(context, config) { 
+        Density(
+            density = context.resources.displayMetrics.density,
+            fontScale = config.fontScale
+        )
+    }
+
     val animatedAlpha by animateFloatAsState(targetValue = if (isVisible) 1f else 0f, label = "Alpha")
     val animatedScale by animateFloatAsState(targetValue = if (isVisible) 1f else 0.5f, label = "Scale")
+    
     if (animatedAlpha > 0f) {
-        Box(modifier = Modifier.offset(x = offsetX, y = offsetY).graphicsLayer(alpha = animatedAlpha, scaleX = animatedScale, scaleY = animatedScale).clickable { onClick() }, contentAlignment = Alignment.Center) {
-            Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                Box(modifier = Modifier.size(48.dp).clip(CircleShape).background(color).border(1.dp, Color.White.copy(alpha = 0.2f), CircleShape), contentAlignment = Alignment.Center) {
-                    Icon(imageVector = icon, contentDescription = null, tint = Color.White, modifier = Modifier.size(24.dp))
+        CompositionLocalProvider(LocalDensity provides standardDensity) {
+            Box(
+                modifier = Modifier
+                    .offset(x = offsetX, y = offsetY)
+                    .graphicsLayer(alpha = animatedAlpha, scaleX = animatedScale, scaleY = animatedScale)
+                    .clickable(
+                        interactionSource = remember { MutableInteractionSource() },
+                        indication = null // Custom circle will handle visuals
+                    ) { onClick() },
+                contentAlignment = Alignment.Center
+            ) {
+                Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                    Box(
+                        modifier = Modifier
+                            .size(44.dp) // Adjusted for 50.dp FAB
+                            .clip(CircleShape)
+                            .background(color)
+                            .border(1.dp, Color.White.copy(alpha = 0.2f), CircleShape),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        Icon(
+                            imageVector = icon,
+                            contentDescription = null,
+                            tint = Color.White,
+                            modifier = Modifier.size(22.dp) // Proportional to 44.dp
+                        )
+                    }
+                    Spacer(modifier = Modifier.height(4.dp))
+                    Text(
+                        label,
+                        color = Color.White,
+                        fontSize = 10.sp, // Slightly larger for 44.dp item
+                        fontWeight = FontWeight.Bold,
+                        textAlign = TextAlign.Center
+                    )
                 }
-                Spacer(modifier = Modifier.height(4.dp))
-                Text(label, color = Color.White, fontSize = 10.sp, fontWeight = FontWeight.Bold)
             }
         }
     }
@@ -1010,13 +1275,13 @@ fun NotificationItem(title: String, body: String) {
 fun DashboardPair(item1: (@Composable () -> Unit)?, item2: (@Composable () -> Unit)?) {
     if (item1 == null && item2 == null) return
     
-    Row(modifier = Modifier.padding(horizontal = 24.dp).fillMaxWidth()) {
+    Row(modifier = Modifier.padding(horizontal = 20.dp).fillMaxWidth()) {
         if (item1 != null) {
             Box(modifier = Modifier.weight(1f)) { item1() }
         }
         
         if (item1 != null && item2 != null) {
-            Spacer(modifier = Modifier.width(16.dp))
+            Spacer(modifier = Modifier.width(12.dp))
         }
         
         if (item2 != null) {

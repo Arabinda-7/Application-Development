@@ -34,16 +34,21 @@ class ProjectNoteAdapter(
         holder.title.text = UIUtils.formatTitleCase(note.title)
         holder.content.text = note.content
 
+        // Card Styling
+        val color = if (note.color != -1) note.color else ContextCompat.getColor(context, R.color.primary_blue)
+        holder.card.setCardBackgroundColor(Color.TRANSPARENT)
+        holder.card.strokeColor = color
+        holder.card.strokeWidth = (1.5 * context.resources.displayMetrics.density).toInt()
+        holder.accentBar.backgroundTintList = ColorStateList.valueOf(color)
+        holder.title.setTextColor(color)
+
         // Visual Completion Feedback
         if (isCompleted) {
             holder.title.paintFlags = holder.title.paintFlags or Paint.STRIKE_THRU_TEXT_FLAG
             holder.card.alpha = 0.5f
-            holder.card.strokeWidth = 2
-            holder.card.strokeColor = Color.parseColor("#2EC4B6")
         } else {
             holder.title.paintFlags = holder.title.paintFlags and Paint.STRIKE_THRU_TEXT_FLAG.inv()
             holder.card.alpha = 1.0f
-            holder.card.strokeWidth = 0
         }
 
         // Deadline/Date
@@ -62,11 +67,6 @@ class ProjectNoteAdapter(
             holder.date.text = sdf.format(Date(note.timestamp))
             holder.date.setTextColor(ContextCompat.getColor(context, R.color.text_secondary))
         }
-
-        // Card Color
-        val color = if (note.color != -1) note.color else ContextCompat.getColor(context, R.color.primary_blue)
-        holder.card.setCardBackgroundColor(ContextCompat.getColor(context, R.color.chip_background))
-        holder.title.setTextColor(color)
 
         // Pin
         holder.ivPin.visibility = if (note.isPinned) View.VISIBLE else View.GONE
@@ -149,5 +149,6 @@ class ProjectNoteAdapter(
         val containerProgress: LinearLayout = itemView.findViewById(R.id.container_progress)
         val progressBar: ProgressBar = itemView.findViewById(R.id.progress_bar)
         val tvProgressPercent: TextView = itemView.findViewById(R.id.tv_progress_percent)
+        val accentBar: View = itemView.findViewById(R.id.accent_bar_project)
     }
 }

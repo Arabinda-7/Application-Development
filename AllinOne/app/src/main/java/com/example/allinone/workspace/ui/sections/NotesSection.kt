@@ -1,0 +1,196 @@
+package com.example.allinone.workspace.ui.sections
+
+import androidx.compose.foundation.*
+import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.lazy.grid.GridCells
+import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
+import androidx.compose.foundation.lazy.grid.items
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.text.BasicTextField
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.material.icons.filled.Delete
+import androidx.compose.material.icons.filled.Description
+import androidx.compose.material.icons.filled.Edit
+import androidx.compose.material3.*
+import androidx.compose.runtime.*
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.SolidColor
+import androidx.compose.ui.text.TextStyle
+import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
+import com.example.allinone.LocalAppStyle
+import com.example.allinone.workspace.data.NoteEntity
+import com.example.allinone.workspace.ui.WorkspaceViewModel
+
+@Composable
+fun NoteViewSection(
+    notes: List<NoteEntity>,
+    onViewNote: (NoteEntity) -> Unit,
+    onEditNote: (NoteEntity) -> Unit,
+    onDeleteNote: (NoteEntity) -> Unit
+) {
+    val style = LocalAppStyle.current
+    LazyVerticalGrid(columns = GridCells.Fixed(2), contentPadding = PaddingValues(8.dp)) {
+        items(notes, key = { it.id }) { note ->
+            var showMenu by remember { mutableStateOf(false) }
+            Box {
+                Card(
+                    modifier = Modifier
+                        .padding(8.dp)
+                        .animateItem()
+                        .combinedClickable(
+                            onClick = { onViewNote(note) },
+                            onLongClick = { showMenu = true }
+                        ),
+                    colors = CardDefaults.cardColors(containerColor = style.surfaceColor)
+                ) {
+                    Column(modifier = Modifier.padding(16.dp)) {
+                        Text(note.title, fontWeight = FontWeight.Bold, color = Color.White, fontSize = 20.sp)
+                        Spacer(modifier = Modifier.height(8.dp))
+                        Text(note.content, maxLines = 5, color = Color.White.copy(alpha = 0.6f), fontSize = 12.sp)
+                    }
+                }
+                WorkspaceDropdown(expanded = showMenu, onDismissRequest = { showMenu = false }) {
+                    WorkspaceDropdownItem(
+                        text = "View Details",
+                        onClick = { onViewNote(note); showMenu = false },
+                        icon = Icons.Default.Description
+                    )
+                    WorkspaceDropdownItem(
+                        text = "Edit",
+                        onClick = { onEditNote(note); showMenu = false },
+                        icon = Icons.Default.Edit
+                    )
+                    HorizontalDivider(modifier = Modifier.padding(vertical = 4.dp), color = Color.White.copy(alpha = 0.1f))
+                    WorkspaceDropdownItem(
+                        text = "Delete",
+                        onClick = { onDeleteNote(note); showMenu = false },
+                        icon = Icons.Default.Delete,
+                        isDestructive = true
+                    )
+                }
+            }
+        }
+    }
+}
+
+@Composable
+fun NoteDetailSection(
+    note: NoteEntity,
+    onBack: () -> Unit,
+    onEdit: () -> Unit
+) {
+    val style = LocalAppStyle.current
+    val projectColorHex = com.example.allinone.DataManager.globalProjectColor
+    val accentColor = if (projectColorHex != -1) Color(projectColorHex) else style.accentColor
+
+    Box(modifier = Modifier.fillMaxSize().background(style.backgroundColor)) {
+        Box(modifier = Modifier.fillMaxWidth().height(160.dp).background(accentColor.copy(alpha = 0.15f)))
+        
+        Column(modifier = Modifier.fillMaxSize().navigationBarsPadding()) {
+            Row(
+                modifier = Modifier.fillMaxWidth().statusBarsPadding().padding(start = 16.dp, end = 16.dp, top = 8.dp, bottom = 8.dp),
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.SpaceBetween
+            ) {
+                IconButton(onClick = onBack) { Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Back", tint = Color.White) }
+                IconButton(onClick = onEdit) { Icon(Icons.Default.Edit, contentDescription = "Edit", tint = accentColor) }
+            }
+
+            Column(modifier = Modifier.padding(horizontal = 24.dp).padding(bottom = 12.dp)) {
+                Text(text = note.title, color = Color.White, fontSize = 32.sp, fontWeight = FontWeight.Black)
+            }
+
+            Column(modifier = Modifier.fillMaxSize().padding(horizontal = 24.dp).verticalScroll(rememberScrollState())) {
+                Spacer(modifier = Modifier.height(24.dp))
+                Text(
+                    text = if (note.content.isNotBlank()) note.content else "Empty note.",
+                    color = Color.White.copy(alpha = 0.8f),
+                    fontSize = 16.sp,
+                    lineHeight = 24.sp
+                )
+                Spacer(modifier = Modifier.height(100.dp))
+            }
+        }
+    }
+}
+
+@Composable
+fun NoteAddEditSection(
+    note: NoteEntity? = null,
+    projectId: String,
+    viewModel: WorkspaceViewModel,
+    onBack: () -> Unit
+) {
+    val style = LocalAppStyle.current
+    val projectColorHex = com.example.allinone.DataManager.globalProjectColor
+    val projectColor = if (projectColorHex != -1) Color(projectColorHex) else style.accentColor
+
+    var title by remember(note) { mutableStateOf(note?.title ?: "") }
+    var content by remember(note) { mutableStateOf(note?.content ?: "") }
+
+    Box(modifier = Modifier.fillMaxSize().background(style.backgroundColor)) {
+        Box(modifier = Modifier.fillMaxWidth().height(160.dp).background(projectColor.copy(alpha = 0.15f)))
+        
+        Column(modifier = Modifier.fillMaxSize().navigationBarsPadding().imePadding()) {
+            Row(
+                modifier = Modifier.fillMaxWidth().statusBarsPadding().padding(start = 16.dp, end = 16.dp, top = 8.dp, bottom = 8.dp),
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.SpaceBetween
+            ) {
+                IconButton(onClick = onBack) { Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Back", tint = Color.White) }
+                TextButton(
+                    onClick = {
+                        val updated = note?.copy(title = title, content = content)
+                            ?: NoteEntity(projectId = projectId, title = title, content = content)
+                        
+                        if (note == null) viewModel.addNote(title, content, projectId)
+                        else viewModel.updateNote(updated)
+                        onBack()
+                    },
+                    enabled = title.isNotBlank()
+                ) {
+                    Text("SAVE", color = projectColor, fontWeight = FontWeight.Black, fontSize = 16.sp, letterSpacing = 1.sp)
+                }
+            }
+
+            Column(modifier = Modifier.padding(horizontal = 24.dp).padding(bottom = 12.dp)) {
+                BasicTextField(
+                    value = title,
+                    onValueChange = { title = it },
+                    textStyle = TextStyle(color = Color.White, fontSize = 32.sp, fontWeight = FontWeight.Black),
+                    cursorBrush = SolidColor(projectColor),
+                    modifier = Modifier.fillMaxWidth(),
+                    decorationBox = { innerTextField ->
+                        if (title.isEmpty()) { Text("Note Title", color = Color.White.copy(alpha = 0.2f), fontSize = 32.sp, fontWeight = FontWeight.Black) }
+                        innerTextField()
+                    }
+                )
+            }
+
+            Column(modifier = Modifier.fillMaxSize().padding(horizontal = 24.dp).verticalScroll(rememberScrollState())) {
+                Spacer(modifier = Modifier.height(16.dp))
+                Text("CONTENT", color = projectColor, fontSize = 10.sp, fontWeight = FontWeight.Black, letterSpacing = 1.5.sp)
+                Spacer(modifier = Modifier.height(12.dp))
+                BasicTextField(
+                    value = content,
+                    onValueChange = { content = it },
+                    textStyle = TextStyle(color = Color.White.copy(alpha = 0.8f), fontSize = 16.sp, lineHeight = 24.sp),
+                    cursorBrush = SolidColor(projectColor),
+                    modifier = Modifier.fillMaxWidth().heightIn(min = 300.dp),
+                    decorationBox = { innerTextField ->
+                        if (content.isEmpty()) {
+                            Text("Start typing your thoughts...", color = Color.White.copy(alpha = 0.2f), fontSize = 16.sp)
+                        }
+                        innerTextField()
+                    }
+                )
+                Spacer(modifier = Modifier.height(100.dp))
+            }
+        }
+    }
+}

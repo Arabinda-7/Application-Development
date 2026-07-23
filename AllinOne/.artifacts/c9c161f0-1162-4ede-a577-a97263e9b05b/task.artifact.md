@@ -1,0 +1,4 @@
+- [x] Restrict header edit button to Dashboard tab
+    - [x] Update `WorkspaceHeader` in `ProjectWorkspaceScreen.kt`
+    - [x] Reduce Edit Icon size in header
+    - [x] Verify changes manually

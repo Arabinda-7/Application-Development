@@ -37,11 +37,45 @@ class PersonalLedgerHubActivity : BaseActivity() {
         findViewById<View>(R.id.btn_add_person_full).setOnClickListener {
             startActivity(Intent(this, AddPersonActivity::class.java))
         }
+        applySectionTheme()
+        updateDynamicBackground()
     }
 
     override fun onResume() {
         super.onResume()
         adapter.notifyDataSetChanged()
+        applySectionTheme()
+        updateDynamicBackground()
+    }
+
+    private fun applySectionTheme() {
+        val financeColor = if (DataManager.globalFinanceColor != -1) DataManager.globalFinanceColor else Color.parseColor("#E91E63")
+        val darkenedFabColor = UIUtils.darkenColor(financeColor, 0.5f)
+        
+        findViewById<FloatingActionButton>(R.id.btn_add_person_full).backgroundTintList = 
+            android.content.res.ColorStateList.valueOf(darkenedFabColor)
+    }
+
+    private fun updateDynamicBackground() {
+        val auraView = findViewById<View>(R.id.personal_ledger_hub_aura_background) ?: return
+        val financeColor = if (DataManager.globalFinanceColor != -1) DataManager.globalFinanceColor else Color.parseColor("#E91E63")
+        
+        val gradient = android.graphics.drawable.GradientDrawable(
+            android.graphics.drawable.GradientDrawable.Orientation.TOP_BOTTOM,
+            intArrayOf(
+                adjustAlpha(financeColor, 0.4f),
+                Color.BLACK
+            )
+        )
+        auraView.background = gradient
+    }
+
+    private fun adjustAlpha(color: Int, factor: Float): Int {
+        val alpha = Math.round(Color.alpha(color) * factor)
+        val red = Color.red(color)
+        val green = Color.green(color)
+        val blue = Color.blue(color)
+        return Color.argb(alpha, red, green, blue)
     }
 
     inner class PersonalLedgerAdapter(

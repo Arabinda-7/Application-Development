@@ -29,6 +29,11 @@ class LedgerActivity : BaseActivity() {
     private lateinit var tvTotalBorrowed: TextView
     private lateinit var tvTotalLent: TextView
     private lateinit var tvNetBalance: TextView
+    private lateinit var btnAddLedger: View
+    private lateinit var cardTotalBorrowed: com.google.android.material.card.MaterialCardView
+    private lateinit var cardTotalLent: com.google.android.material.card.MaterialCardView
+    private lateinit var cardNetBalance: com.google.android.material.card.MaterialCardView
+    private lateinit var auraView: View
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -37,6 +42,11 @@ class LedgerActivity : BaseActivity() {
         tvTotalBorrowed = findViewById(R.id.tv_total_borrowed)
         tvTotalLent = findViewById(R.id.tv_total_lent)
         tvNetBalance = findViewById(R.id.tv_net_balance)
+        btnAddLedger = findViewById(R.id.btn_add_ledger)
+        cardTotalBorrowed = findViewById(R.id.card_total_borrowed)
+        cardTotalLent = findViewById(R.id.card_total_lent)
+        cardNetBalance = findViewById(R.id.card_net_balance)
+        auraView = findViewById(R.id.ledger_aura_background)
 
         val ledgerList = findViewById<RecyclerView>(R.id.ledger_list)
         ledgerList.layoutManager = LinearLayoutManager(this)
@@ -47,7 +57,6 @@ class LedgerActivity : BaseActivity() {
                 DataManager.saveData(this)
                 updateActiveEntries()
                 updateSummary()
-        setupKeyboardHandling(findViewById(R.id.ledger_root_layout))
             },
             onShowMenu = { anchor, entry, isHistory, onAction ->
                 showCustomLedgerMenu(anchor, entry, isHistory, onAction)
@@ -74,7 +83,6 @@ class LedgerActivity : BaseActivity() {
                         DataManager.saveData(this)
                         updateActiveEntries()
                         updateSummary()
-        setupKeyboardHandling(findViewById(R.id.ledger_root_layout))
                     }
                 )
             }
@@ -90,14 +98,56 @@ class LedgerActivity : BaseActivity() {
             startActivity(Intent(this, LedgerHistoryActivity::class.java))
         }
 
+        findViewById<View>(R.id.btn_ledger_settings).setOnClickListener {
+            showLedgerSettingsDialog()
+        }
+
         findViewById<View>(R.id.btn_add_ledger).setOnClickListener { showAddLedgerDialog() }
+        applySectionTheme()
+        updateDynamicBackground()
     }
 
     override fun onResume() {
         super.onResume()
         updateActiveEntries()
         updateSummary()
+        applySectionTheme()
+        updateDynamicBackground()
         setupKeyboardHandling(findViewById(R.id.ledger_root_layout), findViewById(R.id.ledger_content_container))
+    }
+
+    private fun updateDynamicBackground() {
+        val financeColor = if (DataManager.globalFinanceColor != -1) DataManager.globalFinanceColor else Color.parseColor("#E91E63")
+        
+        val gradient = android.graphics.drawable.GradientDrawable(
+            android.graphics.drawable.GradientDrawable.Orientation.TOP_BOTTOM,
+            intArrayOf(
+                adjustAlpha(financeColor, 0.4f),
+                Color.BLACK
+            )
+        )
+        auraView.background = gradient
+    }
+
+    private fun adjustAlpha(color: Int, factor: Float): Int {
+        val alpha = Math.round(Color.alpha(color) * factor)
+        val red = Color.red(color)
+        val green = Color.green(color)
+        val blue = Color.blue(color)
+        return Color.argb(alpha, red, green, blue)
+    }
+
+    private fun applySectionTheme() {
+        val financeColor = if (DataManager.globalFinanceColor != -1) DataManager.globalFinanceColor else Color.parseColor("#E91E63")
+        val darkenedFabColor = UIUtils.darkenColor(financeColor, 0.5f)
+        
+        // Sync FAB color
+        btnAddLedger.backgroundTintList = android.content.res.ColorStateList.valueOf(darkenedFabColor)
+            
+        // Sync Summary Card Strokes
+        cardTotalBorrowed.strokeColor = Color.parseColor("#FF5252")
+        cardTotalLent.strokeColor = Color.parseColor("#4CAF50")
+        cardNetBalance.strokeColor = financeColor
     }
 
     private fun updateActiveEntries() {
@@ -126,6 +176,32 @@ class LedgerActivity : BaseActivity() {
         tvNetBalance.setTextColor(if (netBalance >= 0) Color.parseColor("#4CAF50") else Color.parseColor("#FF5252"))
     }
 
+    private fun showLedgerSettingsDialog() {
+        val dialog = Dialog(this)
+        dialog.setContentView(R.layout.dialog_ledger_settings)
+        dialog.window?.setBackgroundDrawableResource(android.R.color.transparent)
+        dialog.window?.setLayout(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT)
+
+        dialog.findViewById<View>(R.id.item_manage_people).setOnClickListener {
+            dialog.dismiss()
+            // Main Ledger already manages people by grouping.
+            Toast.makeText(this, "Managing People in Main Ledger", Toast.LENGTH_SHORT).show()
+        }
+
+        dialog.findViewById<View>(R.id.item_people_ledger).setOnClickListener {
+            dialog.dismiss()
+            startActivity(Intent(this, PersonalLedgerHubActivity::class.java))
+        }
+
+        dialog.findViewById<View>(R.id.item_sort_order).setOnClickListener {
+            // Future sorting logic
+            Toast.makeText(this, "Sort feature coming soon", Toast.LENGTH_SHORT).show()
+        }
+
+        dialog.findViewById<View>(R.id.btn_close_settings).setOnClickListener { dialog.dismiss() }
+        dialog.show()
+    }
+
     private fun showCustomLedgerMenu(anchor: View, entry: LedgerEntry, isHistory: Boolean, onAction: () -> Unit) {
         val inflater = LayoutInflater.from(this)
         val menuView = inflater.inflate(R.layout.layout_custom_menu, null)
@@ -148,7 +224,6 @@ class LedgerActivity : BaseActivity() {
             DataManager.saveData(this)
             updateActiveEntries()
             updateSummary()
-        setupKeyboardHandling(findViewById(R.id.ledger_root_layout))
             onAction()
             popupWindow.dismiss()
         }
@@ -248,7 +323,6 @@ class LedgerActivity : BaseActivity() {
                 DataManager.saveData(this)
                 updateActiveEntries()
                 updateSummary()
-        setupKeyboardHandling(findViewById(R.id.ledger_root_layout))
                 dialog.dismiss()
             }
         }
@@ -323,7 +397,6 @@ class LedgerActivity : BaseActivity() {
                 updateActiveEntries()
                 DataManager.saveData(this)
                 updateSummary()
-        setupKeyboardHandling(findViewById(R.id.ledger_root_layout))
                 dialog.dismiss()
             } else {
                 Toast.makeText(this, "Name and Amount required", Toast.LENGTH_SHORT).show()
@@ -390,14 +463,19 @@ class LedgerAdapter(
         val progress = if (entry.amount > 0) ((entry.paidAmount / entry.amount) * 100).toInt() else 0
         holder.progressBar.progress = progress
 
-        // Feature 6: Overdue Highlighting
+        // Feature 6: Overdue Highlighting & Dynamic Stroke
         val isOverdue = entry.dueDate != null && entry.dueDate!! < System.currentTimeMillis() && !entry.isSettled
+        val typeColor = if (entry.type == "Borrowed") Color.parseColor("#FF5252") else Color.parseColor("#4CAF50")
+        
+        holder.cardView.setCardBackgroundColor(Color.TRANSPARENT)
+        holder.cardView.strokeWidth = (1.5f * holder.itemView.resources.displayMetrics.density).toInt()
+        
         if (isOverdue) {
             holder.cardView.strokeColor = Color.parseColor("#FF5252")
-            holder.cardView.strokeWidth = (2 * holder.itemView.resources.displayMetrics.density).toInt()
+            // Make border thicker if overdue
+            holder.cardView.strokeWidth = (2.5f * holder.itemView.resources.displayMetrics.density).toInt()
         } else {
-            holder.cardView.strokeColor = Color.parseColor("#22FFFFFF")
-            holder.cardView.strokeWidth = (1 * holder.itemView.resources.displayMetrics.density).toInt()
+            holder.cardView.strokeColor = typeColor
         }
 
         // Feature 5: Show Payment History if Expanded
@@ -460,7 +538,6 @@ class LedgerAdapter(
             holder.tvDueDate.visibility = View.GONE
         }
 
-        val typeColor = if (entry.type == "Borrowed") Color.parseColor("#FF5252") else Color.parseColor("#4CAF50")
         holder.tvType.setTextColor(typeColor)
         holder.tvAmount.setTextColor(typeColor)
 

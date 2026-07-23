@@ -18,7 +18,7 @@ import java.util.*
 
 class AddHabitActivity : BaseActivity() {
 
-    private var habitIndex: Int = -1
+    private var habitId: Long = -1L
     private var existingHabit: Habit? = null
     
     private var tempRepeatDays = mutableListOf(0, 1, 2, 3, 4, 5, 6)
@@ -26,14 +26,17 @@ class AddHabitActivity : BaseActivity() {
     private var selectedColor: Int = -1
     private var selectedIcon: Int = R.drawable.ic_habit_tracker
 
+    private lateinit var tvNameHint: TextView
+    private lateinit var tvScheduleHint: TextView
+
     private lateinit var nameInput: EditText
     private lateinit var btnSave: TextView
     private lateinit var iconPreview: ImageView
     private lateinit var colorPreview: View
     private lateinit var headerAccent: View
-    private lateinit var tvNameHint: TextView
-    private lateinit var tvScheduleHint: TextView
-    
+
+    private var selectedMode = "Reps"
+
     private val colors by lazy {
         listOf(
             ContextCompat.getColor(this, R.color.card_blue),
@@ -47,9 +50,9 @@ class AddHabitActivity : BaseActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_add_habit)
 
-        habitIndex = intent.getIntExtra("HABIT_INDEX", -1)
-        if (habitIndex != -1 && habitIndex < DataManager.habits.size) {
-            existingHabit = DataManager.habits[habitIndex]
+        habitId = intent.getLongExtra("HABIT_ID", -1L)
+        if (habitId != -1L) {
+            existingHabit = DataManager.habits.find { it.timestamp == habitId }
         }
 
         initViews()
@@ -59,6 +62,7 @@ class AddHabitActivity : BaseActivity() {
 
     private fun initViews() {
         nameInput = findViewById(R.id.habit_name_input)
+
         btnSave = findViewById(R.id.btn_save)
         iconPreview = findViewById(R.id.icon_preview)
         colorPreview = findViewById(R.id.color_preview)
@@ -75,11 +79,13 @@ class AddHabitActivity : BaseActivity() {
         selectedFrequency = existingHabit?.frequency ?: "Anytime"
         selectedColor = existingHabit?.color ?: colors[0]
         selectedIcon = existingHabit?.iconResId ?: R.drawable.ic_habit_tracker
+        selectedMode = existingHabit?.trackingMode ?: "Reps"
 
         if (existingHabit != null) {
+            findViewById<TextView>(R.id.tv_header_title_habit).text = "EDIT RITUAL"
             nameInput.setText(existingHabit?.name)
             btnSave.text = "UPDATE"
-            iconPreview.setImageResource(selectedIcon)
+            if (selectedIcon != -1) iconPreview.setImageResource(selectedIcon)
         }
 
         updateThemeVisuals()
@@ -135,6 +141,8 @@ class AddHabitActivity : BaseActivity() {
             }
         }
 
+        // Mode Cards Removed
+
         nameInput.addTextChangedListener(object : android.text.TextWatcher {
             override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {}
             override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) { validateInputs() }
@@ -165,6 +173,7 @@ class AddHabitActivity : BaseActivity() {
         val name = nameInput.text.toString().trim()
         val isNameValid = name.isNotEmpty()
         val isScheduleValid = tempRepeatDays.isNotEmpty()
+        
         val isAllValid = isNameValid && isScheduleValid
 
         btnSave.alpha = if (isAllValid) 1.0f else 0.3f
@@ -174,7 +183,7 @@ class AddHabitActivity : BaseActivity() {
         
         tvNameHint.visibility = if (isNameValid) View.GONE else View.VISIBLE
         tvScheduleHint.visibility = if (isScheduleValid) View.GONE else View.VISIBLE
-        
+
         if (!isNameValid) startPulseAnimation(tvNameHint)
         if (!isScheduleValid) startPulseAnimation(tvScheduleHint)
     }
@@ -250,12 +259,16 @@ class AddHabitActivity : BaseActivity() {
 
     private fun saveHabit() {
         val name = nameInput.text.toString().trim()
+        val target = 1
+        
         if (existingHabit == null) {
-            DataManager.habits.add(Habit(name, false, selectedFrequency, color = selectedColor, iconResId = selectedIcon, repeatType = "SPECIFIC_DAYS", repeatDays = tempRepeatDays.toList(), repeatCount = 1))
+            DataManager.habits.add(Habit(name, false, selectedFrequency, selectedMode, target, 0, false, selectedColor, selectedIcon, repeatType = "SPECIFIC_DAYS", repeatDays = tempRepeatDays.toList(), repeatCount = 1))
         } else {
             existingHabit?.let {
                 it.name = name
                 it.frequency = selectedFrequency
+                it.trackingMode = selectedMode
+                it.target = target
                 it.color = selectedColor
                 it.iconResId = selectedIcon
                 it.repeatDays = tempRepeatDays.toList()
@@ -265,4 +278,5 @@ class AddHabitActivity : BaseActivity() {
         setResult(RESULT_OK)
         finish()
     }
+
 }

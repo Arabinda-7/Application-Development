@@ -45,6 +45,7 @@ class FinanceMonthHistoryActivity : BaseActivity() {
         setupKeyboardHandling(findViewById(R.id.month_history_root), findViewById(R.id.month_history_content_container))
 
         findViewById<View>(R.id.btn_back).setOnClickListener { finish() }
+        updateDynamicBackground()
 
         // Default to current month or intent month
         val targetMonth = intent.getIntExtra("month", Calendar.getInstance().get(Calendar.MONTH))
@@ -52,10 +53,46 @@ class FinanceMonthHistoryActivity : BaseActivity() {
         updateMonthSelectorSelection(targetMonth)
     }
 
+    override fun onResume() {
+        super.onResume()
+        DataManager.loadData(this)
+        updateDynamicBackground()
+        vpMonthDetails.adapter?.notifyDataSetChanged()
+    }
+
+    private fun updateDynamicBackground() {
+        val auraView = findViewById<View>(R.id.month_history_aura_background) ?: return
+        val financeColor = if (DataManager.globalFinanceColor != -1) DataManager.globalFinanceColor else Color.parseColor("#E91E63")
+        
+        val gradient = android.graphics.drawable.GradientDrawable(
+            android.graphics.drawable.GradientDrawable.Orientation.TOP_BOTTOM,
+            intArrayOf(
+                adjustAlpha(financeColor, 0.4f),
+                Color.BLACK
+            )
+        )
+        auraView.background = gradient
+    }
+
+    private fun adjustAlpha(color: Int, factor: Float): Int {
+        val alpha = Math.round(Color.alpha(color) * factor)
+        val red = Color.red(color)
+        val green = Color.green(color)
+        val blue = Color.blue(color)
+        return Color.argb(alpha, red, green, blue)
+    }
+
     private fun showYearPickerDialog() {
         val dialog = android.app.Dialog(this)
         dialog.setContentView(R.layout.dialog_year_roller)
-        dialog.window?.setBackgroundDrawableResource(android.R.color.transparent)
+        dialog.window?.let { window ->
+            window.setBackgroundDrawableResource(android.R.color.transparent)
+            if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.S) {
+                window.addFlags(android.view.WindowManager.LayoutParams.FLAG_BLUR_BEHIND)
+                window.attributes.blurBehindRadius = 20
+            }
+            window.setDimAmount(0.6f)
+        }
         
         val picker = dialog.findViewById<NumberPicker>(R.id.year_number_picker)
         val btnSave = dialog.findViewById<TextView>(R.id.btn_save_year)

@@ -43,6 +43,11 @@ class TransactionAdapter(
         holder.iconCard.setCardBackgroundColor(ColorStateList.valueOf(color).withAlpha(30))
         holder.icon.imageTintList = ColorStateList.valueOf(color)
         
+        // Transparent Aesthetic with Dynamic Stroke
+        holder.transactionCard.setCardBackgroundColor(Color.TRANSPARENT)
+        holder.transactionCard.strokeColor = color
+        holder.transactionCard.strokeWidth = (1.5 * holder.itemView.context.resources.displayMetrics.density).toInt()
+        
         val iconRes = when (transaction.type) {
             "Income" -> R.drawable.icons8_income_100
             "Saving" -> R.drawable.icons8_savings_100
@@ -94,6 +99,7 @@ class TransactionAdapter(
         val amount: TextView = itemView.findViewById(R.id.tv_transaction_amount)
         val icon: ImageView = itemView.findViewById(R.id.iv_transaction_type_icon)
         val iconCard: com.google.android.material.card.MaterialCardView = itemView.findViewById(R.id.card_transaction_icon)
+        val transactionCard: com.google.android.material.card.MaterialCardView = itemView.findViewById(R.id.transaction_card)
     }
 }
 

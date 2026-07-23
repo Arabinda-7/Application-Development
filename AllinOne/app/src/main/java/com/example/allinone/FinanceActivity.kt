@@ -20,6 +20,7 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.example.allinone.Transaction
 import com.example.allinone.TransactionAdapter
+import com.google.android.material.card.MaterialCardView
 import com.google.android.material.chip.ChipGroup
 import java.text.SimpleDateFormat
 import java.util.*
@@ -40,10 +41,18 @@ class FinanceActivity : BaseActivity() {
     private lateinit var pbBudget: android.widget.ProgressBar
     private lateinit var pbSavings: android.widget.ProgressBar
     private lateinit var tvCategorySummary: TextView
-    private lateinit var tvFinanceInsight: TextView
-    private lateinit var cardSavings: View
+    private lateinit var cardSavings: MaterialCardView
+    private lateinit var cardBudget: MaterialCardView
+    private lateinit var cardSpent: MaterialCardView
+    private lateinit var cardRemain: MaterialCardView
+    private lateinit var cardTopExpenses: MaterialCardView
     private lateinit var layoutEmptyState: View
     private var currentFilter = "All"
+
+    private lateinit var chipFilterAll: RadioButton
+    private lateinit var chipFilterExpense: RadioButton
+    private lateinit var chipFilterIncome: RadioButton
+    private lateinit var chipFilterSaving: RadioButton
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -60,9 +69,17 @@ class FinanceActivity : BaseActivity() {
         pbBudget = summary.findViewById(R.id.pb_budget)
         pbSavings = summary.findViewById(R.id.pb_savings)
         tvCategorySummary = summary.findViewById(R.id.tv_category_summary)
-        tvFinanceInsight = summary.findViewById(R.id.tv_finance_insight)
         cardSavings = summary.findViewById(R.id.card_savings)
+        cardBudget = summary.findViewById(R.id.card_budget)
+        cardSpent = summary.findViewById(R.id.card_spent)
+        cardRemain = summary.findViewById(R.id.card_remain)
+        cardTopExpenses = summary.findViewById(R.id.card_top_expenses)
         layoutEmptyState = findViewById(R.id.layout_empty_state)
+        
+        chipFilterAll = findViewById(R.id.chip_filter_all)
+        chipFilterExpense = findViewById(R.id.chip_filter_expense)
+        chipFilterIncome = findViewById(R.id.chip_filter_income)
+        chipFilterSaving = findViewById(R.id.chip_filter_saving)
 
         val financeList = findViewById<RecyclerView>(R.id.finance_list)
         financeList.layoutManager = LinearLayoutManager(this)
@@ -87,6 +104,7 @@ class FinanceActivity : BaseActivity() {
         // Feature 1: Category Filters Logic
         setupFilters()
         updateSummary()
+        applySectionTheme()
         setupKeyboardHandling(findViewById(R.id.finance_root_layout), findViewById(R.id.finance_content_container))
         updateDynamicBackground()
 
@@ -153,7 +171,11 @@ class FinanceActivity : BaseActivity() {
         super.onResume()
         loadCurrentMonthTransactions()
         updateSummary()
+        applySectionTheme()
         updateDynamicBackground()
+        
+        // Feature: Real-time Ledger Toggle
+        findViewById<View>(R.id.btn_finance_ledger).visibility = if (DataManager.isFinanceLedgerEnabled) View.VISIBLE else View.GONE
     }
 
     private fun updateDynamicBackground() {
@@ -179,18 +201,15 @@ class FinanceActivity : BaseActivity() {
     }
 
     private fun setupFilters() {
-        val chipGroup = findViewById<ChipGroup>(R.id.cg_finance_filters)
-        chipGroup.setOnCheckedStateChangeListener { _, checkedIds ->
-            if (checkedIds.isNotEmpty()) {
-                val chipId = checkedIds[0]
-                currentFilter = when (chipId) {
-                    R.id.chip_filter_expense -> "Expense"
-                    R.id.chip_filter_income -> "Income"
-                    R.id.chip_filter_saving -> "Saving"
-                    else -> "All"
-                }
-                applyFilter()
+        val radioGroup = findViewById<RadioGroup>(R.id.rg_finance_filters)
+        radioGroup.setOnCheckedChangeListener { _, checkedId ->
+            currentFilter = when (checkedId) {
+                R.id.chip_filter_expense -> "Expense"
+                R.id.chip_filter_income -> "Income"
+                R.id.chip_filter_saving -> "Saving"
+                else -> "All"
             }
+            applyFilter()
         }
     }
 
@@ -236,8 +255,15 @@ class FinanceActivity : BaseActivity() {
     private fun showAddTransactionDialog(existingTransaction: Transaction? = null) {
         val dialog = Dialog(this)
         dialog.setContentView(R.layout.dialog_add_transaction)
-        dialog.window?.setBackgroundDrawableResource(android.R.color.transparent)
-        dialog.window?.setLayout(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT)
+        dialog.window?.let { window ->
+            window.setBackgroundDrawableResource(android.R.color.transparent)
+            if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.S) {
+                window.addFlags(android.view.WindowManager.LayoutParams.FLAG_BLUR_BEHIND)
+                window.attributes.blurBehindRadius = 20
+            }
+            window.setDimAmount(0.6f)
+            window.setLayout(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT)
+        }
 
         val etAmount = dialog.findViewById<EditText>(R.id.et_trans_amount)
         val tvAmountHint = dialog.findViewById<TextView>(R.id.tv_amount_hint)
@@ -438,7 +464,6 @@ class FinanceActivity : BaseActivity() {
         val expenses = allMonthTransactions.filter { it.type == "Expense" }
         if (expenses.isEmpty()) {
             tvCategorySummary.text = "No expenses recorded this month."
-            tvFinanceInsight.text = "Start tracking your expenses to see insights!"
             return
         }
 
@@ -454,23 +479,6 @@ class FinanceActivity : BaseActivity() {
             breakdown.append("$category: ${String.format(Locale.US, "%s%.0f (%.0f%%)", currency, amount, percentage)}\n")
         }
         tvCategorySummary.text = breakdown.toString().trim()
-
-        val topCategory = categoryGroups.first()
-        val topPercentage = (topCategory.second / totalSpent) * 100
-
-        when {
-            topPercentage > 50 -> {
-                tvFinanceInsight.text = String.format(Locale.US, "Alert: %s accounts for over 50%% of your spending!", topCategory.first)
-            }
-            DataManager.monthlyBudget > 0 && totalSpent > DataManager.monthlyBudget * 0.8 -> {
-                tvFinanceInsight.text = "Warning: You have used 80% of your budget. Slow down!"
-            }
-            else -> {
-                val dailyLimit = ((DataManager.monthlyBudget - totalSpent).coerceAtLeast(0.0) /
-                    (Calendar.getInstance().getActualMaximum(Calendar.DAY_OF_MONTH) - Calendar.getInstance().get(Calendar.DAY_OF_MONTH) + 1).coerceAtLeast(1))
-                tvFinanceInsight.text = String.format(Locale.US, "You're on track! Keep your daily spend under %s%d.", currency, dailyLimit.toInt())
-            }
-        }
     }
 
     private fun showFinanceSettingsDialog() {
@@ -551,8 +559,15 @@ class FinanceActivity : BaseActivity() {
     private fun showSetBudgetDialog() {
         val dialog = Dialog(this)
         dialog.setContentView(R.layout.dialog_set_budget)
-        dialog.window?.setBackgroundDrawableResource(android.R.color.transparent)
-        dialog.window?.setLayout(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT)
+        dialog.window?.let { window ->
+            window.setBackgroundDrawableResource(android.R.color.transparent)
+            if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.S) {
+                window.addFlags(android.view.WindowManager.LayoutParams.FLAG_BLUR_BEHIND)
+                window.attributes.blurBehindRadius = 20
+            }
+            window.setDimAmount(0.6f)
+            window.setLayout(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT)
+        }
 
         val etBudget = dialog.findViewById<EditText>(R.id.et_budget_amount)
         val btnSave = dialog.findViewById<View>(R.id.btn_save_budget)
@@ -579,8 +594,15 @@ class FinanceActivity : BaseActivity() {
     private fun showSetSavingsGoalDialog() {
         val dialog = Dialog(this)
         dialog.setContentView(R.layout.dialog_add_ledger) // Re-use simplified layout
-        dialog.window?.setBackgroundDrawableResource(android.R.color.transparent)
-        dialog.window?.setLayout(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT)
+        dialog.window?.let { window ->
+            window.setBackgroundDrawableResource(android.R.color.transparent)
+            if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.S) {
+                window.addFlags(android.view.WindowManager.LayoutParams.FLAG_BLUR_BEHIND)
+                window.attributes.blurBehindRadius = 20
+            }
+            window.setDimAmount(0.6f)
+            window.setLayout(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT)
+        }
 
         val etGoal = dialog.findViewById<EditText>(R.id.et_ledger_amount)
         val etName = dialog.findViewById<EditText>(R.id.et_person_name)
@@ -617,5 +639,53 @@ class FinanceActivity : BaseActivity() {
         }
 
         showDialogSafe(dialog)
+    }
+
+    private fun applySectionTheme() {
+        val financeColor = if (DataManager.globalFinanceColor != -1) DataManager.globalFinanceColor else Color.parseColor("#E91E63")
+        val strokeWidth = (1.5f * resources.displayMetrics.density).toInt()
+
+        val cards = listOf(cardBudget, cardSpent, cardRemain, cardTopExpenses, cardSavings)
+        cards.forEach { card ->
+            card.setCardBackgroundColor(Color.TRANSPARENT)
+            card.strokeColor = financeColor
+            card.strokeWidth = strokeWidth
+        }
+
+        val chips = listOf<RadioButton>(
+            chipFilterAll,
+            chipFilterExpense,
+            chipFilterIncome,
+            chipFilterSaving
+        )
+
+        val darkenedColor = UIUtils.darkenColor(financeColor, 0.5f)
+
+        chips.forEach { chip ->
+            val checkedDrawable = android.graphics.drawable.GradientDrawable().apply {
+                shape = android.graphics.drawable.GradientDrawable.RECTANGLE
+                cornerRadius = 19f * resources.displayMetrics.density
+                setColor(darkenedColor)
+            }
+            
+            val uncheckedDrawable = android.graphics.drawable.GradientDrawable().apply {
+                shape = android.graphics.drawable.GradientDrawable.RECTANGLE
+                cornerRadius = 19f * resources.displayMetrics.density
+                setColor(Color.TRANSPARENT)
+                setStroke(Math.round(1.5f * resources.displayMetrics.density), financeColor)
+            }
+
+            val stateListDrawable = android.graphics.drawable.StateListDrawable().apply {
+                addState(intArrayOf(android.R.attr.state_checked), checkedDrawable)
+                addState(intArrayOf(), uncheckedDrawable)
+            }
+            
+            chip.background = stateListDrawable
+        }
+
+        // Synchronize FAB color (50% darker)
+        val darkenedFabColor = UIUtils.darkenColor(financeColor, 0.5f)
+        findViewById<com.google.android.material.floatingactionbutton.FloatingActionButton>(R.id.btn_create_new_finance).backgroundTintList = 
+            android.content.res.ColorStateList.valueOf(darkenedFabColor)
     }
 }

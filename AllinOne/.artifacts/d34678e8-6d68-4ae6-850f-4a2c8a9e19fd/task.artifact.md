@@ -1,0 +1,5 @@
+- [x] Remove "Manage Tags" from `ProjectSettingsActivity.kt`
+    - [x] Remove `ConfigItem` in `loadSettings()`
+    - [x] Remove `showManageTagsDialog()` method
+- [x] Remove "Manage Tags" from `dialog_project_settings.xml`
+- [x] Verify changes

@@ -29,7 +29,7 @@
                 android:id="@+id/iv_action_icon"
                 android:layout_width="24dp"
                 android:layout_height="24dp"
-                android:src="@android:drawable/checkbox_on_background"
+                android:src="@drawable/icons8_coffee_100"
                 app:tint="@color/white" />
 
             <TextView

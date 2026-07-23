@@ -31,6 +31,7 @@ class WorkoutAdapter(
     }
 
     private var isCompletedExpanded = true
+    private var isDayOffExpanded = true
     private var displayItems = mutableListOf<Any>()
     private var currentFilter = "All"
     private var selectedDayIndex = 0
@@ -68,9 +69,16 @@ class WorkoutAdapter(
         if (holder is HeaderViewHolder) {
             val headerText = displayItems[position] as String
             holder.title.text = headerText
-            holder.chevron.rotation = if (isCompletedExpanded) 180f else 0f
+            
+            val isExpanded = if (headerText.startsWith("Day Off")) isDayOffExpanded else isCompletedExpanded
+            holder.chevron.rotation = if (isExpanded) 180f else 0f
+            
             holder.itemView.setOnClickListener {
-                isCompletedExpanded = !isCompletedExpanded
+                if (headerText.startsWith("Day Off")) {
+                    isDayOffExpanded = !isDayOffExpanded
+                } else {
+                    isCompletedExpanded = !isCompletedExpanded
+                }
                 applyFilterAndSort()
             }
         } else if (holder is WorkoutViewHolder) {
@@ -86,16 +94,18 @@ class WorkoutAdapter(
                 } else {
                     val details = when (workout.trackingMode) {
                         "Timer" -> "${workout.target}s"
+                        "Sets" -> "${workout.progress}/${workout.target} Sets (×${workout.repsPerSet})"
                         else -> "${workout.progress}/${workout.target} ${workout.trackingMode}"
                     }
                     holder.workoutDetails.text = details
                 }
             } else {
                 if (isCompleted) {
-                    holder.workoutDetails.text = "COMPLETED"
+                    holder.workoutDetails.text = if (workout.trackingMode == "Sets") "${workout.target} Sets × ${workout.repsPerSet} DONE" else "COMPLETED"
                 } else {
                     val unit = when (workout.trackingMode) {
                         "Timer" -> "s"
+                        "Sets" -> " Sets (×${workout.repsPerSet})"
                         else -> " ${workout.trackingMode}"
                     }
                     holder.workoutDetails.text = "0/${workout.target}$unit"
@@ -112,7 +122,7 @@ class WorkoutAdapter(
             holder.itemView.findViewById<View>(R.id.icon_container_workout).backgroundTintList = android.content.res.ColorStateList.valueOf(themeColor).withAlpha(20)
 
             // 3. Card Styling (Glassmorphic)
-            holder.workoutCard.setCardBackgroundColor(android.graphics.Color.parseColor("#1A1A1A"))
+            holder.workoutCard.setCardBackgroundColor(android.graphics.Color.TRANSPARENT)
             holder.workoutCard.strokeColor = themeColor
             holder.workoutCard.strokeWidth = (1.5 * context.resources.displayMetrics.density).toInt()
 
@@ -122,7 +132,7 @@ class WorkoutAdapter(
             holder.btnFinishSelection.strokeColor = themeColor
             holder.tvSelectedNumCircle.backgroundTintList = android.content.res.ColorStateList.valueOf(themeColor)
             holder.btnFinishAll.setCardBackgroundColor(themeColor)
-
+            
             if (workout.iconResId != -1) {
                 holder.workoutIcon.setImageResource(workout.iconResId)
             }
@@ -262,6 +272,10 @@ class WorkoutAdapter(
         popupWindow.elevation = 10f
 
         val dayOffBtn = menuView.findViewById<View>(R.id.menu_take_day_off)
+        val actionText = menuView.findViewById<TextView>(R.id.tv_action_text)
+        actionText.text = "TAKE DAY OFF"
+        menuView.findViewById<ImageView>(R.id.iv_action_icon).setImageResource(R.drawable.icons8_coffee_100)
+        
         dayOffBtn.visibility = if (isCompleted || selectedDateString != todayDateString) View.GONE else View.VISIBLE
         dayOffBtn.setOnClickListener {
             workout.isCompleted = true
@@ -283,7 +297,7 @@ class WorkoutAdapter(
         menuView.findViewById<View>(R.id.menu_edit).setOnClickListener {
             popupWindow.dismiss()
             val intent = Intent(context, AddWorkoutActivity::class.java).apply {
-                putExtra("WORKOUT_INDEX", allWorkouts.indexOf(workout))
+                putExtra("WORKOUT_ID", workout.timestamp)
             }
             context.startActivity(intent)
         }
@@ -340,14 +354,24 @@ class WorkoutAdapter(
         }
 
         val activeWorkouts = filtered.filter { !isWorkoutCompletedOnSelectedDate(it) }.sortedByDescending { it.timestamp }
-        val completedWorkouts = filtered.filter { isWorkoutCompletedOnSelectedDate(it) }.sortedByDescending { it.timestamp }
+        val allCompleted = filtered.filter { isWorkoutCompletedOnSelectedDate(it) }.sortedByDescending { it.timestamp }
+        
+        val dayOffWorkouts = allCompleted.filter { it.isDayOff }
+        val strictlyCompleted = allCompleted.filter { !it.isDayOff }
 
         displayItems.addAll(activeWorkouts)
 
-        if (showCompleted && completedWorkouts.isNotEmpty()) {
-            displayItems.add("Completed ${completedWorkouts.size}")
+        if (dayOffWorkouts.isNotEmpty()) {
+            displayItems.add("Day Off ${dayOffWorkouts.size}")
+            if (isDayOffExpanded) {
+                displayItems.addAll(dayOffWorkouts)
+            }
+        }
+
+        if (showCompleted && strictlyCompleted.isNotEmpty()) {
+            displayItems.add("Completed ${strictlyCompleted.size}")
             if (isCompletedExpanded) {
-                displayItems.addAll(completedWorkouts)
+                displayItems.addAll(strictlyCompleted)
             }
         }
 

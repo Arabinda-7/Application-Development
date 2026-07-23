@@ -18,13 +18,24 @@ data class WorkspaceUIState(
     val notes: List<NoteEntity> = emptyList(),
     val resources: List<ResourceEntity> = emptyList(),
     val logs: List<ActivityLogEntity> = emptyList(),
-    val isLoading: Boolean = false
+    val isLoading: Boolean = true
+)
+
+data class ProjectStats(
+    val totalTasks: Int = 0,
+    val taskBreakdown: Map<String, Int> = emptyMap(),
+    val totalFeatures: Int = 0,
+    val featureBreakdown: Map<String, Int> = emptyMap(),
+    val totalBugs: Int = 0,
+    val bugBreakdown: Map<String, Int> = emptyMap()
 )
 
 class WorkspaceViewModel(private val repository: WorkspaceRepository) : ViewModel() {
 
     private val _uiState = MutableStateFlow(WorkspaceUIState())
     val uiState: StateFlow<WorkspaceUIState> = _uiState.asStateFlow()
+
+    private var selectionJob: kotlinx.coroutines.Job? = null
 
     init {
         loadProjects()
@@ -33,16 +44,22 @@ class WorkspaceViewModel(private val repository: WorkspaceRepository) : ViewMode
     private fun loadProjects() {
         viewModelScope.launch {
             repository.getAllProjects().collect { projects ->
-                _uiState.update { it.copy(projects = projects) }
-                if (projects.isNotEmpty() && _uiState.value.selectedProject == null) {
-                    selectProject(projects.first().id)
+                if (projects.isEmpty()) {
+                    _uiState.update { it.copy(projects = projects, isLoading = false) }
+                } else {
+                    _uiState.update { it.copy(projects = projects) }
+                    if (_uiState.value.selectedProject == null) {
+                        selectProject(projects.first().id)
+                    }
                 }
             }
         }
     }
 
     fun selectProject(projectId: String) {
-        viewModelScope.launch {
+        selectionJob?.cancel()
+        selectionJob = viewModelScope.launch {
+            _uiState.update { it.copy(isLoading = true) }
             val projectFlow = repository.getProjectById(projectId)
             val goalsFlow = repository.getGoalsForProject(projectId)
             val tasksFlow = repository.getTasksForProject(projectId)
@@ -52,10 +69,11 @@ class WorkspaceViewModel(private val repository: WorkspaceRepository) : ViewMode
             val notesFlow = repository.getNotesForProject(projectId)
             val resourcesFlow = repository.getResourcesForProject(projectId)
             val logsFlow = repository.getActivityLogs(projectId)
+            val allProjectsFlow = repository.getAllProjects()
 
             combine(
                 projectFlow, goalsFlow, tasksFlow, featuresFlow, bugsFlow, 
-                ideasFlow, notesFlow, resourcesFlow, logsFlow
+                ideasFlow, notesFlow, resourcesFlow, logsFlow, allProjectsFlow
             ) { array ->
                 try {
                     WorkspaceUIState(
@@ -68,7 +86,7 @@ class WorkspaceViewModel(private val repository: WorkspaceRepository) : ViewMode
                         notes = array[6] as List<NoteEntity>,
                         resources = array[7] as List<ResourceEntity>,
                         logs = array[8] as List<ActivityLogEntity>,
-                        projects = _uiState.value.projects
+                        projects = array[9] as List<ProjectEntity>
                     )
                 } catch (e: Exception) {
                     android.util.Log.e("WorkspaceViewModel", "Mapping error in combine", e)
@@ -77,13 +95,17 @@ class WorkspaceViewModel(private val repository: WorkspaceRepository) : ViewMode
             }.catch { e ->
                 android.util.Log.e("WorkspaceViewModel", "Flow error in combine", e)
             }.collect { newState ->
-                _uiState.value = newState
+                _uiState.value = newState.copy(isLoading = false)
             }
         }
     }
 
     fun addProject(name: String, desc: String, color: Int = -1, icon: String = "") {
         viewModelScope.launch { repository.createProject(name, desc, color, icon) }
+    }
+
+    fun updateProject(project: ProjectEntity) {
+        viewModelScope.launch { repository.updateProject(project) }
     }
 
     fun deleteProject(project: ProjectEntity) {
@@ -97,6 +119,8 @@ class WorkspaceViewModel(private val repository: WorkspaceRepository) : ViewMode
         projectId: String,
         description: String = "",
         priority: Int = 1,
+        status: String = "Todo",
+        progress: Int = 0,
         weight: Int = 1,
         dueDate: Long? = null,
         milestoneId: String? = null
@@ -107,6 +131,8 @@ class WorkspaceViewModel(private val repository: WorkspaceRepository) : ViewMode
                 title = title,
                 description = description,
                 priority = priority,
+                status = status,
+                progress = progress,
                 weight = weight,
                 dueDate = dueDate,
                 milestoneId = milestoneId
@@ -114,10 +140,33 @@ class WorkspaceViewModel(private val repository: WorkspaceRepository) : ViewMode
         }
     }
 
-    fun addGoal(title: String, projectId: String, description: String = "") {
+    fun insertTask(task: TaskEntity) {
+        viewModelScope.launch { repository.insertTask(task) }
+    }
+
+    fun deleteTask(task: TaskEntity) {
+        viewModelScope.launch { repository.deleteTask(task) }
+    }
+
+    fun addGoal(title: String, projectId: String, description: String = "", color: Int = -1, priority: Int = 1, deadline: Long? = null) {
         viewModelScope.launch {
-            repository.insertGoal(GoalEntity(projectId = projectId, title = title, description = description))
+            repository.insertGoal(GoalEntity(
+                projectId = projectId, 
+                title = title, 
+                description = description,
+                color = color,
+                priority = priority,
+                deadline = deadline
+            ))
         }
+    }
+
+    fun updateGoal(goal: GoalEntity) {
+        viewModelScope.launch { repository.updateGoal(goal) }
+    }
+
+    fun deleteGoal(goal: GoalEntity) {
+        viewModelScope.launch { repository.deleteGoal(goal) }
     }
 
     fun addFeature(
@@ -188,6 +237,10 @@ class WorkspaceViewModel(private val repository: WorkspaceRepository) : ViewMode
         viewModelScope.launch { repository.updateBug(bug) }
     }
 
+    fun deleteBug(bug: BugEntity) {
+        viewModelScope.launch { repository.deleteBug(bug) }
+    }
+
     fun addIdea(
         title: String,
         projectId: String,
@@ -206,15 +259,34 @@ class WorkspaceViewModel(private val repository: WorkspaceRepository) : ViewMode
         }
     }
 
+    fun updateIdea(idea: IdeaEntity) {
+        viewModelScope.launch { repository.updateIdea(idea) }
+    }
+
+    fun deleteIdea(idea: IdeaEntity) {
+        viewModelScope.launch { repository.deleteIdea(idea) }
+    }
+
     fun addNote(title: String, content: String, projectId: String) {
         viewModelScope.launch {
             repository.insertNote(NoteEntity(projectId = projectId, title = title, content = content))
         }
     }
 
-    fun importNote(note: com.example.allinone.Note) {
+    fun updateNote(note: NoteEntity) {
+        viewModelScope.launch { repository.updateNote(note) }
+    }
+
+    fun deleteNote(note: NoteEntity) {
+        viewModelScope.launch { repository.deleteNote(note) }
+    }
+
+    fun importNote(note: com.example.allinone.Note, isTransfer: Boolean = false) {
         viewModelScope.launch {
             repository.importFromNote(note)
+            if (isTransfer) {
+                com.example.allinone.DataManager.projects.remove(note)
+            }
             loadProjects()
         }
     }
@@ -239,8 +311,33 @@ class WorkspaceViewModel(private val repository: WorkspaceRepository) : ViewMode
         }
     }
 
+    fun updateResource(resource: ResourceEntity) {
+        viewModelScope.launch { repository.updateResource(resource) }
+    }
+
+    fun deleteResource(resource: ResourceEntity) {
+        viewModelScope.launch { repository.deleteResource(resource) }
+    }
+
     fun updateTask(task: TaskEntity) {
         viewModelScope.launch { repository.updateTask(task) }
+    }
+
+    fun getProjectStats(projectId: String): Flow<ProjectStats> {
+        return combine(
+            repository.getTasksForProject(projectId),
+            repository.getFeaturesForProject(projectId),
+            repository.getBugsForProject(projectId)
+        ) { tasks, features, bugs ->
+            ProjectStats(
+                totalTasks = tasks.size,
+                taskBreakdown = tasks.groupingBy { it.status }.eachCount(),
+                totalFeatures = features.size,
+                featureBreakdown = features.groupingBy { it.status }.eachCount(),
+                totalBugs = bugs.size,
+                bugBreakdown = bugs.groupingBy { it.status }.eachCount()
+            )
+        }
     }
 
     fun convertIdeaToTask(idea: IdeaEntity) {

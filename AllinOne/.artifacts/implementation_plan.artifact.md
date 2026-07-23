@@ -1,24 +1,36 @@
-# Fix Unresolved reference 'etInspirationUrl' in ProjectActivity.kt
+# Implementation Plan - Modernize Dropdown Menus (App UI Matching)
 
-The build is failing because `etInspirationUrl` is used in `ProjectActivity.kt` within the `showAddIdeaDialog` method but is never declared or initialized. This variable should refer to the `EditText` in the `dialog_add_note_project.xml` layout that holds the inspiration URL.
+Style the Workspace context menus (long-press options) to perfectly match the app's aesthetic (Glass/Dark theme with custom accents).
 
 ## Proposed Changes
 
-### [Component Name] ProjectActivity
+### Workspace UI Sections
 
-#### [MODIFY] [ProjectActivity.kt](file:///C:/Users/arabi/OneDrive/Desktop/App Development/AllinOne/app/src/main/java/com/example/allinone/ProjectActivity.kt)
+#### [MODIFY] [CommonWorkspaceComponents.kt](file:///C:/Users/arabi/OneDrive/Desktop/App Development/AllinOne/app/src/main/java/com/example/allinone/workspace/ui/sections/CommonWorkspaceComponents.kt)
+- Create a `StyledDropdownMenu` and `StyledDropdownMenuItem` wrapper (or just apply styles to existing ones).
+- Style will include:
+    - **Background**: `style.surfaceColor` (Dark/Glass).
+    - **Shape**: `RoundedCornerShape(style.borderRadius)`.
+    - **Border**: Subtle border matching the app's card style.
+    - **Text Color**: White with appropriate icons.
+    - **Divider**: Consistent with the app's separators.
 
-- Initialize `etInspirationUrl` in the `showAddIdeaDialog` method using `dialog.findViewById(R.id.et_inspiration_url)`.
-- Update the `btnSave` click listener to save the content of `etInspirationUrl` to the `Note` object's `inspirationUrl` property.
+#### [MODIFY] Update all Section Files
+Update the following files to use the new styled menus:
+- [TasksSection.kt](file:///C:/Users/arabi/OneDrive/Desktop/App Development/AllinOne/app/src/main/java/com/example/allinone/workspace/ui/sections/TasksSection.kt)
+- [BugsSection.kt](file:///C:/Users/arabi/OneDrive/Desktop/App Development/AllinOne/app/src/main/java/com/example/allinone/workspace/ui/sections/BugsSection.kt)
+- [GoalsSection.kt](file:///C:/Users/arabi/OneDrive/Desktop/App Development/AllinOne/app/src/main/java/com/example/allinone/workspace/ui/sections/GoalsSection.kt)
+- [IdeasSection.kt](file:///C:/Users/arabi/OneDrive/Desktop/App Development/AllinOne/app/src/main/java/com/example/allinone/workspace/ui/sections/IdeasSection.kt)
+- [NotesSection.kt](file:///C:/Users/arabi/OneDrive/Desktop/App Development/AllinOne/app/src/main/java/com/example/allinone/workspace/ui/sections/NotesSection.kt)
+- [ResourcesSection.kt](file:///C:/Users/arabi/OneDrive/Desktop/App Development/AllinOne/app/src/main/java/com/example/allinone/workspace/ui/sections/ResourcesSection.kt)
+
+#### [MODIFY] [ProjectWorkspaceScreen.kt](file:///C:/Users/arabi/OneDrive/Desktop/App Development/AllinOne/app/src/main/java/com/example/allinone/workspace/ui/ProjectWorkspaceScreen.kt)
+- Style the `WorkspaceHeader` project selection dropdown.
 
 ## Verification Plan
 
-### Automated Tests
-- Run `./gradlew :app:compileDebugKotlin` to verify the build error is resolved.
-
 ### Manual Verification
-- Deploy the app to a device or emulator.
-- Open the Projects section.
-- Add or edit a Project Idea.
-- Verify that the "Website URL..." field is correctly pre-filled when editing an existing idea.
-- Verify that changes to the "Website URL..." field are saved.
+1. Long-press any Workspace item.
+2. Verify the menu background matches the app's surface color.
+3. Verify the corners are rounded according to `AppStyle`.
+4. Verify icons and text are correctly colored and aligned.

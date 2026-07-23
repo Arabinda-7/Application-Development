@@ -1,0 +1,5 @@
+- [x] Add `getUniqueFeatureName` to `DataManager.kt`
+- [x] Update `AddProjectActivity.kt` to use `getUniqueFeatureName`
+- [x] Update `AddIdeaActivity.kt` to use `getUniqueFeatureName`
+- [x] Update `AddSubFeatureActivity.kt` to use `getUniqueFeatureName`
+- [x] Verify changes

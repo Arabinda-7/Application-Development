@@ -43,6 +43,7 @@ class AddProjectActivity : BaseActivity() {
     private lateinit var containerSubfeatures: LinearLayout
     private lateinit var etNewSubfeature: EditText
     private lateinit var containerTemplates: LinearLayout
+    private lateinit var headerBgAccent: View
 
     private lateinit var layoutSubfeaturesHeaderToggle: View
     private lateinit var ivSubfeaturesMainChevron: ImageView
@@ -86,8 +87,8 @@ class AddProjectActivity : BaseActivity() {
         setContentView(R.layout.activity_add_project)
 
         projectIndex = intent.getIntExtra("PROJECT_INDEX", -1)
-        if (projectIndex != -1 && projectIndex < DataManager.notes.size) {
-            existingNote = DataManager.notes[projectIndex]
+        if (projectIndex != -1 && projectIndex < DataManager.projects.size) {
+            existingNote = DataManager.projects[projectIndex]
         }
 
         tempSubFeatures.clear()
@@ -141,6 +142,7 @@ class AddProjectActivity : BaseActivity() {
         btnCyclePriority = findViewById(R.id.btn_cycle_priority)
         btnEditColor = findViewById(R.id.btn_edit_color)
         btnEditDeadline = findViewById(R.id.btn_edit_deadline)
+        headerBgAccent = findViewById(R.id.header_bg_accent)
 
         findViewById<View>(R.id.btn_close_note).setOnClickListener { finish() }
     }
@@ -195,6 +197,7 @@ class AddProjectActivity : BaseActivity() {
         }
 
         colorPreview.backgroundTintList = ColorStateList.valueOf(selectedColor)
+        updateThemeVisuals()
         updateDeadlineUI()
         refreshSubFeatures()
         refreshGoalsUI()
@@ -264,8 +267,7 @@ class AddProjectActivity : BaseActivity() {
             if (currentIdx == -1) currentIdx = 0
             val nextIdx = (currentIdx + 1) % colors.size
             selectedColor = colors[nextIdx].toInt()
-            colorPreview.backgroundTintList = ColorStateList.valueOf(selectedColor)
-            tvEditColorLabel.backgroundTintList = ColorStateList.valueOf(selectedColor)
+            updateThemeVisuals()
             validateInputs()
         }
         btnEditDeadline.setOnClickListener {
@@ -295,12 +297,9 @@ class AddProjectActivity : BaseActivity() {
 
         findViewById<View>(R.id.btn_add_subfeature).setOnClickListener {
             val name = etNewSubfeature.text.toString().trim()
-            val finalName = name.ifEmpty { "New Feature" }
+            val baseName = name.ifEmpty { "New Feature" }
             
-            if (tempSubFeatures.any { it.name.equals(finalName, ignoreCase = true) }) {
-                Toast.makeText(this, "A feature with this name already exists", Toast.LENGTH_SHORT).show()
-                return@setOnClickListener
-            }
+            val finalName = DataManager.getUniqueFeatureName(baseName, tempSubFeatures)
 
             val newFeature = ProjectFeature(finalName, position = if (tempSubFeatures.isEmpty()) 1 else tempSubFeatures.maxOf { it.position } + 1)
             tempSubFeatures.add(newFeature)
@@ -321,7 +320,8 @@ class AddProjectActivity : BaseActivity() {
         colorPreview.setOnClickListener {
             val colors = listOf(ContextCompat.getColor(this, R.color.card_blue), ContextCompat.getColor(this, R.color.card_orange), ContextCompat.getColor(this, R.color.card_green), Color.MAGENTA, Color.RED, Color.CYAN)
             selectedColor = colors[(colors.indexOf(selectedColor) + 1) % colors.size]
-            colorPreview.backgroundTintList = ColorStateList.valueOf(selectedColor); validateInputs()
+            updateThemeVisuals()
+            validateInputs()
         }
 
         titleInput.addTextChangedListener(object : android.text.TextWatcher {
@@ -347,6 +347,16 @@ class AddProjectActivity : BaseActivity() {
         tvTitleHint.visibility = if (isValid) View.GONE else View.VISIBLE
         if (!isValid) startPulseAnimation(tvTitleHint)
         if (isValid) btnSave.setTextColor(selectedColor) else btnSave.setTextColor(Color.GRAY)
+        tvTitleHint.setTextColor(selectedColor)
+    }
+
+    private fun updateThemeVisuals() {
+        colorPreview.backgroundTintList = ColorStateList.valueOf(selectedColor)
+        headerBgAccent.backgroundTintList = ColorStateList.valueOf(selectedColor)
+        tvEditColorLabel.backgroundTintList = ColorStateList.valueOf(selectedColor)
+        if (btnSave.isEnabled) {
+            btnSave.setTextColor(selectedColor)
+        }
         tvTitleHint.setTextColor(selectedColor)
     }
 
@@ -545,6 +555,11 @@ class AddProjectActivity : BaseActivity() {
                 setTypeface(null, android.graphics.Typeface.BOLD)
                 setPadding(8.dpToPx(), 2.dpToPx(), 8.dpToPx(), 2.dpToPx())
                 val tagColor = when(sub.tag.uppercase()) {
+                    "TASKS" -> Color.parseColor("#1A73E8")
+                    "NOTES" -> Color.parseColor("#9E9E9E")
+                    "FEATURES" -> Color.parseColor("#673AB7")
+                    "BUGS" -> Color.parseColor("#F44336")
+                    "RESOURCES" -> Color.parseColor("#009688")
                     "UI" -> Color.parseColor("#E91E63")
                     "LOGIC" -> Color.parseColor("#673AB7")
                     "BUG" -> Color.RED
@@ -811,9 +826,16 @@ class AddProjectActivity : BaseActivity() {
             note.subFeatures.clear(); note.subFeatures.addAll(tempSubFeatures)
             note.ideaGoals.clear(); note.ideaGoals.addAll(tempGoals)
 
-            if (existingNote == null) DataManager.notes.add(0, note)
-            DataManager.saveData(this); setResult(RESULT_OK); finish()
+            if (existingNote == null) DataManager.projects.add(0, note)
+            DataManager.saveData(this); setResult(RESULT_OK)
+            currentEditingSubFeatures.clear()
+            finish()
         }
+    }
+
+    override fun onDestroy() {
+        super.onDestroy()
+        currentEditingSubFeatures.clear()
     }
 
     private fun Int.dpToPx(): Int = (this * resources.displayMetrics.density).toInt()
@@ -830,7 +852,7 @@ class AddProjectActivity : BaseActivity() {
             else -> Color.parseColor("#2EC4B6")
         })
 
-        tvEditColorLabel.backgroundTintList = ColorStateList.valueOf(selectedColor)
+        updateThemeVisuals()
         tvEditDeadlineLabel.text = selectedDeadline?.let { 
             SimpleDateFormat("MMM dd", Locale.getDefault()).format(Date(it)) 
         } ?: "No Set"

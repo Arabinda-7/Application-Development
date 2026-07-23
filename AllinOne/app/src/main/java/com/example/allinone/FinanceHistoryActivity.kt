@@ -24,6 +24,13 @@ class FinanceHistoryActivity : BaseActivity() {
     private var currentYear: Int = Calendar.getInstance().get(Calendar.YEAR)
     private val monthNames = listOf("January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December")
 
+    private lateinit var containerSpendGraph: LinearLayout
+    private lateinit var avgLine: View
+    private lateinit var avgLabel: TextView
+    private lateinit var tooltipCard: com.google.android.material.card.MaterialCardView
+    private lateinit var tooltipText: TextView
+    private lateinit var auraView: View
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_finance_history)
@@ -36,6 +43,13 @@ class FinanceHistoryActivity : BaseActivity() {
 
         tvSelectedYear = findViewById(R.id.tv_selected_year)
         tvSelectedYear.text = currentYear.toString()
+
+        containerSpendGraph = findViewById(R.id.container_spend_graph)
+        avgLine = findViewById(R.id.view_avg_line)
+        avgLabel = findViewById(R.id.tv_avg_line_label)
+        tooltipCard = findViewById(R.id.card_graph_tooltip)
+        tooltipText = findViewById(R.id.tv_tooltip_text)
+        auraView = findViewById(R.id.finance_history_aura_background)
         
         tvSelectedYear.setOnClickListener {
             showYearPickerDialog()
@@ -57,6 +71,7 @@ class FinanceHistoryActivity : BaseActivity() {
 
         updateYearlyAnalytics()
         setupKeyboardHandling(findViewById(R.id.finance_history_root), findViewById(R.id.finance_history_content_container))
+        updateDynamicBackground()
 
         onBackPressedDispatcher.addCallback(this, object : androidx.activity.OnBackPressedCallback(true) {
             override fun handleOnBackPressed() { finish() }
@@ -66,7 +81,14 @@ class FinanceHistoryActivity : BaseActivity() {
     private fun showYearPickerDialog() {
         val dialog = Dialog(this)
         dialog.setContentView(R.layout.dialog_year_roller)
-        dialog.window?.setBackgroundDrawableResource(android.R.color.transparent)
+        dialog.window?.let { window ->
+            window.setBackgroundDrawableResource(android.R.color.transparent)
+            if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.S) {
+                window.addFlags(android.view.WindowManager.LayoutParams.FLAG_BLUR_BEHIND)
+                window.attributes.blurBehindRadius = 20
+            }
+            window.setDimAmount(0.6f)
+        }
         
         val picker = dialog.findViewById<NumberPicker>(R.id.year_number_picker)
         val btnSave = dialog.findViewById<TextView>(R.id.btn_save_year)
@@ -234,13 +256,7 @@ class FinanceHistoryActivity : BaseActivity() {
     }
 
     private fun updateSpendGraph(transactions: List<Transaction>) {
-        val container = findViewById<LinearLayout>(R.id.container_spend_graph)
-        val avgLine = findViewById<View>(R.id.view_avg_line)
-        val avgLabel = findViewById<TextView>(R.id.tv_avg_line_label)
-        val tooltipCard = findViewById<com.google.android.material.card.MaterialCardView>(R.id.card_graph_tooltip)
-        val tooltipText = findViewById<TextView>(R.id.tv_tooltip_text)
-        
-        container.removeAllViews()
+        containerSpendGraph.removeAllViews()
         tooltipCard.visibility = View.GONE
 
         val sdfMonth = SimpleDateFormat("MM", Locale.getDefault())
@@ -413,9 +429,9 @@ class FinanceHistoryActivity : BaseActivity() {
                     params.gravity = android.view.Gravity.TOP or android.view.Gravity.START
                     params.topMargin = (4 * resources.displayMetrics.density).toInt()
                     
-                    val barWidth = container.width / 12
+                    val barWidth = containerSpendGraph.width / 12
                     var startMargin = (index * barWidth) + (barWidth / 2) - (tooltipCard.width / 2)
-                    startMargin = startMargin.coerceIn(0, container.width - tooltipCard.width)
+                    startMargin = startMargin.coerceIn(0, containerSpendGraph.width - tooltipCard.width)
                     
                     params.leftMargin = startMargin
                     tooltipCard.layoutParams = params
@@ -425,8 +441,28 @@ class FinanceHistoryActivity : BaseActivity() {
                 tooltipCard.postDelayed({ tooltipCard.visibility = View.GONE }, 3000)
             }
             
-            container.addView(barWrapper)
+            containerSpendGraph.addView(barWrapper)
         }
+    }
+
+    override fun onResume() {
+        super.onResume()
+        DataManager.loadData(this)
+        updateYearlyAnalytics()
+        updateDynamicBackground()
+    }
+
+    private fun updateDynamicBackground() {
+        val financeColor = if (DataManager.globalFinanceColor != -1) DataManager.globalFinanceColor else Color.parseColor("#E91E63")
+        
+        val gradient = android.graphics.drawable.GradientDrawable(
+            android.graphics.drawable.GradientDrawable.Orientation.TOP_BOTTOM,
+            intArrayOf(
+                adjustAlpha(financeColor, 0.4f),
+                Color.BLACK
+            )
+        )
+        auraView.background = gradient
     }
 
     private fun adjustAlpha(color: Int, factor: Float): Int {

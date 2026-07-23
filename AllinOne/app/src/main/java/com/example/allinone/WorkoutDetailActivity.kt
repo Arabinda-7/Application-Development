@@ -1,5 +1,6 @@
 package com.example.allinone
 
+import android.content.Intent
 import android.graphics.Color
 import android.os.Bundle
 import android.view.Gravity
@@ -20,6 +21,8 @@ class WorkoutDetailActivity : BaseActivity() {
 
     private var workout: Workout? = null
     private var currentCalendar = Calendar.getInstance()
+    private lateinit var calendarGrid: GridLayout
+    private lateinit var tvMonth: TextView
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -36,8 +39,32 @@ class WorkoutDetailActivity : BaseActivity() {
         }
 
         setupUI()
-        setupCalendarNavigation()
+        calendarGrid = findViewById(R.id.calendar_grid)
+        tvMonth = findViewById(R.id.tv_calendar_month)
         setupCalendar()
+        updateDynamicBackground()
+    }
+
+    private fun updateDynamicBackground() {
+        val auraView = findViewById<View>(R.id.workout_detail_aura_background) ?: return
+        val workoutColor = if (workout?.color != -1) workout?.color ?: Color.parseColor("#FFFFB800") else Color.parseColor("#FFFFB800")
+        
+        val gradient = android.graphics.drawable.GradientDrawable(
+            android.graphics.drawable.GradientDrawable.Orientation.TOP_BOTTOM,
+            intArrayOf(
+                adjustAlpha(workoutColor, 0.4f),
+                Color.BLACK
+            )
+        )
+        auraView.background = gradient
+    }
+
+    private fun adjustAlpha(color: Int, factor: Float): Int {
+        val alpha = Math.round(Color.alpha(color) * factor)
+        val red = Color.red(color)
+        val green = Color.green(color)
+        val blue = Color.blue(color)
+        return Color.argb(alpha, red, green, blue)
     }
 
     private fun setupUI() {
@@ -45,6 +72,14 @@ class WorkoutDetailActivity : BaseActivity() {
         findViewById<TextView>(R.id.tv_frequency_chip).text = workout?.frequency?.uppercase()
         findViewById<TextView>(R.id.tv_repeat_chip).text = if (workout?.repeatDays?.size == 7) "EVERYDAY" else "SPECIFIC DAYS"
         findViewById<ImageView>(R.id.btn_back).setOnClickListener { finish() }
+        
+        findViewById<View>(R.id.btn_edit_workout).setOnClickListener {
+            val intent = Intent(this, AddWorkoutActivity::class.java).apply {
+                putExtra("WORKOUT_ID", workout?.timestamp)
+            }
+            startActivity(intent)
+            finish() // Finish detail screen so when they save and come back they land on the routine list
+        }
         updateStats()
     }
 
@@ -57,17 +92,6 @@ class WorkoutDetailActivity : BaseActivity() {
         val rate = if (daysSinceCreation > 0) (totalCompleted * 100) / daysSinceCreation else 0
         findViewById<TextView>(R.id.tv_rate_percent).text = "$rate%"
         findViewById<TextView>(R.id.tv_rate_fraction).text = "$totalCompleted/$daysSinceCreation workouts"
-    }
-
-    private fun setupCalendarNavigation() {
-        findViewById<View>(R.id.btn_prev_month).setOnClickListener {
-            currentCalendar.add(Calendar.MONTH, -1)
-            setupCalendar()
-        }
-        findViewById<View>(R.id.btn_next_month).setOnClickListener {
-            currentCalendar.add(Calendar.MONTH, 1)
-            setupCalendar()
-        }
     }
 
     private fun calculateStreak(): Int {
@@ -86,9 +110,6 @@ class WorkoutDetailActivity : BaseActivity() {
     }
 
     private fun setupCalendar() {
-        val calendarGrid = findViewById<GridLayout>(R.id.calendar_grid)
-        val tvMonth = findViewById<TextView>(R.id.tv_calendar_month)
-        
         // Remove old views but keep the 7 day headers
         val childCount = calendarGrid.childCount
         if (childCount > 7) {

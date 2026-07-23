@@ -1,0 +1,5 @@
+- [x] Add title and back button logic to `PerformanceDashboardScreen`
+- [x] Update `HabitTrackerActivity` to use the new title and back navigation
+- [x] Update `WorkoutRoutineActivity` to use the new title and back navigation
+- [x] Update `PerformanceHistoryActivity` to use the new title
+- [x] Verify build and functionality

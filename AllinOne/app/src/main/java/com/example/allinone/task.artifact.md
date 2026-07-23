@@ -1,9 +1,7 @@
-- `[x]` Implement `showAddIdeaDialog` in `ProjectActivity.kt`
-    - `[x]` Define the method signature
-    - `[x]` Inflate the dialog and set content view
-    - `[x]` Initialize UI components (Title, Content, Save, Close, MindMap, Priority)
-    - `[x]` Handle "New" vs "Edit" logic (Pre-fill data)
-    - `[x]` Implement Save logic (Update/Add Note, Save Data, Refresh UI)
-    - `[x]` Implement Close/Cancel logic
-- `[x]` Verify the fix
-    - `[x]` Compile the project
+# Task List - Immersive Background for History Screens
+
+- [ ] Update `PerformanceDashboardScreen.kt` to allow immersive status bar
+- [ ] Remove top padding from `PerformanceHistoryActivity.kt`
+- [ ] Adjust `HabitTrackerActivity.kt` and `WorkoutRoutineActivity.kt` for edge-to-edge
+- [ ] Update XML layouts for correct padding in "Today" views
+- [ ] Verify build and UI

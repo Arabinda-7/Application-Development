@@ -20,10 +20,10 @@
             android:layout_height="64dp"
             android:layout_weight="1"
             android:layout_marginEnd="6dp"
-            app:cardBackgroundColor="#1A1A1A"
+            app:cardBackgroundColor="@android:color/transparent"
             app:cardCornerRadius="16dp"
             app:cardElevation="0dp"
-            app:strokeWidth="1dp"
+            app:strokeWidth="1.5dp"
             app:strokeColor="#1AFFFFFF"
             android:clickable="true"
             android:focusable="true">
@@ -61,14 +61,15 @@
         </com.google.android.material.card.MaterialCardView>
 
         <com.google.android.material.card.MaterialCardView
+            android:id="@+id/card_spent"
             android:layout_width="0dp"
             android:layout_height="64dp"
             android:layout_weight="1"
             android:layout_marginHorizontal="3dp"
-            app:cardBackgroundColor="#1A1A1A"
+            app:cardBackgroundColor="@android:color/transparent"
             app:cardCornerRadius="16dp"
             app:cardElevation="0dp"
-            app:strokeWidth="1dp"
+            app:strokeWidth="1.5dp"
             app:strokeColor="#33FF5252">
             <LinearLayout
                 android:layout_width="match_parent"
@@ -102,14 +103,15 @@
         </com.google.android.material.card.MaterialCardView>
 
         <com.google.android.material.card.MaterialCardView
+            android:id="@+id/card_remain"
             android:layout_width="0dp"
             android:layout_height="64dp"
             android:layout_weight="1"
             android:layout_marginStart="6dp"
-            app:cardBackgroundColor="#1A1A1A"
+            app:cardBackgroundColor="@android:color/transparent"
             app:cardCornerRadius="16dp"
             app:cardElevation="0dp"
-            app:strokeWidth="1dp"
+            app:strokeWidth="1.5dp"
             app:strokeColor="#334CAF50">
             <LinearLayout
                 android:layout_width="match_parent"
@@ -151,10 +153,10 @@
             android:layout_height="match_parent"
             android:layout_weight="1"
             android:layout_marginHorizontal="4dp"
-            app:cardBackgroundColor="#1A1A1A"
+            app:cardBackgroundColor="@android:color/transparent"
             app:cardCornerRadius="20dp"
             app:cardElevation="0dp"
-            app:strokeWidth="1dp"
+            app:strokeWidth="1.5dp"
             app:strokeColor="#1AFFFFFF">
             <LinearLayout
                 android:layout_width="match_parent"
@@ -188,10 +190,10 @@
             android:layout_height="match_parent"
             android:layout_weight="1"
             android:layout_marginHorizontal="4dp"
-            app:cardBackgroundColor="#222831"
+            app:cardBackgroundColor="@android:color/transparent"
             app:cardCornerRadius="20dp"
             app:cardElevation="0dp"
-            app:strokeWidth="1dp"
+            app:strokeWidth="1.5dp"
             app:strokeColor="#4DFFFFFF">
             <LinearLayout
                 android:layout_width="match_parent"
@@ -235,19 +237,4 @@
             </LinearLayout>
         </com.google.android.material.card.MaterialCardView>
     </LinearLayout>
-
-    <TextView
-        android:id="@+id/tv_finance_insight"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_marginHorizontal="16dp"
-        android:layout_marginTop="12dp"
-        android:layout_marginBottom="4dp"
-        android:background="@drawable/bg_blue_oval_button"
-        android:backgroundTint="#1A333A42"
-        android:paddingHorizontal="16dp"
-        android:paddingVertical="10dp"
-        android:text="Start tracking your expenses to see insights!"
-        android:textColor="@color/white"
-        android:textSize="11sp" />
 </LinearLayout>

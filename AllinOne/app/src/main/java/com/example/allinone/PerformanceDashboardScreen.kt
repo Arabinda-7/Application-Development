@@ -39,7 +39,9 @@ import java.util.*
 
 @Composable
 fun PerformanceDashboardScreen(
-    onBack: () -> Unit,
+    modifier: Modifier = Modifier,
+    onBack: (() -> Unit)? = null,
+    title: String? = null,
     onDateSelected: (String) -> Unit,
     selectedDate: String,
     currentMonth: Calendar,
@@ -47,9 +49,25 @@ fun PerformanceDashboardScreen(
     onShowPicker: () -> Unit,
     performanceData: DayHistory,
     trendData: List<Pair<Int, Int>>,
-    currentMood: String? = null
+    currentMood: String? = null,
+    overrideColor: Color? = null,
+    isWorkoutContext: Boolean = false,
+    showPerformanceCard: Boolean = true,
+    showTrendCard: Boolean = true,
+    showBackgroundAura: Boolean = true
 ) {
-    val moodColorTarget = remember(currentMood) {
+    val heatmapData = remember(currentMonth, isWorkoutContext) {
+        if (isWorkoutContext) DataManager.getVolumeWeightedHeatmap(currentMonth)
+        else DataManager.getHeatmapData(currentMonth) 
+    }
+    val densityData = remember { DataManager.getTemporalDensityData() }
+    val correlations = remember { DataManager.getHabitCorrelationMatrix() }
+    
+    val muscleDistribution = remember { DataManager.getMuscleDistributionData() }
+    val recoveryStatus = remember { DataManager.getMuscleRecoveryStatus() }
+
+    val moodColorTarget = remember(currentMood, overrideColor) {
+        if (overrideColor != null) return@remember overrideColor
         when (currentMood) {
             "🔥" -> Color(0xFFFFB800)
             "⚡" -> Color(0xFF2EC4B6)
@@ -70,130 +88,155 @@ fun PerformanceDashboardScreen(
     var isPerformanceExpanded by remember { mutableStateOf(false) }
 
     Box(
-        modifier = Modifier
+        modifier = modifier
             .fillMaxSize()
-            .background(Color.Black)
+            .then(if (showBackgroundAura) Modifier.background(Color.Black) else Modifier)
     ) {
-        // Aura Header Background matching Home Screen (localized to top content)
-        Box(
-            modifier = Modifier
-                .fillMaxWidth()
-                .height(450.dp)
-                .background(
-                    Brush.verticalGradient(
-                        colors = listOf(animatedMoodColor.copy(alpha = 0.6f), Color.Black)
+        // Fixed Background Aura
+        if (showBackgroundAura) {
+            Box(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(400.dp)
+                    .background(
+                        Brush.verticalGradient(
+                            colors = listOf(animatedMoodColor.copy(alpha = 0.6f), Color.Black)
+                        )
                     )
-                )
-        )
+            )
+        }
 
         LazyColumn(
-            modifier = Modifier
-                .fillMaxSize()
-                .statusBarsPadding(),
-            contentPadding = PaddingValues(horizontal = 20.dp, vertical = 16.dp)
+            modifier = Modifier.fillMaxSize(),
+            contentPadding = PaddingValues(bottom = 16.dp)
         ) {
             // Header
             item {
-                Row(
-                    modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.SpaceBetween,
-                    verticalAlignment = Alignment.CenterVertically
+                Box(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .statusBarsPadding()
+                        .padding(top = 8.dp, bottom = 12.dp, start = 24.dp, end = 24.dp)
                 ) {
-                    Box(
-                        modifier = Modifier
-                            .size(36.dp)
-                            .clip(CircleShape)
-                            .background(Color.White.copy(alpha = 0.08f))
-                            .clickable { onBack() },
-                        contentAlignment = Alignment.Center
-                    ) {
-                        Icon(
-                            imageVector = Icons.AutoMirrored.Filled.ArrowBack,
-                            contentDescription = "Back",
-                            tint = Color.White,
-                            modifier = Modifier.size(18.dp)
-                        )
+                    Column {
+                        Row(
+                            modifier = Modifier.fillMaxWidth(),
+                            horizontalArrangement = Arrangement.SpaceBetween,
+                            verticalAlignment = Alignment.CenterVertically
+                        ) {
+                            if (onBack != null) {
+                                Box(
+                                    modifier = Modifier
+                                        .size(36.dp)
+                                        .clip(CircleShape)
+                                        .background(Color.White.copy(alpha = 0.08f))
+                                        .clickable(
+                                            interactionSource = remember { MutableInteractionSource() },
+                                            indication = null
+                                        ) { onBack.invoke() },
+                                    contentAlignment = Alignment.Center
+                                ) {
+                                    Icon(
+                                        imageVector = Icons.AutoMirrored.Filled.ArrowBack,
+                                        contentDescription = "Back",
+                                        tint = Color.White,
+                                        modifier = Modifier.size(18.dp)
+                                    )
+                                }
+                            } else {
+                                Spacer(modifier = Modifier.size(36.dp))
+                            }
+
+                            Box(
+                                modifier = Modifier
+                                    .size(36.dp)
+                                    .clip(CircleShape)
+                                    .background(Color.White.copy(alpha = 0.08f))
+                                    .clickable(
+                                        interactionSource = remember { MutableInteractionSource() },
+                                        indication = null
+                                    ) { onShowPicker() },
+                                contentAlignment = Alignment.Center
+                            ) {
+                                Icon(
+                                    imageVector = Icons.Default.DateRange,
+                                    contentDescription = "Calendar",
+                                    tint = Color.White,
+                                    modifier = Modifier.size(18.dp)
+                                )
+                            }
+                        }
+
+                        if (title != null) {
+                            Spacer(modifier = Modifier.height(12.dp))
+                            Text(
+                                text = "MOMENTUM LOG",
+                                color = Color.White.copy(alpha = 0.4f),
+                                fontSize = 10.sp,
+                                fontWeight = FontWeight.Medium,
+                                letterSpacing = 1.sp
+                            )
+                            Text(
+                                text = title.uppercase(),
+                                fontSize = 24.sp,
+                                fontWeight = FontWeight.Black,
+                                color = Color.White,
+                                letterSpacing = (-0.5).sp
+                            )
+                        }
+
+                        val sdfMonth = SimpleDateFormat("MMMM", Locale.getDefault())
+                        val sdfYear = SimpleDateFormat("yyyy", Locale.getDefault())
+
+                        Spacer(modifier = Modifier.height(12.dp))
+                        Row(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .pointerInput(currentMonth) {
+                                    var totalDrag = 0f
+                                    var hasSwiped = false
+                                    detectHorizontalDragGestures(
+                                        onDragEnd = {
+                                            totalDrag = 0f
+                                            hasSwiped = false
+                                        },
+                                        onHorizontalDrag = { change, dragAmount ->
+                                            change.consume()
+                                            if (!hasSwiped) {
+                                                totalDrag += dragAmount
+                                                if (totalDrag > 100) {
+                                                    val newCal = currentMonth.clone() as Calendar
+                                                    newCal.add(Calendar.MONTH, -1)
+                                                    onMonthChanged(newCal)
+                                                    hasSwiped = true
+                                                } else if (totalDrag < -100) {
+                                                    val newCal = currentMonth.clone() as Calendar
+                                                    newCal.add(Calendar.MONTH, 1)
+                                                    onMonthChanged(newCal)
+                                                    hasSwiped = true
+                                                }
+                                            }
+                                        }
+                                    )
+                                },
+                            verticalAlignment = Alignment.CenterVertically
+                        ) {
+                            Text(
+                                text = "${sdfMonth.format(currentMonth.time)} ${sdfYear.format(currentMonth.time)}",
+                                fontSize = 14.sp,
+                                fontWeight = FontWeight.Bold,
+                                color = animatedMoodColor
+                            )
+                        }
                     }
                 }
                 Spacer(modifier = Modifier.height(16.dp))
-                Row(
-                    modifier = Modifier.fillMaxWidth(),
-                    verticalAlignment = Alignment.Bottom,
-                    horizontalArrangement = Arrangement.SpaceBetween
-                ) {
-                    val sdfMonth = SimpleDateFormat("MMMM", Locale.getDefault())
-                    val sdfYear = SimpleDateFormat("yyyy", Locale.getDefault())
-                    
-                    Row(
-                        modifier = Modifier
-                            .weight(1f)
-                            .pointerInput(currentMonth) {
-                                var totalDrag = 0f
-                                var hasSwiped = false
-                                detectHorizontalDragGestures(
-                                    onDragEnd = {
-                                        totalDrag = 0f
-                                        hasSwiped = false
-                                    },
-                                    onHorizontalDrag = { change, dragAmount ->
-                                        change.consume()
-                                        if (!hasSwiped) {
-                                            totalDrag += dragAmount
-                                            if (totalDrag > 100) {
-                                                val newCal = currentMonth.clone() as Calendar
-                                                newCal.add(Calendar.MONTH, -1)
-                                                onMonthChanged(newCal)
-                                                hasSwiped = true
-                                            } else if (totalDrag < -100) {
-                                                val newCal = currentMonth.clone() as Calendar
-                                                newCal.add(Calendar.MONTH, 1)
-                                                onMonthChanged(newCal)
-                                                hasSwiped = true
-                                            }
-                                        }
-                                    }
-                                )
-                            },
-                        verticalAlignment = Alignment.Bottom
-                    ) {
-                        Text(
-                            text = sdfMonth.format(currentMonth.time).uppercase(),
-                            style = MaterialTheme.typography.displayMedium,
-                            fontSize = 36.sp,
-                            fontWeight = FontWeight.Medium,
-                            color = Color.White
-                        )
-                        Spacer(modifier = Modifier.width(12.dp))
-                        Text(
-                            text = sdfYear.format(currentMonth.time),
-                            fontSize = 20.sp,
-                            color = Color.Gray,
-                            modifier = Modifier.padding(bottom = 6.dp)
-                        )
-                    }
-                    Box(
-                        modifier = Modifier
-                            .size(36.dp)
-                            .clip(CircleShape)
-                            .background(Color.White.copy(alpha = 0.08f))
-                            .clickable { onShowPicker() },
-                        contentAlignment = Alignment.Center
-                    ) {
-                        Icon(
-                            imageVector = Icons.Default.DateRange,
-                            contentDescription = "Calendar",
-                            tint = Color.White,
-                            modifier = Modifier.size(18.dp)
-                        )
-                    }
-                }
-                Spacer(modifier = Modifier.height(24.dp))
             }
 
             // Calendar Header
             item {
                 val days = listOf("S", "M", "T", "W", "T", "F", "S")
-                Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
+                Row(modifier = Modifier.fillMaxWidth().padding(horizontal = 24.dp), horizontalArrangement = Arrangement.SpaceBetween) {
                     days.forEach { day ->
                         Text(
                             text = day,
@@ -217,7 +260,7 @@ fun PerformanceDashboardScreen(
                 val todayStr = SimpleDateFormat("yyyyMMdd", Locale.getDefault()).format(Date())
                 val gridMonthStr = SimpleDateFormat("yyyyMM", Locale.getDefault()).format(calendar.time)
 
-                Column(modifier = Modifier.fillMaxWidth()) {
+                Column(modifier = Modifier.fillMaxWidth().padding(horizontal = 24.dp)) {
                     var day = 1
                     for (row in 0..5) {
                         Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
@@ -227,8 +270,10 @@ fun PerformanceDashboardScreen(
                                     Box(modifier = Modifier.weight(1f).aspectRatio(1f))
                                 } else {
                                     val dateStr = gridMonthStr + day.toString().padStart(2, '0')
+                                    val dayProgress = heatmapData.getOrNull(day - 1) ?: 0
                                     CalendarDayItem(
                                         day = day,
+                                        progress = dayProgress,
                                         isSelected = dateStr == selectedDate,
                                         isToday = dateStr == todayStr,
                                         themeColor = animatedMoodColor,
@@ -250,38 +295,95 @@ fun PerformanceDashboardScreen(
             }
 
             // Performance Card
-            item {
-                val formattedDate = try {
-                    val date = SimpleDateFormat("yyyyMMdd", Locale.getDefault()).parse(selectedDate)
-                    SimpleDateFormat("MMMM dd, yyyy", Locale.getDefault()).format(date!!).uppercase()
-                } catch (e: Exception) { "JULY 16, 2026" }
+            if (showPerformanceCard) {
+                item {
+                    val formattedDate = try {
+                        val date = SimpleDateFormat("yyyyMMdd", Locale.getDefault()).parse(selectedDate)
+                        SimpleDateFormat("MMMM dd, yyyy", Locale.getDefault()).format(date!!).uppercase()
+                    } catch (e: Exception) { "JULY 16, 2026" }
 
-                DashboardCard(
-                    title = "PERFORMANCE FOR $formattedDate",
-                    modifier = Modifier.clickable { isPerformanceExpanded = !isPerformanceExpanded }
-                ) {
-                    PerformanceSummary(
-                        data = performanceData,
-                        isExpanded = isPerformanceExpanded,
-                        themeColor = animatedMoodColor
-                    )
+                    DashboardCard(
+                        title = "PERFORMANCE FOR $formattedDate",
+                        modifier = Modifier.padding(horizontal = 24.dp).clickable { isPerformanceExpanded = !isPerformanceExpanded }
+                    ) {
+                        PerformanceSummary(
+                            data = performanceData,
+                            isExpanded = isPerformanceExpanded,
+                            themeColor = animatedMoodColor
+                        )
+                    }
+                    Spacer(modifier = Modifier.height(16.dp))
                 }
-                Spacer(modifier = Modifier.height(16.dp))
             }
 
             // Trend Card
+            if (showTrendCard) {
+                item {
+                    DashboardCard(
+                        title = "7-DAY COMPLETION TREND",
+                        modifier = Modifier.padding(horizontal = 24.dp)
+                    ) {
+                        TrendChart(trendData, animatedMoodColor)
+                    }
+                    Spacer(modifier = Modifier.height(24.dp))
+                }
+            }
+
+            // Advanced Analytics / Insights
             item {
-                DashboardCard(title = "7-DAY COMPLETION TREND") {
-                    TrendChart(trendData, animatedMoodColor)
+                if (isWorkoutContext) {
+                    Column(modifier = Modifier.padding(horizontal = 24.dp)) {
+                        DashboardCard(title = "MUSCLE BALANCE (30D VOLUME)") {
+                            MuscleRadarChart(muscleDistribution, animatedMoodColor)
+                        }
+                        Spacer(modifier = Modifier.height(24.dp))
+                        DashboardCard(title = "MUSCLE READINESS") {
+                            RecoveryStatusDashboard(recoveryStatus, animatedMoodColor)
+                        }
+                    }
+                } else {
+                    Column(modifier = Modifier.padding(horizontal = 24.dp)) {
+                        DashboardCard(title = "POWER HOURS (TEMPORAL SUCCESS)") {
+                            PunchCardChart(densityData, animatedMoodColor)
+                        }
+                        Spacer(modifier = Modifier.height(24.dp))
+                        DashboardCard(title = "BEHAVIORAL CORRELATIONS") {
+                            CorrelationInsightCard(correlations, animatedMoodColor)
+                        }
+                    }
                 }
                 Spacer(modifier = Modifier.height(24.dp))
+            }
+
+            // Consistency Heatmap (Moved to bottom)
+            item {
+                val momentumDescription = if (isWorkoutContext) {
+                    "Volume-weighted frequency map. Darker shades indicate higher intensity or total volume per session."
+                } else {
+                    "Daily completion heat-map across all tracked habits. Darker shades indicate higher success rates."
+                }
+                DashboardCard(
+                    title = if (isWorkoutContext) "VOLUME INTENSITY" else "MONTHLY MOMENTUM",
+                    description = momentumDescription,
+                    modifier = Modifier.padding(horizontal = 24.dp)
+                ) {
+                    ConsistencyHeatmap(heatmapData, animatedMoodColor)
+                }
+                Spacer(modifier = Modifier.height(40.dp))
             }
         }
     }
 }
 
 @Composable
-fun CalendarDayItem(day: Int, isSelected: Boolean, isToday: Boolean, themeColor: Color, modifier: Modifier = Modifier) {
+fun CalendarDayItem(
+    day: Int, 
+    progress: Int,
+    isSelected: Boolean, 
+    isToday: Boolean, 
+    themeColor: Color, 
+    modifier: Modifier = Modifier
+) {
     Box(
         modifier = modifier.aspectRatio(1f).padding(4.dp),
         contentAlignment = Alignment.Center
@@ -295,27 +397,43 @@ fun CalendarDayItem(day: Int, isSelected: Boolean, isToday: Boolean, themeColor:
                 modifier = Modifier.size(36.dp),
                 contentAlignment = Alignment.Center
             ) {
+                // Background based on progress
+                Box(
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .background(
+                            color = if (progress == 0) Color.White.copy(alpha = 0.05f) 
+                                    else themeColor.copy(alpha = (progress / 100f).coerceIn(0.15f, 0.4f)),
+                            shape = RoundedCornerShape(8.dp)
+                        )
+                )
+
                 if (isSelected) {
                     Canvas(modifier = Modifier.fillMaxSize()) {
-                        // Main circle outline
-                        drawCircle(
+                        // Square selection border
+                        val strokeWidth = 1.dp.toPx()
+                        val inset = strokeWidth / 2
+                        drawRoundRect(
                             color = themeColor,
-                            radius = size.minDimension / 2.2f,
-                            style = Stroke(width = 1.dp.toPx())
+                            topLeft = Offset(inset, inset),
+                            size = androidx.compose.ui.geometry.Size(size.width - strokeWidth, size.height - strokeWidth),
+                            cornerRadius = androidx.compose.ui.geometry.CornerRadius(8.dp.toPx()),
+                            style = Stroke(width = strokeWidth)
                         )
-                        // Thick progress arch at the top
+                        
+                        // Small indicator for selection
                         drawArc(
                             color = themeColor,
                             startAngle = -120f,
                             sweepAngle = 60f,
                             useCenter = false,
-                            topLeft = Offset(size.width * 0.1f, size.height * 0.1f),
-                            size = size * 0.8f,
-                            style = Stroke(width = 3.dp.toPx(), cap = StrokeCap.Round)
+                            topLeft = Offset(size.width * 0.15f, size.height * 0.15f),
+                            size = size * 0.7f,
+                            style = Stroke(width = 2.5.dp.toPx(), cap = StrokeCap.Round)
                         )
                     }
                     Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                        Text(text = day.toString(), color = Color.White, fontSize = 14.sp)
+                        Text(text = day.toString(), color = Color.White, fontSize = 14.sp, fontWeight = FontWeight.Bold)
                         Icon(
                             Icons.Default.Check,
                             contentDescription = null,
@@ -324,14 +442,7 @@ fun CalendarDayItem(day: Int, isSelected: Boolean, isToday: Boolean, themeColor:
                         )
                     }
                 } else {
-                    Box(
-                        modifier = Modifier
-                            .size(36.dp)
-                            .background(themeColor.copy(alpha = 0.15f), CircleShape),
-                        contentAlignment = Alignment.Center
-                    ) {
-                        Text(text = day.toString(), color = Color.LightGray, fontSize = 14.sp)
-                    }
+                    Text(text = day.toString(), color = Color.LightGray, fontSize = 14.sp)
                 }
             }
             if (isToday) {
@@ -348,12 +459,17 @@ fun CalendarDayItem(day: Int, isSelected: Boolean, isToday: Boolean, themeColor:
 }
 
 @Composable
-fun DashboardCard(title: String, modifier: Modifier = Modifier, content: @Composable () -> Unit) {
+fun DashboardCard(
+    title: String, 
+    modifier: Modifier = Modifier, 
+    description: String? = null,
+    content: @Composable () -> Unit
+) {
     Card(
         modifier = modifier.fillMaxWidth(),
         shape = RoundedCornerShape(24.dp),
-        colors = CardDefaults.cardColors(containerColor = Color(0xFF1A1A1A)),
-        border = BorderStroke(1.dp, Color.White.copy(alpha = 0.05f))
+        colors = CardDefaults.cardColors(containerColor = Color.White.copy(alpha = 0.05f)),
+        border = BorderStroke(1.dp, Color.White.copy(alpha = 0.08f))
     ) {
         Column(modifier = Modifier.padding(20.dp)) {
             Text(
@@ -363,6 +479,17 @@ fun DashboardCard(title: String, modifier: Modifier = Modifier, content: @Compos
                 color = Color.Gray,
                 letterSpacing = 0.1.em
             )
+            
+            if (description != null) {
+                Spacer(modifier = Modifier.height(4.dp))
+                Text(
+                    text = description,
+                    fontSize = 11.sp,
+                    color = Color.White.copy(alpha = 0.5f),
+                    lineHeight = 16.sp
+                )
+            }
+            
             Spacer(modifier = Modifier.height(16.dp))
             content()
         }
@@ -413,7 +540,7 @@ fun PerformanceSummary(data: DayHistory, isExpanded: Boolean, themeColor: Color)
                     )
                     Spacer(modifier = Modifier.height(16.dp))
                 }
-                
+
                 if (data.totalWorkouts > 0) {
                     ProgressRow(
                         icon = "[W]",
@@ -506,7 +633,7 @@ fun TrendChart(data: List<Pair<Int, Int>>, themeColor: Color) {
             Spacer(modifier = Modifier.width(16.dp))
             LegendItem(color = Color(0xFF29D9C3), label = "Workouts")
         }
-        
+
         Spacer(modifier = Modifier.height(12.dp))
         
         Row(
@@ -561,9 +688,9 @@ fun DoubleBar(habitProgress: Float, workoutProgress: Float, themeColor: Color) {
                     )
             )
         }
-        
+
         Spacer(modifier = Modifier.width(6.dp))
-        
+
         // Workout Bar Column
         Box(
             modifier = Modifier

@@ -2,7 +2,9 @@ package com.example.allinone
 
 import android.os.Bundle
 import androidx.activity.compose.setContent
+import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.runtime.*
+import androidx.compose.ui.Modifier
 import java.text.SimpleDateFormat
 import java.util.*
 
@@ -22,7 +24,7 @@ class PerformanceHistoryActivity : BaseActivity() {
             val performanceData = remember(selectedDate) {
                 val sdf = SimpleDateFormat("yyyyMMdd", Locale.getDefault())
                 val today = sdf.format(Date())
-                
+
                 // Calculate the end of the selected day in milliseconds to filter by timestamp
                 val selectedDayEnd = try {
                     val date = sdf.parse(selectedDate)
@@ -38,11 +40,11 @@ class PerformanceHistoryActivity : BaseActivity() {
 
                 if (selectedDate == today) {
                     val todayIndex = (DataManager.getTrackingCalendar().get(Calendar.DAY_OF_WEEK) - 1)
-                    val todaysHabits = DataManager.habits.filter { 
+                    val todaysHabits = DataManager.habits.filter {
                         (it.repeatType != "SPECIFIC_DAYS" || it.repeatDays.contains(todayIndex)) &&
                         it.timestamp <= selectedDayEnd
                     }
-                    val todaysWorkouts = DataManager.workouts.filter { 
+                    val todaysWorkouts = DataManager.workouts.filter {
                         (it.repeatType != "SPECIFIC_DAYS" || it.repeatDays.contains(todayIndex)) &&
                         it.timestamp <= selectedDayEnd
                     }
@@ -53,7 +55,7 @@ class PerformanceHistoryActivity : BaseActivity() {
                         totalWorkouts = todaysWorkouts.size
                     )
                 } else {
-                    // For past dates, we prefer the snapshot if it exists, 
+                    // For past dates, we prefer the snapshot if it exists,
                     // but we can also recalculate if we want to be perfectly accurate regarding item creation
                     val snapshot = DataManager.history[selectedDate]
                     if (snapshot != null) {
@@ -63,14 +65,14 @@ class PerformanceHistoryActivity : BaseActivity() {
                         val cal = Calendar.getInstance()
                         try { sdf.parse(selectedDate)?.let { cal.time = it } } catch (e: Exception) {}
                         val dayIndex = (cal.get(Calendar.DAY_OF_WEEK) - 1)
-                        
-                        val activeHabits = DataManager.habits.filter { 
+
+                        val activeHabits = DataManager.habits.filter {
                             it.timestamp <= selectedDayEnd && (it.repeatType != "SPECIFIC_DAYS" || it.repeatDays.contains(dayIndex))
                         }
-                        val activeWorkouts = DataManager.workouts.filter { 
+                        val activeWorkouts = DataManager.workouts.filter {
                             it.timestamp <= selectedDayEnd && (it.repeatType != "SPECIFIC_DAYS" || it.repeatDays.contains(dayIndex))
                         }
-                        
+
                         DayHistory(
                             habitsCompleted = activeHabits.count { it.completedDates.contains(selectedDate) },
                             totalHabits = activeHabits.size,
@@ -86,6 +88,7 @@ class PerformanceHistoryActivity : BaseActivity() {
 
             PerformanceDashboardScreen(
                 onBack = { finish() },
+                title = "PERFORMANCE HISTORY",
                 onDateSelected = { selectedDate = it },
                 selectedDate = selectedDate,
                 currentMonth = currentMonth,
@@ -107,7 +110,8 @@ class PerformanceHistoryActivity : BaseActivity() {
                 },
                 performanceData = performanceData,
                 trendData = trendData,
-                currentMood = currentMood
+                currentMood = currentMood,
+                isWorkoutContext = false
             )
         }
     }

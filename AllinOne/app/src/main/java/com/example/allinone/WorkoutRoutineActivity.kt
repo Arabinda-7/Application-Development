@@ -26,6 +26,9 @@ import androidx.activity.enableEdgeToEdge
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.widget.SwitchCompat
+import androidx.compose.runtime.*
+import androidx.compose.ui.graphics.Color as ComposeColor
+import androidx.compose.ui.platform.ComposeView
 import androidx.core.content.ContextCompat
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
@@ -50,6 +53,14 @@ class WorkoutRoutineActivity : BaseActivity() {
     
     private var currentGridCalendar = Calendar.getInstance()
     private var currentTab = "TODAY"
+
+    private lateinit var todayLayout: View
+    private lateinit var historyLayout: View
+    private lateinit var historyComposeView: ComposeView
+    private lateinit var ivToday: ImageView
+    private lateinit var tvTodayNav: TextView
+    private lateinit var ivHistory: ImageView
+    private lateinit var tvHistoryNav: TextView
 
     private val timerActivityResultLauncher = registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
         if (result.resultCode == Activity.RESULT_OK) {
@@ -76,6 +87,15 @@ class WorkoutRoutineActivity : BaseActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_workout_routine)
+
+        todayLayout = findViewById(R.id.today_layout)
+        historyLayout = findViewById(R.id.history_layout)
+        historyComposeView = findViewById(R.id.history_compose_view)
+        
+        ivToday = findViewById(R.id.iv_today)
+        tvTodayNav = findViewById(R.id.tv_today_nav)
+        ivHistory = findViewById(R.id.iv_history)
+        tvHistoryNav = findViewById(R.id.tv_history_nav)
 
         val dateTextView = findViewById<TextView>(R.id.tv_date)
         val sdf = SimpleDateFormat("MMM dd", Locale.getDefault())
@@ -107,13 +127,13 @@ class WorkoutRoutineActivity : BaseActivity() {
 
         setupHeaderLogic()
         setupFooterLogic()
-        setupGridNavigation()
         setupCalendarViewPager()
         applySectionTheme()
         updateSectionProgress()
         setupGestureDetector()
-        setupKeyboardHandling(findViewById(R.id.workout_root_layout), findViewById(R.id.workout_content_container))
+        setupKeyboardHandling(findViewById(R.id.workout_root_layout))
         updateDynamicBackground()
+        setupComposeHistory()
 
         findViewById<View>(R.id.btn_back).setOnClickListener { finish() }
         findViewById<View>(R.id.btn_back_history).setOnClickListener { finish() }
@@ -123,16 +143,6 @@ class WorkoutRoutineActivity : BaseActivity() {
             val menuView = inflater.inflate(R.layout.layout_activity_settings_menu, null)
             val popupWindow = PopupWindow(menuView, ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT, true)
             popupWindow.elevation = 10f
-
-            val balanceBtn = menuView.findViewById<View>(R.id.menu_action_primary)
-            balanceBtn.visibility = View.VISIBLE
-            menuView.findViewById<TextView>(R.id.tv_action_primary).text = "MUSCLE BALANCE"
-            menuView.findViewById<ImageView>(R.id.iv_action_primary).setImageResource(R.drawable.ic_fitness)
-            
-            balanceBtn.setOnClickListener {
-                showWorkoutStatsDialog()
-                popupWindow.dismiss()
-            }
 
             val menuToggle = menuView.findViewById<View>(R.id.menu_toggle_completed)
             val tvToggle = menuView.findViewById<TextView>(R.id.tv_toggle_completed)
@@ -146,6 +156,27 @@ class WorkoutRoutineActivity : BaseActivity() {
                 DataManager.workoutShowCompleted = !DataManager.workoutShowCompleted
                 workoutAdapter.setShowCompleted(DataManager.workoutShowCompleted)
                 DataManager.saveData(this)
+                popupWindow.dismiss()
+            }
+
+            // History Option
+            val historyBtn = menuView.findViewById<View>(R.id.menu_action_primary)
+            historyBtn.visibility = View.VISIBLE
+            menuView.findViewById<TextView>(R.id.tv_action_primary).text = "HISTORY"
+            menuView.findViewById<ImageView>(R.id.iv_action_primary).setImageResource(R.drawable.ic_history)
+            historyBtn.setOnClickListener {
+                switchTab("HISTORY")
+                popupWindow.dismiss()
+            }
+
+            // Muscle Balance Option
+            val balanceBtn = menuView.findViewById<View>(R.id.menu_action_secondary)
+            balanceBtn.visibility = View.VISIBLE
+            menuView.findViewById<TextView>(R.id.tv_action_secondary).text = "MUSCLE BALANCE"
+            menuView.findViewById<ImageView>(R.id.iv_action_secondary).setImageResource(R.drawable.ic_fitness)
+            
+            balanceBtn.setOnClickListener {
+                showWorkoutStatsDialog()
                 popupWindow.dismiss()
             }
 
@@ -256,19 +287,20 @@ class WorkoutRoutineActivity : BaseActivity() {
     }
 
     private fun switchTab(tab: String) {
+        val root = findViewById<ViewGroup>(R.id.workout_content_container)
+        androidx.transition.TransitionManager.beginDelayedTransition(root, androidx.transition.AutoTransition())
         currentTab = tab
-        val todayLayout = findViewById<View>(R.id.today_layout)
-        val historyLayout = findViewById<View>(R.id.history_layout)
         
         if (tab == "TODAY") {
             todayLayout.visibility = View.VISIBLE
             historyLayout.visibility = View.GONE
+            historyComposeView.visibility = View.GONE
             updateNavUI("TODAY")
         } else {
             todayLayout.visibility = View.GONE
-            historyLayout.visibility = View.VISIBLE
+            historyLayout.visibility = View.GONE
+            historyComposeView.visibility = View.VISIBLE
             updateNavUI("HISTORY")
-            updateHistoryUI()
         }
     }
 
@@ -289,15 +321,57 @@ class WorkoutRoutineActivity : BaseActivity() {
         return super.dispatchTouchEvent(ev)
     }
 
-    private fun setupGridNavigation() {
-        val historyLayout = findViewById<View>(R.id.history_layout)
-        historyLayout.findViewById<View>(R.id.btn_prev_month).setOnClickListener {
-            currentGridCalendar.add(Calendar.MONTH, -1)
-            setupDynamicHistoryGrid()
-        }
-        historyLayout.findViewById<View>(R.id.btn_next_month).setOnClickListener {
-            currentGridCalendar.add(Calendar.MONTH, 1)
-            setupDynamicHistoryGrid()
+    private fun setupComposeHistory() {
+        val composeView = findViewById<ComposeView>(R.id.history_compose_view) ?: return
+        composeView.setContent {
+            var selectedDate by remember { mutableStateOf(DataManager.getTrackingDateString()) }
+            var currentMonth by remember { 
+                mutableStateOf(Calendar.getInstance().apply { 
+                    try {
+                        val date = SimpleDateFormat("yyyyMMdd", Locale.getDefault()).parse(selectedDate)
+                        if (date != null) time = date
+                    } catch (e: Exception) {}
+                }) 
+            }
+            
+            val performanceData = remember(selectedDate) {
+                DataManager.getDayHistory(selectedDate)
+            }
+            
+            val trendData = remember { DataManager.getLastSevenDaysDetailedProgress() }
+            val workoutColor = if (DataManager.globalWorkoutColor != -1) ComposeColor(DataManager.globalWorkoutColor) else ComposeColor(0xFFFFB800)
+
+            PerformanceDashboardScreen(
+                onBack = { switchTab("TODAY") },
+                title = "WORKOUT HISTORY",
+                onDateSelected = { selectedDate = it },
+                selectedDate = selectedDate,
+                currentMonth = currentMonth,
+                onMonthChanged = { currentMonth = it.clone() as Calendar },
+                onShowPicker = {
+                    val dialog = android.app.DatePickerDialog(
+                        this,
+                        { _, year, month, day ->
+                            val cal = Calendar.getInstance()
+                            cal.set(year, month, day)
+                            currentMonth = cal.clone() as Calendar
+                            selectedDate = SimpleDateFormat("yyyyMMdd", Locale.getDefault()).format(cal.time)
+                        },
+                        currentMonth.get(Calendar.YEAR),
+                        currentMonth.get(Calendar.MONTH),
+                        currentMonth.get(Calendar.DAY_OF_MONTH)
+                    )
+                    dialog.show()
+                },
+                performanceData = performanceData,
+                trendData = trendData,
+                currentMood = null,
+                overrideColor = workoutColor,
+                isWorkoutContext = true,
+                showPerformanceCard = false,
+                showTrendCard = false,
+                showBackgroundAura = false
+            )
         }
     }
 
@@ -414,6 +488,18 @@ class WorkoutRoutineActivity : BaseActivity() {
 
         val nameInput = dialog.findViewById<EditText>(R.id.workout_name_input)
         val targetInput = dialog.findViewById<EditText>(R.id.target_input)
+        val targetSetsInput = dialog.findViewById<EditText>(R.id.target_sets_input)
+        val repsPerSetInput = dialog.findViewById<EditText>(R.id.reps_per_set_input)
+        val targetTimerInput = dialog.findViewById<EditText>(R.id.target_timer_input)
+
+        val layoutRepsGoal = dialog.findViewById<View>(R.id.layout_reps_goal)
+        val layoutSetsGoal = dialog.findViewById<View>(R.id.layout_sets_goal)
+        val layoutTimerGoal = dialog.findViewById<View>(R.id.layout_timer_goal)
+
+        val btnRollerReps = dialog.findViewById<View>(R.id.btn_roller_reps)
+        val btnRollerSets = dialog.findViewById<View>(R.id.btn_roller_sets)
+        val btnRollerTimer = dialog.findViewById<View>(R.id.btn_roller_timer)
+
         val chipGroup = dialog.findViewById<ChipGroup>(R.id.muscle_chip_group)
         val btnClose = dialog.findViewById<View>(R.id.btn_close_workout)
         val btnSave = dialog.findViewById<TextView>(R.id.btn_save_workout)
@@ -423,18 +509,38 @@ class WorkoutRoutineActivity : BaseActivity() {
         val tvNameHint = dialog.findViewById<TextView>(R.id.tv_name_hint_workout)
         val tvScheduleHint = dialog.findViewById<TextView>(R.id.tv_schedule_hint_workout)
         val tvTargetHint = dialog.findViewById<TextView>(R.id.tv_target_hint_workout)
+        val tvGoalTitle = dialog.findViewById<TextView>(R.id.tv_goal_title)
+        val tvLabelReps = dialog.findViewById<View>(R.id.tv_label_reps)
+        val tvLabelSets = dialog.findViewById<View>(R.id.tv_label_sets)
+        val tvLabelRepsPerSet = dialog.findViewById<View>(R.id.tv_label_reps_per_set)
+        val tvLabelTimer = dialog.findViewById<View>(R.id.tv_label_timer)
 
         val dayViews = listOf(R.id.day_0_direct_workout, R.id.day_1_direct_workout, R.id.day_2_direct_workout, R.id.day_3_direct_workout, R.id.day_4_direct_workout, R.id.day_5_direct_workout, R.id.day_6_direct_workout)
             .map { dialog.findViewById<TextView>(it) }
         
         var tempRepeatDays = existingWorkout?.repeatDays?.toMutableList() ?: mutableListOf(0, 1, 2, 3, 4, 5, 6)
+        var selectedMode = existingWorkout?.trackingMode ?: DataManager.workoutDefaultMode
 
         fun validateInputs() {
             val name = nameInput.text.toString().trim()
-            val target = targetInput.text.toString().toIntOrNull() ?: 0
             val isNameValid = name.isNotEmpty()
             val isScheduleValid = tempRepeatDays.isNotEmpty()
-            val isTargetValid = target > 0
+            
+            val isTargetValid = when (selectedMode) {
+                "Sets" -> {
+                    val sets = targetSetsInput.text.toString().toIntOrNull() ?: 0
+                    val reps = repsPerSetInput.text.toString().toIntOrNull() ?: 0
+                    sets > 0 && reps > 0
+                }
+                "Timer" -> {
+                    val timer = targetTimerInput.text.toString().toIntOrNull() ?: 0
+                    timer > 0
+                }
+                else -> {
+                    val reps = targetInput.text.toString().toIntOrNull() ?: 0
+                    reps > 0
+                }
+            }
             
             val isAllValid = isNameValid && isScheduleValid && isTargetValid
 
@@ -449,7 +555,69 @@ class WorkoutRoutineActivity : BaseActivity() {
             if (!isScheduleValid) startPulseAnimation(tvScheduleHint)
             if (!isTargetValid) startPulseAnimation(tvTargetHint)
         }
-        
+
+        fun showSingleRollerDialog(title: String, targetEditText: EditText, min: Int, max: Int) {
+            val d = Dialog(this)
+            d.setContentView(R.layout.dialog_number_picker)
+            d.window?.setBackgroundDrawableResource(android.R.color.transparent)
+            val tvTitle = d.findViewById<TextView>(R.id.tv_picker_title)
+            val picker = d.findViewById<NumberPicker>(R.id.number_picker)
+            val btnConfirm = d.findViewById<View>(R.id.btn_confirm_picker)
+            tvTitle.text = title
+            picker.minValue = min; picker.maxValue = max; picker.wrapSelectorWheel = false
+            picker.value = targetEditText.text.toString().toIntOrNull() ?: min
+            btnConfirm.setOnClickListener { targetEditText.setText(picker.value.toString()); validateInputs(); d.dismiss() }
+            showDialogSafe(d)
+        }
+
+        fun showDividedRollerDialog(setsEt: EditText, repsEt: EditText) {
+            val d = Dialog(this)
+            d.setContentView(R.layout.dialog_divided_roller)
+            d.window?.setBackgroundDrawableResource(android.R.color.transparent)
+            val npSets = d.findViewById<NumberPicker>(R.id.np_sets)
+            val npReps = d.findViewById<NumberPicker>(R.id.np_reps)
+            val btnConfirm = d.findViewById<View>(R.id.btn_confirm_picker)
+            npSets.minValue = 1; npSets.maxValue = 100; npSets.wrapSelectorWheel = false
+            npReps.minValue = 1; npReps.maxValue = 500; npReps.wrapSelectorWheel = false
+            npSets.value = setsEt.text.toString().toIntOrNull() ?: 1
+            npReps.value = repsEt.text.toString().toIntOrNull() ?: 1
+            btnConfirm.setOnClickListener { setsEt.setText(npSets.value.toString()); repsEt.setText(npReps.value.toString()); validateInputs(); d.dismiss() }
+            showDialogSafe(d)
+        }
+
+        fun showTimerRollerDialog(targetEditText: EditText) {
+            val d = Dialog(this)
+            d.setContentView(R.layout.dialog_timer_roller)
+            d.window?.setBackgroundDrawableResource(android.R.color.transparent)
+            val npMin = d.findViewById<NumberPicker>(R.id.np_minutes)
+            val npSec = d.findViewById<NumberPicker>(R.id.np_seconds)
+            val btnConfirm = d.findViewById<View>(R.id.btn_confirm_picker)
+            npMin.minValue = 0; npMin.maxValue = 60; npMin.wrapSelectorWheel = false
+            npSec.minValue = 0; npSec.maxValue = 59; npSec.wrapSelectorWheel = true
+            val totalSeconds = targetEditText.text.toString().toIntOrNull() ?: 0
+            npMin.value = totalSeconds / 60
+            npSec.value = totalSeconds % 60
+            btnConfirm.setOnClickListener { val confirmedSeconds = (npMin.value * 60) + npSec.value; targetEditText.setText(confirmedSeconds.toString()); validateInputs(); d.dismiss() }
+            showDialogSafe(d)
+        }
+
+        val onGoalClick = View.OnClickListener {
+            when (selectedMode) {
+                "Sets" -> showDividedRollerDialog(targetSetsInput, repsPerSetInput)
+                "Timer" -> showTimerRollerDialog(targetTimerInput)
+                else -> showSingleRollerDialog("REPS", targetInput, 0, 500)
+            }
+        }
+
+        tvGoalTitle.setOnClickListener(onGoalClick)
+        btnRollerReps.setOnClickListener(onGoalClick)
+        btnRollerSets.setOnClickListener(onGoalClick)
+        btnRollerTimer.setOnClickListener(onGoalClick)
+        tvLabelReps.setOnClickListener(onGoalClick)
+        tvLabelSets.setOnClickListener(onGoalClick)
+        tvLabelRepsPerSet.setOnClickListener(onGoalClick)
+        tvLabelTimer.setOnClickListener(onGoalClick)
+
         fun refreshDayButtons() {
             dayViews.forEachIndexed { index, tv ->
                 val isSelected = tempRepeatDays.contains(index)
@@ -473,18 +641,10 @@ class WorkoutRoutineActivity : BaseActivity() {
             override fun afterTextChanged(s: android.text.Editable?) {}
         })
 
-        targetInput.addTextChangedListener(object : android.text.TextWatcher {
-            override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {}
-            override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) { validateInputs() }
-            override fun afterTextChanged(s: android.text.Editable?) {}
-        })
-
         val cardReps = dialog.findViewById<com.google.android.material.card.MaterialCardView>(R.id.card_mode_reps)
         val cardSets = dialog.findViewById<com.google.android.material.card.MaterialCardView>(R.id.card_mode_sets)
         val cardTimer = dialog.findViewById<com.google.android.material.card.MaterialCardView>(R.id.card_mode_timer)
         val modeCards = mapOf("Reps" to cardReps, "Sets" to cardSets, "Timer" to cardTimer)
-        
-        var selectedMode = existingWorkout?.trackingMode ?: DataManager.workoutDefaultMode
 
         fun refreshModeCards() {
             modeCards.forEach { (mode, card) ->
@@ -492,6 +652,10 @@ class WorkoutRoutineActivity : BaseActivity() {
                 card.setCardBackgroundColor(if (isActive) ContextCompat.getColor(this, R.color.chip_selected) else Color.parseColor("#1AFFFFFF"))
                 card.alpha = if (isActive) 1.0f else 0.6f
             }
+            layoutRepsGoal.visibility = if (selectedMode == "Reps") View.VISIBLE else View.GONE
+            layoutSetsGoal.visibility = if (selectedMode == "Sets") View.VISIBLE else View.GONE
+            layoutTimerGoal.visibility = if (selectedMode == "Timer") View.VISIBLE else View.GONE
+            validateInputs()
         }
         refreshModeCards()
         modeCards.forEach { (mode, card) -> card.setOnClickListener { selectedMode = mode; refreshModeCards() } }
@@ -540,8 +704,21 @@ class WorkoutRoutineActivity : BaseActivity() {
         }
 
         if (existingWorkout != null) {
-            nameInput.setText(existingWorkout.name); targetInput.setText(existingWorkout.target.toString())
-            btnSave.text = "Update"; iconPreview.setImageResource(selectedIcon)
+            nameInput.setText(existingWorkout.name)
+            when (selectedMode) {
+                "Sets" -> {
+                    targetSetsInput.setText(existingWorkout.target.toString())
+                    repsPerSetInput.setText(existingWorkout.repsPerSet.toString())
+                }
+                "Timer" -> {
+                    targetTimerInput.setText(existingWorkout.target.toString())
+                }
+                else -> {
+                    targetInput.setText(existingWorkout.target.toString())
+                }
+            }
+            btnSave.text = "Update"
+            if (selectedIcon != -1) iconPreview.setImageResource(selectedIcon)
         }
         
         updateThemeVisuals()
@@ -553,12 +730,18 @@ class WorkoutRoutineActivity : BaseActivity() {
 
         btnSave.setOnClickListener {
             val name = nameInput.text.toString().trim()
-            val target = targetInput.text.toString().toIntOrNull() ?: 0
+            val target = when (selectedMode) {
+                "Sets" -> targetSetsInput.text.toString().toIntOrNull() ?: 0
+                "Timer" -> targetTimerInput.text.toString().toIntOrNull() ?: 0
+                else -> targetInput.text.toString().toIntOrNull() ?: 0
+            }
+            val repsPerSet = if (selectedMode == "Sets") repsPerSetInput.text.toString().toIntOrNull() ?: 0 else 0
+            
             val finalMuscleSelection = if (selectedMuscleGroups.isEmpty()) listOf("General") else selectedMuscleGroups.toList()
             if (existingWorkout == null) {
-                workouts.add(Workout(name, false, selectedMode, target, frequency = selectedFrequency, color = selectedColor, iconResId = selectedIcon, muscleGroups = finalMuscleSelection, repeatType = "SPECIFIC_DAYS", repeatDays = tempRepeatDays.toList(), repeatCount = 1))
+                workouts.add(Workout(name, false, selectedMode, target, repsPerSet = repsPerSet, frequency = selectedFrequency, color = selectedColor, iconResId = selectedIcon, muscleGroups = finalMuscleSelection, repeatType = "SPECIFIC_DAYS", repeatDays = tempRepeatDays.toList(), repeatCount = 1))
             } else {
-                existingWorkout.name = name; existingWorkout.target = target; existingWorkout.trackingMode = selectedMode; existingWorkout.frequency = selectedFrequency; existingWorkout.color = selectedColor; existingWorkout.iconResId = selectedIcon; existingWorkout.muscleGroups = finalMuscleSelection; existingWorkout.repeatDays = tempRepeatDays.toList()
+                existingWorkout.name = name; existingWorkout.target = target; existingWorkout.repsPerSet = repsPerSet; existingWorkout.trackingMode = selectedMode; existingWorkout.frequency = selectedFrequency; existingWorkout.color = selectedColor; existingWorkout.iconResId = selectedIcon; existingWorkout.muscleGroups = finalMuscleSelection; existingWorkout.repeatDays = tempRepeatDays.toList()
             }
             workoutAdapter.sortWorkouts(); DataManager.saveData(this); dialog.dismiss()
         }
@@ -823,11 +1006,13 @@ class WorkoutRoutineActivity : BaseActivity() {
             findViewById(R.id.chip_evening)
         )
 
+        val darkenedColor = UIUtils.darkenColor(workoutColor, 0.5f)
+
         chips.forEach { chip ->
             val checkedDrawable = android.graphics.drawable.GradientDrawable().apply {
                 shape = android.graphics.drawable.GradientDrawable.RECTANGLE
                 cornerRadius = 19f * resources.displayMetrics.density
-                setColor(workoutColor)
+                setColor(darkenedColor)
             }
             
             val uncheckedDrawable = android.graphics.drawable.GradientDrawable().apply {
@@ -882,9 +1067,9 @@ class WorkoutRoutineActivity : BaseActivity() {
         val todayColor = if (active == "TODAY") workoutColor else ContextCompat.getColor(this, R.color.text_secondary)
         val historyColor = if (active == "HISTORY") workoutColor else ContextCompat.getColor(this, R.color.text_secondary)
         
-        findViewById<ImageView>(R.id.iv_today).imageTintList = android.content.res.ColorStateList.valueOf(todayColor)
-        findViewById<TextView>(R.id.tv_today_nav).setTextColor(todayColor)
-        findViewById<ImageView>(R.id.iv_history).imageTintList = android.content.res.ColorStateList.valueOf(historyColor)
-        findViewById<TextView>(R.id.tv_history_nav).setTextColor(historyColor)
+        ivToday.imageTintList = android.content.res.ColorStateList.valueOf(todayColor)
+        tvTodayNav.setTextColor(todayColor)
+        ivHistory.imageTintList = android.content.res.ColorStateList.valueOf(historyColor)
+        tvHistoryNav.setTextColor(historyColor)
     }
 }

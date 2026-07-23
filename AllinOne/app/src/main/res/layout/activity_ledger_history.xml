@@ -4,7 +4,14 @@
     android:id="@+id/ledger_history_root"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@color/dark_background">
+    android:background="#000000">
+
+    <!-- Immersive Background Layer -->
+    <View
+        android:id="@+id/ledger_history_aura_background"
+        android:layout_width="match_parent"
+        android:layout_height="350dp"
+        app:layout_constraintTop_toTopOf="parent" />
 
     <androidx.constraintlayout.widget.ConstraintLayout
         android:id="@+id/ledger_history_content_container"

@@ -5,18 +5,32 @@ import android.net.Uri
 import android.os.Bundle
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.background
-import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.statusBarsPadding
-import androidx.compose.material3.LocalTextStyle
-import androidx.compose.material3.MaterialTheme
+import androidx.compose.animation.core.animateFloatAsState
+import androidx.compose.foundation.BorderStroke
+import androidx.compose.foundation.Image
+import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.RocketLaunch
+import androidx.compose.material3.*
 import androidx.compose.runtime.*
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.Density
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
+import androidx.lifecycle.lifecycleScope
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
+import com.example.allinone.workspace.ui.activity.WorkspaceActivity
 import java.text.SimpleDateFormat
 import java.util.*
 
@@ -24,19 +38,79 @@ class MainActivity : BaseActivity() {
 
     private var dashboardState by mutableStateOf(DashboardState())
 
+    private val lockLauncher = registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
+        if (result.resultCode == RESULT_OK) {
+            DataManager.isAppUnlocked = true
+            refreshState()
+        } else {
+            finish() // Close app if lock is bypassed or failed
+        }
+    }
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         
         // Initial Data Load
         DataManager.loadData(this)
+
+        // Check Onboarding
+        if (!DataManager.isOnboardingCompleted) {
+            startActivity(Intent(this, OnboardingActivity::class.java))
+            finish()
+            return
+        }
+        
+        // Check App Lock
+        if (DataManager.isAppLockEnabled && !DataManager.isAppUnlocked && DataManager.appLockPin != null) {
+            val intent = Intent(this, LockActivity::class.java).apply {
+                putExtra(LockActivity.EXTRA_MODE, LockActivity.MODE_AUTH)
+            }
+            lockLauncher.launch(intent)
+            overridePendingTransition(0, 0)
+        } else {
+            DataManager.isAppUnlocked = true
+        }
+
         refreshState()
 
         setContent {
+            var showSplash by remember { mutableStateOf(true) }
+            var splashProgress by remember { mutableStateOf(0f) }
+            
             val isLoaded = dashboardState.isDataLoaded
+            val isUnlocked = dashboardState.isAppUnlocked
+            
+            LaunchedEffect(Unit) {
+                DataManager.dataChangeSignal.collect {
+                    refreshState()
+                }
+            }
+            
+            LaunchedEffect(isUnlocked) {
+                if (isUnlocked) {
+                    val totalTime = DataManager.startupLoadingTime.toFloat()
+                    val startTime = System.currentTimeMillis()
+                    
+                    // Processing loop to update progress
+                    while (System.currentTimeMillis() - startTime < totalTime) {
+                        val elapsed = System.currentTimeMillis() - startTime
+                        splashProgress = (elapsed / totalTime).coerceIn(0f, 1f)
+                        
+                        delay(16) // ~60fps update
+                    }
+                    
+                    splashProgress = 1f
+                    delay(500) // Brief pause to allow animation to reach 100%
+                    showSplash = false
+                }
+            }
             
             Box(modifier = Modifier.fillMaxSize()) {
                 when {
-                    !isLoaded -> {
+                    showSplash -> {
+                        SplashScreen(splashProgress)
+                    }
+                    !isLoaded || !isUnlocked -> {
                         Box(modifier = Modifier.fillMaxSize().background(Color.Black))
                     }
                     else -> {
@@ -106,8 +180,16 @@ class MainActivity : BaseActivity() {
                                     onNavigateToProjects = { startActivity(Intent(this@MainActivity, ProjectActivity::class.java)) },
                                     onNavigateToFinance = { startActivity(Intent(this@MainActivity, FinanceActivity::class.java)) },
                                     onNavigateToSettings = { startActivity(Intent(this@MainActivity, SettingsActivity::class.java)) },
-                                    onNavigateToProfile = { startActivity(Intent(this@MainActivity, ProfileActivity::class.java)) },
-                                    onNavigateToPerformanceHistory = { startActivity(Intent(this@MainActivity, PerformanceHistoryActivity::class.java)) },
+                                    onNavigateToWorkspace = { startActivity(Intent(this@MainActivity, WorkspaceActivity::class.java)) },
+                                    onNavigateToProfile = { 
+                                        startActivity(Intent(this@MainActivity, ProfileActivity::class.java))
+                                        overridePendingTransition(R.anim.slide_in_left, R.anim.slide_out_right)
+                                    },
+                                    onNavigateToPerformanceHistory = { 
+                                        if (DataManager.showHabitSection || DataManager.showWorkoutSection) {
+                                            startActivity(Intent(this@MainActivity, PerformanceHistoryActivity::class.java))
+                                        }
+                                    },
                                     onQuickAddTodo = { quickAddTask() },
                                     onQuickAddExpense = { quickAddExpense() },
                                     onQuickAddNote = { quickAddNote() },
@@ -129,11 +211,77 @@ class MainActivity : BaseActivity() {
                         }
                     }
                 }
+            }
+        }
+    }
 
-                if (!DataManager.isOnboardingCompleted) {
-                    startActivity(Intent(this@MainActivity, OnboardingActivity::class.java))
-                    finish()
+    @Composable
+    private fun SplashScreen(progress: Float) {
+        val animatedProgress by animateFloatAsState(
+            targetValue = progress,
+            animationSpec = ProgressIndicatorDefaults.ProgressAnimationSpec,
+            label = "progress"
+        )
+
+        Box(
+            modifier = Modifier
+                .fillMaxSize()
+                .background(Color.Black),
+            contentAlignment = Alignment.Center
+        ) {
+            Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                Box(contentAlignment = Alignment.Center) {
+                    // Large Determinate Circular Progress around the icon
+                    CircularProgressIndicator(
+                        progress = { animatedProgress },
+                        modifier = Modifier.size(160.dp),
+                        color = Color(0xFF1A73E8),
+                        strokeWidth = 6.dp,
+                        trackColor = Color(0xFF1A73E8).copy(alpha = 0.1f),
+                        strokeCap = androidx.compose.ui.graphics.StrokeCap.Round
+                    )
+
+                    Surface(
+                        modifier = Modifier.size(110.dp),
+                        shape = CircleShape,
+                        color = Color(0xFF1A73E8).copy(alpha = 0.05f)
+                    ) {}
+                    
+                    Icon(
+                        Icons.Default.RocketLaunch,
+                        null,
+                        tint = Color(0xFF1A73E8),
+                        modifier = Modifier.size(56.dp)
+                    )
                 }
+                
+                Spacer(modifier = Modifier.height(40.dp))
+                
+                Text(
+                    "All In One",
+                    color = Color.White,
+                    fontSize = 32.sp,
+                    fontWeight = FontWeight.Black,
+                    letterSpacing = (-0.5).sp
+                )
+                
+                Text(
+                    if (progress < 0.3f) "Initializing Core..." 
+                    else if (progress < 0.7f) "Optimizing Ecosystem..." 
+                    else "Ready to Launch",
+                    color = Color.White.copy(alpha = 0.4f),
+                    fontSize = 14.sp,
+                    fontWeight = FontWeight.Medium
+                )
+                
+                Spacer(modifier = Modifier.height(16.dp))
+                
+                Text(
+                    "${(animatedProgress * 100).toInt()}%",
+                    color = Color(0xFF1A73E8).copy(alpha = 0.6f),
+                    fontSize = 12.sp,
+                    fontWeight = FontWeight.Bold
+                )
             }
         }
     }
@@ -144,7 +292,26 @@ class MainActivity : BaseActivity() {
         val isMoodExpired = DataManager.lastMoodTimestamp != 0L && (currentTime - DataManager.lastMoodTimestamp) > 3600000
         val effectiveMood = if (isMoodExpired) null else DataManager.dailyMoods[today]
 
-        val nextMilestone = DataManager.notes
+        lifecycleScope.launch {
+            DataManager.updateWorkspaceAgenda(this@MainActivity)
+            val agenda = DataManager.getTodayAgendaNotifications()
+            val totalDeadlines = agenda.values.sumOf { it.size }
+            
+            if (totalDeadlines > 0 && DataManager.lastSummaryNotificationDate != today) {
+                ReminderReceiver.showSummaryNotification(this@MainActivity, totalDeadlines)
+                DataManager.lastSummaryNotificationDate = today
+                DataManager.saveData(this@MainActivity)
+            }
+            
+            // Re-trigger state update to ensure agenda is reflected in UI
+            updateDashboardState(effectiveMood)
+        }
+
+        updateDashboardState(effectiveMood)
+    }
+
+    private fun updateDashboardState(effectiveMood: String?) {
+        val nextMilestone = DataManager.projects
             .filter { it.category == "Project" }
             .flatMap { it.subFeatures }
             .filter { !it.isCompleted && it.dueDate != null }
@@ -160,9 +327,10 @@ class MainActivity : BaseActivity() {
             dateString = SimpleDateFormat("MMMM dd, yyyy", Locale.getDefault()).format(Date()),
             safeSpendAmount = DataManager.monthlyBudget - DataManager.getCurrentMonthExpenditure(),
             nextMilestone = nextMilestone,
-            recentActions = DataManager.recentActivities,
+            recentActions = DataManager.recentActivities.toList(),
             growthAdvice = DataManager.getGrowthAdvice(effectiveMood),
             managementAdvice = DataManager.getManagementAdvice(effectiveMood),
+            todayAgenda = DataManager.getTodayAgendaNotifications(),
             currentMood = effectiveMood,
             habitColor = DataManager.globalHabitColor,
             workoutColor = DataManager.globalWorkoutColor,
@@ -188,12 +356,14 @@ class MainActivity : BaseActivity() {
             appShowShadows = DataManager.appShowShadows,
             globalDisplaySize = DataManager.displaySize,
             fontSize = DataManager.fontSize,
+            isSystemAppearanceEnabled = DataManager.isSystemAppearanceEnabled,
             showHabitSection = DataManager.showHabitSection,
             showWorkoutSection = DataManager.showWorkoutSection,
             showTaskSection = DataManager.showTaskSection,
             showNoteSection = DataManager.showNoteSection,
             showProjectSection = DataManager.showProjectSection,
             showFinanceSection = DataManager.showFinanceSection,
+            isAppUnlocked = DataManager.isAppUnlocked,
             isDataLoaded = true
         )
     }
@@ -234,9 +404,14 @@ class MainActivity : BaseActivity() {
             results.add(SearchResult("TASK", it.name, it.category ?: "General")) 
         }
         
-        // Notes/Projects
+        // Notes
         DataManager.notes.filter { it.title.contains(query, true) || it.content.contains(query, true) }.forEach {
-            results.add(SearchResult(if (it.category == "Project") "PROJECT" else "NOTE", it.title, it.content.take(50)))
+            results.add(SearchResult("NOTE", it.title, it.content.take(50)))
+        }
+
+        // Projects
+        DataManager.projects.filter { it.title.contains(query, true) || it.content.contains(query, true) }.forEach {
+            results.add(SearchResult(if (it.category == "Project") "PROJECT" else "IDEA", it.title, it.content.take(50)))
         }
 
         showSearchResultsDialog(query, results)
@@ -286,7 +461,7 @@ class MainActivity : BaseActivity() {
                 when(item.type) {
                     "TASK" -> startActivity(Intent(this@MainActivity, TaskActivity::class.java))
                     "NOTE" -> startActivity(Intent(this@MainActivity, NotesActivity::class.java))
-                    "PROJECT" -> startActivity(Intent(this@MainActivity, ProjectActivity::class.java))
+                    "PROJECT", "IDEA" -> startActivity(Intent(this@MainActivity, ProjectActivity::class.java))
                 }
             }
         }

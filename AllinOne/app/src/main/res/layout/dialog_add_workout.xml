@@ -18,7 +18,7 @@
     <androidx.constraintlayout.widget.ConstraintLayout
         android:id="@+id/toolbar_workout"
         android:layout_width="match_parent"
-        android:layout_height="64dp"
+        android:layout_height="56dp"
         android:paddingHorizontal="16dp"
         app:layout_constraintTop_toTopOf="parent">
 
@@ -60,8 +60,8 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:orientation="vertical"
-            android:paddingHorizontal="20dp"
-            android:paddingBottom="24dp">
+            android:paddingHorizontal="16dp"
+            android:paddingBottom="12dp">
 
             <!-- Name Input Section -->
             <EditText
@@ -92,7 +92,7 @@
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="16dp"
+                android:layout_marginTop="8dp"
                 android:text="SCHEDULE"
                 android:textColor="#80FFFFFF"
                 android:textSize="10sp"
@@ -114,7 +114,7 @@
                 android:id="@+id/days_container_direct_workout"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="8dp"
+                android:layout_marginTop="2dp"
                 android:gravity="center_horizontal"
                 android:orientation="horizontal">
                 <TextView android:id="@+id/day_0_direct_workout" style="@style/DayButtonCircular" android:text="M" />
@@ -130,7 +130,7 @@
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="16dp"
+                android:layout_marginTop="8dp"
                 android:orientation="horizontal">
 
                 <com.google.android.material.card.MaterialCardView
@@ -147,7 +147,7 @@
                         android:layout_height="wrap_content"
                         android:gravity="center"
                         android:orientation="vertical"
-                        android:padding="16dp">
+                        android:padding="10dp">
                         <ImageView
                             android:id="@+id/icon_preview_workout"
                             android:layout_width="36dp"
@@ -178,7 +178,7 @@
                         android:layout_height="wrap_content"
                         android:gravity="center"
                         android:orientation="vertical"
-                        android:padding="16dp">
+                        android:padding="10dp">
                         <View
                             android:id="@+id/color_preview_workout"
                             android:layout_width="36dp"
@@ -200,7 +200,7 @@
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="16dp"
+                android:layout_marginTop="8dp"
                 android:text="TRACKING MODE"
                 android:textColor="#80FFFFFF"
                 android:textSize="10sp"
@@ -210,14 +210,14 @@
             <GridLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="8dp"
+                android:layout_marginTop="2dp"
                 android:columnCount="3">
 
                 <com.google.android.material.card.MaterialCardView
                     android:id="@+id/card_mode_reps"
                     style="@style/FrequencyCard"
                     android:layout_width="0dp"
-                    android:layout_height="80dp"
+                    android:layout_height="64dp"
                     android:layout_margin="4dp">
                     <LinearLayout style="@style/FrequencyCardContent">
                         <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="🔢" android:textSize="18sp" />
@@ -229,7 +229,7 @@
                     android:id="@+id/card_mode_sets"
                     style="@style/FrequencyCard"
                     android:layout_width="0dp"
-                    android:layout_height="80dp"
+                    android:layout_height="64dp"
                     android:layout_margin="4dp">
                     <LinearLayout style="@style/FrequencyCardContent">
                         <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="🔁" android:textSize="18sp" />
@@ -241,7 +241,7 @@
                     android:id="@+id/card_mode_timer"
                     style="@style/FrequencyCard"
                     android:layout_width="0dp"
-                    android:layout_height="80dp"
+                    android:layout_height="64dp"
                     android:layout_margin="4dp">
                     <LinearLayout style="@style/FrequencyCardContent">
                         <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="⏱️" android:textSize="18sp" />
@@ -256,49 +256,198 @@
                 android:id="@+id/card_target_container"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="12dp"
+                android:layout_marginTop="6dp"
                 app:cardBackgroundColor="#1AFFFFFF"
                 app:cardCornerRadius="16dp"
                 app:cardElevation="0dp">
+
                 <LinearLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:orientation="vertical"
-                    android:padding="16dp">
+                    android:padding="10dp">
+
+                    <TextView
+                        android:id="@+id/tv_goal_title"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="Goal Target"
+                        android:textColor="@color/white"
+                        android:textSize="12sp"
+                        android:alpha="0.7" />
+
+                    <!-- Reps Goal Layout -->
                     <LinearLayout
+                        android:id="@+id/layout_reps_goal"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
+                        android:layout_marginTop="4dp"
                         android:gravity="center_vertical"
                         android:orientation="horizontal">
-                        <TextView
-                            android:layout_width="0dp"
-                            android:layout_height="wrap_content"
-                            android:layout_weight="1"
-                            android:text="Goal Target"
-                            android:textColor="@color/white"
-                            android:textSize="14sp" />
+
                         <EditText
                             android:id="@+id/target_input"
-                            android:layout_width="80dp"
+                            android:layout_width="60dp"
                             android:layout_height="wrap_content"
                             android:background="@drawable/bg_finance_input"
                             android:backgroundTint="#22FFFFFF"
                             android:gravity="center"
                             android:hint="0"
                             android:inputType="number"
-                            android:paddingVertical="8dp"
+                            android:paddingVertical="4dp"
                             android:textColor="@color/white"
-                            android:textSize="18sp"
+                            android:textSize="16sp"
+                            android:textStyle="bold" />
+
+                        <ImageView
+                            android:id="@+id/btn_roller_reps"
+                            android:layout_width="28dp"
+                            android:layout_height="28dp"
+                            android:layout_marginStart="12dp"
+                            android:background="?attr/selectableItemBackgroundBorderless"
+                            android:padding="4dp"
+                            android:src="@drawable/icons8_refresh_100"
+                            app:tint="#1A73E8" />
+
+                        <TextView
+                            android:id="@+id/tv_label_reps"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_marginStart="8dp"
+                            android:text="REPS"
+                            android:textColor="#80FFFFFF"
+                            android:textSize="11sp"
                             android:textStyle="bold" />
                     </LinearLayout>
+
+                    <!-- Sets Goal Layout -->
+                    <LinearLayout
+                        android:id="@+id/layout_sets_goal"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="4dp"
+                        android:orientation="vertical"
+                        android:visibility="gone">
+
+                        <LinearLayout
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:gravity="center_vertical"
+                            android:orientation="horizontal">
+
+                            <EditText
+                                android:id="@+id/target_sets_input"
+                                android:layout_width="50dp"
+                                android:layout_height="wrap_content"
+                                android:background="@drawable/bg_finance_input"
+                                android:backgroundTint="#22FFFFFF"
+                                android:gravity="center"
+                                android:hint="0"
+                                android:inputType="number"
+                                android:paddingVertical="4dp"
+                                android:textColor="@color/white"
+                                android:textSize="16sp"
+                                android:textStyle="bold" />
+
+                            <TextView
+                                android:id="@+id/tv_label_sets"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:layout_marginHorizontal="6dp"
+                                android:text="SETS  ×"
+                                android:textColor="#80FFFFFF"
+                                android:textSize="11sp"
+                                android:textStyle="bold" />
+
+                            <EditText
+                                android:id="@+id/reps_per_set_input"
+                                android:layout_width="50dp"
+                                android:layout_height="wrap_content"
+                                android:background="@drawable/bg_finance_input"
+                                android:backgroundTint="#22FFFFFF"
+                                android:gravity="center"
+                                android:hint="0"
+                                android:inputType="number"
+                                android:paddingVertical="4dp"
+                                android:textColor="@color/white"
+                                android:textSize="16sp"
+                                android:textStyle="bold" />
+
+                            <ImageView
+                                android:id="@+id/btn_roller_sets"
+                                android:layout_width="28dp"
+                                android:layout_height="28dp"
+                                android:layout_marginStart="12dp"
+                                android:background="?attr/selectableItemBackgroundBorderless"
+                                android:padding="4dp"
+                                android:src="@drawable/icons8_refresh_100"
+                                app:tint="#1A73E8" />
+
+                            <TextView
+                                android:id="@+id/tv_label_reps_per_set"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:layout_marginStart="8dp"
+                                android:text="REPS"
+                                android:textColor="#80FFFFFF"
+                                android:textSize="11sp"
+                                android:textStyle="bold" />
+                        </LinearLayout>
+                    </LinearLayout>
+
+                    <!-- Timer Goal Layout -->
+                    <LinearLayout
+                        android:id="@+id/layout_timer_goal"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="4dp"
+                        android:gravity="center_vertical"
+                        android:orientation="horizontal"
+                        android:visibility="gone">
+
+                        <EditText
+                            android:id="@+id/target_timer_input"
+                            android:layout_width="60dp"
+                            android:layout_height="wrap_content"
+                            android:background="@drawable/bg_finance_input"
+                            android:backgroundTint="#22FFFFFF"
+                            android:gravity="center"
+                            android:hint="0"
+                            android:inputType="number"
+                            android:paddingVertical="4dp"
+                            android:textColor="@color/white"
+                            android:textSize="16sp"
+                            android:textStyle="bold" />
+
+                        <ImageView
+                            android:id="@+id/btn_roller_timer"
+                            android:layout_width="28dp"
+                            android:layout_height="28dp"
+                            android:layout_marginStart="12dp"
+                            android:background="?attr/selectableItemBackgroundBorderless"
+                            android:padding="4dp"
+                            android:src="@drawable/icons8_refresh_100"
+                            app:tint="#1A73E8" />
+
+                        <TextView
+                            android:id="@+id/tv_label_timer"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_marginStart="8dp"
+                            android:text="SEC"
+                            android:textColor="#80FFFFFF"
+                            android:textSize="11sp"
+                            android:textStyle="bold" />
+                    </LinearLayout>
+
                     <TextView
                         android:id="@+id/tv_target_hint_workout"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:layout_marginTop="8dp"
+                        android:layout_marginTop="4dp"
                         android:text="Set a goal (e.g. 10 reps)"
                         android:textColor="#FF5252"
-                        android:textSize="11sp"
+                        android:textSize="10sp"
                         android:textStyle="bold"
                         android:visibility="gone" />
                 </LinearLayout>
@@ -308,7 +457,7 @@
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="16dp"
+                android:layout_marginTop="8dp"
                 android:text="MUSCLE GROUPS"
                 android:textColor="#80FFFFFF"
                 android:textSize="10sp"
@@ -319,7 +468,7 @@
                 android:id="@+id/muscle_chip_group"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="8dp"
+                android:layout_marginTop="2dp"
                 app:chipSpacingHorizontal="8dp"
                 app:chipSpacingVertical="4dp" />
 
@@ -327,7 +476,7 @@
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="16dp"
+                android:layout_marginTop="8dp"
                 android:text="TIME OF DAY"
                 android:textColor="#80FFFFFF"
                 android:textSize="10sp"
@@ -337,13 +486,13 @@
             <GridLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="8dp"
+                android:layout_marginTop="2dp"
                 android:columnCount="2"
                 android:rowCount="2">
-
                 <com.google.android.material.card.MaterialCardView
                     android:id="@+id/card_morning_workout"
                     style="@style/FrequencyCard"
+                    android:layout_height="64dp"
                     android:layout_margin="4dp">
                     <LinearLayout style="@style/FrequencyCardContent">
                         <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="🌅" android:textSize="18sp" />

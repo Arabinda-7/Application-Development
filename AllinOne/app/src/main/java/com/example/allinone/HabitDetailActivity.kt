@@ -1,6 +1,8 @@
 package com.example.allinone
 
+import android.content.Intent
 import android.graphics.Color
+import android.content.res.ColorStateList
 import android.os.Bundle
 import android.view.Gravity
 import android.view.View
@@ -20,6 +22,8 @@ class HabitDetailActivity : BaseActivity() {
 
     private var habit: Habit? = null
     private var currentCalendar = Calendar.getInstance()
+    private lateinit var calendarGrid: GridLayout
+    private lateinit var tvMonth: TextView
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -36,15 +40,54 @@ class HabitDetailActivity : BaseActivity() {
         }
 
         setupUI()
-        setupCalendarNavigation()
+        calendarGrid = findViewById(R.id.calendar_grid)
+        tvMonth = findViewById(R.id.tv_calendar_month)
         setupCalendar()
+        updateDynamicBackground()
+    }
+
+    private fun updateDynamicBackground() {
+        val auraView = findViewById<View>(R.id.habit_detail_aura_background) ?: return
+        val habitColor = if (habit?.color != -1) habit?.color ?: Color.parseColor("#FF7A59") else Color.parseColor("#FF7A59")
+        
+        val gradient = android.graphics.drawable.GradientDrawable(
+            android.graphics.drawable.GradientDrawable.Orientation.TOP_BOTTOM,
+            intArrayOf(
+                adjustAlpha(habitColor, 0.4f),
+                Color.BLACK
+            )
+        )
+        auraView.background = gradient
+    }
+
+    private fun adjustAlpha(color: Int, factor: Float): Int {
+        val alpha = Math.round(Color.alpha(color) * factor)
+        val red = Color.red(color)
+        val green = Color.green(color)
+        val blue = Color.blue(color)
+        return Color.argb(alpha, red, green, blue)
     }
 
     private fun setupUI() {
+        val themeColor = if (habit?.color != -1) habit?.color ?: Color.parseColor("#1A73E8") else ContextCompat.getColor(this, R.color.primary_blue)
+        
         findViewById<TextView>(R.id.tv_habit_title).text = habit?.name
-        findViewById<TextView>(R.id.tv_frequency_chip).text = habit?.frequency?.uppercase()
+        
+        val freqChip = findViewById<TextView>(R.id.tv_frequency_chip)
+        freqChip.text = habit?.frequency?.uppercase()
+        freqChip.setTextColor(themeColor)
+        freqChip.backgroundTintList = ColorStateList.valueOf(themeColor).withAlpha(40)
+
         findViewById<TextView>(R.id.tv_repeat_chip).text = if (habit?.repeatDays?.size == 7) "EVERYDAY" else "SPECIFIC DAYS"
         findViewById<ImageView>(R.id.btn_back).setOnClickListener { finish() }
+
+        findViewById<View>(R.id.btn_edit_habit).setOnClickListener {
+            val intent = Intent(this, AddHabitActivity::class.java).apply {
+                putExtra("HABIT_ID", habit?.timestamp)
+            }
+            startActivity(intent)
+            finish()
+        }
         updateStats()
     }
 
@@ -57,17 +100,6 @@ class HabitDetailActivity : BaseActivity() {
         val rate = if (daysSinceCreation > 0) (totalCompleted * 100) / daysSinceCreation else 0
         findViewById<TextView>(R.id.tv_rate_percent).text = "$rate%"
         findViewById<TextView>(R.id.tv_rate_fraction).text = "$totalCompleted/$daysSinceCreation habits"
-    }
-
-    private fun setupCalendarNavigation() {
-        findViewById<View>(R.id.btn_prev_month).setOnClickListener {
-            currentCalendar.add(Calendar.MONTH, -1)
-            setupCalendar()
-        }
-        findViewById<View>(R.id.btn_next_month).setOnClickListener {
-            currentCalendar.add(Calendar.MONTH, 1)
-            setupCalendar()
-        }
     }
 
     private fun calculateStreak(): Int {
@@ -86,9 +118,6 @@ class HabitDetailActivity : BaseActivity() {
     }
 
     private fun setupCalendar() {
-        val calendarGrid = findViewById<GridLayout>(R.id.calendar_grid)
-        val tvMonth = findViewById<TextView>(R.id.tv_calendar_month)
-        
         // Remove old views but keep the 7 day headers
         val childCount = calendarGrid.childCount
         if (childCount > 7) {

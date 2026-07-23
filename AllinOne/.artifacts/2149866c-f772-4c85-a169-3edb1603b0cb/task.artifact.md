@@ -1,0 +1,3 @@
+- [x] Update icon in `layout_project_detail_menu.xml`
+- [x] Verify the change
+- [x] Create walkthrough

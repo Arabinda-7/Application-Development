@@ -18,7 +18,7 @@ import androidx.room.RoomDatabase
         ActivityLogEntity::class,
         NoteCrossReferenceEntity::class
     ],
-    version = 5,
+    version = 6,
     exportSchema = false
 )
 abstract class WorkspaceDatabase : RoomDatabase() {

@@ -52,13 +52,14 @@ class AddSubFeatureActivity : BaseActivity() {
         isIdeaMode = intent.getBooleanExtra("IS_IDEA", false)
 
         if (subFeatureId != null) {
-            if (projectIndex != -1) {
-                val project = DataManager.notes.getOrNull(projectIndex)
+            // Priority 1: Check active editing lists (Real-time fixes)
+            targetFeature = AddProjectActivity.currentEditingSubFeatures.find { it.id == subFeatureId }
+                ?: AddIdeaActivity.currentEditingIdeaSubFeatures.find { it.id == subFeatureId }
+            
+            // Priority 2: Fallback to persistent storage
+            if (targetFeature == null && projectIndex != -1) {
+                val project = DataManager.projects.getOrNull(projectIndex)
                 targetFeature = project?.subFeatures?.find { it.id == subFeatureId }
-            } else {
-                // Check temp list in AddProjectActivity or AddIdeaActivity
-                targetFeature = AddProjectActivity.currentEditingSubFeatures.find { it.id == subFeatureId }
-                    ?: AddIdeaActivity.currentEditingIdeaSubFeatures.find { it.id == subFeatureId }
             }
         }
 
@@ -129,6 +130,7 @@ class AddSubFeatureActivity : BaseActivity() {
             updateWeightUI()
             updatePriorityUI()
             updateBlockedByUI()
+            applyTagSpecificLayout(selectedTag)
         }
 
         tvDeadline.setOnClickListener {
@@ -163,12 +165,13 @@ class AddSubFeatureActivity : BaseActivity() {
         }
 
         btnDelete.setOnClickListener {
-            val project = if (projectIndex != -1) DataManager.notes.getOrNull(projectIndex) else null
-            project?.subFeatures?.remove(targetFeature)
+            // Priority: Remove from active editing lists if present
+            val removedFromActive = AddProjectActivity.currentEditingSubFeatures.remove(targetFeature) ||
+                                   AddIdeaActivity.currentEditingIdeaSubFeatures.remove(targetFeature)
             
-            if (projectIndex == -1) {
-                AddProjectActivity.currentEditingSubFeatures.remove(targetFeature)
-                AddIdeaActivity.currentEditingIdeaSubFeatures.remove(targetFeature)
+            // Fallback: Remove from persistent storage
+            if (!removedFromActive && projectIndex != -1) {
+                DataManager.projects.getOrNull(projectIndex)?.subFeatures?.remove(targetFeature)
             }
             
             DataManager.saveData(this)
@@ -201,9 +204,17 @@ class AddSubFeatureActivity : BaseActivity() {
     }
 
     private fun getOtherFeatures(): List<ProjectFeature> {
-        val project = if (projectIndex != -1) DataManager.notes.getOrNull(projectIndex) else null
-        val list = project?.subFeatures ?: (if (AddProjectActivity.currentEditingSubFeatures.isNotEmpty()) AddProjectActivity.currentEditingSubFeatures else AddIdeaActivity.currentEditingIdeaSubFeatures)
-        return list.filter { it.id != subFeatureId }
+        // Priority 1: Use active editing lists if populated
+        val activeList = if (AddProjectActivity.currentEditingSubFeatures.isNotEmpty()) {
+            AddProjectActivity.currentEditingSubFeatures
+        } else if (AddIdeaActivity.currentEditingIdeaSubFeatures.isNotEmpty()) {
+            AddIdeaActivity.currentEditingIdeaSubFeatures
+        } else null
+
+        // Priority 2: Fallback to persistent storage
+        val list = activeList ?: (if (projectIndex != -1) DataManager.projects.getOrNull(projectIndex)?.subFeatures else null)
+        
+        return (list ?: emptyList()).filter { it.id != subFeatureId }
     }
 
     private fun showBlockedByDialog() {
@@ -252,6 +263,7 @@ class AddSubFeatureActivity : BaseActivity() {
                 setOnClickListener {
                     selectedTag = if (selectedTag == tagName) "" else tagName
                     refreshTagsUI()
+                    applyTagSpecificLayout(selectedTag)
                 }
             }
             containerTags.addView(chip)
@@ -259,23 +271,26 @@ class AddSubFeatureActivity : BaseActivity() {
     }
 
     private fun saveFeature() {
-        val name = etName.text.toString().trim()
-        if (name.isEmpty()) {
+        val nameInput = etName.text.toString().trim()
+        if (nameInput.isEmpty()) {
             Toast.makeText(this, "Name cannot be empty", Toast.LENGTH_SHORT).show()
             return
         }
 
-        val project = if (projectIndex != -1) DataManager.notes.getOrNull(projectIndex) else null
-        val list = project?.subFeatures ?: (if (AddProjectActivity.currentEditingSubFeatures.isNotEmpty()) AddProjectActivity.currentEditingSubFeatures else AddIdeaActivity.currentEditingIdeaSubFeatures)
-        val isDuplicate = list.any { it.id != subFeatureId && it.name.equals(name, ignoreCase = true) }
-
-        if (isDuplicate) {
-            Toast.makeText(this, "A feature with this name already exists", Toast.LENGTH_SHORT).show()
-            return
-        }
+        // Duplicate check prioritizing active editing lists
+        val activeList = if (AddProjectActivity.currentEditingSubFeatures.isNotEmpty()) {
+            AddProjectActivity.currentEditingSubFeatures
+        } else if (AddIdeaActivity.currentEditingIdeaSubFeatures.isNotEmpty()) {
+            AddIdeaActivity.currentEditingIdeaSubFeatures
+        } else null
+        
+        val list = activeList ?: (if (projectIndex != -1) DataManager.projects.getOrNull(projectIndex)?.subFeatures else emptyList())
+        val otherFeatures = list?.filter { it.id != subFeatureId } ?: emptyList()
+        
+        val finalName = DataManager.getUniqueFeatureName(nameInput, otherFeatures)
 
         targetFeature?.let {
-            it.name = name
+            it.name = finalName
             it.details = etDetails.text.toString().trim()
             it.tag = selectedTag
             it.dueDate = selectedDueDate
@@ -322,6 +337,32 @@ class AddSubFeatureActivity : BaseActivity() {
         val pendingIntent = android.app.PendingIntent.getBroadcast(this, requestCode, intent, android.app.PendingIntent.FLAG_UPDATE_CURRENT or android.app.PendingIntent.FLAG_IMMUTABLE)
 
         alarmManager.setExactAndAllowWhileIdle(android.app.AlarmManager.RTC_WAKEUP, feature.dueDate!!, pendingIntent)
+    }
+
+    private fun applyTagSpecificLayout(tag: String) {
+        if (isIdeaMode) return // Idea mode already hides most things
+
+        val upperTag = tag.uppercase()
+        val showDueDate = upperTag == "TASKS" || upperTag == "FEATURES" || upperTag == ""
+        val showWeight = upperTag == "FEATURES" || upperTag == ""
+        val showUrgency = upperTag == "TASKS" || upperTag == "FEATURES" || upperTag == "BUGS" || upperTag == ""
+        val showDependency = upperTag == "TASKS" || upperTag == "FEATURES" || upperTag == "BUGS" || upperTag == ""
+        val showResource = upperTag == "RESOURCES" || upperTag == "FEATURES" || upperTag == ""
+
+        findViewById<View>(R.id.label_due_date).visibility = if (showDueDate) View.VISIBLE else View.GONE
+        findViewById<View>(R.id.container_due_date).visibility = if (showDueDate) View.VISIBLE else View.GONE
+
+        findViewById<View>(R.id.label_weight).visibility = if (showWeight) View.VISIBLE else View.GONE
+        findViewById<View>(R.id.container_weight).visibility = if (showWeight) View.VISIBLE else View.GONE
+
+        findViewById<View>(R.id.label_urgency).visibility = if (showUrgency) View.VISIBLE else View.GONE
+        findViewById<View>(R.id.rg_feature_priority).visibility = if (showUrgency) View.VISIBLE else View.GONE
+
+        findViewById<View>(R.id.label_dependency).visibility = if (showDependency) View.VISIBLE else View.GONE
+        findViewById<View>(R.id.tv_blocked_by_selector).visibility = if (showDependency) View.VISIBLE else View.GONE
+
+        findViewById<View>(R.id.label_resource).visibility = if (showResource) View.VISIBLE else View.GONE
+        findViewById<View>(R.id.et_resource_url).visibility = if (showResource) View.VISIBLE else View.GONE
     }
 
     private fun Int.dpToPx(): Int = (this * resources.displayMetrics.density).toInt()

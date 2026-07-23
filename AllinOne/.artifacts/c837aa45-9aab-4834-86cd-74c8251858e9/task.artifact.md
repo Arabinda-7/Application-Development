@@ -1,0 +1,3 @@
+- [x] Add `MODE_VERIFY_FOR_RECOVERY` to `LockActivity.kt` and update its logic
+- [x] Add "Change Security Question" and update click listeners in `SettingsActivity.kt`
+- [x] Verify security flow manually

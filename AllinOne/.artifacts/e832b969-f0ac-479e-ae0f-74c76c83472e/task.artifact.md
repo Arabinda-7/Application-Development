@@ -1,0 +1,3 @@
+- `[x]` Update expansion variables in `ProjectActivity.kt`
+- `[x]` Ensure initial UI state matches variables
+- `[x]` Verify changes

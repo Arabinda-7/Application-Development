@@ -1,23 +1,24 @@
-# Walkthrough - Fixed Unresolved reference 'showAddIdeaDialog'
+# Walkthrough - Immersive Background for History Screens
 
-I have resolved the build error by implementing the missing `showAddIdeaDialog` method in `ProjectActivity.kt`. This method now handles both creating new project ideas and editing existing ones.
+I have updated the background of the Performance History screen (for Habits and Workouts) to be truly immersive, matching the aesthetic of the Home Page and extending into the notification bar.
 
 ## Changes Made
 
-### ProjectActivity.kt
-- **[NEW] `showAddIdeaDialog`**: Implemented the missing dialog logic.
-    - **UI Binding**: Correctly mapped elements from `dialog_add_note_project.xml`.
-    - **Priority Management**: Added a toggleable priority tag (LOW -> MED -> HIGH) with dynamic color coding.
-    - **Mind Map Integration**: Enabled the Mind Map view for existing ideas.
-    - **Persistence**: Ensured that new and edited ideas are correctly saved to `DataManager` and the UI is refreshed immediately.
-    - **Validation**: Added basic title validation to prevent saving empty ideas.
-    - **Character Counter**: Hooked up a live character count for the idea content.
+### Immersive UI (Status Bar)
+- **Edge-to-Edge History**: Removed the fixed status bar padding from the activities and the top-level Composable. The background aura now bleeds into the notification bar area.
+- **Scrollable Aura Gradient**: Updated `PerformanceDashboardScreen.kt` to move the background aura gradient to the `LazyColumn` header with `statusBarsPadding()`. This ensures the gradient starts from the very top but the controls remain safe from system icons.
+- **Notification Bar Color**: By making the layout edge-to-edge and extending the gradient, the background color is now visible behind the notification bar icons, creating a seamless "Aura" look.
+
+### Activity & Layout Adjustments
+- **[HabitTrackerActivity.kt](file:///C:/Users/arabi/OneDrive/Desktop/App Development/AllinOne/app/src/main/java/com/example/allinone/HabitTrackerActivity.kt)** & **[WorkoutRoutineActivity.kt](file:///C:/Users/arabi/OneDrive/Desktop/App Development/AllinOne/app/src/main/java/com/example/allinone/WorkoutRoutineActivity.kt)**: Adjusted `setupKeyboardHandling` to remove global top padding that was pushing the entire UI down.
+- **[activity_habit_tracker.xml](file:///C:/Users/arabi/OneDrive/Desktop/App Development/AllinOne/app/src/main/res/layout/activity_habit_tracker.xml)** & **[activity_workout_routine.xml](file:///C:/Users/arabi/OneDrive/Desktop/App Development/AllinOne/app/src/main/res/layout/activity_workout_routine.xml)**: Added manual top padding to the "Today" and legacy "History" layouts to ensure they don't overlap with status bar icons.
 
 ## Verification Results
 
 ### Automated Tests
-- Successfully ran `./gradlew :app:compileDebugKotlin` without any errors.
+- Successfully ran `gradle app:assembleDebug` to verify compilation.
 
 ### Manual Verification
-- Verified that `showAddIdeaDialog()` is called when clicking the Floating Action Button in the "Ideas" tab.
-- Verified that `showAddIdeaDialog(note)` is called when editing an idea from the list or long-press menu.
+- Verified that the background aura in Habit and Workout history now extends into the notification bar.
+- Confirmed that the "Today" tab remains correctly padded and readable.
+- Checked that the scroll behavior remains smooth and consistent with the Home Screen.

@@ -19,7 +19,7 @@ import java.util.*
 
 class AddWorkoutActivity : BaseActivity() {
 
-    private var workoutIndex: Int = -1
+    private var workoutId: Long = -1L
     private var existingWorkout: Workout? = null
     
     private var tempRepeatDays = mutableListOf(0, 1, 2, 3, 4, 5, 6)
@@ -31,6 +31,9 @@ class AddWorkoutActivity : BaseActivity() {
 
     private lateinit var nameInput: EditText
     private lateinit var targetInput: EditText
+    private lateinit var targetSetsInput: EditText
+    private lateinit var repsPerSetInput: EditText
+    private lateinit var targetTimerInput: EditText
     private lateinit var btnSave: TextView
     private lateinit var iconPreview: ImageView
     private lateinit var colorPreview: View
@@ -38,7 +41,19 @@ class AddWorkoutActivity : BaseActivity() {
     private lateinit var tvNameHint: TextView
     private lateinit var tvScheduleHint: TextView
     private lateinit var tvTargetHint: TextView
+    private lateinit var tvGoalTitle: TextView
     private lateinit var chipGroup: ChipGroup
+
+    private lateinit var layoutRepsGoal: View
+    private lateinit var layoutSetsGoal: View
+    private lateinit var layoutTimerGoal: View
+    private lateinit var btnRollerReps: View
+    private lateinit var btnRollerSets: View
+    private lateinit var btnRollerTimer: View
+    private lateinit var tvLabelReps: View
+    private lateinit var tvLabelSets: View
+    private lateinit var tvLabelRepsPerSet: View
+    private lateinit var tvLabelTimer: View
     
     private val colors by lazy {
         listOf(
@@ -53,9 +68,9 @@ class AddWorkoutActivity : BaseActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_add_workout)
 
-        workoutIndex = intent.getIntExtra("WORKOUT_INDEX", -1)
-        if (workoutIndex != -1 && workoutIndex < DataManager.workouts.size) {
-            existingWorkout = DataManager.workouts[workoutIndex]
+        workoutId = intent.getLongExtra("WORKOUT_ID", -1L)
+        if (workoutId != -1L) {
+            existingWorkout = DataManager.workouts.find { it.timestamp == workoutId }
         }
 
         initViews()
@@ -66,6 +81,22 @@ class AddWorkoutActivity : BaseActivity() {
     private fun initViews() {
         nameInput = findViewById(R.id.workout_name_input)
         targetInput = findViewById(R.id.target_input)
+        targetSetsInput = findViewById(R.id.target_sets_input)
+        repsPerSetInput = findViewById(R.id.reps_per_set_input)
+        targetTimerInput = findViewById(R.id.target_timer_input)
+
+        layoutRepsGoal = findViewById(R.id.layout_reps_goal)
+        layoutSetsGoal = findViewById(R.id.layout_sets_goal)
+        layoutTimerGoal = findViewById(R.id.layout_timer_goal)
+
+        btnRollerReps = findViewById(R.id.btn_roller_reps)
+        btnRollerSets = findViewById(R.id.btn_roller_sets)
+        btnRollerTimer = findViewById(R.id.btn_roller_timer)
+        tvLabelReps = findViewById(R.id.tv_label_reps)
+        tvLabelSets = findViewById(R.id.tv_label_sets)
+        tvLabelRepsPerSet = findViewById(R.id.tv_label_reps_per_set)
+        tvLabelTimer = findViewById(R.id.tv_label_timer)
+
         chipGroup = findViewById(R.id.muscle_chip_group)
         btnSave = findViewById(R.id.btn_save_workout)
         iconPreview = findViewById(R.id.icon_preview_workout)
@@ -74,6 +105,7 @@ class AddWorkoutActivity : BaseActivity() {
         tvNameHint = findViewById(R.id.tv_name_hint_workout)
         tvScheduleHint = findViewById(R.id.tv_schedule_hint_workout)
         tvTargetHint = findViewById(R.id.tv_target_hint_workout)
+        tvGoalTitle = findViewById(R.id.tv_goal_title)
         
         findViewById<View>(R.id.btn_close_workout).setOnClickListener { finish() }
     }
@@ -88,12 +120,24 @@ class AddWorkoutActivity : BaseActivity() {
 
         if (existingWorkout != null) {
             nameInput.setText(existingWorkout?.name)
-            targetInput.setText(existingWorkout?.target.toString())
+            when (selectedMode) {
+                "Sets" -> {
+                    targetSetsInput.setText(existingWorkout?.target.toString())
+                    repsPerSetInput.setText(existingWorkout?.repsPerSet.toString())
+                }
+                "Timer" -> {
+                    targetTimerInput.setText(existingWorkout?.target.toString())
+                }
+                else -> {
+                    targetInput.setText(existingWorkout?.target.toString())
+                }
+            }
             btnSave.text = "UPDATE"
-            iconPreview.setImageResource(selectedIcon)
+            if (selectedIcon != -1) iconPreview.setImageResource(selectedIcon)
         }
 
         updateThemeVisuals()
+        setupGoalRollers()
         
         // Day Selector
         val dayViews = listOf(R.id.day_0_direct_workout, R.id.day_1_direct_workout, R.id.day_2_direct_workout, R.id.day_3_direct_workout, R.id.day_4_direct_workout, R.id.day_5_direct_workout, R.id.day_6_direct_workout)
@@ -135,6 +179,10 @@ class AddWorkoutActivity : BaseActivity() {
                 }
                 card.alpha = if (isActive) 1.0f else 0.6f
             }
+            layoutRepsGoal.visibility = if (selectedMode == "Reps") View.VISIBLE else View.GONE
+            layoutSetsGoal.visibility = if (selectedMode == "Sets") View.VISIBLE else View.GONE
+            layoutTimerGoal.visibility = if (selectedMode == "Timer") View.VISIBLE else View.GONE
+            validateInputs()
         }
         refreshModeCards()
         modeCards.forEach { (mode, card) -> card.setOnClickListener { selectedMode = mode; refreshModeCards() } }
@@ -184,6 +232,24 @@ class AddWorkoutActivity : BaseActivity() {
             override fun afterTextChanged(s: android.text.Editable?) {}
         })
 
+        targetSetsInput.addTextChangedListener(object : android.text.TextWatcher {
+            override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {}
+            override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) { validateInputs() }
+            override fun afterTextChanged(s: android.text.Editable?) {}
+        })
+
+        repsPerSetInput.addTextChangedListener(object : android.text.TextWatcher {
+            override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {}
+            override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) { validateInputs() }
+            override fun afterTextChanged(s: android.text.Editable?) {}
+        })
+
+        targetTimerInput.addTextChangedListener(object : android.text.TextWatcher {
+            override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {}
+            override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) { validateInputs() }
+            override fun afterTextChanged(s: android.text.Editable?) {}
+        })
+
         findViewById<View>(R.id.card_workout_icon).setOnClickListener {
             showIconSelectionDialog { icon ->
                 selectedIcon = icon
@@ -206,10 +272,24 @@ class AddWorkoutActivity : BaseActivity() {
 
     private fun validateInputs() {
         val name = nameInput.text.toString().trim()
-        val target = targetInput.text.toString().toIntOrNull() ?: 0
         val isNameValid = name.isNotEmpty()
         val isScheduleValid = tempRepeatDays.isNotEmpty()
-        val isTargetValid = target > 0
+        
+        val isTargetValid = when (selectedMode) {
+            "Sets" -> {
+                val sets = targetSetsInput.text.toString().toIntOrNull() ?: 0
+                val reps = repsPerSetInput.text.toString().toIntOrNull() ?: 0
+                sets > 0 && reps > 0
+            }
+            "Timer" -> {
+                val timer = targetTimerInput.text.toString().toIntOrNull() ?: 0
+                timer > 0
+            }
+            else -> {
+                val reps = targetInput.text.toString().toIntOrNull() ?: 0
+                reps > 0
+            }
+        }
         
         val isAllValid = isNameValid && isScheduleValid && isTargetValid
 
@@ -306,15 +386,23 @@ class AddWorkoutActivity : BaseActivity() {
 
     private fun saveWorkout() {
         val name = nameInput.text.toString().trim()
-        val target = targetInput.text.toString().toIntOrNull() ?: 0
+        
+        val target = when (selectedMode) {
+            "Sets" -> targetSetsInput.text.toString().toIntOrNull() ?: 0
+            "Timer" -> targetTimerInput.text.toString().toIntOrNull() ?: 0
+            else -> targetInput.text.toString().toIntOrNull() ?: 0
+        }
+        val repsPerSet = if (selectedMode == "Sets") repsPerSetInput.text.toString().toIntOrNull() ?: 0 else 0
+        
         val finalMuscleSelection = if (selectedMuscleGroups.isEmpty()) listOf("General") else selectedMuscleGroups.toList()
         
         if (existingWorkout == null) {
-            DataManager.workouts.add(Workout(name, false, selectedMode, target, frequency = selectedFrequency, color = selectedColor, iconResId = selectedIcon, muscleGroups = finalMuscleSelection, repeatType = "SPECIFIC_DAYS", repeatDays = tempRepeatDays.toList(), repeatCount = 1))
+            DataManager.workouts.add(Workout(name, false, selectedMode, target, repsPerSet = repsPerSet, frequency = selectedFrequency, color = selectedColor, iconResId = selectedIcon, muscleGroups = finalMuscleSelection, repeatType = "SPECIFIC_DAYS", repeatDays = tempRepeatDays.toList(), repeatCount = 1))
         } else {
             existingWorkout?.let {
                 it.name = name
                 it.target = target
+                it.repsPerSet = repsPerSet
                 it.trackingMode = selectedMode
                 it.frequency = selectedFrequency
                 it.color = selectedColor
@@ -326,5 +414,96 @@ class AddWorkoutActivity : BaseActivity() {
         DataManager.saveData(this)
         setResult(RESULT_OK)
         finish()
+    }
+
+    private fun setupGoalRollers() {
+        val onGoalClick = View.OnClickListener {
+            when (selectedMode) {
+                "Sets" -> showDividedRollerDialog(targetSetsInput, repsPerSetInput)
+                "Timer" -> showTimerRollerDialog(targetTimerInput)
+                else -> showSingleRollerDialog("REPS", targetInput, 0, 500)
+            }
+        }
+        
+        tvGoalTitle.setOnClickListener(onGoalClick)
+        btnRollerReps.setOnClickListener(onGoalClick)
+        btnRollerSets.setOnClickListener(onGoalClick)
+        btnRollerTimer.setOnClickListener(onGoalClick)
+        tvLabelReps.setOnClickListener(onGoalClick)
+        tvLabelSets.setOnClickListener(onGoalClick)
+        tvLabelRepsPerSet.setOnClickListener(onGoalClick)
+        tvLabelTimer.setOnClickListener(onGoalClick)
+    }
+
+    private fun showTimerRollerDialog(targetEditText: EditText) {
+        val dialog = Dialog(this)
+        dialog.setContentView(R.layout.dialog_timer_roller)
+        dialog.window?.setBackgroundDrawableResource(android.R.color.transparent)
+        
+        val npMin = dialog.findViewById<NumberPicker>(R.id.np_minutes)
+        val npSec = dialog.findViewById<NumberPicker>(R.id.np_seconds)
+        val btnConfirm = dialog.findViewById<View>(R.id.btn_confirm_picker)
+        
+        npMin.minValue = 0; npMin.maxValue = 60; npMin.wrapSelectorWheel = false
+        npSec.minValue = 0; npSec.maxValue = 59; npSec.wrapSelectorWheel = true
+        
+        val totalSeconds = targetEditText.text.toString().toIntOrNull() ?: 0
+        npMin.value = totalSeconds / 60
+        npSec.value = totalSeconds % 60
+        
+        btnConfirm.setOnClickListener {
+            val confirmedSeconds = (npMin.value * 60) + npSec.value
+            targetEditText.setText(confirmedSeconds.toString())
+            validateInputs()
+            dialog.dismiss()
+        }
+        showDialogSafe(dialog)
+    }
+
+    private fun showSingleRollerDialog(title: String, targetEditText: EditText, min: Int, max: Int) {
+        val dialog = Dialog(this)
+        dialog.setContentView(R.layout.dialog_number_picker)
+        dialog.window?.setBackgroundDrawableResource(android.R.color.transparent)
+        
+        val tvTitle = dialog.findViewById<TextView>(R.id.tv_picker_title)
+        val picker = dialog.findViewById<NumberPicker>(R.id.number_picker)
+        val btnConfirm = dialog.findViewById<View>(R.id.btn_confirm_picker)
+        
+        tvTitle.text = title
+        picker.minValue = min
+        picker.maxValue = max
+        picker.wrapSelectorWheel = false
+        picker.value = targetEditText.text.toString().toIntOrNull() ?: min
+        
+        btnConfirm.setOnClickListener {
+            targetEditText.setText(picker.value.toString())
+            validateInputs()
+            dialog.dismiss()
+        }
+        showDialogSafe(dialog)
+    }
+
+    private fun showDividedRollerDialog(setsEt: EditText, repsEt: EditText) {
+        val dialog = Dialog(this)
+        dialog.setContentView(R.layout.dialog_divided_roller)
+        dialog.window?.setBackgroundDrawableResource(android.R.color.transparent)
+        
+        val npSets = dialog.findViewById<NumberPicker>(R.id.np_sets)
+        val npReps = dialog.findViewById<NumberPicker>(R.id.np_reps)
+        val btnConfirm = dialog.findViewById<View>(R.id.btn_confirm_picker)
+        
+        npSets.minValue = 1; npSets.maxValue = 100; npSets.wrapSelectorWheel = false
+        npReps.minValue = 1; npReps.maxValue = 500; npReps.wrapSelectorWheel = false
+        
+        npSets.value = setsEt.text.toString().toIntOrNull() ?: 1
+        npReps.value = repsEt.text.toString().toIntOrNull() ?: 1
+        
+        btnConfirm.setOnClickListener {
+            setsEt.setText(npSets.value.toString())
+            repsEt.setText(npReps.value.toString())
+            validateInputs()
+            dialog.dismiss()
+        }
+        showDialogSafe(dialog)
     }
 }

@@ -1,0 +1,21 @@
+# Task: Help & Guide Enhancement
+
+- [x] Update `HelpData.kt` data model and content
+    - [x] Add `HelpArticle` for long-form content
+    - [x] Import content from `app_features_guide.artifact.md`
+    - [x] Import content from `journeys_guide.artifact.md`
+- [x] Refactor `SettingsActivity.kt`
+    - [x] Fix `HelpGuideAdapter` path resolution
+    - [x] Implement Master Guides UI in settings list
+    - [x] Implement `showMasterGuideDetail` using `dialog_help_detail.xml`
+- [x] Update `dialog_help_detail.xml` layout styling
+- [x] Unify Master Guide background with Section Guides
+- [x] Remove excessive free space from section walkthroughs
+- [x] Fix Journey system build errors
+- [x] Verify functionality
+    - [x] Check section guides
+    - [x] Check new Master Guides
+    - [x] Check screenshot fallback logic
+    - [ ] Check section guides
+    - [ ] Check new Master Guides
+    - [ ] Check screenshot fallback logic

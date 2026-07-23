@@ -5,6 +5,7 @@ data class Workout(
     var isCompleted: Boolean,
     var trackingMode: String = "Reps",
     var target: Int = 0,
+    var repsPerSet: Int = 0,
     var progress: Int = 0,
     var frequency: String = "Anytime",
     var isDayOff: Boolean = false,

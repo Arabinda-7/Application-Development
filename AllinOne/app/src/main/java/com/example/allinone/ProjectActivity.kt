@@ -27,7 +27,7 @@ import java.util.*
 
 class ProjectActivity : BaseActivity() {
 
-    private val allNotes = DataManager.notes
+    private val allNotes = DataManager.projects
     private lateinit var projectAdapter: ProjectNoteAdapter
     private lateinit var ideaAdapter: NoteAdapter
     private lateinit var gestureDetector: android.view.GestureDetector
@@ -36,15 +36,39 @@ class ProjectActivity : BaseActivity() {
     private var isProjectsTab = true
     private var isEditMode = false
 
+    private lateinit var projectList: RecyclerView
+    private lateinit var ideaList: RecyclerView
+    private lateinit var bottomNav: View
+    private lateinit var navProjects: View
+    private lateinit var navNotes: View
+    private lateinit var ivProjects: ImageView
+    private lateinit var tvProjects: TextView
+    private lateinit var ivNotes: ImageView
+    private lateinit var tvNotes: TextView
+    private lateinit var btnAdd: View
+    private lateinit var btnEditMode: View
+    private lateinit var btnWorkspace: View
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_projects)
 
-        val projectList = findViewById<RecyclerView>(R.id.project_notes_list)
+        projectList = findViewById(R.id.project_notes_list)
         projectList.layoutManager = StaggeredGridLayoutManager(2, StaggeredGridLayoutManager.VERTICAL)
 
-        val ideaList = findViewById<RecyclerView>(R.id.project_ideas_list)
+        ideaList = findViewById(R.id.project_ideas_list)
         ideaList.layoutManager = LinearLayoutManager(this)
+
+        bottomNav = findViewById(R.id.bottom_navigation_projects)
+        navProjects = findViewById(R.id.nav_projects)
+        navNotes = findViewById(R.id.nav_notes)
+        ivProjects = findViewById(R.id.iv_projects_icon)
+        tvProjects = findViewById(R.id.tv_projects_label)
+        ivNotes = findViewById(R.id.iv_notes_icon)
+        tvNotes = findViewById(R.id.tv_notes_label)
+        btnAdd = findViewById(R.id.btn_add_project_note)
+        btnEditMode = findViewById(R.id.btn_edit_mode)
+        btnWorkspace = findViewById(R.id.btn_workspace)
 
         val dateTextView = findViewById<TextView>(R.id.tv_date)
         val sdf = SimpleDateFormat("MMM dd", Locale.getDefault())
@@ -64,10 +88,7 @@ class ProjectActivity : BaseActivity() {
         ideaList.adapter = ideaAdapter
 
         findViewById<View>(R.id.btn_back).setOnClickListener { finish() }
-        val btnCreate = findViewById<com.google.android.material.floatingactionbutton.FloatingActionButton>(R.id.btn_add_project_note)
-        if (DataManager.projectAddThemeColor != -1) {
-            btnCreate.backgroundTintList = ColorStateList.valueOf(DataManager.projectAddThemeColor)
-        }
+        val btnCreate = btnAdd
         btnCreate.setOnClickListener {
             if (isProjectsTab) {
                 startActivity(Intent(this, AddProjectActivity::class.java))
@@ -81,12 +102,22 @@ class ProjectActivity : BaseActivity() {
         setupGestureDetector()
         setupKeyboardHandling(findViewById(R.id.project_root_layout), findViewById(R.id.project_content_container))
         updateDynamicBackground()
+        applySectionTheme()
     }
 
     override fun onResume() {
         super.onResume()
+        updateUI(isProjectsTab)
         updateDisplayList()
         updateDynamicBackground()
+        applySectionTheme()
+    }
+
+    private fun applySectionTheme() {
+        val projectColor = if (DataManager.globalProjectColor != -1) DataManager.globalProjectColor else Color.parseColor("#1A73E8")
+        val darkenedFabColor = UIUtils.darkenColor(projectColor, 0.5f)
+        findViewById<com.google.android.material.floatingactionbutton.FloatingActionButton>(R.id.btn_add_project_note).backgroundTintList = 
+            ColorStateList.valueOf(darkenedFabColor)
     }
 
     private fun updateDynamicBackground() {
@@ -111,26 +142,7 @@ class ProjectActivity : BaseActivity() {
         return Color.argb(alpha, red, green, blue)
     }
 
-    private lateinit var ivProjects: ImageView
-    private lateinit var tvProjects: TextView
-    private lateinit var ivNotes: ImageView
-    private lateinit var tvNotes: TextView
-    private lateinit var btnAdd: View
-    private lateinit var btnEditMode: View
-    private lateinit var btnWorkspace: View
-
     private fun setupBottomNavigation() {
-        val navProjects = findViewById<View>(R.id.nav_projects)
-        val navNotes = findViewById<View>(R.id.nav_notes)
-
-        ivProjects = findViewById(R.id.iv_projects_icon)
-        tvProjects = findViewById(R.id.tv_projects_label)
-        ivNotes = findViewById(R.id.iv_notes_icon)
-        tvNotes = findViewById(R.id.tv_notes_label)
-        btnAdd = findViewById(R.id.btn_add_project_note)
-        btnEditMode = findViewById(R.id.btn_edit_mode)
-        btnWorkspace = findViewById(R.id.btn_workspace)
-
         navProjects.setOnClickListener { updateUI(true) }
         navNotes.setOnClickListener { updateUI(false) }
 
@@ -167,12 +179,6 @@ class ProjectActivity : BaseActivity() {
     }
 
     private fun updateUI(isProjects: Boolean) {
-        val projectList = findViewById<View>(R.id.project_notes_list)
-        val ideaList = findViewById<View>(R.id.project_ideas_list)
-        val bottomNav = findViewById<View>(R.id.bottom_navigation_projects)
-        val navProjects = findViewById<View>(R.id.nav_projects)
-        val navNotes = findViewById<View>(R.id.nav_notes)
-
         // Feature: Safety Check - Ensure current tab is valid
         var targetIsProjects = isProjects
         if (!DataManager.projectRoadmapsEnabled && targetIsProjects) targetIsProjects = false
@@ -233,11 +239,11 @@ class ProjectActivity : BaseActivity() {
     private fun setupGestureDetector() {
         gestureDetector = android.view.GestureDetector(this, object : SwipeGestureListener() {
             override fun onSwipeLeft() {
-                if (isProjectsTab && DataManager.projectIdeasEnabled) updateUI(false)
+                if (!isProjectsTab && DataManager.projectRoadmapsEnabled) updateUI(true)
             }
 
             override fun onSwipeRight() {
-                if (!isProjectsTab && DataManager.projectRoadmapsEnabled) updateUI(true)
+                if (isProjectsTab && DataManager.projectIdeasEnabled) updateUI(false)
             }
         })
     }
@@ -267,15 +273,18 @@ class ProjectActivity : BaseActivity() {
             .thenByDescending { it.timestamp }))
 
         val ideasList = activeNotes.filter {
-            DataManager.projectDualExistEnabled || it.isDualExist || it.category == "ProjectIdea" || (it.category != "Project" && it.subFeatures.isEmpty())
+            (DataManager.projectDualExistEnabled || it.isDualExist || it.category == "ProjectIdea" || (it.category != "Project" && it.subFeatures.isEmpty()))
+            && it.category != "Project"
         }
-        displayIdeas.addAll(ideasList.sortedByDescending { it.timestamp })
+        val sortedIdeas = ideasList.sortedByDescending { it.timestamp }
+        displayIdeas.clear()
+        displayIdeas.addAll(sortedIdeas)
 
         if (::projectAdapter.isInitialized) {
             projectAdapter.updateNotes(displayNotes)
         }
         if (::ideaAdapter.isInitialized) {
-            ideaAdapter.notifyDataSetChanged()
+            ideaAdapter.updateNotes(sortedIdeas)
         }
     }
 
@@ -410,6 +419,20 @@ class ProjectActivity : BaseActivity() {
         val containerGoals = dialog.findViewById<LinearLayout>(R.id.container_detail_goals)
         val btnClose = dialog.findViewById<View>(R.id.btn_close_details)
         val btnMenu = dialog.findViewById<ImageButton>(R.id.btn_detail_menu)
+        val auraView = dialog.findViewById<View>(R.id.project_detail_aura_background)
+
+        val updateAura = {
+            val projectColor = if (note.color != -1) note.color else Color.parseColor("#1A73E8")
+            val gradient = android.graphics.drawable.GradientDrawable(
+                android.graphics.drawable.GradientDrawable.Orientation.TOP_BOTTOM,
+                intArrayOf(
+                    adjustAlpha(projectColor, 0.4f),
+                    Color.BLACK
+                )
+            )
+            auraView.background = gradient
+        }
+        updateAura()
 
         val headerDescription = dialog.findViewById<View>(R.id.container_description_header)
         val ivDescChevron = dialog.findViewById<ImageView>(R.id.iv_description_chevron)
@@ -422,14 +445,22 @@ class ProjectActivity : BaseActivity() {
         // Note: the chevron is not in the XML yet for the details dialog sub-features label
         // Let's add it via code or just toggle.
         
-        val btnCycleColor = dialog.findViewById<View>(R.id.btn_detail_cycle_color)
         val colorPreviewComp = dialog.findViewById<View>(R.id.tv_detail_color_preview)
-        val btnEditDeadline = dialog.findViewById<View>(R.id.btn_detail_edit_deadline)
         val tvDeadlineComp = dialog.findViewById<TextView>(R.id.tv_detail_deadline_compact)
 
-        var isDescExpanded = true
-        var isGoalsExpanded = true
+        var isDescExpanded = false
+        var isGoalsExpanded = note.ideaGoals.isNotEmpty()
         var isSubfeaturesExpanded = note.subFeatures.isNotEmpty()
+
+        // Initialize visibility and chevrons
+        tvContent.visibility = if (isDescExpanded) View.VISIBLE else View.GONE
+        ivDescChevron.setImageResource(if (isDescExpanded) android.R.drawable.arrow_up_float else android.R.drawable.arrow_down_float)
+        
+        containerGoals.visibility = if (isGoalsExpanded) View.VISIBLE else View.GONE
+        ivGoalsChevron.setImageResource(if (isGoalsExpanded) android.R.drawable.arrow_up_float else android.R.drawable.arrow_down_float)
+        
+        layoutSubfeaturesContainer.visibility = if (isSubfeaturesExpanded) View.VISIBLE else View.GONE
+        ivSubfeaturesChevron.setImageResource(if (isSubfeaturesExpanded) android.R.drawable.arrow_up_float else android.R.drawable.arrow_down_float)
 
         headerDescription.setOnClickListener {
             isDescExpanded = !isDescExpanded
@@ -448,9 +479,6 @@ class ProjectActivity : BaseActivity() {
             layoutSubfeaturesContainer.visibility = if (isSubfeaturesExpanded) View.VISIBLE else View.GONE
             ivSubfeaturesChevron.setImageResource(if (isSubfeaturesExpanded) android.R.drawable.arrow_up_float else android.R.drawable.arrow_down_float)
         }
-        
-        layoutSubfeaturesContainer.visibility = if (isSubfeaturesExpanded) View.VISIBLE else View.GONE
-        ivSubfeaturesChevron.setImageResource(if (isSubfeaturesExpanded) android.R.drawable.arrow_up_float else android.R.drawable.arrow_down_float)
 
         tvTitle.text = note.title
         
@@ -473,7 +501,6 @@ class ProjectActivity : BaseActivity() {
             val btnMarkDone = menuView.findViewById<View>(R.id.menu_detail_mark_done)
             val btnEdit = menuView.findViewById<View>(R.id.menu_detail_edit)
             val btnHistory = menuView.findViewById<View>(R.id.menu_detail_history)
-            val btnConvertNote = menuView.findViewById<View>(R.id.menu_detail_convert_note)
 
             if (note.status == "Completed") {
                 btnMarkDone.visibility = View.GONE
@@ -509,17 +536,6 @@ class ProjectActivity : BaseActivity() {
                 showProjectHistoryDialog(note)
             }
 
-            btnConvertNote.setOnClickListener {
-                popupWindow.dismiss()
-                note.category = "ProjectIdea"
-                note.isDualExist = true // Ensure it stays in both if requested
-                addHistoryLog(note, "Conversion", "Converted Roadmap back to Idea state")
-                DataManager.saveData(this@ProjectActivity)
-                updateDisplayList()
-                dialog.dismiss()
-                Toast.makeText(this@ProjectActivity, "Roadmap converted to Idea!", Toast.LENGTH_SHORT).show()
-            }
-
             popupWindow.showAsDropDown(view, -150, 0)
         }
 
@@ -537,47 +553,6 @@ class ProjectActivity : BaseActivity() {
         tvPriority.setTextColor(priorityColor)
 
         // Simple Clicking logic for Details Dialog
-        val statusContainer = dialog.findViewById<View>(R.id.tv_detail_status).parent as View
-        val priorityContainer = dialog.findViewById<View>(R.id.tv_detail_priority).parent as View
-
-        statusContainer.setOnClickListener {
-            val statuses = listOf("TODO", "DOING", "DONE", "HOLD")
-            val currentStatus = when(note.status) {
-                "DOING", "In Progress" -> "DOING"
-                "DONE", "Completed" -> "DONE"
-                "HOLD", "On Hold" -> "HOLD"
-                else -> "TODO"
-            }
-            val nextIdx = (statuses.indexOf(currentStatus) + 1) % 4
-            note.status = statuses[nextIdx]
-            tvStatus.text = statuses[nextIdx]
-            
-            addHistoryLog(note, "Quick Change", "Status updated to ${note.status}")
-            DataManager.saveData(this)
-            updateDisplayList()
-        }
-
-        priorityContainer.setOnClickListener {
-            val nextPriority = (note.priority + 1) % 3
-            note.priority = nextPriority
-            
-            val newPText = when(nextPriority) {
-                2 -> "HIGH"
-                1 -> "MED"
-                else -> "LOW"
-            }
-            val newPColor = when(nextPriority) {
-                2 -> Color.RED
-                1 -> Color.parseColor("#FFB800")
-                else -> Color.parseColor("#2EC4B6")
-            }
-            tvPriority.text = newPText
-            tvPriority.setTextColor(newPColor)
-            
-            addHistoryLog(note, "Quick Change", "Priority updated to $newPText")
-            DataManager.saveData(this)
-            updateDisplayList()
-        }
 
         // Compact Meta Row 2 Logic
         colorPreviewComp.backgroundTintList = ColorStateList.valueOf(note.color.takeIf { it != -1 } ?: Color.BLUE)
@@ -588,30 +563,6 @@ class ProjectActivity : BaseActivity() {
             } ?: "No Set"
         }
         updateDeadlineUIComp()
-
-        btnCycleColor.setOnClickListener {
-            val colors = listOf(0xFFFF7A59, 0xFFFFB800, 0xFF2EC4B6, 0xFF3A86F0, 0xFF1A73E8, 0xFFE91E63, 0xFF9C27B0, 0xFF673AB7, 0xFF4CAF50)
-            var currentIdx = colors.map { it.toInt() }.indexOf(note.color)
-            if (currentIdx == -1) currentIdx = 0
-            val nextIdx = (currentIdx + 1) % colors.size
-            note.color = colors[nextIdx].toInt()
-            colorPreviewComp.backgroundTintList = ColorStateList.valueOf(note.color)
-            DataManager.saveData(this)
-            updateDisplayList()
-        }
-
-        btnEditDeadline.setOnClickListener {
-            val calendar = Calendar.getInstance()
-            note.deadline?.let { calendar.timeInMillis = it }
-            DatePickerDialog(this, { _, y, m, d ->
-                val newCal = Calendar.getInstance()
-                newCal.set(y, m, d)
-                note.deadline = newCal.timeInMillis
-                updateDeadlineUIComp()
-                DataManager.saveData(this)
-                updateDisplayList()
-            }, calendar.get(Calendar.YEAR), calendar.get(Calendar.MONTH), calendar.get(Calendar.DAY_OF_MONTH)).show()
-        }
 
 
         val sdfMeta = SimpleDateFormat("MMM dd", Locale.getDefault())
@@ -868,6 +819,11 @@ class ProjectActivity : BaseActivity() {
                 setTypeface(null, android.graphics.Typeface.BOLD)
                 setPadding(8.dpToPx(), 2.dpToPx(), 8.dpToPx(), 2.dpToPx())
                 val tagColor = when(sub.tag.uppercase()) {
+                    "TASKS" -> Color.parseColor("#1A73E8")
+                    "NOTES" -> Color.parseColor("#9E9E9E")
+                    "FEATURES" -> Color.parseColor("#673AB7")
+                    "BUGS" -> Color.parseColor("#F44336")
+                    "RESOURCES" -> Color.parseColor("#009688")
                     "UI" -> Color.parseColor("#E91E63")
                     "LOGIC" -> Color.parseColor("#673AB7")
                     "BUG" -> Color.RED

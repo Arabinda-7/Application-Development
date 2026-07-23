@@ -107,21 +107,25 @@ class OnboardingActivity : BaseActivity() {
 
         val pagerState = rememberPagerState(pageCount = { visiblePages.size })
         val hasVisitedLastPage = remember { mutableStateOf(false) }
+        val focusManager = androidx.compose.ui.platform.LocalFocusManager.current
 
         LaunchedEffect(pagerState.currentPage) {
+            // Dismiss keyboard when page changes
+            focusManager.clearFocus()
+            
             if (pagerState.currentPage == visiblePages.size - 1) {
                 hasVisitedLastPage.value = true
             }
         }
         
-        val themeColor = remember(pagerState.currentPage, sections.map { it.isEnabled.value }) {
-            val currentPageType = visiblePages.getOrNull(pagerState.currentPage)
-            when (currentPageType) {
+        val themeColor = remember(pagerState.targetPage, sections.map { it.isEnabled.value }) {
+            val targetPageType = visiblePages.getOrNull(pagerState.targetPage)
+            when (targetPageType) {
                 OnboardingPageType.PROFILE -> Color(0xFF1A73E8)
                 OnboardingPageType.GLOBAL_HUB -> Color(0xFF673AB7)
                 OnboardingPageType.ACTIVATION -> Color(0xFF2EC4B6)
                 OnboardingPageType.FEATURE_DEEP_DIVE -> {
-                    val deepDiveIndex = visiblePages.take(pagerState.currentPage).count { it == OnboardingPageType.FEATURE_DEEP_DIVE }
+                    val deepDiveIndex = visiblePages.take(pagerState.targetPage).count { it == OnboardingPageType.FEATURE_DEEP_DIVE }
                     val activeSection = sections.filter { it.isEnabled.value }.getOrNull(deepDiveIndex)
                     when (activeSection?.id) {
                         "HABITS" -> Color(0xFFFF7A59)
@@ -138,7 +142,16 @@ class OnboardingActivity : BaseActivity() {
         }
         val animatedThemeColor by animateColorAsState(themeColor, tween(800), label = "color")
 
-        Box(modifier = Modifier.fillMaxSize().background(Color.Black)) {
+        Box(modifier = Modifier
+            .fillMaxSize()
+            .background(Color.Black)
+            .clickable(
+                interactionSource = remember { androidx.compose.foundation.interaction.MutableInteractionSource() },
+                indication = null
+            ) {
+                focusManager.clearFocus()
+            }
+        ) {
             LiquidBackground(animatedThemeColor)
 
             Column(modifier = Modifier.fillMaxSize().statusBarsPadding()) {
@@ -146,7 +159,8 @@ class OnboardingActivity : BaseActivity() {
                     HorizontalPager(
                         state = pagerState,
                         modifier = Modifier.fillMaxSize(),
-                        userScrollEnabled = userName.value.isNotEmpty()
+                        userScrollEnabled = userName.value.isNotEmpty(),
+                        beyondViewportPageCount = 1
                     ) { pageIndex ->
                         val type = visiblePages[pageIndex]
                         
@@ -200,7 +214,14 @@ class OnboardingActivity : BaseActivity() {
                         } else {
                             val isProfileValid = userName.value.isNotEmpty()
                             IconButton(
-                                onClick = { scope.launch { pagerState.animateScrollToPage(pagerState.currentPage + 1) } },
+                                onClick = { 
+                                    scope.launch { 
+                                        pagerState.animateScrollToPage(
+                                            page = pagerState.currentPage + 1,
+                                            animationSpec = tween(durationMillis = 700, easing = FastOutSlowInEasing)
+                                        ) 
+                                    } 
+                                },
                                 enabled = isProfileValid,
                                 modifier = Modifier
                                     .size(56.dp)
@@ -227,7 +248,10 @@ class OnboardingActivity : BaseActivity() {
                         canJump = hasVisitedLastPage.value,
                         onDotClick = { page ->
                             scope.launch {
-                                pagerState.animateScrollToPage(page)
+                                pagerState.animateScrollToPage(
+                                    page = page,
+                                    animationSpec = tween(durationMillis = 700, easing = FastOutSlowInEasing)
+                                )
                             }
                         }
                     )
@@ -240,15 +264,15 @@ class OnboardingActivity : BaseActivity() {
     fun LiquidBackground(color: Color) {
         val infiniteTransition = rememberInfiniteTransition(label = "liquid")
         val blobOffset1 by infiniteTransition.animateFloat(
-            initialValue = 0f, targetValue = 100f,
-            animationSpec = infiniteRepeatable(tween(5000, easing = LinearEasing), RepeatMode.Reverse), label = "b1"
+            initialValue = 0f, targetValue = 80f,
+            animationSpec = infiniteRepeatable(tween(6000, easing = LinearEasing), RepeatMode.Reverse), label = "b1"
         )
         val blobOffset2 by infiniteTransition.animateFloat(
-            initialValue = 0f, targetValue = -100f,
-            animationSpec = infiniteRepeatable(tween(7000, easing = LinearEasing), RepeatMode.Reverse), label = "b2"
+            initialValue = 0f, targetValue = -80f,
+            animationSpec = infiniteRepeatable(tween(8000, easing = LinearEasing), RepeatMode.Reverse), label = "b2"
         )
 
-        Box(modifier = Modifier.fillMaxSize().blur(100.dp)) {
+        Box(modifier = Modifier.fillMaxSize().blur(30.dp)) {
             Box(modifier = Modifier
                 .offset(x = blobOffset1.dp, y = blobOffset2.dp)
                 .size(300.dp)
@@ -267,6 +291,8 @@ class OnboardingActivity : BaseActivity() {
 
     @Composable
     fun ProfilePage(name: MutableState<String>, avatar: MutableIntState, selectedFocus: MutableState<Set<String>>, themeColor: Color) {
+        val focusManager = androidx.compose.ui.platform.LocalFocusManager.current
+        
         Column(modifier = Modifier.fillMaxSize(), verticalArrangement = Arrangement.Center) {
             Text("Create Identity", color = Color.White, fontSize = 32.sp, fontWeight = FontWeight.Black, letterSpacing = (-1).sp)
             Text("Your journey begins with a personal touch.", color = Color.White.copy(alpha = 0.6f), fontSize = 16.sp)
@@ -279,6 +305,12 @@ class OnboardingActivity : BaseActivity() {
                 placeholder = { Text("Your Name", color = Color.White.copy(alpha = 0.3f)) },
                 modifier = Modifier.fillMaxWidth(),
                 shape = RoundedCornerShape(16.dp),
+                keyboardOptions = androidx.compose.foundation.text.KeyboardOptions(
+                    imeAction = androidx.compose.ui.text.input.ImeAction.Done
+                ),
+                keyboardActions = androidx.compose.foundation.text.KeyboardActions(
+                    onDone = { focusManager.clearFocus() }
+                ),
                 colors = OutlinedTextFieldDefaults.colors(
                     focusedBorderColor = themeColor,
                     unfocusedBorderColor = Color.White.copy(alpha = 0.1f),
@@ -298,6 +330,7 @@ class OnboardingActivity : BaseActivity() {
                     Surface(
                         modifier = Modifier.clickable { 
                             selectedFocus.value = if (isSelected) selectedFocus.value - g else selectedFocus.value + g
+                            focusManager.clearFocus()
                         },
                         color = if (isSelected) themeColor else Color.White.copy(alpha = 0.05f),
                         shape = RoundedCornerShape(12.dp),
@@ -310,8 +343,14 @@ class OnboardingActivity : BaseActivity() {
 
             Spacer(modifier = Modifier.height(32.dp))
             Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceEvenly) {
-                AvatarItem(R.drawable.boy_avatar_profile, avatar.intValue == R.drawable.boy_avatar_profile, themeColor) { avatar.intValue = R.drawable.boy_avatar_profile }
-                AvatarItem(R.drawable.girl_avatar_profile, avatar.intValue == R.drawable.girl_avatar_profile, themeColor) { avatar.intValue = R.drawable.girl_avatar_profile }
+                AvatarItem(R.drawable.boy_avatar_profile, avatar.intValue == R.drawable.boy_avatar_profile, themeColor) { 
+                    avatar.intValue = R.drawable.boy_avatar_profile 
+                    focusManager.clearFocus()
+                }
+                AvatarItem(R.drawable.girl_avatar_profile, avatar.intValue == R.drawable.girl_avatar_profile, themeColor) { 
+                    avatar.intValue = R.drawable.girl_avatar_profile 
+                    focusManager.clearFocus()
+                }
             }
         }
     }
@@ -649,7 +688,7 @@ class OnboardingActivity : BaseActivity() {
                 Row {
                     repeat(pagerState.pageCount) { i ->
                         val isSelected = pagerState.currentPage == i
-                        val width by animateDpAsState(if (isSelected) 32.dp else 8.dp, spring(stiffness = Spring.StiffnessLow), label = "w")
+                        val width by animateDpAsState(if (isSelected) 32.dp else 8.dp, spring(stiffness = Spring.StiffnessMediumLow), label = "w")
                         Box(
                             modifier = Modifier
                                 .padding(horizontal = 4.dp)

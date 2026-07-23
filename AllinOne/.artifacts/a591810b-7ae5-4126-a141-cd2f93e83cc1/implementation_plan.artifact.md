@@ -1,37 +1,29 @@
-# Implementation Plan - UI Sync for Task Section
+# Fix [ksp] error in HabitTrackerActivity.kt
 
-The user wants to apply the same UI improvements (uniform styling, unclipped borders, and theme-synced footer colors) to the Task section, matching the Habits and Workouts sections.
-
-## User Review Required
-
-> [!NOTE]
-> For the Task section, categories are dynamic and scrollable. I will update their styling to match the "capsule" look (38dp height, 1.5dp stroke) and ensure the borders are not clipped. The bottom navigation will also be synced with the global task theme color.
+The project is failing to build because of a syntax error in `HabitTrackerActivity.kt`. Specifically, a block of code (part of `setupDynamicHistoryGrid`) is dangling outside any function declaration, and several other required functions (`updateHistoryUI`, `updateSectionProgress`, `setupGridNavigation`) are missing their declarations even though they are called in the activity.
 
 ## Proposed Changes
 
-### UI Layouts
+### [Component Name]
 
-#### [MODIFY] [activity_task.xml](file:///C:/Users/arabi/OneDrive/Desktop/App%20Development/AllinOne/app/src/main/res/layout/activity_task.xml)
-- Add `android:clipChildren="false"` and `android:clipToPadding="false"` to the `HorizontalScrollView` (`chip_scroll_categories`) and its child `RadioGroup` (`category_filter_group`).
-- This ensures the chip outlines are not cut off when scrolling or drawing.
+#### [MODIFY] [HabitTrackerActivity.kt](file:///C:/Users/arabi/OneDrive/Desktop/App Development/AllinOne/app/src/main/java/com/example/allinone/HabitTrackerActivity.kt)
 
-### Logic / Styling
+I will restore the missing function declarations for:
+1. `setupGridNavigation()`: Handles month navigation for the history grid.
+2. `updateSectionProgress()`: Updates the progress bar and text for the habits section.
+3. `updateHistoryUI()`: Updates the history statistics (streak, completion rate, etc.) and refreshes the grid.
+4. `setupDynamicHistoryGrid()`: Properly declares the function and initializes the variables (`grid`, `firstDayOfWeek`, `daysInMonth`, etc.) used in the dangling code.
 
-#### [MODIFY] [TaskActivity.kt](file:///C:/Users/arabi/OneDrive/Desktop/App%20Development/AllinOne/app/src/main/java/com/example/allinone/TaskActivity.kt)
-- **Implement `applySectionTheme()`**:
-    *   Apply the global task color (from `DataManager`) to the active footer navigation item.
-    *   Update `updateNavUI()` to use the dynamic theme color.
-    *   Call `applySectionTheme()` in `onCreate` and `onResume`.
-- **Refine `setupFilters()`**:
-    *   Increase chip height to `38dp`.
-    *   Apply the programmatic `GradientDrawable` (capsule shape, 1.5dp stroke) to the category chips.
-    *   Ensure unselected chips have the 1.5dp stroke and selected chips have the solid theme color.
-- **Immediate Startup Sync**: Ensure `updateNavUI()` is called within `applySectionTheme()` to prevent the "blue flicker" on activity start.
+I will also ensure the class structure is correct by removing any extra closing braces that might have caused the class to close prematurely.
 
 ## Verification Plan
 
+### Automated Tests
+- Run `./gradlew :app:kspDebugKotlin` to verify the KSP error is resolved.
+- Run a full build: `./gradlew assembleDebug`.
+
 ### Manual Verification
-- Deploy the app and navigate to the Tasks section.
-- Verify that the category filter chips have the new "capsule" styling with clear 1.5dp borders.
-- Verify that the bottom navigation active state uses the global task color.
-- Check that there is no blue flicker when entering the Tasks page.
+- Deploy the app to a device.
+- Navigate to the Habit Tracker.
+- Switch to the "History" tab and verify the calendar grid and stats are displayed correctly.
+- Verify that ticking/unticking habits updates the section progress bar.

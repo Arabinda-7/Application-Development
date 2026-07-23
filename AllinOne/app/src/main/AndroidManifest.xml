@@ -31,28 +31,19 @@
             </intent-filter>
         </activity>
         <activity android:name=".HabitTrackerActivity"
+            android:exported="true"
             tools:ignore="MissingClass" />
-        <activity android:name=".TaskActivity" />
-        <activity android:name=".WorkoutRoutineActivity" />
-        <activity android:name=".TimerActivity" />
+        <activity android:name=".TaskActivity" android:exported="true" />
+        <activity android:name=".WorkoutRoutineActivity" android:exported="true" />
         <activity android:name=".NotesActivity"
+            android:exported="true"
             tools:ignore="MissingClass" />
-        <activity android:name=".FinanceActivity" />
-        <activity android:name=".FinanceHistoryActivity" />
+        <activity android:name=".FinanceActivity" android:exported="true" />
         <activity android:name=".SettingsActivity"
+            android:exported="true"
             tools:ignore="MissingClass" />
-        <activity android:name=".HabitDetailActivity" />
-        <activity android:name=".WorkoutDetailActivity"
-            tools:ignore="MissingClass" />
-        <activity android:name=".ProjectActivity" />
-        <activity android:name=".LedgerActivity" />
-        <activity android:name=".LedgerHistoryActivity" />
-        <activity android:name=".FinanceMonthHistoryActivity" />
-        <activity android:name=".PersonLedgerActivity" />
-        <activity android:name=".AddPersonActivity" android:windowSoftInputMode="adjustResize" />
-        <activity android:name=".PersonalLedgerHubActivity" />
-        <activity android:name=".PersonalLedgerBookActivity" />
-        <activity android:name=".ProfileActivity" />
+        <activity android:name=".ProjectActivity" android:exported="true" />
+        <activity android:name=".ProfileActivity" android:exported="true" />
         <activity android:name=".OnboardingActivity" />
         <activity android:name=".PerformanceHistoryActivity" />
         <activity android:name=".LockActivity" android:windowSoftInputMode="adjustResize" />
@@ -70,6 +61,17 @@
         <activity android:name=".NoteSettingsActivity" android:windowSoftInputMode="adjustResize" />
         <activity android:name=".FinanceSettingsActivity" android:windowSoftInputMode="adjustResize" />
         <activity android:name=".ProjectSettingsActivity" android:windowSoftInputMode="adjustResize" />
+        <activity android:name=".LedgerActivity" />
+        <activity android:name=".LedgerHistoryActivity" />
+        <activity android:name=".PersonLedgerActivity" />
+        <activity android:name=".PersonalLedgerHubActivity" />
+        <activity android:name=".PersonalLedgerBookActivity" />
+        <activity android:name=".AddPersonActivity" />
+        <activity android:name=".FinanceHistoryActivity" />
+        <activity android:name=".FinanceMonthHistoryActivity" />
+        <activity android:name=".HabitDetailActivity" />
+        <activity android:name=".WorkoutDetailActivity" />
+        <activity android:name=".TimerActivity" />
         <activity
             android:name=".workspace.ui.activity.WorkspaceActivity"
             android:windowSoftInputMode="adjustResize" />

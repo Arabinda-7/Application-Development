@@ -75,48 +75,88 @@
             android:layout_marginTop="8dp"
             app:layout_constraintTop_toBottomOf="@id/tv_title" />
 
-        <!-- Feature 1: Scrollable Category Filters -->
-        <HorizontalScrollView
-            android:id="@+id/scroll_filters"
+        <RadioGroup
+            android:id="@+id/rg_finance_filters"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginTop="8dp"
-            android:scrollbars="none"
+            android:layout_marginTop="0dp"
+            android:paddingVertical="8dp"
+            android:paddingHorizontal="8dp"
+            android:orientation="horizontal"
+            android:weightSum="4"
+            android:clipChildren="false"
+            android:clipToPadding="false"
             app:layout_constraintTop_toBottomOf="@id/finance_summary">
-            <com.google.android.material.chip.ChipGroup
-                android:id="@+id/cg_finance_filters"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:paddingHorizontal="16dp"
-                app:singleSelection="true"
-                app:selectionRequired="true">
-                <com.google.android.material.chip.Chip
-                    android:id="@+id/chip_filter_all"
-                    style="@style/Widget.Material3.Chip.Filter"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="All"
-                    android:checked="true" />
-                <com.google.android.material.chip.Chip
-                    android:id="@+id/chip_filter_expense"
-                    style="@style/Widget.Material3.Chip.Filter"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="Expenses" />
-                <com.google.android.material.chip.Chip
-                    android:id="@+id/chip_filter_income"
-                    style="@style/Widget.Material3.Chip.Filter"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="Income" />
-                <com.google.android.material.chip.Chip
-                    android:id="@+id/chip_filter_saving"
-                    style="@style/Widget.Material3.Chip.Filter"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="Savings" />
-            </com.google.android.material.chip.ChipGroup>
-        </HorizontalScrollView>
+
+            <RadioButton
+                android:id="@+id/chip_filter_all"
+                android:layout_width="0dp"
+                android:layout_height="38dp"
+                android:layout_weight="1"
+                android:layout_margin="2dp"
+                android:padding="0dp"
+                android:minWidth="0dp"
+                android:minHeight="0dp"
+                android:background="@drawable/filter_chip_bg"
+                android:button="@null"
+                android:checked="true"
+                android:gravity="center"
+                android:text="ALL"
+                android:textColor="@color/white"
+                android:textSize="10sp"
+                android:textStyle="bold" />
+
+            <RadioButton
+                android:id="@+id/chip_filter_expense"
+                android:layout_width="0dp"
+                android:layout_height="38dp"
+                android:layout_weight="1"
+                android:layout_margin="2dp"
+                android:padding="0dp"
+                android:minWidth="0dp"
+                android:minHeight="0dp"
+                android:background="@drawable/filter_chip_bg"
+                android:button="@null"
+                android:gravity="center"
+                android:text="EXPENSES"
+                android:textColor="@color/white"
+                android:textSize="10sp"
+                android:textStyle="bold" />
+
+            <RadioButton
+                android:id="@+id/chip_filter_income"
+                android:layout_width="0dp"
+                android:layout_height="38dp"
+                android:layout_weight="1"
+                android:layout_margin="2dp"
+                android:padding="0dp"
+                android:minWidth="0dp"
+                android:minHeight="0dp"
+                android:background="@drawable/filter_chip_bg"
+                android:button="@null"
+                android:gravity="center"
+                android:text="INCOME"
+                android:textColor="@color/white"
+                android:textSize="10sp"
+                android:textStyle="bold" />
+
+            <RadioButton
+                android:id="@+id/chip_filter_saving"
+                android:layout_width="0dp"
+                android:layout_height="38dp"
+                android:layout_weight="1"
+                android:layout_margin="2dp"
+                android:padding="0dp"
+                android:minWidth="0dp"
+                android:minHeight="0dp"
+                android:background="@drawable/filter_chip_bg"
+                android:button="@null"
+                android:gravity="center"
+                android:text="SAVINGS"
+                android:textColor="@color/white"
+                android:textSize="10sp"
+                android:textStyle="bold" />
+        </RadioGroup>
 
         <androidx.recyclerview.widget.RecyclerView
             android:id="@+id/finance_list"
@@ -126,7 +166,7 @@
             android:paddingBottom="100dp"
             android:clipToPadding="false"
             app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintTop_toBottomOf="@id/scroll_filters" />
+            app:layout_constraintTop_toBottomOf="@id/rg_finance_filters" />
 
         <!-- Feature 5: Premium Empty State -->
         <LinearLayout
@@ -137,7 +177,7 @@
             android:orientation="vertical"
             android:visibility="gone"
             app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintTop_toBottomOf="@id/scroll_filters">
+            app:layout_constraintTop_toBottomOf="@id/rg_finance_filters">
             <ImageView
                 android:layout_width="120dp"
                 android:layout_height="120dp"

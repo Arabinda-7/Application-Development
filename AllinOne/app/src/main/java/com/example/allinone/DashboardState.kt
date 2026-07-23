@@ -11,6 +11,7 @@ data class DashboardState(
     val recentActions: List<String> = emptyList(),
     val growthAdvice: String = "Build consistency with daily rituals.",
     val managementAdvice: String = "Organize your workflow for peak efficiency.",
+    val todayAgenda: Map<String, List<AgendaItem>> = emptyMap(),
     val currentMood: String? = null,
 
     val habitColor: Int = -1,
@@ -31,6 +32,7 @@ data class DashboardState(
     val homeFocusSize: String = "M",
     val globalDisplaySize: String = "S",
     val fontSize: String = "S",
+    val isSystemAppearanceEnabled: Boolean = true,
     val appThemeMode: String = "DARK",
     val appAccentColor: Int = -1,
     val appFontFamily: String = "DEFAULT",
@@ -45,5 +47,6 @@ data class DashboardState(
     val showProjectSection: Boolean = true,
     val showFinanceSection: Boolean = true,
 
+    val isAppUnlocked: Boolean = false,
     val isDataLoaded: Boolean = false
 )

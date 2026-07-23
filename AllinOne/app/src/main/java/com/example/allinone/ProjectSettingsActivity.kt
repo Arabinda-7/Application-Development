@@ -42,26 +42,10 @@ class ProjectSettingsActivity : BaseActivity() {
     private fun loadSettings() {
         val settings = mutableListOf<ConfigItem>()
         
-        settings.add(ConfigItem("Manage Templates", "Edit roadmap pre-sets") { 
-            showManageTemplatesDialog()
-        })
-        
-        settings.add(ConfigItem("Manage Tags", "Customize UI, Logic, Bug tags") { 
-            showManageTagsDialog()
-        })
-
-        settings.add(ConfigItem("Auto-Save Ideas", "Save content as you type", isToggle = true, isChecked = DataManager.projectAutoSaveIdeas) {
-            DataManager.projectAutoSaveIdeas = !DataManager.projectAutoSaveIdeas
-        })
-
-        settings.add(ConfigItem("Auto Archive", "Hide completed projects", isToggle = true, isChecked = DataManager.projectAutoArchive) {
-            DataManager.projectAutoArchive = !DataManager.projectAutoArchive
-        })
-
+        settings.add(ConfigItem("Structure", isHeader = true))
         settings.add(ConfigItem("Roadmaps Section", "Show/Hide Project Roadmaps", isToggle = true, isChecked = DataManager.projectRoadmapsEnabled) {
             if (DataManager.projectRoadmapsEnabled && !DataManager.projectIdeasEnabled) {
                 Toast.makeText(this, "At least one section must be enabled", Toast.LENGTH_SHORT).show()
-                // Force sync if toggle logic in adapter doesn't handle it
                 loadSettings()
             } else {
                 DataManager.projectRoadmapsEnabled = !DataManager.projectRoadmapsEnabled
@@ -76,17 +60,27 @@ class ProjectSettingsActivity : BaseActivity() {
                 DataManager.projectIdeasEnabled = !DataManager.projectIdeasEnabled
             }
         })
-        
-        settings.add(ConfigItem("Dual Exist", "Show projects in both tabs", isToggle = true, isChecked = DataManager.projectDualExistEnabled) {
-            DataManager.projectDualExistEnabled = !DataManager.projectDualExistEnabled
+
+        settings.add(ConfigItem("Manage Templates", "Edit roadmap pre-sets") { 
+            showManageTemplatesDialog()
         })
         
-        settings.add(ConfigItem("Deadline Notifications", "Alerts for upcoming milestones", isToggle = true, isChecked = DataManager.projectDeadlineAlerts) {
-            DataManager.projectDeadlineAlerts = !DataManager.projectDeadlineAlerts
+        settings.add(ConfigItem("Automation", isHeader = true))
+        settings.add(ConfigItem("Auto-Save Ideas", "Save content as you type", isToggle = true, isChecked = DataManager.projectAutoSaveIdeas) {
+            DataManager.projectAutoSaveIdeas = !DataManager.projectAutoSaveIdeas
+        })
+
+        settings.add(ConfigItem("Auto Archive", "Hide completed projects", isToggle = true, isChecked = DataManager.projectAutoArchive) {
+            DataManager.projectAutoArchive = !DataManager.projectAutoArchive
         })
 
         settings.add(ConfigItem("Synergy Sync", "Unified task & project tracking", isToggle = true, isChecked = DataManager.projectSynergySync) {
             DataManager.projectSynergySync = !DataManager.projectSynergySync
+        })
+
+        settings.add(ConfigItem("Performance", isHeader = true))
+        settings.add(ConfigItem("Deadline Notifications", "Alerts for upcoming milestones", isToggle = true, isChecked = DataManager.projectDeadlineAlerts) {
+            DataManager.projectDeadlineAlerts = !DataManager.projectDeadlineAlerts
         })
         
         settings.add(ConfigItem("Productivity Analytics", "Track completion velocity", isToggle = true, isChecked = DataManager.projectAnalyticsEnabled) {
@@ -165,72 +159,6 @@ class ProjectSettingsActivity : BaseActivity() {
         showDialogSafe(dialog)
     }
 
-    private fun showManageTagsDialog() {
-        val dialog = Dialog(this)
-        dialog.setContentView(R.layout.dialog_manage_categories)
-        dialog.window?.setBackgroundDrawableResource(android.R.color.transparent)
-        dialog.window?.setLayout(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT)
-
-        val container = dialog.findViewById<LinearLayout>(R.id.categories_container)
-        val etNew = dialog.findViewById<EditText>(R.id.et_new_category)
-        val btnAdd = dialog.findViewById<View>(R.id.btn_add_category)
-        val title = dialog.findViewById<TextView>(R.id.tv_categories_title)
-        val btnDeleteMode = dialog.findViewById<ImageButton>(R.id.btn_toggle_delete_mode)
-
-        title.text = "Project Tags"
-        etNew.hint = "Tag Name (e.g. UI)..."
-
-        var isDeleteMode = false
-
-        fun refresh() {
-            container.removeAllViews()
-            btnDeleteMode.imageTintList = android.content.res.ColorStateList.valueOf(if (isDeleteMode) Color.RED else Color.WHITE)
-
-            DataManager.projectCustomTags.forEach { tagName ->
-                val itemView = LayoutInflater.from(this).inflate(R.layout.item_category_manage, container, false)
-                itemView.findViewById<TextView>(R.id.tv_category_name).text = tagName
-
-                val btnRemove = itemView.findViewById<View>(R.id.btn_remove_category)
-                btnRemove.visibility = if (isDeleteMode) View.VISIBLE else View.GONE
-
-                itemView.setOnClickListener {
-                    if (isDeleteMode) {
-                        isDeleteMode = false
-                        refresh()
-                    }
-                }
-
-                btnRemove.setOnClickListener {
-                    if (DataManager.projectCustomTags.size > 1) {
-                        DataManager.projectCustomTags.remove(tagName)
-                        DataManager.saveData(this)
-                        refresh()
-                    } else {
-                        Toast.makeText(this, "At least one tag required", Toast.LENGTH_SHORT).show()
-                    }
-                }
-                container.addView(itemView)
-            }
-        }
-
-        btnDeleteMode.setOnClickListener {
-            isDeleteMode = !isDeleteMode
-            refresh()
-        }
-
-        btnAdd.setOnClickListener {
-            val name = etNew.text.toString().trim().uppercase()
-            if (name.isNotEmpty() && !DataManager.projectCustomTags.contains(name)) {
-                DataManager.projectCustomTags.add(name)
-                DataManager.saveData(this)
-                refresh()
-                etNew.text.clear()
-            }
-        }
-
-        refresh()
-        showDialogSafe(dialog)
-    }
 
     private fun showCreateTemplateStepsDialog(templateName: String, onComplete: () -> Unit) {
         val dialog = Dialog(this)
