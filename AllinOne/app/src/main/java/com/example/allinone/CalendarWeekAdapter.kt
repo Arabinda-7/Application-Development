@@ -10,6 +10,7 @@ import java.util.*
 class CalendarWeekAdapter(
     private val weeks: List<List<DayModel>>,
     private val habitColor: Int,
+    private val itemLayoutId: Int,
     private val onDaySelected: (DayModel) -> Unit
 ) : RecyclerView.Adapter<CalendarWeekAdapter.WeekViewHolder>() {
 
@@ -32,9 +33,7 @@ class CalendarWeekAdapter(
 
     inner class WeekViewHolder(private val rv: RecyclerView) : RecyclerView.ViewHolder(rv) {
         fun bind(days: List<DayModel>) {
-            rv.adapter = CalendarDayAdapter(days, habitColor) { selectedDay ->
-                // Clear selection in other weeks if necessary
-                // For simplicity, we assume one selection at a time globally
+            rv.adapter = CalendarDayAdapter(days, habitColor, itemLayoutId) { selectedDay ->
                 onDaySelected(selectedDay)
             }
         }

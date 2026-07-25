@@ -22,7 +22,7 @@ class FinanceSettingsActivity : BaseActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        setContentView(R.layout.activity_section_settings)
+        setContentView(R.layout.activity_section_settings_finance)
 
         settingsList = findViewById(R.id.settings_list)
         tvTitle = findViewById(R.id.tv_title)
@@ -67,14 +67,14 @@ class FinanceSettingsActivity : BaseActivity() {
     }
 
     private fun showManageCategoriesDialog() {
-        val dialog = Dialog(this); dialog.setContentView(R.layout.dialog_manage_categories)
+        val dialog = Dialog(this); dialog.setContentView(R.layout.dialog_manage_categories_finance)
         val container = dialog.findViewById<LinearLayout>(R.id.categories_container)
         val et = dialog.findViewById<EditText>(R.id.et_new_category)
         
         fun refresh() {
             container.removeAllViews()
             DataManager.financeCustomCategories.forEach { c ->
-                val iv = LayoutInflater.from(this).inflate(R.layout.item_category_manage, container, false)
+                val iv = LayoutInflater.from(this).inflate(R.layout.item_category_manage_finance, container, false)
                 iv.findViewById<TextView>(R.id.tv_category_name).text = c
                 iv.findViewById<View>(R.id.btn_remove_category).setOnClickListener { 
                     DataManager.financeCustomCategories.remove(c)

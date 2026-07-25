@@ -29,6 +29,7 @@ class AddIdeaActivity : BaseActivity() {
     private lateinit var titleInput: EditText
     private lateinit var contentInput: EditText
     private lateinit var btnSave: TextView
+    private lateinit var btnDelete: View
     private lateinit var btnClose: View
     private lateinit var btnPriority: TextView
     private lateinit var tvCharCount: TextView
@@ -79,6 +80,7 @@ class AddIdeaActivity : BaseActivity() {
         titleInput = findViewById(R.id.note_title_input)
         contentInput = findViewById(R.id.note_content_input)
         btnSave = findViewById(R.id.btn_save_note)
+        btnDelete = findViewById(R.id.btn_delete_note)
         btnClose = findViewById(R.id.btn_close_note)
         btnPriority = findViewById(R.id.btn_priority_tag)
         tvCharCount = findViewById(R.id.tv_char_count)
@@ -139,7 +141,26 @@ class AddIdeaActivity : BaseActivity() {
 
         btnClose.setOnClickListener { finish() }
         btnSave.setOnClickListener { saveIdea() }
+        setupListeners()
+    }
 
+    private fun showDeleteConfirmation() {
+        android.app.AlertDialog.Builder(this)
+            .setTitle("Delete Idea")
+            .setMessage("Are you sure you want to delete this idea?")
+            .setPositiveButton("DELETE") { _, _ ->
+                existingIdea?.let { 
+                    DataManager.projects.remove(it)
+                    DataManager.saveData(this)
+                    Toast.makeText(this, "Idea deleted", Toast.LENGTH_SHORT).show()
+                    finish()
+                }
+            }
+            .setNegativeButton("CANCEL", null)
+            .show()
+    }
+
+    private fun setupListeners() {
         btnToggleDescription.setOnClickListener {
             val isVisible = containerDescription.visibility == View.VISIBLE
             containerDescription.visibility = if (isVisible) View.GONE else View.VISIBLE

@@ -26,7 +26,6 @@ class WorkoutAdapter(
 ) : RecyclerView.Adapter<RecyclerView.ViewHolder>() {
 
     companion object {
-        private const val TYPE_WORKOUT = 0
         private const val TYPE_HEADER = 1
     }
 
@@ -44,15 +43,26 @@ class WorkoutAdapter(
     }
 
     override fun getItemViewType(position: Int): Int {
-        return if (displayItems[position] is String) TYPE_HEADER else TYPE_WORKOUT
+        val item = displayItems[position]
+        return if (item is String) {
+            TYPE_HEADER
+        } else {
+            val workout = item as Workout
+            when (workout.frequency) {
+                "Morning" -> R.layout.item_workout_morning
+                "Afternoon" -> R.layout.item_workout_afternoon
+                "Evening" -> R.layout.item_workout_evening
+                else -> R.layout.item_workout_anytime
+            }
+        }
     }
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): RecyclerView.ViewHolder {
         return if (viewType == TYPE_HEADER) {
-            val view = LayoutInflater.from(parent.context).inflate(R.layout.item_task_header, parent, false)
+            val view = LayoutInflater.from(parent.context).inflate(R.layout.item_header_workout, parent, false)
             HeaderViewHolder(view)
         } else {
-            val view = LayoutInflater.from(parent.context).inflate(R.layout.workout_list_item, parent, false)
+            val view = LayoutInflater.from(parent.context).inflate(viewType, parent, false)
             WorkoutViewHolder(view)
         }
     }
@@ -215,6 +225,11 @@ class WorkoutAdapter(
                     val addedValue = holder.numberPicker.value
                     if (addedValue > 0) {
                         workout.progress += addedValue
+                        
+                        // Track historical partial progress
+                        val progressPercent = (workout.progress * 100) / workout.target.coerceAtLeast(1)
+                        workout.dailyProgress[todayDateString] = progressPercent
+
                         if (workout.progress >= workout.target) {
                             workout.isCompleted = true
                             workout.isExpanded = false
@@ -236,6 +251,7 @@ class WorkoutAdapter(
                 holder.btnFinishAll.setOnClickListener {
                     workout.progress = workout.target
                     workout.isCompleted = true
+                    workout.dailyProgress[todayDateString] = 100
                     TransitionManager.beginDelayedTransition(holder.itemView as ViewGroup)
                     workout.isExpanded = false
                     
@@ -281,6 +297,7 @@ class WorkoutAdapter(
             workout.isCompleted = true
             workout.isDayOff = true
             workout.isExpanded = false
+            workout.dailyProgress[todayDateString] = 100
             
             if (!workout.completedDates.contains(todayDateString)) {
                 workout.completedDates.add(todayDateString)
@@ -316,9 +333,11 @@ class WorkoutAdapter(
                 workout.isCompleted = false
                 workout.progress = 0
                 workout.isDayOff = false
+                workout.dailyProgress.remove(todayDateString)
             }
             
             workout.completedDates.remove(selectedDateString)
+            workout.dailyProgress.remove(selectedDateString)
 
             applyFilterAndSort()
             onProgressChanged()

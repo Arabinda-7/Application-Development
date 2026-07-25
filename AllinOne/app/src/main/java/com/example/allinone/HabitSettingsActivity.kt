@@ -16,7 +16,7 @@ class HabitSettingsActivity : BaseActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        setContentView(R.layout.activity_section_settings)
+        setContentView(R.layout.activity_section_settings_habit)
 
         settingsList = findViewById(R.id.settings_list)
         tvTitle = findViewById(R.id.tv_title)

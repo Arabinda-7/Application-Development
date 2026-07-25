@@ -1,27 +1,21 @@
-# Walkthrough: Detailed Agenda with Navigation Paths
+# Walkthrough: Simplified Agenda Layout with Section Tags
 
-I have transformed the "Today's Agenda" into a rich, interactive notification center. Agenda items now display detailed metadata and breadcrumb paths, and they support direct navigation to their respective sections in the app.
+I have refined the "Today's Agenda" layout to provide a cleaner interface. The complex breadcrumb paths have been removed and replaced with concise section and priority tags in the top-right corner of each item.
 
 ## Changes Made
 
-### Rich Data Model
-- **`AgendaItem`**: Introduced a new data class to hold title, details, paths, and navigation logic.
-- **Deep Scanning with Paths**: Updated `DataManager` to not only find deadlines but also construct their "location" within the app (e.g., `Workspace > AllInOne > Goals`).
+### UI Simplification
+- **Removed Path Display**: The full directory-style path (e.g., `Workspace > Project > Tasks`) has been removed to reduce visual clutter.
+- **Top-Right Section Tags**: Each agenda item now features a subtle tag in the top-right corner containing the section name (e.g., `TASK`, `GOAL`) and the priority level (e.g., `HIGH`).
+- **Clean Layout**: Item titles now have more breathing room and are truncated with an ellipsis if they are too long, ensuring they don't overlap with the new tags.
 
-### UI & UX Enhancements
-- **Interactive Agenda**: The notification dialog now uses a modern card layout for each item.
-- **Detailed Metadata**: Items show secondary info like Priority (High/Medium/Low), Weights, Progress percentages, or Health status.
-- **Breadcrumb Navigation**: Each item displays its path with a location icon, making it clear where the task or milestone belongs.
-- **Direct Navigation**: Clicking any item in the agenda will now automatically navigate you to the correct activity or workspace section.
+### Data Structure Update
+- **Refined `AgendaItem`**: Updated the data model to separate `priority` from `details`, allowing the UI to render the priority specifically within the section tag.
+- **Priority Formatting**: All priority levels are now displayed in uppercase for better readability within the tags.
 
 ## Verification Results
 
-### Automated Validation
-- **Path Accuracy**: Verified that Workspace items correctly resolve their parent project names for the breadcrumb path.
-- **Priority Mapping**: Confirmed that numeric priority values (0-2) are correctly translated into human-readable strings.
-
 ### Manual Verification
-- Verified that clicking a legacy task navigates to `TaskActivity`.
-- Verified that clicking a Roadmap item navigates to `ProjectActivity`.
-- Verified that clicking a Workspace item navigates to `WorkspaceActivity`.
-- Confirmed that the "red dot" and dialog list are perfectly synchronized with the new detailed data.
+- Verified that agenda items no longer show the `Place` icon or breadcrumb text.
+- Verified that items correctly display tags like `TASK | HIGH` or `ROADMAP | MEDIUM` in the corner.
+- Confirmed that clicking an item still navigates correctly to the respective app section.

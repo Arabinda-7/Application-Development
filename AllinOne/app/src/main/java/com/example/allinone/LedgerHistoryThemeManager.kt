@@ -1,0 +1,27 @@
+package com.example.allinone
+
+import android.graphics.Color
+import android.graphics.drawable.GradientDrawable
+import android.view.View
+
+class LedgerHistoryThemeManager(
+    private val auraView: View
+) {
+    fun applyTheme() {
+        val financeColor = if (DataManager.globalFinanceColor != -1) DataManager.globalFinanceColor else Color.parseColor("#E91E63")
+        
+        val gradient = GradientDrawable(
+            GradientDrawable.Orientation.TOP_BOTTOM,
+            intArrayOf(adjustAlpha(financeColor, 0.4f), Color.BLACK)
+        )
+        auraView.background = gradient
+    }
+
+    private fun adjustAlpha(color: Int, factor: Float): Int {
+        val alpha = Math.round(Color.alpha(color) * factor)
+        val red = Color.red(color)
+        val green = Color.green(color)
+        val blue = Color.blue(color)
+        return Color.argb(alpha, red, green, blue)
+    }
+}

@@ -22,7 +22,7 @@ class NoteSettingsActivity : BaseActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        setContentView(R.layout.activity_section_settings)
+        setContentView(R.layout.activity_section_settings_note)
 
         settingsList = findViewById(R.id.settings_list)
         tvTitle = findViewById(R.id.tv_title)
@@ -89,7 +89,7 @@ class NoteSettingsActivity : BaseActivity() {
 
     private fun showManageSectionsDialog() {
         val dialog = android.app.Dialog(this)
-        dialog.setContentView(R.layout.dialog_manage_sections)
+        dialog.setContentView(R.layout.dialog_manage_sections_note)
         dialog.window?.setBackgroundDrawableResource(android.R.color.transparent)
         dialog.window?.setLayout(android.view.ViewGroup.LayoutParams.MATCH_PARENT, android.view.ViewGroup.LayoutParams.WRAP_CONTENT)
 
@@ -141,13 +141,13 @@ class NoteSettingsActivity : BaseActivity() {
     }
 
     private fun showNoteTemplatesDialog() {
-        val dialog = Dialog(this); dialog.setContentView(R.layout.dialog_manage_categories)
+        val dialog = Dialog(this); dialog.setContentView(R.layout.dialog_manage_categories_note)
         val container = dialog.findViewById<LinearLayout>(R.id.categories_container)
         dialog.findViewById<View>(R.id.container_add_category).visibility = View.GONE
         dialog.findViewById<TextView>(R.id.tv_categories_title).text = "Note Templates"
 
         DataManager.noteTemplates.keys.forEach { name ->
-            val iv = LayoutInflater.from(this).inflate(R.layout.item_category_manage, container, false)
+            val iv = LayoutInflater.from(this).inflate(R.layout.item_category_manage_note, container, false)
             iv.findViewById<TextView>(R.id.tv_category_name).text = name
             iv.findViewById<View>(R.id.btn_remove_category).visibility = View.GONE
             iv.setOnClickListener { 
@@ -179,13 +179,13 @@ class NoteSettingsActivity : BaseActivity() {
     }
 
     private fun showNoteBulkMoveDialog() {
-        val dialog = Dialog(this); dialog.setContentView(R.layout.dialog_manage_categories)
+        val dialog = Dialog(this); dialog.setContentView(R.layout.dialog_manage_categories_note)
         val container = dialog.findViewById<LinearLayout>(R.id.categories_container)
         dialog.findViewById<View>(R.id.container_add_category).visibility = View.GONE
         dialog.findViewById<TextView>(R.id.tv_categories_title).text = "Move All Notes To..."
 
         DataManager.noteVisibleSections.forEach { category ->
-            val iv = LayoutInflater.from(this).inflate(R.layout.item_category_manage, container, false)
+            val iv = LayoutInflater.from(this).inflate(R.layout.item_category_manage_note, container, false)
             iv.findViewById<TextView>(R.id.tv_category_name).text = category
             iv.findViewById<View>(R.id.btn_remove_category).visibility = View.GONE
             iv.setOnClickListener {

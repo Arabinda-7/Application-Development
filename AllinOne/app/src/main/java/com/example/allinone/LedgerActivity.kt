@@ -1,69 +1,42 @@
 package com.example.allinone
 
-import android.app.AlertDialog
-import android.app.DatePickerDialog
 import android.app.Dialog
-import android.app.TimePickerDialog
 import android.content.Context
 import android.content.Intent
-import android.graphics.Color
-import android.graphics.Paint
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.*
-import androidx.appcompat.app.AppCompatActivity
-import androidx.core.content.ContextCompat
-import androidx.recyclerview.widget.LinearLayoutManager
-import androidx.recyclerview.widget.RecyclerView
+import androidx.activity.viewModels
 import java.text.SimpleDateFormat
 import java.util.*
 
 class LedgerActivity : BaseActivity() {
 
-    private val allEntries = DataManager.ledgerEntries
-    private val activeEntries = mutableListOf<LedgerEntry>()
-    private lateinit var ledgerAdapter: LedgerAdapter
+    private val viewModel: FinanceLedgerViewModel by viewModels()
     
-    private lateinit var tvTotalBorrowed: TextView
-    private lateinit var tvTotalLent: TextView
-    private lateinit var tvNetBalance: TextView
-    private lateinit var btnAddLedger: View
-    private lateinit var cardTotalBorrowed: com.google.android.material.card.MaterialCardView
-    private lateinit var cardTotalLent: com.google.android.material.card.MaterialCardView
-    private lateinit var cardNetBalance: com.google.android.material.card.MaterialCardView
-    private lateinit var auraView: View
+    private lateinit var summarySection: FinanceLedgerSummarySection
+    private lateinit var listSection: FinanceLedgerListSection
+    private lateinit var themeManager: FinanceLedgerThemeManager
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_ledger)
 
-        tvTotalBorrowed = findViewById(R.id.tv_total_borrowed)
-        tvTotalLent = findViewById(R.id.tv_total_lent)
-        tvNetBalance = findViewById(R.id.tv_net_balance)
-        btnAddLedger = findViewById(R.id.btn_add_ledger)
-        cardTotalBorrowed = findViewById(R.id.card_total_borrowed)
-        cardTotalLent = findViewById(R.id.card_total_lent)
-        cardNetBalance = findViewById(R.id.card_net_balance)
-        auraView = findViewById(R.id.ledger_aura_background)
+        initSections()
+        setupLogic()
+    }
 
-        val ledgerList = findViewById<RecyclerView>(R.id.ledger_list)
-        ledgerList.layoutManager = LinearLayoutManager(this)
+    private fun initSections() {
+        summarySection = FinanceLedgerSummarySection(findViewById(R.id.ledger_root_layout))
         
-        updateActiveEntries()
-        ledgerAdapter = LedgerAdapter(activeEntries, 
-            onUpdate = {
-                DataManager.saveData(this)
-                updateActiveEntries()
-                updateSummary()
-            },
-            onShowMenu = { anchor, entry, isHistory, onAction ->
-                showCustomLedgerMenu(anchor, entry, isHistory, onAction)
-            },
-            onAddPayment = { entry ->
-                showAddPaymentDialog(this, entry)
-            },
+        listSection = FinanceLedgerListSection(
+            this,
+            findViewById(R.id.ledger_list),
+            onUpdate = { updateAllUI() },
+            onShowMenu = { anchor, entry, isHistory, onAction -> showCustomLedgerMenu(anchor, entry, isHistory, onAction) },
+            onAddPayment = { entry -> showAddPaymentDialog(this, entry) },
             onConfirmSettlement = { entry ->
                 showConfirmationDialog(
                     title = "SETTLE ENTRY",
@@ -72,108 +45,45 @@ class LedgerActivity : BaseActivity() {
                     onConfirm = {
                         entry.isSettled = true
                         entry.settlementTimestamp = System.currentTimeMillis()
-                        
-                        // Add remaining as payment record
                         val remaining = entry.amount - entry.paidAmount
                         if (remaining > 0) {
                             entry.paymentHistory.add(LedgerPayment(remaining))
                             entry.paidAmount = entry.amount
                         }
-                        
                         DataManager.saveData(this)
-                        updateActiveEntries()
-                        updateSummary()
+                        updateAllUI()
                     }
                 )
             }
         )
-        ledgerList.adapter = ledgerAdapter
 
-        updateSummary()
+        themeManager = FinanceLedgerThemeManager(
+            findViewById(R.id.ledger_aura_background),
+            findViewById(R.id.btn_add_ledger),
+            listOf(
+                findViewById(R.id.card_total_borrowed),
+                findViewById(R.id.card_total_lent),
+                findViewById(R.id.card_net_balance)
+            )
+        )
+    }
+
+    private fun setupLogic() {
+        updateAllUI()
+        themeManager.applyTheme()
         setupKeyboardHandling(findViewById(R.id.ledger_root_layout))
 
         findViewById<View>(R.id.btn_back).setOnClickListener { finish() }
-
         findViewById<View>(R.id.btn_ledger_history).setOnClickListener {
             startActivity(Intent(this, LedgerHistoryActivity::class.java))
         }
-
-        findViewById<View>(R.id.btn_ledger_settings).setOnClickListener {
-            showLedgerSettingsDialog()
-        }
-
+        findViewById<View>(R.id.btn_ledger_settings).setOnClickListener { showLedgerSettingsDialog() }
         findViewById<View>(R.id.btn_add_ledger).setOnClickListener { showAddLedgerDialog() }
-        applySectionTheme()
-        updateDynamicBackground()
     }
 
-    override fun onResume() {
-        super.onResume()
-        updateActiveEntries()
-        updateSummary()
-        applySectionTheme()
-        updateDynamicBackground()
-        setupKeyboardHandling(findViewById(R.id.ledger_root_layout), findViewById(R.id.ledger_content_container))
-    }
-
-    private fun updateDynamicBackground() {
-        val financeColor = if (DataManager.globalFinanceColor != -1) DataManager.globalFinanceColor else Color.parseColor("#E91E63")
-        
-        val gradient = android.graphics.drawable.GradientDrawable(
-            android.graphics.drawable.GradientDrawable.Orientation.TOP_BOTTOM,
-            intArrayOf(
-                adjustAlpha(financeColor, 0.4f),
-                Color.BLACK
-            )
-        )
-        auraView.background = gradient
-    }
-
-    private fun adjustAlpha(color: Int, factor: Float): Int {
-        val alpha = Math.round(Color.alpha(color) * factor)
-        val red = Color.red(color)
-        val green = Color.green(color)
-        val blue = Color.blue(color)
-        return Color.argb(alpha, red, green, blue)
-    }
-
-    private fun applySectionTheme() {
-        val financeColor = if (DataManager.globalFinanceColor != -1) DataManager.globalFinanceColor else Color.parseColor("#E91E63")
-        val darkenedFabColor = UIUtils.darkenColor(financeColor, 0.5f)
-        
-        // Sync FAB color
-        btnAddLedger.backgroundTintList = android.content.res.ColorStateList.valueOf(darkenedFabColor)
-            
-        // Sync Summary Card Strokes
-        cardTotalBorrowed.strokeColor = Color.parseColor("#FF5252")
-        cardTotalLent.strokeColor = Color.parseColor("#4CAF50")
-        cardNetBalance.strokeColor = financeColor
-    }
-
-    private fun updateActiveEntries() {
-        activeEntries.clear()
-        // Feature 4: Sort by Person Name to naturally group them
-        activeEntries.addAll(allEntries.filter { !it.isSettled }
-            .sortedWith(compareBy({ it.personName }, { it.timestamp })))
-            
-        if (::ledgerAdapter.isInitialized) {
-            ledgerAdapter.notifyDataSetChanged()
-        }
-    }
-
-    private fun updateSummary() {
-        val totalBorrow = activeEntries.filter { it.type == "Borrowed" }.sumOf { it.amount - it.paidAmount }
-        val totalLent = activeEntries.filter { it.type == "Lent" }.sumOf { it.amount - it.paidAmount }
-        
-        // Feature 3: Calculate Net Balance
-        val netBalance = totalLent - totalBorrow
-        val currency = DataManager.financeCurrency
-        
-        tvTotalBorrowed.text = String.format(Locale.US, "%s%.0f", currency, totalBorrow)
-        tvTotalLent.text = String.format(Locale.US, "%s%.0f", currency, totalLent)
-        
-        tvNetBalance.text = String.format(Locale.US, "%s%.0f", currency, Math.abs(netBalance))
-        tvNetBalance.setTextColor(if (netBalance >= 0) Color.parseColor("#4CAF50") else Color.parseColor("#FF5252"))
+    private fun updateAllUI() {
+        val active = listSection.updateActiveEntries()
+        summarySection.update(active)
     }
 
     private fun showLedgerSettingsDialog() {
@@ -182,22 +92,10 @@ class LedgerActivity : BaseActivity() {
         dialog.window?.setBackgroundDrawableResource(android.R.color.transparent)
         dialog.window?.setLayout(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT)
 
-        dialog.findViewById<View>(R.id.item_manage_people).setOnClickListener {
-            dialog.dismiss()
-            // Main Ledger already manages people by grouping.
-            Toast.makeText(this, "Managing People in Main Ledger", Toast.LENGTH_SHORT).show()
-        }
-
         dialog.findViewById<View>(R.id.item_people_ledger).setOnClickListener {
             dialog.dismiss()
             startActivity(Intent(this, PersonalLedgerHubActivity::class.java))
         }
-
-        dialog.findViewById<View>(R.id.item_sort_order).setOnClickListener {
-            // Future sorting logic
-            Toast.makeText(this, "Sort feature coming soon", Toast.LENGTH_SHORT).show()
-        }
-
         dialog.findViewById<View>(R.id.btn_close_settings).setOnClickListener { dialog.dismiss() }
         dialog.show()
     }
@@ -208,73 +106,29 @@ class LedgerActivity : BaseActivity() {
         val popupWindow = PopupWindow(menuView, ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT, true)
         popupWindow.elevation = 20f
 
-        val btnUndo = menuView.findViewById<View>(R.id.menu_undo)
-        val btnDelete = menuView.findViewById<View>(R.id.menu_delete)
-        val btnEdit = menuView.findViewById<View>(R.id.menu_edit)
-        val btnDayOff = menuView.findViewById<View>(R.id.menu_take_day_off)
-        val btnHide = menuView.findViewById<View>(R.id.menu_hide_unhide)
-
-        btnDayOff.visibility = View.GONE
-        btnHide.visibility = View.GONE
-        btnEdit.visibility = if (isHistory) View.GONE else View.VISIBLE
-        btnUndo.visibility = if (isHistory) View.VISIBLE else View.GONE
-
-        btnUndo.setOnClickListener {
-            entry.isSettled = false
-            DataManager.saveData(this)
-            updateActiveEntries()
-            updateSummary()
-            onAction()
-            popupWindow.dismiss()
-        }
-
-        if (!isHistory) {
-            val paymentLayout = LinearLayout(this).apply {
-                orientation = LinearLayout.HORIZONTAL
-                gravity = android.view.Gravity.CENTER_VERTICAL
-                setPadding(12.dpToPx(), 12.dpToPx(), 12.dpToPx(), 12.dpToPx())
-                val outValue = android.util.TypedValue()
-                theme.resolveAttribute(android.R.attr.selectableItemBackground, outValue, true)
-                setBackgroundResource(outValue.resourceId)
-                isClickable = true
-                isFocusable = true
-                
-                val icon = ImageView(this@LedgerActivity).apply {
-                    layoutParams = LinearLayout.LayoutParams(24.dpToPx(), 24.dpToPx())
-                    setImageResource(android.R.drawable.ic_input_add)
-                    imageTintList = android.content.res.ColorStateList.valueOf(Color.WHITE)
-                }
-                val text = TextView(this@LedgerActivity).apply {
-                    layoutParams = LinearLayout.LayoutParams(ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT).apply {
-                        marginStart = 16.dpToPx()
-                    }
-                    text = "ADD PAYMENT"
-                    setTextColor(Color.WHITE)
-                    textSize = 14f
-                    setTypeface(null, android.graphics.Typeface.BOLD)
-                }
-                addView(icon)
-                addView(text)
-                
-                setOnClickListener {
-                    popupWindow.dismiss()
-                    showAddPaymentDialog(this@LedgerActivity, entry)
-                }
+        menuView.findViewById<View>(R.id.menu_undo).apply {
+            visibility = if (isHistory) View.VISIBLE else View.GONE
+            setOnClickListener {
+                entry.isSettled = false
+                DataManager.saveData(this@LedgerActivity)
+                updateAllUI()
+                onAction()
+                popupWindow.dismiss()
             }
-            (menuView as ViewGroup).getChildAt(0).let { (it as ViewGroup).addView(paymentLayout, 0) }
         }
 
-        btnEdit.setOnClickListener {
-            popupWindow.dismiss()
-            showAddLedgerDialog(entry)
+        menuView.findViewById<View>(R.id.menu_edit).apply {
+            visibility = if (isHistory) View.GONE else View.VISIBLE
+            setOnClickListener {
+                popupWindow.dismiss()
+                showAddLedgerDialog(entry)
+            }
         }
 
-        btnDelete.setOnClickListener {
-            allEntries.remove(entry)
+        menuView.findViewById<View>(R.id.menu_delete).setOnClickListener {
+            DataManager.ledgerEntries.remove(entry)
             DataManager.saveData(this)
-            updateActiveEntries()
-            updateSummary()
-        setupKeyboardHandling(findViewById(R.id.ledger_root_layout))
+            updateAllUI()
             onAction()
             popupWindow.dismiss()
         }
@@ -290,39 +144,23 @@ class LedgerActivity : BaseActivity() {
 
         val etInput = dialog.findViewById<EditText>(R.id.et_payment_amount)
         val tvRemaining = dialog.findViewById<TextView>(R.id.tv_remaining_label)
-        val btnConfirm = dialog.findViewById<TextView>(R.id.btn_confirm_payment)
-        val btnClose = dialog.findViewById<View>(R.id.btn_close_payment)
-
         val remaining = entry.amount - entry.paidAmount
         tvRemaining.text = "Amount remaining: ${DataManager.financeCurrency}${remaining.toInt()}"
-        etInput.hint = "${DataManager.financeCurrency}0"
+        
+        dialog.findViewById<View>(R.id.btn_pay_full).setOnClickListener { etInput.setText(remaining.toInt().toString()) }
+        dialog.findViewById<View>(R.id.btn_close_payment).setOnClickListener { dialog.dismiss() }
 
-        dialog.findViewById<View>(R.id.btn_pay_25).setOnClickListener {
-            etInput.setText((remaining * 0.25).toInt().toString())
-        }
-        dialog.findViewById<View>(R.id.btn_pay_50).setOnClickListener {
-            etInput.setText((remaining * 0.50).toInt().toString())
-        }
-        dialog.findViewById<View>(R.id.btn_pay_full).setOnClickListener {
-            etInput.setText(remaining.toInt().toString())
-        }
-
-        btnClose.setOnClickListener { dialog.dismiss() }
-
-        btnConfirm.setOnClickListener {
+        dialog.findViewById<View>(R.id.btn_confirm_payment).setOnClickListener {
             val paid = etInput.text.toString().toDoubleOrNull() ?: 0.0
             if (paid > 0) {
-                // Feature 5: Record in Payment History
                 entry.paymentHistory.add(LedgerPayment(paid))
-                
                 entry.paidAmount += paid
                 if (entry.paidAmount >= entry.amount) {
                     entry.isSettled = true
                     entry.settlementTimestamp = System.currentTimeMillis()
                 }
                 DataManager.saveData(this)
-                updateActiveEntries()
-                updateSummary()
+                updateAllUI()
                 dialog.dismiss()
             }
         }
@@ -340,18 +178,11 @@ class LedgerActivity : BaseActivity() {
         val etNote = dialog.findViewById<EditText>(R.id.et_ledger_note)
         val tvDueDate = dialog.findViewById<TextView>(R.id.tv_ledger_due_date)
         val rgType = dialog.findViewById<RadioGroup>(R.id.rg_ledger_type)
-        val btnSave = dialog.findViewById<TextView>(R.id.btn_save_ledger)
-        val btnClose = dialog.findViewById<View>(R.id.btn_close_ledger)
-        val tvTitle = dialog.findViewById<TextView>(R.id.tv_dialog_title)
-
-        val currency = DataManager.financeCurrency
-        etAmount.hint = "${currency}0.00"
-
+        
         var selectedDueDate: Long? = existingEntry?.dueDate
         val sdf = SimpleDateFormat("MMM dd, yyyy", Locale.getDefault())
 
         if (existingEntry != null) {
-            tvTitle.text = "Edit Ledger"
             etAmount.setText(existingEntry.amount.toString())
             etName.setText(existingEntry.personName)
             etNote.setText(existingEntry.note)
@@ -363,224 +194,42 @@ class LedgerActivity : BaseActivity() {
             val cal = Calendar.getInstance()
             selectedDueDate?.let { cal.timeInMillis = it }
             android.app.DatePickerDialog(this, { _, y, m, d ->
-                cal.set(y, m, d)
-                selectedDueDate = cal.timeInMillis
-                tvDueDate.text = sdf.format(cal.time)
+                cal.set(y, m, d); selectedDueDate = cal.timeInMillis; tvDueDate.text = sdf.format(cal.time)
             }, cal.get(Calendar.YEAR), cal.get(Calendar.MONTH), cal.get(Calendar.DAY_OF_MONTH)).show()
         }
 
-        btnClose.setOnClickListener { dialog.dismiss() }
-
-        btnSave.setOnClickListener {
+        dialog.findViewById<View>(R.id.btn_save_ledger).setOnClickListener {
             val amount = etAmount.text.toString().toDoubleOrNull() ?: 0.0
             val name = etName.text.toString().trim()
             if (name.isNotEmpty() && amount > 0) {
                 val type = if (rgType.checkedRadioButtonId == R.id.radio_borrowed) "Borrowed" else "Lent"
-                
                 if (existingEntry == null) {
-                    val entry = LedgerEntry(
-                        personName = name,
-                        amount = amount,
-                        type = type,
-                        note = etNote.text.toString().trim(),
-                        dueDate = selectedDueDate
-                    )
-                    allEntries.add(0, entry)
+                    DataManager.ledgerEntries.add(0, LedgerEntry(personName = name, amount = amount, type = type, note = etNote.text.toString().trim(), dueDate = selectedDueDate))
                 } else {
-                    existingEntry.personName = name
-                    existingEntry.amount = amount
-                    existingEntry.type = type
-                    existingEntry.note = etNote.text.toString().trim()
-                    existingEntry.dueDate = selectedDueDate
+                    existingEntry.apply { personName = name; this.amount = amount; this.type = type; note = etNote.text.toString().trim(); dueDate = selectedDueDate }
                 }
-                
-                updateActiveEntries()
-                DataManager.saveData(this)
-                updateSummary()
-                dialog.dismiss()
-            } else {
-                Toast.makeText(this, "Name and Amount required", Toast.LENGTH_SHORT).show()
+                updateAllUI(); DataManager.saveData(this); dialog.dismiss()
             }
         }
-
+        dialog.findViewById<View>(R.id.btn_close_ledger).setOnClickListener { dialog.dismiss() }
         dialog.show()
     }
 
-    private fun showConfirmationDialog(
-        title: String,
-        message: String,
-        positiveButtonText: String = "PROCEED",
-        onConfirm: () -> Unit
-    ) {
+    private fun showConfirmationDialog(title: String, message: String, positiveButtonText: String, onConfirm: () -> Unit) {
         val dialog = Dialog(this)
         dialog.setContentView(R.layout.dialog_confirmation)
         dialog.window?.setBackgroundDrawableResource(android.R.color.transparent)
         dialog.window?.setLayout(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT)
-
-        val tvTitle = dialog.findViewById<TextView>(R.id.tv_confirm_title)
-        val tvMessage = dialog.findViewById<TextView>(R.id.tv_confirm_message)
-        val btnNegative = dialog.findViewById<TextView>(R.id.btn_confirm_negative)
-        val btnPositive = dialog.findViewById<TextView>(R.id.btn_confirm_positive)
-
-        tvTitle.text = title
-        tvMessage.text = message
-        btnPositive.text = positiveButtonText
-
-        btnNegative.setOnClickListener { dialog.dismiss() }
-        btnPositive.setOnClickListener {
-            onConfirm()
-            dialog.dismiss()
-        }
+        dialog.findViewById<TextView>(R.id.tv_confirm_title).text = title
+        dialog.findViewById<TextView>(R.id.tv_confirm_message).text = message
+        dialog.findViewById<TextView>(R.id.btn_confirm_positive).apply { text = positiveButtonText; setOnClickListener { onConfirm(); dialog.dismiss() } }
+        dialog.findViewById<View>(R.id.btn_confirm_negative).setOnClickListener { dialog.dismiss() }
         dialog.show()
     }
 
-    private fun Int.dpToPx(): Int = (this * resources.displayMetrics.density).toInt()
-}
-
-class LedgerAdapter(
-    private val entries: MutableList<LedgerEntry>,
-    private val onUpdate: () -> Unit,
-    private val onShowMenu: (View, LedgerEntry, Boolean, () -> Unit) -> Unit,
-    private val onAddPayment: (LedgerEntry) -> Unit,
-    private val onConfirmSettlement: (LedgerEntry) -> Unit
-) : RecyclerView.Adapter<LedgerAdapter.LedgerViewHolder>() {
-
-    override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): LedgerViewHolder {
-        val view = LayoutInflater.from(parent.context).inflate(R.layout.ledger_list_item, parent, false)
-        return LedgerViewHolder(view)
-    }
-
-    override fun onBindViewHolder(holder: LedgerViewHolder, position: Int) {
-        val entry = entries[position]
-        holder.tvName.text = entry.personName
-        holder.tvType.text = entry.type.uppercase()
-        
-        val remaining = entry.amount - entry.paidAmount
-        holder.tvAmount.text = "${DataManager.financeCurrency}${remaining.toInt()}"
-        holder.tvDate.text = SimpleDateFormat("MMM dd, yyyy", Locale.getDefault()).format(Date(entry.timestamp))
-        
-        // Feature 1: Circular Progress Calculation
-        val progress = if (entry.amount > 0) ((entry.paidAmount / entry.amount) * 100).toInt() else 0
-        holder.progressBar.progress = progress
-
-        // Feature 6: Overdue Highlighting & Dynamic Stroke
-        val isOverdue = entry.dueDate != null && entry.dueDate!! < System.currentTimeMillis() && !entry.isSettled
-        val typeColor = if (entry.type == "Borrowed") Color.parseColor("#FF5252") else Color.parseColor("#4CAF50")
-        
-        holder.cardView.setCardBackgroundColor(Color.TRANSPARENT)
-        holder.cardView.strokeWidth = (1.5f * holder.itemView.resources.displayMetrics.density).toInt()
-        
-        if (isOverdue) {
-            holder.cardView.strokeColor = Color.parseColor("#FF5252")
-            // Make border thicker if overdue
-            holder.cardView.strokeWidth = (2.5f * holder.itemView.resources.displayMetrics.density).toInt()
-        } else {
-            holder.cardView.strokeColor = typeColor
-        }
-
-        // Feature 5: Show Payment History if Expanded
-        if (entry.isExpanded && entry.paymentHistory.isNotEmpty()) {
-            holder.historyContainer.visibility = View.VISIBLE
-            holder.historyContainer.removeAllViews()
-            
-            val title = TextView(holder.itemView.context).apply {
-                text = "PAYMENT LOG"
-                setTextColor(Color.parseColor("#80FFFFFF"))
-                textSize = 10f
-                setPadding(0, 8, 0, 8)
-                setTypeface(null, android.graphics.Typeface.BOLD)
-            }
-            holder.historyContainer.addView(title)
-
-            entry.paymentHistory.forEach { payment ->
-                val row = LinearLayout(holder.itemView.context).apply {
-                    orientation = LinearLayout.HORIZONTAL
-                    setPadding(0, 4, 0, 4)
-                    
-                    val tvDate = TextView(holder.itemView.context).apply {
-                        layoutParams = LinearLayout.LayoutParams(0, ViewGroup.LayoutParams.WRAP_CONTENT, 1f)
-                        text = SimpleDateFormat("MMM dd, h:mm a", Locale.getDefault()).format(Date(payment.timestamp))
-                        setTextColor(Color.parseColor("#B0B0B0"))
-                        textSize = 11f
-                    }
-                    val tvAmt = TextView(holder.itemView.context).apply {
-                        text = "+${DataManager.financeCurrency}${payment.amount.toInt()}"
-                        setTextColor(Color.parseColor("#4CAF50"))
-                        textSize = 11f
-                        setTypeface(null, android.graphics.Typeface.BOLD)
-                    }
-                    addView(tvDate)
-                    addView(tvAmt)
-                }
-                holder.historyContainer.addView(row)
-            }
-        } else {
-            holder.historyContainer.visibility = View.GONE
-        }
-
-        if (entry.paidAmount > 0 && !entry.isSettled) {
-            holder.tvNote.text = "Paid: ${DataManager.financeCurrency}${entry.paidAmount.toInt()} / ${DataManager.financeCurrency}${entry.amount.toInt()}\n${entry.note}"
-            holder.tvNote.visibility = View.VISIBLE
-        } else if (entry.note.isNotEmpty()) {
-            holder.tvNote.text = entry.note
-            holder.tvNote.visibility = View.VISIBLE
-        } else {
-            holder.tvNote.visibility = View.GONE
-        }
-
-        // Due Date Logic
-        if (entry.dueDate != null && !entry.isSettled) {
-            val sdfDue = SimpleDateFormat("MMM dd", Locale.getDefault())
-            holder.tvDueDate.text = if (isOverdue) "OVERDUE: ${sdfDue.format(Date(entry.dueDate!!))}" else "DUE: ${sdfDue.format(Date(entry.dueDate!!))}"
-            holder.tvDueDate.visibility = View.VISIBLE
-            holder.tvDueDate.setTextColor(if (isOverdue) Color.RED else Color.parseColor("#FFB800"))
-        } else {
-            holder.tvDueDate.visibility = View.GONE
-        }
-
-        holder.tvType.setTextColor(typeColor)
-        holder.tvAmount.setTextColor(typeColor)
-
-        // Feature: Quick Add Payment on Price click
-        holder.tvAmount.setOnClickListener {
-            onAddPayment(entry)
-        }
-
-        // Feature: Open Person Detail on Name click
-        holder.tvName.setOnClickListener {
-            val intent = Intent(holder.itemView.context, PersonLedgerActivity::class.java).apply {
-                putExtra("personName", entry.personName)
-            }
-            holder.itemView.context.startActivity(intent)
-        }
-
-        holder.btnSettle.setOnClickListener {
-            onConfirmSettlement(entry)
-        }
-
-        holder.itemView.setOnClickListener {
-            entry.isExpanded = !entry.isExpanded
-            notifyItemChanged(position)
-        }
-
-        holder.itemView.setOnLongClickListener {
-            onShowMenu(it, entry, false) {}
-            true
-        }
-    }
-
-    override fun getItemCount(): Int = entries.size
-
-    class LedgerViewHolder(view: View) : RecyclerView.ViewHolder(view) {
-        val cardView: com.google.android.material.card.MaterialCardView = view as com.google.android.material.card.MaterialCardView
-        val tvName: TextView = view.findViewById(R.id.tv_person_name)
-        val tvType: TextView = view.findViewById(R.id.tv_ledger_type)
-        val tvAmount: TextView = view.findViewById(R.id.tv_ledger_amount)
-        val tvNote: TextView = view.findViewById(R.id.tv_ledger_note)
-        val tvDueDate: TextView = view.findViewById(R.id.tv_due_date_label)
-        val tvDate: TextView = view.findViewById(R.id.tv_ledger_date)
-        val btnSettle: ImageView = view.findViewById(R.id.btn_settle_ledger)
-        val progressBar: ProgressBar = view.findViewById(R.id.pb_debt_progress_circular)
-        val historyContainer: LinearLayout = view.findViewById(R.id.container_payment_history)
+    override fun onResume() {
+        super.onResume()
+        updateAllUI()
+        themeManager.applyTheme()
     }
 }

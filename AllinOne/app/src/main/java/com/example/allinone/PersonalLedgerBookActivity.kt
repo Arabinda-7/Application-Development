@@ -285,7 +285,7 @@ class PersonalLedgerBookActivity : BaseActivity() {
             .sortedByDescending { if (showHistory) it.settlementTimestamp ?: 0 else it.timestamp }
 
         override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder {
-            val view = LayoutInflater.from(parent.context).inflate(R.layout.ledger_list_item, parent, false)
+            val view = LayoutInflater.from(parent.context).inflate(R.layout.item_ledger_book, parent, false)
             return ViewHolder(view)
         }
 

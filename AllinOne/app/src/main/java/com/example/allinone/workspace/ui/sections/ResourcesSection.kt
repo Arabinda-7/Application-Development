@@ -50,15 +50,21 @@ fun ResourceViewSection(
                         ),
                     colors = CardDefaults.cardColors(containerColor = style.surfaceColor)
                 ) {
-                    Row(modifier = Modifier.padding(16.dp), verticalAlignment = Alignment.CenterVertically) {
-                        Surface(color = Color.White.copy(alpha = 0.1f), shape = RoundedCornerShape(8.dp), modifier = Modifier.size(32.dp)) {
-                            Box(contentAlignment = Alignment.Center) { Text("${index + 1}", color = Color.White, fontSize = 12.sp, fontWeight = FontWeight.Bold) }
+                    Box(modifier = Modifier.fillMaxWidth()) {
+                        Row(modifier = Modifier.padding(16.dp), verticalAlignment = Alignment.CenterVertically) {
+                            Surface(color = Color.White.copy(alpha = 0.1f), shape = RoundedCornerShape(8.dp), modifier = Modifier.size(32.dp)) {
+                                Box(contentAlignment = Alignment.Center) { Text("${index + 1}", color = Color.White, fontSize = 12.sp, fontWeight = FontWeight.Bold) }
+                            }
+                            Spacer(modifier = Modifier.width(16.dp))
+                            Column(modifier = Modifier.weight(1f)) {
+                                Text(text = res.title, color = Color.White, fontWeight = FontWeight.Bold, fontSize = 16.sp)
+                                Text(text = res.type, color = Color.White.copy(alpha = 0.4f), fontSize = 10.sp)
+                            }
                         }
-                        Spacer(modifier = Modifier.width(16.dp))
-                        Column(modifier = Modifier.weight(1f)) {
-                            Text(text = res.title, color = Color.White, fontWeight = FontWeight.Bold, fontSize = 20.sp)
-                            Text(text = res.type, color = Color.White.copy(alpha = 0.4f), fontSize = 10.sp)
-                        }
+                        CreatedAtText(
+                            timestamp = res.createdAt,
+                            modifier = Modifier.align(Alignment.BottomEnd).padding(8.dp)
+                        )
                     }
                 }
                 WorkspaceDropdown(expanded = showMenu, onDismissRequest = { showMenu = false }) {
@@ -106,7 +112,7 @@ fun ResourceDetailSection(
                 horizontalArrangement = Arrangement.SpaceBetween
             ) {
                 IconButton(onClick = onBack) { Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Back", tint = Color.White) }
-                IconButton(onClick = onEdit) { Icon(Icons.Default.Edit, contentDescription = "Edit", tint = accentColor) }
+                IconButton(onClick = onEdit) { Icon(Icons.Default.Edit, contentDescription = "Edit", tint = accentColor, modifier = Modifier.size(28.dp)) }
             }
 
             Column(modifier = Modifier.padding(horizontal = 24.dp).padding(bottom = 12.dp)) {

@@ -1,33 +1,34 @@
-# Implementation Plan - Fix Unresolved Reference 'MuscleRadarChart'
+# Implementation Plan - Fix Habit Completion Crash
 
-The user is encountering a build error because `MuscleRadarChart` and `RecoveryStatusDashboard` are missing from the project, even though they are being called in `PerformanceDashboardScreen.kt`. I will implement these components in `AnalyticsComponents.kt`.
+The goal is to fix the crash occurring when users complete habits, which is likely caused by uninitialized map fields in habits loaded from older data.
 
 ## User Review Required
 
 > [!IMPORTANT]
-> The missing components will be implemented using standard Jetpack Compose Canvas and Layout APIs to match the existing design language of the "All in One" app.
+> This fix will ensure that all existing habits have their `dailyProgress` and `completedDates` fields properly initialized after loading from storage. This prevents NullPointerExceptions when interacting with habits created before these fields were added.
 
 ## Proposed Changes
 
-### [Component Name]
+### [Component] Data Management
 
-#### [MODIFY] [AnalyticsComponents.kt](file:///C:/Users/arabi/OneDrive/Desktop/App/Development/AllinOne/app/src/main/java/com/example/allinone/AnalyticsComponents.kt)
+#### [MODIFY] [DataManager.kt](file:///C:/Users/arabi/OneDrive/Desktop/App Development/AllinOne/app/src/main/java/com/example/allinone/DataManager.kt)
+- Update `loadData` to iterate through all habits after deserialization.
+- Initialize `dailyProgress` and `completedDates` if they are null (due to Gson deserialization of older objects).
 
-- Implement `MuscleRadarChart(muscleDistribution: Map<String, Int>, themeColor: Color)`:
-    - Uses `Canvas` to draw a radar (spider) chart.
-    - Labels each axis with the muscle group name.
-    - Draws a polygon representing the distribution of volume/intensity.
-- Implement `RecoveryStatusDashboard(recoveryStatus: Map<String, Float>, themeColor: Color)`:
-    - Displays a list or grid of muscle groups with their recovery percentage.
-    - Uses progress indicators to show how close a muscle is to full recovery (48-hour model).
-- Add necessary imports for `Canvas`, `Path`, `Math` etc.
+---
+
+### [Component] Habit Adapter
+
+#### [MODIFY] [HabitAdapter.kt](file:///C:/Users/arabi/OneDrive/Desktop/App Development/AllinOne/app/src/main/java/com/example/allinone/HabitAdapter.kt)
+- Ensure `applyFilterAndSort()` is called when a multi-target habit (target > 1) is completed via incrementing. This ensures the habit moves to the "Completed" section immediately.
+- Add null-safe access to `dailyProgress` just as an extra layer of protection.
 
 ## Verification Plan
 
 ### Automated Tests
-- Run `./gradlew :app:compileDebugKotlin` to ensure the project builds successfully.
+- I will verify the logic by manual inspection and ensure the code builds successfully.
 
 ### Manual Verification
-- Deploy the app to a device/emulator.
-- Navigate to the Performance Dashboard.
-- Switch to Workout Context (if possible) and verify the charts are rendered correctly.
+1. Open the app with existing habit data.
+2. Complete a single-target habit (checkbox) and verify no crash occurs.
+3. Complete a multi-target habit (increment buttons) and verify it moves to the completed section without crashing.

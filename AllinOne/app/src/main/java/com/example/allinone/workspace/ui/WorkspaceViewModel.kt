@@ -7,29 +7,6 @@ import com.example.allinone.workspace.domain.WorkspaceRepository
 import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
 
-data class WorkspaceUIState(
-    val projects: List<ProjectEntity> = emptyList(),
-    val selectedProject: ProjectEntity? = null,
-    val goals: List<GoalEntity> = emptyList(),
-    val tasks: List<TaskEntity> = emptyList(),
-    val features: List<FeatureEntity> = emptyList(),
-    val bugs: List<BugEntity> = emptyList(),
-    val ideas: List<IdeaEntity> = emptyList(),
-    val notes: List<NoteEntity> = emptyList(),
-    val resources: List<ResourceEntity> = emptyList(),
-    val logs: List<ActivityLogEntity> = emptyList(),
-    val isLoading: Boolean = true
-)
-
-data class ProjectStats(
-    val totalTasks: Int = 0,
-    val taskBreakdown: Map<String, Int> = emptyMap(),
-    val totalFeatures: Int = 0,
-    val featureBreakdown: Map<String, Int> = emptyMap(),
-    val totalBugs: Int = 0,
-    val bugBreakdown: Map<String, Int> = emptyMap()
-)
-
 class WorkspaceViewModel(private val repository: WorkspaceRepository) : ViewModel() {
 
     private val _uiState = MutableStateFlow(WorkspaceUIState())
@@ -90,7 +67,7 @@ class WorkspaceViewModel(private val repository: WorkspaceRepository) : ViewMode
                     )
                 } catch (e: Exception) {
                     android.util.Log.e("WorkspaceViewModel", "Mapping error in combine", e)
-                    _uiState.value // Keep old state
+                    _uiState.value 
                 }
             }.catch { e ->
                 android.util.Log.e("WorkspaceViewModel", "Flow error in combine", e)
@@ -342,9 +319,7 @@ class WorkspaceViewModel(private val repository: WorkspaceRepository) : ViewMode
 
     fun convertIdeaToTask(idea: IdeaEntity) {
         viewModelScope.launch {
-            // Mark idea as converted
             repository.insertIdea(idea.copy(status = "Converted"))
-            // Create task
             repository.insertTask(TaskEntity(
                 projectId = idea.projectId,
                 title = idea.title,

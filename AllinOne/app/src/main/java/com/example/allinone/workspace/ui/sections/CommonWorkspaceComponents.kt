@@ -23,6 +23,22 @@ import com.example.allinone.workspace.data.BugEntity
 import com.example.allinone.workspace.data.FeatureEntity
 import com.example.allinone.workspace.data.ProjectEntity
 import com.example.allinone.workspace.data.TaskEntity
+import java.text.SimpleDateFormat
+import java.util.*
+
+@Composable
+fun CreatedAtText(timestamp: Long, modifier: Modifier = Modifier) {
+    val timeStr = remember(timestamp) {
+        SimpleDateFormat("MMM dd, HH:mm", Locale.getDefault()).format(Date(timestamp))
+    }
+    Text(
+        text = timeStr,
+        color = Color.White.copy(alpha = 0.25f),
+        fontSize = 9.sp,
+        fontWeight = FontWeight.Medium,
+        modifier = modifier
+    )
+}
 
 @Composable
 fun ProjectOverviewItem(
@@ -44,9 +60,15 @@ fun ProjectOverviewItem(
         colors = CardDefaults.cardColors(containerColor = if (isSelected) style.surfaceColor else style.surfaceColor.copy(alpha = 0.5f)), 
         border = if (isSelected) BorderStroke(1.dp, projectColor.copy(alpha = 0.4f)) else null
     ) {
-        Row(modifier = Modifier.padding(16.dp), verticalAlignment = Alignment.CenterVertically) {
-            Column(modifier = Modifier.weight(1f)) { Text(project.name, color = Color.White, fontWeight = FontWeight.Bold, fontSize = 20.sp); Text(project.status.uppercase(), color = Color.White.copy(alpha = 0.4f), fontSize = 10.sp, fontWeight = FontWeight.Black, letterSpacing = 0.5.sp) }
-            Column(horizontalAlignment = Alignment.End) { Text("${project.progress}%", color = Color.White, fontWeight = FontWeight.Black, fontSize = 14.sp); LinearProgressIndicator(progress = { project.progress / 100f }, modifier = Modifier.width(60.dp).height(4.dp), color = projectColor, trackColor = Color.White.copy(alpha = 0.05f), strokeCap = StrokeCap.Round) }
+        Box(modifier = Modifier.fillMaxWidth()) {
+            Row(modifier = Modifier.padding(16.dp).padding(bottom = 8.dp), verticalAlignment = Alignment.CenterVertically) {
+                Column(modifier = Modifier.weight(1f)) { Text(project.name, color = Color.White, fontWeight = FontWeight.Bold, fontSize = 16.sp, maxLines = 2, overflow = TextOverflow.Ellipsis); Text(project.status.uppercase(), color = Color.White.copy(alpha = 0.4f), fontSize = 10.sp, fontWeight = FontWeight.Black, letterSpacing = 0.5.sp) }
+                Column(horizontalAlignment = Alignment.End) { Text("${project.progress}%", color = Color.White, fontWeight = FontWeight.Black, fontSize = 14.sp); LinearProgressIndicator(progress = { project.progress / 100f }, modifier = Modifier.width(60.dp).height(4.dp), color = projectColor, trackColor = Color.White.copy(alpha = 0.05f), strokeCap = StrokeCap.Round) }
+            }
+            CreatedAtText(
+                timestamp = project.createdAt,
+                modifier = Modifier.align(Alignment.BottomEnd).padding(8.dp)
+            )
         }
     }
 }
@@ -255,23 +277,29 @@ fun FeatureItemCard(
                     onLongClick = { showMenu = true }
                 )
         ) {
-            Column(modifier = Modifier.padding(12.dp)) {
-                Row(verticalAlignment = Alignment.Top) {
-                    Column(modifier = Modifier.weight(1f)) {
-                        Text(feature.title, fontWeight = FontWeight.Bold, color = Color.White, fontSize = 18.sp)
-                        if (feature.targetVersion.isNotBlank()) { Text(feature.targetVersion, color = style.accentColor, fontSize = 10.sp, fontWeight = FontWeight.Bold) }
+            Box(modifier = Modifier.fillMaxWidth()) {
+                Column(modifier = Modifier.padding(12.dp)) {
+                    Row(verticalAlignment = Alignment.Top) {
+                        Column(modifier = Modifier.weight(1f)) {
+                            Text(feature.title, fontWeight = FontWeight.Bold, color = Color.White, fontSize = 16.sp)
+                            if (feature.targetVersion.isNotBlank()) { Text(feature.targetVersion, color = style.accentColor, fontSize = 10.sp, fontWeight = FontWeight.Bold) }
+                        }
+                        Surface(color = Color.White.copy(alpha = 0.1f), shape = RoundedCornerShape(4.dp)) { Text(feature.effortSize, modifier = Modifier.padding(horizontal = 4.dp, vertical = 2.dp), color = Color.White, fontSize = 9.sp, fontWeight = FontWeight.Black) }
                     }
-                    Surface(color = Color.White.copy(alpha = 0.1f), shape = RoundedCornerShape(4.dp)) { Text(feature.effortSize, modifier = Modifier.padding(horizontal = 4.dp, vertical = 2.dp), color = Color.White, fontSize = 9.sp, fontWeight = FontWeight.Black) }
+                    if (feature.description.isNotBlank()) { Spacer(modifier = Modifier.height(4.dp)); Text(feature.description, fontSize = 12.sp, color = Color.White.copy(alpha = 0.6f), maxLines = 2, overflow = TextOverflow.Ellipsis) }
+                    Spacer(modifier = Modifier.height(12.dp))
+                    Row(verticalAlignment = Alignment.CenterVertically) { LinearProgressIndicator(progress = { progress }, modifier = Modifier.weight(1f).height(4.dp).clip(CircleShape), color = if (progress == 1f) Color(0xFF2EC4B6) else style.accentColor, trackColor = Color.White.copy(alpha = 0.05f)); Spacer(modifier = Modifier.width(8.dp)); Text("${(progress * 100).toInt()}%", color = Color.White.copy(alpha = 0.5f), fontSize = 10.sp, fontWeight = FontWeight.Bold) }
+                    Spacer(modifier = Modifier.height(12.dp))
+                    Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                        if (linkedTasks.isEmpty() && feature.status != "Shipped") { TextButton(onClick = { onQuickTasks(feature) }, modifier = Modifier.height(32.dp), contentPadding = PaddingValues(horizontal = 8.dp)) { Icon(Icons.Default.AutoFixHigh, contentDescription = null, modifier = Modifier.size(14.dp)); Spacer(modifier = Modifier.width(4.dp)); Text("QUICK TASKS", fontSize = 10.sp, fontWeight = FontWeight.Bold) } }
+                        Spacer(modifier = Modifier.weight(1f))
+                        if (feature.status != "Shipped") { IconButton(onClick = { val nextStatus = when(feature.status) { "Backlog" -> "Planning"; "Planning" -> "Development"; "Development" -> "Testing"; "Testing" -> "Shipped"; else -> "Shipped" }; onUpdate(feature.copy(status = nextStatus)) }, modifier = Modifier.size(32.dp).background(style.accentColor.copy(alpha = 0.1f), CircleShape)) { Icon(if (feature.status == "Testing") Icons.Default.RocketLaunch else Icons.Default.ChevronRight, contentDescription = "Next", tint = style.accentColor, modifier = Modifier.size(16.dp)) } }
+                    }
                 }
-                if (feature.description.isNotBlank()) { Spacer(modifier = Modifier.height(4.dp)); Text(feature.description, fontSize = 12.sp, color = Color.White.copy(alpha = 0.6f), maxLines = 2, overflow = TextOverflow.Ellipsis) }
-                Spacer(modifier = Modifier.height(12.dp))
-                Row(verticalAlignment = Alignment.CenterVertically) { LinearProgressIndicator(progress = { progress }, modifier = Modifier.weight(1f).height(4.dp).clip(CircleShape), color = if (progress == 1f) Color(0xFF2EC4B6) else style.accentColor, trackColor = Color.White.copy(alpha = 0.05f)); Spacer(modifier = Modifier.width(8.dp)); Text("${(progress * 100).toInt()}%", color = Color.White.copy(alpha = 0.5f), fontSize = 10.sp, fontWeight = FontWeight.Bold) }
-                Spacer(modifier = Modifier.height(12.dp))
-                Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                    if (linkedTasks.isEmpty() && feature.status != "Shipped") { TextButton(onClick = { onQuickTasks(feature) }, modifier = Modifier.height(32.dp), contentPadding = PaddingValues(horizontal = 8.dp)) { Icon(Icons.Default.AutoFixHigh, contentDescription = null, modifier = Modifier.size(14.dp)); Spacer(modifier = Modifier.width(4.dp)); Text("QUICK TASKS", fontSize = 10.sp, fontWeight = FontWeight.Bold) } }
-                    Spacer(modifier = Modifier.weight(1f))
-                    if (feature.status != "Shipped") { IconButton(onClick = { val nextStatus = when(feature.status) { "Backlog" -> "Planning"; "Planning" -> "Development"; "Development" -> "Testing"; "Testing" -> "Shipped"; else -> "Shipped" }; onUpdate(feature.copy(status = nextStatus)) }, modifier = Modifier.size(32.dp).background(style.accentColor.copy(alpha = 0.1f), CircleShape)) { Icon(if (feature.status == "Testing") Icons.Default.RocketLaunch else Icons.Default.ChevronRight, contentDescription = "Next", tint = style.accentColor, modifier = Modifier.size(16.dp)) } }
-                }
+                CreatedAtText(
+                    timestamp = feature.createdAt,
+                    modifier = Modifier.align(Alignment.BottomEnd).padding(8.dp)
+                )
             }
         }
         WorkspaceDropdown(expanded = showMenu, onDismissRequest = { showMenu = false }) {
@@ -307,18 +335,24 @@ fun BugItemCard(
                     onLongClick = { showMenu = true }
                 )
         ) {
-            Column(modifier = Modifier.padding(12.dp)) {
-                Row(verticalAlignment = Alignment.Top) {
-                    Column(modifier = Modifier.weight(1f)) {
-                        Text(bug.title, fontWeight = FontWeight.Bold, color = Color.White, fontSize = 18.sp)
-                        Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.padding(top = 2.dp)) { Surface(color = severityColor.copy(alpha = 0.1f), shape = RoundedCornerShape(4.dp)) { Text(bug.severity.uppercase(), modifier = Modifier.padding(horizontal = 4.dp, vertical = 2.dp), color = severityColor, fontSize = 8.sp, fontWeight = FontWeight.Black) }; Spacer(modifier = Modifier.width(8.dp)); Text(bug.environment, color = Color.White.copy(alpha = 0.4f), fontSize = 10.sp) }
+            Box(modifier = Modifier.fillMaxWidth()) {
+                Column(modifier = Modifier.padding(12.dp)) {
+                    Row(verticalAlignment = Alignment.Top) {
+                        Column(modifier = Modifier.weight(1f)) {
+                            Text(bug.title, fontWeight = FontWeight.Bold, color = Color.White, fontSize = 16.sp)
+                            Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.padding(top = 2.dp)) { Surface(color = severityColor.copy(alpha = 0.1f), shape = RoundedCornerShape(4.dp)) { Text(bug.severity.uppercase(), modifier = Modifier.padding(horizontal = 4.dp, vertical = 2.dp), color = severityColor, fontSize = 8.sp, fontWeight = FontWeight.Black) }; Spacer(modifier = Modifier.width(8.dp)); Text(bug.environment, color = Color.White.copy(alpha = 0.4f), fontSize = 10.sp) }
+                        }
+                        val priorityIcon = when(bug.priority) { 2 -> Icons.Default.KeyboardDoubleArrowUp; 1 -> Icons.Default.KeyboardArrowUp; else -> Icons.Default.KeyboardArrowDown }; Icon(imageVector = priorityIcon, contentDescription = null, tint = severityColor, modifier = Modifier.size(18.dp))
                     }
-                    val priorityIcon = when(bug.priority) { 2 -> Icons.Default.KeyboardDoubleArrowUp; 1 -> Icons.Default.KeyboardArrowUp; else -> Icons.Default.KeyboardArrowDown }; Icon(imageVector = priorityIcon, contentDescription = null, tint = severityColor, modifier = Modifier.size(18.dp))
+                    if (bug.description.isNotBlank()) { Spacer(modifier = Modifier.height(8.dp)); Text(bug.description, fontSize = 12.sp, color = Color.White.copy(alpha = 0.6f), maxLines = 3, overflow = TextOverflow.Ellipsis) }
+                    if (bug.version.isNotBlank()) { Spacer(modifier = Modifier.height(8.dp)); Text("v${bug.version}", color = style.accentColor, fontSize = 10.sp, fontWeight = FontWeight.Bold) }
+                    Spacer(modifier = Modifier.height(16.dp))
+                    Row(horizontalArrangement = Arrangement.End, modifier = Modifier.fillMaxWidth()) { if (bug.status != "Verified") { IconButton(onClick = { val nextStatus = when(bug.status) { "Open" -> "Confirmed"; "Confirmed" -> "Fixing"; "Fixing" -> "Fixed"; "Fixed" -> "Verified"; else -> "Verified" }; onUpdate(bug.copy(status = nextStatus)) }, modifier = Modifier.size(32.dp).background(style.accentColor.copy(alpha = 0.1f), CircleShape)) { Icon(if (bug.status == "Fixed") Icons.Default.Verified else Icons.Default.ChevronRight, contentDescription = "Next", tint = style.accentColor, modifier = Modifier.size(16.dp)) } } else { Icon(Icons.Default.CheckCircle, null, tint = Color(0xFF2EC4B6), modifier = Modifier.size(24.dp)) } }
                 }
-                if (bug.description.isNotBlank()) { Spacer(modifier = Modifier.height(8.dp)); Text(bug.description, fontSize = 12.sp, color = Color.White.copy(alpha = 0.6f), maxLines = 3, overflow = TextOverflow.Ellipsis) }
-                if (bug.version.isNotBlank()) { Spacer(modifier = Modifier.height(8.dp)); Text("v${bug.version}", color = style.accentColor, fontSize = 10.sp, fontWeight = FontWeight.Bold) }
-                Spacer(modifier = Modifier.height(16.dp))
-                Row(horizontalArrangement = Arrangement.End, modifier = Modifier.fillMaxWidth()) { if (bug.status != "Verified") { IconButton(onClick = { val nextStatus = when(bug.status) { "Open" -> "Confirmed"; "Confirmed" -> "Fixing"; "Fixing" -> "Fixed"; "Fixed" -> "Verified"; else -> "Verified" }; onUpdate(bug.copy(status = nextStatus)) }, modifier = Modifier.size(32.dp).background(style.accentColor.copy(alpha = 0.1f), CircleShape)) { Icon(if (bug.status == "Fixed") Icons.Default.Verified else Icons.Default.ChevronRight, contentDescription = "Next", tint = style.accentColor, modifier = Modifier.size(16.dp)) } } else { Icon(Icons.Default.CheckCircle, null, tint = Color(0xFF2EC4B6), modifier = Modifier.size(24.dp)) } }
+                CreatedAtText(
+                    timestamp = bug.createdAt,
+                    modifier = Modifier.align(Alignment.BottomStart).padding(8.dp)
+                )
             }
         }
         WorkspaceDropdown(expanded = showMenu, onDismissRequest = { showMenu = false }) {

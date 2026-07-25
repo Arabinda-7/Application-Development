@@ -1,32 +1,51 @@
-# Implementation Plan - Unify Project and Idea Title Sizes
+# Implementation Plan - Advanced Workout Analytics (Senior DS Perspective)
 
-The user wants to adjust the font size of project and idea titles to match the "title of different section". Based on the project structure, main activity titles (like "PROJECTS", "TASKS", "HABITS") are consistently set to **20sp**. Currently, project and idea titles in list items are set to **16sp** (XML) or **15sp** (Compose).
-
-This plan will update these titles to **20sp** for consistency across the app.
+This plan implements the "Senior Data Science" visualizations for the Workout History, focusing on physiological modeling (ACWR), progression velocity, and training stability.
 
 ## User Review Required
 
 > [!IMPORTANT]
-> I have assumed that "title of different section" refers to the main activity headers (e.g., "PROJECTS", "TASKS") which are **20sp**. If you meant a different section (like the 10sp headers on the Home Screen or the 28sp titles in edit screens), please let me know.
+> The **Acute:Chronic Workload Ratio (ACWR)** model is a high-level sports science metric. I will use "Estimated Volume" (Sets × Reps) as the primary workload unit.
+>
+> [!NOTE]
+> For **Training Entropy**, we will calculate the variance in "Workout Start Times" over the last 30 days. This requires checking when `completedDates` were added (using `timestamp` if available, otherwise assuming standard times).
 
 ## Proposed Changes
 
-### [UI Components: Project & Idea Titles]
+### 1. Data Analytics Layer ([DataManager.kt](file:///C:/Users/arabi/OneDrive/Desktop/App%20Development/AllinOne/app/src/main/java/com/example/allinone/DataManager.kt))
 
-#### [MODIFY] [project_note_item.xml](file:///C:/Users/arabi/OneDrive/Desktop/App Development/AllinOne/app/src/main/res/layout/project_note_item.xml)
-- Update `tv_note_title` `android:textSize` from `16sp` to `20sp`.
+#### [MODIFY] `DataManager.kt`
+- Implement `getVolumeWeightedHeatmap(calendar)`: Calculates workload intensity per day.
+- Implement `getMuscleDistributionData()`: Real implementation aggregating volume per muscle group (30d).
+- Implement `getMuscleRecoveryStatus()`: Real implementation using a 48h linear decay model per muscle group.
+- [NEW] `getACWRData()`: Returns acute (7d) and chronic (28d) workload averages for the ACWR chart.
+- [NEW] `getTrainingStabilityScore()`: Calculates entropy of workout timestamps.
+- [NEW] `getExerciseProgressionVelocity()`: Calculates the Z-Score of volume for a specific exercise over time.
 
-#### [MODIFY] [note_list_item.xml](file:///C:/Users/arabi/OneDrive/Desktop/App Development/AllinOne/app/src/main/res/layout/note_list_item.xml)
-- Update `note_title` `android:textSize` from `16sp` to `20sp`.
+### 2. UI Components ([AnalyticsComponents.kt](file:///C:/Users/arabi/OneDrive/Desktop/App%20Development/AllinOne/app/src/main/java/com/example/allinone/AnalyticsComponents.kt))
 
-#### [MODIFY] [ProjectWorkspaceScreen.kt](file:///C:/Users/arabi/OneDrive/Desktop/App Development/AllinOne/app/src/main/java/com/example/allinone/workspace/ui/ProjectWorkspaceScreen.kt)
-- Update `ProjectOverviewItem` project name `fontSize` from `15.sp` to `20.sp`.
-- Update `IdeaBacklog` idea title `fontSize` to `20.sp` (it currently uses default).
-- Update `GoalsTree` goal title `fontSize` from `15.sp` to `20.sp` (for consistency with projects/ideas).
+#### [MODIFY] `AnalyticsComponents.kt`
+- [NEW] `ACWRChart`: A dual-axis area chart showing Fitness (Chronic) vs Fatigue (Acute) and the "Sweet Spot" corridor.
+- [NEW] `StabilityChaosGauge`: A circular gauge visualizing "Training Entropy" (Consistency).
+- [NEW] `ProgressionVelocityChart`: A line chart showing the relative growth (Z-Score) of total workload.
+
+### 3. Screen Integration ([PerformanceDashboardScreen.kt](file:///C:/Users/arabi/OneDrive/Desktop/App%20Development/AllinOne/app/src/main/java/com/example/allinone/ui/performance/PerformanceDashboardScreen.kt))
+
+#### [MODIFY] `PerformanceDashboardScreen.kt`
+- Integrate the new `ACWRChart` and `StabilityChaosGauge` into the `isWorkoutContext` flow.
+- Re-organize the analytics section to prioritize high-impact data science cards.
+
+---
 
 ## Verification Plan
 
+### Automated Tests
+- **Workload Logic**: Verify `getDailyVolume` correctly handles different tracking modes (Sets vs Reps).
+- **Decay Model**: Test that a muscle group trained 24 hours ago shows exactly 50% recovery in the model.
+- **ACWR Math**: Verify that if volume is perfectly consistent, ACWR returns 1.0.
+
 ### Manual Verification
-1. Open the **Projects** activity and verify the titles in the list items match the "PROJECTS" header at the top.
-2. Open the **Ideas** tab and verify the titles match.
-3. Open the **Project Workspace** and verify the project overview and idea backlog titles are larger (20sp).
+- Deploy to device and navigate to Workout History.
+- Verify the **Volume Heatmap** shows varying intensities (opacities) based on workout "heaviness".
+- Check that the **Muscle Radar Chart** accurately reflects the breakdown of muscle groups from the last 30 days of data.
+- Observe the **ACWR Chart** "Sweet Spot" corridor (0.8 - 1.3) updates correctly as new mock data is added.

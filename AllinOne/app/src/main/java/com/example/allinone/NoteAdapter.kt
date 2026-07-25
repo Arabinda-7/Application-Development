@@ -23,8 +23,20 @@ class NoteAdapter(
     private var isDeleteMode = false
     private val selectedNotes = mutableSetOf<Note>()
 
+    override fun getItemViewType(position: Int): Int {
+        val note = notes[position]
+        return when (note.category) {
+            "Notes" -> R.layout.item_note_notes
+            "Questions" -> R.layout.item_note_questions
+            "Daily" -> R.layout.item_note_daily
+            "Stories" -> R.layout.item_note_stories
+            "ProjectIdea" -> R.layout.item_note_project_idea
+            else -> R.layout.item_note_notes
+        }
+    }
+
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): NoteViewHolder {
-        val view = LayoutInflater.from(parent.context).inflate(R.layout.note_list_item, parent, false)
+        val view = LayoutInflater.from(parent.context).inflate(viewType, parent, false)
         return NoteViewHolder(view)
     }
 
@@ -147,10 +159,9 @@ class NoteAdapter(
         }
 
         menuView.findViewById<View>(R.id.menu_delete).setOnClickListener {
-            notes.remove(note)
-            notifyDataSetChanged()
-            onProgressChanged()
-            DataManager.saveData(context)
+            DataManager.notes.remove(note)
+            DataManager.projects.remove(note)
+            onProgressChanged() // This updates the external display list and saves
             popupWindow.dismiss()
         }
 

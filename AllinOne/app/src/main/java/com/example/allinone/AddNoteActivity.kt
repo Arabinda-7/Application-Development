@@ -29,6 +29,7 @@ class AddNoteActivity : BaseActivity() {
     private lateinit var contentInput: EditText
     private lateinit var colorPreview: View
     private lateinit var btnSave: TextView
+    private lateinit var btnDelete: View
     private lateinit var tvMetadata: TextView
     private var selectedColor: Int = -1
 
@@ -53,6 +54,7 @@ class AddNoteActivity : BaseActivity() {
         contentInput = findViewById(R.id.note_content_input)
         colorPreview = findViewById(R.id.note_color_preview)
         btnSave = findViewById(R.id.btn_save_note)
+        btnDelete = findViewById(R.id.btn_delete_note)
         tvMetadata = findViewById(R.id.tv_note_metadata)
         
         findViewById<View>(R.id.btn_close_note).setOnClickListener { finish() }
@@ -69,6 +71,8 @@ class AddNoteActivity : BaseActivity() {
             titleInput.setText(existingNote?.title)
             contentInput.setText(existingNote?.content)
             btnSave.text = "SAVE"
+            btnDelete.visibility = View.VISIBLE
+            btnDelete.setOnClickListener { showDeleteConfirmation() }
         } else {
             val template = DataManager.noteTemplates[currentCategory] ?: ""
             if (template.isNotEmpty()) {
@@ -105,6 +109,23 @@ class AddNoteActivity : BaseActivity() {
         findViewById<View>(R.id.btn_reminder).setOnClickListener { showReminderPicker(titleInput.text.toString()) }
 
         btnSave.setOnClickListener { saveNote() }
+    }
+
+    private fun showDeleteConfirmation() {
+        android.app.AlertDialog.Builder(this)
+            .setTitle("Delete Note")
+            .setMessage("Are you sure you want to delete this note?")
+            .setPositiveButton("DELETE") { _, _ ->
+                existingNote?.let { 
+                    DataManager.notes.remove(it)
+                    DataManager.saveData(this)
+                    Toast.makeText(this, "Note deleted", Toast.LENGTH_SHORT).show()
+                    setResult(RESULT_OK)
+                    finish()
+                }
+            }
+            .setNegativeButton("CANCEL", null)
+            .show()
     }
 
     private fun startVoiceInput() {

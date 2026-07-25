@@ -2,9 +2,8 @@ package com.example.allinone.workspace.ui.sections
 
 import androidx.compose.foundation.*
 import androidx.compose.foundation.layout.*
-import androidx.compose.foundation.lazy.grid.GridCells
-import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
-import androidx.compose.foundation.lazy.grid.items
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.material.icons.Icons
@@ -34,24 +33,32 @@ fun NoteViewSection(
     onDeleteNote: (NoteEntity) -> Unit
 ) {
     val style = LocalAppStyle.current
-    LazyVerticalGrid(columns = GridCells.Fixed(2), contentPadding = PaddingValues(8.dp)) {
+    LazyColumn(contentPadding = PaddingValues(bottom = 24.dp)) {
         items(notes, key = { it.id }) { note ->
             var showMenu by remember { mutableStateOf(false) }
-            Box {
+            Box(modifier = Modifier.animateItem()) {
                 Card(
                     modifier = Modifier
-                        .padding(8.dp)
-                        .animateItem()
+                        .fillMaxWidth()
+                        .padding(vertical = 6.dp)
                         .combinedClickable(
                             onClick = { onViewNote(note) },
                             onLongClick = { showMenu = true }
                         ),
                     colors = CardDefaults.cardColors(containerColor = style.surfaceColor)
                 ) {
-                    Column(modifier = Modifier.padding(16.dp)) {
-                        Text(note.title, fontWeight = FontWeight.Bold, color = Color.White, fontSize = 20.sp)
-                        Spacer(modifier = Modifier.height(8.dp))
-                        Text(note.content, maxLines = 5, color = Color.White.copy(alpha = 0.6f), fontSize = 12.sp)
+                    Box(modifier = Modifier.fillMaxWidth()) {
+                        Column(modifier = Modifier.padding(16.dp)) {
+                            Text(note.title, fontWeight = FontWeight.Bold, color = Color.White, fontSize = 16.sp)
+                            if (note.content.isNotBlank()) {
+                                Spacer(modifier = Modifier.height(8.dp))
+                                Text(note.content, color = Color.White.copy(alpha = 0.6f), fontSize = 12.sp)
+                            }
+                        }
+                        CreatedAtText(
+                            timestamp = note.createdAt,
+                            modifier = Modifier.align(Alignment.BottomEnd).padding(8.dp)
+                        )
                     }
                 }
                 WorkspaceDropdown(expanded = showMenu, onDismissRequest = { showMenu = false }) {
@@ -82,7 +89,8 @@ fun NoteViewSection(
 fun NoteDetailSection(
     note: NoteEntity,
     onBack: () -> Unit,
-    onEdit: () -> Unit
+    onEdit: () -> Unit,
+    onDelete: () -> Unit
 ) {
     val style = LocalAppStyle.current
     val projectColorHex = com.example.allinone.DataManager.globalProjectColor
@@ -98,7 +106,10 @@ fun NoteDetailSection(
                 horizontalArrangement = Arrangement.SpaceBetween
             ) {
                 IconButton(onClick = onBack) { Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Back", tint = Color.White) }
-                IconButton(onClick = onEdit) { Icon(Icons.Default.Edit, contentDescription = "Edit", tint = accentColor) }
+                Row {
+                    IconButton(onClick = onDelete) { Icon(Icons.Default.Delete, contentDescription = "Delete", tint = Color.Red.copy(alpha = 0.7f)) }
+                    IconButton(onClick = onEdit) { Icon(Icons.Default.Edit, contentDescription = "Edit", tint = accentColor, modifier = Modifier.size(28.dp)) }
+                }
             }
 
             Column(modifier = Modifier.padding(horizontal = 24.dp).padding(bottom = 12.dp)) {
@@ -124,7 +135,8 @@ fun NoteAddEditSection(
     note: NoteEntity? = null,
     projectId: String,
     viewModel: WorkspaceViewModel,
-    onBack: () -> Unit
+    onBack: () -> Unit,
+    onDelete: (() -> Unit)? = null
 ) {
     val style = LocalAppStyle.current
     val projectColorHex = com.example.allinone.DataManager.globalProjectColor
@@ -142,7 +154,12 @@ fun NoteAddEditSection(
                 verticalAlignment = Alignment.CenterVertically,
                 horizontalArrangement = Arrangement.SpaceBetween
             ) {
-                IconButton(onClick = onBack) { Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Back", tint = Color.White) }
+                Row(verticalAlignment = Alignment.CenterVertically) {
+                    IconButton(onClick = onBack) { Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Back", tint = Color.White) }
+                    if (note != null && onDelete != null) {
+                        IconButton(onClick = onDelete) { Icon(Icons.Default.Delete, contentDescription = "Delete", tint = Color.Red.copy(alpha = 0.7f)) }
+                    }
+                }
                 TextButton(
                     onClick = {
                         val updated = note?.copy(title = title, content = content)

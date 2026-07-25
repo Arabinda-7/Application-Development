@@ -30,6 +30,7 @@ class AddHabitActivity : BaseActivity() {
     private lateinit var tvScheduleHint: TextView
 
     private lateinit var nameInput: EditText
+    private lateinit var targetInput: EditText
     private lateinit var btnSave: TextView
     private lateinit var iconPreview: ImageView
     private lateinit var colorPreview: View
@@ -62,6 +63,7 @@ class AddHabitActivity : BaseActivity() {
 
     private fun initViews() {
         nameInput = findViewById(R.id.habit_name_input)
+        targetInput = findViewById(R.id.habit_target_input)
 
         btnSave = findViewById(R.id.btn_save)
         iconPreview = findViewById(R.id.icon_preview)
@@ -69,7 +71,7 @@ class AddHabitActivity : BaseActivity() {
         headerAccent = findViewById(R.id.header_bg_accent)
         tvNameHint = findViewById(R.id.tv_name_hint)
         tvScheduleHint = findViewById(R.id.tv_schedule_hint)
-        
+
         findViewById<View>(R.id.btn_close).setOnClickListener { finish() }
     }
 
@@ -82,14 +84,14 @@ class AddHabitActivity : BaseActivity() {
         selectedMode = existingHabit?.trackingMode ?: "Reps"
 
         if (existingHabit != null) {
-            findViewById<TextView>(R.id.tv_header_title_habit).text = "EDIT RITUAL"
             nameInput.setText(existingHabit?.name)
+            targetInput.setText(existingHabit?.target.toString())
             btnSave.text = "UPDATE"
             if (selectedIcon != -1) iconPreview.setImageResource(selectedIcon)
         }
 
         updateThemeVisuals()
-        
+
         // Day Selector
         val dayViews = listOf(R.id.day_0_direct, R.id.day_1_direct, R.id.day_2_direct, R.id.day_3_direct, R.id.day_4_direct, R.id.day_5_direct, R.id.day_6_direct)
             .map { findViewById<TextView>(it) }
@@ -259,7 +261,7 @@ class AddHabitActivity : BaseActivity() {
 
     private fun saveHabit() {
         val name = nameInput.text.toString().trim()
-        val target = 1
+        val target = targetInput.text.toString().toIntOrNull() ?: 1
         
         if (existingHabit == null) {
             DataManager.habits.add(Habit(name, false, selectedFrequency, selectedMode, target, 0, false, selectedColor, selectedIcon, repeatType = "SPECIFIC_DAYS", repeatDays = tempRepeatDays.toList(), repeatCount = 1))

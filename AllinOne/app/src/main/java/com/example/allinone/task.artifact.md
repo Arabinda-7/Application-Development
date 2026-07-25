@@ -1,7 +1,16 @@
-# Task List - Immersive Background for History Screens
-
-- [ ] Update `PerformanceDashboardScreen.kt` to allow immersive status bar
-- [ ] Remove top padding from `PerformanceHistoryActivity.kt`
-- [ ] Adjust `HabitTrackerActivity.kt` and `WorkoutRoutineActivity.kt` for edge-to-edge
-- [ ] Update XML layouts for correct padding in "Today" views
-- [ ] Verify build and UI
+- [x] HabitTrackerActivity refactored
+- [x] MainActivity refactored
+- [x] TaskActivity refactored
+- [x] NotesActivity refactored
+- [x] FinanceActivity refactored
+- [x] ProjectActivity refactored
+- [x] WorkoutRoutineActivity refactored
+- [x] ProfileActivity refactored
+- [x] PerformanceHistoryActivity refactored
+- [x] PersonalLedgerHubActivity refactored
+- [x] LedgerActivity refactored
+- [x] FinanceMonthHistoryActivity refactored
+- [x] LedgerHistoryActivity refactored
+- [x] Workspace section (ProjectWorkspaceScreen) refactored
+- [x] SettingsActivity refactored
+- [x] OnboardingActivity refactored

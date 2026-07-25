@@ -37,6 +37,7 @@ class AddProjectActivity : BaseActivity() {
     private lateinit var seekProgress: SeekBar
     private lateinit var tvProgressValue: TextView
     private lateinit var btnPin: ImageView
+    private lateinit var btnDelete: View
     private lateinit var colorPreview: View
     private lateinit var btnSave: TextView
     private lateinit var tvDeadlineDisplay: TextView
@@ -81,11 +82,13 @@ class AddProjectActivity : BaseActivity() {
     private var selectedColor = -1
     private var selectedDeadline: Long? = null
     private val tempSubFeatures = mutableListOf<ProjectFeature>()
+    private var isViewOnly = false
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_add_project)
 
+        isViewOnly = intent.getBooleanExtra("IS_VIEW_ONLY", false)
         projectIndex = intent.getIntExtra("PROJECT_INDEX", -1)
         if (projectIndex != -1 && projectIndex < DataManager.projects.size) {
             existingNote = DataManager.projects[projectIndex]
@@ -112,6 +115,7 @@ class AddProjectActivity : BaseActivity() {
         seekProgress = findViewById(R.id.seek_progress)
         tvProgressValue = findViewById(R.id.tv_progress_value)
         btnPin = findViewById(R.id.btn_pin)
+        btnDelete = findViewById(R.id.btn_delete_note)
         colorPreview = findViewById(R.id.note_color_preview)
         btnSave = findViewById(R.id.btn_save_note)
         tvDeadlineDisplay = findViewById(R.id.tv_deadline_display)
@@ -143,6 +147,18 @@ class AddProjectActivity : BaseActivity() {
         btnEditColor = findViewById(R.id.btn_edit_color)
         btnEditDeadline = findViewById(R.id.btn_edit_deadline)
         headerBgAccent = findViewById(R.id.header_bg_accent)
+        
+        val auraBg = findViewById<View>(R.id.aura_background)
+        if (isViewOnly) {
+            auraBg.visibility = View.VISIBLE
+            auraBg.alpha = 0.2f
+            auraBg.background = android.graphics.drawable.GradientDrawable(
+                android.graphics.drawable.GradientDrawable.Orientation.TOP_BOTTOM,
+                intArrayOf(selectedColor, Color.BLACK)
+            )
+        } else {
+            auraBg.visibility = View.GONE
+        }
 
         findViewById<View>(R.id.btn_close_note).setOnClickListener { finish() }
     }
@@ -330,8 +346,75 @@ class AddProjectActivity : BaseActivity() {
             override fun afterTextChanged(s: android.text.Editable?) {}
         })
 
-        btnSave.setOnClickListener { saveProject() }
+        btnSave.setOnClickListener { 
+            if (isViewOnly) {
+                isViewOnly = false
+                setupLogic()
+            } else {
+                saveProject() 
+            }
+        }
+        
+        if (isViewOnly) {
+            btnSave.text = "EDIT"
+            titleInput.isEnabled = false
+            contentInput.isEnabled = false
+            rgStatus.isEnabled = false
+            rgPriority.isEnabled = false
+            seekProgress.isEnabled = false
+            findViewById<View>(R.id.btn_set_deadline).visibility = View.GONE
+            findViewById<View>(R.id.et_goal_input).visibility = View.GONE
+            findViewById<View>(R.id.btn_add_goal).visibility = View.GONE
+            findViewById<View>(R.id.et_new_subfeature).visibility = View.GONE
+            findViewById<View>(R.id.btn_add_subfeature).visibility = View.GONE
+            findViewById<View>(R.id.scroll_templates).visibility = View.GONE
+            findViewById<View>(R.id.container_templates_header).visibility = View.GONE
+            
+            btnCycleStatus.isEnabled = false
+            btnCyclePriority.isEnabled = false
+            btnEditColor.isEnabled = false
+            btnEditDeadline.isEnabled = false
+            colorPreview.isEnabled = false
+            btnPin.isEnabled = false
+        } else {
+            btnSave.text = if (existingNote != null) "UPDATE" else "SAVE"
+            titleInput.isEnabled = true
+            contentInput.isEnabled = true
+            rgStatus.isEnabled = true
+            rgPriority.isEnabled = true
+            seekProgress.isEnabled = true
+            findViewById<View>(R.id.btn_set_deadline).visibility = View.VISIBLE
+            findViewById<View>(R.id.et_goal_input).visibility = View.VISIBLE
+            findViewById<View>(R.id.btn_add_goal).visibility = View.VISIBLE
+            findViewById<View>(R.id.et_new_subfeature).visibility = View.VISIBLE
+            findViewById<View>(R.id.btn_add_subfeature).visibility = View.VISIBLE
+            
+            btnCycleStatus.isEnabled = true
+            btnCyclePriority.isEnabled = true
+            btnEditColor.isEnabled = true
+            btnEditDeadline.isEnabled = true
+            colorPreview.isEnabled = true
+            btnPin.isEnabled = true
+        }
+
         validateInputs()
+    }
+
+    private fun showDeleteConfirmation() {
+        android.app.AlertDialog.Builder(this)
+            .setTitle("Delete Project")
+            .setMessage("Are you sure you want to delete this project roadmap?")
+            .setPositiveButton("DELETE") { _, _ ->
+                existingNote?.let { 
+                    DataManager.projects.remove(it)
+                    DataManager.saveData(this)
+                    Toast.makeText(this, "Project deleted", Toast.LENGTH_SHORT).show()
+                    setResult(RESULT_OK)
+                    finish()
+                }
+            }
+            .setNegativeButton("CANCEL", null)
+            .show()
     }
 
     override fun onResume() {
@@ -665,7 +748,9 @@ class AddProjectActivity : BaseActivity() {
             header.addView(tvDate)
         }
         
-        header.addView(btnEdit)
+        if (!isViewOnly) {
+            header.addView(btnEdit)
+        }
 
         layout.addView(header)
         layout.addView(tvNote)
@@ -700,20 +785,25 @@ class AddProjectActivity : BaseActivity() {
             popupWindow.dismiss()
         }
 
-        menuView.findViewById<View>(R.id.menu_edit).setOnClickListener {
-            popupWindow.dismiss()
-            val intent = Intent(this, AddSubFeatureActivity::class.java).apply {
-                putExtra("PROJECT_INDEX", projectIndex)
-                putExtra("SUB_FEATURE_ID", sub.id)
+        if (isViewOnly) {
+            menuView.findViewById<View>(R.id.menu_edit).visibility = View.GONE
+            menuView.findViewById<View>(R.id.menu_delete).visibility = View.GONE
+        } else {
+            menuView.findViewById<View>(R.id.menu_edit).setOnClickListener {
+                popupWindow.dismiss()
+                val intent = Intent(this, AddSubFeatureActivity::class.java).apply {
+                    putExtra("PROJECT_INDEX", projectIndex)
+                    putExtra("SUB_FEATURE_ID", sub.id)
+                }
+                startActivity(intent)
             }
-            startActivity(intent)
-        }
 
-        menuView.findViewById<View>(R.id.menu_delete).setOnClickListener {
-            tempSubFeatures.remove(sub)
-            updateProjectProgress()
-            refreshSubFeatures()
-            popupWindow.dismiss()
+            menuView.findViewById<View>(R.id.menu_delete).setOnClickListener {
+                tempSubFeatures.remove(sub)
+                updateProjectProgress()
+                refreshSubFeatures()
+                popupWindow.dismiss()
+            }
         }
 
         menuView.findViewById<View>(R.id.menu_hide_unhide).visibility = View.GONE
@@ -759,6 +849,7 @@ class AddProjectActivity : BaseActivity() {
                 setImageResource(android.R.drawable.ic_menu_close_clear_cancel)
                 imageTintList = ColorStateList.valueOf(Color.parseColor("#40FFFFFF"))
                 layoutParams = LinearLayout.LayoutParams(20.dpToPx(), 20.dpToPx())
+                visibility = if (isViewOnly) View.GONE else View.VISIBLE
                 setOnClickListener {
                     tempGoals.remove(goal)
                     refreshGoalsUI()
@@ -787,10 +878,26 @@ class AddProjectActivity : BaseActivity() {
     }
 
     private fun updateProjectProgress() {
-        // Weighted Progress Calculation
-        val totalWeight = tempSubFeatures.sumOf { it.weight }.coerceAtLeast(1)
-        val completedWeight = tempSubFeatures.filter { it.isCompleted }.sumOf { it.weight }
-        val progress = (completedWeight * 100) / totalWeight
+        // Weighted Progress Calculation (High: 5pt, Mid: 2pt, Low: 1pt)
+        val totalPoints = tempSubFeatures.sumOf { feature ->
+            val pts: Int = when(feature.priority) {
+                2 -> 5
+                1 -> 2
+                else -> 1
+            }
+            pts
+        }.coerceAtLeast(1)
+
+        val completedPoints = tempSubFeatures.filter { it.isCompleted }.sumOf { feature ->
+            val pts: Int = when(feature.priority) {
+                2 -> 5
+                1 -> 2
+                else -> 1
+            }
+            pts
+        }
+        
+        val progress = (completedPoints * 100) / totalPoints
         
         seekProgress.progress = progress
         tvProgressValue.text = "$progress%"

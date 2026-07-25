@@ -24,7 +24,7 @@ class TaskSettingsActivity : BaseActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        setContentView(R.layout.activity_section_settings)
+        setContentView(R.layout.activity_section_settings_task)
 
         settingsList = findViewById(R.id.settings_list)
         tvTitle = findViewById(R.id.tv_title)
@@ -90,7 +90,7 @@ class TaskSettingsActivity : BaseActivity() {
 
     private fun showManageSectionsDialog() {
         val dialog = android.app.Dialog(this)
-        dialog.setContentView(R.layout.dialog_manage_sections)
+        dialog.setContentView(R.layout.dialog_manage_sections_task)
         dialog.window?.setBackgroundDrawableResource(android.R.color.transparent)
         dialog.window?.setLayout(android.view.ViewGroup.LayoutParams.MATCH_PARENT, android.view.ViewGroup.LayoutParams.WRAP_CONTENT)
 
@@ -143,7 +143,7 @@ class TaskSettingsActivity : BaseActivity() {
 
     private fun showManageCategoriesDialog() {
         val dialog = Dialog(this)
-        val view = layoutInflater.inflate(R.layout.dialog_manage_categories, null)
+        val view = layoutInflater.inflate(R.layout.dialog_manage_categories_task, null)
         dialog.setContentView(view)
         dialog.window?.setBackgroundDrawableResource(android.R.color.transparent)
         dialog.window?.setLayout(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT)
@@ -157,10 +157,10 @@ class TaskSettingsActivity : BaseActivity() {
 
         fun render() {
             container.removeAllViews()
-            btnDeleteMode.imageTintList = android.content.res.ColorStateList.valueOf(if (isDeleteMode) Color.RED else Color.WHITE)
+            btnDeleteMode?.imageTintList = android.content.res.ColorStateList.valueOf(if (isDeleteMode) Color.RED else Color.WHITE)
 
             DataManager.taskCustomCategories.forEach { category ->
-                val catView = layoutInflater.inflate(R.layout.item_category_manage, container, false)
+                val catView = layoutInflater.inflate(R.layout.item_category_manage_task, container, false)
                 catView.findViewById<TextView>(R.id.tv_category_name).text = category
                 
                 val btnRemove = catView.findViewById<View>(R.id.btn_remove_category)

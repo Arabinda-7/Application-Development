@@ -20,7 +20,6 @@ class TaskAdapter(
 ) : RecyclerView.Adapter<RecyclerView.ViewHolder>() {
 
     companion object {
-        private const val TYPE_TASK = 0
         private const val TYPE_HEADER = 1
     }
 
@@ -40,15 +39,20 @@ class TaskAdapter(
     }
 
     override fun getItemViewType(position: Int): Int {
-        return if (displayItems[position] is String) TYPE_HEADER else TYPE_TASK
+        val item = displayItems[position]
+        return if (item is String) {
+            TYPE_HEADER
+        } else {
+            if (currentSection == "Tasks") R.layout.item_task_tasks else R.layout.item_task_list
+        }
     }
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): RecyclerView.ViewHolder {
         return if (viewType == TYPE_HEADER) {
-            val view = LayoutInflater.from(parent.context).inflate(R.layout.item_task_header, parent, false)
+            val view = LayoutInflater.from(parent.context).inflate(R.layout.item_header_task, parent, false)
             HeaderViewHolder(view)
         } else {
-            val view = LayoutInflater.from(parent.context).inflate(R.layout.task_list_item, parent, false)
+            val view = LayoutInflater.from(parent.context).inflate(viewType, parent, false)
             TaskViewHolder(view)
         }
     }
@@ -102,6 +106,12 @@ class TaskAdapter(
             
             holder.ivReminder.visibility = if (task.reminderTime != null) View.VISIBLE else View.GONE
             
+            val displayTime = task.reminderTime ?: task.timestamp
+            val sdf = java.text.SimpleDateFormat("MMM dd, HH:mm", java.util.Locale.getDefault())
+            holder.tvReminderTime.text = sdf.format(java.util.Date(displayTime))
+            holder.tvReminderTime.visibility = View.VISIBLE
+            holder.tvReminderTime.setTextColor(Color.parseColor("#B3FFFFFF"))
+
             // Subtask expansion rendering
             if (expandedTasks.contains(task)) {
                 holder.subtaskContainer.visibility = View.VISIBLE
@@ -333,7 +343,7 @@ class TaskAdapter(
             
             val taskColor = if (DataManager.globalTaskColor != -1) DataManager.globalTaskColor else ContextCompat.getColor(context, R.color.primary_blue)
             ctView.setCheckMarkTintList(android.content.res.ColorStateList.valueOf(taskColor))
-            ctView.setPadding(0, 16, 0, 16)
+            ctView.setPadding(0, 8, 0, 8)
             
             ctView.setOnClickListener {
                 subtask.isCompleted = !subtask.isCompleted
@@ -356,6 +366,7 @@ class TaskAdapter(
         val tvCategory: TextView = itemView.findViewById(R.id.tv_task_category)
         val tvSubtasks: TextView = itemView.findViewById(R.id.tv_subtask_progress)
         val ivReminder: ImageView = itemView.findViewById(R.id.iv_reminder_icon)
+        val tvReminderTime: TextView = itemView.findViewById(R.id.tv_reminder_time)
         val subtaskContainer: LinearLayout = itemView.findViewById(R.id.subtask_list_container)
     }
 

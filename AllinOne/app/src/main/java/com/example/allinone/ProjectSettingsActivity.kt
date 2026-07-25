@@ -26,7 +26,7 @@ class ProjectSettingsActivity : BaseActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        setContentView(R.layout.activity_section_settings)
+        setContentView(R.layout.activity_section_settings_project)
 
         settingsList = findViewById(R.id.settings_list)
         tvTitle = findViewById(R.id.tv_title)
@@ -92,7 +92,7 @@ class ProjectSettingsActivity : BaseActivity() {
 
     private fun showManageTemplatesDialog() {
         val dialog = Dialog(this)
-        dialog.setContentView(R.layout.dialog_manage_categories)
+        dialog.setContentView(R.layout.dialog_manage_categories_project)
         dialog.window?.setBackgroundDrawableResource(android.R.color.transparent)
         dialog.window?.setLayout(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT)
 
@@ -109,10 +109,10 @@ class ProjectSettingsActivity : BaseActivity() {
 
         fun refresh() {
             container.removeAllViews()
-            btnDeleteMode.imageTintList = android.content.res.ColorStateList.valueOf(if (isDeleteMode) Color.RED else Color.WHITE)
+            btnDeleteMode?.imageTintList = android.content.res.ColorStateList.valueOf(if (isDeleteMode) Color.RED else Color.WHITE)
 
             DataManager.projectTemplates.keys.forEach { templateName ->
-                val itemView = LayoutInflater.from(this).inflate(R.layout.item_category_manage, container, false)
+                val itemView = LayoutInflater.from(this).inflate(R.layout.item_category_manage_project, container, false)
                 itemView.findViewById<TextView>(R.id.tv_category_name).text = templateName
 
                 val btnRemove = itemView.findViewById<View>(R.id.btn_remove_category)
@@ -162,7 +162,7 @@ class ProjectSettingsActivity : BaseActivity() {
 
     private fun showCreateTemplateStepsDialog(templateName: String, onComplete: () -> Unit) {
         val dialog = Dialog(this)
-        dialog.setContentView(R.layout.dialog_manage_categories)
+        dialog.setContentView(R.layout.dialog_manage_categories_project)
         dialog.window?.setBackgroundDrawableResource(android.R.color.transparent)
         dialog.window?.setLayout(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT)
 
@@ -193,7 +193,7 @@ class ProjectSettingsActivity : BaseActivity() {
         fun refreshSteps() {
             container.removeAllViews()
             steps.forEach { step ->
-                val itemView = LayoutInflater.from(this).inflate(R.layout.item_category_manage, container, false)
+                val itemView = LayoutInflater.from(this).inflate(R.layout.item_category_manage_project, container, false)
                 itemView.findViewById<TextView>(R.id.tv_category_name).text = step
                 itemView.findViewById<View>(R.id.btn_remove_category).setOnClickListener {
                     steps.remove(step)

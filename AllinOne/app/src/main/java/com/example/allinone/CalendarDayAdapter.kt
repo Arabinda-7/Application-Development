@@ -22,11 +22,12 @@ data class DayModel(
 class CalendarDayAdapter(
     private val days: List<DayModel>,
     private val habitColor: Int,
+    private val layoutId: Int,
     private val onDaySelected: (DayModel) -> Unit
 ) : RecyclerView.Adapter<CalendarDayAdapter.DayViewHolder>() {
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): DayViewHolder {
-        val view = LayoutInflater.from(parent.context).inflate(R.layout.item_calendar_date, parent, false)
+        val view = LayoutInflater.from(parent.context).inflate(layoutId, parent, false)
         return DayViewHolder(view)
     }
 

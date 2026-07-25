@@ -16,5 +16,7 @@ data class Habit(
     val timestamp: Long = System.currentTimeMillis(),
     var isExpanded: Boolean = false,
     var isSelected: Boolean = false,
-    var completedDates: MutableList<String> = mutableListOf()
+    var completedDates: MutableList<String> = mutableListOf(),
+    var dailyProgress: MutableMap<String, Int> = mutableMapOf(),
+    var reminderTime: Long? = null
 )

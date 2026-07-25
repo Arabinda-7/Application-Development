@@ -10,6 +10,7 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
@@ -259,6 +260,52 @@ fun RecoveryStatusDashboard(recoveryStatus: Map<String, Float>, themeColor: Colo
 }
 
 @Composable
+fun StabilityGauge(stabilityIndex: Float, themeColor: Color) {
+    Column(horizontalAlignment = Alignment.CenterHorizontally, modifier = Modifier.fillMaxWidth()) {
+        Box(contentAlignment = Alignment.Center, modifier = Modifier.size(100.dp)) {
+            CircularProgressIndicator(
+                progress = { stabilityIndex / 100f },
+                modifier = Modifier.fillMaxSize(),
+                color = themeColor,
+                trackColor = Color.White.copy(alpha = 0.05f),
+                strokeWidth = 8.dp,
+                strokeCap = androidx.compose.ui.graphics.StrokeCap.Round
+            )
+            Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                Text(
+                    text = "${stabilityIndex.toInt()}%",
+                    fontSize = 20.sp,
+                    fontWeight = FontWeight.Black,
+                    color = Color.White
+                )
+                Text(
+                    text = "STABILITY",
+                    fontSize = 8.sp,
+                    fontWeight = FontWeight.Bold,
+                    color = Color.Gray
+                )
+            }
+        }
+        Spacer(modifier = Modifier.height(12.dp))
+        Text(
+            text = if (stabilityIndex > 85) "Your routine is highly stable!" 
+                   else if (stabilityIndex > 60) "Moderate consistency. Keep it up." 
+                   else "Routine is volatile. Focus on small wins.",
+            fontSize = 11.sp,
+            color = Color.White.copy(alpha = 0.6f),
+            textAlign = TextAlign.Center
+        )
+    }
+}
+
+@Composable
+fun WeeklyCyclicalRadarChart(cyclicalData: Map<Int, Float>, themeColor: Color) {
+    val labels = listOf("SUN", "MON", "TUE", "WED", "THU", "FRI", "SAT")
+    val distribution = labels.indices.associate { labels[it] to (cyclicalData[it]?.toInt() ?: 0) }
+    MuscleRadarChart(muscleDistribution = distribution, themeColor = themeColor)
+}
+
+@Composable
 fun RecoveryItem(muscle: String, status: Float, themeColor: Color, modifier: Modifier = Modifier) {
     Surface(
         modifier = modifier,
@@ -301,5 +348,351 @@ fun RecoveryItem(muscle: String, status: Float, themeColor: Color, modifier: Mod
                 )
             }
         }
+    }
+}
+
+@Composable
+fun ACWRChart(data: Pair<List<Float>, List<Float>>, themeColor: Color) {
+    val acute = data.first
+    val chronic = data.second
+    val maxVal = (acute + chronic).maxOrNull()?.coerceAtLeast(1f) ?: 1f
+
+    Column {
+        Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.End) {
+            LegendItem(color = themeColor, label = "Fatigue (Acute)")
+            Spacer(modifier = Modifier.width(12.dp))
+            LegendItem(color = Color.White.copy(alpha = 0.3f), label = "Fitness (Chronic)")
+        }
+        Spacer(modifier = Modifier.height(16.dp))
+        Box(modifier = Modifier.fillMaxWidth().height(140.dp)) {
+            Canvas(modifier = Modifier.fillMaxSize()) {
+                val width = size.width
+                val height = size.height
+                val stepX = width / (acute.size - 1).coerceAtLeast(1)
+
+                // Sweet Spot Corridor (0.8 - 1.3 of Chronic)
+                val corridorPath = Path()
+                chronic.forEachIndexed { i, c ->
+                    val x = i * stepX
+                    val y = height - (height * (c * 1.3f / maxVal)).coerceIn(0f, height)
+                    if (i == 0) corridorPath.moveTo(x, y) else corridorPath.lineTo(x, y)
+                }
+                for (i in chronic.indices.reversed()) {
+                    val x = i * stepX
+                    val y = height - (height * (chronic[i] * 0.8f / maxVal)).coerceIn(0f, height)
+                    corridorPath.lineTo(x, y)
+                }
+                corridorPath.close()
+                drawPath(corridorPath, Color(0xFF4CAF50).copy(alpha = 0.1f))
+
+                // Chronic Line
+                val chronicPath = Path()
+                chronic.forEachIndexed { i, v ->
+                    val x = i * stepX
+                    val y = height - (height * (v / maxVal)).coerceIn(0f, height)
+                    if (i == 0) chronicPath.moveTo(x, y) else chronicPath.lineTo(x, y)
+                }
+                drawPath(chronicPath, Color.White.copy(alpha = 0.2f), style = Stroke(width = 2.dp.toPx()))
+
+                // Acute Area
+                val acutePath = Path()
+                acute.forEachIndexed { i, v ->
+                    val x = i * stepX
+                    val y = height - (height * (v / maxVal)).coerceIn(0f, height)
+                    if (i == 0) acutePath.moveTo(x, y) else acutePath.lineTo(x, y)
+                }
+                acutePath.lineTo(width, height)
+                acutePath.lineTo(0f, height)
+                acutePath.close()
+                drawPath(acutePath, Brush.verticalGradient(listOf(themeColor.copy(alpha = 0.3f), Color.Transparent)))
+                
+                val acuteLinePath = Path()
+                acute.forEachIndexed { i, v ->
+                    val x = i * stepX
+                    val y = height - (height * (v / maxVal)).coerceIn(0f, height)
+                    if (i == 0) acuteLinePath.moveTo(x, y) else acuteLinePath.lineTo(x, y)
+                }
+                drawPath(acuteLinePath, themeColor, style = Stroke(width = 2.dp.toPx()))
+            }
+        }
+        Spacer(modifier = Modifier.height(8.dp))
+        Text(
+            text = "The green corridor represents your optimal 'Sweet Spot' for growth without overtraining.",
+            fontSize = 10.sp,
+            color = Color.Gray,
+            textAlign = TextAlign.Center,
+            modifier = Modifier.fillMaxWidth()
+        )
+    }
+}
+
+@Composable
+fun StabilityChaosGauge(score: Float, themeColor: Color) {
+    Box(modifier = Modifier.fillMaxWidth().height(120.dp), contentAlignment = Alignment.Center) {
+        Canvas(modifier = Modifier.size(100.dp)) {
+            val center = Offset(size.width / 2, size.height / 2)
+            
+            drawArc(
+                color = Color.White.copy(alpha = 0.05f),
+                startAngle = 135f,
+                sweepAngle = 270f,
+                useCenter = false,
+                style = Stroke(width = 8.dp.toPx(), cap = androidx.compose.ui.graphics.StrokeCap.Round)
+            )
+            
+            drawArc(
+                brush = Brush.sweepGradient(listOf(Color.Red, Color.Yellow, Color.Green), center),
+                startAngle = 135f,
+                sweepAngle = 270f * score,
+                useCenter = false,
+                style = Stroke(width = 8.dp.toPx(), cap = androidx.compose.ui.graphics.StrokeCap.Round)
+            )
+        }
+        Column(horizontalAlignment = Alignment.CenterHorizontally) {
+            Text(
+                text = "${(score * 100).toInt()}%",
+                fontSize = 24.sp,
+                fontWeight = FontWeight.Black,
+                color = Color.White
+            )
+            Text(
+                text = if (score > 0.8f) "STABLE" else if (score > 0.5f) "BALANCED" else "CHAOTIC",
+                fontSize = 10.sp,
+                fontWeight = FontWeight.Bold,
+                color = themeColor
+            )
+        }
+    }
+}
+
+@Composable
+fun ResilienceGauge(score: Float, themeColor: Color) {
+    Column(horizontalAlignment = Alignment.CenterHorizontally, modifier = Modifier.fillMaxWidth()) {
+        Box(contentAlignment = Alignment.Center, modifier = Modifier.size(100.dp)) {
+            CircularProgressIndicator(
+                progress = { score / 100f },
+                modifier = Modifier.fillMaxSize(),
+                color = themeColor,
+                trackColor = Color.White.copy(alpha = 0.05f),
+                strokeWidth = 8.dp,
+                strokeCap = androidx.compose.ui.graphics.StrokeCap.Round
+            )
+            Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                Text(
+                    text = "${score.toInt()}%",
+                    fontSize = 20.sp,
+                    fontWeight = FontWeight.Black,
+                    color = Color.White
+                )
+                Text(
+                    text = "RECOVERY",
+                    fontSize = 8.sp,
+                    fontWeight = FontWeight.Bold,
+                    color = Color.Gray
+                )
+            }
+        }
+        Spacer(modifier = Modifier.height(12.dp))
+        Text(
+            text = if (score > 85) "Exceptional resilience! Breaks don't stop you." 
+                   else if (score > 60) "Good recovery pace. Keep momentum high." 
+                   else "Difficult to restart. Focus on 'Never Miss Twice'.",
+            fontSize = 11.sp,
+            color = Color.White.copy(alpha = 0.6f),
+            textAlign = TextAlign.Center
+        )
+    }
+}
+
+@Composable
+fun MonthlyMomentumChart(data: List<Pair<String, Int>>, themeColor: Color) {
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .height(120.dp),
+        horizontalArrangement = Arrangement.SpaceBetween,
+        verticalAlignment = Alignment.Bottom
+    ) {
+        data.forEach { (month, percent) ->
+            Column(horizontalAlignment = Alignment.CenterHorizontally, modifier = Modifier.weight(1f)) {
+                Box(
+                    modifier = Modifier
+                        .width(20.dp)
+                        .weight(1f),
+                    contentAlignment = Alignment.BottomCenter
+                ) {
+                    Box(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .fillMaxHeight(percent / 100f)
+                            .background(
+                                brush = Brush.verticalGradient(listOf(themeColor.copy(alpha = 0.4f), themeColor)),
+                                shape = RoundedCornerShape(topStart = 4.dp, topEnd = 4.dp)
+                            )
+                    )
+                }
+                Spacer(modifier = Modifier.height(8.dp))
+                Text(text = month, fontSize = 10.sp, color = Color.Gray)
+            }
+        }
+    }
+}
+
+@Composable
+fun MilestoneProgressCard(current: Int, next: Int, progress: Float, themeColor: Color) {
+    Column {
+        Row(verticalAlignment = Alignment.CenterVertically) {
+            Text(
+                text = "$current DAY STREAK",
+                fontSize = 14.sp,
+                fontWeight = FontWeight.Black,
+                color = Color.White
+            )
+            Spacer(modifier = Modifier.weight(1f))
+            Text(
+                text = "NEXT: $next",
+                fontSize = 10.sp,
+                fontWeight = FontWeight.Bold,
+                color = themeColor
+            )
+        }
+        Spacer(modifier = Modifier.height(12.dp))
+        LinearProgressIndicator(
+            progress = { progress },
+            modifier = Modifier.fillMaxWidth().height(8.dp).clip(CircleShape),
+            color = themeColor,
+            trackColor = Color.White.copy(alpha = 0.05f),
+            strokeCap = androidx.compose.ui.graphics.StrokeCap.Round
+        )
+        Spacer(modifier = Modifier.height(8.dp))
+        Text(
+            text = "${(progress * 100).toInt()}% to your next milestone!",
+            fontSize = 10.sp,
+            color = Color.Gray
+        )
+    }
+}
+
+@Composable
+fun VolumeProgressionChart(data: List<Float>, themeColor: Color) {
+    val maxVolume = data.maxOrNull()?.coerceAtLeast(1f) ?: 1f
+    
+    Column {
+        Box(modifier = Modifier.fillMaxWidth().height(120.dp), contentAlignment = Alignment.BottomCenter) {
+            Row(
+                modifier = Modifier.fillMaxSize(),
+                horizontalArrangement = Arrangement.spacedBy(2.dp),
+                verticalAlignment = Alignment.Bottom
+            ) {
+                data.forEach { volume ->
+                    val heightFactor = (volume / maxVolume).coerceIn(0.05f, 1f)
+                    Box(
+                        modifier = Modifier
+                            .weight(1f)
+                            .fillMaxHeight(heightFactor)
+                            .background(
+                                brush = Brush.verticalGradient(listOf(themeColor.copy(alpha = 0.4f), themeColor)),
+                                shape = RoundedCornerShape(topStart = 4.dp, topEnd = 4.dp)
+                            )
+                    )
+                }
+            }
+        }
+        Spacer(modifier = Modifier.height(8.dp))
+        Text(
+            text = "DAILY WORKLOAD PROGRESSION (LATEST 30 DAYS)",
+            fontSize = 9.sp,
+            fontWeight = FontWeight.Bold,
+            color = Color.Gray,
+            letterSpacing = 1.sp
+        )
+    }
+}
+
+@Composable
+fun WorkoutDiversityChart(data: Map<String, Int>, themeColor: Color) {
+    val total = data.values.sum().coerceAtLeast(1)
+    
+    Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+        data.forEach { (mode, count) ->
+            val percentage = (count.toFloat() / total)
+            Column {
+                Row(verticalAlignment = Alignment.CenterVertically) {
+                    Text(
+                        text = mode.uppercase(),
+                        fontSize = 9.sp,
+                        fontWeight = FontWeight.Black,
+                        color = Color.White.copy(alpha = 0.7f),
+                        modifier = Modifier.weight(1f)
+                    )
+                    Text(
+                        text = "${(percentage * 100).toInt()}%",
+                        fontSize = 9.sp,
+                        fontWeight = FontWeight.Bold,
+                        color = themeColor
+                    )
+                }
+                Spacer(modifier = Modifier.height(4.dp))
+                Box(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .height(4.dp)
+                        .background(Color.White.copy(alpha = 0.05f), CircleShape)
+                ) {
+                    Box(
+                        modifier = Modifier
+                            .fillMaxWidth(percentage)
+                            .fillMaxHeight()
+                            .background(themeColor, CircleShape)
+                    )
+                }
+            }
+        }
+    }
+}
+
+@Composable
+fun IntensityHeatmap(data: List<Int>, themeColor: Color) {
+    ConsistencyHeatmap(data = data, themeColor = themeColor)
+}
+
+@Composable
+fun MuscleFocusGrid(data: Map<Int, List<String>>, themeColor: Color) {
+    val muscles = listOf("Chest", "Back", "Legs", "Shoulders", "Arms")
+    
+    Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+        muscles.forEach { muscle ->
+            Row(verticalAlignment = Alignment.CenterVertically) {
+                Text(
+                    text = muscle.uppercase(),
+                    fontSize = 8.sp,
+                    fontWeight = FontWeight.Bold,
+                    color = Color.Gray,
+                    modifier = Modifier.width(60.dp)
+                )
+                Row(horizontalArrangement = Arrangement.spacedBy(2.dp)) {
+                    for (day in 0 until 31) {
+                        val isTrained = data[day]?.contains(muscle) ?: false
+                        Box(
+                            modifier = Modifier
+                                .size(6.dp)
+                                .background(
+                                    color = if (isTrained) themeColor else Color.White.copy(alpha = 0.05f),
+                                    shape = CircleShape
+                                )
+                        )
+                    }
+                }
+            }
+        }
+    }
+}
+
+@Composable
+private fun LegendItem(color: Color, label: String) {
+    Row(verticalAlignment = Alignment.CenterVertically) {
+        Box(modifier = Modifier.size(8.dp).background(color, CircleShape))
+        Spacer(modifier = Modifier.width(8.dp))
+        Text(text = label, fontSize = 10.sp, color = Color.Gray)
     }
 }

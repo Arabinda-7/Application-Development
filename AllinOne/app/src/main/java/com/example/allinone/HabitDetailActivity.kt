@@ -99,7 +99,7 @@ class HabitDetailActivity : BaseActivity() {
         val daysSinceCreation = ((System.currentTimeMillis() - creationDate.time) / (1000 * 60 * 60 * 24)).toInt() + 1
         val rate = if (daysSinceCreation > 0) (totalCompleted * 100) / daysSinceCreation else 0
         findViewById<TextView>(R.id.tv_rate_percent).text = "$rate%"
-        findViewById<TextView>(R.id.tv_rate_fraction).text = "$totalCompleted/$daysSinceCreation habits"
+        findViewById<TextView>(R.id.tv_rate_fraction).text = "$totalCompleted/$daysSinceCreation days"
     }
 
     private fun calculateStreak(): Int {
@@ -143,8 +143,18 @@ class HabitDetailActivity : BaseActivity() {
         for (day in 1..daysInMonth) {
             val dayCalendar = Calendar.getInstance()
             dayCalendar.set(currentYear, currentMonth, day)
-            val isCompleted = habit?.completedDates?.contains(sdfDate.format(dayCalendar.time)) == true
-            calendarGrid.addView(createDayView(day.toString(), if (isCompleted) 100 else 0))
+            val dateKey = sdfDate.format(dayCalendar.time)
+            
+            val target = habit?.target ?: 1
+            val progressPercent = if (target > 1) {
+                val progress = habit?.dailyProgress?.get(dateKey) ?: 0
+                if (progress >= target) 100 
+                else (progress * 100) / target
+            } else {
+                if (habit?.completedDates?.contains(dateKey) == true) 100 else 0
+            }
+            
+            calendarGrid.addView(createDayView(day.toString(), progressPercent))
         }
     }
 

@@ -51,24 +51,30 @@ fun IdeaViewSection(
                         ),
                     colors = CardDefaults.cardColors(containerColor = style.surfaceColor)
                 ) {
-                    Row(modifier = Modifier.fillMaxWidth().padding(16.dp), verticalAlignment = Alignment.CenterVertically) {
-                        Column(modifier = Modifier.weight(1f)) {
-                            Text(idea.title, color = Color.White, fontWeight = FontWeight.Bold, fontSize = 20.sp)
-                            if (idea.description.isNotBlank()) {
-                                Text(
-                                    text = idea.description,
-                                    color = Color.White.copy(alpha = 0.5f),
-                                    fontSize = 12.sp,
-                                    maxLines = 3,
-                                    overflow = TextOverflow.Ellipsis
-                                )
+                    Box(modifier = Modifier.fillMaxWidth()) {
+                        Row(modifier = Modifier.fillMaxWidth().padding(16.dp), verticalAlignment = Alignment.CenterVertically) {
+                            Column(modifier = Modifier.weight(1f)) {
+                                Text(idea.title, color = Color.White, fontWeight = FontWeight.Bold, fontSize = 16.sp)
+                                if (idea.description.isNotBlank()) {
+                                    Text(
+                                        text = idea.description,
+                                        color = Color.White.copy(alpha = 0.5f),
+                                        fontSize = 12.sp,
+                                        maxLines = 3,
+                                        overflow = TextOverflow.Ellipsis
+                                    )
+                                }
+                            }
+                            if (idea.status != "Converted") { 
+                                Button(onClick = { onConvert(idea) }, contentPadding = PaddingValues(horizontal = 12.dp, vertical = 4.dp), modifier = Modifier.height(32.dp)) { 
+                                    Text("GRADUATE", fontSize = 10.sp, fontWeight = FontWeight.Black) 
+                                } 
                             }
                         }
-                        if (idea.status != "Converted") { 
-                            Button(onClick = { onConvert(idea) }, contentPadding = PaddingValues(horizontal = 12.dp, vertical = 4.dp), modifier = Modifier.height(32.dp)) { 
-                                Text("GRADUATE", fontSize = 10.sp, fontWeight = FontWeight.Black) 
-                            } 
-                        }
+                        CreatedAtText(
+                            timestamp = idea.createdAt,
+                            modifier = Modifier.align(Alignment.BottomEnd).padding(8.dp)
+                        )
                     }
                 }
                 WorkspaceDropdown(expanded = showMenu, onDismissRequest = { showMenu = false }) {
@@ -114,7 +120,7 @@ fun IdeaDetailSection(
                 horizontalArrangement = Arrangement.SpaceBetween
             ) {
                 IconButton(onClick = onBack) { Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Back", tint = Color.White) }
-                IconButton(onClick = onEdit) { Icon(Icons.Default.Edit, contentDescription = "Edit", tint = accentColor) }
+                IconButton(onClick = onEdit) { Icon(Icons.Default.Edit, contentDescription = "Edit", tint = accentColor, modifier = Modifier.size(28.dp)) }
             }
 
             Column(modifier = Modifier.padding(horizontal = 24.dp).padding(bottom = 12.dp)) {

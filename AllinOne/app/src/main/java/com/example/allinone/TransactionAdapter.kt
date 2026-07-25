@@ -18,8 +18,18 @@ class TransactionAdapter(
     private val onDelete: (Transaction, Int) -> Unit
 ) : RecyclerView.Adapter<TransactionAdapter.TransactionViewHolder>() {
 
+    override fun getItemViewType(position: Int): Int {
+        val transaction = transactions[position]
+        return when (transaction.type) {
+            "Income" -> R.layout.item_finance_income
+            "Saving" -> R.layout.item_finance_saving
+            "Expense" -> R.layout.item_finance_expense
+            else -> R.layout.item_finance_expense
+        }
+    }
+
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): TransactionViewHolder {
-        val view = LayoutInflater.from(parent.context).inflate(R.layout.transaction_list_item, parent, false)
+        val view = LayoutInflater.from(parent.context).inflate(viewType, parent, false)
         return TransactionViewHolder(view)
     }
 

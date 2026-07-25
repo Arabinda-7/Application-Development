@@ -25,6 +25,8 @@ import androidx.compose.ui.unit.sp
 import com.example.allinone.LocalAppStyle
 import com.example.allinone.workspace.data.TaskEntity
 import com.example.allinone.workspace.ui.WorkspaceViewModel
+import java.text.SimpleDateFormat
+import java.util.*
 
 @Composable
 fun TaskViewSection(
@@ -119,107 +121,117 @@ fun TaskItemUI(task: TaskEntity, onUpdateTask: (TaskEntity) -> Unit, onViewTask:
             colors = CardDefaults.cardColors(containerColor = style.surfaceColor),
             border = if (task.priority == 2 && !isDone) BorderStroke(1.dp, priorityColor.copy(alpha = 0.2f)) else null
         ) {
-            Column(modifier = Modifier.padding(12.dp)) {
-                Row(verticalAlignment = Alignment.CenterVertically) {
-                    Checkbox(
-                        checked = isDone,
-                        onCheckedChange = { checked ->
-                            val newStatus = if (checked) "Done" else "Todo"
-                            val newProgress = if (checked) 100 else 0
-                            onUpdateTask(task.copy(status = newStatus, progress = newProgress))
-                        },
-                        colors = CheckboxDefaults.colors(
-                            checkedColor = Color(0xFF2EC4B6),
-                            uncheckedColor = Color.White.copy(alpha = 0.2f)
-                        ),
-                        modifier = Modifier.size(24.dp)
-                    )
-
-                    Spacer(modifier = Modifier.width(8.dp))
-
-                    Column(modifier = Modifier.weight(1f)) {
-                        val titleText = if (index != null) "$index. ${task.title}" else task.title
-                        Text(
-                            titleText,
-                            fontWeight = FontWeight.Bold,
-                            color = if (isDone) Color.White.copy(alpha = 0.4f) else Color.White,
-                            textDecoration = if (isDone) androidx.compose.ui.text.style.TextDecoration.LineThrough else null,
-                            fontSize = 14.sp
-                        )
-                    }
-                    
-                    val priorityIcon = when(task.priority) {
-                        2 -> Icons.Default.KeyboardDoubleArrowUp
-                        1 -> Icons.Default.KeyboardArrowUp
-                        else -> Icons.Default.KeyboardArrowDown
-                    }
-                    Icon(
-                        imageVector = priorityIcon, 
-                        contentDescription = null, 
-                        tint = if (isDone) Color.White.copy(alpha = 0.2f) else priorityColor,
-                        modifier = Modifier.size(18.dp)
-                    )
-                }
-
-                if (task.description.isNotBlank()) {
-                    Spacer(modifier = Modifier.height(4.dp))
-                    Text(
-                        task.description,
-                        fontSize = 12.sp,
-                        color = Color.White.copy(alpha = 0.4f),
-                        maxLines = 1,
-                        overflow = androidx.compose.ui.text.style.TextOverflow.Ellipsis,
-                        modifier = Modifier.padding(start = 32.dp)
-                    )
-                }
-
-                Spacer(modifier = Modifier.height(12.dp))
-                
-                Row(verticalAlignment = Alignment.CenterVertically) {
-                    LinearProgressIndicator(
-                        progress = { task.progress / 100f },
-                        modifier = Modifier
-                            .weight(1f)
-                            .height(4.dp)
-                            .clip(CircleShape),
-                        color = if (isDone) Color(0xFF2EC4B6) else style.accentColor,
-                        trackColor = Color.White.copy(alpha = 0.05f)
-                    )
-                    
-                    Spacer(modifier = Modifier.width(12.dp))
-                    
-                    if (!isDone) {
-                        IconButton(
-                            onClick = {
-                                val nextStatus = when(task.status) {
-                                    "Todo" -> "In Progress"
-                                    "In Progress" -> "Review"
-                                    "Review" -> "Done"
-                                    else -> "Done"
-                                }
-                                val newProgress = if (nextStatus == "Done") 100 else task.progress
-                                onUpdateTask(task.copy(status = nextStatus, progress = newProgress))
+            Box(modifier = Modifier.fillMaxWidth()) {
+                Column(modifier = Modifier.padding(12.dp)) {
+                    Row(verticalAlignment = Alignment.CenterVertically) {
+                        Checkbox(
+                            checked = isDone,
+                            onCheckedChange = { checked ->
+                                val newStatus = if (checked) "Done" else "Todo"
+                                val newProgress = if (checked) 100 else 0
+                                onUpdateTask(task.copy(status = newStatus, progress = newProgress))
                             },
-                            modifier = Modifier
-                                .size(32.dp)
-                                .background(style.accentColor.copy(alpha = 0.1f), CircleShape)
-                        ) {
-                            Icon(
-                                imageVector = Icons.Default.ChevronRight, 
-                                contentDescription = "Next", 
-                                tint = style.accentColor,
-                                modifier = Modifier.size(16.dp)
-                            )
-                        }
-                    } else {
-                        Icon(
-                            imageVector = Icons.Default.CheckCircle, 
-                            contentDescription = "Completed", 
-                            tint = Color(0xFF2EC4B6),
+                            colors = CheckboxDefaults.colors(
+                                checkedColor = Color(0xFF2EC4B6),
+                                uncheckedColor = Color.White.copy(alpha = 0.2f)
+                            ),
                             modifier = Modifier.size(24.dp)
                         )
+
+                        Spacer(modifier = Modifier.width(8.dp))
+
+                        Column(modifier = Modifier.weight(1f)) {
+                            val titleText = if (index != null) "$index. ${task.title}" else task.title
+                            Text(
+                                titleText,
+                                fontWeight = FontWeight.Bold,
+                                color = if (isDone) Color.White.copy(alpha = 0.4f) else Color.White,
+                                textDecoration = if (isDone) androidx.compose.ui.text.style.TextDecoration.LineThrough else null,
+                                fontSize = 14.sp
+                            )
+                        }
+                        
+                        val priorityIcon = when(task.priority) {
+                            2 -> Icons.Default.KeyboardDoubleArrowUp
+                            1 -> Icons.Default.KeyboardArrowUp
+                            else -> Icons.Default.KeyboardArrowDown
+                        }
+                        Icon(
+                            imageVector = priorityIcon, 
+                            contentDescription = null, 
+                            tint = if (isDone) Color.White.copy(alpha = 0.2f) else priorityColor,
+                            modifier = Modifier.size(18.dp)
+                        )
                     }
+
+                    if (task.description.isNotBlank()) {
+                        Spacer(modifier = Modifier.height(4.dp))
+                        Text(
+                            task.description,
+                            fontSize = 12.sp,
+                            color = Color.White.copy(alpha = 0.4f),
+                            maxLines = 1,
+                            overflow = androidx.compose.ui.text.style.TextOverflow.Ellipsis,
+                            modifier = Modifier.padding(start = 32.dp)
+                        )
+                    }
+
+                    Spacer(modifier = Modifier.height(12.dp))
+                    
+                    Row(verticalAlignment = Alignment.CenterVertically) {
+                        LinearProgressIndicator(
+                            progress = { task.progress / 100f },
+                            modifier = Modifier
+                                .weight(1f)
+                                .height(4.dp)
+                                .clip(CircleShape),
+                            color = if (isDone) Color(0xFF2EC4B6) else style.accentColor,
+                            trackColor = Color.White.copy(alpha = 0.05f)
+                        )
+                        
+                        Spacer(modifier = Modifier.width(12.dp))
+                        
+                        if (!isDone) {
+                            IconButton(
+                                onClick = {
+                                    val nextStatus = when(task.status) {
+                                        "Todo" -> "In Progress"
+                                        "In Progress" -> "Review"
+                                        "Review" -> "Done"
+                                        else -> "Done"
+                                    }
+                                    val newProgress = if (nextStatus == "Done") 100 else task.progress
+                                    onUpdateTask(task.copy(status = nextStatus, progress = newProgress))
+                                },
+                                modifier = Modifier
+                                    .size(32.dp)
+                                    .background(style.accentColor.copy(alpha = 0.1f), CircleShape)
+                            ) {
+                                Icon(
+                                    imageVector = Icons.Default.ChevronRight, 
+                                    contentDescription = "Next", 
+                                    tint = style.accentColor,
+                                    modifier = Modifier.size(16.dp)
+                                )
+                            }
+                        } else {
+                            Icon(
+                                imageVector = Icons.Default.CheckCircle, 
+                                contentDescription = "Completed", 
+                                tint = Color(0xFF2EC4B6),
+                                modifier = Modifier.size(24.dp)
+                            )
+                        }
+                    }
+                    
+                    Spacer(modifier = Modifier.height(16.dp))
                 }
+                
+                val displayTime = task.dueDate ?: task.createdAt
+                CreatedAtText(
+                    timestamp = displayTime,
+                    modifier = Modifier.align(Alignment.BottomEnd).padding(8.dp)
+                )
             }
         }
         WorkspaceDropdown(expanded = showMenu, onDismissRequest = { showMenu = false }) {
@@ -270,7 +282,7 @@ fun TaskDetailSection(
                 horizontalArrangement = Arrangement.SpaceBetween
             ) {
                 IconButton(onClick = onBack) { Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Back", tint = Color.White) }
-                IconButton(onClick = onEdit) { Icon(Icons.Default.Edit, contentDescription = "Edit", tint = accentColor) }
+                IconButton(onClick = onEdit) { Icon(Icons.Default.Edit, contentDescription = "Edit", tint = accentColor, modifier = Modifier.size(28.dp)) }
             }
 
             Column(modifier = Modifier.padding(horizontal = 24.dp).padding(bottom = 12.dp)) {
@@ -283,6 +295,11 @@ fun TaskDetailSection(
                 DetailInfoItem(label = "STATUS", value = task.status.uppercase(), color = accentColor)
                 DetailInfoItem(label = "PRIORITY", value = when(task.priority) { 2 -> "High"; 1 -> "Medium"; else -> "Low" }, color = accentColor)
                 DetailInfoItem(label = "PROGRESS", value = "${task.progress}%", color = accentColor)
+                
+                if (task.dueDate != null) {
+                    val dueStr = SimpleDateFormat("MMM dd, yyyy 'at' h:mm a", Locale.getDefault()).format(Date(task.dueDate))
+                    DetailInfoItem(label = "DUE DATE / REMINDER", value = dueStr, color = accentColor)
+                }
 
                 Spacer(modifier = Modifier.height(32.dp))
                 
@@ -331,6 +348,9 @@ fun TaskAddEditSection(
     var description by remember(task) { mutableStateOf(task?.description ?: "") }
     var priority by remember(task) { mutableStateOf(task?.priority ?: 1) }
     var status by remember(task) { mutableStateOf(task?.status ?: "Todo") }
+    var dueDate by remember(task) { mutableStateOf(task?.dueDate) }
+
+    val context = androidx.compose.ui.platform.LocalContext.current
 
     val dynamicAccentColor = when(priority) {
         2 -> Color(0xFFFF5252)
@@ -351,8 +371,8 @@ fun TaskAddEditSection(
                 TextButton(
                     onClick = {
                         val progress = if (status == "Done") 100 else if (task?.status == "Done") 0 else task?.progress ?: 0
-                        val updated = task?.copy(title = title, description = description, priority = priority, status = status, progress = progress)
-                            ?: TaskEntity(projectId = projectId, title = title, description = description, priority = priority, status = status, progress = progress)
+                        val updated = task?.copy(title = title, description = description, priority = priority, status = status, progress = progress, dueDate = dueDate)
+                            ?: TaskEntity(projectId = projectId, title = title, description = description, priority = priority, status = status, progress = progress, dueDate = dueDate)
                         
                         if (task == null) {
                              viewModel.insertTask(updated)
@@ -413,6 +433,74 @@ fun TaskAddEditSection(
                             border = if (isSel) null else BorderStroke(1.dp, color.copy(alpha = 0.2f)),
                             modifier = Modifier.weight(1f).height(40.dp)
                         ) { Box(contentAlignment = Alignment.Center) { Text(label, color = if (isSel) Color.White else color, fontSize = 10.sp, fontWeight = FontWeight.Black) } }
+                    }
+                }
+
+                Spacer(modifier = Modifier.height(24.dp))
+                Text("REMINDER / DUE DATE", color = dynamicAccentColor, fontSize = 10.sp, fontWeight = FontWeight.Black, letterSpacing = 1.5.sp)
+                Spacer(modifier = Modifier.height(12.dp))
+                Surface(
+                    onClick = {
+                        val calendar = Calendar.getInstance()
+                        dueDate?.let { calendar.timeInMillis = it }
+                        
+                        val datePicker = android.app.DatePickerDialog(
+                            context,
+                            { _, year, month, day ->
+                                calendar.set(Calendar.YEAR, year)
+                                calendar.set(Calendar.MONTH, month)
+                                calendar.set(Calendar.DAY_OF_MONTH, day)
+                                
+                                android.app.TimePickerDialog(
+                                    context,
+                                    { _, hour, minute ->
+                                        calendar.set(Calendar.HOUR_OF_DAY, hour)
+                                        calendar.set(Calendar.MINUTE, minute)
+                                        dueDate = calendar.timeInMillis
+                                    },
+                                    calendar.get(Calendar.HOUR_OF_DAY),
+                                    calendar.get(Calendar.MINUTE),
+                                    false
+                                ).show()
+                            },
+                            calendar.get(Calendar.YEAR),
+                            calendar.get(Calendar.MONTH),
+                            calendar.get(Calendar.DAY_OF_MONTH)
+                        )
+                        datePicker.show()
+                    },
+                    shape = RoundedCornerShape(12.dp),
+                    color = Color.White.copy(alpha = 0.05f),
+                    border = BorderStroke(1.dp, Color.White.copy(alpha = 0.1f)),
+                    modifier = Modifier.fillMaxWidth()
+                ) {
+                    Row(
+                        modifier = Modifier.padding(16.dp),
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        Icon(
+                            imageVector = Icons.Default.NotificationsActive,
+                            contentDescription = null,
+                            tint = if (dueDate != null) dynamicAccentColor else Color.White.copy(alpha = 0.3f),
+                            modifier = Modifier.size(20.dp)
+                        )
+                        Spacer(modifier = Modifier.width(12.dp))
+                        Text(
+                            text = if (dueDate != null) {
+                                SimpleDateFormat("MMM dd, h:mm a", Locale.getDefault()).format(Date(dueDate!!))
+                            } else {
+                                "Set reminder time..."
+                            },
+                            color = if (dueDate != null) Color.White else Color.White.copy(alpha = 0.3f),
+                            fontSize = 14.sp,
+                            fontWeight = FontWeight.Bold
+                        )
+                        Spacer(modifier = Modifier.weight(1f))
+                        if (dueDate != null) {
+                            IconButton(onClick = { dueDate = null }, modifier = Modifier.size(24.dp)) {
+                                Icon(Icons.Default.Close, contentDescription = "Clear", tint = Color.White.copy(alpha = 0.5f))
+                            }
+                        }
                     }
                 }
 

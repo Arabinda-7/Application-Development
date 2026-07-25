@@ -40,20 +40,6 @@
                 app:tint="@color/white" />
 
             <TextView
-                android:id="@+id/tv_header_title_habit"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="ADD RITUAL"
-                android:textColor="@color/white"
-                android:textSize="18sp"
-                android:textStyle="bold"
-                android:letterSpacing="0.1"
-                app:layout_constraintBottom_toBottomOf="parent"
-                app:layout_constraintStart_toEndOf="@id/btn_close"
-                app:layout_constraintEnd_toStartOf="@id/btn_save"
-                app:layout_constraintTop_toTopOf="parent" />
-
-            <TextView
                 android:id="@+id/btn_save"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
@@ -107,6 +93,41 @@
                     android:textSize="11sp"
                     android:textStyle="bold"
                     android:visibility="gone" />
+
+                <!-- Target Input Section -->
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="16dp"
+                    android:gravity="center_vertical"
+                    android:orientation="horizontal">
+
+                    <TextView
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:text="DAILY TARGET"
+                        android:textColor="#80FFFFFF"
+                        android:textSize="10sp"
+                        android:textStyle="bold"
+                        android:letterSpacing="0.1" />
+
+                    <EditText
+                        android:id="@+id/habit_target_input"
+                        android:layout_width="60dp"
+                        android:layout_height="wrap_content"
+                        android:background="@drawable/priority_chip_bg"
+                        android:backgroundTint="#1AFFFFFF"
+                        android:gravity="center"
+                        android:hint="1"
+                        android:inputType="number"
+                        android:padding="8dp"
+                        android:text="1"
+                        android:textColor="@color/white"
+                        android:textColorHint="#40FFFFFF"
+                        android:textSize="14sp"
+                        android:textStyle="bold" />
+                </LinearLayout>
 
                 <!-- Direct Day Selector -->
                 <TextView

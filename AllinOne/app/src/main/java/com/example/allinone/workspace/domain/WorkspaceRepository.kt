@@ -270,6 +270,7 @@ class WorkspaceRepository(private val dao: WorkspaceDao) {
 
     suspend fun deleteNote(note: NoteEntity) {
         dao.deleteNote(note)
+        logActivity(note.projectId, "NOTE", note.id, "DELETE", "Note '${note.title}' removed")
         notifyChange()
     }
 

@@ -1,39 +1,30 @@
-package com.example.allinone
+package com.example.allinone.ui.performance
 
 import androidx.compose.animation.animateColorAsState
-import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.*
 import androidx.compose.foundation.gestures.detectHorizontalDragGestures
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.*
-import androidx.compose.foundation.lazy.grid.*
-import androidx.compose.foundation.shape.*
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
-import androidx.compose.material.icons.automirrored.filled.TrendingUp
-import androidx.compose.material.icons.filled.Check
 import androidx.compose.material.icons.filled.DateRange
-import androidx.compose.material.icons.filled.KeyboardArrowDown
-import androidx.compose.material.icons.filled.KeyboardArrowUp
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.draw.shadow
-import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.StrokeCap
-import androidx.compose.ui.graphics.drawscope.Stroke
-import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.input.pointer.pointerInput
-import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
-import androidx.compose.ui.unit.*
+import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
+import com.example.allinone.*
+import com.example.allinone.ui.performance.components.*
 import java.text.SimpleDateFormat
 import java.util.*
 
@@ -54,17 +45,40 @@ fun PerformanceDashboardScreen(
     isWorkoutContext: Boolean = false,
     showPerformanceCard: Boolean = true,
     showTrendCard: Boolean = true,
-    showBackgroundAura: Boolean = true
+    showBackgroundAura: Boolean = true,
+    habits: List<Habit> = emptyList(),
+    selectedHabitName: String? = null,
+    onHabitSelected: (String?) -> Unit = {},
+    onSaveNote: (String, String) -> Unit = { _, _ -> }
 ) {
-    val heatmapData = remember(currentMonth, isWorkoutContext) {
+    val heatmapData = remember(currentMonth, isWorkoutContext, selectedHabitName) {
         if (isWorkoutContext) DataManager.getVolumeWeightedHeatmap(currentMonth)
+        else if (selectedHabitName != null) com.example.allinone.data.HabitDataManager.getHabitSpecificHeatmap(selectedHabitName, currentMonth)
         else DataManager.getHeatmapData(currentMonth) 
     }
     val densityData = remember { DataManager.getTemporalDensityData() }
     val correlations = remember { DataManager.getHabitCorrelationMatrix() }
     
+    val streaks = remember(selectedHabitName) {
+        if (selectedHabitName != null) DataManager.getHabitStreaks(selectedHabitName)
+        else null
+    }
+
+    val cyclicalData = remember(selectedHabitName) { DataManager.getWeeklyCyclicalData(selectedHabitName) }
+    val stabilityIndex = remember(selectedHabitName) { DataManager.getStabilityIndex(selectedHabitName) }
+    val resilienceScore = remember(selectedHabitName) { DataManager.getResilienceScore(selectedHabitName) }
+    val momentumHistory = remember(selectedHabitName) { DataManager.getMonthlyMomentumHistory(selectedHabitName) }
+    val milestoneProgress = remember(selectedHabitName) { DataManager.getStreakMilestoneProgress(selectedHabitName) }
+
     val muscleDistribution = remember { DataManager.getMuscleDistributionData() }
     val recoveryStatus = remember { DataManager.getMuscleRecoveryStatus() }
+    val acwrData = remember { DataManager.getACWRData() }
+    val workoutStability = remember { DataManager.getTrainingStabilityScore() }
+    
+    val volumeData = remember(currentMonth) { DataManager.getMonthlyVolumeData(currentMonth) }
+    val diversityData = remember { DataManager.getWorkoutDiversityData() }
+    val intensityData = remember(currentMonth) { DataManager.getIntensityDistribution(currentMonth) }
+    val muscleFocusData = remember(currentMonth) { DataManager.getDailyMuscleFocus(currentMonth) }
 
     val moodColorTarget = remember(currentMood, overrideColor) {
         if (overrideColor != null) return@remember overrideColor
@@ -185,6 +199,47 @@ fun PerformanceDashboardScreen(
                             )
                         }
 
+                        // Habit Selector
+                        if (!isWorkoutContext && habits.isNotEmpty()) {
+                            Spacer(modifier = Modifier.height(16.dp))
+                            LazyRow(
+                                modifier = Modifier.fillMaxWidth(),
+                                horizontalArrangement = Arrangement.spacedBy(8.dp),
+                                contentPadding = PaddingValues(end = 24.dp)
+                            ) {
+                                item {
+                                    FilterChip(
+                                        selected = selectedHabitName == null,
+                                        onClick = { onHabitSelected(null) },
+                                        label = { Text("OVERALL", fontSize = 10.sp, fontWeight = FontWeight.Bold) },
+                                        colors = FilterChipDefaults.filterChipColors(
+                                            selectedContainerColor = animatedMoodColor,
+                                            selectedLabelColor = Color.Black,
+                                            containerColor = Color.White.copy(alpha = 0.05f),
+                                            labelColor = Color.White
+                                        ),
+                                        border = null,
+                                        shape = CircleShape
+                                    )
+                                }
+                                items(habits) { habit ->
+                                    FilterChip(
+                                        selected = selectedHabitName == habit.name,
+                                        onClick = { onHabitSelected(habit.name) },
+                                        label = { Text(habit.name.uppercase(), fontSize = 10.sp, fontWeight = FontWeight.Bold) },
+                                        colors = FilterChipDefaults.filterChipColors(
+                                            selectedContainerColor = if (habit.color != -1) Color(habit.color) else animatedMoodColor,
+                                            selectedLabelColor = Color.Black,
+                                            containerColor = Color.White.copy(alpha = 0.05f),
+                                            labelColor = Color.White
+                                        ),
+                                        border = null,
+                                        shape = CircleShape
+                                    )
+                                }
+                            }
+                        }
+
                         val sdfMonth = SimpleDateFormat("MMMM", Locale.getDefault())
                         val sdfYear = SimpleDateFormat("yyyy", Locale.getDefault())
 
@@ -270,7 +325,7 @@ fun PerformanceDashboardScreen(
                                     Box(modifier = Modifier.weight(1f).aspectRatio(1f))
                                 } else {
                                     val dateStr = gridMonthStr + day.toString().padStart(2, '0')
-                                    val dayProgress = heatmapData.getOrNull(day - 1) ?: 0
+                                    val dayProgress = heatmapData[day - 1] ?: 0
                                     CalendarDayItem(
                                         day = day,
                                         progress = dayProgress,
@@ -298,9 +353,11 @@ fun PerformanceDashboardScreen(
             if (showPerformanceCard) {
                 item {
                     val formattedDate = try {
-                        val date = SimpleDateFormat("yyyyMMdd", Locale.getDefault()).parse(selectedDate)
-                        SimpleDateFormat("MMMM dd, yyyy", Locale.getDefault()).format(date!!).uppercase()
-                    } catch (e: Exception) { "JULY 16, 2026" }
+                        val sdfIn = SimpleDateFormat("yyyyMMdd", Locale.getDefault())
+                        val sdfOut = SimpleDateFormat("MMMM dd, yyyy", Locale.getDefault())
+                        val date = sdfIn.parse(selectedDate)
+                        if (date != null) sdfOut.format(date).uppercase() else selectedDate
+                    } catch (e: Exception) { selectedDate }
 
                     DashboardCard(
                         title = "PERFORMANCE FOR $formattedDate",
@@ -309,7 +366,10 @@ fun PerformanceDashboardScreen(
                         PerformanceSummary(
                             data = performanceData,
                             isExpanded = isPerformanceExpanded,
-                            themeColor = animatedMoodColor
+                            themeColor = animatedMoodColor,
+                            isWorkoutContext = isWorkoutContext,
+                            currentStreak = streaks?.first,
+                            longestStreak = streaks?.second
                         )
                     }
                     Spacer(modifier = Modifier.height(16.dp))
@@ -323,26 +383,118 @@ fun PerformanceDashboardScreen(
                         title = "7-DAY COMPLETION TREND",
                         modifier = Modifier.padding(horizontal = 24.dp)
                     ) {
-                        TrendChart(trendData, animatedMoodColor)
+                        TrendChart(trendData, animatedMoodColor, isWorkoutContext)
                     }
                     Spacer(modifier = Modifier.height(24.dp))
                 }
+            }
+
+            // Daily Reflection Card
+            item {
+                var noteText by remember(selectedDate, performanceData.notes) { mutableStateOf(performanceData.notes ?: "") }
+                DashboardCard(
+                    title = "DAILY REFLECTION",
+                    modifier = Modifier.padding(horizontal = 24.dp)
+                ) {
+                    Column {
+                        TextField(
+                            value = noteText,
+                            onValueChange = { noteText = it },
+                            placeholder = { Text("How was your day? Any obstacles?", fontSize = 12.sp, color = Color.Gray) },
+                            modifier = Modifier.fillMaxWidth(),
+                            colors = TextFieldDefaults.colors(
+                                focusedContainerColor = Color.Transparent,
+                                unfocusedContainerColor = Color.Transparent,
+                                focusedIndicatorColor = animatedMoodColor,
+                                unfocusedIndicatorColor = Color.White.copy(alpha = 0.1f),
+                                focusedTextColor = Color.White,
+                                unfocusedTextColor = Color.White
+                            ),
+                            textStyle = androidx.compose.ui.text.TextStyle(fontSize = 14.sp)
+                        )
+                        if (noteText != (performanceData.notes ?: "")) {
+                            Spacer(modifier = Modifier.height(8.dp))
+                            TextButton(
+                                onClick = { onSaveNote(selectedDate, noteText) },
+                                modifier = Modifier.align(Alignment.End)
+                            ) {
+                                Text("SAVE REFLECTION", color = animatedMoodColor, fontSize = 10.sp, fontWeight = FontWeight.Bold)
+                            }
+                        }
+                    }
+                }
+                Spacer(modifier = Modifier.height(24.dp))
             }
 
             // Advanced Analytics / Insights
             item {
                 if (isWorkoutContext) {
                     Column(modifier = Modifier.padding(horizontal = 24.dp)) {
-                        DashboardCard(title = "MUSCLE BALANCE (30D VOLUME)") {
-                            MuscleRadarChart(muscleDistribution, animatedMoodColor)
+                        DashboardCard(
+                            title = "PHYSIOLOGICAL READINESS (ACWR)",
+                            description = "Acute:Chronic Workload Ratio. Compares your recent fatigue (7d) against long-term fitness (28d)."
+                        ) {
+                            ACWRChart(acwrData, animatedMoodColor)
+                        }
+                        Spacer(modifier = Modifier.height(24.dp))
+                        Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(16.dp)) {
+                            DashboardCard(title = "MUSCLE BALANCE", modifier = Modifier.weight(1.2f)) {
+                                MuscleRadarChart(muscleDistribution, animatedMoodColor)
+                            }
+                            DashboardCard(title = "TRAINING STABILITY", modifier = Modifier.weight(0.8f)) {
+                                StabilityChaosGauge(workoutStability, animatedMoodColor)
+                            }
                         }
                         Spacer(modifier = Modifier.height(24.dp))
                         DashboardCard(title = "MUSCLE READINESS") {
                             RecoveryStatusDashboard(recoveryStatus, animatedMoodColor)
                         }
+                        Spacer(modifier = Modifier.height(24.dp))
+                        DashboardCard(title = "DAILY VOLUME PROGRESSION") {
+                            VolumeProgressionChart(volumeData, animatedMoodColor)
+                        }
+                        Spacer(modifier = Modifier.height(24.dp))
+                        Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(16.dp)) {
+                            DashboardCard(title = "WORKOUT DIVERSITY", modifier = Modifier.weight(1f)) {
+                                WorkoutDiversityChart(diversityData, animatedMoodColor)
+                            }
+                            DashboardCard(title = "INTENSITY HEATMAP", modifier = Modifier.weight(1f)) {
+                                IntensityHeatmap(intensityData, animatedMoodColor)
+                            }
+                        }
+                        Spacer(modifier = Modifier.height(24.dp))
+                        DashboardCard(title = "MUSCLE FOCUS HEATMAP") {
+                            MuscleFocusGrid(muscleFocusData, animatedMoodColor)
+                        }
                     }
                 } else {
                     Column(modifier = Modifier.padding(horizontal = 24.dp)) {
+                        DashboardCard(title = "STREAK MILESTONES") {
+                            MilestoneProgressCard(
+                                current = milestoneProgress.first,
+                                next = milestoneProgress.second,
+                                progress = milestoneProgress.third,
+                                themeColor = animatedMoodColor
+                            )
+                        }
+                        Spacer(modifier = Modifier.height(24.dp))
+                        DashboardCard(title = "MONTHLY MOMENTUM HISTORY") {
+                            MonthlyMomentumChart(momentumHistory, animatedMoodColor)
+                        }
+                        Spacer(modifier = Modifier.height(24.dp))
+                        DashboardCard(title = "WEEKLY CYCLICALITY") {
+                            WeeklyCyclicalRadarChart(cyclicalData, animatedMoodColor)
+                        }
+                        Spacer(modifier = Modifier.height(24.dp))
+                        Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(16.dp)) {
+                            DashboardCard(title = "ROUTINE STABILITY", modifier = Modifier.weight(1f)) {
+                                StabilityGauge(stabilityIndex, animatedMoodColor)
+                            }
+                            DashboardCard(title = "RESILIENCE (RECOVERY)", modifier = Modifier.weight(1f)) {
+                                ResilienceGauge(resilienceScore, animatedMoodColor)
+                            }
+                        }
+                        Spacer(modifier = Modifier.height(24.dp))
                         DashboardCard(title = "POWER HOURS (TEMPORAL SUCCESS)") {
                             PunchCardChart(densityData, animatedMoodColor)
                         }
@@ -367,356 +519,10 @@ fun PerformanceDashboardScreen(
                     description = momentumDescription,
                     modifier = Modifier.padding(horizontal = 24.dp)
                 ) {
-                    ConsistencyHeatmap(heatmapData, animatedMoodColor)
+                    ConsistencyHeatmap(heatmapData.values.toList(), animatedMoodColor)
                 }
                 Spacer(modifier = Modifier.height(40.dp))
             }
         }
-    }
-}
-
-@Composable
-fun CalendarDayItem(
-    day: Int, 
-    progress: Int,
-    isSelected: Boolean, 
-    isToday: Boolean, 
-    themeColor: Color, 
-    modifier: Modifier = Modifier
-) {
-    Box(
-        modifier = modifier.aspectRatio(1f).padding(4.dp),
-        contentAlignment = Alignment.Center
-    ) {
-        Column(
-            horizontalAlignment = Alignment.CenterHorizontally,
-            verticalArrangement = Arrangement.Center,
-            modifier = Modifier.fillMaxSize()
-        ) {
-            Box(
-                modifier = Modifier.size(36.dp),
-                contentAlignment = Alignment.Center
-            ) {
-                // Background based on progress
-                Box(
-                    modifier = Modifier
-                        .fillMaxSize()
-                        .background(
-                            color = if (progress == 0) Color.White.copy(alpha = 0.05f) 
-                                    else themeColor.copy(alpha = (progress / 100f).coerceIn(0.15f, 0.4f)),
-                            shape = RoundedCornerShape(8.dp)
-                        )
-                )
-
-                if (isSelected) {
-                    Canvas(modifier = Modifier.fillMaxSize()) {
-                        // Square selection border
-                        val strokeWidth = 1.dp.toPx()
-                        val inset = strokeWidth / 2
-                        drawRoundRect(
-                            color = themeColor,
-                            topLeft = Offset(inset, inset),
-                            size = androidx.compose.ui.geometry.Size(size.width - strokeWidth, size.height - strokeWidth),
-                            cornerRadius = androidx.compose.ui.geometry.CornerRadius(8.dp.toPx()),
-                            style = Stroke(width = strokeWidth)
-                        )
-                        
-                        // Small indicator for selection
-                        drawArc(
-                            color = themeColor,
-                            startAngle = -120f,
-                            sweepAngle = 60f,
-                            useCenter = false,
-                            topLeft = Offset(size.width * 0.15f, size.height * 0.15f),
-                            size = size * 0.7f,
-                            style = Stroke(width = 2.5.dp.toPx(), cap = StrokeCap.Round)
-                        )
-                    }
-                    Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                        Text(text = day.toString(), color = Color.White, fontSize = 14.sp, fontWeight = FontWeight.Bold)
-                        Icon(
-                            Icons.Default.Check,
-                            contentDescription = null,
-                            tint = themeColor,
-                            modifier = Modifier.size(10.dp)
-                        )
-                    }
-                } else {
-                    Text(text = day.toString(), color = Color.LightGray, fontSize = 14.sp)
-                }
-            }
-            if (isToday) {
-                Spacer(modifier = Modifier.height(2.dp))
-                Box(
-                    modifier = Modifier
-                        .width(12.dp)
-                        .height(2.dp)
-                        .background(themeColor, RoundedCornerShape(1.dp))
-                )
-            }
-        }
-    }
-}
-
-@Composable
-fun DashboardCard(
-    title: String, 
-    modifier: Modifier = Modifier, 
-    description: String? = null,
-    content: @Composable () -> Unit
-) {
-    Card(
-        modifier = modifier.fillMaxWidth(),
-        shape = RoundedCornerShape(24.dp),
-        colors = CardDefaults.cardColors(containerColor = Color.White.copy(alpha = 0.05f)),
-        border = BorderStroke(1.dp, Color.White.copy(alpha = 0.08f))
-    ) {
-        Column(modifier = Modifier.padding(20.dp)) {
-            Text(
-                text = title,
-                fontSize = 10.sp,
-                fontWeight = FontWeight.Bold,
-                color = Color.Gray,
-                letterSpacing = 0.1.em
-            )
-            
-            if (description != null) {
-                Spacer(modifier = Modifier.height(4.dp))
-                Text(
-                    text = description,
-                    fontSize = 11.sp,
-                    color = Color.White.copy(alpha = 0.5f),
-                    lineHeight = 16.sp
-                )
-            }
-            
-            Spacer(modifier = Modifier.height(16.dp))
-            content()
-        }
-    }
-}
-
-@Composable
-fun PerformanceSummary(data: DayHistory, isExpanded: Boolean, themeColor: Color) {
-    val totalItems = data.totalHabits + data.totalWorkouts
-    val totalCompleted = data.habitsCompleted + data.workoutsCompleted
-    val overallPercent = if (totalItems > 0) (totalCompleted * 100) / totalItems else 0
-
-    Column {
-        Row(verticalAlignment = Alignment.CenterVertically) {
-            Text(
-                text = "$overallPercent%",
-                fontSize = 40.sp,
-                fontWeight = FontWeight.Bold,
-                color = Color.White
-            )
-            Spacer(modifier = Modifier.width(8.dp))
-            Icon(
-                Icons.AutoMirrored.Filled.TrendingUp,
-                contentDescription = null,
-                tint = themeColor,
-                modifier = Modifier.size(24.dp)
-            )
-            Spacer(modifier = Modifier.weight(1f))
-            Icon(
-                imageVector = if (isExpanded) Icons.Default.KeyboardArrowUp else Icons.Default.KeyboardArrowDown,
-                contentDescription = "Toggle Details",
-                tint = Color.Gray,
-                modifier = Modifier.size(20.dp)
-            )
-        }
-        Text(text = "Overall Completion", fontSize = 12.sp, color = Color.Gray)
-        
-        androidx.compose.animation.AnimatedVisibility(visible = isExpanded) {
-            Column {
-                Spacer(modifier = Modifier.height(24.dp))
-
-                if (data.totalHabits > 0) {
-                    ProgressRow(
-                        icon = "[H]",
-                        label = "Habits (${data.habitsCompleted}/${data.totalHabits})",
-                        progress = data.habitsCompleted.toFloat() / data.totalHabits,
-                        color = themeColor
-                    )
-                    Spacer(modifier = Modifier.height(16.dp))
-                }
-
-                if (data.totalWorkouts > 0) {
-                    ProgressRow(
-                        icon = "[W]",
-                        label = "Workouts (${data.workoutsCompleted}/${data.totalWorkouts})",
-                        progress = data.workoutsCompleted.toFloat() / data.totalWorkouts,
-                        color = Color(0xFF29D9C3)
-                    )
-                    Spacer(modifier = Modifier.height(16.dp))
-                }
-
-                if (totalItems > 0) {
-                    ProgressRow(
-                        icon = "Σ",
-                        label = "Total Performance ($totalCompleted/$totalItems)",
-                        progress = totalCompleted.toFloat() / totalItems,
-                        color = themeColor
-                    )
-                } else {
-                    Text(
-                        text = "No items scheduled for this day.",
-                        color = Color.Gray,
-                        fontSize = 12.sp,
-                        modifier = Modifier.fillMaxWidth(),
-                        textAlign = TextAlign.Center
-                    )
-                }
-            }
-        }
-    }
-}
-
-@Composable
-fun ProgressRow(icon: String, label: String, progress: Float, color: Color) {
-    val percentage = (progress * 100).toInt()
-    Column {
-        Row(verticalAlignment = Alignment.CenterVertically) {
-            Box(
-                modifier = Modifier
-                    .size(20.dp)
-                    .background(Color.White.copy(alpha = 0.1f), RoundedCornerShape(4.dp)),
-                contentAlignment = Alignment.Center
-            ) {
-                Text(text = icon, fontSize = 10.sp, color = Color.White, fontWeight = FontWeight.Bold)
-            }
-            Spacer(modifier = Modifier.width(12.dp))
-            Text(text = label, modifier = Modifier.weight(1f), fontSize = 12.sp, color = Color.White.copy(alpha = 0.8f))
-            Text(text = "$percentage%", fontSize = 12.sp, color = Color.White)
-        }
-        Spacer(modifier = Modifier.height(8.dp))
-        CustomLinearProgressIndicator(progress = progress, color = color)
-    }
-}
-
-@Composable
-fun CustomLinearProgressIndicator(progress: Float, color: Color) {
-    val animatedProgress by animateFloatAsState(
-        targetValue = progress,
-        animationSpec = tween(durationMillis = 600),
-        label = "ProgressAnimation"
-    )
-    Box(
-        modifier = Modifier
-            .fillMaxWidth()
-            .height(6.dp)
-            .background(Color.White.copy(alpha = 0.1f), RoundedCornerShape(3.dp))
-    ) {
-        Box(
-            modifier = Modifier
-                .fillMaxWidth(animatedProgress)
-                .fillMaxHeight()
-                .background(
-                    brush = Brush.horizontalGradient(listOf(color.copy(alpha = 0.8f), color)),
-                    shape = RoundedCornerShape(3.dp)
-                )
-        )
-    }
-}
-
-@Composable
-fun TrendChart(data: List<Pair<Int, Int>>, themeColor: Color) {
-    val days = listOf("F", "S", "S", "M", "T", "W", "T")
-    
-    Column {
-        Row(
-            modifier = Modifier.fillMaxWidth(),
-            horizontalArrangement = Arrangement.End,
-            verticalAlignment = Alignment.CenterVertically
-        ) {
-            LegendItem(color = themeColor, label = "Habits")
-            Spacer(modifier = Modifier.width(16.dp))
-            LegendItem(color = Color(0xFF29D9C3), label = "Workouts")
-        }
-
-        Spacer(modifier = Modifier.height(12.dp))
-        
-        Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .height(110.dp),
-            horizontalArrangement = Arrangement.SpaceBetween,
-            verticalAlignment = Alignment.Bottom
-        ) {
-            data.forEach { pair ->
-                DoubleBar(
-                    habitProgress = pair.first.toFloat() / 100f,
-                    workoutProgress = pair.second.toFloat() / 100f,
-                    themeColor = themeColor
-                )
-            }
-        }
-        Spacer(modifier = Modifier.height(12.dp))
-        Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
-            days.forEach { day ->
-                Text(
-                    text = day,
-                    modifier = Modifier.width(34.dp), // Matched to double bar + spacer width
-                    textAlign = TextAlign.Center,
-                    fontSize = 10.sp,
-                    color = Color.Gray
-                )
-            }
-        }
-    }
-}
-
-@Composable
-fun DoubleBar(habitProgress: Float, workoutProgress: Float, themeColor: Color) {
-    val fullHeight = 90.dp
-    Row(verticalAlignment = Alignment.Bottom) {
-        // Habit Bar Column
-        Box(
-            modifier = Modifier
-                .width(14.dp)
-                .height(fullHeight)
-                .background(Color.White.copy(alpha = 0.05f), CircleShape),
-            contentAlignment = Alignment.BottomCenter
-        ) {
-            Box(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .height(fullHeight * habitProgress.coerceIn(0.1f, 1f))
-                    .background(
-                        brush = Brush.verticalGradient(listOf(themeColor.copy(alpha = 0.4f), themeColor)),
-                        shape = CircleShape
-                    )
-            )
-        }
-
-        Spacer(modifier = Modifier.width(6.dp))
-
-        // Workout Bar Column
-        Box(
-            modifier = Modifier
-                .width(14.dp)
-                .height(fullHeight) // Made equal to Habit bar height
-                .background(Color.White.copy(alpha = 0.05f), CircleShape),
-            contentAlignment = Alignment.BottomCenter
-        ) {
-            Box(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .height(fullHeight * workoutProgress.coerceIn(0.1f, 1f))
-                    .background(
-                        brush = Brush.verticalGradient(listOf(Color(0xFF29D9C3).copy(alpha = 0.4f), Color(0xFF29D9C3))),
-                        shape = CircleShape
-                    )
-            )
-        }
-    }
-}
-
-@Composable
-fun LegendItem(color: Color, label: String) {
-    Row(verticalAlignment = Alignment.CenterVertically) {
-        Box(modifier = Modifier.size(8.dp).background(color, CircleShape))
-        Spacer(modifier = Modifier.width(8.dp))
-        Text(text = label, fontSize = 10.sp, color = Color.Gray)
     }
 }

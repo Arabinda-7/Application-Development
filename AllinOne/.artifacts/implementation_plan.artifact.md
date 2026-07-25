@@ -1,36 +1,30 @@
-# Implementation Plan - Modernize Dropdown Menus (App UI Matching)
+# Implementation Plan - Reduce Task Card Free Space
 
-Style the Workspace context menus (long-press options) to perfectly match the app's aesthetic (Glass/Dark theme with custom accents).
+The user wants to reduce the "free space" in the task card, especially when there are subtasks. The current layout has multiple layers of padding and margins that accumulate, resulting in excessive empty space at the bottom and between elements.
 
 ## Proposed Changes
 
-### Workspace UI Sections
+### 1. Update Task Card Layouts
+Modify the XML layouts to reduce vertical margins and padding.
 
-#### [MODIFY] [CommonWorkspaceComponents.kt](file:///C:/Users/arabi/OneDrive/Desktop/App Development/AllinOne/app/src/main/java/com/example/allinone/workspace/ui/sections/CommonWorkspaceComponents.kt)
-- Create a `StyledDropdownMenu` and `StyledDropdownMenuItem` wrapper (or just apply styles to existing ones).
-- Style will include:
-    - **Background**: `style.surfaceColor` (Dark/Glass).
-    - **Shape**: `RoundedCornerShape(style.borderRadius)`.
-    - **Border**: Subtle border matching the app's card style.
-    - **Text Color**: White with appropriate icons.
-    - **Divider**: Consistent with the app's separators.
+#### [MODIFY] [item_task_tasks.xml](file:///C:/Users/arabi/OneDrive/Desktop/App Development/AllinOne/app/src/main/res/layout/item_task_tasks.xml)
+- Reduce parent `ConstraintLayout` vertical padding from `16dp` to `12dp`.
+- Reduce `subtask_list_container` `layout_marginTop` from `12dp` to `8dp`.
+- Change `subtask_list_container` `layout_marginBottom` from `12dp` to `4dp`.
 
-#### [MODIFY] Update all Section Files
-Update the following files to use the new styled menus:
-- [TasksSection.kt](file:///C:/Users/arabi/OneDrive/Desktop/App Development/AllinOne/app/src/main/java/com/example/allinone/workspace/ui/sections/TasksSection.kt)
-- [BugsSection.kt](file:///C:/Users/arabi/OneDrive/Desktop/App Development/AllinOne/app/src/main/java/com/example/allinone/workspace/ui/sections/BugsSection.kt)
-- [GoalsSection.kt](file:///C:/Users/arabi/OneDrive/Desktop/App Development/AllinOne/app/src/main/java/com/example/allinone/workspace/ui/sections/GoalsSection.kt)
-- [IdeasSection.kt](file:///C:/Users/arabi/OneDrive/Desktop/App Development/AllinOne/app/src/main/java/com/example/allinone/workspace/ui/sections/IdeasSection.kt)
-- [NotesSection.kt](file:///C:/Users/arabi/OneDrive/Desktop/App Development/AllinOne/app/src/main/java/com/example/allinone/workspace/ui/sections/NotesSection.kt)
-- [ResourcesSection.kt](file:///C:/Users/arabi/OneDrive/Desktop/App Development/AllinOne/app/src/main/java/com/example/allinone/workspace/ui/sections/ResourcesSection.kt)
+#### [MODIFY] [item_task_list.xml](file:///C:/Users/arabi/OneDrive/Desktop/App Development/AllinOne/app/src/main/res/layout/item_task_list.xml)
+- Apply the same changes as in `item_task_tasks.xml`.
 
-#### [MODIFY] [ProjectWorkspaceScreen.kt](file:///C:/Users/arabi/OneDrive/Desktop/App Development/AllinOne/app/src/main/java/com/example/allinone/workspace/ui/ProjectWorkspaceScreen.kt)
-- Style the `WorkspaceHeader` project selection dropdown.
+### 2. Update Task Adapter
+Reduce the programmatic padding applied to subtask items.
+
+#### [MODIFY] [TaskAdapter.kt](file:///C:/Users/arabi/OneDrive/Desktop/App Development/AllinOne/app/src/main/java/com/example/allinone/TaskAdapter.kt)
+- In `renderSubtasks`, change `ctView.setPadding(0, 16, 0, 16)` to `ctView.setPadding(0, 8, 0, 8)`.
 
 ## Verification Plan
 
 ### Manual Verification
-1. Long-press any Workspace item.
-2. Verify the menu background matches the app's surface color.
-3. Verify the corners are rounded according to `AppStyle`.
-4. Verify icons and text are correctly colored and aligned.
+- Deploy the app to a device or emulator.
+- Add a task with one or more subtasks.
+- Expand the task to see the subtasks.
+- Verify that the vertical space inside the card is significantly reduced and more compact.

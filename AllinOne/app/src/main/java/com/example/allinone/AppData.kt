@@ -2,11 +2,22 @@ package com.example.allinone
 
 import com.example.allinone.workspace.data.*
 
+data class WorkoutProgressEntry(
+    val name: String,
+    val progress: Int,
+    val target: Int,
+    val unit: String,
+    val color: Int = -1,
+    val isCompleted: Boolean = false
+)
+
 data class DayHistory(
     val habitsCompleted: Int,
     val totalHabits: Int,
     val workoutsCompleted: Int,
-    val totalWorkouts: Int
+    val totalWorkouts: Int,
+    val workoutDetails: List<WorkoutProgressEntry>? = null,
+    val notes: String? = null
 )
 
 data class AllAppData(

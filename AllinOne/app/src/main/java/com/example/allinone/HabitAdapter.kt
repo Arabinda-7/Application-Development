@@ -25,7 +25,6 @@ class HabitAdapter(
 ) : RecyclerView.Adapter<RecyclerView.ViewHolder>() {
 
     companion object {
-        private const val TYPE_HABIT = 0
         private const val TYPE_HEADER = 1
     }
 
@@ -43,15 +42,26 @@ class HabitAdapter(
     }
 
     override fun getItemViewType(position: Int): Int {
-        return if (displayItems[position] is String) TYPE_HEADER else TYPE_HABIT
+        val item = displayItems[position]
+        return if (item is String) {
+            TYPE_HEADER
+        } else {
+            val habit = item as Habit
+            when (habit.frequency) {
+                "Morning" -> R.layout.item_habit_morning
+                "Afternoon" -> R.layout.item_habit_afternoon
+                "Evening" -> R.layout.item_habit_evening
+                else -> R.layout.item_habit_anytime
+            }
+        }
     }
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): RecyclerView.ViewHolder {
         return if (viewType == TYPE_HEADER) {
-            val view = LayoutInflater.from(parent.context).inflate(R.layout.item_task_header, parent, false)
+            val view = LayoutInflater.from(parent.context).inflate(R.layout.item_header_habit, parent, false)
             HeaderViewHolder(view)
         } else {
-            val view = LayoutInflater.from(parent.context).inflate(R.layout.habit_list_item, parent, false)
+            val view = LayoutInflater.from(parent.context).inflate(viewType, parent, false)
             HabitViewHolder(view)
         }
     }
@@ -132,35 +142,83 @@ class HabitAdapter(
 
             updateVisuals(holder, isCompleted)
 
-            holder.habitCompleted.setOnClickListener {
-                if (selectedDateString != todayDateString) {
-                    holder.habitCompleted.isChecked = isCompleted
-                    android.widget.Toast.makeText(context, "You can only mark habits for today!", android.widget.Toast.LENGTH_SHORT).show()
-                    return@setOnClickListener
-                }
-
-                if (isCompleted) {
-                    holder.habitCompleted.isChecked = true
-                    return@setOnClickListener
-                } else {
-                    // Marking logic
-                    if (holder.habitCompleted.isChecked) {
-                        habit.isCompleted = true
-                        habit.progress = habit.target
-                        
-                        if (!habit.completedDates.contains(selectedDateString)) {
-                            habit.completedDates.add(selectedDateString)
-                            triggerCompletionEffects(context)
-                            DataManager.addActivity("Finished Ritual: ${habit.name}")
-                            
-                            // Award XP
-                            if (DataManager.addXP(context, 10)) {
-                                android.widget.Toast.makeText(context, "LEVEL UP! You are now Level ${DataManager.userLevel}", android.widget.Toast.LENGTH_LONG).show()
+            if (habit.target > 1) {
+                holder.habitCompleted.visibility = View.GONE
+                holder.progressControls.visibility = View.VISIBLE
+                
+                val currentProgress = if (selectedDateString == todayDateString) habit.progress else habit.dailyProgress[selectedDateString] ?: 0
+                holder.tvProgress.text = "$currentProgress/${habit.target}"
+                
+                holder.btnIncrement.setOnClickListener {
+                    if (selectedDateString != todayDateString) return@setOnClickListener
+                    if (habit.progress < habit.target) {
+                        habit.progress++
+                        habit.dailyProgress[selectedDateString] = habit.progress
+                        if (habit.progress == habit.target) {
+                            habit.isCompleted = true
+                            if (!habit.completedDates.contains(selectedDateString)) {
+                                habit.completedDates.add(selectedDateString)
+                                triggerCompletionEffects(context)
                             }
+                            applyFilterAndSort()
+                        } else {
+                            notifyItemChanged(position)
                         }
-                        
-                        applyFilterAndSort()
                         onProgressChanged()
+                    }
+                }
+                
+                holder.btnDecrement.setOnClickListener {
+                    if (selectedDateString != todayDateString) return@setOnClickListener
+                    if (habit.progress > 0) {
+                        habit.progress--
+                        habit.dailyProgress[selectedDateString] = habit.progress
+                        if (habit.progress < habit.target) {
+                            val wasCompleted = habit.isCompleted
+                            habit.isCompleted = false
+                            habit.completedDates.remove(selectedDateString)
+                            if (wasCompleted) applyFilterAndSort() else notifyItemChanged(position)
+                        } else {
+                            notifyItemChanged(position)
+                        }
+                        onProgressChanged()
+                    }
+                }
+            } else {
+                holder.habitCompleted.visibility = View.VISIBLE
+                holder.progressControls.visibility = View.GONE
+
+                holder.habitCompleted.setOnClickListener {
+                    if (selectedDateString != todayDateString) {
+                        holder.habitCompleted.isChecked = isCompleted
+                        android.widget.Toast.makeText(context, "You can only mark habits for today!", android.widget.Toast.LENGTH_SHORT).show()
+                        return@setOnClickListener
+                    }
+
+                    if (isCompleted) {
+                        holder.habitCompleted.isChecked = true
+                        return@setOnClickListener
+                    } else {
+                        // Marking logic
+                        if (holder.habitCompleted.isChecked) {
+                            habit.isCompleted = true
+                            habit.progress = habit.target
+                            habit.dailyProgress[selectedDateString] = habit.target
+                            
+                            if (!habit.completedDates.contains(selectedDateString)) {
+                                habit.completedDates.add(selectedDateString)
+                                triggerCompletionEffects(context)
+                                DataManager.addActivity("Finished Ritual: ${habit.name}")
+                                
+                                // Award XP
+                                if (DataManager.addXP(context, 10)) {
+                                    android.widget.Toast.makeText(context, "LEVEL UP! You are now Level ${DataManager.userLevel}", android.widget.Toast.LENGTH_LONG).show()
+                                }
+                            }
+                            
+                            applyFilterAndSort()
+                            onProgressChanged()
+                        }
                     }
                 }
             }
@@ -337,6 +395,10 @@ class HabitAdapter(
         val habitCompleted: CheckBox = itemView.findViewById(R.id.habit_completed)
         val habitCard: MaterialCardView = itemView.findViewById(R.id.habit_card)
         val habitIcon: ImageView = itemView.findViewById(R.id.habit_icon)
+        val progressControls: View = itemView.findViewById(R.id.progress_controls)
+        val tvProgress: TextView = itemView.findViewById(R.id.tv_habit_progress)
+        val btnIncrement: ImageButton = itemView.findViewById(R.id.btn_increment)
+        val btnDecrement: ImageButton = itemView.findViewById(R.id.btn_decrement)
     }
 
     class HeaderViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {

@@ -1,54 +1,45 @@
-# Implementation Plan - Immersive Aura Headers
+# Implementation Plan - Project View, History & Settings Fixes
 
-Extend the "Aura" background effect into the system notification bar (status bar) across all major app sections, matching the immersive look of the Home and Habit screens.
+This plan addresses UI refinements for the Project View mode, upgrades the history view to a full-page experience, restricts editing in View Mode, and fixes a crash in Project Settings.
 
 ## User Review Required
 
 > [!IMPORTANT]
-> This change involves modifying the root layout structure of several major screens to separate the "Background" layer from the "Content" layer. This is necessary to allow the background to draw behind the status bar while keeping buttons and text safely padded below it.
+> - **Full-Page History**: Project history will now be a dedicated activity `ProjectHistoryActivity` with a design matching the Workspace and Workout sections.
+> - **View Mode Restrictions**: Editing and deleting (goals/sub-features) will be completely disabled in View Mode. Only completion status can be toggled via long-press.
+> - **Crash Fix**: The crash in Project Settings is caused by a missing view ID in the template management dialog layout.
 
 ## Proposed Changes
 
-### [BaseActivity Refinement]
+### 1. View Mode Enhancements
 
-I will update the global keyboard and inset handler to support immersive backgrounds.
+#### [MODIFY] [AddProjectActivity.kt](file:///C:/Users/arabi/OneDrive/Desktop/App Development/AllinOne/app/src/main/java/com/example/allinone/AddProjectActivity.kt)
+- Update `setupLogic()` to apply a large immersive aura background when `isViewOnly` is true.
+- Hide goal delete buttons and sub-feature edit icons in View Mode.
+- Disable direct editing of existing sub-features/goals (Read-only).
 
-#### [MODIFY] [BaseActivity.kt](file:///C:/Users/arabi/OneDrive/Desktop/App Development/AllinOne/app/src/main/java/com/example/allinone/BaseActivity.kt)
-- Update `setupKeyboardHandling(rootView: View, topPaddingView: View?)`:
-    - The `rootView` will handle the bottom insets (keyboard and navigation bar).
-    - The `topPaddingView` (e.g., your header or content container) will handle the status bar insets.
-    - This allows the background (which is a sibling to `topPaddingView`) to remain at the absolute top of the screen.
+#### [MODIFY] [activity_add_project.xml](file:///C:/Users/arabi/OneDrive/Desktop/App Development/AllinOne/app/src/main/res/layout/activity_add_project.xml)
+- Add an `aura_background` view behind content for the dynamic coloring effect.
 
-### [Layout Enhancements]
+### 2. Full-Page Project History
 
-I will restructure the following layouts to support immersion:
+#### [NEW] [ProjectHistoryActivity.kt](file:///C:/Users/arabi/OneDrive/Desktop/App Development/AllinOne/app/src/main/java/com/example/allinone/ProjectHistoryActivity.kt)
+- Dedicated activity to show statistics (Progress, Features, Actions) and a scrollable timeline of project history.
 
-#### [MODIFY] [activity_task.xml](file:///C:/Users/arabi/OneDrive/Desktop/App Development/AllinOne/app/src/main/res/layout/activity_task.xml)
-- Wrap all content (except `task_aura_background`) in a new `ConstraintLayout` with id `task_content_container`.
+#### [NEW] [activity_project_history.xml](file:///C:/Users/arabi/OneDrive/Desktop/App Development/AllinOne/app/src/main/res/layout/activity_project_history.xml)
+- Full-page layout with immersive header, stats cards, and a history RecyclerView.
 
-#### [MODIFY] [activity_notes.xml](file:///C:/Users/arabi/OneDrive/Desktop/App Development/AllinOne/app/src/main/res/layout/activity_notes.xml)
-- Wrap all content (except `note_aura_background`) in a new `ConstraintLayout` with id `notes_content_container`.
-
-#### [MODIFY] [activity_projects.xml](file:///C:/Users/arabi/OneDrive/Desktop/App Development/AllinOne/app/src/main/res/layout/activity_projects.xml)
-- Wrap all content (except `project_aura_background`) in a new `ConstraintLayout` with id `project_content_container`.
-
-#### [MODIFY] [activity_finance.xml](file:///C:/Users/arabi/OneDrive/Desktop/App Development/AllinOne/app/src/main/res/layout/activity_finance.xml)
-- Wrap all content (except `finance_aura_background`) in a new `ConstraintLayout` with id `finance_content_container`.
-
-### [Activity Logic Updates]
-
-I will update the activities to use the new immersive padding logic.
-
-#### [MODIFY] [TaskActivity.kt](file:///C:/Users/arabi/OneDrive/Desktop/App Development/AllinOne/app/src/main/java/com/example/allinone/TaskActivity.kt)
-#### [MODIFY] [NotesActivity.kt](file:///C:/Users/arabi/OneDrive/Desktop/App Development/AllinOne/app/src/main/java/com/example/allinone/NotesActivity.kt)
 #### [MODIFY] [ProjectActivity.kt](file:///C:/Users/arabi/OneDrive/Desktop/App Development/AllinOne/app/src/main/java/com/example/allinone/ProjectActivity.kt)
-#### [MODIFY] [FinanceActivity.kt](file:///C:/Users/arabi/OneDrive/Desktop/App Development/AllinOne/app/src/main/java/com/example/allinone/FinanceActivity.kt)
-#### [MODIFY] [WorkoutRoutineActivity.kt](file:///C:/Users/arabi/OneDrive/Desktop/App Development/AllinOne/app/src/main/java/com/example/allinone/WorkoutRoutineActivity.kt)
-- Update calls to `setupKeyboardHandling` to pass both the root and the new content container.
+- Redirect history clicks to `ProjectHistoryActivity`.
+
+### 3. Crash Fix (Project Settings)
+
+#### [MODIFY] [dialog_manage_categories_project.xml](file:///C:/Users/arabi/OneDrive/Desktop/App Development/AllinOne/app/src/main/res/layout/dialog_manage_categories_project.xml)
+- Add the missing `btn_toggle_delete_mode` ImageButton to fix the NullPointerException in `ProjectSettingsActivity`.
 
 ## Verification Plan
 
 ### Manual Verification
-- **Visual Check**: Open each section and verify the background color extends to the very top, behind the time and battery icons.
-- **Usability Check**: Verify that the "Back" button and "Title" are not overlapping with the status bar icons.
-- **Keyboard Check**: Verify that the keyboard still correctly pushes the layout up without breaking the immersive header.
+- **View Mode**: Open a project and verify the new aura background and restricted interactions.
+- **History**: Verify that clicking history on a project card opens a full-page view with correct stats.
+- **Settings**: Verify that opening Project Settings and managing templates no longer crashes the app.

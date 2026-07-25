@@ -55,12 +55,18 @@ fun GoalViewSection(
                     colors = CardDefaults.cardColors(containerColor = style.surfaceColor),
                     border = BorderStroke(1.dp, color.copy(alpha = 0.2f))
                 ) {
-                    Row(modifier = Modifier.padding(16.dp), verticalAlignment = Alignment.CenterVertically) {
-                        Box(modifier = Modifier.width(4.dp).height(40.dp).clip(CircleShape).background(color))
-                        Spacer(modifier = Modifier.width(16.dp))
-                        Column(modifier = Modifier.weight(1f)) { Text(text = goal.title, color = color, fontWeight = FontWeight.Bold, fontSize = 20.sp); if (goal.description.isNotBlank()) { Text(goal.description, color = Color.White.copy(alpha = 0.5f), fontSize = 12.sp, maxLines = 2, overflow = TextOverflow.Ellipsis) } }
-                        val priorityColor = when(goal.priority) { 2 -> Color.Red; 1 -> Color(0xFFFFB800); else -> Color(0xFF2EC4B6) }
-                        Box(modifier = Modifier.size(8.dp).clip(CircleShape).background(priorityColor))
+                    Box(modifier = Modifier.fillMaxWidth()) {
+                        Row(modifier = Modifier.padding(16.dp), verticalAlignment = Alignment.CenterVertically) {
+                            Box(modifier = Modifier.width(4.dp).height(40.dp).clip(CircleShape).background(color))
+                            Spacer(modifier = Modifier.width(16.dp))
+                            Column(modifier = Modifier.weight(1f)) { Text(text = goal.title, color = color, fontWeight = FontWeight.Bold, fontSize = 16.sp); if (goal.description.isNotBlank()) { Text(goal.description, color = Color.White.copy(alpha = 0.5f), fontSize = 12.sp, maxLines = 2, overflow = TextOverflow.Ellipsis) } }
+                            val priorityColor = when(goal.priority) { 2 -> Color.Red; 1 -> Color(0xFFFFB800); else -> Color(0xFF2EC4B6) }
+                            Box(modifier = Modifier.size(8.dp).clip(CircleShape).background(priorityColor))
+                        }
+                        CreatedAtText(
+                            timestamp = goal.createdAt,
+                            modifier = Modifier.align(Alignment.BottomEnd).padding(8.dp)
+                        )
                     }
                 }
                 WorkspaceDropdown(expanded = showMenu, onDismissRequest = { showMenu = false }) {
@@ -106,7 +112,7 @@ fun GoalDetailSection(
                 horizontalArrangement = Arrangement.SpaceBetween
             ) {
                 IconButton(onClick = onBack) { Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Back", tint = Color.White) }
-                IconButton(onClick = onEdit) { Icon(Icons.Default.Edit, contentDescription = "Edit", tint = goalColor) }
+                IconButton(onClick = onEdit) { Icon(Icons.Default.Edit, contentDescription = "Edit", tint = goalColor, modifier = Modifier.size(28.dp)) }
             }
 
             Column(modifier = Modifier.padding(horizontal = 24.dp).padding(bottom = 12.dp)) {

@@ -38,7 +38,9 @@ class AddTaskActivity : BaseActivity() {
     private lateinit var etNewSubtask: EditText
     private lateinit var btnSave: TextView
     private lateinit var tvReminder: TextView
-    
+    private lateinit var btnSetReminder: View
+    private lateinit var ivReminderIcon: ImageView
+
     private var selectedCategory = "General"
     private var selectedPriority = 0
     private var selectedReminder: Long? = null
@@ -68,6 +70,8 @@ class AddTaskActivity : BaseActivity() {
         containerSubtasks = findViewById(R.id.container_subtasks)
         etNewSubtask = findViewById(R.id.et_new_subtask)
         tvReminder = findViewById(R.id.tv_reminder_summary)
+        btnSetReminder = findViewById(R.id.btn_set_reminder)
+        ivReminderIcon = findViewById(R.id.iv_reminder_button_icon)
         btnSave = findViewById(R.id.btn_save_task)
         
         findViewById<View>(R.id.btn_back).setOnClickListener { finish() }
@@ -182,9 +186,14 @@ class AddTaskActivity : BaseActivity() {
     private fun updateReminderUI() {
         if (selectedReminder == null) {
             tvReminder.text = "Set reminder"
+            ivReminderIcon.visibility = View.VISIBLE
+            btnSetReminder.setBackgroundResource(R.drawable.bg_dialog_rounded)
+            btnSetReminder.backgroundTintList = android.content.res.ColorStateList.valueOf(Color.parseColor("#20FFFFFF"))
         } else {
-            val sdf = SimpleDateFormat("MMM dd, h:mm a", Locale.getDefault())
+            val sdf = SimpleDateFormat("MMM dd, HH:mm", Locale.getDefault())
             tvReminder.text = sdf.format(Date(selectedReminder!!))
+            ivReminderIcon.visibility = View.GONE
+            btnSetReminder.background = null
         }
     }
 

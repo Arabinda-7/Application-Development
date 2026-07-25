@@ -1,9 +1,6 @@
-# Tasks - Immersive Aura Headers
-
-- [ ] Update `BaseActivity.kt` with split top/bottom inset handling
-- [ ] Refactor `activity_task.xml` and `TaskActivity.kt`
-- [ ] Refactor `activity_notes.xml` and `NotesActivity.kt`
-- [ ] Refactor `activity_projects.xml` and `ProjectActivity.kt`
-- [ ] Refactor `activity_finance.xml` and `FinanceActivity.kt`
-- [ ] Refactor `activity_workout_routine.xml` and `WorkoutRoutineActivity.kt`
-- [ ] Final visual verification
+- [x] Fix crash in `ProjectSettingsActivity` by updating `dialog_manage_categories_project.xml`
+- [x] Implement `ProjectHistoryActivity` and its layout
+- [x] Update `ProjectActivity` to launch new history activity
+- [x] Add aura background to `activity_add_project.xml`
+- [x] Update `AddProjectActivity` (Aura Background & Interaction Restrictions)
+- [x] Verify all refinements

@@ -5,5 +5,6 @@ data class AgendaItem(
     val details: String = "",
     val path: String = "",
     val category: String = "",
-    val navigationTarget: String = "" // e.g., "TASK_ACTIVITY", "PROJECT_ACTIVITY", "WORKSPACE"
+    val priority: String = "",
+    val navigationTarget: String = ""
 )
