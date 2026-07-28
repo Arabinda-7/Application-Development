@@ -1,15 +1,17 @@
 package com.example.allinone
 
 import android.app.Activity
-import android.app.Dialog
 import android.content.Intent
+import android.graphics.Color
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.*
+import androidx.activity.OnBackPressedCallback
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.activity.viewModels
+import androidx.core.content.ContextCompat
 import java.text.SimpleDateFormat
 import java.util.*
 
@@ -19,7 +21,7 @@ class WorkoutRoutineActivity : BaseActivity() {
     
     private lateinit var progressSection: WorkoutProgressSection
     private lateinit var calendarSection: WorkoutCalendarSection
-    private lateinit var filterSection: HabitFilterSection // Re-using FilterSection as logic is same
+    private lateinit var filterSection: WorkoutFilterSection
     private lateinit var listSection: WorkoutListSection
     private lateinit var navigationSection: WorkoutNavigationSection
     private lateinit var themeManager: WorkoutThemeManager
@@ -72,7 +74,7 @@ class WorkoutRoutineActivity : BaseActivity() {
             applyFilters()
         }
 
-        filterSection = HabitFilterSection(findViewById(R.id.filter_chips)) { filter ->
+        filterSection = WorkoutFilterSection(findViewById(R.id.filter_chips)) { filter ->
             viewModel.selectedTimeFilter = filter
             applyFilters()
         }
@@ -90,11 +92,7 @@ class WorkoutRoutineActivity : BaseActivity() {
             findViewById(R.id.workout_content_container),
             findViewById(R.id.today_layout),
             findViewById(R.id.history_layout),
-            findViewById(R.id.history_compose_view),
-            findViewById(R.id.iv_today),
-            findViewById(R.id.tv_today_nav),
-            findViewById(R.id.iv_history),
-            findViewById(R.id.tv_history_nav)
+            findViewById(R.id.history_compose_view)
         ) { tab ->
             viewModel.currentTab = tab
             if (tab == "HISTORY") {
@@ -106,14 +104,19 @@ class WorkoutRoutineActivity : BaseActivity() {
         themeManager = WorkoutThemeManager(
             this,
             findViewById(R.id.workout_aura_background),
-            listOf(
-                findViewById(R.id.chip_all),
-                findViewById(R.id.chip_morning),
-                findViewById(R.id.chip_afternoon),
-                findViewById(R.id.chip_evening)
-            ),
+            findViewById(R.id.filter_chips),
             findViewById(R.id.btn_create_new_workout),
-            findViewById(R.id.section_progress_bar)
+            findViewById(R.id.section_progress_bar),
+            historyCards = listOf(
+                findViewById(R.id.history_card_streak),
+                findViewById(R.id.history_card_workouts),
+                findViewById(R.id.history_card_efficiency)
+            ),
+            historyValues = listOf(
+                findViewById(R.id.history_current_streak),
+                findViewById(R.id.history_workouts_finished),
+                findViewById(R.id.history_efficiency)
+            )
         )
 
         historyGridSection = WorkoutHistoryGridSection(
@@ -136,13 +139,15 @@ class WorkoutRoutineActivity : BaseActivity() {
 
     private fun setupLogic() {
         calendarSection.setup()
+        setupDynamicFilterChips()
         filterSection.setup()
         navigationSection.setup()
         themeManager.applyTheme()
         progressSection.update()
         composeHandler.setup()
         setupGestureDetector()
-        setupKeyboardHandling(findViewById(R.id.workout_root_layout))
+        setupKeyboardHandling(findViewById(R.id.workout_root_layout), findViewById(R.id.workout_content_container))
+        setupBackNavigation()
 
         findViewById<View>(R.id.btn_back).setOnClickListener { finish() }
         findViewById<View>(R.id.btn_back_history).setOnClickListener { finish() }
@@ -171,8 +176,13 @@ class WorkoutRoutineActivity : BaseActivity() {
     }
 
     private fun updateHistoryUI() {
-        findViewById<TextView>(R.id.history_current_streak)?.text = DataManager.getWorkoutStreak().toString()
+        val streaks = DataManager.getWorkoutStreaks()
+        findViewById<TextView>(R.id.history_current_streak)?.text = streaks.first.toString()
+        findViewById<TextView>(R.id.history_best_streak)?.text = "Best Streak: ${streaks.second}"
+        
         findViewById<TextView>(R.id.history_workouts_finished)?.text = DataManager.getTotalWorkoutsFinished().toString()
+        findViewById<TextView>(R.id.history_workouts_this_month)?.text = "This month: ${DataManager.getWorkoutsThisMonth()}"
+        
         findViewById<TextView>(R.id.history_efficiency)?.text = "${DataManager.getGlobalCompletionRate("WORKOUTS")}%"
         updateAllUI()
     }
@@ -225,6 +235,40 @@ class WorkoutRoutineActivity : BaseActivity() {
         popupWindow.showAsDropDown(anchor, -150, 0)
     }
 
+    private fun setupDynamicFilterChips() {
+        val filterGroup = findViewById<RadioGroup>(R.id.filter_chips)
+        // Keep ALL chip, remove others
+        val allChip = findViewById<View>(R.id.chip_all)
+        filterGroup.removeAllViews()
+        filterGroup.addView(allChip)
+
+        if (DataManager.workoutFilterType == "TIME") {
+            addFilterChip(filterGroup, "MORNING")
+            addFilterChip(filterGroup, "AFTERNOON")
+            addFilterChip(filterGroup, "EVENING")
+        } else {
+            DataManager.workoutMuscleGroups.forEach { muscle ->
+                addFilterChip(filterGroup, muscle.uppercase())
+            }
+        }
+    }
+
+    private fun addFilterChip(group: RadioGroup, label: String) {
+        val rb = RadioButton(this)
+        val params = RadioGroup.LayoutParams((80 * resources.displayMetrics.density).toInt(), (38 * resources.displayMetrics.density).toInt())
+        params.setMargins((2 * resources.displayMetrics.density).toInt(), (2 * resources.displayMetrics.density).toInt(), (2 * resources.displayMetrics.density).toInt(), (2 * resources.displayMetrics.density).toInt())
+        rb.layoutParams = params
+        rb.background = ContextCompat.getDrawable(this, R.drawable.filter_chip_bg)
+        rb.buttonDrawable = null
+        rb.text = label
+        rb.gravity = android.view.Gravity.CENTER
+        rb.setTextColor(Color.WHITE)
+        rb.textSize = 10f
+        rb.typeface = android.graphics.Typeface.DEFAULT_BOLD
+        rb.id = View.generateViewId()
+        group.addView(rb)
+    }
+
     private fun setupGestureDetector() {
         gestureDetector = android.view.GestureDetector(this, object : SwipeGestureListener() {
             override fun onSwipeLeft() {
@@ -232,6 +276,19 @@ class WorkoutRoutineActivity : BaseActivity() {
             }
             override fun onSwipeRight() {
                 if (viewModel.currentTab == "HISTORY") navigationSection.switchTab("TODAY")
+            }
+        })
+    }
+
+    private fun setupBackNavigation() {
+        onBackPressedDispatcher.addCallback(this, object : OnBackPressedCallback(true) {
+            override fun handleOnBackPressed() {
+                if (viewModel.currentTab == "HISTORY") {
+                    navigationSection.switchTab("TODAY")
+                } else {
+                    isEnabled = false
+                    onBackPressedDispatcher.onBackPressed()
+                }
             }
         })
     }

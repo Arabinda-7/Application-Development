@@ -1,3 +1,8 @@
+@file:OptIn(
+    androidx.compose.foundation.ExperimentalFoundationApi::class,
+    androidx.compose.foundation.layout.ExperimentalLayoutApi::class
+)
+
 package com.example.allinone.workspace.ui.sections
 
 import androidx.compose.foundation.*
@@ -46,20 +51,43 @@ fun GoalViewSection(
                 Card(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .padding(vertical = 6.dp)
+                        .padding(horizontal = 16.dp, vertical = 6.dp)
                         .combinedClickable(
                             onClick = { onViewGoal(goal) },
                             onLongClick = { showMenu = true }
                         ),
-                    shape = RoundedCornerShape(12.dp),
-                    colors = CardDefaults.cardColors(containerColor = style.surfaceColor),
-                    border = BorderStroke(1.dp, color.copy(alpha = 0.2f))
+                    shape = RoundedCornerShape(20.dp),
+                    colors = CardDefaults.cardColors(containerColor = Color.Transparent),
+                    border = BorderStroke(1.5.dp, color)
                 ) {
-                    Box(modifier = Modifier.fillMaxWidth()) {
-                        Row(modifier = Modifier.padding(16.dp), verticalAlignment = Alignment.CenterVertically) {
-                            Box(modifier = Modifier.width(4.dp).height(40.dp).clip(CircleShape).background(color))
-                            Spacer(modifier = Modifier.width(16.dp))
-                            Column(modifier = Modifier.weight(1f)) { Text(text = goal.title, color = color, fontWeight = FontWeight.Bold, fontSize = 16.sp); if (goal.description.isNotBlank()) { Text(goal.description, color = Color.White.copy(alpha = 0.5f), fontSize = 12.sp, maxLines = 2, overflow = TextOverflow.Ellipsis) } }
+                    Box(modifier = Modifier.fillMaxWidth().height(IntrinsicSize.Min)) {
+                        Row(modifier = Modifier.padding(vertical = 16.dp, horizontal = 12.dp), verticalAlignment = Alignment.CenterVertically) {
+                            // Vertical Accent Bar
+                            Box(modifier = Modifier.width(4.dp).fillMaxHeight().clip(CircleShape).background(color.copy(alpha = 0.8f)))
+                            
+                            Spacer(modifier = Modifier.width(12.dp))
+                            
+                            Column(modifier = Modifier.weight(1f)) {
+                                Text(
+                                    text = goal.title, 
+                                    color = color, 
+                                    fontWeight = FontWeight.Bold, 
+                                    fontSize = 20.sp,
+                                    maxLines = 1,
+                                    overflow = TextOverflow.Ellipsis
+                                )
+                                if (goal.description.isNotBlank()) {
+                                    Spacer(modifier = Modifier.height(4.dp))
+                                    Text(
+                                        goal.description, 
+                                        color = Color.White.copy(alpha = 0.6f), 
+                                        fontSize = 14.sp, 
+                                        maxLines = 2, 
+                                        overflow = TextOverflow.Ellipsis
+                                    )
+                                }
+                            }
+                            
                             val priorityColor = when(goal.priority) { 2 -> Color.Red; 1 -> Color(0xFFFFB800); else -> Color(0xFF2EC4B6) }
                             Box(modifier = Modifier.size(8.dp).clip(CircleShape).background(priorityColor))
                         }

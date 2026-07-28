@@ -14,7 +14,20 @@ class SettingsBackupHandler(
     private val scope: LifecycleCoroutineScope
 ) {
     fun exportBackup() {
-        exportLauncher.launch("allinone_backup_${System.currentTimeMillis()}.json")
+        UIUtils.showPasswordDialog(context, "ENCRYPT BACKUP") { password ->
+            currentPassword = password
+            exportLauncher.launch("allinone_backup_${System.currentTimeMillis()}.json")
+        }
+    }
+
+    private var currentPassword: CharArray? = null
+
+    fun getExportedJson(onResult: (String) -> Unit) {
+        scope.launch {
+            val json = DataManager.exportData(context, currentPassword)
+            onResult(json)
+            currentPassword = null // Clear after use
+        }
     }
 
     fun importBackup() {
@@ -22,20 +35,33 @@ class SettingsBackupHandler(
     }
 
     fun handleImport(content: String, onImportSuccess: () -> Unit) {
-        showConfirmationDialog("RESTORE DATA", "Overwrite all current app data?", "RESTORE NOW") {
-            scope.launch {
-                if (DataManager.importData(context, content)) {
-                    android.widget.Toast.makeText(context, "Data Restored Successfully", android.widget.Toast.LENGTH_LONG).show()
-                    onImportSuccess()
-                } else {
-                    android.widget.Toast.makeText(context, "Import Failed: Incompatible file", android.widget.Toast.LENGTH_LONG).show()
-                }
+        val isEncrypted = !content.trim().startsWith("{")
+        
+        if (isEncrypted) {
+            UIUtils.showPasswordDialog(context, "DECRYPT BACKUP") { password ->
+                performImport(content, password, onImportSuccess)
+            }
+        } else {
+            showConfirmationDialog("RESTORE DATA", "Overwrite all current app data?", "RESTORE NOW") {
+                performImport(content, null, onImportSuccess)
+            }
+        }
+    }
+
+    private fun performImport(content: String, password: CharArray?, onImportSuccess: () -> Unit) {
+        scope.launch {
+            if (DataManager.importData(context, content, password)) {
+                android.widget.Toast.makeText(context, "Data Restored Successfully", android.widget.Toast.LENGTH_LONG).show()
+                onImportSuccess()
+            } else {
+                val msg = if (password != null) "Incorrect password or corrupted file" else "Import Failed: Incompatible file"
+                android.widget.Toast.makeText(context, msg, android.widget.Toast.LENGTH_LONG).show()
             }
         }
     }
 
     private fun showConfirmationDialog(title: String, message: String, pos: String, onConfirm: () -> Unit) {
-        val dialog = Dialog(context); dialog.setContentView(R.layout.dialog_confirmation)
+        val dialog = Dialog(context); dialog.setContentView(R.layout.dialog_confirm_backup)
         dialog.window?.let { it.setBackgroundDrawableResource(android.R.color.transparent); if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.S) it.attributes.blurBehindRadius = 20; it.addFlags(android.view.WindowManager.LayoutParams.FLAG_BLUR_BEHIND) }
         dialog.findViewById<TextView>(R.id.tv_confirm_title).text = title
         dialog.findViewById<TextView>(R.id.tv_confirm_message).text = message

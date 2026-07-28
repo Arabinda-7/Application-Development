@@ -1,3 +1,8 @@
+@file:OptIn(
+    androidx.compose.foundation.ExperimentalFoundationApi::class,
+    androidx.compose.foundation.layout.ExperimentalLayoutApi::class
+)
+
 package com.example.allinone.onboarding
 
 import androidx.compose.animation.*
@@ -26,6 +31,7 @@ import com.example.allinone.R
 @Composable
 fun ProfilePage(userName: MutableState<String>, selectedAvatar: MutableIntState, selectedRoles: MutableState<Set<String>>, accentColor: Color) {
     Column(modifier = Modifier.fillMaxSize().padding(24.dp).verticalScroll(rememberScrollState())) {
+        Spacer(modifier = Modifier.height(8.dp))
         Text("Personalize Identity", color = Color.White, fontSize = 32.sp, fontWeight = FontWeight.Black, lineHeight = 38.sp)
         Text("Your identity shapes the system's focus.", color = Color.White.copy(alpha = 0.5f), fontSize = 14.sp, modifier = Modifier.padding(top = 8.dp))
         Spacer(modifier = Modifier.height(32.dp))
@@ -42,6 +48,7 @@ fun ProfilePage(userName: MutableState<String>, selectedAvatar: MutableIntState,
 @Composable
 fun OverviewPage(accentColor: Color) {
     Column(modifier = Modifier.fillMaxSize().padding(24.dp), verticalArrangement = Arrangement.Center, horizontalAlignment = Alignment.CenterHorizontally) {
+        Spacer(modifier = Modifier.height(8.dp))
         Icon(Icons.Default.Diversity3, contentDescription = null, tint = accentColor, modifier = Modifier.size(100.dp))
         Spacer(modifier = Modifier.height(32.dp))
         Text("Unified Ecosystem", color = Color.White, fontSize = 28.sp, fontWeight = FontWeight.Black, textAlign = TextAlign.Center)
@@ -52,6 +59,7 @@ fun OverviewPage(accentColor: Color) {
 @Composable
 fun GlobalHubPage(sections: List<OnboardingSection>, accentColor: Color) {
     Column(modifier = Modifier.fillMaxSize().padding(24.dp)) {
+        Spacer(modifier = Modifier.height(8.dp))
         Text("The Global Hub", color = Color.White, fontSize = 32.sp, fontWeight = FontWeight.Black)
         Text("Enable the modules you need for your daily flow.", color = Color.White.copy(alpha = 0.5f), fontSize = 14.sp)
         LazyColumn(modifier = Modifier.weight(1f).padding(top = 24.dp)) {
@@ -72,23 +80,63 @@ fun GlobalHubPage(sections: List<OnboardingSection>, accentColor: Color) {
 @Composable
 fun FeatureDeepDivePage(section: OnboardingSection, accentColor: Color) {
     Column(modifier = Modifier.fillMaxSize().padding(24.dp).verticalScroll(rememberScrollState())) {
+        Spacer(modifier = Modifier.height(8.dp))
         Row(verticalAlignment = Alignment.CenterVertically) {
-            Box(modifier = Modifier.size(40.dp).clip(RoundedCornerShape(12.dp).copy(bottomStart = CornerSize(0.dp))).background(accentColor), contentAlignment = Alignment.Center) { Icon(section.icon, contentDescription = null, tint = Color.White, modifier = Modifier.size(20.dp)) }
-            Spacer(modifier = Modifier.width(12.dp))
-            Text(section.title.uppercase(), color = accentColor, fontSize = 12.sp, fontWeight = FontWeight.Black, letterSpacing = 2.sp)
+            Box(
+                modifier = Modifier
+                    .size(48.dp)
+                    .clip(RoundedCornerShape(14.dp).copy(bottomStart = CornerSize(0.dp)))
+                    .background(accentColor),
+                contentAlignment = Alignment.Center
+            ) {
+                Icon(
+                    section.icon,
+                    contentDescription = null,
+                    tint = Color.White,
+                    modifier = Modifier.size(24.dp)
+                )
+            }
+            Spacer(modifier = Modifier.width(16.dp))
+            Text(
+                section.title,
+                color = Color.White,
+                fontSize = 32.sp,
+                fontWeight = FontWeight.Black
+            )
         }
-        Spacer(modifier = Modifier.height(16.dp))
-        Text("Deep Dive: ${section.title}", color = Color.White, fontSize = 28.sp, fontWeight = FontWeight.Black)
-        Text("Configure specific capabilities for this module.", color = Color.White.copy(alpha = 0.5f), fontSize = 14.sp)
-        
-        Spacer(modifier = Modifier.height(32.dp))
-        Text("CORE CAPABILITIES", color = Color.White.copy(alpha = 0.3f), fontSize = 10.sp, fontWeight = FontWeight.Black, letterSpacing = 1.sp)
+        Spacer(modifier = Modifier.height(12.dp))
+        Text(
+            "Configure specific capabilities for this module.",
+            color = Color.White.copy(alpha = 0.5f),
+            fontSize = 14.sp
+        )
+
+        Spacer(modifier = Modifier.height(24.dp))
+        Text(
+            "CORE CAPABILITIES",
+            color = Color.White.copy(alpha = 0.3f),
+            fontSize = 10.sp,
+            fontWeight = FontWeight.Black,
+            letterSpacing = 1.sp
+        )
         FeatureCapabilitiesGrid(section.id, accentColor)
         
-        Spacer(modifier = Modifier.height(24.dp))
-        Text("ACTIVE MODULES", color = Color.White.copy(alpha = 0.3f), fontSize = 10.sp, fontWeight = FontWeight.Black, letterSpacing = 1.sp)
-        Spacer(modifier = Modifier.height(12.dp))
-        FlowRow(modifier = Modifier.fillMaxWidth()) { section.subFeatures.forEach { config -> ModuleChip(config, section.isEnabled.value, accentColor) } }
+        if (section.subFeatures.isNotEmpty()) {
+            Spacer(modifier = Modifier.height(16.dp))
+            Text(
+                "ACTIVE MODULES",
+                color = Color.White.copy(alpha = 0.3f),
+                fontSize = 10.sp,
+                fontWeight = FontWeight.Black,
+                letterSpacing = 1.sp
+            )
+            Spacer(modifier = Modifier.height(12.dp))
+            FlowRow(modifier = Modifier.fillMaxWidth()) {
+                section.subFeatures.forEach { config ->
+                    ModuleChip(config, section.isEnabled.value, accentColor)
+                }
+            }
+        }
         
         if (!section.isEnabled.value) {
             Spacer(modifier = Modifier.height(24.dp))
@@ -106,6 +154,7 @@ fun FeatureDeepDivePage(section: OnboardingSection, accentColor: Color) {
 @Composable
 fun ActivationPage(accentColor: Color) {
     Column(modifier = Modifier.fillMaxSize().padding(24.dp), verticalArrangement = Arrangement.Center, horizontalAlignment = Alignment.CenterHorizontally) {
+        Spacer(modifier = Modifier.height(8.dp))
         Box(modifier = Modifier.size(120.dp), contentAlignment = Alignment.Center) {
             val infiniteTransition = rememberInfiniteTransition(label = "Activation")
             val scale by infiniteTransition.animateFloat(initialValue = 1f, targetValue = 1.2f, animationSpec = infiniteRepeatable(tween(2000), RepeatMode.Reverse), label = "Scale")

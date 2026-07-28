@@ -1,9 +1,15 @@
+@file:OptIn(
+    androidx.compose.foundation.ExperimentalFoundationApi::class,
+    androidx.compose.foundation.layout.ExperimentalLayoutApi::class
+)
+
 package com.example.allinone.workspace.ui.sections
 
 import androidx.compose.foundation.*
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.material.icons.Icons
@@ -15,10 +21,12 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.SolidColor
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.allinone.LocalAppStyle
@@ -40,19 +48,41 @@ fun NoteViewSection(
                 Card(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .padding(vertical = 6.dp)
+                        .padding(horizontal = 16.dp, vertical = 6.dp)
                         .combinedClickable(
                             onClick = { onViewNote(note) },
                             onLongClick = { showMenu = true }
                         ),
-                    colors = CardDefaults.cardColors(containerColor = style.surfaceColor)
+                    shape = RoundedCornerShape(20.dp),
+                    colors = CardDefaults.cardColors(containerColor = Color.Transparent),
+                    border = BorderStroke(1.5.dp, style.accentColor)
                 ) {
-                    Box(modifier = Modifier.fillMaxWidth()) {
-                        Column(modifier = Modifier.padding(16.dp)) {
-                            Text(note.title, fontWeight = FontWeight.Bold, color = Color.White, fontSize = 16.sp)
-                            if (note.content.isNotBlank()) {
-                                Spacer(modifier = Modifier.height(8.dp))
-                                Text(note.content, color = Color.White.copy(alpha = 0.6f), fontSize = 12.sp)
+                    Box(modifier = Modifier.fillMaxWidth().height(IntrinsicSize.Min)) {
+                        Row(modifier = Modifier.padding(vertical = 16.dp, horizontal = 12.dp), verticalAlignment = Alignment.CenterVertically) {
+                            // Vertical Accent Bar
+                            Box(modifier = Modifier.width(4.dp).fillMaxHeight().clip(CircleShape).background(style.accentColor.copy(alpha = 0.8f)))
+                            
+                            Spacer(modifier = Modifier.width(12.dp))
+                            
+                            Column(modifier = Modifier.weight(1f)) {
+                                Text(
+                                    note.title, 
+                                    fontWeight = FontWeight.Bold, 
+                                    color = Color.White, 
+                                    fontSize = 20.sp,
+                                    maxLines = 1,
+                                    overflow = TextOverflow.Ellipsis
+                                )
+                                if (note.content.isNotBlank()) {
+                                    Spacer(modifier = Modifier.height(4.dp))
+                                    Text(
+                                        note.content, 
+                                        color = Color.White.copy(alpha = 0.6f), 
+                                        fontSize = 14.sp,
+                                        maxLines = 2,
+                                        overflow = TextOverflow.Ellipsis
+                                    )
+                                }
                             }
                         }
                         CreatedAtText(

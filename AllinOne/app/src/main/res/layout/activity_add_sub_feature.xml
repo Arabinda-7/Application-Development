@@ -130,9 +130,8 @@
 
                     <TextView
                         android:id="@+id/tv_feature_deadline"
-                        android:layout_width="0dp"
+                        android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:layout_weight="1"
                         android:background="@drawable/bg_finance_input"
                         android:backgroundTint="#11FFFFFF"
                         android:padding="16dp"
@@ -141,13 +140,6 @@
                         android:textSize="16sp"
                         android:clickable="true"
                         android:focusable="true" />
-
-                    <androidx.appcompat.widget.SwitchCompat
-                        android:id="@+id/sw_feature_reminder"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:layout_marginStart="16dp"
-                        app:thumbTint="@color/chip_selected" />
                 </LinearLayout>
 
                 <TextView

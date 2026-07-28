@@ -1,0 +1,7 @@
+- [x] Refine `WorkspaceHeader` in `WorkspaceMainComponents.kt`
+    - [x] Increase height to 72.dp
+    - [x] Shrink "Switch" button components (Icon, Padding, Font)
+    - [x] Optimize horizontal spacing
+- [x] Refine `ProjectOverviewItem` in `CommonWorkspaceComponents.kt`
+    - [x] Allow project name to wrap to 2 lines
+- [x] Verify UI improvements in Workspace section

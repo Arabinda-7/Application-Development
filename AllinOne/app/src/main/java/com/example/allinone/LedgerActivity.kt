@@ -102,7 +102,7 @@ class LedgerActivity : BaseActivity() {
 
     private fun showCustomLedgerMenu(anchor: View, entry: LedgerEntry, isHistory: Boolean, onAction: () -> Unit) {
         val inflater = LayoutInflater.from(this)
-        val menuView = inflater.inflate(R.layout.layout_custom_menu, null)
+        val menuView = inflater.inflate(R.layout.menu_ledger_item, null)
         val popupWindow = PopupWindow(menuView, ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT, true)
         popupWindow.elevation = 20f
 
@@ -138,7 +138,7 @@ class LedgerActivity : BaseActivity() {
 
     private fun showAddPaymentDialog(context: Context, entry: LedgerEntry) {
         val dialog = Dialog(context)
-        dialog.setContentView(R.layout.dialog_add_payment)
+        dialog.setContentView(R.layout.dialog_add_payment_simple)
         dialog.window?.setBackgroundDrawableResource(android.R.color.transparent)
         dialog.window?.setLayout(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT)
 
@@ -169,7 +169,7 @@ class LedgerActivity : BaseActivity() {
 
     private fun showAddLedgerDialog(existingEntry: LedgerEntry? = null) {
         val dialog = Dialog(this)
-        dialog.setContentView(R.layout.dialog_add_ledger)
+        dialog.setContentView(R.layout.dialog_add_ledger_main)
         dialog.window?.setBackgroundDrawableResource(android.R.color.transparent)
         dialog.window?.setLayout(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT)
 
@@ -217,7 +217,7 @@ class LedgerActivity : BaseActivity() {
 
     private fun showConfirmationDialog(title: String, message: String, positiveButtonText: String, onConfirm: () -> Unit) {
         val dialog = Dialog(this)
-        dialog.setContentView(R.layout.dialog_confirmation)
+        dialog.setContentView(R.layout.dialog_confirm_ledger)
         dialog.window?.setBackgroundDrawableResource(android.R.color.transparent)
         dialog.window?.setLayout(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT)
         dialog.findViewById<TextView>(R.id.tv_confirm_title).text = title

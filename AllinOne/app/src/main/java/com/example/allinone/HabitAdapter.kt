@@ -228,7 +228,7 @@ class HabitAdapter(
     private fun showCustomMenu(anchor: View, habit: Habit) {
         val context = anchor.context
         val inflater = LayoutInflater.from(context)
-        val menuView = inflater.inflate(R.layout.layout_custom_menu, null)
+        val menuView = inflater.inflate(R.layout.menu_habit_item, null)
         val isCompleted = isHabitCompletedOnSelectedDate(habit)
 
         val popupWindow = PopupWindow(menuView, ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT, true)

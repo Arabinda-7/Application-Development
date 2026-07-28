@@ -1,3 +1,8 @@
+@file:OptIn(
+    androidx.compose.foundation.ExperimentalFoundationApi::class,
+    androidx.compose.foundation.layout.ExperimentalLayoutApi::class
+)
+
 package com.example.allinone.workspace.ui.sections
 
 import androidx.compose.foundation.*
@@ -5,6 +10,7 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.itemsIndexed
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.material.icons.Icons
@@ -37,6 +43,7 @@ fun IdeaViewSection(
     onDeleteIdea: (IdeaEntity) -> Unit
 ) {
     val style = LocalAppStyle.current
+    val ideaAccentColor = Color(0xFF2EC4B6)
     LazyColumn(contentPadding = PaddingValues(bottom = 24.dp)) {
         items(ideas, key = { it.id }) { idea ->
             var showMenu by remember { mutableStateOf(false) }
@@ -44,23 +51,38 @@ fun IdeaViewSection(
                 Card(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .padding(vertical = 6.dp)
+                        .padding(horizontal = 16.dp, vertical = 6.dp)
                         .combinedClickable(
                             onClick = { onViewIdea(idea) },
                             onLongClick = { showMenu = true }
                         ),
-                    colors = CardDefaults.cardColors(containerColor = style.surfaceColor)
+                    shape = RoundedCornerShape(20.dp),
+                    colors = CardDefaults.cardColors(containerColor = Color.Transparent),
+                    border = BorderStroke(1.5.dp, ideaAccentColor)
                 ) {
-                    Box(modifier = Modifier.fillMaxWidth()) {
-                        Row(modifier = Modifier.fillMaxWidth().padding(16.dp), verticalAlignment = Alignment.CenterVertically) {
+                    Box(modifier = Modifier.fillMaxWidth().height(IntrinsicSize.Min)) {
+                        Row(modifier = Modifier.padding(vertical = 16.dp, horizontal = 12.dp), verticalAlignment = Alignment.CenterVertically) {
+                            // Vertical Accent Bar
+                            Box(modifier = Modifier.width(4.dp).fillMaxHeight().clip(CircleShape).background(ideaAccentColor.copy(alpha = 0.8f)))
+                            
+                            Spacer(modifier = Modifier.width(12.dp))
+                            
                             Column(modifier = Modifier.weight(1f)) {
-                                Text(idea.title, color = Color.White, fontWeight = FontWeight.Bold, fontSize = 16.sp)
+                                Text(
+                                    idea.title, 
+                                    color = Color.White, 
+                                    fontWeight = FontWeight.Bold, 
+                                    fontSize = 20.sp,
+                                    maxLines = 1,
+                                    overflow = TextOverflow.Ellipsis
+                                )
                                 if (idea.description.isNotBlank()) {
+                                    Spacer(modifier = Modifier.height(4.dp))
                                     Text(
                                         text = idea.description,
                                         color = Color.White.copy(alpha = 0.5f),
-                                        fontSize = 12.sp,
-                                        maxLines = 3,
+                                        fontSize = 14.sp,
+                                        maxLines = 2,
                                         overflow = TextOverflow.Ellipsis
                                     )
                                 }

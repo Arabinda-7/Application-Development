@@ -1,6 +1,7 @@
 package com.example.allinone
 
 import android.view.View
+import android.widget.ImageView
 import android.widget.ProgressBar
 import android.widget.TextView
 import androidx.compose.ui.graphics.Color
@@ -48,12 +49,20 @@ class WorkoutPerformanceSection(
         rootView.findViewById<TextView>(R.id.tv_performance_title)?.text = "PERFORMANCE FOR ${formattedDate.uppercase()}"
         rootView.findViewById<TextView>(R.id.tv_overall_percentage)?.text = "$overallPercent%"
         
+        // Apply Theme
+        val workoutColorInt = if (DataManager.globalWorkoutColor != -1) DataManager.globalWorkoutColor else android.graphics.Color.parseColor("#FFFFB800")
+        val colorStateList = android.content.res.ColorStateList.valueOf(workoutColorInt)
+        
+        rootView.findViewById<TextView>(R.id.tv_overall_percentage)?.setTextColor(workoutColorInt)
+        rootView.findViewById<ImageView>(R.id.performance_card_arrow)?.imageTintList = colorStateList
+        
         rootView.findViewById<TextView>(R.id.tv_workouts_stat_label)?.text = "Workouts ($completedCount/$totalCount)"
         rootView.findViewById<TextView>(R.id.tv_workouts_stat_percent)?.text = "$overallPercent%"
         rootView.findViewById<ProgressBar>(R.id.pb_workouts_history)?.progress = overallPercent
+        rootView.findViewById<ProgressBar>(R.id.pb_workouts_history)?.progressTintList = colorStateList
 
         // Update Compose-based Analytics
-        val workoutColor = if (DataManager.globalWorkoutColor != -1) Color(DataManager.globalWorkoutColor) else Color(0xFFFFB800)
+        val workoutColor = Color(workoutColorInt)
         
         rootView.findViewById<ComposeView>(R.id.compose_volume_trend)?.setContent {
             val volumeData = DataManager.getMonthlyVolumeData(calendar)

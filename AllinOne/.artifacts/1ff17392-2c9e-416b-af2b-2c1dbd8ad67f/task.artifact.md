@@ -1,0 +1,4 @@
+- `[x]` Add 4dp top gap to all pages in `OnboardingPages.kt`
+- `[x]` Implement validation and dot navigation in `OnboardingComponents.kt`
+- `[x]` Orchestrate validation and swipe-blocking in `OnboardingActivity.kt`
+- `[x]` Verify all refinements

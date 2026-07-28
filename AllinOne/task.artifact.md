@@ -1,17 +1,10 @@
-# Habit History Enhancement Task List
-
-- [x] **Phase 1: Foundation & Habit-Specific History**
-    - [x] Update `HabitDataManager` with analytical functions
-        - [x] Implement `getHabitHistory(habitName, calendar)` for heatmaps
-        - [x] Implement `calculateStreaks(habitName)`
-    - [x] Update `PerformanceDashboardScreen` UI
-        - [x] Add Habit Selector (Chips or horizontal list)
-        - [x] Display Streaks (Current/Best)
-        - [x] Link Habit Selector to Heatmap and Performance cards
-- [x] **Phase 2: Gamification & Reflections**
-    - [x] Add "Daily Notes/Reflection" field to `DayHistory` or a separate storage
-    - [x] Add UI to edit/view notes for a selected day in the dashboard
-- [x] **Phase 3: Advanced Visualizations**
-    - [x] Implement Cyclical Radar Chart (Sun-Sat performance)
-    - [x] Implement Stability Index (Routine variance)
-    - [x] Implement Habit Stacking Flow (Markov Chain probabilities)
+- [x] Update Layouts for Real-time Background and Aligned Headers
+    - [x] Modify `activity_add_project.xml`
+    - [x] Modify `activity_edit_project.xml`
+    - [x] Modify `activity_add_sub_feature.xml` (remove reminder switch)
+- [x] Implement Real-time Background and Header Logic in Activities
+    - [x] Update `AddProjectActivity.kt`
+    - [x] Update `EditProjectActivity.kt`
+- [x] Simplify Reminder Logic in Sub-feature Activity
+    - [x] Update `AddSubFeatureActivity.kt`
+- [x] Verify UI consistency and automatic reminders

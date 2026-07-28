@@ -28,6 +28,10 @@ import com.example.allinone.ui.performance.components.*
 import java.text.SimpleDateFormat
 import java.util.*
 
+enum class PerformanceFilterType {
+    OVERALL, HABITS, WORKOUTS
+}
+
 @Composable
 fun PerformanceDashboardScreen(
     modifier: Modifier = Modifier,
@@ -51,24 +55,77 @@ fun PerformanceDashboardScreen(
     onHabitSelected: (String?) -> Unit = {},
     onSaveNote: (String, String) -> Unit = { _, _ -> }
 ) {
-    val heatmapData = remember(currentMonth, isWorkoutContext, selectedHabitName) {
-        if (isWorkoutContext) DataManager.getVolumeWeightedHeatmap(currentMonth)
-        else if (selectedHabitName != null) com.example.allinone.data.HabitDataManager.getHabitSpecificHeatmap(selectedHabitName, currentMonth)
+    var primaryFilter by remember(isWorkoutContext) {
+        mutableStateOf(if (isWorkoutContext) PerformanceFilterType.WORKOUTS else if (selectedHabitName != null) PerformanceFilterType.HABITS else PerformanceFilterType.OVERALL)
+    }
+
+    val currentIsWorkoutContext = primaryFilter == PerformanceFilterType.WORKOUTS
+    val currentSelectedHabitName = if (primaryFilter == PerformanceFilterType.HABITS) selectedHabitName else null
+
+    val currentPerformanceData = remember(selectedDate, primaryFilter, currentSelectedHabitName, performanceData) {
+        when (primaryFilter) {
+            PerformanceFilterType.OVERALL -> performanceData
+            PerformanceFilterType.HABITS -> {
+                if (currentSelectedHabitName == null) {
+                    val raw = DataManager.getDayHistory(selectedDate)
+                    DayHistory(raw?.habitsCompleted ?: 0, raw?.totalHabits ?: 0, 0, 0, null)
+                } else {
+                    val habit = DataManager.habits.find { it.name == currentSelectedHabitName }
+                    val isCompleted = habit?.completedDates?.contains(selectedDate) == true
+                    DayHistory(if (isCompleted) 1 else 0, 1, 0, 0, null)
+                }
+            }
+            PerformanceFilterType.WORKOUTS -> {
+                val raw = DataManager.getDayHistory(selectedDate)
+                DayHistory(0, 0, raw?.workoutsCompleted ?: 0, raw?.totalWorkouts ?: 0, raw?.workoutDetails)
+            }
+        }
+    }
+
+    val currentTrendData = remember(selectedDate, primaryFilter, currentSelectedHabitName, trendData) {
+        when (primaryFilter) {
+            PerformanceFilterType.OVERALL -> trendData
+            PerformanceFilterType.HABITS -> {
+                if (currentSelectedHabitName == null) {
+                    DataManager.getLastSevenDaysDetailedProgress().map { Pair(it.first, it.second) }
+                } else {
+                    val habit = DataManager.habits.find { it.name == currentSelectedHabitName }
+                    val sdf = SimpleDateFormat("yyyyMMdd", Locale.getDefault())
+                    (0..6).map { i ->
+                        val cal = Calendar.getInstance()
+                        cal.add(Calendar.DAY_OF_YEAR, -i)
+                        val date = sdf.format(cal.time)
+                        val progress = if (habit?.completedDates?.contains(date) == true) 100 else 0
+                        Pair(i, progress)
+                    }.reversed()
+                }
+            }
+            PerformanceFilterType.WORKOUTS -> {
+                // Use workout completion trend
+                DataManager.getLastSevenDaysWorkoutProgress().map { Pair(it.first, it.second) }
+            }
+        }
+    }
+
+    val heatmapData = remember(currentMonth, primaryFilter, currentSelectedHabitName) {
+        if (currentIsWorkoutContext) DataManager.getVolumeWeightedHeatmap(currentMonth)
+        else if (currentSelectedHabitName != null) com.example.allinone.data.HabitDataManager.getHabitSpecificHeatmap(currentSelectedHabitName, currentMonth)
         else DataManager.getHeatmapData(currentMonth) 
     }
     val densityData = remember { DataManager.getTemporalDensityData() }
     val correlations = remember { DataManager.getHabitCorrelationMatrix() }
     
-    val streaks = remember(selectedHabitName) {
-        if (selectedHabitName != null) DataManager.getHabitStreaks(selectedHabitName)
+    val streaks = remember(currentSelectedHabitName, primaryFilter) {
+        if (currentSelectedHabitName != null) DataManager.getHabitStreaks(currentSelectedHabitName)
+        else if (primaryFilter == PerformanceFilterType.WORKOUTS) DataManager.getWorkoutStreaks()
         else null
     }
 
-    val cyclicalData = remember(selectedHabitName) { DataManager.getWeeklyCyclicalData(selectedHabitName) }
-    val stabilityIndex = remember(selectedHabitName) { DataManager.getStabilityIndex(selectedHabitName) }
-    val resilienceScore = remember(selectedHabitName) { DataManager.getResilienceScore(selectedHabitName) }
-    val momentumHistory = remember(selectedHabitName) { DataManager.getMonthlyMomentumHistory(selectedHabitName) }
-    val milestoneProgress = remember(selectedHabitName) { DataManager.getStreakMilestoneProgress(selectedHabitName) }
+    val cyclicalData = remember(currentSelectedHabitName, primaryFilter) { DataManager.getWeeklyCyclicalData(currentSelectedHabitName) }
+    val stabilityIndex = remember(currentSelectedHabitName, primaryFilter) { DataManager.getStabilityIndex(currentSelectedHabitName) }
+    val resilienceScore = remember(currentSelectedHabitName, primaryFilter) { DataManager.getResilienceScore(currentSelectedHabitName) }
+    val momentumHistory = remember(currentSelectedHabitName, primaryFilter) { DataManager.getMonthlyMomentumHistory(currentSelectedHabitName) }
+    val milestoneProgress = remember(currentSelectedHabitName, primaryFilter) { DataManager.getStreakMilestoneProgress(currentSelectedHabitName) }
 
     val muscleDistribution = remember { DataManager.getMuscleDistributionData() }
     val recoveryStatus = remember { DataManager.getMuscleRecoveryStatus() }
@@ -80,8 +137,8 @@ fun PerformanceDashboardScreen(
     val intensityData = remember(currentMonth) { DataManager.getIntensityDistribution(currentMonth) }
     val muscleFocusData = remember(currentMonth) { DataManager.getDailyMuscleFocus(currentMonth) }
 
-    val moodColorTarget = remember(currentMood, overrideColor) {
-        if (overrideColor != null) return@remember overrideColor
+    val moodColorTarget = remember(currentMood, overrideColor, primaryFilter) {
+        if (overrideColor != null && primaryFilter != PerformanceFilterType.OVERALL) return@remember overrideColor
         when (currentMood) {
             "🔥" -> Color(0xFFFFB800)
             "⚡" -> Color(0xFF2EC4B6)
@@ -89,7 +146,11 @@ fun PerformanceDashboardScreen(
             "💼" -> Color(0xFF1A73E8)
             "😴" -> Color(0xFF9E9E9E)
             "🧠" -> Color(0xFF3F51B5)
-            else -> Color(0xFF1A73E8)
+            else -> {
+                if (primaryFilter == PerformanceFilterType.WORKOUTS) Color(0xFFFFB800)
+                else if (primaryFilter == PerformanceFilterType.HABITS) Color(0xFFFF7A59)
+                else Color(0xFF1A73E8)
+            }
         }
     }
 
@@ -111,10 +172,16 @@ fun PerformanceDashboardScreen(
             Box(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .height(400.dp)
+                    .height(440.dp)
                     .background(
-                        Brush.verticalGradient(
-                            colors = listOf(animatedMoodColor.copy(alpha = 0.6f), Color.Black)
+                        Brush.radialGradient(
+                            colors = listOf(
+                                animatedMoodColor.copy(alpha = 0.45f),
+                                animatedMoodColor.copy(alpha = 0.15f),
+                                Color.Transparent
+                            ),
+                            center = androidx.compose.ui.geometry.Offset(x = 500f, y = 0f),
+                            radius = 1200f
                         )
                     )
             )
@@ -199,9 +266,32 @@ fun PerformanceDashboardScreen(
                             )
                         }
 
+                        // Primary Filter Selector
+                        Spacer(modifier = Modifier.height(16.dp))
+                        Row(
+                            modifier = Modifier.fillMaxWidth(),
+                            horizontalArrangement = Arrangement.spacedBy(8.dp)
+                        ) {
+                            PerformanceFilterType.values().forEach { type ->
+                                FilterChip(
+                                    selected = primaryFilter == type,
+                                    onClick = { primaryFilter = type },
+                                    label = { Text(type.name, fontSize = 10.sp, fontWeight = FontWeight.Bold) },
+                                    colors = FilterChipDefaults.filterChipColors(
+                                        selectedContainerColor = animatedMoodColor,
+                                        selectedLabelColor = Color.Black,
+                                        containerColor = Color.White.copy(alpha = 0.05f),
+                                        labelColor = Color.White
+                                    ),
+                                    border = null,
+                                    shape = CircleShape
+                                )
+                            }
+                        }
+
                         // Habit Selector
-                        if (!isWorkoutContext && habits.isNotEmpty()) {
-                            Spacer(modifier = Modifier.height(16.dp))
+                        if (primaryFilter == PerformanceFilterType.HABITS && habits.isNotEmpty()) {
+                            Spacer(modifier = Modifier.height(12.dp))
                             LazyRow(
                                 modifier = Modifier.fillMaxWidth(),
                                 horizontalArrangement = Arrangement.spacedBy(8.dp),
@@ -364,10 +454,10 @@ fun PerformanceDashboardScreen(
                         modifier = Modifier.padding(horizontal = 24.dp).clickable { isPerformanceExpanded = !isPerformanceExpanded }
                     ) {
                         PerformanceSummary(
-                            data = performanceData,
+                            data = currentPerformanceData,
                             isExpanded = isPerformanceExpanded,
                             themeColor = animatedMoodColor,
-                            isWorkoutContext = isWorkoutContext,
+                            isWorkoutContext = currentIsWorkoutContext,
                             currentStreak = streaks?.first,
                             longestStreak = streaks?.second
                         )
@@ -383,7 +473,7 @@ fun PerformanceDashboardScreen(
                         title = "7-DAY COMPLETION TREND",
                         modifier = Modifier.padding(horizontal = 24.dp)
                     ) {
-                        TrendChart(trendData, animatedMoodColor, isWorkoutContext)
+                        TrendChart(currentTrendData, animatedMoodColor, currentIsWorkoutContext)
                     }
                     Spacer(modifier = Modifier.height(24.dp))
                 }
@@ -428,7 +518,7 @@ fun PerformanceDashboardScreen(
 
             // Advanced Analytics / Insights
             item {
-                if (isWorkoutContext) {
+                if (currentIsWorkoutContext) {
                     Column(modifier = Modifier.padding(horizontal = 24.dp)) {
                         DashboardCard(
                             title = "PHYSIOLOGICAL READINESS (ACWR)",
@@ -509,13 +599,13 @@ fun PerformanceDashboardScreen(
 
             // Consistency Heatmap (Moved to bottom)
             item {
-                val momentumDescription = if (isWorkoutContext) {
+                val momentumDescription = if (currentIsWorkoutContext) {
                     "Volume-weighted frequency map. Darker shades indicate higher intensity or total volume per session."
                 } else {
                     "Daily completion heat-map across all tracked habits. Darker shades indicate higher success rates."
                 }
                 DashboardCard(
-                    title = if (isWorkoutContext) "VOLUME INTENSITY" else "MONTHLY MOMENTUM",
+                    title = if (currentIsWorkoutContext) "VOLUME INTENSITY" else "MONTHLY MOMENTUM",
                     description = momentumDescription,
                     modifier = Modifier.padding(horizontal = 24.dp)
                 ) {

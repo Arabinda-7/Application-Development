@@ -1,0 +1,4 @@
+- [x] Modify `WorkoutThemeManager.kt` to accept `RadioGroup` and style dynamic chips.
+- [x] Update `WorkoutRoutineActivity.kt` to pass the `RadioGroup` to `WorkoutThemeManager`.
+- [x] Verify the code logic for null safety and correctness.
+- [x] Create walkthrough artifact.

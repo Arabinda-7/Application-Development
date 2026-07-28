@@ -146,7 +146,7 @@ class FinanceHistoryActivity : BaseActivity() {
 
     private fun showGraphColorPickerDialog(isSpending: Boolean) {
         val dialog = Dialog(this)
-        dialog.setContentView(R.layout.dialog_settings_color_picker)
+        dialog.setContentView(R.layout.dialog_color_picker_history)
         dialog.window?.setBackgroundDrawableResource(android.R.color.transparent)
 
         val grid = dialog.findViewById<GridLayout>(R.id.color_grid)

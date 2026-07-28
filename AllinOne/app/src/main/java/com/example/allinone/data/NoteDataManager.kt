@@ -9,6 +9,7 @@ object NoteDataManager {
     var noteAutoCleanupDays: Int = 0
     var noteDefaultCategory: String = "Notes"
     var noteShowHidden: Boolean = false
+    var noteVoiceInputEnabled: Boolean = true
     var noteVisibleSections = mutableListOf("Notes")
     
     var noteTemplates: MutableMap<String, String> = mutableMapOf(

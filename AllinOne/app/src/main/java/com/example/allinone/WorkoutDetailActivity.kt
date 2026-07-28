@@ -1,19 +1,18 @@
 package com.example.allinone
 
 import android.content.Intent
+import android.content.res.ColorStateList
 import android.graphics.Color
 import android.os.Bundle
 import android.view.Gravity
 import android.view.View
+import android.widget.EditText
 import android.widget.FrameLayout
 import android.widget.GridLayout
 import android.widget.ImageView
 import android.widget.TextView
-import androidx.activity.enableEdgeToEdge
-import androidx.appcompat.app.AppCompatActivity
+import androidx.appcompat.app.AlertDialog
 import androidx.core.content.ContextCompat
-import androidx.core.view.ViewCompat
-import androidx.core.view.WindowInsetsCompat
 import java.text.SimpleDateFormat
 import java.util.*
 
@@ -38,33 +37,21 @@ class WorkoutDetailActivity : BaseActivity() {
             return
         }
 
-        setupUI()
         calendarGrid = findViewById(R.id.calendar_grid)
         tvMonth = findViewById(R.id.tv_calendar_month)
+
+        setupUI()
         setupCalendar()
-        updateDynamicBackground()
+        updateThemeVisuals()
     }
 
-    private fun updateDynamicBackground() {
-        val auraView = findViewById<View>(R.id.workout_detail_aura_background) ?: return
-        val workoutColor = if (workout?.color != -1) workout?.color ?: Color.parseColor("#FFFFB800") else Color.parseColor("#FFFFB800")
+    private fun updateThemeVisuals() {
+        val themeColor = if (workout?.color != -1) workout?.color ?: Color.parseColor("#FFFFB800") else Color.parseColor("#FFFFB800")
+        findViewById<View>(R.id.header_bg_accent_workout).backgroundTintList = ColorStateList.valueOf(themeColor)
         
-        val gradient = android.graphics.drawable.GradientDrawable(
-            android.graphics.drawable.GradientDrawable.Orientation.TOP_BOTTOM,
-            intArrayOf(
-                adjustAlpha(workoutColor, 0.4f),
-                Color.BLACK
-            )
-        )
-        auraView.background = gradient
-    }
-
-    private fun adjustAlpha(color: Int, factor: Float): Int {
-        val alpha = Math.round(Color.alpha(color) * factor)
-        val red = Color.red(color)
-        val green = Color.green(color)
-        val blue = Color.blue(color)
-        return Color.argb(alpha, red, green, blue)
+        val freqChip = findViewById<TextView>(R.id.tv_frequency_chip)
+        freqChip.setTextColor(themeColor)
+        freqChip.backgroundTintList = ColorStateList.valueOf(themeColor).withAlpha(40)
     }
 
     private fun setupUI() {
@@ -78,39 +65,59 @@ class WorkoutDetailActivity : BaseActivity() {
                 putExtra("WORKOUT_ID", workout?.timestamp)
             }
             startActivity(intent)
-            finish() // Finish detail screen so when they save and come back they land on the routine list
+            finish()
         }
         updateStats()
     }
 
     private fun updateStats() {
-        val totalCompleted = workout?.completedDates?.size ?: 0
-        findViewById<TextView>(R.id.tv_finished_count).text = totalCompleted.toString()
+        val w = workout ?: return
+        val totalCompletedDays = w.completedDates.size
+        findViewById<TextView>(R.id.tv_finished_count).text = totalCompletedDays.toString()
         findViewById<TextView>(R.id.tv_streak_count).text = calculateStreak().toString()
-        val creationDate = Date(workout?.timestamp ?: System.currentTimeMillis())
+        
+        val creationDate = Date(w.timestamp)
         val daysSinceCreation = ((System.currentTimeMillis() - creationDate.time) / (1000 * 60 * 60 * 24)).toInt() + 1
-        val rate = if (daysSinceCreation > 0) (totalCompleted * 100) / daysSinceCreation else 0
+        
+        // Sum of all progress percentages / days since creation
+        val totalProgressPoints = w.dailyProgress.values.sum()
+        val rate = if (daysSinceCreation > 0) totalProgressPoints / daysSinceCreation else 0
+        
         findViewById<TextView>(R.id.tv_rate_percent).text = "$rate%"
-        findViewById<TextView>(R.id.tv_rate_fraction).text = "$totalCompleted/$daysSinceCreation workouts"
+        findViewById<TextView>(R.id.tv_rate_fraction).text = "$totalCompletedDays/$daysSinceCreation workouts"
     }
 
     private fun calculateStreak(): Int {
-        val completedDates = workout?.completedDates ?: return 0
-        if (completedDates.isEmpty()) return 0
+        val dailyProgress = workout?.dailyProgress ?: return 0
+        if (dailyProgress.isEmpty()) return 0
+        
         val sdf = SimpleDateFormat("yyyyMMdd", Locale.getDefault())
         val calendar = Calendar.getInstance()
         var streak = 0
+        
         val today = sdf.format(calendar.time)
-        val yesterday = calendar.let { val cal = it.clone() as Calendar; cal.add(Calendar.DAY_OF_YEAR, -1); sdf.format(cal.time) }
-        if (!completedDates.contains(today) && !completedDates.contains(yesterday)) return 0
+        calendar.add(Calendar.DAY_OF_YEAR, -1)
+        val yesterday = sdf.format(calendar.time)
+        
+        // If neither today nor yesterday has progress, streak is 0
+        if ((dailyProgress[today] ?: 0) == 0 && (dailyProgress[yesterday] ?: 0) == 0) return 0
+        
         calendar.time = Date()
-        if (!completedDates.contains(today)) calendar.add(Calendar.DAY_OF_YEAR, -1)
-        while (completedDates.contains(sdf.format(calendar.time))) { streak++; calendar.add(Calendar.DAY_OF_YEAR, -1) }
+        if ((dailyProgress[today] ?: 0) == 0) calendar.add(Calendar.DAY_OF_YEAR, -1)
+        
+        while (true) {
+            val key = sdf.format(calendar.time)
+            if ((dailyProgress[key] ?: 0) > 0) {
+                streak++
+                calendar.add(Calendar.DAY_OF_YEAR, -1)
+            } else {
+                break
+            }
+        }
         return streak
     }
 
     private fun setupCalendar() {
-        // Remove old views but keep the 7 day headers
         val childCount = calendarGrid.childCount
         if (childCount > 7) {
             calendarGrid.removeViews(7, childCount - 7)
@@ -135,26 +142,82 @@ class WorkoutDetailActivity : BaseActivity() {
         for (day in 1..daysInMonth) {
             val dayCalendar = Calendar.getInstance()
             dayCalendar.set(currentYear, currentMonth, day)
-            val isCompleted = workout?.completedDates?.contains(sdfDate.format(dayCalendar.time)) == true
-            calendarGrid.addView(createDayView(day.toString(), if (isCompleted) 100 else 0))
+            val dateKey = sdfDate.format(dayCalendar.time)
+            
+            val progressPercent = workout?.dailyProgress?.get(dateKey) ?: 0
+            calendarGrid.addView(createDayView(day.toString(), progressPercent, dateKey))
         }
+    }
+
+    private fun showProgressInputDialog(dateKey: String) {
+        val w = workout ?: return
+        val builder = AlertDialog.Builder(this, R.style.NumberPickerTheme)
+        
+        // Let's create a simple custom view for input
+        val padding = (24 * resources.displayMetrics.density).toInt()
+        val input = EditText(this).apply {
+            hint = "Value (Max: ${w.target})"
+            setHintTextColor(Color.GRAY)
+            setTextColor(Color.WHITE)
+            inputType = android.text.InputType.TYPE_CLASS_NUMBER
+            setPadding(padding, padding, padding, padding)
+            // Get current value if exists
+            val currentVal = if (w.dailyProgress.containsKey(dateKey)) {
+                (w.dailyProgress[dateKey]!! * w.target) / 100
+            } else 0
+            setText(currentVal.toString())
+        }
+
+        builder.setTitle("Log Progress for $dateKey")
+        builder.setMessage("Enter number of ${w.trackingMode} done:")
+        builder.setView(input)
+
+        builder.setPositiveButton("LOG") { _, _ ->
+            val enteredValue = input.text.toString().toIntOrNull() ?: 0
+            val target = w.target.coerceAtLeast(1)
+            val percentage = ((enteredValue.coerceIn(0, target) * 100) / target)
+            
+            if (percentage > 0) {
+                w.dailyProgress[dateKey] = percentage
+                if (!w.completedDates.contains(dateKey)) w.completedDates.add(dateKey)
+                
+                // If logging for today, update current session
+                if (dateKey == DataManager.getTrackingDateString()) {
+                    w.progress = enteredValue.coerceIn(0, target)
+                    w.isCompleted = percentage == 100
+                }
+            } else {
+                w.dailyProgress.remove(dateKey)
+                w.completedDates.remove(dateKey)
+                if (dateKey == DataManager.getTrackingDateString()) {
+                    w.progress = 0
+                    w.isCompleted = false
+                }
+            }
+            
+            DataManager.saveData(this)
+            updateStats()
+            setupCalendar()
+        }
+        builder.setNegativeButton("CANCEL", null)
+        builder.show()
     }
 
     private fun createSpacerView(): View {
         val view = View(this)
         val params = GridLayout.LayoutParams()
         params.width = 0
-        params.height = 100
+        params.height = (40 * resources.displayMetrics.density).toInt()
         params.columnSpec = GridLayout.spec(GridLayout.UNDEFINED, 1f)
         view.layoutParams = params
         return view
     }
 
-    private fun createDayView(day: String, progressPercent: Int): View {
+    private fun createDayView(day: String, progressPercent: Int, dateKey: String): View {
         val frameLayout = FrameLayout(this)
         val params = GridLayout.LayoutParams()
         params.width = 0
-        params.height = 100
+        params.height = (40 * resources.displayMetrics.density).toInt()
         params.columnSpec = GridLayout.spec(GridLayout.UNDEFINED, 1f)
         frameLayout.layoutParams = params
         
@@ -168,6 +231,10 @@ class WorkoutDetailActivity : BaseActivity() {
         progressBar.max = 100
         progressBar.progress = progressPercent
         progressBar.scaleX = -1f // Flip for anti-clockwise
+        
+        val themeColor = if (workout?.color != -1) workout?.color ?: Color.parseColor("#FFFFB800") else Color.parseColor("#FFFFB800")
+        progressBar.progressTintList = ColorStateList.valueOf(themeColor)
+        
         frameLayout.addView(progressBar)
         
         val textView = TextView(this)
@@ -176,6 +243,10 @@ class WorkoutDetailActivity : BaseActivity() {
         textView.textSize = 12f
         textView.gravity = Gravity.CENTER
         frameLayout.addView(textView)
+
+        frameLayout.setOnClickListener {
+            showProgressInputDialog(dateKey)
+        }
 
         return frameLayout
     }

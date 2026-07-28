@@ -168,8 +168,18 @@
                 android:orientation="vertical"
                 android:padding="8dp">
 
+                <!-- App Lock Toggle -->
+                <include layout="@layout/item_profile_setting" android:id="@+id/item_app_lock" />
+
+                <View android:layout_width="match_parent" android:layout_height="1dp" android:background="#1AFFFFFF" android:layout_marginHorizontal="16dp"/>
+
                 <!-- Biometric Toggle -->
                 <include layout="@layout/item_profile_setting" android:id="@+id/item_biometric_lock" />
+
+                <View android:layout_width="match_parent" android:layout_height="1dp" android:background="#1AFFFFFF" android:layout_marginHorizontal="16dp"/>
+
+                <!-- Screenshot Protection Toggle -->
+                <include layout="@layout/item_profile_setting" android:id="@+id/item_screenshot_protection" />
 
                 <View android:layout_width="match_parent" android:layout_height="1dp" android:background="#1AFFFFFF" android:layout_marginHorizontal="16dp"/>
 

@@ -19,10 +19,6 @@ import java.util.*
 
 class AddIdeaActivity : BaseActivity() {
 
-    companion object {
-        var currentEditingIdeaSubFeatures: MutableList<ProjectFeature> = mutableListOf()
-    }
-
     private var ideaIndex: Int = -1
     private var existingIdea: Note? = null
 
@@ -45,6 +41,7 @@ class AddIdeaActivity : BaseActivity() {
     private lateinit var containerSubfeatures: LinearLayout
     private lateinit var etNewSubfeature: EditText
     private lateinit var btnAddSubfeature: View
+    private lateinit var containerTemplates: LinearLayout
     private lateinit var btnConvert: TextView
     private lateinit var btnConvertIcon: View
     private lateinit var tvCreatedAt: TextView
@@ -63,8 +60,8 @@ class AddIdeaActivity : BaseActivity() {
             existingIdea = DataManager.projects[ideaIndex]
         }
 
-        currentEditingIdeaSubFeatures.clear()
-        currentEditingIdeaSubFeatures.addAll(existingIdea?.subFeatures ?: mutableListOf())
+        DataManager.currentEditingIdeaSubFeatures.clear()
+        DataManager.currentEditingIdeaSubFeatures.addAll(existingIdea?.subFeatures ?: mutableListOf())
 
         initViews()
         setupLogic()
@@ -94,6 +91,7 @@ class AddIdeaActivity : BaseActivity() {
         btnToggleFeatures = findViewById(R.id.btn_toggle_subfeatures)
         layoutFeaturesContainer = findViewById(R.id.layout_features_container)
         containerSubfeatures = findViewById(R.id.container_subfeatures)
+        containerTemplates = findViewById(R.id.container_templates)
         etNewSubfeature = findViewById(R.id.et_new_subfeature)
         btnAddSubfeature = findViewById(R.id.btn_add_subfeature)
         btnConvert = findViewById(R.id.btn_convert_project)
@@ -130,7 +128,7 @@ class AddIdeaActivity : BaseActivity() {
             }
 
             // Auto-expand if features exist
-            if (currentEditingIdeaSubFeatures.isNotEmpty()) {
+            if (DataManager.currentEditingIdeaSubFeatures.isNotEmpty()) {
                 layoutFeaturesContainer.visibility = View.VISIBLE
                 btnToggleFeatures.text = "FEATURES ▲"
             } else {
@@ -191,12 +189,35 @@ class AddIdeaActivity : BaseActivity() {
         btnAddSubfeature.setOnClickListener {
             val name = etNewSubfeature.text.toString().trim()
             val baseName = name.ifEmpty { "New Feature" }
-            val finalName = DataManager.getUniqueFeatureName(baseName, currentEditingIdeaSubFeatures)
+            val finalName = DataManager.getUniqueFeatureName(baseName, DataManager.currentEditingIdeaSubFeatures)
             
-            val nextPos = if (currentEditingIdeaSubFeatures.isEmpty()) 1 else currentEditingIdeaSubFeatures.maxOf { it.position } + 1
-            currentEditingIdeaSubFeatures.add(ProjectFeature(name = finalName, position = nextPos))
+            val nextPos = if (DataManager.currentEditingIdeaSubFeatures.isEmpty()) 1 else DataManager.currentEditingIdeaSubFeatures.maxOf { it.position } + 1
+            val newFeature = ProjectFeature(name = finalName, position = nextPos)
+            DataManager.currentEditingIdeaSubFeatures.add(newFeature)
             etNewSubfeature.text.clear()
             refreshSubFeatures()
+            
+            startActivity(Intent(this, AddSubFeatureActivity::class.java).apply {
+                putExtra("PROJECT_INDEX", DataManager.projects.indexOf(existingIdea))
+                putExtra("SUB_FEATURE_ID", newFeature.id)
+                putExtra("IS_IDEA", true)
+            })
+        }
+
+        // Templates
+        DataManager.projectTemplates.forEach { (name, steps) ->
+            val templateBtn = TextView(this).apply {
+                text = name; setTextColor(Color.WHITE); textSize = 12f
+                setPadding(24.dpToPx(), 12.dpToPx(), 24.dpToPx(), 12.dpToPx())
+                background = ContextCompat.getDrawable(this@AddIdeaActivity, R.drawable.priority_chip_bg)
+                layoutParams = LinearLayout.LayoutParams(ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT).apply { marginEnd = 12.dpToPx() }
+                setOnClickListener {
+                    DataManager.currentEditingIdeaSubFeatures.clear()
+                    steps.forEachIndexed { i, step -> DataManager.currentEditingIdeaSubFeatures.add(ProjectFeature(step, position = i + 1)) }
+                    refreshSubFeatures()
+                }
+            }
+            containerTemplates.addView(templateBtn)
         }
 
         btnPriority.setOnClickListener {
@@ -244,8 +265,9 @@ class AddIdeaActivity : BaseActivity() {
         goalsList.removeAllViews()
         tempGoals.sortedByDescending { it.timestamp }.forEach { entry ->
             val layout = LinearLayout(this).apply {
-                orientation = LinearLayout.VERTICAL
-                setPadding(0, 8.dpToPx(), 0, 8.dpToPx())
+                orientation = LinearLayout.HORIZONTAL
+                setPadding(0, 4.dpToPx(), 0, 4.dpToPx())
+                gravity = android.view.Gravity.CENTER_VERTICAL
                 layoutParams = LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT)
             }
 
@@ -253,28 +275,67 @@ class AddIdeaActivity : BaseActivity() {
                 text = entry.text
                 setTextColor(Color.WHITE)
                 textSize = 14f
+                layoutParams = LinearLayout.LayoutParams(0, ViewGroup.LayoutParams.WRAP_CONTENT, 1f)
             }
 
-            val tvDate = TextView(this).apply {
-                val date = SimpleDateFormat("MMM dd, HH:mm", Locale.getDefault()).format(Date(entry.timestamp))
-                text = date
-                setTextColor(Color.GRAY)
-                textSize = 10f
-                gravity = android.view.Gravity.END
-                layoutParams = LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT)
+            val btnEdit = ImageView(this).apply {
+                setImageResource(R.drawable.icons8_edit_pencil_100)
+                val iconSize = 20.dpToPx()
+                layoutParams = LinearLayout.LayoutParams(iconSize, iconSize)
+                setPadding(2.dpToPx(), 2.dpToPx(), 2.dpToPx(), 2.dpToPx())
+                imageTintList = ColorStateList.valueOf(Color.GRAY)
+                setOnClickListener { showEditGoalDialog(entry) }
+            }
+
+            val btnDel = ImageView(this).apply {
+                setImageResource(android.R.drawable.ic_menu_close_clear_cancel)
+                val iconSize = 20.dpToPx()
+                layoutParams = LinearLayout.LayoutParams(iconSize, iconSize).apply { marginStart = 8.dpToPx() }
+                imageTintList = ColorStateList.valueOf(Color.parseColor("#80FFFFFF"))
+                setOnClickListener {
+                    android.app.AlertDialog.Builder(this@AddIdeaActivity)
+                        .setTitle("Delete Goal")
+                        .setMessage("Are you sure you want to remove this goal?")
+                        .setPositiveButton("DELETE") { _, _ ->
+                            tempGoals.remove(entry)
+                            refreshGoalsUI()
+                        }
+                        .setNegativeButton("CANCEL", null)
+                        .show()
+                }
             }
 
             layout.addView(tvText)
-            layout.addView(tvDate)
+            layout.addView(btnEdit)
+            layout.addView(btnDel)
             goalsList.addView(layout)
         }
+    }
+
+    private fun showEditGoalDialog(goal: JournalEntry) {
+        val et = EditText(this).apply {
+            setText(goal.text)
+            setPadding(24.dpToPx(), 16.dpToPx(), 24.dpToPx(), 16.dpToPx())
+        }
+        android.app.AlertDialog.Builder(this)
+            .setTitle("Edit Goal")
+            .setView(et)
+            .setPositiveButton("UPDATE") { _, _ ->
+                val newText = et.text.toString().trim()
+                if (newText.isNotEmpty()) {
+                    goal.text = newText
+                    refreshGoalsUI()
+                }
+            }
+            .setNegativeButton("CANCEL", null)
+            .show()
     }
 
     private fun refreshSubFeatures() {
         containerSubfeatures.removeAllViews()
         
-        val active = currentEditingIdeaSubFeatures.filter { !it.isCompleted }.sortedBy { it.position }
-        val completed = currentEditingIdeaSubFeatures.filter { it.isCompleted }.sortedByDescending { it.position }
+        val active = DataManager.currentEditingIdeaSubFeatures.filter { !it.isCompleted }.sortedBy { it.position }
+        val completed = DataManager.currentEditingIdeaSubFeatures.filter { it.isCompleted }.sortedByDescending { it.position }
 
         active.forEach { containerSubfeatures.addView(createSubFeatureItem(it)) }
         completed.forEach { containerSubfeatures.addView(createSubFeatureItem(it)) }
@@ -347,7 +408,7 @@ class AddIdeaActivity : BaseActivity() {
 
     private fun showSubFeatureMenu(anchor: View, sub: ProjectFeature) {
         val inflater = LayoutInflater.from(this)
-        val menuView = inflater.inflate(R.layout.layout_custom_menu, null)
+        val menuView = inflater.inflate(R.layout.menu_idea_item, null)
         val popupWindow = PopupWindow(menuView, ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT, true)
         popupWindow.elevation = 20f
 
@@ -379,8 +440,16 @@ class AddIdeaActivity : BaseActivity() {
             }
 
         btnDelete.setOnClickListener {
-            currentEditingIdeaSubFeatures.remove(sub)
-            refreshSubFeatures()
+            android.app.AlertDialog.Builder(this)
+                .setTitle("Delete Feature")
+                .setMessage("Are you sure you want to remove '${sub.name}'?")
+                .setPositiveButton("DELETE") { _, _ ->
+                    DataManager.currentEditingIdeaSubFeatures.remove(sub)
+                    DataManager.currentEditingIdeaSubFeatures.forEachIndexed { index, feature -> feature.position = index + 1 }
+                    refreshSubFeatures()
+                }
+                .setNegativeButton("CANCEL", null)
+                .show()
             popupWindow.dismiss()
         }
 
@@ -450,13 +519,13 @@ class AddIdeaActivity : BaseActivity() {
             idea.status = "In Progress"
             idea.priority = currentPriority
             idea.subFeatures.clear()
-            idea.subFeatures.addAll(currentEditingIdeaSubFeatures)
+            idea.subFeatures.addAll(DataManager.currentEditingIdeaSubFeatures)
             idea.ideaGoals.clear()
             idea.ideaGoals.addAll(tempGoals)
 
             if (existingIdea == null) DataManager.projects.add(0, idea)
             DataManager.saveData(this)
-            currentEditingIdeaSubFeatures.clear()
+            DataManager.currentEditingIdeaSubFeatures.clear()
             Toast.makeText(this, "Converted to Project Roadmap!", Toast.LENGTH_SHORT).show()
             finish()
         }
@@ -470,20 +539,20 @@ class AddIdeaActivity : BaseActivity() {
             idea.content = contentInput.text.toString()
             idea.priority = currentPriority
             idea.subFeatures.clear()
-            idea.subFeatures.addAll(currentEditingIdeaSubFeatures)
+            idea.subFeatures.addAll(DataManager.currentEditingIdeaSubFeatures)
             idea.ideaGoals.clear()
             idea.ideaGoals.addAll(tempGoals)
 
             if (existingIdea == null) DataManager.projects.add(0, idea)
             DataManager.saveData(this)
-            currentEditingIdeaSubFeatures.clear()
+            DataManager.currentEditingIdeaSubFeatures.clear()
             finish()
         }
     }
 
     override fun onDestroy() {
         super.onDestroy()
-        currentEditingIdeaSubFeatures.clear()
+        DataManager.currentEditingIdeaSubFeatures.clear()
     }
 
     private fun Int.dpToPx(): Int = (this * resources.displayMetrics.density).toInt()

@@ -37,9 +37,14 @@ class WorkoutSettingsActivity : BaseActivity() {
         val settings = mutableListOf<ConfigItem>()
         
         settings.add(ConfigItem("Configuration", isHeader = true))
-        settings.add(ConfigItem("Manage Muscle Groups", "Add or remove body part tags") { 
+        settings.add(ConfigItem("Manage Muscles", "Add or remove body part tags") { 
             showManageMuscleGroupsDialog()
         })
+
+        settings.add(ConfigItem("Primary Filter Type", "Current: ${if (DataManager.workoutFilterType == "TIME") "Time of Day" else "Muscle Groups"}", options = listOf("Time of Day", "Muscle Groups"), selectedIndex = if (DataManager.workoutFilterType == "TIME") 0 else 1, onOptionSelected = { index ->
+            DataManager.workoutFilterType = if (index == 0) "TIME" else "MUSCLE"
+            loadSettings()
+        }))
 
         settings.add(ConfigItem("Workout Weight Unit", "Current: ${DataManager.workoutWeightUnit}", options = listOf("Kg", "Lb"), selectedIndex = if (DataManager.workoutWeightUnit == "Kg") 0 else 1, onOptionSelected = { index ->
             DataManager.workoutWeightUnit = if (index == 0) "Kg" else "Lb"

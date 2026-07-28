@@ -46,6 +46,7 @@ data class DashboardState(
     val showNoteSection: Boolean = true,
     val showProjectSection: Boolean = true,
     val showFinanceSection: Boolean = true,
+    val showPerformanceSection: Boolean = true,
 
     val isAppUnlocked: Boolean = false,
     val isDataLoaded: Boolean = false

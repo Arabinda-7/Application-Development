@@ -120,7 +120,7 @@ class NoteAdapter(
     private fun showCustomMenu(anchor: View, note: Note) {
         val context = anchor.context
         val inflater = LayoutInflater.from(context)
-        val menuView = inflater.inflate(R.layout.layout_custom_menu, null)
+        val menuView = inflater.inflate(R.layout.menu_note_item, null)
 
         val popupWindow = PopupWindow(
             menuView,

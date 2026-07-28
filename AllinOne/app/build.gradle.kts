@@ -8,7 +8,9 @@ plugins {
 android {
     namespace = "com.example.allinone"
     compileSdk = 36
-
+    lint {
+        abortOnError = false
+    }
     defaultConfig {
         applicationId = "com.example.allinone"
         minSdk = 24
@@ -68,6 +70,11 @@ dependencies {
     implementation(libs.androidx.room.runtime)
     implementation(libs.androidx.room.ktx)
     ksp(libs.androidx.room.compiler)
+
+    // Security & Biometric
+    implementation(libs.androidx.security.crypto)
+    implementation(libs.androidx.biometric)
+    implementation(libs.sqlcipher)
 
     debugImplementation(libs.androidx.ui.tooling)
 

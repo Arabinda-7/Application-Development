@@ -81,7 +81,7 @@ class LedgerHistoryActivity : BaseActivity() {
 
     private fun showCustomLedgerMenu(anchor: View, entry: LedgerEntry) {
         val inflater = LayoutInflater.from(this)
-        val menuView = inflater.inflate(R.layout.layout_custom_menu, null)
+        val menuView = inflater.inflate(R.layout.menu_ledger_history, null)
         val popupWindow = PopupWindow(menuView, ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT, true)
         popupWindow.elevation = 20f
 
@@ -111,7 +111,7 @@ class LedgerHistoryActivity : BaseActivity() {
 
     private fun showConfirmationDialog(title: String, message: String, positiveButtonText: String, onConfirm: () -> Unit) {
         val dialog = Dialog(this)
-        dialog.setContentView(R.layout.dialog_confirmation)
+        dialog.setContentView(R.layout.dialog_confirm_ledger)
         dialog.window?.setBackgroundDrawableResource(android.R.color.transparent)
         dialog.window?.setLayout(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT)
         dialog.findViewById<TextView>(R.id.tv_confirm_title).text = title

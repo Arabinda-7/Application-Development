@@ -25,7 +25,7 @@ import androidx.compose.ui.unit.sp
 import com.example.allinone.R
 
 @Composable
-fun LiquidBackground(accentColor: Color) {
+fun LiquidBackground(accentColor: Color, scrollOffset: Float = 0f) {
     val infiniteTransition = rememberInfiniteTransition(label = "LiquidBg")
     val phase by infiniteTransition.animateFloat(
         initialValue = 0f, targetValue = 2 * Math.PI.toFloat(),
@@ -35,8 +35,26 @@ fun LiquidBackground(accentColor: Color) {
     Box(modifier = Modifier.fillMaxSize().background(Color.Black)) {
         Canvas(modifier = Modifier.fillMaxSize()) {
             val canvasWidth = size.width; val canvasHeight = size.height
-            drawCircle(brush = Brush.radialGradient(colors = listOf(accentColor.copy(alpha = 0.15f), Color.Transparent)), center = androidx.compose.ui.geometry.Offset(canvasWidth * 0.2f + (50 * Math.sin(phase.toDouble())).toFloat(), canvasHeight * 0.3f), radius = canvasWidth * 0.8f)
-            drawCircle(brush = Brush.radialGradient(colors = listOf(accentColor.copy(alpha = 0.1f), Color.Transparent)), center = androidx.compose.ui.geometry.Offset(canvasWidth * 0.8f, canvasHeight * 0.7f + (40 * Math.cos(phase.toDouble())).toFloat()), radius = canvasWidth * 0.6f)
+            
+            // Apply parallax based on scrollOffset
+            val parallaxX = scrollOffset * 100f
+
+            drawCircle(
+                brush = Brush.radialGradient(colors = listOf(accentColor.copy(alpha = 0.15f), Color.Transparent)),
+                center = androidx.compose.ui.geometry.Offset(
+                    canvasWidth * 0.2f + (50 * Math.sin(phase.toDouble())).toFloat() - (parallaxX * 0.5f),
+                    canvasHeight * 0.3f
+                ),
+                radius = canvasWidth * 0.8f
+            )
+            drawCircle(
+                brush = Brush.radialGradient(colors = listOf(accentColor.copy(alpha = 0.1f), Color.Transparent)),
+                center = androidx.compose.ui.geometry.Offset(
+                    canvasWidth * 0.8f - (parallaxX * 0.8f),
+                    canvasHeight * 0.7f + (40 * Math.cos(phase.toDouble())).toFloat()
+                ),
+                radius = canvasWidth * 0.6f
+            )
         }
     }
 }
@@ -69,31 +87,91 @@ fun ModuleChip(config: SubFeatureConfig, isSectionEnabled: Boolean, accentColor:
 @Composable
 fun FeatureCapabilitiesGrid(sectionId: String, accentColor: Color) {
     val caps = when (sectionId) {
-        "HABITS" -> listOf("Heatmaps", "Streaks", "Daily Reset", "Notifications", "Aura Themes", "Logging")
-        "TASKS" -> listOf("Priority", "Categories", "Search", "Reminders", "Analytics", "Subtasks")
-        "NOTES" -> listOf("Templates", "Voice Input", "Auto-Cleanup", "Pinning", "Voice Memos", "Drafts")
-        "FINANCE" -> listOf("Budgeting", "Heatmaps", "Categorization", "Income/Exp", "Savings", "Currencies")
-        "PROJECTS" -> listOf("Roadmaps", "Milestones", "Sub-features", "Ideas", "History", "Sync")
-        "WORKOUTS" -> listOf("Muscle Grp", "Timer", "Sets/Reps", "Balance", "Logging", "Progression")
+        "HABITS" -> listOf(
+            "Custom Streaks", "Heatmap Trends", "Stability Index", 
+            "Resilience Score", "Aura Themes", "Smart Notifications", 
+            "Vacation Mode", "Bulk Log Mode", "Grace Days", "Daily Reset Control"
+        )
+        "TASKS" -> listOf(
+            "Priority Levels", "Custom Categories", "Subtask Support", 
+            "Timed Reminders", "Auto-Archive", "Advanced Search", 
+            "Progress Analytics", "Quick Add Actions"
+        )
+        "NOTES" -> listOf(
+            "Daily Journaling", "Question Templates", "Story Writing", 
+            "Voice Input", "Auto-Cleanup", "Aura Colors", 
+            "Character Counts", "Hidden Logs", "Rich Formatting"
+        )
+        "FINANCE" -> listOf(
+            "Monthly Budgeting", "Savings Goals", "Safe Spend Logic", 
+            "Heatmap Analytics", "Personal Ledgers", "Income vs Exp", 
+            "Currency Support", "Category Icons", "Category Colors", 
+            "Ledger Entries", "History Tracking"
+        )
+        "PROJECTS" -> listOf(
+            "Roadmaps", "Milestones", "Sub-features", "Ideas Hub", 
+            "Synergy Sync", "Deadline Alerts", "Progress Automation"
+        )
+        "WORKOUTS" -> listOf(
+            "Muscle Groups", "Rest Timer", 
+            "Sets & Reps", "Progression Score", "ACWR Analytics", 
+            "Recovery Status", "Volume Tracking", "History Heatmap", 
+            "Stability Score", "Routine Management", "Workout Detail"
+        )
         else -> emptyList()
     }
 
-    LazyVerticalGrid(columns = GridCells.Fixed(2), modifier = Modifier.height(180.dp), contentPadding = PaddingValues(8.dp)) {
-        items(caps) { cap ->
-            Row(modifier = Modifier.padding(6.dp), verticalAlignment = Alignment.CenterVertically) {
-                Icon(Icons.Default.Bolt, contentDescription = null, tint = accentColor, modifier = Modifier.size(14.dp))
-                Spacer(modifier = Modifier.width(6.dp)); Text(cap, color = Color.White.copy(alpha = 0.7f), fontSize = 11.sp, fontWeight = FontWeight.Medium)
+    Column(modifier = Modifier.fillMaxWidth().padding(vertical = 8.dp)) {
+        caps.chunked(2).forEach { rowItems ->
+            Row(modifier = Modifier.fillMaxWidth().padding(vertical = 4.dp)) {
+                rowItems.forEach { cap ->
+                    Row(modifier = Modifier.weight(1f).padding(horizontal = 4.dp), verticalAlignment = Alignment.CenterVertically) {
+                        Icon(Icons.Default.Bolt, contentDescription = null, tint = accentColor, modifier = Modifier.size(14.dp))
+                        Spacer(modifier = Modifier.width(6.dp))
+                        Text(cap, color = Color.White.copy(alpha = 0.7f), fontSize = 11.sp, fontWeight = FontWeight.Medium)
+                    }
+                }
+                if (rowItems.size == 1) {
+                    Spacer(modifier = Modifier.weight(1f))
+                }
             }
         }
     }
 }
 
 @Composable
-fun OnboardingFooter(pagerState: PagerState, accentColor: Color, isLastPage: Boolean, onNext: (Int) -> Unit) {
+fun OnboardingFooter(
+    pagerState: PagerState,
+    accentColor: Color,
+    isLastPage: Boolean,
+    isNextEnabled: Boolean = true,
+    onDotClick: (Int) -> Unit = {},
+    onNext: (Int) -> Unit
+) {
     val scope = rememberCoroutineScope()
     Row(modifier = Modifier.fillMaxWidth().padding(24.dp), horizontalArrangement = Arrangement.SpaceBetween, verticalAlignment = Alignment.CenterVertically) {
-        Row { repeat(pagerState.pageCount) { i -> val active = pagerState.currentPage == i; val width by animateDpAsState(targetValue = if (active) 24.dp else 8.dp, label = "DotWidth"); Box(modifier = Modifier.padding(horizontal = 4.dp).height(8.dp).width(width).clip(CircleShape).background(if (active) accentColor else Color.White.copy(alpha = 0.2f))) } }
-        Button(onClick = { onNext(pagerState.currentPage) }, colors = ButtonDefaults.buttonColors(containerColor = accentColor), shape = RoundedCornerShape(16.dp), contentPadding = PaddingValues(horizontal = 32.dp, vertical = 16.dp)) {
+        Row {
+            repeat(pagerState.pageCount) { i ->
+                val active = pagerState.currentPage == i
+                val width by animateDpAsState(targetValue = if (active) 24.dp else 8.dp, label = "DotWidth")
+                Box(
+                    modifier = Modifier
+                        .padding(horizontal = 4.dp)
+                        .height(8.dp)
+                        .width(width)
+                        .clip(CircleShape)
+                        .background(if (active) accentColor else Color.White.copy(alpha = 0.2f))
+                        .clickable { onDotClick(i) }
+                )
+            }
+        }
+        Button(
+            onClick = { onNext(pagerState.currentPage) },
+            enabled = isNextEnabled,
+            colors = ButtonDefaults.buttonColors(containerColor = accentColor, disabledContainerColor = accentColor.copy(alpha = 0.3f)),
+            shape = RoundedCornerShape(16.dp),
+            contentPadding = PaddingValues(horizontal = 32.dp, vertical = 16.dp)
+        ) {
             Text(if (isLastPage) "ACTIVATE SYSTEM" else "CONTINUE", fontWeight = FontWeight.Black, letterSpacing = 1.sp)
             Spacer(modifier = Modifier.width(8.dp)); Icon(if (isLastPage) Icons.Default.PowerSettingsNew else Icons.Default.ArrowForward, contentDescription = null)
         }

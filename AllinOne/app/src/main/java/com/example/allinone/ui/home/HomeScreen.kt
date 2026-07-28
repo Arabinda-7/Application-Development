@@ -214,7 +214,7 @@ fun HomeScreen(
 
             Spacer(modifier = Modifier.height(16.dp))
 
-            val showExecutiveCard = state.showHabitSection || state.showWorkoutSection || state.showFinanceSection
+            val showExecutiveCard = (state.showPerformanceSection && (state.showHabitSection || state.showWorkoutSection)) || state.showFinanceSection
             if (showExecutiveCard) {
                 Card(
                     shape = RoundedCornerShape(style.borderRadius),
@@ -223,7 +223,7 @@ fun HomeScreen(
                 ) {
                     Column(modifier = Modifier.padding(24.dp)) {
                         Row(verticalAlignment = Alignment.CenterVertically) {
-                            if (state.showHabitSection || state.showWorkoutSection) {
+                            if (state.showPerformanceSection && (state.showHabitSection || state.showWorkoutSection)) {
                                 Column(modifier = Modifier.weight(1f)) {
                                     Text(
                                         "Daily Performance", 
@@ -247,7 +247,7 @@ fun HomeScreen(
                             }
                         }
                         
-                        if (state.showHabitSection || state.showWorkoutSection) {
+                        if (state.showPerformanceSection && (state.showHabitSection || state.showWorkoutSection)) {
                             Spacer(modifier = Modifier.height(16.dp))
                             LinearProgressIndicator(
                                 progress = { state.overallProgress / 100f },

@@ -123,7 +123,7 @@ fun WorkspaceSidebar(selectedTab: WorkspaceTab, onTabSelected: (WorkspaceTab) ->
 @Composable
 fun NoProjectsScreen(onAddProject: () -> Unit, onImportProject: () -> Unit, onTrySample: () -> Unit, onToggleMenu: () -> Unit, isSidebarExpanded: Boolean, modifier: Modifier = Modifier) {
     Column(modifier = modifier.fillMaxSize(), horizontalAlignment = Alignment.CenterHorizontally) {
-        Box(modifier = Modifier.fillMaxWidth().padding(start = 16.dp, end = 16.dp, top = 4.dp, bottom = 12.dp).height(48.dp), contentAlignment = Alignment.CenterStart) {
+        Box(modifier = Modifier.fillMaxWidth().height(64.dp).padding(horizontal = 16.dp), contentAlignment = Alignment.CenterStart) {
             if (!isSidebarExpanded) { IconButton(onClick = onToggleMenu) { Icon(Icons.Default.Menu, contentDescription = "Menu", tint = Color.White) } }
         }
         Column(modifier = Modifier.weight(1f), verticalArrangement = Arrangement.Center, horizontalAlignment = Alignment.CenterHorizontally) {
@@ -143,7 +143,7 @@ fun NoProjectsScreen(onAddProject: () -> Unit, onImportProject: () -> Unit, onTr
 
 @Composable
 fun WorkspaceHeader(selectedProject: ProjectEntity?, projects: List<ProjectEntity>, currentTab: WorkspaceTab, onProjectSelected: (String) -> Unit, onDeleteProject: (ProjectEntity) -> Unit, onEditProject: () -> Unit, onImportRequest: () -> Unit, isSidebarExpanded: Boolean, onToggleMenu: () -> Unit, modifier: Modifier = Modifier) {
-    Row(modifier = modifier.fillMaxWidth().padding(start = 16.dp, end = 16.dp, top = 4.dp, bottom = 12.dp), verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.SpaceBetween) {
+    Row(modifier = modifier.fillMaxWidth().height(72.dp).padding(horizontal = 16.dp), verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.SpaceBetween) {
         Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.weight(1f)) {
             val menuButtonWidth by animateDpAsState(
                 targetValue = if (isSidebarExpanded) 0.dp else 56.dp,
@@ -156,7 +156,7 @@ fun WorkspaceHeader(selectedProject: ProjectEntity?, projects: List<ProjectEntit
                 }
             }
             Column {
-                Text("Workspace", color = Color.White.copy(alpha = 0.5f), fontSize = 12.sp)
+                Text("Workspace", color = Color.White.copy(alpha = 0.5f), fontSize = 11.sp)
                 Text(selectedProject?.name ?: "Select Project", color = Color.White, fontSize = 24.sp, fontWeight = FontWeight.Bold, maxLines = 2, overflow = androidx.compose.ui.text.style.TextOverflow.Ellipsis)
             }
         }
@@ -164,15 +164,20 @@ fun WorkspaceHeader(selectedProject: ProjectEntity?, projects: List<ProjectEntit
         Box {
             if (currentTab == WorkspaceTab.Dashboard) {
                 Row(verticalAlignment = Alignment.CenterVertically) {
-                    IconButton(onClick = onEditProject, modifier = Modifier.size(40.dp)) {
-                        Icon(Icons.Default.Edit, contentDescription = "Edit Project", tint = Color.White, modifier = Modifier.size(20.dp))
+                    IconButton(onClick = onEditProject, modifier = Modifier.size(36.dp)) {
+                        Icon(Icons.Default.Edit, contentDescription = "Edit Project", tint = Color.White, modifier = Modifier.size(18.dp))
                     }
-                    Spacer(modifier = Modifier.width(8.dp))
-                    IconButton(onClick = onImportRequest) { Icon(Icons.Default.UploadFile, contentDescription = "Import", tint = Color.White.copy(alpha = 0.7f)) }
-                    Spacer(modifier = Modifier.width(8.dp))
-                    Button(onClick = { showProjectMenu = true }, shape = RoundedCornerShape(12.dp), contentPadding = PaddingValues(horizontal = 16.dp, vertical = 8.dp)) {
-                        Icon(Icons.Default.SwapHoriz, contentDescription = null, modifier = Modifier.size(18.dp))
-                        Spacer(modifier = Modifier.width(8.dp)); Text("Switch", fontSize = 12.sp, fontWeight = FontWeight.Bold)
+                    Spacer(modifier = Modifier.width(6.dp))
+                    IconButton(onClick = onImportRequest, modifier = Modifier.size(36.dp)) { Icon(Icons.Default.UploadFile, contentDescription = "Import", tint = Color.White.copy(alpha = 0.7f), modifier = Modifier.size(18.dp)) }
+                    Spacer(modifier = Modifier.width(6.dp))
+                    Button(
+                        onClick = { showProjectMenu = true }, 
+                        shape = RoundedCornerShape(10.dp), 
+                        contentPadding = PaddingValues(horizontal = 10.dp, vertical = 4.dp),
+                        modifier = Modifier.height(32.dp)
+                    ) {
+                        Icon(Icons.Default.SwapHoriz, contentDescription = null, modifier = Modifier.size(16.dp))
+                        Spacer(modifier = Modifier.width(4.dp)); Text("Switch", fontSize = 11.sp, fontWeight = FontWeight.Bold)
                     }
                 }
             }

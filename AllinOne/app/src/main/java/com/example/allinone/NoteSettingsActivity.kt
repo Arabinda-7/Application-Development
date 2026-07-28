@@ -160,7 +160,7 @@ class NoteSettingsActivity : BaseActivity() {
     }
 
     private fun showSingleTemplateEditor(name: String) {
-        val dialog = Dialog(this); dialog.setContentView(R.layout.dialog_set_budget)
+        val dialog = Dialog(this); dialog.setContentView(R.layout.dialog_set_budget_note)
         dialog.findViewById<TextView>(R.id.tv_settings_title).text = "Edit: $name"
         val et = dialog.findViewById<EditText>(R.id.et_budget_amount)
         et.setHint("Template content...")

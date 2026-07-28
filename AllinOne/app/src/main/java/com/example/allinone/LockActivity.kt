@@ -16,6 +16,9 @@ import androidx.core.content.ContextCompat
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
 import android.app.AlertDialog
+import androidx.biometric.BiometricManager
+import androidx.biometric.BiometricPrompt
+import java.util.concurrent.Executor
 
 class LockActivity : BaseActivity() {
 
@@ -45,6 +48,10 @@ class LockActivity : BaseActivity() {
     private lateinit var layoutSetupRecovery: View
     private lateinit var tvSetupSelectedQuestion: TextView
     private lateinit var etSetupRecoveryAnswer: EditText
+
+    private lateinit var executor: Executor
+    private lateinit var biometricPrompt: BiometricPrompt
+    private lateinit var promptInfo: BiometricPrompt.PromptInfo
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -88,6 +95,47 @@ class LockActivity : BaseActivity() {
 
         if (currentMode == MODE_SETUP_RECOVERY) {
             showRecoverySetupUI()
+        }
+
+        if (currentMode == MODE_AUTH && DataManager.isBiometricLockEnabled) {
+            setupBiometrics()
+            showBiometricPrompt()
+        }
+    }
+
+    private fun setupBiometrics() {
+        executor = ContextCompat.getMainExecutor(this)
+        biometricPrompt = BiometricPrompt(this, executor, object : BiometricPrompt.AuthenticationCallback() {
+            override fun onAuthenticationError(errorCode: Int, errString: CharSequence) {
+                super.onAuthenticationError(errorCode, errString)
+                if (errorCode != BiometricPrompt.ERROR_USER_CANCELED && errorCode != BiometricPrompt.ERROR_NEGATIVE_BUTTON) {
+                    Toast.makeText(applicationContext, "Auth error: $errString", Toast.LENGTH_SHORT).show()
+                }
+            }
+
+            override fun onAuthenticationSucceeded(result: BiometricPrompt.AuthenticationResult) {
+                super.onAuthenticationSucceeded(result)
+                setResult(RESULT_OK)
+                finish()
+                overridePendingTransition(0, 0)
+            }
+
+            override fun onAuthenticationFailed() {
+                super.onAuthenticationFailed()
+            }
+        })
+
+        promptInfo = BiometricPrompt.PromptInfo.Builder()
+            .setTitle("Biometric Login")
+            .setSubtitle("Unlock using your biometric credential")
+            .setNegativeButtonText("Use PIN")
+            .build()
+    }
+
+    private fun showBiometricPrompt() {
+        val biometricManager = BiometricManager.from(this)
+        if (biometricManager.canAuthenticate(BiometricManager.Authenticators.BIOMETRIC_STRONG) == BiometricManager.BIOMETRIC_SUCCESS) {
+            biometricPrompt.authenticate(promptInfo)
         }
     }
 
@@ -328,7 +376,7 @@ class LockActivity : BaseActivity() {
 
     private fun showQuestionSelectionDialog(questions: Array<String>, onSelected: (String) -> Unit) {
         val dialog = android.app.Dialog(this)
-        dialog.setContentView(R.layout.dialog_settings_selection)
+        dialog.setContentView(R.layout.dialog_settings_select_lock)
         dialog.window?.let { window ->
             window.setBackgroundDrawableResource(android.R.color.transparent)
             window.setLayout(
@@ -349,7 +397,7 @@ class LockActivity : BaseActivity() {
         container.removeAllViews()
 
         questions.forEach { question ->
-            val itemView = layoutInflater.inflate(R.layout.item_settings_selection, container, false) as TextView
+            val itemView = layoutInflater.inflate(R.layout.item_settings_select_lock, container, false) as TextView
             itemView.text = question
             
             if (DataManager.appLockQuestion == question) {

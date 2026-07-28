@@ -327,4 +327,27 @@ class WorkspaceViewModel(private val repository: WorkspaceRepository) : ViewMode
             ))
         }
     }
+
+    fun canCompleteProject(projectId: String): Pair<Boolean, String> {
+        val state = _uiState.value
+        if (state.selectedProject?.id != projectId) return true to ""
+
+        val unfinishedTasks = state.tasks.count { it.status != "Done" }
+        val unfinishedFeatures = state.features.count { it.status != "Shipped" }
+        val unfinishedBugs = state.bugs.count { it.status != "Fixed" && it.status != "Verified" }
+        val unfinishedGoals = state.goals.count { it.status != "Completed" }
+
+        val totalUnfinished = unfinishedTasks + unfinishedFeatures + unfinishedBugs + unfinishedGoals
+        if (totalUnfinished == 0) return true to ""
+
+        val message = buildString {
+            append("Cannot complete project. Pending items: ")
+            if (unfinishedTasks > 0) append("$unfinishedTasks Tasks, ")
+            if (unfinishedFeatures > 0) append("$unfinishedFeatures Features, ")
+            if (unfinishedBugs > 0) append("$unfinishedBugs Bugs, ")
+            if (unfinishedGoals > 0) append("$unfinishedGoals Goals, ")
+        }.removeSuffix(", ")
+
+        return false to message
+    }
 }

@@ -176,7 +176,7 @@ class PersonLedgerActivity : BaseActivity() {
 
     private fun showCustomLedgerMenu(anchor: View, entry: LedgerEntry, isHistory: Boolean, onAction: () -> Unit) {
         val inflater = LayoutInflater.from(this)
-        val menuView = inflater.inflate(R.layout.layout_custom_menu, null)
+        val menuView = inflater.inflate(R.layout.menu_ledger_item, null)
         val popupWindow = PopupWindow(menuView, ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT, true)
         popupWindow.elevation = 20f
 
@@ -293,12 +293,11 @@ class PersonLedgerActivity : BaseActivity() {
 
     private fun showAddLedgerDialog(existingEntry: LedgerEntry? = null) {
         val dialog = Dialog(this)
-        dialog.setContentView(R.layout.dialog_add_ledger)
+        dialog.setContentView(R.layout.dialog_add_ledger_person)
         dialog.window?.setBackgroundDrawableResource(android.R.color.transparent)
         dialog.window?.setLayout(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT)
 
         val etAmount = dialog.findViewById<EditText>(R.id.et_ledger_amount)
-        val etName = dialog.findViewById<EditText>(R.id.et_person_name)
         val etNote = dialog.findViewById<EditText>(R.id.et_ledger_note)
         val tvDueDate = dialog.findViewById<TextView>(R.id.tv_ledger_due_date)
         val rgType = dialog.findViewById<RadioGroup>(R.id.rg_ledger_type)
@@ -306,15 +305,8 @@ class PersonLedgerActivity : BaseActivity() {
         val btnClose = dialog.findViewById<View>(R.id.btn_close_ledger)
         val tvTitle = dialog.findViewById<TextView>(R.id.tv_dialog_title)
 
-        // Hide Person name field in this context
-        dialog.findViewById<View>(R.id.tv_person_label).visibility = View.GONE
-        etName.visibility = View.GONE
-
         val currency = DataManager.financeCurrency
         etAmount.hint = "${currency}0.00"
-
-        etName.setText(personName)
-        etName.isEnabled = false // Locked to this person
 
         var selectedDueDate: Long? = existingEntry?.dueDate
         val sdf = SimpleDateFormat("MMM dd, yyyy", Locale.getDefault())
@@ -355,7 +347,7 @@ class PersonLedgerActivity : BaseActivity() {
     }
 
     private fun showConfirmationDialog(title: String, message: String, positiveButtonText: String = "PROCEED", onConfirm: () -> Unit) {
-        val dialog = Dialog(this); dialog.setContentView(R.layout.dialog_confirmation)
+        val dialog = Dialog(this); dialog.setContentView(R.layout.dialog_confirm_ledger)
         dialog.window?.setBackgroundDrawableResource(android.R.color.transparent)
         dialog.window?.setLayout(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT)
         val tvTitle = dialog.findViewById<TextView>(R.id.tv_confirm_title)

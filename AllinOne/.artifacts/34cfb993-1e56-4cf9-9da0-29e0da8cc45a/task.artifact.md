@@ -1,0 +1,4 @@
+- [x] Update `activity_add_task.xml` with `tv_selected_reminder`
+- [x] Update `AddTaskActivity.kt` logic for reminder visibility and interaction
+- [x] Update `dialog_add_task.xml` for consistency
+- [ ] Verify changes manually in the app

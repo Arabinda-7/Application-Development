@@ -16,7 +16,7 @@ class SettingsAppearanceHandler(
     private val onThemeChanged: () -> Unit
 ) {
     fun showColorPickerDialog(section: String, onColorSelected: () -> Unit) {
-        val dialog = Dialog(context); dialog.setContentView(R.layout.dialog_settings_color_picker)
+        val dialog = Dialog(context); dialog.setContentView(R.layout.dialog_color_picker_appearance)
         dialog.window?.let { it.setBackgroundDrawableResource(android.R.color.transparent); if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.S) it.attributes.blurBehindRadius = 20; it.addFlags(android.view.WindowManager.LayoutParams.FLAG_BLUR_BEHIND) }
         val grid = dialog.findViewById<GridLayout>(R.id.color_grid)
         dialog.findViewById<TextView>(R.id.tv_picker_title).text = "SELECT COLOR: $section"
@@ -68,7 +68,7 @@ class SettingsAppearanceHandler(
     }
 
     fun showIconPickerDialog(section: String, currentPath: String, onIconSelected: () -> Unit) {
-        val dialog = Dialog(context); dialog.setContentView(R.layout.dialog_manage_categories_appearance)
+        val dialog = Dialog(context); dialog.setContentView(R.layout.dialog_manage_cat_appearance)
         dialog.window?.let { it.setBackgroundDrawableResource(android.R.color.transparent); if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.S) it.attributes.blurBehindRadius = 20; it.addFlags(android.view.WindowManager.LayoutParams.FLAG_BLUR_BEHIND) }
         val container = dialog.findViewById<LinearLayout>(R.id.categories_container)
         val icons = listOf(R.drawable.ic_habit_tracker, R.drawable.ic_workout_routine, R.drawable.ic_task, R.drawable.ic_notes, R.drawable.ic_project, R.drawable.ic_finance)

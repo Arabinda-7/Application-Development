@@ -281,7 +281,7 @@ class WorkoutAdapter(
     private fun showCustomMenu(anchor: View, workout: Workout) {
         val context = anchor.context
         val inflater = LayoutInflater.from(context)
-        val menuView = inflater.inflate(R.layout.layout_custom_menu, null)
+        val menuView = inflater.inflate(R.layout.menu_workout_item, null)
         val isCompleted = isWorkoutCompletedOnSelectedDate(workout)
 
         val popupWindow = PopupWindow(menuView, ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT, true)
@@ -362,14 +362,23 @@ class WorkoutAdapter(
         displayItems.clear()
 
         val filtered = allWorkouts.filter { workout ->
-            val matchesTime = if (currentFilter == "All") true else workout.frequency == currentFilter
+            val matchesFilter = if (currentFilter == "All") {
+                true
+            } else {
+                if (DataManager.workoutFilterType == "TIME") {
+                    workout.frequency == currentFilter
+                } else {
+                    workout.muscleGroups.contains(currentFilter)
+                }
+            }
+            
             val matchesDay = if (workout.repeatType == "SPECIFIC_DAYS") {
                 workout.repeatDays.contains(selectedDayIndex)
             } else {
                 true 
             }
             val isAvailableOnDate = DataManager.getTrackingDateString(workout.timestamp) <= selectedDateString
-            matchesTime && matchesDay && isAvailableOnDate
+            matchesFilter && matchesDay && isAvailableOnDate
         }
 
         val activeWorkouts = filtered.filter { !isWorkoutCompletedOnSelectedDate(it) }.sortedByDescending { it.timestamp }

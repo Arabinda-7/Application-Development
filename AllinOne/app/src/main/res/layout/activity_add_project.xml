@@ -4,23 +4,15 @@
     android:id="@+id/add_project_root"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@color/dark_background">
+    android:background="#000000">
 
-    <!-- Dynamic Header Area -->
-    <View
-        android:id="@+id/header_bg_accent"
-        android:layout_width="match_parent"
-        android:layout_height="120dp"
-        android:background="#1A73E8"
-        android:alpha="0.15"
-        app:layout_constraintTop_toTopOf="parent" />
-
+    <!-- Immersive Aura Background -->
     <View
         android:id="@+id/aura_background"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:alpha="0"
-        android:visibility="gone" />
+        android:alpha="0.3"
+        android:background="@drawable/bg_project_navy_gradient" />
 
     <androidx.constraintlayout.widget.ConstraintLayout
         android:id="@+id/add_project_content_container"
@@ -169,347 +161,200 @@
                         android:orientation="horizontal" />
                 </HorizontalScrollView>
 
-                <!-- Meta Section Container -->
+                <!-- Row Controls (Status, Priority, Theme) -->
                 <LinearLayout
-                    android:id="@+id/layout_project_meta"
+                    android:id="@+id/row_controls"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
+                    android:layout_marginTop="24dp"
                     android:orientation="vertical"
                     app:layout_constraintTop_toBottomOf="@id/scroll_templates">
 
-                    <!-- Add Mode: Full Selectors -->
-                    <LinearLayout
-                        android:id="@+id/layout_add_selectors"
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="STATUS"
+                        android:textColor="@color/text_secondary"
+                        android:textSize="10sp"
+                        android:textStyle="bold"
+                        android:layout_marginBottom="4dp"/>
+
+                    <HorizontalScrollView
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:orientation="vertical">
-
-                        <TextView
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:text="STATUS"
-                            android:textColor="@color/text_secondary"
-                            android:textSize="10sp"
-                            android:textStyle="bold"
-                            android:layout_marginTop="24dp"
-                            android:layout_marginBottom="4dp"/>
-
-                        <HorizontalScrollView
-                            android:layout_width="match_parent"
-                            android:layout_height="wrap_content"
-                            android:scrollbars="none">
-                            <RadioGroup
-                                android:id="@+id/rg_status"
-                                android:layout_width="wrap_content"
-                                android:layout_height="wrap_content"
-                                android:orientation="horizontal">
-                                <RadioButton
-                                    android:id="@+id/rb_status_todo"
-                                    android:layout_width="wrap_content"
-                                    android:layout_height="32dp"
-                                    android:text="TODO"
-                                    android:button="@null"
-                                    android:paddingHorizontal="16dp"
-                                    android:textColor="@color/white"
-                                    android:gravity="center"
-                                    android:textSize="12sp"
-                                    android:layout_marginEnd="8dp"
-                                    android:background="@drawable/priority_chip_bg"/>
-                                <RadioButton
-                                    android:id="@+id/rb_status_progress"
-                                    android:layout_width="wrap_content"
-                                    android:layout_height="32dp"
-                                    android:text="DOING"
-                                    android:button="@null"
-                                    android:paddingHorizontal="16dp"
-                                    android:textColor="@color/white"
-                                    android:gravity="center"
-                                    android:textSize="12sp"
-                                    android:layout_marginEnd="8dp"
-                                    android:background="@drawable/priority_chip_bg"/>
-                                <RadioButton
-                                    android:id="@+id/rb_status_completed"
-                                    android:layout_width="wrap_content"
-                                    android:layout_height="32dp"
-                                    android:text="DONE"
-                                    android:button="@null"
-                                    android:paddingHorizontal="16dp"
-                                    android:textColor="@color/white"
-                                    android:gravity="center"
-                                    android:textSize="12sp"
-                                    android:layout_marginEnd="8dp"
-                                    android:background="@drawable/priority_chip_bg"/>
-                                <RadioButton
-                                    android:id="@+id/rb_status_hold"
-                                    android:layout_width="wrap_content"
-                                    android:layout_height="32dp"
-                                    android:text="HOLD"
-                                    android:button="@null"
-                                    android:paddingHorizontal="16dp"
-                                    android:textColor="@color/white"
-                                    android:gravity="center"
-                                    android:textSize="12sp"
-                                    android:background="@drawable/priority_chip_bg"/>
-                            </RadioGroup>
-                        </HorizontalScrollView>
-
-                        <TextView
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:text="PRIORITY"
-                            android:textColor="@color/text_secondary"
-                            android:textSize="10sp"
-                            android:textStyle="bold"
-                            android:layout_marginTop="12dp"
-                            android:layout_marginBottom="4dp"/>
-
+                        android:scrollbars="none">
                         <RadioGroup
-                            android:id="@+id/rg_priority"
-                            android:layout_width="match_parent"
+                            android:id="@+id/rg_status"
+                            android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
                             android:orientation="horizontal">
                             <RadioButton
-                                android:id="@+id/rb_priority_low"
-                                android:layout_width="0dp"
+                                android:id="@+id/rb_status_todo"
+                                android:layout_width="wrap_content"
                                 android:layout_height="32dp"
-                                android:layout_weight="1"
-                                android:text="LOW"
+                                android:text="TODO"
                                 android:button="@null"
+                                android:paddingHorizontal="16dp"
                                 android:textColor="@color/white"
                                 android:gravity="center"
                                 android:textSize="12sp"
                                 android:layout_marginEnd="8dp"
                                 android:background="@drawable/priority_chip_bg"/>
                             <RadioButton
-                                android:id="@+id/rb_priority_med"
-                                android:layout_width="0dp"
+                                android:id="@+id/rb_status_progress"
+                                android:layout_width="wrap_content"
                                 android:layout_height="32dp"
-                                android:layout_weight="1"
-                                android:text="MED"
+                                android:text="DOING"
                                 android:button="@null"
+                                android:paddingHorizontal="16dp"
                                 android:textColor="@color/white"
                                 android:gravity="center"
                                 android:textSize="12sp"
                                 android:layout_marginEnd="8dp"
                                 android:background="@drawable/priority_chip_bg"/>
                             <RadioButton
-                                android:id="@+id/rb_priority_high"
-                                android:layout_width="0dp"
+                                android:id="@+id/rb_status_completed"
+                                android:layout_width="wrap_content"
                                 android:layout_height="32dp"
-                                android:layout_weight="1"
-                                android:text="HIGH"
+                                android:text="DONE"
                                 android:button="@null"
+                                android:paddingHorizontal="16dp"
+                                android:textColor="@color/white"
+                                android:gravity="center"
+                                android:textSize="12sp"
+                                android:layout_marginEnd="8dp"
+                                android:background="@drawable/priority_chip_bg"/>
+                            <RadioButton
+                                android:id="@+id/rb_status_hold"
+                                android:layout_width="wrap_content"
+                                android:layout_height="32dp"
+                                android:text="HOLD"
+                                android:button="@null"
+                                android:paddingHorizontal="16dp"
                                 android:textColor="@color/white"
                                 android:gravity="center"
                                 android:textSize="12sp"
                                 android:background="@drawable/priority_chip_bg"/>
                         </RadioGroup>
+                    </HorizontalScrollView>
 
-                        <LinearLayout
-                            android:layout_width="match_parent"
-                            android:layout_height="wrap_content"
-                            android:layout_marginTop="16dp"
-                            android:gravity="center_vertical"
-                            android:orientation="horizontal">
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="PRIORITY"
+                        android:textColor="@color/text_secondary"
+                        android:textSize="10sp"
+                        android:textStyle="bold"
+                        android:layout_marginTop="12dp"
+                        android:layout_marginBottom="4dp"/>
 
-                            <TextView
-                                android:layout_width="0dp"
-                                android:layout_height="wrap_content"
-                                android:layout_weight="1"
-                                android:text="Color Theme"
-                                android:textColor="@color/text_secondary"
-                                android:textSize="14sp" />
-
-                            <View
-                                android:id="@+id/note_color_preview"
-                                android:layout_width="24dp"
-                                android:layout_height="24dp"
-                                android:background="@drawable/circle_selected_bg" />
-                        </LinearLayout>
-
-                        <!-- Deadline Section (Add Mode) -->
-                        <LinearLayout
-                            android:id="@+id/container_deadline"
-                            android:layout_width="match_parent"
-                            android:layout_height="wrap_content"
-                            android:layout_marginTop="16dp"
-                            android:orientation="horizontal"
-                            android:gravity="center_vertical">
-
-                            <ImageView
-                                android:layout_width="20dp"
-                                android:layout_height="20dp"
-                                android:src="@drawable/ic_notes"
-                                app:tint="@color/text_secondary" />
-
-                            <TextView
-                                android:id="@+id/tv_deadline_display"
-                                android:layout_width="0dp"
-                                android:layout_height="wrap_content"
-                                android:layout_weight="1"
-                                android:layout_marginStart="8dp"
-                                android:text="No Deadline Set"
-                                android:textColor="@color/text_secondary"
-                                android:textSize="14sp" />
-
-                            <TextView
-                                android:id="@+id/btn_set_deadline"
-                                android:layout_width="wrap_content"
-                                android:layout_height="wrap_content"
-                                android:text="SET DEADLINE"
-                                android:textColor="#1A73E8"
-                                android:textSize="12sp"
-                                android:textStyle="bold"
-                                android:padding="8dp" />
-                        </LinearLayout>
-                    </LinearLayout>
-
-                    <!-- Edit Mode: Compact Selectors Row 1 -->
-                    <LinearLayout
-                        android:id="@+id/layout_edit_compact"
+                    <RadioGroup
+                        android:id="@+id/rg_priority"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:layout_marginTop="8dp"
-                        android:orientation="horizontal"
-                        android:padding="12dp"
-                        android:background="@drawable/bg_dialog_rounded"
-                        android:backgroundTint="#0AFFFFFF"
-                        android:visibility="gone">
-
-                        <LinearLayout
-                            android:id="@+id/btn_cycle_status"
+                        android:orientation="horizontal">
+                        <RadioButton
+                            android:id="@+id/rb_priority_low"
                             android:layout_width="0dp"
-                            android:layout_height="wrap_content"
+                            android:layout_height="32dp"
                             android:layout_weight="1"
-                            android:orientation="vertical"
-                            android:clickable="true"
-                            android:focusable="true"
-                            android:background="?attr/selectableItemBackground">
-                            <TextView
-                                android:layout_width="wrap_content"
-                                android:layout_height="wrap_content"
-                                android:text="STATUS"
-                                android:textColor="#80FFFFFF"
-                                android:textSize="9sp"
-                                android:textStyle="bold"
-                                android:letterSpacing="0.1"/>
-                            <TextView
-                                android:id="@+id/tv_edit_status_label"
-                                android:layout_width="wrap_content"
-                                android:layout_height="wrap_content"
-                                android:layout_marginTop="2dp"
-                                android:text="IN PROGRESS"
-                                android:textColor="@color/white"
-                                android:textSize="12sp"
-                                android:textStyle="bold" />
-                        </LinearLayout>
-
-                        <View
-                            android:layout_width="1dp"
-                            android:layout_height="match_parent"
-                            android:layout_marginHorizontal="16dp"
-                            android:background="#1AFFFFFF"/>
-
-                        <LinearLayout
-                            android:id="@+id/btn_cycle_priority"
+                            android:text="LOW"
+                            android:button="@null"
+                            android:textColor="@color/white"
+                            android:gravity="center"
+                            android:textSize="12sp"
+                            android:layout_marginEnd="8dp"
+                            android:background="@drawable/priority_chip_bg"/>
+                        <RadioButton
+                            android:id="@+id/rb_priority_med"
                             android:layout_width="0dp"
-                            android:layout_height="wrap_content"
+                            android:layout_height="32dp"
                             android:layout_weight="1"
-                            android:orientation="vertical"
-                            android:clickable="true"
-                            android:focusable="true"
-                            android:background="?attr/selectableItemBackground">
-                            <TextView
-                                android:layout_width="wrap_content"
-                                android:layout_height="wrap_content"
-                                android:text="PRIORITY"
-                                android:textColor="#80FFFFFF"
-                                android:textSize="9sp"
-                                android:textStyle="bold"
-                                android:letterSpacing="0.1"/>
-                            <TextView
-                                android:id="@+id/tv_edit_priority_label"
-                                android:layout_width="wrap_content"
-                                android:layout_height="wrap_content"
-                                android:layout_marginTop="2dp"
-                                android:text="HIGH"
-                                android:textColor="#FF5252"
-                                android:textSize="12sp"
-                                android:textStyle="bold" />
-                        </LinearLayout>
-                    </LinearLayout>
+                            android:text="MED"
+                            android:button="@null"
+                            android:textColor="@color/white"
+                            android:gravity="center"
+                            android:textSize="12sp"
+                            android:layout_marginEnd="8dp"
+                            android:background="@drawable/priority_chip_bg"/>
+                        <RadioButton
+                            android:id="@+id/rb_priority_high"
+                            android:layout_width="0dp"
+                            android:layout_height="32dp"
+                            android:layout_weight="1"
+                            android:text="HIGH"
+                            android:button="@null"
+                            android:textColor="@color/white"
+                            android:gravity="center"
+                            android:textSize="12sp"
+                            android:background="@drawable/priority_chip_bg"/>
+                    </RadioGroup>
 
-                    <!-- Edit Mode: Compact Meta Row 2 (Color & Deadline) -->
                     <LinearLayout
-                        android:id="@+id/layout_edit_compact_row2"
+                        android:id="@+id/cell_theme"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:layout_marginTop="8dp"
+                        android:layout_marginTop="16dp"
+                        android:gravity="center_vertical"
                         android:orientation="horizontal"
-                        android:padding="12dp"
-                        android:background="@drawable/bg_dialog_rounded"
-                        android:backgroundTint="#0AFFFFFF"
-                        android:visibility="gone">
+                        android:clickable="true"
+                        android:focusable="true"
+                        android:background="?attr/selectableItemBackground">
 
-                        <LinearLayout
-                            android:id="@+id/btn_edit_color"
+                        <TextView
                             android:layout_width="0dp"
                             android:layout_height="wrap_content"
                             android:layout_weight="1"
-                            android:orientation="vertical"
-                            android:clickable="true"
-                            android:focusable="true"
-                            android:background="?attr/selectableItemBackground">
-                            <TextView
-                                android:layout_width="wrap_content"
-                                android:layout_height="wrap_content"
-                                android:text="THEME"
-                                android:textColor="#80FFFFFF"
-                                android:textSize="9sp"
-                                android:textStyle="bold"
-                                android:letterSpacing="0.1"/>
-                            <View
-                                android:id="@+id/tv_edit_color_label"
-                                android:layout_width="16dp"
-                                android:layout_height="16dp"
-                                android:layout_marginTop="4dp"
-                                android:background="@drawable/circle_selected_bg" />
-                        </LinearLayout>
+                            android:text="Color Theme"
+                            android:textColor="@color/text_secondary"
+                            android:textSize="14sp" />
 
                         <View
-                            android:layout_width="1dp"
-                            android:layout_height="match_parent"
-                            android:layout_marginHorizontal="16dp"
-                            android:background="#1AFFFFFF"/>
-
-                        <LinearLayout
-                            android:id="@+id/btn_edit_deadline"
-                            android:layout_width="0dp"
-                            android:layout_height="wrap_content"
-                            android:layout_weight="1"
-                            android:orientation="vertical"
-                            android:clickable="true"
-                            android:focusable="true"
-                            android:background="?attr/selectableItemBackground">
-                            <TextView
-                                android:layout_width="wrap_content"
-                                android:layout_height="wrap_content"
-                                android:text="DEADLINE"
-                                android:textColor="#80FFFFFF"
-                                android:textSize="9sp"
-                                android:textStyle="bold"
-                                android:letterSpacing="0.1"/>
-                            <TextView
-                                android:id="@+id/tv_edit_deadline_label"
-                                android:layout_width="wrap_content"
-                                android:layout_height="wrap_content"
-                                android:layout_marginTop="2dp"
-                                android:text="No Deadline"
-                                android:textColor="@color/white"
-                                android:textSize="12sp"
-                                android:textStyle="bold" />
-                        </LinearLayout>
+                            android:id="@+id/note_color_preview"
+                            android:layout_width="24dp"
+                            android:layout_height="24dp"
+                            android:background="@drawable/circle_selected_bg" />
                     </LinearLayout>
+                </LinearLayout>
+
+                <!-- Deadline Section -->
+                <LinearLayout
+                    android:id="@+id/cell_deadline"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="16dp"
+                    android:orientation="horizontal"
+                    android:gravity="center_vertical"
+                    android:clickable="true"
+                    android:focusable="true"
+                    android:background="?attr/selectableItemBackground"
+                    app:layout_constraintTop_toBottomOf="@id/row_controls">
+
+                    <ImageView
+                        android:layout_width="20dp"
+                        android:layout_height="20dp"
+                        android:src="@drawable/ic_notes"
+                        app:tint="@color/text_secondary" />
+
+                    <TextView
+                        android:id="@+id/tv_deadline_display"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:layout_marginStart="8dp"
+                        android:text="No Deadline Set"
+                        android:textColor="@color/text_secondary"
+                        android:textSize="14sp" />
+
+                    <TextView
+                        android:id="@+id/btn_set_deadline"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="SET DEADLINE"
+                        android:textColor="#1A73E8"
+                        android:textSize="12sp"
+                        android:textStyle="bold"
+                        android:padding="8dp" />
                 </LinearLayout>
 
                 <!-- Progress Slider -->
@@ -520,7 +365,7 @@
                     android:layout_marginTop="24dp"
                     android:orientation="vertical"
                     android:visibility="gone"
-                    app:layout_constraintTop_toBottomOf="@id/layout_project_meta">
+                    app:layout_constraintTop_toBottomOf="@id/cell_deadline">
 
                     <LinearLayout
                         android:layout_width="match_parent"
@@ -607,19 +452,28 @@
                     android:layout_marginTop="24dp"
                     android:orientation="horizontal"
                     android:gravity="center_vertical"
+                    android:clickable="true"
+                    android:focusable="true"
+                    android:background="?attr/selectableItemBackground"
                     app:layout_constraintTop_toBottomOf="@id/note_content_input">
 
                     <TextView
-                        android:id="@+id/btn_toggle_goals"
-                        android:layout_width="wrap_content"
+                        android:id="@+id/tv_goals_label"
+                        android:layout_width="0dp"
                         android:layout_height="wrap_content"
-                        android:text="PROJECT GOALS ▲"
+                        android:layout_weight="1"
+                        android:text="PROJECT GOALS"
                         android:textColor="@color/white"
                         android:textSize="12sp"
                         android:textStyle="bold"
-                        android:clickable="true"
-                        android:focusable="true"
                         android:paddingVertical="8dp" />
+
+                    <ImageView
+                        android:id="@+id/iv_goals_chevron"
+                        android:layout_width="20dp"
+                        android:layout_height="20dp"
+                        android:src="@android:drawable/arrow_up_float"
+                        app:tint="#80FFFFFF" />
                 </LinearLayout>
 
                 <LinearLayout
@@ -634,16 +488,20 @@
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:orientation="horizontal"
-                        android:gravity="center_vertical">
+                        android:gravity="center_vertical"
+                        android:background="@drawable/priority_chip_bg"
+                        android:backgroundTint="#11FFFFFF"
+                        android:padding="4dp">
 
                         <EditText
                             android:id="@+id/et_goal_input"
                             android:layout_width="0dp"
                             android:layout_height="wrap_content"
                             android:layout_weight="1"
+                            android:layout_marginStart="12dp"
                             android:hint="Add a key project goal..."
                             android:textColor="@color/white"
-                            android:textColorHint="#4DFFFFFF"
+                            android:textColorHint="#80FFFFFF"
                             android:textSize="14sp"
                             android:background="@null"
                             android:padding="8dp"
@@ -715,16 +573,20 @@
                         android:layout_height="wrap_content"
                         android:layout_marginTop="8dp"
                         android:orientation="horizontal"
-                        android:gravity="center_vertical">
+                        android:gravity="center_vertical"
+                        android:background="@drawable/priority_chip_bg"
+                        android:backgroundTint="#11FFFFFF"
+                        android:padding="4dp">
 
                         <EditText
                             android:id="@+id/et_new_subfeature"
                             android:layout_width="0dp"
                             android:layout_height="wrap_content"
                             android:layout_weight="1"
+                            android:layout_marginStart="12dp"
                             android:hint="Add new sub-feature..."
                             android:textColor="@color/white"
-                            android:textColorHint="#4DFFFFFF"
+                            android:textColorHint="#80FFFFFF"
                             android:textSize="14sp"
                             android:background="@null"
                             android:padding="8dp"
@@ -738,6 +600,16 @@
                             android:background="?attr/selectableItemBackgroundBorderless"
                             app:tint="@color/white" />
                     </LinearLayout>
+
+                    <TextView
+                        android:id="@+id/tv_footer_dates"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="64dp"
+                        android:gravity="end"
+                        android:text="Created: Jul 25 | Updated: Jul 25"
+                        android:textColor="#80FFFFFF"
+                        android:textSize="10sp" />
                 </LinearLayout>
 
             </androidx.constraintlayout.widget.ConstraintLayout>

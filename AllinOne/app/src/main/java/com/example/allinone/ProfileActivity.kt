@@ -43,14 +43,17 @@ class ProfileActivity : BaseActivity() {
         }
     }
 
+    private var backupPassword: CharArray? = null
+
     private val exportLauncher = registerForActivityResult(ActivityResultContracts.CreateDocument("application/json")) { uri ->
         uri?.let {
             lifecycleScope.launch {
                 try {
-                    val json = DataManager.exportData(this@ProfileActivity)
+                    val json = DataManager.exportData(this@ProfileActivity, backupPassword)
                     contentResolver.openOutputStream(it)?.use { stream ->
                         stream.write(json.toByteArray())
                     }
+                    backupPassword = null
                     Toast.makeText(this@ProfileActivity, "Backup Saved Successfully", Toast.LENGTH_SHORT).show()
                 } catch (e: Exception) {
                     Toast.makeText(this@ProfileActivity, "Failed to Save Backup", Toast.LENGTH_SHORT).show()
@@ -84,7 +87,7 @@ class ProfileActivity : BaseActivity() {
 
         securitySection = ProfileSecurityHubSection(
             findViewById(R.id.profile_root),
-            onLockToggled = { isChecked ->
+            onAppLockToggled = { isChecked ->
                 if (isChecked && DataManager.appLockPin == null) {
                     startActivity(Intent(this, LockActivity::class.java).apply { 
                         putExtra(LockActivity.EXTRA_MODE, LockActivity.MODE_SETUP) 
@@ -95,6 +98,17 @@ class ProfileActivity : BaseActivity() {
                     viewModel.refresh()
                 }
             },
+            onBiometricToggled = { isChecked ->
+                DataManager.isBiometricLockEnabled = isChecked
+                DataManager.saveData(this)
+                viewModel.refresh()
+            },
+            onScreenshotToggled = { isChecked ->
+                DataManager.isScreenshotProtectionEnabled = isChecked
+                DataManager.saveData(this)
+                SecurityManager.setScreenshotProtection(this, isChecked)
+                viewModel.refresh()
+            },
             onOledToggled = { isChecked ->
                 DataManager.isOledThemeEnabled = isChecked
                 DataManager.saveData(this)
@@ -104,7 +118,10 @@ class ProfileActivity : BaseActivity() {
         )
 
         dataSection = ProfileDataGovernanceSection(findViewById(R.id.profile_root)) {
-            exportLauncher.launch("allinone_backup_${System.currentTimeMillis()}.json")
+            UIUtils.showPasswordDialog(this, "ENCRYPT BACKUP") { password ->
+                backupPassword = password
+                exportLauncher.launch("allinone_backup_${System.currentTimeMillis()}.json")
+            }
         }
     }
 
@@ -127,7 +144,12 @@ class ProfileActivity : BaseActivity() {
         findViewById<View>(R.id.btn_edit_profile_top).setOnClickListener { showEditProfileDialog() }
 
         identitySection.setup()
-        securitySection.setup(viewModel.isAppLockEnabled, viewModel.isOledThemeEnabled)
+        securitySection.setup(
+            DataManager.isAppLockEnabled,
+            DataManager.isBiometricLockEnabled,
+            DataManager.isScreenshotProtectionEnabled,
+            DataManager.isOledThemeEnabled
+        )
         dataSection.setup()
         
         updateUI()

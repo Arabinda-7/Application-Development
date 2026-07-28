@@ -141,91 +141,45 @@
                 android:clipToPadding="false"
                 app:layout_constraintTop_toBottomOf="@id/calendar_header_names" />
 
-            <RadioGroup
-                android:id="@+id/filter_chips"
+            <HorizontalScrollView
+                android:id="@+id/scroll_filter_chips"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="0dp"
-                android:paddingVertical="8dp"
-                android:paddingHorizontal="8dp"
-                android:orientation="horizontal"
-                android:weightSum="4"
-                android:clipChildren="false"
-                android:clipToPadding="false"
+                android:scrollbars="none"
                 app:layout_constraintTop_toBottomOf="@id/vp_calendar">
 
-                <RadioButton
-                    android:id="@+id/chip_all"
-                    android:layout_width="0dp"
-                    android:layout_height="38dp"
-                    android:layout_weight="1"
-                    android:layout_margin="2dp"
-                    android:padding="0dp"
-                    android:minWidth="0dp"
-                    android:minHeight="0dp"
-                    android:background="@drawable/filter_chip_bg"
-                    android:button="@null"
-                    android:checked="true"
-                    android:gravity="center"
-                    android:text="ALL"
-                    android:textColor="@color/white"
-                    android:textSize="10sp"
-                    android:textStyle="bold" />
+                <RadioGroup
+                    android:id="@+id/filter_chips"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:paddingVertical="8dp"
+                    android:paddingHorizontal="8dp"
+                    android:orientation="horizontal"
+                    android:clipChildren="false"
+                    android:clipToPadding="false">
 
-                <RadioButton
-                    android:id="@+id/chip_morning"
-                    android:layout_width="0dp"
-                    android:layout_height="38dp"
-                    android:layout_weight="1"
-                    android:layout_margin="2dp"
-                    android:padding="0dp"
-                    android:minWidth="0dp"
-                    android:minHeight="0dp"
-                    android:background="@drawable/filter_chip_bg"
-                    android:button="@null"
-                    android:checked="false"
-                    android:gravity="center"
-                    android:text="MORNING"
-                    android:textColor="@color/white"
-                    android:textSize="10sp"
-                    android:textStyle="bold" />
+                    <RadioButton
+                        android:id="@+id/chip_all"
+                        android:layout_width="80dp"
+                        android:layout_height="38dp"
+                        android:layout_margin="2dp"
+                        android:padding="0dp"
+                        android:minWidth="0dp"
+                        android:minHeight="0dp"
+                        android:background="@drawable/filter_chip_bg"
+                        android:button="@null"
+                        android:checked="true"
+                        android:gravity="center"
+                        android:text="ALL"
+                        android:textColor="@color/white"
+                        android:textSize="10sp"
+                        android:textStyle="bold" />
 
-                <RadioButton
-                    android:id="@+id/chip_afternoon"
-                    android:layout_width="0dp"
-                    android:layout_height="38dp"
-                    android:layout_weight="1"
-                    android:layout_margin="2dp"
-                    android:padding="0dp"
-                    android:minWidth="0dp"
-                    android:minHeight="0dp"
-                    android:background="@drawable/filter_chip_bg"
-                    android:button="@null"
-                    android:checked="false"
-                    android:gravity="center"
-                    android:text="AFTERNOON"
-                    android:textColor="@color/white"
-                    android:textSize="10sp"
-                    android:textStyle="bold" />
+                    <!-- Dynamic chips will be added here -->
 
-                <RadioButton
-                    android:id="@+id/chip_evening"
-                    android:layout_width="0dp"
-                    android:layout_height="38dp"
-                    android:layout_weight="1"
-                    android:layout_margin="2dp"
-                    android:padding="0dp"
-                    android:minWidth="0dp"
-                    android:minHeight="0dp"
-                    android:background="@drawable/filter_chip_bg"
-                    android:button="@null"
-                    android:checked="false"
-                    android:gravity="center"
-                    android:text="EVENING"
-                    android:textColor="@color/white"
-                    android:textSize="10sp"
-                    android:textStyle="bold" />
-            </RadioGroup>
+                </RadioGroup>
+            </HorizontalScrollView>
 
             <androidx.recyclerview.widget.RecyclerView
                 android:id="@+id/workout_list"
@@ -234,7 +188,7 @@
                 android:layout_marginTop="8dp"
                 android:layout_marginBottom="8dp"
                 app:layout_constraintBottom_toTopOf="@id/btn_create_new_workout"
-                app:layout_constraintTop_toBottomOf="@id/filter_chips" />
+                app:layout_constraintTop_toBottomOf="@id/scroll_filter_chips" />
 
             <com.google.android.material.card.MaterialCardView
                 android:id="@+id/btn_create_new_workout"
@@ -330,77 +284,104 @@
                     android:layout_marginTop="16dp"
                     android:orientation="horizontal">
 
-                    <androidx.cardview.widget.CardView
+                    <com.google.android.material.card.MaterialCardView
+                        android:id="@+id/history_card_streak"
                         android:layout_width="0dp"
                         android:layout_height="120dp"
                         android:layout_weight="1"
                         android:layout_marginEnd="8dp"
-                        app:cardBackgroundColor="@color/card_blue"
-                        app:cardCornerRadius="24dp">
+                        app:cardBackgroundColor="#11FFFFFF"
+                        app:cardCornerRadius="28dp"
+                        app:cardElevation="0dp"
+                        app:strokeWidth="1.5dp"
+                        app:strokeColor="#2196F3">
                         <LinearLayout android:layout_width="match_parent" android:layout_height="match_parent" android:orientation="vertical" android:padding="12dp" android:gravity="center_vertical">
-                            <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="CURRENT STREAK" android:textColor="#E0E0E0" android:textSize="10sp" android:textStyle="bold" />
+                            <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="CURRENT STREAK" android:textColor="#B0B0B0" android:textSize="10sp" android:textStyle="bold" />
                             <TextView
                                 android:id="@+id/history_current_streak"
                                 android:layout_width="wrap_content"
                                 android:layout_height="wrap_content"
                                 android:text="0"
-                                android:textColor="@color/white"
+                                android:textColor="#2196F3"
                                 android:textSize="28sp"
                                 android:textStyle="bold" />
-                            <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="Best Streak: 3" android:textColor="#E0E0E0" android:textSize="10sp" />
+                            <TextView
+                                android:id="@+id/history_best_streak"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:text="Best Streak: 0"
+                                android:textColor="#80FFFFFF"
+                                android:textSize="10sp" />
                         </LinearLayout>
-                    </androidx.cardview.widget.CardView>
+                    </com.google.android.material.card.MaterialCardView>
 
-                    <androidx.cardview.widget.CardView
+                    <com.google.android.material.card.MaterialCardView
+                        android:id="@+id/history_card_workouts"
                         android:layout_width="0dp"
                         android:layout_height="120dp"
                         android:layout_weight="1"
                         android:layout_marginHorizontal="4dp"
-                        app:cardBackgroundColor="@color/card_orange"
-                        app:cardCornerRadius="24dp">
+                        app:cardBackgroundColor="#11FFFFFF"
+                        app:cardCornerRadius="28dp"
+                        app:cardElevation="0dp"
+                        app:strokeWidth="1.5dp"
+                        app:strokeColor="#FF9800">
                         <LinearLayout android:layout_width="match_parent" android:layout_height="match_parent" android:orientation="vertical" android:padding="12dp" android:gravity="center_vertical">
-                            <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="WORKOUTS" android:textColor="#E0E0E0" android:textSize="10sp" android:textStyle="bold" />
+                            <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="WORKOUTS" android:textColor="#B0B0B0" android:textSize="10sp" android:textStyle="bold" />
                             <TextView
                                 android:id="@+id/history_workouts_finished"
                                 android:layout_width="wrap_content"
                                 android:layout_height="wrap_content"
                                 android:text="0"
-                                android:textColor="@color/white"
+                                android:textColor="#FF9800"
                                 android:textSize="28sp"
                                 android:textStyle="bold" />
-                            <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="This month: 0" android:textColor="#E0E0E0" android:textSize="10sp" />
+                            <TextView
+                                android:id="@+id/history_workouts_this_month"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:text="This month: 0"
+                                android:textColor="#80FFFFFF"
+                                android:textSize="10sp" />
                         </LinearLayout>
-                    </androidx.cardview.widget.CardView>
+                    </com.google.android.material.card.MaterialCardView>
 
-                    <androidx.cardview.widget.CardView
+                    <com.google.android.material.card.MaterialCardView
+                        android:id="@+id/history_card_efficiency"
                         android:layout_width="0dp"
                         android:layout_height="120dp"
                         android:layout_weight="1"
                         android:layout_marginStart="8dp"
-                        app:cardBackgroundColor="#FBC02D"
-                        app:cardCornerRadius="24dp">
+                        app:cardBackgroundColor="#11FFFFFF"
+                        app:cardCornerRadius="28dp"
+                        app:cardElevation="0dp"
+                        app:strokeWidth="1.5dp"
+                        app:strokeColor="#FFC107">
                         <LinearLayout android:layout_width="match_parent" android:layout_height="match_parent" android:orientation="vertical" android:padding="12dp" android:gravity="center_vertical">
-                            <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="EFFICIENCY" android:textColor="#333333" android:textSize="10sp" android:textStyle="bold" />
+                            <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="EFFICIENCY" android:textColor="#B0B0B0" android:textSize="10sp" android:textStyle="bold" />
                             <TextView
                                 android:id="@+id/history_efficiency"
                                 android:layout_width="wrap_content"
                                 android:layout_height="wrap_content"
                                 android:text="0%"
-                                android:textColor="#333333"
+                                android:textColor="#FFC107"
                                 android:textSize="28sp"
                                 android:textStyle="bold" />
-                            <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="Overall progress" android:textColor="#333333" android:textSize="10sp" />
+                            <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="Overall progress" android:textColor="#80FFFFFF" android:textSize="10sp" />
                         </LinearLayout>
-                    </androidx.cardview.widget.CardView>
+                    </com.google.android.material.card.MaterialCardView>
                 </LinearLayout>
 
                 <!-- Dynamic Grid Section -->
-                <androidx.cardview.widget.CardView
+                <com.google.android.material.card.MaterialCardView
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:layout_marginTop="16dp"
-                    app:cardBackgroundColor="#2A2A2A"
-                    app:cardCornerRadius="24dp">
+                    app:cardBackgroundColor="#11FFFFFF"
+                    app:cardCornerRadius="28dp"
+                    app:cardElevation="0dp"
+                    app:strokeWidth="1dp"
+                    app:strokeColor="#1AFFFFFF">
                     <LinearLayout android:id="@+id/history_grid_container" android:layout_width="match_parent" android:layout_height="wrap_content" android:orientation="vertical" android:padding="16dp">
 
                         <RelativeLayout
@@ -427,17 +408,19 @@
                             <TextView style="@style/CalendarDayHeader" android:text="SAT" />
                         </GridLayout>
                     </LinearLayout>
-                </androidx.cardview.widget.CardView>
+                </com.google.android.material.card.MaterialCardView>
 
                 <!-- Performance Card -->
-                <androidx.cardview.widget.CardView
+                <com.google.android.material.card.MaterialCardView
                     android:id="@+id/performance_card"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:layout_marginTop="16dp"
-                    app:cardBackgroundColor="#1AFFFFFF"
-                    app:cardCornerRadius="24dp"
-                    app:cardElevation="0dp">
+                    app:cardBackgroundColor="#11FFFFFF"
+                    app:cardCornerRadius="28dp"
+                    app:cardElevation="0dp"
+                    app:strokeWidth="1dp"
+                    app:strokeColor="#1AFFFFFF">
 
                     <LinearLayout
                         android:layout_width="match_parent"
@@ -472,6 +455,7 @@
                                 android:textStyle="bold" />
 
                             <ImageView
+                                android:id="@+id/performance_card_arrow"
                                 android:layout_width="24dp"
                                 android:layout_height="24dp"
                                 android:layout_marginStart="12dp"
@@ -519,16 +503,18 @@
                             android:progressDrawable="@drawable/neon_progress_bar_workout" />
 
                     </LinearLayout>
-                </androidx.cardview.widget.CardView>
+                </com.google.android.material.card.MaterialCardView>
 
                 <!-- New Analytics Cards -->
-                <androidx.cardview.widget.CardView
+                <com.google.android.material.card.MaterialCardView
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:layout_marginTop="16dp"
-                    app:cardBackgroundColor="#1AFFFFFF"
+                    app:cardBackgroundColor="#11FFFFFF"
                     app:cardCornerRadius="24dp"
-                    app:cardElevation="0dp">
+                    app:cardElevation="0dp"
+                    app:strokeWidth="1dp"
+                    app:strokeColor="#1AFFFFFF">
                     <LinearLayout
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
@@ -548,21 +534,23 @@
                             android:layout_height="140dp"
                             android:layout_marginTop="12dp" />
                     </LinearLayout>
-                </androidx.cardview.widget.CardView>
+                </com.google.android.material.card.MaterialCardView>
 
                 <LinearLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:layout_marginTop="16dp"
                     android:orientation="horizontal">
-                    <androidx.cardview.widget.CardView
+                    <com.google.android.material.card.MaterialCardView
                         android:layout_width="0dp"
                         android:layout_height="wrap_content"
                         android:layout_weight="1"
                         android:layout_marginEnd="8dp"
-                        app:cardBackgroundColor="#1AFFFFFF"
+                        app:cardBackgroundColor="#11FFFFFF"
                         app:cardCornerRadius="24dp"
-                        app:cardElevation="0dp">
+                        app:cardElevation="0dp"
+                        app:strokeWidth="1dp"
+                        app:strokeColor="#1AFFFFFF">
                         <LinearLayout
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
@@ -582,16 +570,18 @@
                                 android:layout_height="100dp"
                                 android:layout_marginTop="8dp" />
                         </LinearLayout>
-                    </androidx.cardview.widget.CardView>
+                    </com.google.android.material.card.MaterialCardView>
 
-                    <androidx.cardview.widget.CardView
+                    <com.google.android.material.card.MaterialCardView
                         android:layout_width="0dp"
                         android:layout_height="wrap_content"
                         android:layout_weight="1"
                         android:layout_marginStart="8dp"
-                        app:cardBackgroundColor="#1AFFFFFF"
+                        app:cardBackgroundColor="#11FFFFFF"
                         app:cardCornerRadius="24dp"
-                        app:cardElevation="0dp">
+                        app:cardElevation="0dp"
+                        app:strokeWidth="1dp"
+                        app:strokeColor="#1AFFFFFF">
                         <LinearLayout
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
@@ -611,16 +601,18 @@
                                 android:layout_height="100dp"
                                 android:layout_marginTop="8dp" />
                         </LinearLayout>
-                    </androidx.cardview.widget.CardView>
+                    </com.google.android.material.card.MaterialCardView>
                 </LinearLayout>
 
-                <androidx.cardview.widget.CardView
+                <com.google.android.material.card.MaterialCardView
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:layout_marginTop="16dp"
-                    app:cardBackgroundColor="#1AFFFFFF"
+                    app:cardBackgroundColor="#11FFFFFF"
                     app:cardCornerRadius="24dp"
-                    app:cardElevation="0dp">
+                    app:cardElevation="0dp"
+                    app:strokeWidth="1dp"
+                    app:strokeColor="#1AFFFFFF">
                     <LinearLayout
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
@@ -640,74 +632,11 @@
                             android:layout_height="wrap_content"
                             android:layout_marginTop="12dp" />
                     </LinearLayout>
-                </androidx.cardview.widget.CardView>
+                </com.google.android.material.card.MaterialCardView>
 
             </LinearLayout>
         </ScrollView>
 
-        <!-- Bottom Navigation Mock -->
-        <LinearLayout
-            android:id="@+id/bottom_nav_mock"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:minHeight="64dp"
-            android:paddingVertical="8dp"
-            android:background="#1A1A1A"
-            android:orientation="horizontal"
-            android:visibility="gone"
-            app:layout_constraintBottom_toBottomOf="parent">
-
-            <LinearLayout
-                android:id="@+id/nav_today"
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:layout_weight="1"
-                android:orientation="vertical"
-                android:gravity="center"
-                android:clickable="true"
-                android:focusable="true">
-                <ImageView
-                    android:id="@+id/iv_today"
-                    android:layout_width="24dp"
-                    android:layout_height="24dp"
-                    android:src="@android:drawable/ic_menu_today"
-                    app:tint="@color/chip_selected" />
-                <TextView
-                    android:id="@+id/tv_today_nav"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="TODAY"
-                    android:textColor="@color/chip_selected"
-                    android:textSize="8sp"
-                    android:layout_marginTop="4dp" />
-            </LinearLayout>
-
-            <LinearLayout
-                android:id="@+id/nav_history"
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:layout_weight="1"
-                android:orientation="vertical"
-                android:gravity="center"
-                android:clickable="true"
-                android:focusable="true">
-                <ImageView
-                    android:id="@+id/iv_history"
-                    android:layout_width="24dp"
-                    android:layout_height="24dp"
-                    android:src="@android:drawable/ic_menu_sort_by_size"
-                    app:tint="@color/text_secondary" />
-                <TextView
-                    android:id="@+id/tv_history_nav"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="HISTORY"
-                    android:textColor="@color/text_secondary"
-                    android:textSize="8sp"
-                    android:layout_marginTop="4dp" />
-            </LinearLayout>
-
-        </LinearLayout>
     </androidx.constraintlayout.widget.ConstraintLayout>
 
 </androidx.constraintlayout.widget.ConstraintLayout>

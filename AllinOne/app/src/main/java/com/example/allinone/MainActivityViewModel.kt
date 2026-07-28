@@ -64,6 +64,7 @@ class MainActivityViewModel : ViewModel() {
             showNoteSection = DataManager.showNoteSection,
             showProjectSection = DataManager.showProjectSection,
             showFinanceSection = DataManager.showFinanceSection,
+            showPerformanceSection = DataManager.showPerformanceSection,
             isAppUnlocked = DataManager.isAppUnlocked,
             isDataLoaded = true
         )

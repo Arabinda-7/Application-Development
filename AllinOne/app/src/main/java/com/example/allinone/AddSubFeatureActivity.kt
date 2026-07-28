@@ -29,7 +29,6 @@ class AddSubFeatureActivity : BaseActivity() {
     private lateinit var btnSave: TextView
     private lateinit var btnDelete: Button
 
-    private lateinit var swReminder: androidx.appcompat.widget.SwitchCompat
     private lateinit var seekWeight: SeekBar
     private lateinit var tvWeightValue: TextView
     private lateinit var rgPriority: RadioGroup
@@ -53,8 +52,8 @@ class AddSubFeatureActivity : BaseActivity() {
 
         if (subFeatureId != null) {
             // Priority 1: Check active editing lists (Real-time fixes)
-            targetFeature = AddProjectActivity.currentEditingSubFeatures.find { it.id == subFeatureId }
-                ?: AddIdeaActivity.currentEditingIdeaSubFeatures.find { it.id == subFeatureId }
+            targetFeature = DataManager.currentEditingSubFeatures.find { it.id == subFeatureId }
+                ?: DataManager.currentEditingIdeaSubFeatures.find { it.id == subFeatureId }
             
             // Priority 2: Fallback to persistent storage
             if (targetFeature == null && projectIndex != -1) {
@@ -101,7 +100,6 @@ class AddSubFeatureActivity : BaseActivity() {
         btnSave = findViewById(R.id.btn_save_subfeature)
         btnDelete = findViewById(R.id.btn_delete_subfeature)
 
-        swReminder = findViewById(R.id.sw_feature_reminder)
         seekWeight = findViewById(R.id.seek_feature_weight)
         tvWeightValue = findViewById(R.id.tv_weight_value)
         rgPriority = findViewById(R.id.rg_feature_priority)
@@ -121,7 +119,6 @@ class AddSubFeatureActivity : BaseActivity() {
             // Milestone Enhancements
             selectedWeight = feature.weight
             selectedPriority = feature.priority
-            swReminder.isChecked = feature.hasReminder
             blockedByFeatureId = feature.blockedByNodeId
             etResourceUrl.setText(feature.resourceUrl)
             
@@ -135,10 +132,16 @@ class AddSubFeatureActivity : BaseActivity() {
 
         tvDeadline.setOnClickListener {
             val cal = Calendar.getInstance()
-            selectedDueDate?.let { cal.timeInMillis = it }
+            if (selectedDueDate != null) {
+                cal.timeInMillis = selectedDueDate!!
+            } else {
+                // Smart Deadline: Default to 7 days from now
+                cal.add(Calendar.DAY_OF_YEAR, 7)
+            }
             DatePickerDialog(this, { _, y, m, d ->
-                cal.set(y, m, d)
-                selectedDueDate = cal.timeInMillis
+                val newCal = Calendar.getInstance()
+                newCal.set(y, m, d)
+                selectedDueDate = newCal.timeInMillis
                 updateDeadlineUI()
             }, cal.get(Calendar.YEAR), cal.get(Calendar.MONTH), cal.get(Calendar.DAY_OF_MONTH)).show()
         }
@@ -166,8 +169,8 @@ class AddSubFeatureActivity : BaseActivity() {
 
         btnDelete.setOnClickListener {
             // Priority: Remove from active editing lists if present
-            val removedFromActive = AddProjectActivity.currentEditingSubFeatures.remove(targetFeature) ||
-                                   AddIdeaActivity.currentEditingIdeaSubFeatures.remove(targetFeature)
+            val removedFromActive = DataManager.currentEditingSubFeatures.remove(targetFeature) ||
+                                   DataManager.currentEditingIdeaSubFeatures.remove(targetFeature)
             
             // Fallback: Remove from persistent storage
             if (!removedFromActive && projectIndex != -1) {
@@ -205,10 +208,10 @@ class AddSubFeatureActivity : BaseActivity() {
 
     private fun getOtherFeatures(): List<ProjectFeature> {
         // Priority 1: Use active editing lists if populated
-        val activeList = if (AddProjectActivity.currentEditingSubFeatures.isNotEmpty()) {
-            AddProjectActivity.currentEditingSubFeatures
-        } else if (AddIdeaActivity.currentEditingIdeaSubFeatures.isNotEmpty()) {
-            AddIdeaActivity.currentEditingIdeaSubFeatures
+        val activeList = if (DataManager.currentEditingSubFeatures.isNotEmpty()) {
+            DataManager.currentEditingSubFeatures
+        } else if (DataManager.currentEditingIdeaSubFeatures.isNotEmpty()) {
+            DataManager.currentEditingIdeaSubFeatures
         } else null
 
         // Priority 2: Fallback to persistent storage
@@ -237,9 +240,26 @@ class AddSubFeatureActivity : BaseActivity() {
     }
 
     private fun updateDeadlineUI() {
-        tvDeadline.text = selectedDueDate?.let { 
+        val deadlineText = selectedDueDate?.let { 
             SimpleDateFormat("MMM dd, yyyy", Locale.getDefault()).format(Date(it)) 
         } ?: "Set Due Date"
+        
+        tvDeadline.text = deadlineText
+
+        // Smart Hint logic: If no deadline and created > 2 days ago
+        targetFeature?.let { feature ->
+            if (selectedDueDate == null) {
+                val ageDays = (System.currentTimeMillis() - feature.createdAt) / (1000 * 60 * 60 * 24)
+                if (ageDays >= 2) {
+                    tvDeadline.text = "$deadlineText (Suggestion: Set now)"
+                    tvDeadline.setTextColor(Color.parseColor("#FFB800"))
+                } else {
+                    tvDeadline.setTextColor(Color.WHITE)
+                }
+            } else {
+                tvDeadline.setTextColor(Color.WHITE)
+            }
+        }
     }
 
     private fun refreshTagsUI() {
@@ -278,10 +298,10 @@ class AddSubFeatureActivity : BaseActivity() {
         }
 
         // Duplicate check prioritizing active editing lists
-        val activeList = if (AddProjectActivity.currentEditingSubFeatures.isNotEmpty()) {
-            AddProjectActivity.currentEditingSubFeatures
-        } else if (AddIdeaActivity.currentEditingIdeaSubFeatures.isNotEmpty()) {
-            AddIdeaActivity.currentEditingIdeaSubFeatures
+        val activeList = if (DataManager.currentEditingSubFeatures.isNotEmpty()) {
+            DataManager.currentEditingSubFeatures
+        } else if (DataManager.currentEditingIdeaSubFeatures.isNotEmpty()) {
+            DataManager.currentEditingIdeaSubFeatures
         } else null
         
         val list = activeList ?: (if (projectIndex != -1) DataManager.projects.getOrNull(projectIndex)?.subFeatures else emptyList())
@@ -298,7 +318,7 @@ class AddSubFeatureActivity : BaseActivity() {
             // Milestone Enhancements
             it.weight = selectedWeight
             it.priority = selectedPriority
-            it.hasReminder = swReminder.isChecked
+            it.hasReminder = selectedDueDate != null
             it.blockedByNodeId = blockedByFeatureId
             it.resourceUrl = etResourceUrl.text.toString().trim()
         }

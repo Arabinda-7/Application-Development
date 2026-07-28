@@ -2,7 +2,9 @@ package com.example.allinone
 
 import android.content.Context
 import android.content.SharedPreferences
+import androidx.room.withTransaction
 import com.example.allinone.data.*
+import com.example.allinone.workspace.data.*
 import com.example.allinone.workspace.data.WorkspaceDatabase
 import com.google.gson.Gson
 import com.google.gson.reflect.TypeToken
@@ -70,6 +72,7 @@ object DataManager {
 
     // Workout Settings
     var workoutMuscleGroups: MutableList<String> get() = WorkoutDataManager.workoutMuscleGroups; set(value) { WorkoutDataManager.workoutMuscleGroups = value }
+    var workoutFilterType: String get() = WorkoutDataManager.workoutFilterType; set(value) { WorkoutDataManager.workoutFilterType = value }
     var workoutAutoRestTimer: Boolean get() = WorkoutDataManager.workoutAutoRestTimer; set(value) { WorkoutDataManager.workoutAutoRestTimer = value }
     var workoutWeightUnit: String get() = WorkoutDataManager.workoutWeightUnit; set(value) { WorkoutDataManager.workoutWeightUnit = value }
     var workoutDefaultMode: String get() = WorkoutDataManager.workoutDefaultMode; set(value) { WorkoutDataManager.workoutDefaultMode = value }
@@ -80,6 +83,7 @@ object DataManager {
     var noteAutoCleanupDays: Int get() = NoteDataManager.noteAutoCleanupDays; set(value) { NoteDataManager.noteAutoCleanupDays = value }
     var noteDefaultCategory: String get() = NoteDataManager.noteDefaultCategory; set(value) { NoteDataManager.noteDefaultCategory = value }
     var noteShowHidden: Boolean get() = NoteDataManager.noteShowHidden; set(value) { NoteDataManager.noteShowHidden = value }
+    var noteVoiceInputEnabled: Boolean get() = NoteDataManager.noteVoiceInputEnabled; set(value) { NoteDataManager.noteVoiceInputEnabled = value }
     var noteVisibleSections: MutableList<String> get() = NoteDataManager.noteVisibleSections; set(value) { NoteDataManager.noteVisibleSections = value }
     
     // Project Advanced Settings
@@ -100,6 +104,8 @@ object DataManager {
     
     // User / System Settings
     var isAppLockEnabled: Boolean get() = UserDataManager.isAppLockEnabled; set(value) { UserDataManager.isAppLockEnabled = value }
+    var isBiometricLockEnabled: Boolean get() = UserDataManager.isBiometricLockEnabled; set(value) { UserDataManager.isBiometricLockEnabled = value }
+    var isScreenshotProtectionEnabled: Boolean get() = UserDataManager.isScreenshotProtectionEnabled; set(value) { UserDataManager.isScreenshotProtectionEnabled = value }
     var isAppUnlocked: Boolean get() = UserDataManager.isAppUnlocked; set(value) { UserDataManager.isAppUnlocked = value }
     var isOledThemeEnabled: Boolean = false // Legacy
     var isOnboardingCompleted: Boolean get() = UserDataManager.isOnboardingCompleted; set(value) { UserDataManager.isOnboardingCompleted = value }
@@ -140,6 +146,8 @@ object DataManager {
     var showNoteSection: Boolean get() = UserDataManager.showNoteSection; set(value) { UserDataManager.showNoteSection = value }
     var showProjectSection: Boolean get() = UserDataManager.showProjectSection; set(value) { UserDataManager.showProjectSection = value }
     var showFinanceSection: Boolean get() = UserDataManager.showFinanceSection; set(value) { UserDataManager.showFinanceSection = value }
+    var showPerformanceSection: Boolean get() = UserDataManager.showPerformanceSection; set(value) { UserDataManager.showPerformanceSection = value }
+    var isAppInternetRestricted: Boolean get() = UserDataManager.isAppInternetRestricted; set(value) { UserDataManager.isAppInternetRestricted = value }
     
     var userCustomColors: MutableList<Int> get() = UserDataManager.userCustomColors; set(value) { UserDataManager.userCustomColors = value }
 
@@ -183,6 +191,8 @@ object DataManager {
     
     fun getWorkoutProgress() = WorkoutDataManager.getWorkoutProgress()
     fun getWorkoutStreak() = WorkoutDataManager.getWorkoutStreak()
+    fun getWorkoutStreaks() = WorkoutDataManager.getWorkoutStreaks()
+    fun getWorkoutsThisMonth() = WorkoutDataManager.getWorkoutsThisMonth()
     fun getTotalWorkoutsFinished() = WorkoutDataManager.getTotalWorkoutsFinished()
     fun getTodayCaloriesBurned() = WorkoutDataManager.getTodayCaloriesBurned()
     
@@ -225,9 +235,10 @@ object DataManager {
 
     fun getUniqueFeatureName(baseName: String, existing: List<ProjectFeature>): String {
         var name = baseName
-        var count = 1
-        while (existing.any { it.name == name }) {
-            name = "$baseName (${count++})"
+        var count = 2
+        while (existing.any { it.name.equals(name, ignoreCase = true) }) {
+            name = "$baseName $count"
+            count++
         }
         return name
     }
@@ -250,6 +261,8 @@ object DataManager {
     private const val KEY_HISTORY = "history_data"
     private const val KEY_LAST_RESET_DATE = "last_reset_date"
     private const val KEY_LAST_MONTH_RESET = "last_month_reset"
+    private const val KEY_WORKOUT_FILTER_TYPE = "workout_filter_type"
+    private const val KEY_WORKOUT_MUSCLE_GROUPS = "workout_muscle_groups"
     private const val KEY_TASK_SHOW_COMPLETED = "task_show_completed"
     private const val KEY_TASK_SHOW_HIDDEN = "task_show_hidden"
     private const val KEY_TASK_SORT_ORDER = "task_sort_order"
@@ -268,6 +281,7 @@ object DataManager {
     private const val KEY_FINANCE_LEDGER_ENABLED = "finance_ledger_enabled"
     private const val KEY_NOTE_AUTO_CLEANUP = "note_auto_cleanup"
     private const val KEY_NOTE_SHOW_HIDDEN = "note_show_hidden"
+    private const val KEY_NOTE_VOICE_INPUT = "note_voice_input_enabled"
     private const val KEY_NOTE_VISIBLE_SECTIONS = "note_visible_sections"
     private const val KEY_NOTE_DEFAULT_CAT = "note_default_cat"
     private const val KEY_NOTE_TEMPLATES = "note_templates"
@@ -283,6 +297,8 @@ object DataManager {
     private const val KEY_PROJ_TEMPLATES = "project_templates"
     private const val KEY_PROJ_ROADMAPS = "project_roadmaps_enabled"
     private const val KEY_APP_LOCK = "app_lock_enabled"
+    private const val KEY_BIOMETRIC_LOCK = "biometric_lock_enabled"
+    private const val KEY_SCREENSHOT_PROTECTION = "screenshot_protection_enabled"
     private const val KEY_APP_LOCK_PIN = "app_lock_pin"
     private const val KEY_OLED_THEME = "oled_theme_enabled"
     private const val KEY_ONBOARDING_COMPLETED = "onboarding_completed"
@@ -310,6 +326,8 @@ object DataManager {
     private const val KEY_SHOW_NOTES = "show_note_section"
     private const val KEY_SHOW_PROJECTS = "show_project_section"
     private const val KEY_SHOW_FINANCE = "show_finance_section"
+    private const val KEY_SHOW_PERFORMANCE = "show_performance_section"
+    private const val KEY_APP_INTERNET_RESTRICTED = "app_internet_restricted"
 
     private const val KEY_GLOBAL_HABIT_COLOR = "global_habit_color"
     private const val KEY_GLOBAL_WORKOUT_COLOR = "global_workout_color"
@@ -334,8 +352,36 @@ object DataManager {
     private const val KEY_STARTUP_LOADING_TIME = "startup_loading_time"
 
     private fun getPrefs(context: Context): SharedPreferences {
+        return SecurityManager.getEncryptedPrefs(context)
+    }
+
+    private fun getLegacyPrefs(context: Context): SharedPreferences {
         return context.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE)
     }
+
+    private fun migrateToEncryptedPrefs(context: Context) {
+        val legacyPrefs = getLegacyPrefs(context)
+        val encryptedPrefs = getPrefs(context)
+        
+        if (legacyPrefs.all.isNotEmpty()) {
+            val editor = encryptedPrefs.edit()
+            legacyPrefs.all.forEach { (key, value) ->
+                when (value) {
+                    is String -> editor.putString(key, value)
+                    is Boolean -> editor.putBoolean(key, value)
+                    is Int -> editor.putInt(key, value)
+                    is Long -> editor.putLong(key, value)
+                    is Float -> editor.putFloat(key, value)
+                }
+            }
+            editor.apply()
+            legacyPrefs.edit().clear().apply() // Clear legacy data after migration
+        }
+    }
+
+    // Shared state for sub-feature editing
+    var currentEditingSubFeatures: MutableList<ProjectFeature> = mutableListOf()
+    var currentEditingIdeaSubFeatures: MutableList<ProjectFeature> = mutableListOf()
 
     fun saveData(context: Context?) {
         if (context == null) return
@@ -363,6 +409,8 @@ object DataManager {
             putString(KEY_TASK_CUSTOM_CATEGORIES, gson.toJson(taskCustomCategories))
             putBoolean(KEY_TASK_AUTO_ARCHIVE, taskAutoArchive)
             putBoolean(KEY_TASK_EDIT_MODE, taskEditModeEnabled)
+            putString(KEY_WORKOUT_FILTER_TYPE, workoutFilterType)
+            putString(KEY_WORKOUT_MUSCLE_GROUPS, gson.toJson(workoutMuscleGroups))
             putString(KEY_TASK_DEFAULT_SECTION, taskDefaultSection)
             putString(KEY_TASK_VISIBLE_SECTIONS, gson.toJson(taskVisibleSections))
             putString(KEY_FINANCE_CUSTOM_CATEGORIES, gson.toJson(financeCustomCategories))
@@ -375,6 +423,7 @@ object DataManager {
             putBoolean(KEY_FINANCE_LEDGER_ENABLED, isFinanceLedgerEnabled)
             putInt(KEY_NOTE_AUTO_CLEANUP, noteAutoCleanupDays)
             putBoolean(KEY_NOTE_SHOW_HIDDEN, noteShowHidden)
+            putBoolean(KEY_NOTE_VOICE_INPUT, noteVoiceInputEnabled)
             putString(KEY_NOTE_VISIBLE_SECTIONS, gson.toJson(noteVisibleSections))
             putString(KEY_NOTE_DEFAULT_CAT, noteDefaultCategory)
             putString(KEY_NOTE_TEMPLATES, gson.toJson(noteTemplates))
@@ -391,6 +440,8 @@ object DataManager {
             putBoolean(KEY_PROJ_DUAL_EXIST, projectDualExistEnabled)
             putBoolean(KEY_PROJ_IDEAS_ENABLED, projectIdeasEnabled)
             putBoolean(KEY_APP_LOCK, isAppLockEnabled)
+            putBoolean(KEY_BIOMETRIC_LOCK, isBiometricLockEnabled)
+            putBoolean(KEY_SCREENSHOT_PROTECTION, isScreenshotProtectionEnabled)
             putString(KEY_APP_LOCK_PIN, appLockPin)
             putString("app_lock_question", appLockQuestion)
             putString("app_lock_answer", appLockAnswer)
@@ -420,6 +471,8 @@ object DataManager {
             putBoolean(KEY_SHOW_NOTES, showNoteSection)
             putBoolean(KEY_SHOW_PROJECTS, showProjectSection)
             putBoolean(KEY_SHOW_FINANCE, showFinanceSection)
+            putBoolean(KEY_SHOW_PERFORMANCE, showPerformanceSection)
+            putBoolean(KEY_APP_INTERNET_RESTRICTED, isAppInternetRestricted)
 
             putString(KEY_USER_NAME, userName)
             putString(KEY_USER_BIO, userBio)
@@ -457,6 +510,7 @@ object DataManager {
 
     // Load logic remains complex and central for now
     fun loadData(context: Context) {
+        migrateToEncryptedPrefs(context)
         val prefs = getPrefs(context)
         val gson = Gson()
         
@@ -503,6 +557,8 @@ object DataManager {
         taskEditModeEnabled = prefs.getBoolean(KEY_TASK_EDIT_MODE, false)
         taskDefaultSection = prefs.getString(KEY_TASK_DEFAULT_SECTION, "Tasks") ?: "Tasks"
         taskVisibleSections = gson.fromJson(prefs.getString(KEY_TASK_VISIBLE_SECTIONS, "[\"Tasks\"]"), object : TypeToken<MutableList<String>>() {}.type)
+        workoutFilterType = prefs.getString(KEY_WORKOUT_FILTER_TYPE, "TIME") ?: "TIME"
+        workoutMuscleGroups = gson.fromJson(prefs.getString(KEY_WORKOUT_MUSCLE_GROUPS, "[\"Chest\", \"Back\", \"Legs\", \"Shoulders\", \"Arms\", \"Cardio\", \"Full Body\"]"), object : TypeToken<MutableList<String>>() {}.type) ?: mutableListOf("Chest", "Back", "Legs", "Shoulders", "Arms", "Cardio", "Full Body")
 
         financeCustomCategories = gson.fromJson(prefs.getString(KEY_FINANCE_CUSTOM_CATEGORIES, "[\"Food\", \"Rent\", \"Transport\", \"Shopping\", \"Entertainment\", \"Health\", \"Other\"]"), object : TypeToken<MutableList<String>>() {}.type)
         financeCategoryIcons = gson.fromJson(prefs.getString(KEY_FINANCE_CATEGORY_ICONS, "{}"), object : TypeToken<MutableMap<String, Int>>() {}.type) ?: mutableMapOf()
@@ -515,6 +571,7 @@ object DataManager {
 
         noteAutoCleanupDays = prefs.getInt(KEY_NOTE_AUTO_CLEANUP, 0)
         noteShowHidden = prefs.getBoolean(KEY_NOTE_SHOW_HIDDEN, false)
+        noteVoiceInputEnabled = prefs.getBoolean(KEY_NOTE_VOICE_INPUT, true)
         noteVisibleSections = gson.fromJson(prefs.getString(KEY_NOTE_VISIBLE_SECTIONS, "[\"Notes\"]"), object : TypeToken<MutableList<String>>() {}.type) ?: mutableListOf("Notes")
         noteDefaultCategory = prefs.getString(KEY_NOTE_DEFAULT_CAT, "Notes") ?: "Notes"
         noteTemplates = gson.fromJson(prefs.getString(KEY_NOTE_TEMPLATES, "{}"), object : TypeToken<MutableMap<String, String>>() {}.type) ?: mutableMapOf()
@@ -534,6 +591,8 @@ object DataManager {
         projectRoadmapsEnabled = prefs.getBoolean(KEY_PROJ_ROADMAPS, true)
 
         isAppLockEnabled = prefs.getBoolean(KEY_APP_LOCK, false)
+        isBiometricLockEnabled = prefs.getBoolean(KEY_BIOMETRIC_LOCK, false)
+        isScreenshotProtectionEnabled = prefs.getBoolean(KEY_SCREENSHOT_PROTECTION, false)
         appLockPin = prefs.getString(KEY_APP_LOCK_PIN, null)
         appLockQuestion = prefs.getString("app_lock_question", null)
         appLockAnswer = prefs.getString("app_lock_answer", null)
@@ -564,6 +623,8 @@ object DataManager {
         showNoteSection = prefs.getBoolean(KEY_SHOW_NOTES, true)
         showProjectSection = prefs.getBoolean(KEY_SHOW_PROJECTS, true)
         showFinanceSection = prefs.getBoolean(KEY_SHOW_FINANCE, true)
+        showPerformanceSection = prefs.getBoolean(KEY_SHOW_PERFORMANCE, true)
+        isAppInternetRestricted = prefs.getBoolean(KEY_APP_INTERNET_RESTRICTED, true)
 
         userName = prefs.getString(KEY_USER_NAME, "User") ?: "User"
         userBio = prefs.getString(KEY_USER_BIO, "") ?: ""
@@ -593,7 +654,10 @@ object DataManager {
         globalNoteIcon = getResourceId(context, prefs.getString(KEY_GLOBAL_NOTE_ICON, "ic_notes") ?: "ic_notes")
         globalFinanceIcon = getResourceId(context, prefs.getString(KEY_GLOBAL_FINANCE_ICON, "ic_finance") ?: "ic_finance")
 
-        projectTemplates = gson.fromJson(prefs.getString(KEY_PROJ_TEMPLATES, "{}"), object : TypeToken<MutableMap<String, List<String>>>() {}.type) ?: mutableMapOf()
+        val savedTemplates = gson.fromJson<MutableMap<String, List<String>>>(prefs.getString(KEY_PROJ_TEMPLATES, "{}"), object : TypeToken<MutableMap<String, List<String>>>() {}.type) ?: mutableMapOf()
+        if (savedTemplates.isNotEmpty()) {
+            projectTemplates = savedTemplates
+        }
 
         // Sync logic
         checkAndResetDailyStats(context)
@@ -652,6 +716,20 @@ object DataManager {
             val historyEntry = history[date]
             val progress = historyEntry?.let { 
                 if (it.totalHabits == 0) 0 else (it.habitsCompleted * 100) / it.totalHabits 
+            } ?: 0
+            Pair(i, progress)
+        }.reversed()
+    }
+
+    fun getLastSevenDaysWorkoutProgress(): List<Pair<Int, Int>> {
+        val sdf = SimpleDateFormat("yyyyMMdd", Locale.getDefault())
+        return (0..6).map { i ->
+            val cal = Calendar.getInstance()
+            cal.add(Calendar.DAY_OF_YEAR, -i)
+            val date = sdf.format(cal.time)
+            val historyEntry = history[date]
+            val progress = historyEntry?.let { 
+                if (it.totalWorkouts == 0) 0 else (it.workoutsCompleted * 100) / it.totalWorkouts 
             } ?: 0
             Pair(i, progress)
         }.reversed()
@@ -725,33 +803,169 @@ object DataManager {
         return HabitDataManager.getHabitStreak()
     }
     
-    fun exportData(context: Context): String {
+    suspend fun exportData(context: Context, password: CharArray? = null): String = withContext(Dispatchers.IO) {
         val prefs = getPrefs(context)
-        val allData = prefs.all
-        return Gson().toJson(allData)
+        val allData = prefs.all.toMutableMap()
+
+        // Add Workspace Data
+        val db = WorkspaceDatabase.getDatabase(context)
+        val dao = db.workspaceDao()
+
+        allData["workspaceProjects"] = dao.getAllProjectsSync()
+        allData["workspaceGoals"] = dao.getAllGoalsSync()
+        allData["workspaceTasks"] = dao.getAllTasksSync()
+        allData["workspaceFeatures"] = dao.getAllFeaturesSync()
+        allData["workspaceBugs"] = dao.getAllBugsSync()
+        allData["workspaceIdeas"] = dao.getAllIdeasSync()
+        allData["workspaceNotes"] = dao.getAllNotesSync()
+        allData["workspaceResources"] = dao.getAllResourcesSync()
+        allData["workspaceLogs"] = dao.getAllActivityLogsSync()
+        allData["workspaceRefs"] = dao.getAllNoteCrossReferencesSync()
+
+        val json = Gson().toJson(allData)
+        if (password != null) {
+            SecurityManager.encryptData(json, password)
+        } else {
+            json
+        }
     }
 
-    fun importData(context: Context, json: String): Boolean {
-        return try {
+    suspend fun importData(context: Context, dataString: String, password: CharArray? = null): Boolean = withContext(Dispatchers.IO) {
+        try {
+            // Reset existing database to ensure we can re-open it with the imported key
+            WorkspaceDatabase.resetDatabase(context)
+
+            val json = if (password != null) {
+                SecurityManager.decryptData(dataString, password)
+            } else {
+                dataString
+            }
+            
             val type = object : TypeToken<Map<String, Any>>() {}.type
             val data: Map<String, Any> = Gson().fromJson(json, type)
             val prefs = getPrefs(context)
             val editor = prefs.edit()
+
+            val legacyKeyMap = mapOf(
+                "habits" to KEY_HABITS,
+                "workouts" to KEY_WORKOUTS,
+                "tasks" to KEY_TASKS,
+                "notes" to KEY_NOTES,
+                "projects" to KEY_PROJECTS,
+                "transactions" to KEY_TRANSACTIONS,
+                "ledgerEntries" to KEY_LEDGER,
+                "personalLedgers" to KEY_PERSONAL_LEDGER,
+                "history" to KEY_HISTORY,
+                "dailyMoods" to KEY_DAILY_MOODS,
+                "recentActivities" to KEY_RECENT_ACT,
+                "monthlyBudget" to KEY_BUDGET,
+                "monthlyBudgets" to KEY_MONTHLY_BUDGETS,
+                "monthlySavingsGoal" to KEY_SAVINGS_GOAL,
+                "monthlySavingsGoals" to KEY_MONTHLY_SAVINGS_GOALS
+            )
+
+            val workspaceKeys = setOf(
+                "workspaceProjects", "workspaceGoals", "workspaceTasks", "workspaceFeatures",
+                "workspaceBugs", "workspaceIdeas", "workspaceNotes", "workspaceResources",
+                "workspaceLogs", "workspaceRefs"
+            )
+
+            val floatKeys = setOf(KEY_BUDGET, KEY_SAVINGS_GOAL)
+            val longKeys = setOf(KEY_LAST_MOOD_TIMESTAMP)
+
             data.forEach { (key, value) ->
-                when (value) {
-                    is String -> editor.putString(key, value)
-                    is Boolean -> editor.putBoolean(key, value)
-                    is Double -> {
-                        if (value == value.toInt().toDouble()) editor.putInt(key, value.toInt())
-                        else editor.putFloat(key, value.toFloat())
+                val targetKey = legacyKeyMap[key] ?: key
+                if (targetKey !in workspaceKeys) {
+                    when (value) {
+                        is String -> editor.putString(targetKey, value)
+                        is Boolean -> editor.putBoolean(targetKey, value)
+                        is List<*>, is Map<*, *> -> {
+                            // Handle legacy JSON structures (convert to JSON string for SharedPreferences)
+                            editor.putString(targetKey, Gson().toJson(value))
+                        }
+                        is Double -> {
+                            when (targetKey) {
+                                in floatKeys -> editor.putFloat(targetKey, value.toFloat())
+                                in longKeys -> editor.putLong(targetKey, value.toLong())
+                                else -> {
+                                    val longValue = value.toLong()
+                                    if (value == longValue.toDouble()) {
+                                        if (longValue in Int.MIN_VALUE..Int.MAX_VALUE) editor.putInt(targetKey, longValue.toInt())
+                                        else editor.putLong(targetKey, longValue)
+                                    } else {
+                                        editor.putFloat(targetKey, value.toFloat())
+                                    }
+                                }
+                            }
+                        }
                     }
-                    is Float -> editor.putFloat(key, value)
-                    is Int -> editor.putInt(key, value)
-                    is Long -> editor.putLong(key, value)
                 }
             }
             editor.apply()
-            loadData(context)
+
+            // Restore Workspace Data
+            val db = WorkspaceDatabase.getDatabase(context)
+            val dao = db.workspaceDao()
+            val gson = Gson()
+
+            db.withTransaction {
+                dao.deleteAllProjects()
+                dao.deleteAllGoals()
+                dao.deleteAllTasks()
+                dao.deleteAllFeatures()
+                dao.deleteAllBugs()
+                dao.deleteAllIdeas()
+                dao.deleteAllNotes()
+                dao.deleteAllResources()
+                dao.deleteAllActivityLogs()
+                dao.deleteAllNoteCrossReferences()
+
+                data["workspaceProjects"]?.let {
+                    val listType = object : TypeToken<List<ProjectEntity>>() {}.type
+                    dao.insertAllProjects(gson.fromJson(gson.toJson(it), listType))
+                }
+                data["workspaceGoals"]?.let {
+                    val listType = object : TypeToken<List<GoalEntity>>() {}.type
+                    dao.insertAllGoals(gson.fromJson(gson.toJson(it), listType))
+                }
+                data["workspaceTasks"]?.let {
+                    val listType = object : TypeToken<List<TaskEntity>>() {}.type
+                    dao.insertAllTasks(gson.fromJson(gson.toJson(it), listType))
+                }
+                data["workspaceFeatures"]?.let {
+                    val listType = object : TypeToken<List<FeatureEntity>>() {}.type
+                    dao.insertAllFeatures(gson.fromJson(gson.toJson(it), listType))
+                }
+                data["workspaceBugs"]?.let {
+                    val listType = object : TypeToken<List<BugEntity>>() {}.type
+                    dao.insertAllBugs(gson.fromJson(gson.toJson(it), listType))
+                }
+                data["workspaceIdeas"]?.let {
+                    val listType = object : TypeToken<List<IdeaEntity>>() {}.type
+                    dao.insertAllIdeas(gson.fromJson(gson.toJson(it), listType))
+                }
+                data["workspaceNotes"]?.let {
+                    val listType = object : TypeToken<List<NoteEntity>>() {}.type
+                    dao.insertAllNotes(gson.fromJson(gson.toJson(it), listType))
+                }
+                data["workspaceResources"]?.let {
+                    val listType = object : TypeToken<List<ResourceEntity>>() {}.type
+                    dao.insertAllResources(gson.fromJson(gson.toJson(it), listType))
+                }
+                data["workspaceLogs"]?.let {
+                    val listType = object : TypeToken<List<ActivityLogEntity>>() {}.type
+                    dao.insertAllActivityLogs(gson.fromJson(gson.toJson(it), listType))
+                }
+                data["workspaceRefs"]?.let {
+                    val listType = object : TypeToken<List<NoteCrossReferenceEntity>>() {}.type
+                    dao.insertAllNoteCrossReferences(gson.fromJson(gson.toJson(it), listType))
+                }
+            }
+
+            withContext(Dispatchers.Main) {
+                loadData(context)
+                notifyDataChanged()
+            }
             true
         } catch (e: Exception) {
             false

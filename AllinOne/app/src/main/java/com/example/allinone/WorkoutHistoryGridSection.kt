@@ -35,6 +35,7 @@ class WorkoutHistoryGridSection(
         val daysInMonth = tempCal.getActualMaximum(Calendar.DAY_OF_MONTH)
         
         val sdfDate = SimpleDateFormat("yyyyMMdd", Locale.getDefault())
+        val todayStr = sdfDate.format(Date())
 
         for (i in 0 until firstDayOfWeek) {
             grid.addView(createSpacerView())
@@ -48,7 +49,7 @@ class WorkoutHistoryGridSection(
             val dateKey = sdfDate.format(dayCalendar.time)
             
             val progress = heatmapData[day - 1] ?: 0
-            grid.addView(createDayView(day.toString(), progress, dateKey))
+            grid.addView(createDayView(day.toString(), progress, dateKey, dateKey == todayStr))
         }
     }
 
@@ -62,7 +63,7 @@ class WorkoutHistoryGridSection(
         return view
     }
 
-    private fun createDayView(day: String, progressPercent: Int, dateKey: String): View {
+    private fun createDayView(day: String, progressPercent: Int, dateKey: String, isToday: Boolean): View {
         val frameLayout = FrameLayout(context)
         val params = GridLayout.LayoutParams()
         params.width = 0
@@ -70,8 +71,12 @@ class WorkoutHistoryGridSection(
         params.columnSpec = GridLayout.spec(GridLayout.UNDEFINED, 1f)
         frameLayout.layoutParams = params
 
+        val workoutColor = if (DataManager.globalWorkoutColor != -1) DataManager.globalWorkoutColor else Color.parseColor("#FFFFB800")
+
         if (dateKey == currentlySelectedDate) {
-            frameLayout.setBackgroundResource(R.drawable.history_calendar_selected_bg)
+            val bg = ContextCompat.getDrawable(context, R.drawable.history_calendar_selected_bg)?.mutate() as? android.graphics.drawable.GradientDrawable
+            bg?.setStroke((3 * context.resources.displayMetrics.density).toInt(), workoutColor)
+            frameLayout.background = bg
         }
 
         val progressBar = ProgressBar(context, null, android.R.attr.progressBarStyleHorizontal)
@@ -84,7 +89,6 @@ class WorkoutHistoryGridSection(
         progressBar.progress = progressPercent
         progressBar.scaleX = -1f
 
-        val workoutColor = if (DataManager.globalWorkoutColor != -1) DataManager.globalWorkoutColor else Color.parseColor("#FFFFB800")
         progressBar.progressTintList = android.content.res.ColorStateList.valueOf(workoutColor)
 
         frameLayout.addView(progressBar)
@@ -95,6 +99,22 @@ class WorkoutHistoryGridSection(
         textView.textSize = 13f
         textView.gravity = Gravity.CENTER
         frameLayout.addView(textView)
+
+        if (isToday) {
+            val dot = View(context)
+            val dotSize = (4 * context.resources.displayMetrics.density).toInt()
+            val dotParams = FrameLayout.LayoutParams(dotSize, dotSize)
+            dotParams.gravity = Gravity.BOTTOM or Gravity.CENTER_HORIZONTAL
+            dotParams.bottomMargin = (4 * context.resources.displayMetrics.density).toInt()
+            dot.layoutParams = dotParams
+            
+            val shape = android.graphics.drawable.GradientDrawable()
+            shape.shape = android.graphics.drawable.GradientDrawable.OVAL
+            shape.setColor(workoutColor)
+            dot.background = shape
+            
+            frameLayout.addView(dot)
+        }
 
         frameLayout.setOnClickListener {
             currentlySelectedDate = dateKey

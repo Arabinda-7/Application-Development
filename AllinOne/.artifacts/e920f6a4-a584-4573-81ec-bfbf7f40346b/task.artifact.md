@@ -1,0 +1,4 @@
+- [x] Simplify Detail Navigation (Standard Slide) in `ProjectWorkspaceScreen.kt`
+- [x] Simplify Tab Transitions (Standard Crossfade) in `ProjectWorkspaceScreen.kt`
+- [x] Speed up Background Color Animation in `ProjectWorkspaceScreen.kt`
+- [x] Verify transitions match the rest of the app

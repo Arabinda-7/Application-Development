@@ -4,12 +4,15 @@ import androidx.compose.foundation.*
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.pager.HorizontalPager
+import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.*
 import androidx.compose.material3.*
+import androidx.compose.material3.TabRowDefaults.tabIndicatorOffset
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -25,6 +28,7 @@ import com.example.allinone.LocalAppStyle
 import com.example.allinone.workspace.data.FeatureEntity
 import com.example.allinone.workspace.data.TaskEntity
 import com.example.allinone.workspace.ui.WorkspaceViewModel
+import kotlinx.coroutines.launch
 
 @Composable
 fun FeatureViewSection(
@@ -37,6 +41,9 @@ fun FeatureViewSection(
 ) {
     val style = LocalAppStyle.current
     val statuses = listOf("Backlog", "Planning", "Development", "Testing", "Shipped")
+    val pagerState = rememberPagerState(pageCount = { statuses.size })
+    val scope = rememberCoroutineScope()
+
     Column(modifier = Modifier.fillMaxSize()) {
         Row(modifier = Modifier.fillMaxWidth().padding(bottom = 16.dp), horizontalArrangement = Arrangement.spacedBy(12.dp)) {
             val shipped = features.count { it.status == "Shipped" }
@@ -44,30 +51,84 @@ fun FeatureViewSection(
             Box(modifier = Modifier.weight(1f)) { MetricCard("In Progress", features.count { it.status == "Development" }.toString(), style.accentColor) }
             Box(modifier = Modifier.weight(1f)) { MetricCard("Shipped", "$shipped / $total", Color(0xFF2EC4B6)) }
         }
-        Row(modifier = Modifier.fillMaxWidth().horizontalScroll(rememberScrollState())) {
-            statuses.forEach { status ->
-                Column(modifier = Modifier.width(280.dp).padding(8.dp)) {
-                    Text(status.uppercase(), fontWeight = FontWeight.Black, fontSize = 11.sp, letterSpacing = 1.sp, color = if (status == "Shipped") Color(0xFF2EC4B6) else Color.White.copy(alpha = 0.4f))
-                    Spacer(modifier = Modifier.height(12.dp))
-                    val statusFeatures = features.filter { it.status == status }
-                    if (statusFeatures.isEmpty()) { Box(modifier = Modifier.fillMaxWidth().height(100.dp).border(1.dp, Color.White.copy(alpha = 0.05f), RoundedCornerShape(12.dp)), contentAlignment = Alignment.Center) { Text("Empty", color = Color.White.copy(alpha = 0.1f), fontSize = 12.sp) } }
-                    else { 
-                        LazyColumn(modifier = Modifier.weight(1f)) {
-                            items(statusFeatures, key = { it.id }) { feature ->
-                                Box(modifier = Modifier.animateItem()) {
-                                    FeatureItemCard(
-                                        feature = feature,
-                                        linkedTasks = tasks.filter { it.milestoneId == feature.id },
-                                        onUpdate = { viewModel.updateFeature(it) },
-                                        onViewFeature = onViewFeature,
-                                        onEditFeature = onEditFeature,
-                                        onDeleteFeature = onDeleteFeature,
-                                        onQuickTasks = { viewModel.quickTasks(it) }
-                                    )
-                                    Spacer(modifier = Modifier.height(12.dp))
-                                }
+
+        ScrollableTabRow(
+            selectedTabIndex = pagerState.currentPage,
+            containerColor = Color.Transparent,
+            contentColor = style.accentColor,
+            edgePadding = 0.dp,
+            divider = {},
+            indicator = { tabPositions ->
+                TabRowDefaults.SecondaryIndicator(
+                    modifier = Modifier.tabIndicatorOffset(tabPositions[pagerState.currentPage]),
+                    color = style.accentColor
+                )
+            },
+            modifier = Modifier.fillMaxWidth().padding(bottom = 16.dp)
+        ) {
+            statuses.forEachIndexed { index, status ->
+                Tab(
+                    selected = pagerState.currentPage == index,
+                    onClick = { scope.launch { pagerState.animateScrollToPage(index) } },
+                    text = {
+                        Text(
+                            status.uppercase(),
+                            fontWeight = FontWeight.Black,
+                            fontSize = 11.sp,
+                            letterSpacing = 1.sp,
+                            color = if (pagerState.currentPage == index) Color.White else Color.White.copy(alpha = 0.4f)
+                        )
+                    }
+                )
+            }
+        }
+
+        HorizontalPager(
+            state = pagerState,
+            modifier = Modifier.weight(1f),
+            verticalAlignment = Alignment.Top
+        ) { pageIndex ->
+            val status = statuses[pageIndex]
+            val statusFeatures = features.filter { it.status == status }
+            
+            Column(modifier = Modifier.fillMaxSize().padding(horizontal = 4.dp)) {
+                if (statusFeatures.isEmpty()) {
+                    Box(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .height(200.dp)
+                            .padding(top = 40.dp)
+                            .border(1.dp, Color.White.copy(alpha = 0.05f), RoundedCornerShape(12.dp)),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                            Icon(
+                                imageVector = if (status == "Shipped") Icons.Default.RocketLaunch else Icons.Default.Category,
+                                contentDescription = null,
+                                tint = Color.White.copy(alpha = 0.05f),
+                                modifier = Modifier.size(48.dp)
+                            )
+                            Spacer(modifier = Modifier.height(12.dp))
+                            Text("No features in $status", color = Color.White.copy(alpha = 0.1f), fontSize = 14.sp)
+                        }
+                    }
+                } else {
+                    LazyColumn(modifier = Modifier.fillMaxSize()) {
+                        items(statusFeatures, key = { it.id }) { feature ->
+                            Box(modifier = Modifier.animateItem()) {
+                                FeatureItemCard(
+                                    feature = feature,
+                                    linkedTasks = tasks.filter { it.milestoneId == feature.id },
+                                    onUpdate = { viewModel.updateFeature(it) },
+                                    onViewFeature = onViewFeature,
+                                    onEditFeature = onEditFeature,
+                                    onDeleteFeature = onDeleteFeature,
+                                    onQuickTasks = { viewModel.quickTasks(it) }
+                                )
+                                Spacer(modifier = Modifier.height(12.dp))
                             }
                         }
+                        item { Spacer(modifier = Modifier.height(80.dp)) }
                     }
                 }
             }

@@ -70,7 +70,7 @@ class ConfigAdapter(
 
     private fun showOptionsDialog(context: android.content.Context, item: ConfigItem) {
         val dialog = android.app.Dialog(context)
-        dialog.setContentView(R.layout.dialog_settings_selection)
+        dialog.setContentView(R.layout.dialog_settings_select_config)
         dialog.window?.let { window ->
             window.setBackgroundDrawableResource(android.R.color.transparent)
             window.setLayout(
@@ -91,7 +91,7 @@ class ConfigAdapter(
         container.removeAllViews()
 
         item.options?.forEachIndexed { index, option ->
-            val itemView = LayoutInflater.from(context).inflate(R.layout.item_settings_selection, container, false) as TextView
+            val itemView = LayoutInflater.from(context).inflate(R.layout.item_settings_select_config, container, false) as TextView
             itemView.text = option
             
             if (item.selectedIndex == index) {

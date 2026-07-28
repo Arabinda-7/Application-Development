@@ -138,15 +138,14 @@ class ProjectActivity : BaseActivity() {
         if (viewModel.isEditMode) {
             showEditProjectNoteDialog(note)
         } else {
-            startActivity(Intent(this, AddProjectActivity::class.java).apply {
+            startActivity(Intent(this, ViewProjectActivity::class.java).apply {
                 putExtra("PROJECT_INDEX", DataManager.projects.indexOf(note))
-                putExtra("IS_VIEW_ONLY", true)
             })
         }
     }
 
     fun showEditProjectNoteDialog(note: Note) {
-        startActivity(Intent(this, AddProjectActivity::class.java).apply {
+        startActivity(Intent(this, EditProjectActivity::class.java).apply {
             putExtra("PROJECT_INDEX", DataManager.projects.indexOf(note))
         })
     }
@@ -177,7 +176,7 @@ class ProjectActivity : BaseActivity() {
 
     fun showProjectMenu(anchor: View, note: Note) {
         val inflater = LayoutInflater.from(this)
-        val menuView = inflater.inflate(R.layout.layout_custom_menu, null)
+        val menuView = inflater.inflate(R.layout.menu_project_item, null)
 
         val popupWindow = PopupWindow(
             menuView,

@@ -31,15 +31,15 @@ class AddTaskActivity : BaseActivity() {
     private var currentSection: String = "Tasks"
     
     private lateinit var etName: EditText
+    private lateinit var tvHeaderTitle: TextView
     private lateinit var tvNameHint: TextView
     private lateinit var rgPriority: RadioGroup
     private lateinit var chipGroupCat: ChipGroup
     private lateinit var containerSubtasks: LinearLayout
     private lateinit var etNewSubtask: EditText
     private lateinit var btnSave: TextView
-    private lateinit var tvReminder: TextView
+    private lateinit var tvSelectedReminder: TextView
     private lateinit var btnSetReminder: View
-    private lateinit var ivReminderIcon: ImageView
 
     private var selectedCategory = "General"
     private var selectedPriority = 0
@@ -64,14 +64,14 @@ class AddTaskActivity : BaseActivity() {
 
     private fun initViews() {
         etName = findViewById(R.id.task_name_input)
+        tvHeaderTitle = findViewById(R.id.tv_header_title)
         tvNameHint = findViewById(R.id.tv_name_hint)
         rgPriority = findViewById(R.id.rg_priority)
         chipGroupCat = findViewById(R.id.category_chip_group)
         containerSubtasks = findViewById(R.id.container_subtasks)
         etNewSubtask = findViewById(R.id.et_new_subtask)
-        tvReminder = findViewById(R.id.tv_reminder_summary)
+        tvSelectedReminder = findViewById(R.id.tv_selected_reminder)
         btnSetReminder = findViewById(R.id.btn_set_reminder)
-        ivReminderIcon = findViewById(R.id.iv_reminder_button_icon)
         btnSave = findViewById(R.id.btn_save_task)
         
         findViewById<View>(R.id.btn_back).setOnClickListener { finish() }
@@ -85,6 +85,7 @@ class AddTaskActivity : BaseActivity() {
 
         if (existingTask != null) {
             etName.setText(existingTask?.name)
+            tvHeaderTitle.text = "EDIT TASK"
             btnSave.text = "UPDATE"
             when (selectedPriority) {
                 0 -> rgPriority.check(R.id.rb_priority_low)
@@ -93,6 +94,8 @@ class AddTaskActivity : BaseActivity() {
             }
             updateReminderUI()
             updatePriorityAlpha(rgPriority.checkedRadioButtonId)
+        } else {
+            updateReminderUI()
         }
 
         // Categories
@@ -130,6 +133,24 @@ class AddTaskActivity : BaseActivity() {
                 selectedReminder = time
                 updateReminderUI()
             }
+        }
+
+        tvSelectedReminder.setOnClickListener {
+            val options = arrayOf("Change Time", "Remove Reminder")
+            android.app.AlertDialog.Builder(this, android.R.style.Theme_DeviceDefault_Dialog_Alert)
+                .setTitle("Reminder Options")
+                .setItems(options) { _, which ->
+                    if (which == 0) {
+                        showReminderPicker { time ->
+                            selectedReminder = time
+                            updateReminderUI()
+                        }
+                    } else {
+                        selectedReminder = null
+                        updateReminderUI()
+                    }
+                }
+                .show()
         }
 
         btnSave.setOnClickListener { saveTask() }
@@ -184,21 +205,28 @@ class AddTaskActivity : BaseActivity() {
     }
 
     private fun updateReminderUI() {
-        if (selectedReminder == null) {
-            tvReminder.text = "Set reminder"
-            ivReminderIcon.visibility = View.VISIBLE
-            btnSetReminder.setBackgroundResource(R.drawable.bg_dialog_rounded)
-            btnSetReminder.backgroundTintList = android.content.res.ColorStateList.valueOf(Color.parseColor("#20FFFFFF"))
-        } else {
+        val hasReminder = selectedReminder != null
+        btnSetReminder.visibility = if (hasReminder) View.GONE else View.VISIBLE
+        tvSelectedReminder.visibility = if (hasReminder) View.VISIBLE else View.GONE
+        
+        if (hasReminder) {
             val sdf = SimpleDateFormat("MMM dd, HH:mm", Locale.getDefault())
-            tvReminder.text = sdf.format(Date(selectedReminder!!))
-            ivReminderIcon.visibility = View.GONE
-            btnSetReminder.background = null
+            tvSelectedReminder.text = sdf.format(Date(selectedReminder!!))
+        }
+
+        // Realtime update if editing existing task
+        existingTask?.let { task ->
+            if (task.reminderTime != selectedReminder) {
+                task.reminderTime = selectedReminder
+                DataManager.saveData(this)
+            }
         }
     }
 
     private fun showReminderPicker(onTimeSelected: (Long) -> Unit) {
         val calendar = Calendar.getInstance()
+        selectedReminder?.let { calendar.timeInMillis = it }
+        
         val datePicker = DatePickerDialog(this, { _, y, m, d ->
             calendar.set(Calendar.YEAR, y)
             calendar.set(Calendar.MONTH, m)
@@ -208,9 +236,9 @@ class AddTaskActivity : BaseActivity() {
                 calendar.set(Calendar.MINUTE, min)
                 onTimeSelected(calendar.timeInMillis)
             }, calendar.get(Calendar.HOUR_OF_DAY), calendar.get(Calendar.MINUTE), false)
-            showDialogSafe(timePicker)
+            timePicker.show() // Use direct show to avoid BaseActivity singleton lock issues
         }, calendar.get(Calendar.YEAR), calendar.get(Calendar.MONTH), calendar.get(Calendar.DAY_OF_MONTH))
-        showDialogSafe(datePicker)
+        datePicker.show()
     }
 
     private fun startPulseAnimation(view: View) {

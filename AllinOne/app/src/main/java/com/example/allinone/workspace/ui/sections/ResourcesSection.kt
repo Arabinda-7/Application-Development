@@ -1,9 +1,15 @@
+@file:OptIn(
+    androidx.compose.foundation.ExperimentalFoundationApi::class,
+    androidx.compose.foundation.layout.ExperimentalLayoutApi::class
+)
+
 package com.example.allinone.workspace.ui.sections
 
 import androidx.compose.foundation.*
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.itemsIndexed
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.material.icons.Icons
@@ -22,6 +28,7 @@ import androidx.compose.ui.graphics.SolidColor
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.allinone.LocalAppStyle
@@ -36,6 +43,7 @@ fun ResourceViewSection(
     onDeleteResource: (ResourceEntity) -> Unit
 ) {
     val style = LocalAppStyle.current
+    val accentColor = style.accentColor
     LazyColumn(contentPadding = PaddingValues(bottom = 24.dp)) {
         itemsIndexed(resources, key = { _, res -> res.id }) { index, res ->
             var showMenu by remember { mutableStateOf(false) }
@@ -43,21 +51,35 @@ fun ResourceViewSection(
                 Card(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .padding(vertical = 4.dp)
+                        .padding(horizontal = 16.dp, vertical = 6.dp)
                         .combinedClickable(
                             onClick = { onViewResource(res) },
                             onLongClick = { showMenu = true }
                         ),
-                    colors = CardDefaults.cardColors(containerColor = style.surfaceColor)
+                    shape = RoundedCornerShape(20.dp),
+                    colors = CardDefaults.cardColors(containerColor = Color.Transparent),
+                    border = BorderStroke(1.5.dp, accentColor.copy(alpha = 0.3f))
                 ) {
-                    Box(modifier = Modifier.fillMaxWidth()) {
+                    Box(modifier = Modifier.fillMaxWidth().height(IntrinsicSize.Min)) {
                         Row(modifier = Modifier.padding(16.dp), verticalAlignment = Alignment.CenterVertically) {
+                            // Vertical Accent Bar
+                            Box(modifier = Modifier.width(4.dp).fillMaxHeight().clip(CircleShape).background(accentColor.copy(alpha = 0.8f)))
+                            
+                            Spacer(modifier = Modifier.width(12.dp))
+                            
                             Surface(color = Color.White.copy(alpha = 0.1f), shape = RoundedCornerShape(8.dp), modifier = Modifier.size(32.dp)) {
                                 Box(contentAlignment = Alignment.Center) { Text("${index + 1}", color = Color.White, fontSize = 12.sp, fontWeight = FontWeight.Bold) }
                             }
                             Spacer(modifier = Modifier.width(16.dp))
                             Column(modifier = Modifier.weight(1f)) {
-                                Text(text = res.title, color = Color.White, fontWeight = FontWeight.Bold, fontSize = 16.sp)
+                                Text(
+                                    text = res.title, 
+                                    color = Color.White, 
+                                    fontWeight = FontWeight.Bold, 
+                                    fontSize = 20.sp,
+                                    maxLines = 1,
+                                    overflow = TextOverflow.Ellipsis
+                                )
                                 Text(text = res.type, color = Color.White.copy(alpha = 0.4f), fontSize = 10.sp)
                             }
                         }

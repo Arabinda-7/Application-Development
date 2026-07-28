@@ -26,7 +26,7 @@ class PersonalLedgerBookActivity : BaseActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        setContentView(R.layout.activity_person_ledger)
+        setContentView(R.layout.activity_personal_book)
 
         val ledgerId = intent.getStringExtra("ledgerId") ?: ""
         ledger = DataManager.personalLedgers.find { it.id == ledgerId } ?: run { finish(); return }
@@ -213,21 +213,17 @@ class PersonalLedgerBookActivity : BaseActivity() {
 
     private fun showAddEntryDialog(existingEntry: PersonalLedgerEntry? = null) {
         val dialog = Dialog(this)
-        dialog.setContentView(R.layout.dialog_add_ledger)
+        dialog.setContentView(R.layout.dialog_add_ledger_person)
         dialog.window?.setBackgroundDrawableResource(android.R.color.transparent)
         dialog.window?.setLayout(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT)
 
         val etAmount = dialog.findViewById<EditText>(R.id.et_ledger_amount)
-        val etName = dialog.findViewById<EditText>(R.id.et_person_name)
         val etNote = dialog.findViewById<EditText>(R.id.et_ledger_note)
         val tvDueDate = dialog.findViewById<TextView>(R.id.tv_ledger_due_date)
         val rgType = dialog.findViewById<RadioGroup>(R.id.rg_ledger_type)
         val btnSave = dialog.findViewById<TextView>(R.id.btn_save_ledger)
         val btnClose = dialog.findViewById<View>(R.id.btn_close_ledger)
         val tvTitle = dialog.findViewById<TextView>(R.id.tv_dialog_title)
-
-        dialog.findViewById<View>(R.id.tv_person_label).visibility = View.GONE
-        etName.visibility = View.GONE
 
         if (existingEntry != null) {
             tvTitle.text = "Edit Entry"
@@ -266,7 +262,7 @@ class PersonalLedgerBookActivity : BaseActivity() {
     }
 
     private fun showConfirmationDialog(title: String, message: String, positiveButtonText: String = "PROCEED", onConfirm: () -> Unit) {
-        val dialog = Dialog(this); dialog.setContentView(R.layout.dialog_confirmation)
+        val dialog = Dialog(this); dialog.setContentView(R.layout.dialog_confirm_ledger)
         dialog.window?.setBackgroundDrawableResource(android.R.color.transparent)
         dialog.window?.setLayout(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT)
         val tvTitle = dialog.findViewById<TextView>(R.id.tv_confirm_title)
@@ -337,7 +333,7 @@ class PersonalLedgerBookActivity : BaseActivity() {
 
         private fun showEntryMenu(anchor: View, entry: PersonalLedgerEntry) {
             val inflater = LayoutInflater.from(this@PersonalLedgerBookActivity)
-            val menuView = inflater.inflate(R.layout.layout_custom_menu, null)
+            val menuView = inflater.inflate(R.layout.menu_ledger_item, null)
             val popupWindow = PopupWindow(menuView, ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT, true)
             popupWindow.elevation = 20f
 

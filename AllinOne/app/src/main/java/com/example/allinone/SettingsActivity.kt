@@ -28,12 +28,13 @@ class SettingsActivity : BaseActivity() {
 
     private val exportLauncher = registerForActivityResult(ActivityResultContracts.CreateDocument("application/json")) { uri ->
         uri?.let {
-            lifecycleScope.launch {
-                try {
-                    val json = DataManager.exportData(this@SettingsActivity)
-                    contentResolver.openOutputStream(it)?.use { it.write(json.toByteArray()) }
-                    Toast.makeText(this@SettingsActivity, "Backup Saved", Toast.LENGTH_SHORT).show()
-                } catch (e: Exception) { Toast.makeText(this@SettingsActivity, "Export Failed", Toast.LENGTH_SHORT).show() }
+            backupHandler.getExportedJson { json ->
+                lifecycleScope.launch {
+                    try {
+                        contentResolver.openOutputStream(it)?.use { it.write(json.toByteArray()) }
+                        Toast.makeText(this@SettingsActivity, "Backup Saved", Toast.LENGTH_SHORT).show()
+                    } catch (e: Exception) { Toast.makeText(this@SettingsActivity, "Export Failed", Toast.LENGTH_SHORT).show() }
+                }
             }
         }
     }
@@ -56,7 +57,14 @@ class SettingsActivity : BaseActivity() {
         initHandlers()
         setupLogic()
 
-        if (viewModel.currentPath == "HUB") hubSection.setup() else showSectionSettings(viewModel.currentPath)
+        if (viewModel.currentPath == "HUB") showHub() else showSectionSettings(viewModel.currentPath)
+    }
+
+    private fun showHub() {
+        viewModel.currentPath = "HUB"
+        findViewById<TextView>(R.id.tv_title).text = "APP SETTINGS"
+        hubSection.updateMiniProfileUI()
+        hubSection.showHub()
     }
 
     private fun initHandlers() {
@@ -78,7 +86,7 @@ class SettingsActivity : BaseActivity() {
         when (viewModel.currentPath) {
             "HUB" -> finish()
             "APPEARANCE_ICONS", "APPEARANCE_COLORS", "APPEARANCE_ADD_FEATURE", "APPEARANCE_COLOR", "APPEARANCE_ICON" -> showSectionSettings("APPEARANCE")
-            else -> hubSection.showHub().also { viewModel.currentPath = "HUB" }
+            else -> showHub()
         }
     }
 
@@ -96,20 +104,96 @@ class SettingsActivity : BaseActivity() {
                 })
                 if (DataManager.isAppLockEnabled && DataManager.appLockPin != null) {
                     settings.add(ConfigItem("Change PIN", "Update security code") { startActivity(Intent(this, LockActivity::class.java).apply { putExtra(LockActivity.EXTRA_MODE, LockActivity.MODE_CHANGE) }) })
+                    settings.add(ConfigItem("Biometric Unlock", "Use Fingerprint/Face", isToggle = true, isChecked = DataManager.isBiometricLockEnabled) {
+                        DataManager.isBiometricLockEnabled = !DataManager.isBiometricLockEnabled
+                        DataManager.saveData(this)
+                        showSectionSettings("SECURITY")
+                    })
                 }
+                settings.add(ConfigItem("Screen Protection", "Block screenshots & recording", isToggle = true, isChecked = DataManager.isScreenshotProtectionEnabled) {
+                    DataManager.isScreenshotProtectionEnabled = !DataManager.isScreenshotProtectionEnabled
+                    DataManager.saveData(this)
+                    SecurityManager.setScreenshotProtection(this, DataManager.isScreenshotProtectionEnabled)
+                    showSectionSettings("SECURITY")
+                })
                 settings.add(ConfigItem("OLED Mode", "Pure black theme", isToggle = true, isChecked = DataManager.isOledThemeEnabled) { DataManager.isOledThemeEnabled = !DataManager.isOledThemeEnabled; DataManager.saveData(this) })
             }
             "OTHERS" -> {
+                settings.add(ConfigItem("Disable App Internet", "App will not use any network data", isToggle = true, isChecked = DataManager.isAppInternetRestricted) {
+                    if (DataManager.isAppInternetRestricted) {
+                        // User trying to TURN OFF restriction (Enable internet)
+                        showPrivacyWarningDialog {
+                            DataManager.isAppInternetRestricted = false
+                            DataManager.saveData(this)
+                            showSectionSettings("OTHERS")
+                        }
+                    } else {
+                        // User trying to TURN ON restriction (Disable internet)
+                        DataManager.isAppInternetRestricted = true
+                        DataManager.saveData(this)
+                        showSectionSettings("OTHERS")
+                    }
+                })
+                settings.add(ConfigItem("Home Page Sections", "Customize dashboard visibility") { showHomePageSectionsDialog() })
                 settings.add(ConfigItem("Startup Loading Time", "Current: ${DataManager.startupLoadingTime/1000.0}s") { showLoadingTimeSliderDialog() })
                 settings.add(ConfigItem("Export Backup", "Save to JSON") { backupHandler.exportBackup() })
                 settings.add(ConfigItem("Import Backup", "Restore from JSON") { backupHandler.importBackup() })
             }
             "APPEARANCE" -> {
+                settings.add(ConfigItem("Global Scaling", isHeader = true))
+                settings.add(ConfigItem("Follow System Settings", "Sync display and font size with phone", isToggle = true, isChecked = DataManager.isSystemAppearanceEnabled) {
+                    DataManager.isSystemAppearanceEnabled = !DataManager.isSystemAppearanceEnabled
+                    DataManager.saveData(this)
+                    recreate()
+                })
+                settings.add(ConfigItem("Current Focus Size", "Circle scale for mood logging (Current: ${DataManager.homeFocusSize})", options = listOf("S", "M", "L", "XL"), selectedIndex = listOf("S", "M", "L", "XL").indexOf(DataManager.homeFocusSize), onOptionSelected = { i ->
+                    DataManager.homeFocusSize = listOf("S", "M", "L", "XL")[i]
+                    DataManager.saveData(this)
+                    showSectionSettings("APPEARANCE")
+                }))
+                settings.add(ConfigItem("Global Display Size", "Icons and margins for all sub-sections (Current: ${DataManager.displaySize})", options = listOf("S", "M", "L", "XL"), selectedIndex = listOf("S", "M", "L", "XL").indexOf(DataManager.displaySize), onOptionSelected = { i ->
+                    DataManager.displaySize = listOf("S", "M", "L", "XL")[i]
+                    DataManager.saveData(this)
+                    showSectionSettings("APPEARANCE")
+                }))
+                settings.add(ConfigItem("Home Page Display Size", "Dedicated scale for the main dashboard (Current: ${DataManager.homeDisplaySize})", options = listOf("S", "M", "L", "XL"), selectedIndex = listOf("S", "M", "L", "XL").indexOf(DataManager.homeDisplaySize), onOptionSelected = { i ->
+                    DataManager.homeDisplaySize = listOf("S", "M", "L", "XL")[i]
+                    DataManager.saveData(this)
+                    showSectionSettings("APPEARANCE")
+                }))
+                settings.add(ConfigItem("Text Font Size", "Scaling for titles and content (Current: ${DataManager.fontSize})", options = listOf("XS", "S", "M", "L", "XL"), selectedIndex = listOf("XS", "S", "M", "L", "XL").indexOf(DataManager.fontSize), onOptionSelected = { i ->
+                    DataManager.fontSize = listOf("XS", "S", "M", "L", "XL")[i]
+                    DataManager.saveData(this)
+                    showSectionSettings("APPEARANCE")
+                }))
+
+                settings.add(ConfigItem("Advanced Look & Feel", isHeader = true))
+                settings.add(ConfigItem("Theme Mode", "Override system theme (Current: ${DataManager.appThemeMode})", options = listOf("LIGHT", "DARK", "OLED"), selectedIndex = listOf("LIGHT", "DARK", "OLED").indexOf(DataManager.appThemeMode), onOptionSelected = { i ->
+                    DataManager.appThemeMode = listOf("LIGHT", "DARK", "OLED")[i]
+                    DataManager.saveData(this)
+                    recreate()
+                }))
+                settings.add(ConfigItem("Accent Color", "Custom highlights app-wide") { appearanceHandler.showColorPickerDialog("APP_ACCENT") { showSectionSettings("APPEARANCE") } })
+                settings.add(ConfigItem("Border Radius", "Curvature for cards and buttons (Current: ${DataManager.appBorderRadius}dp)") { appearanceHandler.showBorderRadiusSliderDialog() })
+                settings.add(ConfigItem("Card Style", "Surface appearance (Current: ${DataManager.appCardStyle})", options = listOf("GLASS", "MATERIAL", "FLAT"), selectedIndex = listOf("GLASS", "MATERIAL", "FLAT").indexOf(DataManager.appCardStyle), onOptionSelected = { i ->
+                    DataManager.appCardStyle = listOf("GLASS", "MATERIAL", "FLAT")[i]
+                    DataManager.saveData(this)
+                    showSectionSettings("APPEARANCE")
+                }))
+                settings.add(ConfigItem("Font Family", "Change typography style (Current: ${DataManager.appFontFamily})", options = listOf("DEFAULT", "SERIF", "SANS_SERIF", "MONOSPACE"), selectedIndex = listOf("DEFAULT", "SERIF", "SANS_SERIF", "MONOSPACE").indexOf(DataManager.appFontFamily), onOptionSelected = { i ->
+                    DataManager.appFontFamily = listOf("DEFAULT", "SERIF", "SANS_SERIF", "MONOSPACE")[i]
+                    DataManager.saveData(this)
+                    showSectionSettings("APPEARANCE")
+                }))
+                settings.add(ConfigItem("Show Shadows", "Toggle UI depth and elevation", isToggle = true, isChecked = DataManager.appShowShadows) {
+                    DataManager.appShowShadows = !DataManager.appShowShadows
+                    DataManager.saveData(this)
+                    showSectionSettings("APPEARANCE")
+                })
+
+                settings.add(ConfigItem("Legacy Settings", isHeader = true))
                 settings.add(ConfigItem("Section Icons", "Manage icons") { showSectionSettings("APPEARANCE_ICONS") })
                 settings.add(ConfigItem("Section Colors", "Manage colors") { showSectionSettings("APPEARANCE_COLORS") })
-                settings.add(ConfigItem("Accent Color", "Custom highlights") { appearanceHandler.showColorPickerDialog("APP_ACCENT") { showSectionSettings("APPEARANCE") } })
-                settings.add(ConfigItem("Border Radius", "Curvature: ${DataManager.appBorderRadius}dp") { appearanceHandler.showBorderRadiusSliderDialog() })
-                settings.add(ConfigItem("Theme Mode", "LIGHT/DARK/OLED", options = listOf("LIGHT", "DARK", "OLED"), selectedIndex = listOf("LIGHT", "DARK", "OLED").indexOf(DataManager.appThemeMode), onOptionSelected = { i -> DataManager.appThemeMode = listOf("LIGHT", "DARK", "OLED")[i]; DataManager.saveData(this); recreate() }))
             }
             "APPEARANCE_ICONS" -> {
                 listOf("HABIT", "WORKOUT", "TASK", "PROJECT", "NOTE", "FINANCE").forEach { settings.add(ConfigItem("$it Icon", "Change default") { appearanceHandler.showIconPickerDialog(it, section) { showSectionSettings("APPEARANCE_ICONS") } }) }
@@ -123,6 +207,62 @@ class SettingsActivity : BaseActivity() {
             }
         }
         findViewById<RecyclerView>(R.id.settings_list).adapter = ConfigAdapter(settings) { DataManager.saveData(this) }
+    }
+
+    private fun showHomePageSectionsDialog() {
+        val d = Dialog(this)
+        d.setContentView(R.layout.dialog_manage_sections)
+        d.window?.setBackgroundDrawableResource(android.R.color.transparent)
+        d.window?.setLayout(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT)
+
+        val container = d.findViewById<LinearLayout>(R.id.container_section_switches)
+        val sections = listOf(
+            "Habits" to { DataManager.showHabitSection } to { v: Boolean -> DataManager.showHabitSection = v },
+            "Workouts" to { DataManager.showWorkoutSection } to { v: Boolean -> DataManager.showWorkoutSection = v },
+            "Tasks" to { DataManager.showTaskSection } to { v: Boolean -> DataManager.showTaskSection = v },
+            "Notes" to { DataManager.showNoteSection } to { v: Boolean -> DataManager.showNoteSection = v },
+            "Projects" to { DataManager.showProjectSection } to { v: Boolean -> DataManager.showProjectSection = v },
+            "Finance" to { DataManager.showFinanceSection } to { v: Boolean -> DataManager.showFinanceSection = v }
+        )
+
+        sections.forEach { pair ->
+            val name = pair.first.first
+            val getter = pair.first.second
+            val setter = pair.second
+
+            val row = LayoutInflater.from(this).inflate(R.layout.item_manage_section_row, container, false)
+            row.findViewById<TextView>(R.id.tv_section_name).text = name
+            val sw = row.findViewById<androidx.appcompat.widget.SwitchCompat>(R.id.sw_section_toggle)
+            sw.isChecked = getter()
+            sw.setOnCheckedChangeListener { _, isChecked -> setter(isChecked) }
+            container.addView(row)
+        }
+
+        d.findViewById<View>(R.id.btn_save_sections).setOnClickListener {
+            DataManager.saveData(this)
+            d.dismiss()
+        }
+        d.show()
+    }
+
+    private fun showPrivacyWarningDialog(onConfirm: () -> Unit) {
+        val d = Dialog(this)
+        d.setContentView(R.layout.dialog_confirmation)
+        d.window?.setBackgroundDrawableResource(android.R.color.transparent)
+        d.window?.setLayout(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT)
+
+        d.findViewById<TextView>(R.id.tv_confirm_title).text = "PRIVACY WARNING"
+        d.findViewById<TextView>(R.id.tv_confirm_message).text = "Disabling this will allow the app to access the internet. This could potentially compromise your privacy. Are you sure?"
+        d.findViewById<TextView>(R.id.btn_confirm_positive).text = "ALLOW"
+        d.findViewById<TextView>(R.id.btn_confirm_positive).setOnClickListener {
+            onConfirm()
+            d.dismiss()
+        }
+        d.findViewById<TextView>(R.id.btn_confirm_negative).setOnClickListener {
+            d.dismiss()
+            showSectionSettings("OTHERS") // Refresh to ensure toggle stays ON
+        }
+        d.show()
     }
 
     private fun showLoadingTimeSliderDialog() {
@@ -143,7 +283,7 @@ class SettingsActivity : BaseActivity() {
     }
 
     private fun showAvatarOptionsDialog() {
-        val d = Dialog(this); d.setContentView(R.layout.dialog_manage_categories_appearance)
+        val d = Dialog(this); d.setContentView(R.layout.dialog_manage_cat_settings)
         d.window?.setBackgroundDrawableResource(android.R.color.transparent)
         val container = d.findViewById<LinearLayout>(R.id.categories_container)
         d.findViewById<TextView>(R.id.tv_categories_title).text = "SELECT AVATAR"

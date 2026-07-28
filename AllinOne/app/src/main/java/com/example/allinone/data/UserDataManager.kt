@@ -33,9 +33,13 @@ object UserDataManager {
     var showNoteSection: Boolean = true
     var showProjectSection: Boolean = true
     var showFinanceSection: Boolean = true
+    var showPerformanceSection: Boolean = true
     
+    var isAppInternetRestricted: Boolean = true
     var isOnboardingCompleted: Boolean = false
     var isAppLockEnabled: Boolean = false
+    var isBiometricLockEnabled: Boolean = false
+    var isScreenshotProtectionEnabled: Boolean = false
     var isAppUnlocked: Boolean = false
     var appLockPin: String? = null
     var appLockQuestion: String? = null

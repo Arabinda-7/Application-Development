@@ -12,8 +12,11 @@ import androidx.compose.material.icons.filled.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.graphicsLayer
+import androidx.compose.ui.util.lerp
 import com.example.allinone.onboarding.*
 import kotlinx.coroutines.launch
+import kotlin.math.absoluteValue
 
 class OnboardingActivity : BaseActivity() {
 
@@ -33,50 +36,106 @@ class OnboardingActivity : BaseActivity() {
 
         val sections = remember {
             listOf(
-                OnboardingSection("HABITS", "Habit Tracker", "Daily rituals and streaks", Icons.Default.SelfImprovement, mutableStateOf(true), listOf(SubFeatureConfig("streaks", "Streaks", mutableStateOf(true)), SubFeatureConfig("aura", "Aura Themes", mutableStateOf(true)))),
-                OnboardingSection("WORKOUTS", "Workouts", "Fitness and progression", Icons.Default.FitnessCenter, mutableStateOf(true), listOf(SubFeatureConfig("timer", "Timer", mutableStateOf(true)), SubFeatureConfig("muscle", "Muscle Balance", mutableStateOf(true)))),
-                OnboardingSection("TASKS", "To-Do List", "Tasks and prioritization", Icons.Default.Checklist, mutableStateOf(true), listOf(SubFeatureConfig("reminders", "Reminders", mutableStateOf(true)))),
-                OnboardingSection("NOTES", "Notes", "Writing and templates", Icons.Default.Description, mutableStateOf(true), listOf(SubFeatureConfig("voice", "Voice Input", mutableStateOf(true)))),
+                OnboardingSection("HABITS", "Habit Tracker", "Daily rituals and streaks", Icons.Default.SelfImprovement, mutableStateOf(true), emptyList()),
+                OnboardingSection("WORKOUTS", "Workouts", "Fitness and progression", Icons.Default.FitnessCenter, mutableStateOf(true), emptyList()),
+                OnboardingSection("TASKS", "To-Do List", "Tasks and prioritization", Icons.Default.Checklist, mutableStateOf(true), listOf(SubFeatureConfig("list", "Tasks List", mutableStateOf(true)))),
+                OnboardingSection("NOTES", "Notes", "Writing and templates", Icons.Default.Description, mutableStateOf(true), listOf(
+                    SubFeatureConfig("daily", "Daily Logs", mutableStateOf(false)),
+                    SubFeatureConfig("questions", "Questions", mutableStateOf(false)),
+                    SubFeatureConfig("stories", "Stories", mutableStateOf(false))
+                )),
                 OnboardingSection("PROJECTS", "Projects", "Roadmaps and milestones", Icons.Default.AccountTree, mutableStateOf(true), listOf(SubFeatureConfig("ideas", "Ideas", mutableStateOf(true)))),
-                OnboardingSection("FINANCE", "Finance", "Budget and savings", Icons.Default.AccountBalanceWallet, mutableStateOf(true), listOf(SubFeatureConfig("heatmap", "Heatmaps", mutableStateOf(true))))
+                OnboardingSection("FINANCE", "Finance", "Budget and savings", Icons.Default.AccountBalanceWallet, mutableStateOf(true), emptyList())
             )
         }
 
-        val pages = remember(sections.map { it.isEnabled.value }) {
-            val list = mutableListOf(OnboardingPageType.OVERVIEW, OnboardingPageType.PROFILE, OnboardingPageType.GLOBAL_HUB)
-            sections.forEach { if (it.isEnabled.value) list.add(OnboardingPageType.FEATURE_DEEP_DIVE) }
-            list.add(OnboardingPageType.ACTIVATION)
+        val isNameFilled = userName.value.isNotBlank()
+
+        val pages = remember(sections.map { it.isEnabled.value }, isNameFilled) {
+            val list = mutableListOf(OnboardingPageType.OVERVIEW, OnboardingPageType.PROFILE)
+            
+            // Only add subsequent pages if name is filled
+            if (isNameFilled) {
+                list.add(OnboardingPageType.GLOBAL_HUB)
+                sections.forEach { if (it.isEnabled.value) list.add(OnboardingPageType.FEATURE_DEEP_DIVE) }
+                list.add(OnboardingPageType.ACTIVATION)
+            }
             list
         }
 
         val pagerState = rememberPagerState(pageCount = { pages.size })
+        val profilePageIndex = pages.indexOf(OnboardingPageType.PROFILE)
 
         Box(modifier = Modifier.fillMaxSize()) {
-            LiquidBackground(accentColor)
+            val scrollOffset = pagerState.currentPage + pagerState.currentPageOffsetFraction
+            LiquidBackground(accentColor, scrollOffset)
             
-            HorizontalPager(state = pagerState, modifier = Modifier.fillMaxSize(), userScrollEnabled = false) { index ->
+            HorizontalPager(
+                state = pagerState,
+                modifier = Modifier.fillMaxSize(),
+                userScrollEnabled = true
+            ) { index ->
                 val pageType = pages[index]
-                when (pageType) {
-                    OnboardingPageType.OVERVIEW -> OverviewPage(accentColor)
-                    OnboardingPageType.PROFILE -> ProfilePage(userName, selectedAvatar, selectedRoles, accentColor)
-                    OnboardingPageType.GLOBAL_HUB -> GlobalHubPage(sections, accentColor)
-                    OnboardingPageType.FEATURE_DEEP_DIVE -> {
-                        // Find which enabled section this deep dive corresponds to
-                        val hubIndex = pages.indexOf(OnboardingPageType.GLOBAL_HUB)
-                        val enabledSections = sections.filter { it.isEnabled.value }
-                        val sectionIndex = index - hubIndex - 1
-                        if (sectionIndex in enabledSections.indices) {
-                            FeatureDeepDivePage(enabledSections[sectionIndex], accentColor)
+                Box(modifier = Modifier.graphicsLayer {
+                    val pageOffset = (
+                            (pagerState.currentPage - index) + pagerState
+                                .currentPageOffsetFraction
+                            ).absoluteValue
+
+                    alpha = lerp(
+                        start = 0.4f,
+                        stop = 1f,
+                        fraction = 1f - pageOffset.coerceIn(0f, 1f)
+                    )
+                    
+                    val scale = lerp(
+                        start = 0.85f,
+                        stop = 1f,
+                        fraction = 1f - pageOffset.coerceIn(0f, 1f)
+                    )
+                    scaleX = scale
+                    scaleY = scale
+                }) {
+                    when (pageType) {
+                        OnboardingPageType.OVERVIEW -> OverviewPage(accentColor)
+                        OnboardingPageType.PROFILE -> ProfilePage(userName, selectedAvatar, selectedRoles, accentColor)
+                        OnboardingPageType.GLOBAL_HUB -> GlobalHubPage(sections, accentColor)
+                        OnboardingPageType.FEATURE_DEEP_DIVE -> {
+                            // Find which enabled section this deep dive corresponds to
+                            val hubIndex = pages.indexOf(OnboardingPageType.GLOBAL_HUB)
+                            val enabledSections = sections.filter { it.isEnabled.value }
+                            val sectionIndex = index - hubIndex - 1
+                            if (sectionIndex in enabledSections.indices) {
+                                FeatureDeepDivePage(enabledSections[sectionIndex], accentColor)
+                            }
                         }
+                        OnboardingPageType.ACTIVATION -> ActivationPage(accentColor)
                     }
-                    OnboardingPageType.ACTIVATION -> ActivationPage(accentColor)
                 }
             }
 
             Box(modifier = Modifier.fillMaxSize(), contentAlignment = androidx.compose.ui.Alignment.BottomCenter) {
-                OnboardingFooter(pagerState, accentColor, pagerState.currentPage == pages.size - 1) { current ->
-                    if (current < pages.size - 1) scope.launch { pagerState.animateScrollToPage(current + 1) }
-                    else completeOnboarding(userName.value, selectedAvatar.intValue, sections)
+                OnboardingFooter(
+                    pagerState = pagerState,
+                    accentColor = accentColor,
+                    isLastPage = pagerState.currentPage == pages.size - 1,
+                    isNextEnabled = if (pagerState.currentPage == profilePageIndex) isNameFilled else true,
+                    onDotClick = { target ->
+                        val canJump = target <= profilePageIndex || isNameFilled
+                        if (canJump) {
+                            scope.launch { pagerState.animateScrollToPage(target) }
+                        }
+                    }
+                ) { current ->
+                    if (current < pages.size - 1) {
+                        if (current == profilePageIndex && !isNameFilled) {
+                            // Validation failed, don't move
+                        } else {
+                            scope.launch { pagerState.animateScrollToPage(current + 1) }
+                        }
+                    } else {
+                        completeOnboarding(userName.value, selectedAvatar.intValue, sections)
+                    }
                 }
             }
         }
@@ -90,8 +149,28 @@ class OnboardingActivity : BaseActivity() {
                 "HABITS" -> DataManager.showHabitSection = section.isEnabled.value
                 "WORKOUTS" -> DataManager.showWorkoutSection = section.isEnabled.value
                 "TASKS" -> DataManager.showTaskSection = section.isEnabled.value
-                "NOTES" -> DataManager.showNoteSection = section.isEnabled.value
-                "PROJECTS" -> DataManager.showProjectSection = section.isEnabled.value
+                "NOTES" -> {
+                    DataManager.showNoteSection = section.isEnabled.value
+                    if (section.isEnabled.value) {
+                        val visibleSections = mutableListOf("Notes")
+                        section.subFeatures.forEach { sub ->
+                            when (sub.id) {
+                                "daily" -> if (sub.isEnabled.value) visibleSections.add("Daily")
+                                "questions" -> if (sub.isEnabled.value) visibleSections.add("Questions")
+                                "stories" -> if (sub.isEnabled.value) visibleSections.add("Stories")
+                            }
+                        }
+                        DataManager.noteVisibleSections = visibleSections
+                    }
+                }
+                "PROJECTS" -> {
+                    DataManager.showProjectSection = section.isEnabled.value
+                    if (section.isEnabled.value) {
+                        section.subFeatures.forEach { sub ->
+                            if (sub.id == "ideas") DataManager.projectIdeasEnabled = sub.isEnabled.value
+                        }
+                    }
+                }
                 "FINANCE" -> DataManager.showFinanceSection = section.isEnabled.value
             }
         }

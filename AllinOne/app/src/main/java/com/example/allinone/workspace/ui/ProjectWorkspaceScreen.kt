@@ -59,11 +59,13 @@ fun ProjectWorkspaceScreen(
     AnimatedContent(
         targetState = activeCreationPage,
         transitionSpec = {
-            val duration = 350
+            val duration = 300
             if (targetState != null) {
-                fadeIn(animationSpec = tween(duration)) + scaleIn(initialScale = 0.92f, animationSpec = tween(duration)) togetherWith fadeOut(animationSpec = tween(duration))
+                slideInHorizontally(animationSpec = tween(duration)) { it } + fadeIn(animationSpec = tween(duration)) togetherWith 
+                fadeOut(animationSpec = tween(duration))
             } else {
-                fadeIn(animationSpec = tween(duration)) togetherWith fadeOut(animationSpec = tween(duration)) + scaleOut(targetScale = 0.92f, animationSpec = tween(duration))
+                fadeIn(animationSpec = tween(duration)) togetherWith 
+                slideOutHorizontally(animationSpec = tween(duration)) { it } + fadeOut(animationSpec = tween(duration))
             }
         },
         label = "CreationPageTransition"
@@ -98,10 +100,37 @@ fun ProjectWorkspaceScreen(
                         )
                     }
             ) {
-                val projectColorHex = com.example.allinone.DataManager.globalProjectColor
-                val baseColor = if (projectColorHex != -1) Color(projectColorHex) else Color(0xFF1A73E8)
+                val targetColor = remember(uiState.selectedProject) {
+                    val projectColor = uiState.selectedProject?.color ?: -1
+                    val globalColor = com.example.allinone.DataManager.globalProjectColor
+                    if (projectColor != -1) Color(projectColor)
+                    else if (globalColor != -1) Color(globalColor)
+                    else Color(0xFF1A73E8)
+                }
                 
-                Box(modifier = Modifier.fillMaxWidth().height(350.dp).background(brush = Brush.verticalGradient(colors = listOf(baseColor.copy(alpha = 0.4f), style.backgroundColor))))
+                val baseColor by animateColorAsState(
+                    targetValue = targetColor,
+                    animationSpec = tween(300),
+                    label = "BaseColorAnimation"
+                )
+                
+                Box(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .height(450.dp)
+                        .background(
+                            brush = Brush.radialGradient(
+                                colors = listOf(
+                                    baseColor.copy(alpha = 0.35f),
+                                    baseColor.copy(alpha = 0.15f),
+                                    baseColor.copy(alpha = 0.05f),
+                                    Color.Transparent
+                                ),
+                                center = androidx.compose.ui.geometry.Offset(x = 500f, y = 0f),
+                                radius = 1400f
+                            )
+                        )
+                )
 
                 Scaffold(
                     containerColor = Color.Transparent,
@@ -133,25 +162,27 @@ fun ProjectWorkspaceScreen(
                     if (projectForStats != null) { ProjectStatsDialog(project = projectForStats!!, viewModel = viewModel, onDismiss = { projectForStats = null }) }
 
                     Column(modifier = Modifier.fillMaxSize().padding(padding).blur(blurRadius)) {
-                        Crossfade(targetState = uiState.isLoading, animationSpec = tween(500), label = "MainLoadingTransition") { loading ->
-                            if (loading && uiState.projects.isEmpty()) { Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) { CircularProgressIndicator(color = style.accentColor) } }
-                            else {
-                                Column(modifier = Modifier.fillMaxSize()) {
-                                    if (uiState.projects.isEmpty()) { NoProjectsScreen(onAddProject = { activeCreationPage = WorkspaceAction.AddProject }, onImportProject = { showImportDialog = true }, onTrySample = { viewModel.createSampleProject() }, onToggleMenu = { isSidebarExpanded = !isSidebarExpanded }, isSidebarExpanded = isSidebarExpanded, modifier = Modifier.statusBarsPadding()) }
-                                    else {
-                                        WorkspaceHeader(selectedProject = uiState.selectedProject, projects = uiState.projects, currentTab = currentTab, onProjectSelected = { viewModel.selectProject(it) }, onDeleteProject = { viewModel.deleteProject(it) }, onEditProject = { editingEntity = uiState.selectedProject; activeCreationPage = WorkspaceAction.EditProject }, onImportRequest = { showImportDialog = true }, isSidebarExpanded = isSidebarExpanded, onToggleMenu = { isSidebarExpanded = !isSidebarExpanded }, modifier = Modifier.statusBarsPadding())
-                                        Box(modifier = Modifier.weight(1f).padding(16.dp)) {
-                                            Column(modifier = Modifier.fillMaxSize()) {
-                                                Text(text = currentTab.title.uppercase(), color = Color.White, fontSize = 18.sp, fontWeight = FontWeight.Black, letterSpacing = 1.sp, modifier = Modifier.padding(bottom = 12.dp))
-                                                AnimatedContent(
-                                                    targetState = currentTab,
-                                                    transitionSpec = {
-                                                        val d = 300; val o = 30
-                                                        if (targetState.ordinal > initialState.ordinal) { fadeIn(tween(d)) + slideInHorizontally(tween(d)) { o } togetherWith fadeOut(tween(d)) + slideOutHorizontally(tween(d)) { -o } }
-                                                        else { fadeIn(tween(d)) + slideInHorizontally(tween(d)) { -o } togetherWith fadeOut(tween(d)) + slideOutHorizontally(tween(d)) { o } }
-                                                    },
-                                                    label = "TabTransition", modifier = Modifier.weight(1f)
-                                                ) { targetTab ->
+                        if (uiState.isLoading && uiState.projects.isEmpty()) { 
+                            Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) { 
+                                CircularProgressIndicator(color = style.accentColor) 
+                            } 
+                        } else {
+                            Column(modifier = Modifier.fillMaxSize()) {
+                                if (uiState.projects.isEmpty()) { 
+                                    NoProjectsScreen(onAddProject = { activeCreationPage = WorkspaceAction.AddProject }, onImportProject = { showImportDialog = true }, onTrySample = { viewModel.createSampleProject() }, onToggleMenu = { isSidebarExpanded = !isSidebarExpanded }, isSidebarExpanded = isSidebarExpanded, modifier = Modifier.statusBarsPadding()) 
+                                } else {
+                                    WorkspaceHeader(selectedProject = uiState.selectedProject, projects = uiState.projects, currentTab = currentTab, onProjectSelected = { viewModel.selectProject(it) }, onDeleteProject = { viewModel.deleteProject(it) }, onEditProject = { editingEntity = uiState.selectedProject; activeCreationPage = WorkspaceAction.EditProject }, onImportRequest = { showImportDialog = true }, isSidebarExpanded = isSidebarExpanded, onToggleMenu = { isSidebarExpanded = !isSidebarExpanded }, modifier = Modifier.statusBarsPadding())
+                                    Box(modifier = Modifier.weight(1f).padding(16.dp)) {
+                                        Column(modifier = Modifier.fillMaxSize()) {
+                                            Text(text = currentTab.title.uppercase(), color = Color.White, fontSize = 18.sp, fontWeight = FontWeight.Black, letterSpacing = 1.sp, modifier = Modifier.padding(bottom = 12.dp))
+                                            AnimatedContent(
+                                                targetState = currentTab,
+                                                transitionSpec = {
+                                                    val d = 250
+                                                    fadeIn(tween(d)) togetherWith fadeOut(tween(d))
+                                                },
+                                                label = "TabTransition", modifier = Modifier.weight(1f)
+                                            ) { targetTab ->
                                                     Box(modifier = Modifier.fillMaxSize()) {
                                                         when (targetTab) {
                                                             WorkspaceTab.Dashboard -> WorkspaceDashboard(state = uiState, viewModel = viewModel, onViewFeature = { editingEntity = it; activeCreationPage = WorkspaceAction.ViewFeature }, onEditFeature = { editingEntity = it; activeCreationPage = WorkspaceAction.EditFeature }, onViewBug = { editingEntity = it; activeCreationPage = WorkspaceAction.ViewBug }, onEditBug = { editingEntity = it; activeCreationPage = WorkspaceAction.EditBug }, onShowStats = { projectForStats = it }, isStatsShowing = projectForStats != null)
@@ -173,7 +204,6 @@ fun ProjectWorkspaceScreen(
                             }
                         }
                     }
-                }
                 WorkspaceSidebar(selectedTab = currentTab, onTabSelected = { currentTab = it; isSidebarExpanded = false }, onBack = onBack, isExpanded = isSidebarExpanded, onToggleExpand = { isSidebarExpanded = !isSidebarExpanded })
             }
         }

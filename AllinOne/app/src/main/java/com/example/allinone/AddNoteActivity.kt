@@ -105,7 +105,10 @@ class AddNoteActivity : BaseActivity() {
             colorPreview.backgroundTintList = android.content.res.ColorStateList.valueOf(selectedColor)
         }
 
-        findViewById<View>(R.id.btn_voice_input).setOnClickListener { startVoiceInput() }
+        findViewById<View>(R.id.btn_voice_input).apply {
+            visibility = if (DataManager.noteVoiceInputEnabled) View.VISIBLE else View.GONE
+            setOnClickListener { startVoiceInput() }
+        }
         findViewById<View>(R.id.btn_reminder).setOnClickListener { showReminderPicker(titleInput.text.toString()) }
 
         btnSave.setOnClickListener { saveNote() }

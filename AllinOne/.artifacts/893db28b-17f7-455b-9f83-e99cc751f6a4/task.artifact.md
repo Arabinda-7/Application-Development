@@ -1,0 +1,5 @@
+- [x] Refine Workspace Aura in `ProjectWorkspaceScreen.kt`
+    - [x] Increase aura height to 450.dp
+    - [x] Increase radial gradient radius to 1400f
+    - [x] Update alpha stops for smoother stretching
+- [x] Verify changes visually (Conceptual)

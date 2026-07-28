@@ -180,7 +180,7 @@ class TaskAdapter(
     private fun showCustomMenu(anchor: View, task: Task) {
         val context = anchor.context
         val inflater = LayoutInflater.from(context)
-        val menuView = inflater.inflate(R.layout.layout_custom_menu, null)
+        val menuView = inflater.inflate(R.layout.menu_task_item, null)
 
         val popupWindow = PopupWindow(menuView, ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT, true)
         popupWindow.elevation = 10f

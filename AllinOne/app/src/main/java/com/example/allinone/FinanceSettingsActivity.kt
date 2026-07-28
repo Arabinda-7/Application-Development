@@ -99,7 +99,7 @@ class FinanceSettingsActivity : BaseActivity() {
     }
 
     private fun showSetBudgetDialog() {
-        val dialog = Dialog(this); dialog.setContentView(R.layout.dialog_set_budget)
+        val dialog = Dialog(this); dialog.setContentView(R.layout.dialog_set_budget_finance)
         val et = dialog.findViewById<EditText>(R.id.et_budget_amount)
         et.setText(DataManager.monthlyBudget.toString())
         
@@ -113,7 +113,7 @@ class FinanceSettingsActivity : BaseActivity() {
     }
 
     private fun showSetSavingsGoalDialog() {
-        val dialog = Dialog(this); dialog.setContentView(R.layout.dialog_set_budget)
+        val dialog = Dialog(this); dialog.setContentView(R.layout.dialog_set_budget_finance)
         dialog.findViewById<TextView>(R.id.tv_settings_title).text = "Savings Goal"
         val et = dialog.findViewById<EditText>(R.id.et_budget_amount)
         et.setHint("Goal Amount...")

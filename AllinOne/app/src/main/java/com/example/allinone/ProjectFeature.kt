@@ -15,5 +15,6 @@ data class ProjectFeature(
     var dueDate: Long? = null,
     var weight: Int = 1,
     var priority: Int = 0, // 0: Low, 1: Med, 2: High
-    var hasReminder: Boolean = false
+    var hasReminder: Boolean = false,
+    val createdAt: Long = System.currentTimeMillis()
 )

@@ -37,12 +37,15 @@ class AddWorkoutActivity : BaseActivity() {
     private lateinit var btnSave: TextView
     private lateinit var iconPreview: ImageView
     private lateinit var colorPreview: View
-    private lateinit var headerAccent: View
     private lateinit var tvNameHint: TextView
     private lateinit var tvScheduleHint: TextView
     private lateinit var tvTargetHint: TextView
     private lateinit var tvGoalTitle: TextView
     private lateinit var chipGroup: ChipGroup
+
+    private lateinit var bgModeReps: View
+    private lateinit var bgModeSets: View
+    private lateinit var bgModeTimer: View
 
     private lateinit var layoutRepsGoal: View
     private lateinit var layoutSetsGoal: View
@@ -101,11 +104,14 @@ class AddWorkoutActivity : BaseActivity() {
         btnSave = findViewById(R.id.btn_save_workout)
         iconPreview = findViewById(R.id.icon_preview_workout)
         colorPreview = findViewById(R.id.color_preview_workout)
-        headerAccent = findViewById(R.id.header_bg_accent_workout)
         tvNameHint = findViewById(R.id.tv_name_hint_workout)
         tvScheduleHint = findViewById(R.id.tv_schedule_hint_workout)
         tvTargetHint = findViewById(R.id.tv_target_hint_workout)
         tvGoalTitle = findViewById(R.id.tv_goal_title)
+        
+        bgModeReps = findViewById(R.id.bg_mode_reps)
+        bgModeSets = findViewById(R.id.bg_mode_sets)
+        bgModeTimer = findViewById(R.id.bg_mode_timer)
         
         findViewById<View>(R.id.btn_close_workout).setOnClickListener { finish() }
     }
@@ -146,8 +152,8 @@ class AddWorkoutActivity : BaseActivity() {
         fun refreshDayButtons() {
             dayViews.forEachIndexed { index, tv ->
                 val isSelected = tempRepeatDays.contains(index)
-                tv.backgroundTintList = ColorStateList.valueOf(if (isSelected) ContextCompat.getColor(this, R.color.chip_selected) else Color.parseColor("#1AFFFFFF"))
-                tv.alpha = if (isSelected) 1.0f else 0.5f
+                tv.isSelected = isSelected
+                tv.alpha = if (isSelected) 1.0f else 0.7f
             }
             validateInputs()
         }
@@ -172,13 +178,10 @@ class AddWorkoutActivity : BaseActivity() {
         )
 
         fun refreshModeCards() {
-            modeCards.forEach { (mode, card) ->
-                val isActive = mode == selectedMode
-                if (card is com.google.android.material.card.MaterialCardView) {
-                    card.setCardBackgroundColor(if (isActive) ContextCompat.getColor(this, R.color.chip_selected) else Color.parseColor("#1AFFFFFF"))
-                }
-                card.alpha = if (isActive) 1.0f else 0.6f
-            }
+            bgModeReps.visibility = if (selectedMode == "Reps") View.VISIBLE else View.GONE
+            bgModeSets.visibility = if (selectedMode == "Sets") View.VISIBLE else View.GONE
+            bgModeTimer.visibility = if (selectedMode == "Timer") View.VISIBLE else View.GONE
+
             layoutRepsGoal.visibility = if (selectedMode == "Reps") View.VISIBLE else View.GONE
             layoutSetsGoal.visibility = if (selectedMode == "Sets") View.VISIBLE else View.GONE
             layoutTimerGoal.visibility = if (selectedMode == "Timer") View.VISIBLE else View.GONE
@@ -199,20 +202,54 @@ class AddWorkoutActivity : BaseActivity() {
             freqCards.forEach { (type, card) ->
                 val isActive = type == selectedFrequency
                 if (card is com.google.android.material.card.MaterialCardView) {
-                    card.setCardBackgroundColor(if (isActive) ContextCompat.getColor(this, R.color.chip_selected) else Color.parseColor("#1AFFFFFF"))
+                    card.strokeColor = if (isActive) ContextCompat.getColor(this, R.color.gradient_blue_end) else ContextCompat.getColor(this, R.color.card_border)
+                    card.strokeWidth = if (isActive) (2 * resources.displayMetrics.density).toInt() else (1 * resources.displayMetrics.density).toInt()
                 }
-                card.alpha = if (isActive) 1.0f else 0.6f
+                card.alpha = if (isActive) 1.0f else 0.7f
             }
         }
         refreshFreqCards()
         freqCards.forEach { (type, card) -> card.setOnClickListener { selectedFrequency = type; refreshFreqCards() } }
 
         // Muscle Chips
+        chipGroup.removeAllViews()
+        val chipStates = arrayOf(
+            intArrayOf(android.R.attr.state_checked),
+            intArrayOf(-android.R.attr.state_checked)
+        )
+        
+        val strokeColor = ColorStateList(
+            chipStates,
+            intArrayOf(
+                ContextCompat.getColor(this, R.color.gradient_blue_end),
+                ContextCompat.getColor(this, R.color.card_border)
+            )
+        )
+        
+        val bgColor = ColorStateList(
+            chipStates,
+            intArrayOf(
+                Color.parseColor("#1E293B"),
+                Color.parseColor("#0F172A")
+            )
+        )
+
         DataManager.workoutMuscleGroups.forEach { group ->
             val chip = com.google.android.material.chip.Chip(this)
-            chip.text = group; chip.isCheckable = true; chip.isChecked = selectedMuscleGroups.contains(group)
-            chip.setChipBackgroundColorResource(R.color.chip_background); chip.setTextColor(Color.WHITE)
-            chip.setCheckedIconVisible(true); chip.setCheckedIconTintResource(R.color.white)
+            chip.text = group
+            chip.isCheckable = true
+            chip.isChecked = selectedMuscleGroups.contains(group)
+            
+            chip.chipBackgroundColor = bgColor
+            chip.chipStrokeColor = strokeColor
+            chip.chipStrokeWidth = resources.displayMetrics.density * 1.5f
+            chip.setTextColor(Color.WHITE)
+            chip.rippleColor = ColorStateList.valueOf(Color.parseColor("#22FFFFFF"))
+            
+            chip.chipStartPadding = 12f * resources.displayMetrics.density
+            chip.chipEndPadding = 12f * resources.displayMetrics.density
+            
+            chip.setCheckedIconVisible(false)
             chip.setOnCheckedChangeListener { _, isChecked -> 
                 if (isChecked) { if (!selectedMuscleGroups.contains(group)) selectedMuscleGroups.add(group) } 
                 else { selectedMuscleGroups.remove(group) } 
@@ -308,13 +345,9 @@ class AddWorkoutActivity : BaseActivity() {
     }
 
     private fun updateThemeVisuals() {
-        iconPreview.backgroundTintList = ColorStateList.valueOf(selectedColor)
         colorPreview.backgroundTintList = ColorStateList.valueOf(selectedColor)
-        headerAccent.backgroundTintList = ColorStateList.valueOf(selectedColor)
-        if (btnSave.isEnabled) btnSave.setTextColor(selectedColor) else btnSave.setTextColor(Color.GRAY)
-        tvNameHint.setTextColor(selectedColor)
-        tvScheduleHint.setTextColor(selectedColor)
-        tvTargetHint.setTextColor(selectedColor)
+        if (btnSave.isEnabled) btnSave.setTextColor(ContextCompat.getColor(this, R.color.primary_blue)) else btnSave.setTextColor(Color.GRAY)
+        tvNameHint.setTextColor(Color.GRAY)
     }
 
     private fun startPulseAnimation(view: View) {
@@ -352,7 +385,7 @@ class AddWorkoutActivity : BaseActivity() {
         )
         
         val dialog = Dialog(this)
-        dialog.setContentView(R.layout.dialog_premium_icon_picker)
+        dialog.setContentView(R.layout.dialog_icon_picker_workout)
         dialog.window?.setBackgroundDrawableResource(android.R.color.transparent)
         dialog.window?.setLayout(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT)
 

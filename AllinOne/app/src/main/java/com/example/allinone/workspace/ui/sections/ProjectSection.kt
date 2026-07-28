@@ -1,5 +1,6 @@
 package com.example.allinone.workspace.ui.sections
 
+import android.widget.Toast
 import androidx.compose.foundation.*
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.CircleShape
@@ -14,6 +15,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.SolidColor
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
@@ -29,6 +31,7 @@ fun ProjectAddEditSection(
     onBack: () -> Unit
 ) {
     val style = LocalAppStyle.current
+    val context = LocalContext.current
     
     var title by remember(project) { mutableStateOf(project?.name ?: "") }
     var description by remember(project) { mutableStateOf(project?.description ?: "") }
@@ -50,6 +53,14 @@ fun ProjectAddEditSection(
                 IconButton(onClick = onBack) { Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Back", tint = Color.White) }
                 TextButton(
                     onClick = {
+                        if (status == "Completed" && project != null) {
+                            val (canComplete, message) = viewModel.canCompleteProject(project.id)
+                            if (!canComplete) {
+                                Toast.makeText(context, message, Toast.LENGTH_LONG).show()
+                                return@TextButton
+                            }
+                        }
+
                         if (project == null) {
                             viewModel.addProject(title, description, colorInt, "")
                         } else {
@@ -96,7 +107,18 @@ fun ProjectAddEditSection(
                     listOf("Active", "Completed", "Archived").forEach { s ->
                         val isSel = status == s
                         Surface(
-                            onClick = { status = s },
+                            onClick = {
+                                if (s == "Completed" && project != null) {
+                                    val (canComplete, message) = viewModel.canCompleteProject(project.id)
+                                    if (!canComplete) {
+                                        Toast.makeText(context, message, Toast.LENGTH_SHORT).show()
+                                    } else {
+                                        status = s
+                                    }
+                                } else {
+                                    status = s
+                                }
+                            },
                             color = if (isSel) dynamicAccentColor else Color.White.copy(alpha = 0.05f),
                             shape = RoundedCornerShape(8.dp),
                             modifier = Modifier.weight(1f).height(40.dp)

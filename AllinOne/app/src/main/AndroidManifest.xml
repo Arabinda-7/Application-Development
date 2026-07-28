@@ -6,6 +6,7 @@
     <uses-permission android:name="android.permission.SCHEDULE_EXACT_ALARM" />
     <uses-permission android:name="android.permission.USE_EXACT_ALARM" />
     <uses-permission android:name="android.permission.VIBRATE" />
+    <uses-permission android:name="android.permission.INTERNET" />
 
     <application
         android:name=".AllInOneApplication"
@@ -52,6 +53,8 @@
         <activity android:name=".AddWorkoutActivity" android:windowSoftInputMode="adjustResize" />
         <activity android:name=".AddNoteActivity" android:windowSoftInputMode="adjustResize" />
         <activity android:name=".AddProjectActivity" android:windowSoftInputMode="adjustResize" />
+        <activity android:name=".ViewProjectActivity" android:windowSoftInputMode="adjustResize" />
+        <activity android:name=".EditProjectActivity" android:windowSoftInputMode="adjustResize" />
         <activity android:name=".AddFinanceActivity" android:windowSoftInputMode="adjustResize" />
         <activity android:name=".AddTaskActivity" android:windowSoftInputMode="adjustResize" />
         <activity android:name=".AddSubFeatureActivity" android:windowSoftInputMode="adjustResize" />

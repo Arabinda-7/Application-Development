@@ -1,10 +1,16 @@
+@file:OptIn(
+    androidx.compose.foundation.ExperimentalFoundationApi::class,
+    androidx.compose.foundation.layout.ExperimentalLayoutApi::class
+)
+
 package com.example.allinone.workspace.ui.sections
 
 import androidx.compose.foundation.*
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.itemsIndexed
+import androidx.compose.foundation.pager.HorizontalPager
+import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.BasicTextField
@@ -12,6 +18,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.*
 import androidx.compose.material.icons.automirrored.filled.*
 import androidx.compose.material3.*
+import androidx.compose.material3.TabRowDefaults.tabIndicatorOffset
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -25,6 +32,7 @@ import androidx.compose.ui.unit.sp
 import com.example.allinone.LocalAppStyle
 import com.example.allinone.workspace.data.TaskEntity
 import com.example.allinone.workspace.ui.WorkspaceViewModel
+import kotlinx.coroutines.launch
 import java.text.SimpleDateFormat
 import java.util.*
 
@@ -38,6 +46,8 @@ fun TaskViewSection(
 ) {
     val style = LocalAppStyle.current
     val statuses = listOf("Todo", "In Progress", "Review", "Done")
+    val pagerState = rememberPagerState(pageCount = { statuses.size })
+    val scope = rememberCoroutineScope()
     
     Column(modifier = Modifier.fillMaxSize()) {
         Row(modifier = Modifier.fillMaxWidth().padding(bottom = 16.dp), horizontalArrangement = Arrangement.spacedBy(12.dp)) {
@@ -47,50 +57,86 @@ fun TaskViewSection(
             Box(modifier = Modifier.weight(1f)) { MetricCard("Total Tasks", total.toString(), style.accentColor) }
         }
 
-        Row(modifier = Modifier.horizontalScroll(rememberScrollState())) {
-            statuses.forEach { status ->
-                Column(modifier = Modifier.width(300.dp).padding(8.dp)) {
-                    Text(
-                        status.uppercase(), 
-                        fontWeight = FontWeight.Black, 
-                        fontSize = 11.sp, 
-                        letterSpacing = 1.sp,
-                        color = if (status == "Done") Color(0xFF2EC4B6) else Color.White.copy(alpha = 0.5f)
-                    )
-                    Spacer(modifier = Modifier.height(12.dp))
-                    
-                    val statusTasks = tasks.filter { it.status == status }
-                    
-                    if (statusTasks.isEmpty()) {
-                        Box(
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .height(100.dp)
-                                .border(1.dp, Color.White.copy(alpha = 0.05f), RoundedCornerShape(12.dp)),
-                            contentAlignment = Alignment.Center
-                        ) {
-                            Text("No tasks", color = Color.White.copy(alpha = 0.1f), fontSize = 12.sp)
+        ScrollableTabRow(
+            selectedTabIndex = pagerState.currentPage,
+            containerColor = Color.Transparent,
+            contentColor = style.accentColor,
+            edgePadding = 0.dp,
+            divider = {},
+            indicator = { tabPositions ->
+                TabRowDefaults.SecondaryIndicator(
+                    modifier = Modifier.tabIndicatorOffset(tabPositions[pagerState.currentPage]),
+                    color = style.accentColor
+                )
+            },
+            modifier = Modifier.fillMaxWidth().padding(bottom = 16.dp)
+        ) {
+            statuses.forEachIndexed { index, status ->
+                Tab(
+                    selected = pagerState.currentPage == index,
+                    onClick = { scope.launch { pagerState.animateScrollToPage(index) } },
+                    text = {
+                        Text(
+                            status.uppercase(),
+                            fontWeight = FontWeight.Black,
+                            fontSize = 11.sp,
+                            letterSpacing = 1.sp,
+                            color = if (pagerState.currentPage == index) Color.White else Color.White.copy(alpha = 0.4f)
+                        )
+                    }
+                )
+            }
+        }
+
+        HorizontalPager(
+            state = pagerState,
+            modifier = Modifier.weight(1f),
+            verticalAlignment = Alignment.Top
+        ) { pageIndex ->
+            val status = statuses[pageIndex]
+            val statusTasks = tasks.filter { it.status == status }
+            
+            Column(modifier = Modifier.fillMaxSize().padding(horizontal = 4.dp)) {
+                if (statusTasks.isEmpty()) {
+                    Box(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .height(200.dp)
+                            .padding(top = 40.dp)
+                            .border(1.dp, Color.White.copy(alpha = 0.05f), RoundedCornerShape(12.dp)),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                            Icon(
+                                imageVector = if (status == "Done") Icons.Default.CheckCircle else Icons.Default.Task,
+                                contentDescription = null,
+                                tint = Color.White.copy(alpha = 0.05f),
+                                modifier = Modifier.size(48.dp)
+                            )
+                            Spacer(modifier = Modifier.height(12.dp))
+                            Text("No tasks in $status", color = Color.White.copy(alpha = 0.1f), fontSize = 14.sp)
                         }
-                    } else {
-                        LazyColumn(modifier = Modifier.weight(1f)) {
-                            val sortedTasks = statusTasks.sortedByDescending { it.priority }
-                            itemsIndexed(
-                                sortedTasks, 
-                                key = { _, task -> task.id }
-                            ) { index, task ->
-                                Box(modifier = Modifier.animateItem()) {
-                                    TaskItemUI(
-                                        task = task,
-                                        onUpdateTask = onUpdateTask,
-                                        onViewTask = onViewTask,
-                                        onEditTask = onEditTask,
-                                        onDeleteTask = onDeleteTask,
-                                        index = index + 1
-                                    )
-                                    Spacer(modifier = Modifier.height(8.dp))
-                                }
+                    }
+                } else {
+                    LazyColumn(modifier = Modifier.fillMaxSize()) {
+                        val sortedTasks = statusTasks.sortedByDescending { it.priority }
+                        itemsIndexed(
+                            sortedTasks, 
+                            key = { _, task -> task.id }
+                        ) { index, task ->
+                            Box(modifier = Modifier.animateItem()) {
+                                TaskItemUI(
+                                    task = task,
+                                    onUpdateTask = onUpdateTask,
+                                    onViewTask = onViewTask,
+                                    onEditTask = onEditTask,
+                                    onDeleteTask = onDeleteTask,
+                                    index = index + 1
+                                )
+                                Spacer(modifier = Modifier.height(8.dp))
                             }
                         }
+                        item { Spacer(modifier = Modifier.height(80.dp)) }
                     }
                 }
             }
@@ -118,113 +164,123 @@ fun TaskItemUI(task: TaskEntity, onUpdateTask: (TaskEntity) -> Unit, onViewTask:
                     onClick = { onViewTask(task) },
                     onLongClick = { showMenu = true }
                 ),
-            colors = CardDefaults.cardColors(containerColor = style.surfaceColor),
-            border = if (task.priority == 2 && !isDone) BorderStroke(1.dp, priorityColor.copy(alpha = 0.2f)) else null
+            shape = RoundedCornerShape(20.dp),
+            colors = CardDefaults.cardColors(containerColor = Color.Transparent),
+            border = BorderStroke(1.5.dp, if (task.priority == 2 && !isDone) priorityColor else priorityColor.copy(alpha = 0.3f))
         ) {
-            Box(modifier = Modifier.fillMaxWidth()) {
-                Column(modifier = Modifier.padding(12.dp)) {
-                    Row(verticalAlignment = Alignment.CenterVertically) {
-                        Checkbox(
-                            checked = isDone,
-                            onCheckedChange = { checked ->
-                                val newStatus = if (checked) "Done" else "Todo"
-                                val newProgress = if (checked) 100 else 0
-                                onUpdateTask(task.copy(status = newStatus, progress = newProgress))
-                            },
-                            colors = CheckboxDefaults.colors(
-                                checkedColor = Color(0xFF2EC4B6),
-                                uncheckedColor = Color.White.copy(alpha = 0.2f)
-                            ),
-                            modifier = Modifier.size(24.dp)
-                        )
-
-                        Spacer(modifier = Modifier.width(8.dp))
-
-                        Column(modifier = Modifier.weight(1f)) {
-                            val titleText = if (index != null) "$index. ${task.title}" else task.title
-                            Text(
-                                titleText,
-                                fontWeight = FontWeight.Bold,
-                                color = if (isDone) Color.White.copy(alpha = 0.4f) else Color.White,
-                                textDecoration = if (isDone) androidx.compose.ui.text.style.TextDecoration.LineThrough else null,
-                                fontSize = 14.sp
-                            )
-                        }
-                        
-                        val priorityIcon = when(task.priority) {
-                            2 -> Icons.Default.KeyboardDoubleArrowUp
-                            1 -> Icons.Default.KeyboardArrowUp
-                            else -> Icons.Default.KeyboardArrowDown
-                        }
-                        Icon(
-                            imageVector = priorityIcon, 
-                            contentDescription = null, 
-                            tint = if (isDone) Color.White.copy(alpha = 0.2f) else priorityColor,
-                            modifier = Modifier.size(18.dp)
-                        )
-                    }
-
-                    if (task.description.isNotBlank()) {
-                        Spacer(modifier = Modifier.height(4.dp))
-                        Text(
-                            task.description,
-                            fontSize = 12.sp,
-                            color = Color.White.copy(alpha = 0.4f),
-                            maxLines = 1,
-                            overflow = androidx.compose.ui.text.style.TextOverflow.Ellipsis,
-                            modifier = Modifier.padding(start = 32.dp)
-                        )
-                    }
-
-                    Spacer(modifier = Modifier.height(12.dp))
+            Box(modifier = Modifier.fillMaxWidth().height(IntrinsicSize.Min)) {
+                Row(modifier = Modifier.padding(12.dp), verticalAlignment = Alignment.CenterVertically) {
+                    // Vertical Accent Bar
+                    Box(modifier = Modifier.width(4.dp).fillMaxHeight().clip(CircleShape).background(priorityColor.copy(alpha = 0.8f)))
                     
-                    Row(verticalAlignment = Alignment.CenterVertically) {
-                        LinearProgressIndicator(
-                            progress = { task.progress / 100f },
-                            modifier = Modifier
-                                .weight(1f)
-                                .height(4.dp)
-                                .clip(CircleShape),
-                            color = if (isDone) Color(0xFF2EC4B6) else style.accentColor,
-                            trackColor = Color.White.copy(alpha = 0.05f)
-                        )
-                        
-                        Spacer(modifier = Modifier.width(12.dp))
-                        
-                        if (!isDone) {
-                            IconButton(
-                                onClick = {
-                                    val nextStatus = when(task.status) {
-                                        "Todo" -> "In Progress"
-                                        "In Progress" -> "Review"
-                                        "Review" -> "Done"
-                                        else -> "Done"
-                                    }
-                                    val newProgress = if (nextStatus == "Done") 100 else task.progress
-                                    onUpdateTask(task.copy(status = nextStatus, progress = newProgress))
+                    Spacer(modifier = Modifier.width(12.dp))
+                    
+                    Column(modifier = Modifier.weight(1f)) {
+                        Row(verticalAlignment = Alignment.CenterVertically) {
+                            Checkbox(
+                                checked = isDone,
+                                onCheckedChange = { checked ->
+                                    val newStatus = if (checked) "Done" else "Todo"
+                                    val newProgress = if (checked) 100 else 0
+                                    onUpdateTask(task.copy(status = newStatus, progress = newProgress))
                                 },
-                                modifier = Modifier
-                                    .size(32.dp)
-                                    .background(style.accentColor.copy(alpha = 0.1f), CircleShape)
-                            ) {
-                                Icon(
-                                    imageVector = Icons.Default.ChevronRight, 
-                                    contentDescription = "Next", 
-                                    tint = style.accentColor,
-                                    modifier = Modifier.size(16.dp)
-                                )
-                            }
-                        } else {
-                            Icon(
-                                imageVector = Icons.Default.CheckCircle, 
-                                contentDescription = "Completed", 
-                                tint = Color(0xFF2EC4B6),
+                                colors = CheckboxDefaults.colors(
+                                    checkedColor = Color(0xFF2EC4B6),
+                                    uncheckedColor = Color.White.copy(alpha = 0.2f)
+                                ),
                                 modifier = Modifier.size(24.dp)
                             )
+
+                            Spacer(modifier = Modifier.width(8.dp))
+
+                            Column(modifier = Modifier.weight(1f)) {
+                                val titleText = if (index != null) "$index. ${task.title}" else task.title
+                                Text(
+                                    titleText,
+                                    fontWeight = FontWeight.Bold,
+                                    color = if (isDone) Color.White.copy(alpha = 0.4f) else Color.White,
+                                    textDecoration = if (isDone) androidx.compose.ui.text.style.TextDecoration.LineThrough else null,
+                                    fontSize = 18.sp,
+                                    maxLines = 1,
+                                    overflow = androidx.compose.ui.text.style.TextOverflow.Ellipsis
+                                )
+                            }
+                            
+                            val priorityIcon = when(task.priority) {
+                                2 -> Icons.Default.KeyboardDoubleArrowUp
+                                1 -> Icons.Default.KeyboardArrowUp
+                                else -> Icons.Default.KeyboardArrowDown
+                            }
+                            Icon(
+                                imageVector = priorityIcon, 
+                                contentDescription = null, 
+                                tint = if (isDone) Color.White.copy(alpha = 0.2f) else priorityColor,
+                                modifier = Modifier.size(18.dp)
+                            )
                         }
+
+                        if (task.description.isNotBlank()) {
+                            Spacer(modifier = Modifier.height(4.dp))
+                            Text(
+                                task.description,
+                                fontSize = 14.sp,
+                                color = Color.White.copy(alpha = 0.4f),
+                                maxLines = 1,
+                                overflow = androidx.compose.ui.text.style.TextOverflow.Ellipsis,
+                                modifier = Modifier.padding(start = 32.dp)
+                            )
+                        }
+
+                        Spacer(modifier = Modifier.height(12.dp))
+                        
+                        Row(verticalAlignment = Alignment.CenterVertically) {
+                            LinearProgressIndicator(
+                                progress = { task.progress / 100f },
+                                modifier = Modifier
+                                    .weight(1f)
+                                    .height(4.dp)
+                                    .clip(CircleShape),
+                                color = if (isDone) Color(0xFF2EC4B6) else style.accentColor,
+                                trackColor = Color.White.copy(alpha = 0.05f)
+                            )
+                            
+                            Spacer(modifier = Modifier.width(12.dp))
+                            
+                            if (!isDone) {
+                                IconButton(
+                                    onClick = {
+                                        val nextStatus = when(task.status) {
+                                            "Todo" -> "In Progress"
+                                            "In Progress" -> "Review"
+                                            "Review" -> "Done"
+                                            else -> "Done"
+                                        }
+                                        val newProgress = if (nextStatus == "Done") 100 else task.progress
+                                        onUpdateTask(task.copy(status = nextStatus, progress = newProgress))
+                                    },
+                                    modifier = Modifier
+                                        .size(32.dp)
+                                        .background(style.accentColor.copy(alpha = 0.1f), CircleShape)
+                                ) {
+                                    Icon(
+                                        imageVector = Icons.Default.ChevronRight, 
+                                        contentDescription = "Next", 
+                                        tint = style.accentColor,
+                                        modifier = Modifier.size(16.dp)
+                                    )
+                                }
+                            } else {
+                                Icon(
+                                    imageVector = Icons.Default.CheckCircle, 
+                                    contentDescription = "Completed", 
+                                    tint = Color(0xFF2EC4B6),
+                                    modifier = Modifier.size(24.dp)
+                                )
+                            }
+                        }
+                        
+                        Spacer(modifier = Modifier.height(16.dp))
                     }
-                    
-                    Spacer(modifier = Modifier.height(16.dp))
                 }
                 
                 val displayTime = task.dueDate ?: task.createdAt

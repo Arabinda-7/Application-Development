@@ -1,0 +1,5 @@
+- [x] Update `MainSplashScreenHandler.kt` with new UI
+    - [x] Add `CircularProgressIndicator`
+    - [x] Add `RocketLaunch` icon
+    - [x] Update text and styling
+- [x] Verify changes on device

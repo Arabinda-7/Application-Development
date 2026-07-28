@@ -1,0 +1,11 @@
+- [x] Create `activity_view_project.xml` for immersive viewing experience
+    - [x] Implement 2x2 Glass Card grid (Status, Priority, Theme, Deadline)
+    - [x] Add `aura_background` for immersive effect
+- [x] Refine `activity_add_project.xml`
+    - [x] Ensure it's optimized for Add/Edit mode (chip style)
+- [x] Update `AddProjectActivity.kt` to support dual layouts
+    - [x] Switch layout in `onCreate` based on `isViewOnly`
+    - [x] Update `initViews` to handle optional IDs
+    - [x] Update `setupLogic` to handle both UI styles
+    - [x] Implement Aura background dynamic coloring in View mode
+- [x] Verify both "Add" and "View" flows

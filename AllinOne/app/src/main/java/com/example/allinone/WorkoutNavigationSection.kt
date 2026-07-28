@@ -3,9 +3,6 @@ package com.example.allinone
 import android.content.Context
 import android.view.View
 import android.view.ViewGroup
-import android.widget.ImageView
-import android.widget.TextView
-import androidx.core.content.ContextCompat
 import androidx.transition.AutoTransition
 import androidx.transition.TransitionManager
 
@@ -15,15 +12,10 @@ class WorkoutNavigationSection(
     private val todayLayout: View,
     private val historyLayout: View,
     private val composeView: View,
-    private val ivToday: ImageView,
-    private val tvTodayNav: TextView,
-    private val ivHistory: ImageView,
-    private val tvHistoryNav: TextView,
     private val onTabSwitched: (String) -> Unit
 ) {
     fun setup() {
-        root.findViewById<View>(R.id.nav_today).setOnClickListener { switchTab("TODAY") }
-        root.findViewById<View>(R.id.nav_history).setOnClickListener { switchTab("HISTORY") }
+        // Footer navigation removed
     }
 
     fun switchTab(tab: String) {
@@ -43,13 +35,6 @@ class WorkoutNavigationSection(
     }
 
     fun updateNavUI(active: String) {
-        val workoutColor = if (DataManager.globalWorkoutColor != -1) DataManager.globalWorkoutColor else android.graphics.Color.parseColor("#FFFFB800")
-        val todayColor = if (active == "TODAY") workoutColor else ContextCompat.getColor(context, R.color.text_secondary)
-        val historyColor = if (active == "HISTORY") workoutColor else ContextCompat.getColor(context, R.color.text_secondary)
-        
-        ivToday.imageTintList = android.content.res.ColorStateList.valueOf(todayColor)
-        tvTodayNav.setTextColor(todayColor)
-        ivHistory.imageTintList = android.content.res.ColorStateList.valueOf(historyColor)
-        tvHistoryNav.setTextColor(historyColor)
+        // Navigation UI removed
     }
 }

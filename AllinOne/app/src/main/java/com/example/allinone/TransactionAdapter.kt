@@ -74,7 +74,7 @@ class TransactionAdapter(
     private fun showCustomMenu(anchor: View, transaction: Transaction, position: Int) {
         val context = anchor.context
         val inflater = LayoutInflater.from(context)
-        val menuView = inflater.inflate(R.layout.layout_custom_menu, null)
+        val menuView = inflater.inflate(R.layout.menu_finance_item, null)
 
         val popupWindow = PopupWindow(menuView, ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT, true)
         popupWindow.elevation = 10f

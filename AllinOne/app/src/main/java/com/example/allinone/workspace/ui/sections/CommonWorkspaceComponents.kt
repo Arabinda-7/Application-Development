@@ -1,3 +1,8 @@
+@file:OptIn(
+    androidx.compose.foundation.ExperimentalFoundationApi::class,
+    androidx.compose.foundation.layout.ExperimentalLayoutApi::class
+)
+
 package com.example.allinone.workspace.ui.sections
 
 import androidx.compose.foundation.*
@@ -52,18 +57,49 @@ fun ProjectOverviewItem(
     Card(
         modifier = Modifier
             .fillMaxWidth()
+            .padding(vertical = 4.dp)
             .combinedClickable(
                 onClick = onClick,
                 onLongClick = onLongClick
             ),
-        shape = RoundedCornerShape(12.dp), 
-        colors = CardDefaults.cardColors(containerColor = if (isSelected) style.surfaceColor else style.surfaceColor.copy(alpha = 0.5f)), 
-        border = if (isSelected) BorderStroke(1.dp, projectColor.copy(alpha = 0.4f)) else null
+        shape = RoundedCornerShape(20.dp), 
+        colors = CardDefaults.cardColors(containerColor = Color.Transparent), 
+        border = BorderStroke(1.5.dp, if (isSelected) projectColor else projectColor.copy(alpha = 0.3f))
     ) {
-        Box(modifier = Modifier.fillMaxWidth()) {
-            Row(modifier = Modifier.padding(16.dp).padding(bottom = 8.dp), verticalAlignment = Alignment.CenterVertically) {
-                Column(modifier = Modifier.weight(1f)) { Text(project.name, color = Color.White, fontWeight = FontWeight.Bold, fontSize = 16.sp, maxLines = 2, overflow = TextOverflow.Ellipsis); Text(project.status.uppercase(), color = Color.White.copy(alpha = 0.4f), fontSize = 10.sp, fontWeight = FontWeight.Black, letterSpacing = 0.5.sp) }
-                Column(horizontalAlignment = Alignment.End) { Text("${project.progress}%", color = Color.White, fontWeight = FontWeight.Black, fontSize = 14.sp); LinearProgressIndicator(progress = { project.progress / 100f }, modifier = Modifier.width(60.dp).height(4.dp), color = projectColor, trackColor = Color.White.copy(alpha = 0.05f), strokeCap = StrokeCap.Round) }
+        Box(modifier = Modifier.fillMaxWidth().height(IntrinsicSize.Min)) {
+            Row(modifier = Modifier.padding(16.dp), verticalAlignment = Alignment.CenterVertically) {
+                // Vertical Accent Bar
+                Box(modifier = Modifier.width(4.dp).fillMaxHeight().clip(CircleShape).background(projectColor.copy(alpha = 0.8f)))
+                
+                Spacer(modifier = Modifier.width(12.dp))
+                
+                Column(modifier = Modifier.weight(1f)) { 
+                    Text(
+                        project.name, 
+                        color = Color.White, 
+                        fontWeight = FontWeight.Bold, 
+                        fontSize = 20.sp, 
+                        maxLines = 2, 
+                        overflow = TextOverflow.Ellipsis
+                    )
+                    Text(
+                        project.status.uppercase(), 
+                        color = Color.White.copy(alpha = 0.4f), 
+                        fontSize = 10.sp, 
+                        fontWeight = FontWeight.Black, 
+                        letterSpacing = 0.5.sp
+                    ) 
+                }
+                Column(horizontalAlignment = Alignment.End) { 
+                    Text("${project.progress}%", color = Color.White, fontWeight = FontWeight.Black, fontSize = 14.sp)
+                    LinearProgressIndicator(
+                        progress = { project.progress / 100f }, 
+                        modifier = Modifier.width(60.dp).height(4.dp), 
+                        color = projectColor, 
+                        trackColor = Color.White.copy(alpha = 0.05f), 
+                        strokeCap = StrokeCap.Round
+                    ) 
+                }
             }
             CreatedAtText(
                 timestamp = project.createdAt,
@@ -322,32 +358,91 @@ fun BugItemCard(
     val style = LocalAppStyle.current
     var showMenu by remember { mutableStateOf(false) }
     val severityColor = when (bug.severity) { "Critical" -> Color.Red; "High" -> Color(0xFFFF5252); "Medium" -> Color(0xFFFFB800); else -> Color(0xFF2EC4B6) }
-    val borderModifier = if (bug.severity == "Critical") { Modifier.border(1.dp, severityColor.copy(alpha = 0.5f), RoundedCornerShape(12.dp)) } else { Modifier.border(1.dp, Color.White.copy(alpha = 0.05f), RoundedCornerShape(12.dp)) }
+    val accentColor = style.accentColor
+    
     Box {
         Card(
-            shape = RoundedCornerShape(12.dp),
-            colors = CardDefaults.cardColors(containerColor = style.surfaceColor),
+            shape = RoundedCornerShape(20.dp),
+            colors = CardDefaults.cardColors(containerColor = Color.Transparent),
+            border = BorderStroke(1.5.dp, severityColor),
             modifier = Modifier
                 .fillMaxWidth()
-                .then(borderModifier)
+                .padding(vertical = 4.dp)
                 .combinedClickable(
                     onClick = { onViewBug(bug) },
                     onLongClick = { showMenu = true }
                 )
         ) {
-            Box(modifier = Modifier.fillMaxWidth()) {
-                Column(modifier = Modifier.padding(12.dp)) {
-                    Row(verticalAlignment = Alignment.Top) {
-                        Column(modifier = Modifier.weight(1f)) {
-                            Text(bug.title, fontWeight = FontWeight.Bold, color = Color.White, fontSize = 16.sp)
-                            Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.padding(top = 2.dp)) { Surface(color = severityColor.copy(alpha = 0.1f), shape = RoundedCornerShape(4.dp)) { Text(bug.severity.uppercase(), modifier = Modifier.padding(horizontal = 4.dp, vertical = 2.dp), color = severityColor, fontSize = 8.sp, fontWeight = FontWeight.Black) }; Spacer(modifier = Modifier.width(8.dp)); Text(bug.environment, color = Color.White.copy(alpha = 0.4f), fontSize = 10.sp) }
+            Box(modifier = Modifier.fillMaxWidth().height(IntrinsicSize.Min)) {
+                Row(modifier = Modifier.padding(12.dp), verticalAlignment = Alignment.CenterVertically) {
+                    // Vertical Accent Bar
+                    Box(modifier = Modifier.width(4.dp).fillMaxHeight().clip(CircleShape).background(severityColor.copy(alpha = 0.8f)))
+                    
+                    Spacer(modifier = Modifier.width(12.dp))
+                    
+                    Column(modifier = Modifier.weight(1f)) {
+                        Row(verticalAlignment = Alignment.Top) {
+                            Column(modifier = Modifier.weight(1f)) {
+                                Text(
+                                    bug.title, 
+                                    fontWeight = FontWeight.Bold, 
+                                    color = Color.White, 
+                                    fontSize = 20.sp,
+                                    maxLines = 1,
+                                    overflow = TextOverflow.Ellipsis
+                                )
+                                Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.padding(top = 2.dp)) { 
+                                    Surface(color = severityColor.copy(alpha = 0.1f), shape = RoundedCornerShape(4.dp)) { 
+                                        Text(bug.severity.uppercase(), modifier = Modifier.padding(horizontal = 4.dp, vertical = 2.dp), color = severityColor, fontSize = 8.sp, fontWeight = FontWeight.Black) 
+                                    }
+                                    Spacer(modifier = Modifier.width(8.dp))
+                                    Text(bug.environment, color = Color.White.copy(alpha = 0.4f), fontSize = 10.sp) 
+                                }
+                            }
+                            val priorityIcon = when(bug.priority) { 
+                                2 -> Icons.Default.KeyboardDoubleArrowUp
+                                1 -> Icons.Default.KeyboardArrowUp
+                                else -> Icons.Default.KeyboardArrowDown 
+                            }
+                            Icon(imageVector = priorityIcon, contentDescription = null, tint = severityColor, modifier = Modifier.size(18.dp))
                         }
-                        val priorityIcon = when(bug.priority) { 2 -> Icons.Default.KeyboardDoubleArrowUp; 1 -> Icons.Default.KeyboardArrowUp; else -> Icons.Default.KeyboardArrowDown }; Icon(imageVector = priorityIcon, contentDescription = null, tint = severityColor, modifier = Modifier.size(18.dp))
+                        if (bug.description.isNotBlank()) { 
+                            Spacer(modifier = Modifier.height(8.dp))
+                            Text(
+                                bug.description, 
+                                fontSize = 14.sp, 
+                                color = Color.White.copy(alpha = 0.6f), 
+                                maxLines = 3, 
+                                overflow = TextOverflow.Ellipsis
+                            ) 
+                        }
+                        if (bug.version.isNotBlank()) { 
+                            Spacer(modifier = Modifier.height(8.dp))
+                            Text("v${bug.version}", color = accentColor, fontSize = 10.sp, fontWeight = FontWeight.Bold) 
+                        }
+                        Spacer(modifier = Modifier.height(16.dp))
+                        Row(horizontalArrangement = Arrangement.End, modifier = Modifier.fillMaxWidth()) { 
+                            if (bug.status != "Verified") { 
+                                IconButton(
+                                    onClick = { 
+                                        val nextStatus = when(bug.status) { 
+                                            "Open" -> "Confirmed"
+                                            "Confirmed" -> "Fixing"
+                                            "Fixing" -> "Fixed"
+                                            "Fixed" -> "Verified"
+                                            else -> "Verified" 
+                                        }
+                                        onUpdate(bug.copy(status = nextStatus)) 
+                                    }, 
+                                    modifier = Modifier.size(32.dp).background(accentColor.copy(alpha = 0.1f), CircleShape)
+                                ) { 
+                                    Icon(if (bug.status == "Fixed") Icons.Default.Verified else Icons.Default.ChevronRight, contentDescription = "Next", tint = accentColor, modifier = Modifier.size(16.dp)) 
+                                } 
+                            } else { 
+                                Icon(Icons.Default.CheckCircle, null, tint = Color(0xFF2EC4B6), modifier = Modifier.size(24.dp)) 
+                            } 
+                        }
                     }
-                    if (bug.description.isNotBlank()) { Spacer(modifier = Modifier.height(8.dp)); Text(bug.description, fontSize = 12.sp, color = Color.White.copy(alpha = 0.6f), maxLines = 3, overflow = TextOverflow.Ellipsis) }
-                    if (bug.version.isNotBlank()) { Spacer(modifier = Modifier.height(8.dp)); Text("v${bug.version}", color = style.accentColor, fontSize = 10.sp, fontWeight = FontWeight.Bold) }
-                    Spacer(modifier = Modifier.height(16.dp))
-                    Row(horizontalArrangement = Arrangement.End, modifier = Modifier.fillMaxWidth()) { if (bug.status != "Verified") { IconButton(onClick = { val nextStatus = when(bug.status) { "Open" -> "Confirmed"; "Confirmed" -> "Fixing"; "Fixing" -> "Fixed"; "Fixed" -> "Verified"; else -> "Verified" }; onUpdate(bug.copy(status = nextStatus)) }, modifier = Modifier.size(32.dp).background(style.accentColor.copy(alpha = 0.1f), CircleShape)) { Icon(if (bug.status == "Fixed") Icons.Default.Verified else Icons.Default.ChevronRight, contentDescription = "Next", tint = style.accentColor, modifier = Modifier.size(16.dp)) } } else { Icon(Icons.Default.CheckCircle, null, tint = Color(0xFF2EC4B6), modifier = Modifier.size(24.dp)) } }
                 }
                 CreatedAtText(
                     timestamp = bug.createdAt,
@@ -408,9 +503,50 @@ fun WorkspaceDropdownItem(
 
 @Composable
 fun MetricCard(label: String, value: String, color: Color) {
-    val style = LocalAppStyle.current
-    Card(modifier = Modifier.fillMaxWidth().height(100.dp), colors = CardDefaults.cardColors(containerColor = style.surfaceColor)) {
-        Column(modifier = Modifier.padding(16.dp).fillMaxSize(), verticalArrangement = Arrangement.Center) { Text(label, color = color, fontSize = 10.sp, fontWeight = FontWeight.Bold); Text(value, color = Color.White, fontSize = 20.sp, fontWeight = FontWeight.Black) }
+    Card(
+        modifier = Modifier
+            .fillMaxWidth()
+            .height(100.dp),
+        shape = RoundedCornerShape(20.dp),
+        colors = CardDefaults.cardColors(containerColor = Color.Transparent),
+        border = BorderStroke(1.5.dp, color.copy(alpha = 0.3f))
+    ) {
+        Box(modifier = Modifier.fillMaxSize().height(IntrinsicSize.Min)) {
+            Row(
+                modifier = Modifier.padding(16.dp),
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                // Vertical Accent Bar
+                Box(
+                    modifier = Modifier
+                        .width(4.dp)
+                        .fillMaxHeight()
+                        .clip(CircleShape)
+                        .background(color.copy(alpha = 0.8f))
+                )
+
+                Spacer(modifier = Modifier.width(16.dp))
+
+                Column(
+                    modifier = Modifier.fillMaxHeight(),
+                    verticalArrangement = Arrangement.Center
+                ) {
+                    Text(
+                        text = label.uppercase(),
+                        color = color,
+                        fontSize = 10.sp,
+                        fontWeight = FontWeight.Bold,
+                        letterSpacing = 1.sp
+                    )
+                    Text(
+                        text = value,
+                        color = Color.White,
+                        fontSize = 20.sp,
+                        fontWeight = FontWeight.Black
+                    )
+                }
+            }
+        }
     }
 }
 

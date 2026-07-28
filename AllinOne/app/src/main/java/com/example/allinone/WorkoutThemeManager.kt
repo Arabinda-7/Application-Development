@@ -8,14 +8,18 @@ import android.graphics.drawable.StateListDrawable
 import android.view.View
 import android.widget.ProgressBar
 import android.widget.RadioButton
+import android.widget.RadioGroup
+import android.widget.TextView
 import com.google.android.material.card.MaterialCardView
 
 class WorkoutThemeManager(
     private val context: Context,
     private val auraView: View,
-    private val chips: List<RadioButton>,
+    private val filterGroup: RadioGroup,
     private val createButton: MaterialCardView,
-    private val sectionProgressBar: ProgressBar
+    private val sectionProgressBar: ProgressBar,
+    private val historyCards: List<MaterialCardView> = emptyList(),
+    private val historyValues: List<TextView> = emptyList()
 ) {
     fun applyTheme() {
         val workoutColor = if (DataManager.globalWorkoutColor != -1) DataManager.globalWorkoutColor else Color.parseColor("#FFFFB800")
@@ -25,6 +29,9 @@ class WorkoutThemeManager(
         
         createButton.strokeColor = workoutColor
         sectionProgressBar.progressTintList = ColorStateList.valueOf(workoutColor)
+        
+        historyCards.forEach { it.strokeColor = workoutColor }
+        historyValues.forEach { it.setTextColor(workoutColor) }
     }
 
     private fun applyAura(workoutColor: Int) {
@@ -39,26 +46,30 @@ class WorkoutThemeManager(
         val density = context.resources.displayMetrics.density
         val darkenedColor = UIUtils.darkenColor(workoutColor, 0.5f)
 
-        chips.forEach { chip ->
-            val checkedDrawable = GradientDrawable().apply {
-                shape = GradientDrawable.RECTANGLE
-                cornerRadius = 19f * density
-                setColor(darkenedColor)
-            }
-            
-            val uncheckedDrawable = GradientDrawable().apply {
-                shape = GradientDrawable.RECTANGLE
-                cornerRadius = 19f * density
-                setColor(Color.TRANSPARENT)
-                setStroke(Math.round(1.5f * density), workoutColor)
-            }
+        for (i in 0 until filterGroup.childCount) {
+            val view = filterGroup.getChildAt(i)
+            if (view is RadioButton) {
+                val chip = view
+                val checkedDrawable = GradientDrawable().apply {
+                    shape = GradientDrawable.RECTANGLE
+                    cornerRadius = 19f * density
+                    setColor(darkenedColor)
+                }
+                
+                val uncheckedDrawable = GradientDrawable().apply {
+                    shape = GradientDrawable.RECTANGLE
+                    cornerRadius = 19f * density
+                    setColor(Color.TRANSPARENT)
+                    setStroke(Math.round(1.5f * density), workoutColor)
+                }
 
-            val stateListDrawable = StateListDrawable().apply {
-                addState(intArrayOf(android.R.attr.state_checked), checkedDrawable)
-                addState(intArrayOf(), uncheckedDrawable)
+                val stateListDrawable = StateListDrawable().apply {
+                    addState(intArrayOf(android.R.attr.state_checked), checkedDrawable)
+                    addState(intArrayOf(), uncheckedDrawable)
+                }
+                
+                chip.background = stateListDrawable
             }
-            
-            chip.background = stateListDrawable
         }
     }
 

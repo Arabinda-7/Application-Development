@@ -33,6 +33,7 @@ open class BaseActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         enableEdgeToEdge()
         applyAppTheme()
+        SecurityManager.setScreenshotProtection(this, DataManager.isScreenshotProtectionEnabled)
         appliedDisplaySize = DataManager.displaySize
         appliedFontSize = DataManager.fontSize
         super.onCreate(savedInstanceState)

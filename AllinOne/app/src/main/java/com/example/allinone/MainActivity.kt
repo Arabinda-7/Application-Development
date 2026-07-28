@@ -6,6 +6,9 @@ import androidx.activity.compose.setContent
 import androidx.activity.result.ActivityResultLauncher
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.activity.viewModels
+import androidx.compose.animation.core.Animatable
+import androidx.compose.animation.core.LinearEasing
+import androidx.compose.animation.core.tween
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
@@ -42,8 +45,6 @@ class MainActivity : BaseActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         
-        DataManager.loadData(this)
-
         if (!DataManager.isOnboardingCompleted) {
             startActivity(Intent(this, OnboardingActivity::class.java))
             finish()
@@ -65,7 +66,7 @@ class MainActivity : BaseActivity() {
 
         setContent {
             var showSplash by remember { mutableStateOf(true) }
-            var splashProgress by remember { mutableStateOf(0f) }
+            val splashProgress = remember { Animatable(0f) }
             
             val dashboardState = viewModel.dashboardState
             val isLoaded = dashboardState.isDataLoaded
@@ -79,14 +80,14 @@ class MainActivity : BaseActivity() {
             
             LaunchedEffect(isUnlocked) {
                 if (isUnlocked) {
-                    val totalTime = DataManager.startupLoadingTime.toFloat()
-                    val startTime = System.currentTimeMillis()
-                    while (System.currentTimeMillis() - startTime < totalTime) {
-                        val elapsed = System.currentTimeMillis() - startTime
-                        splashProgress = (elapsed / totalTime).coerceIn(0f, 1f)
-                        delay(16)
-                    }
-                    splashProgress = 1f
+                    val totalTime = DataManager.startupLoadingTime
+                    splashProgress.animateTo(
+                        targetValue = 1f,
+                        animationSpec = tween(
+                            durationMillis = totalTime,
+                            easing = LinearEasing
+                        )
+                    )
                     delay(500)
                     showSplash = false
                 }
@@ -95,7 +96,7 @@ class MainActivity : BaseActivity() {
             Box(modifier = Modifier.fillMaxSize()) {
                 when {
                     showSplash -> {
-                        SplashScreen(splashProgress)
+                        SplashScreen(splashProgress.value)
                     }
                     !isLoaded || !isUnlocked -> {
                         Box(modifier = Modifier.fillMaxSize().background(Color.Black))

@@ -8,6 +8,7 @@ import android.view.ViewGroup
 import android.widget.ImageView
 import android.widget.PopupWindow
 import android.widget.TextView
+import androidx.activity.OnBackPressedCallback
 import androidx.activity.viewModels
 import androidx.recyclerview.widget.RecyclerView
 import com.google.android.material.card.MaterialCardView
@@ -73,11 +74,7 @@ class HabitTrackerActivity : BaseActivity() {
             findViewById(R.id.habit_content_container),
             findViewById(R.id.today_layout),
             findViewById(R.id.history_layout),
-            findViewById(R.id.history_compose_view),
-            findViewById(R.id.iv_today),
-            findViewById(R.id.tv_today_nav),
-            findViewById(R.id.iv_history),
-            findViewById(R.id.tv_history_nav)
+            findViewById(R.id.history_compose_view)
         ) { tab ->
             viewModel.currentTab = tab
             if (tab == "HISTORY") {
@@ -125,7 +122,8 @@ class HabitTrackerActivity : BaseActivity() {
         progressSection.update()
         composeHandler.setup()
         setupGestureDetector()
-        setupKeyboardHandling(findViewById(R.id.habit_tracker_root))
+        setupKeyboardHandling(findViewById(R.id.habit_tracker_root), findViewById(R.id.habit_content_container))
+        setupBackNavigation()
 
         findViewById<View>(R.id.btn_back).setOnClickListener { finish() }
         findViewById<View>(R.id.btn_back_history).setOnClickListener { finish() }
@@ -192,6 +190,19 @@ class HabitTrackerActivity : BaseActivity() {
             }
             override fun onSwipeRight() {
                 if (viewModel.currentTab == "HISTORY") navigationSection.switchTab("TODAY")
+            }
+        })
+    }
+
+    private fun setupBackNavigation() {
+        onBackPressedDispatcher.addCallback(this, object : OnBackPressedCallback(true) {
+            override fun handleOnBackPressed() {
+                if (viewModel.currentTab == "HISTORY") {
+                    navigationSection.switchTab("TODAY")
+                } else {
+                    isEnabled = false
+                    onBackPressedDispatcher.onBackPressed()
+                }
             }
         })
     }

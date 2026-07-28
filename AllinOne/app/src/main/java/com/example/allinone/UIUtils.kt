@@ -129,4 +129,40 @@ object UIUtils {
             Math.min(b, 255)
         )
     }
+
+    fun showPasswordDialog(context: Context, title: String, onConfirm: (CharArray) -> Unit) {
+        val dialog = android.app.Dialog(context)
+        dialog.setContentView(R.layout.dialog_backup_password)
+        dialog.window?.let { window ->
+            window.setBackgroundDrawableResource(android.R.color.transparent)
+            window.setLayout(
+                android.view.ViewGroup.LayoutParams.MATCH_PARENT,
+                android.view.ViewGroup.LayoutParams.WRAP_CONTENT
+            )
+            window.addFlags(android.view.WindowManager.LayoutParams.FLAG_BLUR_BEHIND)
+            if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.S) {
+                window.attributes.blurBehindRadius = 20
+            }
+        }
+
+        val tvTitle = dialog.findViewById<android.widget.TextView>(R.id.tv_password_title)
+        val etPassword = dialog.findViewById<android.widget.EditText>(R.id.et_backup_password)
+        val btnSave = dialog.findViewById<android.view.View>(R.id.btn_save_password)
+        val btnCancel = dialog.findViewById<android.view.View>(R.id.btn_cancel_password)
+
+        tvTitle.text = title
+
+        btnSave.setOnClickListener {
+            val pass = etPassword.text.toString()
+            if (pass.isNotEmpty()) {
+                onConfirm(pass.toCharArray())
+                dialog.dismiss()
+            } else {
+                android.widget.Toast.makeText(context, "Please enter a password", android.widget.Toast.LENGTH_SHORT).show()
+            }
+        }
+
+        btnCancel.setOnClickListener { dialog.dismiss() }
+        dialog.show()
+    }
 }

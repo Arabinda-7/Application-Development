@@ -128,7 +128,7 @@ class FinanceActivity : BaseActivity() {
 
     private fun showSetBudgetDialog() {
         val dialog = Dialog(this)
-        dialog.setContentView(R.layout.dialog_set_budget)
+        dialog.setContentView(R.layout.dialog_set_budget_finance)
         dialog.window?.let { window ->
             window.setBackgroundDrawableResource(android.R.color.transparent)
             window.setLayout(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT)
@@ -150,7 +150,7 @@ class FinanceActivity : BaseActivity() {
 
     private fun showSetSavingsGoalDialog() {
         val dialog = Dialog(this)
-        dialog.setContentView(R.layout.dialog_add_ledger)
+        dialog.setContentView(R.layout.dialog_add_ledger_finance)
         dialog.window?.setBackgroundDrawableResource(android.R.color.transparent)
         dialog.window?.setLayout(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT)
 

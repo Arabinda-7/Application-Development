@@ -9,7 +9,7 @@ import android.widget.TextView
 object HabitInsightsDialog {
     fun show(context: Context) {
         val dialog = Dialog(context)
-        dialog.setContentView(R.layout.dialog_set_budget)
+        dialog.setContentView(R.layout.dialog_set_budget_habit)
         dialog.window?.setBackgroundDrawableResource(android.R.color.transparent)
         dialog.window?.setLayout(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT)
 

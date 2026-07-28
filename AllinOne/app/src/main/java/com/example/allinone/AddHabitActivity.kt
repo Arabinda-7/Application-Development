@@ -227,7 +227,7 @@ class AddHabitActivity : BaseActivity() {
         )
         
         val dialog = Dialog(this)
-        dialog.setContentView(R.layout.dialog_premium_icon_picker)
+        dialog.setContentView(R.layout.dialog_icon_picker_habit)
         dialog.window?.setBackgroundDrawableResource(android.R.color.transparent)
         dialog.window?.setLayout(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT)
 
