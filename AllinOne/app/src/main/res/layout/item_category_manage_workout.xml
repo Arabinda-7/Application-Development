@@ -1,24 +1,32 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/item_container"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
+    android:layout_marginBottom="12dp"
+    android:background="@drawable/bg_muscle_item"
     android:gravity="center_vertical"
     android:orientation="horizontal"
-    android:paddingVertical="8dp">
+    android:paddingHorizontal="20dp"
+    android:paddingVertical="16dp">
+
     <TextView
         android:id="@+id/tv_category_name"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:layout_weight="1"
         android:textColor="@color/white"
-        android:textSize="14sp" />
+        android:textSize="16sp"
+        android:fontFamily="sans-serif-medium" />
+
     <ImageButton
         android:id="@+id/btn_remove_category"
-        android:layout_width="32dp"
-        android:layout_height="32dp"
+        android:layout_width="24dp"
+        android:layout_height="24dp"
         android:background="?attr/selectableItemBackgroundBorderless"
-        android:src="@android:drawable/ic_menu_close_clear_cancel"
         android:contentDescription="Remove"
+        android:scaleType="centerInside"
+        android:src="@android:drawable/ic_menu_close_clear_cancel"
         xmlns:app="http://schemas.android.com/apk/res-auto"
-        app:tint="@color/text_secondary" />
+        app:tint="#80FFFFFF" />
 </LinearLayout>

@@ -102,6 +102,7 @@ class WorkspaceViewModel(private val repository: WorkspaceRepository) : ViewMode
         dueDate: Long? = null,
         milestoneId: String? = null
     ) {
+        com.example.allinone.DataManager.checkAndSetNewTodayNotification(dueDate)
         viewModelScope.launch {
             repository.insertTask(TaskEntity(
                 projectId = projectId,
@@ -118,6 +119,7 @@ class WorkspaceViewModel(private val repository: WorkspaceRepository) : ViewMode
     }
 
     fun insertTask(task: TaskEntity) {
+        com.example.allinone.DataManager.checkAndSetNewTodayNotification(task.dueDate)
         viewModelScope.launch { repository.insertTask(task) }
     }
 
@@ -126,6 +128,7 @@ class WorkspaceViewModel(private val repository: WorkspaceRepository) : ViewMode
     }
 
     fun addGoal(title: String, projectId: String, description: String = "", color: Int = -1, priority: Int = 1, deadline: Long? = null) {
+        com.example.allinone.DataManager.checkAndSetNewTodayNotification(deadline)
         viewModelScope.launch {
             repository.insertGoal(GoalEntity(
                 projectId = projectId, 
@@ -139,6 +142,7 @@ class WorkspaceViewModel(private val repository: WorkspaceRepository) : ViewMode
     }
 
     fun updateGoal(goal: GoalEntity) {
+        com.example.allinone.DataManager.checkAndSetNewTodayNotification(goal.deadline)
         viewModelScope.launch { repository.updateGoal(goal) }
     }
 
@@ -297,6 +301,7 @@ class WorkspaceViewModel(private val repository: WorkspaceRepository) : ViewMode
     }
 
     fun updateTask(task: TaskEntity) {
+        com.example.allinone.DataManager.checkAndSetNewTodayNotification(task.dueDate)
         viewModelScope.launch { repository.updateTask(task) }
     }
 

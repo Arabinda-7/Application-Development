@@ -5,7 +5,7 @@ import com.example.allinone.R
 import java.util.*
 
 object HabitDataManager {
-    var habits = mutableListOf<Habit>()
+    var habits: MutableList<Habit> = java.util.Collections.synchronizedList(mutableListOf<Habit>())
     
     var habitDefaultTab: String = "TODAY"
     var habitVacationMode: Boolean = false
@@ -23,8 +23,10 @@ object HabitDataManager {
 
     fun getHabitProgress(): Int {
         val todayIndex = (Calendar.getInstance().get(Calendar.DAY_OF_WEEK) - 1)
-        val todaysHabits = habits.filter {
-            (it.repeatType != "SPECIFIC_DAYS" || it.repeatDays.contains(todayIndex))
+        val todaysHabits = synchronized(habits) {
+            habits.filter {
+                (it.repeatType != "SPECIFIC_DAYS" || it.repeatDays.contains(todayIndex))
+            }
         }
         if (todaysHabits.isEmpty()) return 0
         val completed = todaysHabits.count { it.isCompleted }
@@ -32,7 +34,7 @@ object HabitDataManager {
     }
 
     fun getHabitSpecificHeatmap(habitName: String, calendar: Calendar): Map<Int, Int> {
-        val habit = habits.find { it.name == habitName } ?: return emptyMap()
+        val habit = synchronized(habits) { habits.find { it.name == habitName } } ?: return emptyMap()
         val result = mutableMapOf<Int, Int>()
         val year = calendar.get(Calendar.YEAR)
         val month = calendar.get(Calendar.MONTH)
@@ -50,7 +52,7 @@ object HabitDataManager {
     }
 
     fun getHabitStreaks(habitName: String): Pair<Int, Int> {
-        val habit = habits.find { it.name == habitName } ?: return 0 to 0
+        val habit = synchronized(habits) { habits.find { it.name == habitName } } ?: return 0 to 0
         val sortedDates = habit.completedDates.sortedDescending()
         if (sortedDates.isEmpty()) return 0 to 0
 
@@ -69,7 +71,8 @@ object HabitDataManager {
         if (allSorted.isNotEmpty()) {
             var lastDate: Calendar? = null
             for (dateStr in allSorted) {
-                val date = Calendar.getInstance().apply { time = sdf.parse(dateStr)!! }
+                val parsedDate = try { sdf.parse(dateStr) } catch (e: Exception) { null } ?: continue
+                val date = Calendar.getInstance().apply { time = parsedDate }
                 if (lastDate == null) {
                     tempStreak = 1
                 } else {
@@ -134,7 +137,7 @@ object HabitDataManager {
     }
 
     fun getWeeklyCyclicalData(habitName: String? = null): Map<Int, Float> {
-        val habitList = if (habitName != null) habits.filter { it.name == habitName } else habits
+        val habitList = synchronized(habits) { if (habitName != null) habits.filter { it.name == habitName } else habits.toList() }
         if (habitList.isEmpty()) return emptyMap()
 
         val sdf = java.text.SimpleDateFormat("yyyyMMdd", java.util.Locale.getDefault())
@@ -163,7 +166,7 @@ object HabitDataManager {
     }
 
     fun getStabilityIndex(habitName: String? = null): Float {
-        val habitList = if (habitName != null) habits.filter { it.name == habitName } else habits
+        val habitList = synchronized(habits) { if (habitName != null) habits.filter { it.name == habitName } else habits.toList() }
         if (habitList.isEmpty()) return 100f
         
         val sdf = java.text.SimpleDateFormat("yyyyMMdd", java.util.Locale.getDefault())
@@ -192,13 +195,14 @@ object HabitDataManager {
 
     fun getHabitCorrelationMatrix(): List<Triple<String, String, Double>> {
         val result = mutableListOf<Triple<String, String, Double>>()
-        if (habits.size < 2) return result
+        val currentHabits = synchronized(habits) { habits.toList() }
+        if (currentHabits.size < 2) return result
 
-        for (i in habits.indices) {
-            for (j in habits.indices) {
+        for (i in currentHabits.indices) {
+            for (j in currentHabits.indices) {
                 if (i == j) continue
-                val h1 = habits[i]
-                val h2 = habits[j]
+                val h1 = currentHabits[i]
+                val h2 = currentHabits[j]
                 
                 val commonDays = h1.completedDates.filter { h2.completedDates.contains(it) }.size
                 if (h1.completedDates.isEmpty()) continue
@@ -216,7 +220,8 @@ object HabitDataManager {
         val result = mutableMapOf<Int, MutableMap<String, Int>>()
         val sdf = java.text.SimpleDateFormat("yyyyMMdd", java.util.Locale.getDefault())
         
-        habits.forEach { habit ->
+        val currentHabits = synchronized(habits) { habits.toList() }
+        currentHabits.forEach { habit ->
             habit.completedDates.forEach { dateStr ->
                 try {
                     val date = sdf.parse(dateStr)
@@ -227,14 +232,16 @@ object HabitDataManager {
                         val dayMap = result.getOrPut(dayOfWeek) { mutableMapOf() }
                         dayMap[timeOfDay] = (dayMap[timeOfDay] ?: 0) + 1
                     }
-                } catch (e: Exception) {}
+                } catch (e: Exception) {
+                    e.printStackTrace()
+                }
             }
         }
         return result
     }
 
     fun getResilienceScore(habitName: String? = null): Float {
-        val habitList = if (habitName != null) habits.filter { it.name == habitName } else habits
+        val habitList = synchronized(habits) { if (habitName != null) habits.filter { it.name == habitName } else habits.toList() }
         if (habitList.isEmpty()) return 100f
         
         var totalBreakDays = 0
@@ -269,7 +276,7 @@ object HabitDataManager {
     }
 
     fun getMonthlyMomentumHistory(habitName: String? = null): List<Pair<String, Int>> {
-        val habitList = if (habitName != null) habits.filter { it.name == habitName } else habits
+        val habitList = synchronized(habits) { if (habitName != null) habits.filter { it.name == habitName } else habits.toList() }
         val result = mutableListOf<Pair<String, Int>>()
         val sdf = java.text.SimpleDateFormat("MMM", java.util.Locale.getDefault())
         val dateSdf = java.text.SimpleDateFormat("yyyyMMdd", java.util.Locale.getDefault())

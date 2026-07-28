@@ -53,9 +53,9 @@ class ProjectNoteAdapter(
 
         // Deadline/Date
         val sdf = SimpleDateFormat("MMM dd, yyyy", Locale.getDefault())
-        if (note.deadline != null) {
-            val daysLeft = ((note.deadline!! - System.currentTimeMillis()) / (24 * 60 * 60 * 1000L)).toInt()
-            val deadlineStr = sdf.format(Date(note.deadline!!))
+        note.deadline?.let { deadline ->
+            val daysLeft = ((deadline - System.currentTimeMillis()) / (24 * 60 * 60 * 1000L)).toInt()
+            val deadlineStr = sdf.format(Date(deadline))
             if (daysLeft < 0) {
                 holder.date.text = "OVERDUE: $deadlineStr"
                 holder.date.setTextColor(Color.RED)
@@ -63,7 +63,7 @@ class ProjectNoteAdapter(
                 holder.date.text = "$daysLeft days left | $deadlineStr"
                 holder.date.setTextColor(ContextCompat.getColor(context, R.color.text_secondary))
             }
-        } else {
+        } ?: run {
             holder.date.text = sdf.format(Date(note.timestamp))
             holder.date.setTextColor(ContextCompat.getColor(context, R.color.text_secondary))
         }

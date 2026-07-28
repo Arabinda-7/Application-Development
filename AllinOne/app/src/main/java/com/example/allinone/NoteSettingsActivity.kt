@@ -88,13 +88,26 @@ class NoteSettingsActivity : BaseActivity() {
     }
 
     private fun showManageSectionsDialog() {
-        val dialog = android.app.Dialog(this)
+        val dialog = Dialog(this)
         dialog.setContentView(R.layout.dialog_manage_sections_note)
-        dialog.window?.setBackgroundDrawableResource(android.R.color.transparent)
-        dialog.window?.setLayout(android.view.ViewGroup.LayoutParams.MATCH_PARENT, android.view.ViewGroup.LayoutParams.WRAP_CONTENT)
-
-        val container = dialog.findViewById<android.widget.LinearLayout>(R.id.container_section_switches)
+        
+        val container = dialog.findViewById<LinearLayout>(R.id.container_section_switches)
         val btnSave = dialog.findViewById<android.view.View>(R.id.btn_save_sections)
+        val accentLine = dialog.findViewById<View>(R.id.title_accent_line)
+        val root = dialog.findViewById<View>(R.id.dialog_root)
+
+        val accentColor = if (DataManager.appAccentColor != -1) DataManager.appAccentColor else android.graphics.Color.parseColor("#1A73E8")
+        val radius = DataManager.appBorderRadius.toFloat() * resources.displayMetrics.density
+
+        accentLine.setBackgroundColor(accentColor)
+        root.background = android.graphics.drawable.GradientDrawable().apply {
+            setColor(if (DataManager.appThemeMode == "OLED") android.graphics.Color.BLACK else android.graphics.Color.parseColor("#121212"))
+            cornerRadius = radius
+        }
+        (btnSave.background as? android.graphics.drawable.GradientDrawable)?.let {
+            it.setColor(accentColor)
+            it.cornerRadius = radius * 0.5f
+        }
         
         val options = listOf("Notes", "Questions", "Daily", "Stories")
         val tempSelection = DataManager.noteVisibleSections.toMutableList()
@@ -106,6 +119,15 @@ class NoteSettingsActivity : BaseActivity() {
                 textSize = 16f
                 isChecked = tempSelection.contains(option)
                 setPadding(0, 24, 0, 24)
+                
+                // Theme the switch
+                val states = arrayOf(intArrayOf(-android.R.attr.state_checked), intArrayOf(android.R.attr.state_checked))
+                val thumbColors = intArrayOf(android.graphics.Color.GRAY, accentColor)
+                val trackColors = intArrayOf(android.graphics.Color.parseColor("#33FFFFFF"), UIUtils.adjustAlpha(accentColor, 0.3f))
+                
+                androidx.core.graphics.drawable.DrawableCompat.setTintList(thumbDrawable, android.content.res.ColorStateList(states, thumbColors))
+                androidx.core.graphics.drawable.DrawableCompat.setTintList(trackDrawable, android.content.res.ColorStateList(states, trackColors))
+
                 setOnCheckedChangeListener { _, isChecked ->
                     if (isChecked) {
                         if (!tempSelection.contains(option)) tempSelection.add(option)
@@ -123,33 +145,52 @@ class NoteSettingsActivity : BaseActivity() {
         }
 
         btnSave.setOnClickListener {
-            // Maintain selection while updating visibility
             val newSections = tempSelection.toList()
             DataManager.noteVisibleSections.clear()
             DataManager.noteVisibleSections.addAll(newSections)
             
-            // Ensure default is still valid
             if (!DataManager.noteVisibleSections.contains(DataManager.noteDefaultCategory)) {
                 DataManager.noteDefaultCategory = DataManager.noteVisibleSections.firstOrNull() ?: "Notes"
             }
             
             DataManager.saveData(this)
-            loadSettings() // Refresh default tab options
+            loadSettings()
             dialog.dismiss()
         }
         showDialogSafe(dialog)
     }
 
     private fun showNoteTemplatesDialog() {
-        val dialog = Dialog(this); dialog.setContentView(R.layout.dialog_manage_categories_note)
+        val dialog = Dialog(this)
+        dialog.setContentView(R.layout.dialog_manage_categories_note)
+        
         val container = dialog.findViewById<LinearLayout>(R.id.categories_container)
+        val tvTitle = dialog.findViewById<TextView>(R.id.tv_categories_title)
+        val accentLine = dialog.findViewById<View>(R.id.title_accent_line)
+        val root = dialog.findViewById<View>(R.id.dialog_root)
+
+        val accentColor = if (DataManager.appAccentColor != -1) DataManager.appAccentColor else android.graphics.Color.parseColor("#1A73E8")
+        val radius = DataManager.appBorderRadius.toFloat() * resources.displayMetrics.density
+
         dialog.findViewById<View>(R.id.container_add_category).visibility = View.GONE
-        dialog.findViewById<TextView>(R.id.tv_categories_title).text = "Note Templates"
+        tvTitle.text = "NOTE TEMPLATES"
+        accentLine.setBackgroundColor(accentColor)
+        root.background = android.graphics.drawable.GradientDrawable().apply {
+            setColor(if (DataManager.appThemeMode == "OLED") android.graphics.Color.BLACK else android.graphics.Color.parseColor("#121212"))
+            cornerRadius = radius
+        }
 
         DataManager.noteTemplates.keys.forEach { name ->
             val iv = LayoutInflater.from(this).inflate(R.layout.item_category_manage_note, container, false)
             iv.findViewById<TextView>(R.id.tv_category_name).text = name
             iv.findViewById<View>(R.id.btn_remove_category).visibility = View.GONE
+            
+            // Item Background
+            iv.findViewById<View>(R.id.item_container).background = android.graphics.drawable.GradientDrawable().apply {
+                setColor(android.graphics.Color.parseColor("#2A2A2A"))
+                cornerRadius = radius * 0.5f
+            }
+
             iv.setOnClickListener { 
                 showSingleTemplateEditor(name)
                 dialog.dismiss() 
@@ -160,16 +201,43 @@ class NoteSettingsActivity : BaseActivity() {
     }
 
     private fun showSingleTemplateEditor(name: String) {
-        val dialog = Dialog(this); dialog.setContentView(R.layout.dialog_set_budget_note)
-        dialog.findViewById<TextView>(R.id.tv_settings_title).text = "Edit: $name"
+        val dialog = Dialog(this)
+        dialog.setContentView(R.layout.dialog_set_budget_note)
+        
+        val tvTitle = dialog.findViewById<TextView>(R.id.tv_settings_title)
         val et = dialog.findViewById<EditText>(R.id.et_budget_amount)
+        val btnSave = dialog.findViewById<View>(R.id.btn_save_budget)
+        val accentLine = dialog.findViewById<View>(R.id.title_accent_line)
+        val root = dialog.findViewById<View>(R.id.dialog_root)
+
+        val accentColor = if (DataManager.appAccentColor != -1) DataManager.appAccentColor else android.graphics.Color.parseColor("#1A73E8")
+        val radius = DataManager.appBorderRadius.toFloat() * resources.displayMetrics.density
+
+        tvTitle.text = "EDIT: ${name.uppercase()}"
         et.setHint("Template content...")
         et.setText(DataManager.noteTemplates[name])
         et.inputType = android.text.InputType.TYPE_CLASS_TEXT or android.text.InputType.TYPE_TEXT_FLAG_MULTI_LINE
         et.setSingleLine(false)
-        et.maxLines = 5
+        et.maxLines = 10
         
-        dialog.findViewById<View>(R.id.btn_save_budget).setOnClickListener {
+        accentLine.setBackgroundColor(accentColor)
+        root.background = android.graphics.drawable.GradientDrawable().apply {
+            setColor(if (DataManager.appThemeMode == "OLED") android.graphics.Color.BLACK else android.graphics.Color.parseColor("#121212"))
+            cornerRadius = radius
+        }
+        
+        et.background = android.graphics.drawable.GradientDrawable().apply {
+            setColor(android.graphics.Color.parseColor("#1AFFFFFF"))
+            cornerRadius = radius * 0.7f
+            setStroke(1, android.graphics.Color.parseColor("#33FFFFFF"))
+        }
+
+        (btnSave.background as? android.graphics.drawable.GradientDrawable)?.let {
+            it.setColor(accentColor)
+            it.cornerRadius = radius * 0.5f
+        }
+        
+        btnSave.setOnClickListener {
             DataManager.noteTemplates[name] = et.text.toString()
             DataManager.saveData(this)
             dialog.dismiss()
@@ -179,15 +247,36 @@ class NoteSettingsActivity : BaseActivity() {
     }
 
     private fun showNoteBulkMoveDialog() {
-        val dialog = Dialog(this); dialog.setContentView(R.layout.dialog_manage_categories_note)
+        val dialog = Dialog(this)
+        dialog.setContentView(R.layout.dialog_manage_categories_note)
+        
         val container = dialog.findViewById<LinearLayout>(R.id.categories_container)
+        val tvTitle = dialog.findViewById<TextView>(R.id.tv_categories_title)
+        val accentLine = dialog.findViewById<View>(R.id.title_accent_line)
+        val root = dialog.findViewById<View>(R.id.dialog_root)
+
+        val accentColor = if (DataManager.appAccentColor != -1) DataManager.appAccentColor else android.graphics.Color.parseColor("#1A73E8")
+        val radius = DataManager.appBorderRadius.toFloat() * resources.displayMetrics.density
+
         dialog.findViewById<View>(R.id.container_add_category).visibility = View.GONE
-        dialog.findViewById<TextView>(R.id.tv_categories_title).text = "Move All Notes To..."
+        tvTitle.text = "MOVE ALL NOTES TO..."
+        accentLine.setBackgroundColor(accentColor)
+        root.background = android.graphics.drawable.GradientDrawable().apply {
+            setColor(if (DataManager.appThemeMode == "OLED") android.graphics.Color.BLACK else android.graphics.Color.parseColor("#121212"))
+            cornerRadius = radius
+        }
 
         DataManager.noteVisibleSections.forEach { category ->
             val iv = LayoutInflater.from(this).inflate(R.layout.item_category_manage_note, container, false)
             iv.findViewById<TextView>(R.id.tv_category_name).text = category
             iv.findViewById<View>(R.id.btn_remove_category).visibility = View.GONE
+            
+            // Item Background
+            iv.findViewById<View>(R.id.item_container).background = android.graphics.drawable.GradientDrawable().apply {
+                setColor(android.graphics.Color.parseColor("#2A2A2A"))
+                cornerRadius = radius * 0.5f
+            }
+
             iv.setOnClickListener {
                 val count = DataManager.notes.size
                 DataManager.notes.forEach { it.category = category }

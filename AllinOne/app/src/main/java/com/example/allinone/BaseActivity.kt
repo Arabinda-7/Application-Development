@@ -2,6 +2,7 @@ package com.example.allinone
 
 import android.app.Dialog
 import android.content.Context
+import android.content.pm.PackageManager
 import android.graphics.Rect
 import android.os.Bundle
 import android.view.MotionEvent
@@ -9,7 +10,9 @@ import android.view.View
 import android.view.inputmethod.InputMethodManager
 import android.widget.EditText
 import androidx.activity.enableEdgeToEdge
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AppCompatActivity
+import androidx.core.content.ContextCompat
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
 
@@ -18,9 +21,33 @@ open class BaseActivity : AppCompatActivity() {
     private var appliedFontSize: String = ""
     private var activeDialog: Dialog? = null
 
+    private var onPermissionGranted: (() -> Unit)? = null
+    private val permissionLauncher = registerForActivityResult(ActivityResultContracts.RequestPermission()) { isGranted ->
+        if (isGranted) {
+            onPermissionGranted?.invoke()
+        }
+    }
+
+    fun checkAndRequestPermission(permission: String, onGranted: () -> Unit) {
+        when {
+            ContextCompat.checkSelfPermission(this, permission) == PackageManager.PERMISSION_GRANTED -> {
+                onGranted()
+            }
+            else -> {
+                onPermissionGranted = onGranted
+                permissionLauncher.launch(permission)
+            }
+        }
+    }
+
     fun showDialogSafe(dialog: Dialog) {
         if (activeDialog?.isShowing == true) return
         dialog.window?.let { window ->
+            window.setBackgroundDrawableResource(android.R.color.transparent)
+            window.setLayout(
+                android.view.ViewGroup.LayoutParams.MATCH_PARENT,
+                android.view.ViewGroup.LayoutParams.WRAP_CONTENT
+            )
             window.addFlags(android.view.WindowManager.LayoutParams.FLAG_BLUR_BEHIND)
             if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.S) {
                 window.attributes.blurBehindRadius = 20

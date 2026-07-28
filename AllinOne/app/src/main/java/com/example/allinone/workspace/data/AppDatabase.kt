@@ -4,8 +4,10 @@ import android.content.Context
 import androidx.room.Database
 import androidx.room.Room
 import androidx.room.RoomDatabase
-import net.sqlcipher.database.SupportFactory
+import androidx.room.TypeConverters
+import net.zetetic.database.sqlcipher.SupportOpenHelperFactory
 import com.example.allinone.SecurityManager
+import com.example.allinone.data.database.*
 
 @Database(
     entities = [
@@ -18,27 +20,41 @@ import com.example.allinone.SecurityManager
         IdeaEntity::class,
         ResourceEntity::class,
         ActivityLogEntity::class,
-        NoteCrossReferenceEntity::class
+        NoteCrossReferenceEntity::class,
+        // Global Entities
+        com.example.allinone.data.database.TaskEntity::class,
+        com.example.allinone.data.database.NoteEntity::class,
+        HabitEntity::class,
+        WorkoutEntity::class,
+        TransactionEntity::class,
+        PersonalLedgerEntity::class,
+        LedgerEntryEntity::class
     ],
-    version = 6,
+    version = 7, // Incremented version
     exportSchema = false
 )
-abstract class WorkspaceDatabase : RoomDatabase() {
+@TypeConverters(AppTypeConverters::class)
+abstract class AppDatabase : RoomDatabase() {
     abstract fun workspaceDao(): WorkspaceDao
+    abstract fun taskDao(): AppTaskDao
+    abstract fun habitDao(): AppHabitDao
+    abstract fun workoutDao(): AppWorkoutDao
+    abstract fun noteDao(): AppNoteDao
+    abstract fun financeDao(): AppFinanceDao
 
     companion object {
         @Volatile
-        private var INSTANCE: WorkspaceDatabase? = null
+        private var INSTANCE: AppDatabase? = null
 
-        fun getDatabase(context: Context): WorkspaceDatabase {
+        fun getDatabase(context: Context): AppDatabase {
             return INSTANCE ?: synchronized(this) {
                 val passphrase = SecurityManager.getDatabasePassphrase(context).toByteArray()
-                val factory = SupportFactory(passphrase)
+                val factory = SupportOpenHelperFactory(passphrase)
                 
                 val instance = Room.databaseBuilder(
                     context.applicationContext,
-                    WorkspaceDatabase::class.java,
-                    "workspace_database"
+                    AppDatabase::class.java,
+                    "app_database" // Renamed from workspace_database
                 )
                 .openHelperFactory(factory)
                 .fallbackToDestructiveMigration()
@@ -51,7 +67,7 @@ abstract class WorkspaceDatabase : RoomDatabase() {
         fun resetDatabase(context: Context) {
             INSTANCE?.close()
             INSTANCE = null
-            context.deleteDatabase("workspace_database")
+            context.deleteDatabase("app_database")
         }
     }
 }

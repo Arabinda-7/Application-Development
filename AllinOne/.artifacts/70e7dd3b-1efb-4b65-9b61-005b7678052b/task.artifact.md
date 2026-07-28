@@ -1,0 +1,5 @@
+- [x] Create custom selection dialog layout `dialog_selector.xml`
+- [x] Update `EditProjectActivity.kt` with custom selection logic
+    - [x] Implement `showStatusMenu()` with custom dialog
+    - [x] Implement `showPriorityMenu()` with custom dialog
+- [x] Verify selection UI and functionality

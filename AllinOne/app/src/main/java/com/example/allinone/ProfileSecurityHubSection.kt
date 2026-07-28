@@ -12,6 +12,8 @@ class ProfileSecurityHubSection(
     private val onScreenshotToggled: (Boolean) -> Unit,
     private val onOledToggled: (Boolean) -> Unit
 ) {
+    private var currentAccentColor: Int? = null
+
     fun setup(isAppLockEnabled: Boolean, isBiometricEnabled: Boolean, isScreenshotEnabled: Boolean, isOledEnabled: Boolean) {
         setupToggle(
             R.id.item_app_lock,
@@ -44,6 +46,17 @@ class ProfileSecurityHubSection(
             isOledEnabled,
             onOledToggled
         )
+    }
+
+    fun applyTint(color: Int) {
+        currentAccentColor = color
+        val colorStateList = android.content.res.ColorStateList.valueOf(color)
+        
+        listOf(R.id.item_app_lock, R.id.item_biometric_lock, R.id.item_screenshot_protection, R.id.item_oled_mode).forEach { id ->
+            val container = rootView.findViewById<View>(id)
+            container.findViewById<ImageView>(R.id.iv_setting_icon).imageTintList = colorStateList
+            container.findViewById<SwitchCompat>(R.id.sw_profile_toggle).thumbTintList = colorStateList
+        }
     }
 
     private fun setupToggle(containerId: Int, icon: Int, title: String, isChecked: Boolean, onToggle: (Boolean) -> Unit) {

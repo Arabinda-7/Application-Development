@@ -1,16 +1,14 @@
-- [x] HabitTrackerActivity refactored
-- [x] MainActivity refactored
-- [x] TaskActivity refactored
-- [x] NotesActivity refactored
-- [x] FinanceActivity refactored
-- [x] ProjectActivity refactored
-- [x] WorkoutRoutineActivity refactored
-- [x] ProfileActivity refactored
-- [x] PerformanceHistoryActivity refactored
-- [x] PersonalLedgerHubActivity refactored
-- [x] LedgerActivity refactored
-- [x] FinanceMonthHistoryActivity refactored
-- [x] LedgerHistoryActivity refactored
-- [x] Workspace section (ProjectWorkspaceScreen) refactored
-- [x] SettingsActivity refactored
-- [x] OnboardingActivity refactored
+# Task Checklist - Resource Optimization
+
+- [ ] Create Vector Drawables for common icons
+    - [ ] `ic_trash.xml`
+    - [ ] `ic_edit.xml`
+    - [ ] `ic_done.xml`
+    - [ ] `ic_close.xml`
+    - [ ] `ic_home.xml`
+    - [ ] `ic_arrow_vector.xml`
+- [ ] Replace PNG usages with Vector Drawables in Layouts
+- [ ] Replace PNG usages with Vector Drawables in Code
+- [ ] Consolidate Arrows in `IconPreview.kt` and `JourneyUI.kt`
+- [ ] Update `build.gradle.kts` for minification and shrinking
+- [ ] Verify build and APK size

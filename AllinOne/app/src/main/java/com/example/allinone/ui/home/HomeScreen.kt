@@ -1,5 +1,6 @@
 package com.example.allinone.ui.home
 
+import android.content.Intent
 import androidx.compose.animation.*
 import androidx.compose.animation.core.*
 import androidx.compose.foundation.*
@@ -66,6 +67,7 @@ fun HomeScreen(
     var showNotificationsDialog by remember { mutableStateOf(false) }
     var showVoiceComingSoon by remember { mutableStateOf(false) }
 
+    val context = LocalContext.current
     val infiniteTransition = rememberInfiniteTransition(label = "Aura")
     val auraAlpha by infiniteTransition.animateFloat(
         initialValue = 0.4f,
@@ -117,7 +119,7 @@ fun HomeScreen(
     val dialRotation by transition.animateFloat(label = "Rotation") { if (it) 45f else 0f }
 
     val todayDateString = remember { SimpleDateFormat("yyyyMMdd", Locale.getDefault()).format(Date()) }
-    val showRedDot = state.todayAgenda.isNotEmpty() && DataManager.lastViewedNotificationDate != todayDateString
+    val showRedDot = state.todayAgenda.isNotEmpty() && (DataManager.lastViewedNotificationDate != todayDateString || DataManager.hasNewTodayNotifications)
 
     Scaffold(
         contentWindowInsets = WindowInsets(0, 0, 0, 0),
@@ -199,7 +201,8 @@ fun HomeScreen(
                 onNotificationsClick = { 
                     showNotificationsDialog = true
                     DataManager.lastViewedNotificationDate = todayDateString
-                    DataManager.saveData(null)
+                    DataManager.hasNewTodayNotifications = false
+                    DataManager.saveData(context)
                 },
                 onSettingsClick = onNavigateToSettings,
                 onProfileClick = onNavigateToProfile,
@@ -465,12 +468,32 @@ fun HomeScreen(
                                 letterSpacing = 1.sp,
                                 modifier = Modifier.padding(top = 16.dp, bottom = 8.dp)
                             )
+                            
+                            var lastColorInt: Int? = null
+                            
                             items.forEach { item ->
+                                val rawItemColor = if (item.color != -1) item.color else style.accentColor.toArgb()
+                                // Logic: If same as previous color, use a slight variation or a fixed fallback to ensure distinction
+                                val finalItemColorInt = if (lastColorInt != null && lastColorInt == rawItemColor) {
+                                    // Fallback: If it's a conflict, use a secondary color or darken it
+                                    UIUtils.darkenColor(rawItemColor, 0.7f)
+                                } else {
+                                    rawItemColor
+                                }
+                                lastColorInt = finalItemColorInt
+                                val itemColor = Color(finalItemColorInt)
+
                                 Surface(
                                     onClick = {
                                         when (item.navigationTarget) {
                                             "TASK_ACTIVITY" -> onNavigateToTodos()
-                                            "PROJECT_ACTIVITY" -> onNavigateToProjects()
+                                            "PROJECT_ACTIVITY" -> {
+                                                val intent = Intent(context, ViewProjectActivity::class.java).apply {
+                                                    val index = item.id.toIntOrNull() ?: item.parentId?.toIntOrNull()
+                                                    putExtra("PROJECT_INDEX", index ?: -1)
+                                                }
+                                                context.startActivity(intent)
+                                            }
                                             "WORKSPACE" -> onNavigateToWorkspace()
                                             "NOTE_ACTIVITY" -> onNavigateToNotes()
                                         }
@@ -486,7 +509,18 @@ fun HomeScreen(
                                                 verticalAlignment = Alignment.CenterVertically,
                                                 modifier = Modifier.fillMaxWidth().padding(end = 80.dp)
                                             ) {
-                                                Box(modifier = Modifier.size(6.dp).background(style.accentColor, CircleShape))
+                                                val icon = when(item.category) {
+                                                    "TASKS" -> Icons.Default.CheckCircle
+                                                    "PROJECTS" -> Icons.Default.DateRange
+                                                    "SUBFEATURES" -> Icons.Default.Info
+                                                    else -> Icons.Default.Notifications
+                                                }
+                                                Icon(
+                                                    imageVector = icon,
+                                                    contentDescription = null,
+                                                    tint = itemColor,
+                                                    modifier = Modifier.size(16.dp)
+                                                )
                                                 Spacer(modifier = Modifier.width(12.dp))
                                                 Text(
                                                     text = item.title,
@@ -497,13 +531,28 @@ fun HomeScreen(
                                                     overflow = androidx.compose.ui.text.style.TextOverflow.Ellipsis
                                                 )
                                             }
-                                            if (item.details.isNotEmpty()) {
-                                                Text(
-                                                    text = item.details,
-                                                    color = Color.White.copy(alpha = 0.5f),
-                                                    fontSize = 12.sp,
-                                                    modifier = Modifier.padding(start = 18.dp, top = 2.dp)
-                                                )
+                                            
+                                            val timeStr = if (item.time != 0L) {
+                                                SimpleDateFormat("hh:mm a", Locale.getDefault()).format(Date(item.time))
+                                            } else ""
+                                            
+                                            Row(modifier = Modifier.padding(start = 28.dp, top = 2.dp), verticalAlignment = Alignment.CenterVertically) {
+                                                if (timeStr.isNotEmpty()) {
+                                                    Text(
+                                                        text = timeStr,
+                                                        color = itemColor.copy(alpha = 0.8f),
+                                                        fontSize = 11.sp,
+                                                        fontWeight = FontWeight.Bold
+                                                    )
+                                                    Spacer(modifier = Modifier.width(8.dp))
+                                                }
+                                                if (item.details.isNotEmpty()) {
+                                                    Text(
+                                                        text = item.details,
+                                                        color = Color.White.copy(alpha = 0.5f),
+                                                        fontSize = 12.sp
+                                                    )
+                                                }
                                             }
                                         }
 
@@ -521,14 +570,14 @@ fun HomeScreen(
                                             
                                             if (tagText.isNotEmpty()) {
                                                 Surface(
-                                                    color = style.accentColor.copy(alpha = 0.15f),
+                                                    color = itemColor.copy(alpha = 0.15f),
                                                     shape = RoundedCornerShape(4.dp),
-                                                    border = BorderStroke(0.5.dp, style.accentColor.copy(alpha = 0.3f))
+                                                    border = BorderStroke(0.5.dp, itemColor.copy(alpha = 0.3f))
                                                 ) {
                                                     Text(
                                                         text = tagText,
-                                                        color = style.accentColor,
-                                                        fontSize = 9.sp,
+                                                        color = itemColor,
+                                                        fontSize = 8.sp,
                                                         fontWeight = FontWeight.Bold,
                                                         modifier = Modifier.padding(horizontal = 6.dp, vertical = 2.dp)
                                                     )

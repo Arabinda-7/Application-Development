@@ -75,6 +75,7 @@ dependencies {
     implementation(libs.androidx.security.crypto)
     implementation(libs.androidx.biometric)
     implementation(libs.sqlcipher)
+    implementation(libs.androidx.sqlite)
 
     debugImplementation(libs.androidx.ui.tooling)
 

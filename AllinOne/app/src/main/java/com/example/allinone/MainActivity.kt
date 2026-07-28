@@ -36,7 +36,7 @@ class MainActivity : BaseActivity() {
     ) { result ->
         if (result.resultCode == RESULT_OK) {
             DataManager.isAppUnlocked = true
-            viewModel.refreshState()
+            viewModel.refreshState(this)
         } else {
             finish()
         }
@@ -45,24 +45,8 @@ class MainActivity : BaseActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         
-        if (!DataManager.isOnboardingCompleted) {
-            startActivity(Intent(this, OnboardingActivity::class.java))
-            finish()
-            return
-        }
-        
-        if (DataManager.isAppLockEnabled && !DataManager.isAppUnlocked && DataManager.appLockPin != null) {
-            val intent = Intent(this, LockActivity::class.java).apply {
-                putExtra(LockActivity.EXTRA_MODE, LockActivity.MODE_AUTH)
-            }
-            lockLauncher.launch(intent)
-            overridePendingTransition(0, 0)
-        } else {
-            DataManager.isAppUnlocked = true
-        }
-
         initHandlers()
-        viewModel.refreshState()
+        viewModel.refreshState(this)
 
         setContent {
             var showSplash by remember { mutableStateOf(true) }
@@ -72,9 +56,30 @@ class MainActivity : BaseActivity() {
             val isLoaded = dashboardState.isDataLoaded
             val isUnlocked = dashboardState.isAppUnlocked
             
+            LaunchedEffect(isLoaded) {
+                if (isLoaded) {
+                    if (!DataManager.isOnboardingCompleted) {
+                        startActivity(Intent(this@MainActivity, OnboardingActivity::class.java))
+                        finish()
+                        return@LaunchedEffect
+                    }
+
+                    if (DataManager.isAppLockEnabled && !DataManager.isAppUnlocked && DataManager.appLockPin != null) {
+                        val intent = Intent(this@MainActivity, LockActivity::class.java).apply {
+                            putExtra(LockActivity.EXTRA_MODE, LockActivity.MODE_AUTH)
+                        }
+                        lockLauncher.launch(intent)
+                        overridePendingTransition(0, 0)
+                    } else {
+                        DataManager.isAppUnlocked = true
+                        viewModel.refreshState(this@MainActivity)
+                    }
+                }
+            }
+
             LaunchedEffect(Unit) {
                 DataManager.dataChangeSignal.collect {
-                    viewModel.refreshState(viewModel.dashboardState.currentMood)
+                    viewModel.refreshState(this@MainActivity, viewModel.dashboardState.currentMood)
                 }
             }
             
@@ -169,14 +174,14 @@ class MainActivity : BaseActivity() {
                                     onQuickAddExpense = { quickActionsHandler.quickAddExpense() },
                                     onQuickAddNote = { quickActionsHandler.quickAddNote() },
                                     onColorSelected = { section, color ->
-                                        viewModel.updateSectionColor(section, color)
+                                        viewModel.updateSectionColor(this@MainActivity, section, color)
                                     },
                                     onMoodSelected = { emoji ->
                                         val today = DataManager.getTrackingDateString()
                                         DataManager.dailyMoods[today] = emoji
                                         DataManager.lastMoodTimestamp = System.currentTimeMillis()
                                         DataManager.saveData(this@MainActivity)
-                                        viewModel.refreshState(emoji)
+                                        viewModel.refreshState(this@MainActivity, emoji)
                                     },
                                     onSearchRequested = { query ->
                                         searchSection.performSearch(query)
@@ -198,6 +203,6 @@ class MainActivity : BaseActivity() {
 
     override fun onResume() {
         super.onResume()
-        viewModel.refreshState(viewModel.dashboardState.currentMood)
+        viewModel.refreshState(this, viewModel.dashboardState.currentMood)
     }
 }

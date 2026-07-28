@@ -132,9 +132,7 @@ class AddSubFeatureActivity : BaseActivity() {
 
         tvDeadline.setOnClickListener {
             val cal = Calendar.getInstance()
-            if (selectedDueDate != null) {
-                cal.timeInMillis = selectedDueDate!!
-            } else {
+            selectedDueDate?.let { cal.timeInMillis = it } ?: run {
                 // Smart Deadline: Default to 7 days from now
                 cal.add(Calendar.DAY_OF_YEAR, 7)
             }
@@ -326,10 +324,14 @@ class AddSubFeatureActivity : BaseActivity() {
         DataManager.saveData(this)
         
         // Schedule Reminder
-        if (targetFeature?.hasReminder == true && targetFeature?.dueDate != null) {
-            val time = targetFeature?.dueDate!!
-            if (time > System.currentTimeMillis()) {
-                scheduleMilestoneReminder(targetFeature!!)
+        targetFeature?.let { feature ->
+            DataManager.checkAndSetNewTodayNotification(feature.dueDate)
+            if (feature.hasReminder && feature.dueDate != null) {
+                feature.dueDate?.let { time ->
+                    if (time > System.currentTimeMillis()) {
+                        scheduleMilestoneReminder(feature)
+                    }
+                }
             }
         }
 
@@ -342,21 +344,26 @@ class AddSubFeatureActivity : BaseActivity() {
         
         if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.S) {
             if (!alarmManager.canScheduleExactAlarms()) {
-                val intent = Intent(android.provider.Settings.ACTION_REQUEST_SCHEDULE_EXACT_ALARM)
-                startActivity(intent)
+                try {
+                    val intent = Intent(android.provider.Settings.ACTION_REQUEST_SCHEDULE_EXACT_ALARM)
+                    startActivity(intent)
+                } catch (e: Exception) {
+                    Toast.makeText(this, "Permission required for exact alarms", Toast.LENGTH_SHORT).show()
+                }
                 return
             }
         }
 
+        val dueDate = feature.dueDate ?: return
         val intent = Intent(this, ReminderReceiver::class.java).apply {
             putExtra("TASK_NAME", "Milestone: ${feature.name}")
-            putExtra("TASK_TIMESTAMP", feature.dueDate)
+            putExtra("TASK_TIMESTAMP", dueDate)
         }
         
         val requestCode = feature.id.hashCode()
         val pendingIntent = android.app.PendingIntent.getBroadcast(this, requestCode, intent, android.app.PendingIntent.FLAG_UPDATE_CURRENT or android.app.PendingIntent.FLAG_IMMUTABLE)
 
-        alarmManager.setExactAndAllowWhileIdle(android.app.AlarmManager.RTC_WAKEUP, feature.dueDate!!, pendingIntent)
+        alarmManager.setExactAndAllowWhileIdle(android.app.AlarmManager.RTC_WAKEUP, dueDate, pendingIntent)
     }
 
     private fun applyTagSpecificLayout(tag: String) {

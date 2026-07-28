@@ -58,6 +58,9 @@ class EditProjectActivity : BaseActivity() {
     private var isDescriptionExpanded = false
     private var isGoalsExpanded = false
     private var isSubfeaturesExpanded = true
+    private var currentSubfeatureFilter = "ALL"
+    private var isActiveSubfeaturesExpanded = true
+    private var isCompletedSubfeaturesExpanded = false
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -208,16 +211,23 @@ class EditProjectActivity : BaseActivity() {
     }
 
     private fun showStatusMenu() {
-        val popup = PopupMenu(this, cellStatus)
-        popup.menu.add("TODO")
-        popup.menu.add("DOING")
-        popup.menu.add("DONE")
-        popup.menu.add("HOLD")
-        popup.setOnMenuItemClickListener { item ->
-            updateStatusUI(item.title.toString())
-            true
+        val options = listOf("TODO", "DOING", "DONE", "HOLD")
+        val icons = listOf(
+            android.R.drawable.ic_menu_edit,
+            R.drawable.icons8_clock_100,
+            R.drawable.icons8_done_100,
+            android.R.drawable.ic_menu_recent_history
+        )
+        val colors = listOf(
+            Color.WHITE,
+            Color.parseColor("#FFB800"),
+            Color.parseColor("#2EC4B6"),
+            Color.parseColor("#FF5252")
+        )
+
+        showCustomSelector("SELECT STATUS", options, icons, colors) { selected ->
+            updateStatusUI(selected)
         }
-        popup.show()
     }
 
     private fun updateStatusUI(status: String) {
@@ -231,20 +241,56 @@ class EditProjectActivity : BaseActivity() {
     }
 
     private fun showPriorityMenu() {
-        val popup = PopupMenu(this, cellPriority)
-        popup.menu.add("LOW")
-        popup.menu.add("MED")
-        popup.menu.add("HIGH")
-        popup.setOnMenuItemClickListener { item ->
-            val priority = when(item.title) {
+        val options = listOf("LOW", "MED", "HIGH")
+        val icons = listOf(
+            R.drawable.priority_chip_bg,
+            R.drawable.priority_chip_bg,
+            R.drawable.priority_chip_bg
+        )
+        val colors = listOf(
+            Color.parseColor("#2EC4B6"),
+            Color.parseColor("#FFB800"),
+            Color.RED
+        )
+
+        showCustomSelector("SELECT PRIORITY", options, icons, colors) { selected ->
+            val priority = when(selected) {
                 "LOW" -> 0
                 "HIGH" -> 2
                 else -> 1
             }
             updatePriorityUI(priority)
-            true
         }
-        popup.show()
+    }
+
+    private fun showCustomSelector(title: String, options: List<String>, icons: List<Int>, colors: List<Int>, onSelected: (String) -> Unit) {
+        val dialogView = LayoutInflater.from(this).inflate(R.layout.dialog_selector, null)
+        val dialog = android.app.AlertDialog.Builder(this)
+            .setView(dialogView)
+            .create()
+
+        dialog.window?.setBackgroundDrawableResource(android.R.color.transparent)
+
+        dialogView.findViewById<TextView>(R.id.dialog_title).text = title
+        val container = dialogView.findViewById<LinearLayout>(R.id.options_container)
+
+        options.forEachIndexed { index, option ->
+            val itemView = LayoutInflater.from(this).inflate(R.layout.item_selector_option, container, false)
+            val tv = itemView.findViewById<TextView>(R.id.option_text)
+            val iv = itemView.findViewById<ImageView>(R.id.option_icon)
+
+            tv.text = option
+            iv.setImageResource(icons[index])
+            iv.imageTintList = ColorStateList.valueOf(colors[index])
+            
+            itemView.setOnClickListener {
+                onSelected(option)
+                dialog.dismiss()
+            }
+            container.addView(itemView)
+        }
+
+        dialog.show()
     }
 
     private fun updatePriorityUI(priority: Int) {
@@ -276,45 +322,192 @@ class EditProjectActivity : BaseActivity() {
 
     private fun refreshSubFeatures() {
         containerSubfeatures.removeAllViews()
-        DataManager.currentEditingSubFeatures.forEach { sub ->
-            val layout = LinearLayout(this).apply {
-                orientation = LinearLayout.HORIZONTAL
-                setPadding(0, 2.dpToPx(), 0, 2.dpToPx())
-                gravity = android.view.Gravity.CENTER_VERTICAL
-                isClickable = true
-                isFocusable = true
-                background = ContextCompat.getDrawable(this@EditProjectActivity, R.drawable.glass_card_bg)
-                backgroundTintList = ColorStateList.valueOf(Color.TRANSPARENT)
+        
+        // 1. Filter Bar
+        val filterBar = HorizontalScrollView(this).apply {
+            scrollBarSize = 0
+            isHorizontalScrollBarEnabled = false
+            layoutParams = LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT).apply {
+                setMargins(0, 0, 0, 8.dpToPx())
             }
-            val tv = TextView(this).apply {
-                text = "${sub.position}. ${sub.name}"
-                setTextColor(Color.WHITE)
-                textSize = 14f
-                layoutParams = LinearLayout.LayoutParams(0, ViewGroup.LayoutParams.WRAP_CONTENT, 1f)
-            }
-            val btnEdit = ImageView(this).apply {
-                setImageResource(R.drawable.icons8_edit_pencil_100)
-                val iconSize = 20.dpToPx()
-                layoutParams = LinearLayout.LayoutParams(iconSize, iconSize)
-                setPadding(2.dpToPx(), 2.dpToPx(), 2.dpToPx(), 2.dpToPx())
-                imageTintList = ColorStateList.valueOf(Color.GRAY)
+        }
+        val filterContainer = LinearLayout(this).apply { orientation = LinearLayout.HORIZONTAL }
+        val categories = listOf("ALL", "TASKS", "FEATURES", "BUGS", "RESOURCES", "OTHER")
+        
+        categories.forEach { cat ->
+            val chip = TextView(this).apply {
+                text = cat
+                textSize = 10f
+                setTypeface(null, android.graphics.Typeface.BOLD)
+                setPadding(12.dpToPx(), 6.dpToPx(), 12.dpToPx(), 6.dpToPx())
+                val isSelected = currentSubfeatureFilter == cat
+                setTextColor(if (isSelected) Color.WHITE else Color.GRAY)
+                background = ContextCompat.getDrawable(this@EditProjectActivity, R.drawable.priority_chip_bg)
+                backgroundTintList = ColorStateList.valueOf(if (isSelected) Color.parseColor("#1A73E8") else Color.parseColor("#11FFFFFF"))
+                
+                layoutParams = LinearLayout.LayoutParams(ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT).apply {
+                    marginEnd = 8.dpToPx()
+                }
+                
                 setOnClickListener {
-                    startActivity(Intent(this@EditProjectActivity, AddSubFeatureActivity::class.java).apply {
-                        putExtra("PROJECT_INDEX", projectIndex)
-                        putExtra("SUB_FEATURE_ID", sub.id)
-                    })
+                    currentSubfeatureFilter = cat
+                    refreshSubFeatures()
                 }
             }
-            layout.addView(tv)
-            layout.addView(btnEdit)
-            
-            layout.setOnLongClickListener {
-                showSubFeatureMenu(it, sub)
-                true
-            }
-
-            containerSubfeatures.addView(layout)
+            filterContainer.addView(chip)
         }
+        filterBar.addView(filterContainer)
+        containerSubfeatures.addView(filterBar)
+
+        if (!isSubfeaturesExpanded) return
+
+        val allSubs = DataManager.currentEditingSubFeatures
+        val filteredSubs = if (currentSubfeatureFilter == "ALL") allSubs 
+                          else allSubs.filter { it.tag.uppercase() == currentSubfeatureFilter || (currentSubfeatureFilter == "OTHER" && it.tag.isEmpty()) }
+
+        val activeSubs = filteredSubs.filter { !it.isCompleted }
+        val completedSubs = filteredSubs.filter { it.isCompleted }
+
+        // 2. Active Section
+        if (activeSubs.isNotEmpty()) {
+            addSectionHeader("Active (${activeSubs.size})", isActiveSubfeaturesExpanded) {
+                isActiveSubfeaturesExpanded = !isActiveSubfeaturesExpanded
+                refreshSubFeatures()
+            }
+            if (isActiveSubfeaturesExpanded) {
+                activeSubs.forEach { sub -> addSubfeatureRow(sub) }
+            }
+        }
+
+        // 3. Completed Section
+        if (completedSubs.isNotEmpty()) {
+            addSectionHeader("Completed (${completedSubs.size})", isCompletedSubfeaturesExpanded) {
+                isCompletedSubfeaturesExpanded = !isCompletedSubfeaturesExpanded
+                refreshSubFeatures()
+            }
+            if (isCompletedSubfeaturesExpanded) {
+                completedSubs.forEach { sub -> addSubfeatureRow(sub) }
+            }
+        }
+    }
+
+    private fun addSectionHeader(title: String, isExpanded: Boolean, onClick: () -> Unit) {
+        val header = LinearLayout(this).apply {
+            orientation = LinearLayout.HORIZONTAL
+            gravity = android.view.Gravity.CENTER_VERTICAL
+            setPadding(4.dpToPx(), 8.dpToPx(), 4.dpToPx(), 4.dpToPx())
+            setOnClickListener { onClick() }
+        }
+        val tv = TextView(this).apply {
+            text = title.uppercase()
+            setTextColor(Color.GRAY)
+            textSize = 10f
+            setTypeface(null, android.graphics.Typeface.BOLD)
+            layoutParams = LinearLayout.LayoutParams(0, ViewGroup.LayoutParams.WRAP_CONTENT, 1f)
+        }
+        val iv = ImageView(this).apply {
+            setImageResource(if (isExpanded) android.R.drawable.arrow_up_float else android.R.drawable.arrow_down_float)
+            imageTintList = ColorStateList.valueOf(Color.GRAY)
+            layoutParams = LinearLayout.LayoutParams(16.dpToPx(), 16.dpToPx())
+        }
+        header.addView(tv)
+        header.addView(iv)
+        containerSubfeatures.addView(header)
+    }
+
+    private fun addSubfeatureRow(sub: ProjectFeature) {
+        val layout = LinearLayout(this).apply {
+            orientation = LinearLayout.HORIZONTAL
+            setPadding(0, 4.dpToPx(), 0, 4.dpToPx())
+            gravity = android.view.Gravity.CENTER_VERTICAL
+            isClickable = true
+            isFocusable = true
+            background = ContextCompat.getDrawable(this@EditProjectActivity, R.drawable.glass_card_bg)
+            backgroundTintList = ColorStateList.valueOf(Color.TRANSPARENT)
+        }
+        val tv = TextView(this).apply {
+            text = "${sub.position}. ${sub.name}"
+            setTextColor(Color.WHITE)
+            textSize = 14f
+            layoutParams = LinearLayout.LayoutParams(0, ViewGroup.LayoutParams.WRAP_CONTENT, 1f)
+            if (sub.isCompleted) {
+                paintFlags = paintFlags or Paint.STRIKE_THRU_TEXT_FLAG
+                alpha = 0.6f
+            }
+        }
+        
+        val containerMeta = LinearLayout(this).apply {
+            orientation = LinearLayout.HORIZONTAL
+            gravity = android.view.Gravity.CENTER_VERTICAL
+            layoutParams = LinearLayout.LayoutParams(ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT)
+        }
+
+        if (sub.tag.isNotEmpty()) {
+            val tvTag = TextView(this).apply {
+                text = sub.tag.uppercase()
+                setTextColor(Color.parseColor("#1A73E8"))
+                textSize = 10f
+                setTypeface(null, android.graphics.Typeface.BOLD)
+                setPadding(4.dpToPx(), 2.dpToPx(), 4.dpToPx(), 2.dpToPx())
+                background = ContextCompat.getDrawable(this@EditProjectActivity, R.drawable.priority_chip_bg)
+                backgroundTintList = ColorStateList.valueOf(Color.parseColor("#1A73E8")).withAlpha(30)
+                val params = LinearLayout.LayoutParams(ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT)
+                params.marginEnd = 4.dpToPx()
+                layoutParams = params
+            }
+            containerMeta.addView(tvTag)
+        }
+
+        val priorityText = when(sub.priority) { 2 -> "HIGH"; 1 -> "MED"; else -> "LOW" }
+        val priorityColor = when(sub.priority) { 2 -> Color.RED; 1 -> Color.parseColor("#FFB800"); else -> Color.parseColor("#2EC4B6") }
+        val tvPriority = TextView(this).apply {
+            text = priorityText
+            setTextColor(priorityColor)
+            textSize = 10f
+            setTypeface(null, android.graphics.Typeface.BOLD)
+            setPadding(4.dpToPx(), 2.dpToPx(), 4.dpToPx(), 2.dpToPx())
+            background = ContextCompat.getDrawable(this@EditProjectActivity, R.drawable.priority_chip_bg)
+            backgroundTintList = ColorStateList.valueOf(priorityColor).withAlpha(30)
+            val params = LinearLayout.LayoutParams(ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT)
+            params.marginEnd = 4.dpToPx()
+            layoutParams = params
+        }
+        containerMeta.addView(tvPriority)
+
+        val tvDate = TextView(this).apply {
+            sub.dueDate?.let {
+                text = SimpleDateFormat("MMM dd", Locale.getDefault()).format(Date(it))
+                setTextColor(Color.RED)
+                textSize = 12f
+                setPadding(4.dpToPx(), 0, 8.dpToPx(), 0)
+            } ?: run {
+                visibility = View.GONE
+            }
+        }
+        val btnEdit = ImageView(this).apply {
+            setImageResource(R.drawable.icons8_edit_pencil_100)
+            val iconSize = 20.dpToPx()
+            layoutParams = LinearLayout.LayoutParams(iconSize, iconSize)
+            setPadding(2.dpToPx(), 2.dpToPx(), 2.dpToPx(), 2.dpToPx())
+            imageTintList = ColorStateList.valueOf(Color.GRAY)
+            setOnClickListener {
+                startActivity(Intent(this@EditProjectActivity, AddSubFeatureActivity::class.java).apply {
+                    putExtra("PROJECT_INDEX", projectIndex)
+                    putExtra("SUB_FEATURE_ID", sub.id)
+                })
+            }
+        }
+        layout.addView(tv)
+        layout.addView(containerMeta)
+        layout.addView(tvDate)
+        layout.addView(btnEdit)
+        
+        layout.setOnLongClickListener {
+            showSubFeatureMenu(it, sub)
+            true
+        }
+
+        containerSubfeatures.addView(layout)
     }
 
     private fun showSubFeatureMenu(anchor: View, sub: ProjectFeature) {

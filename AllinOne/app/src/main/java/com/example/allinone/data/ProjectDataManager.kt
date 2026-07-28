@@ -4,13 +4,13 @@ import com.example.allinone.Note
 import com.example.allinone.R
 
 object ProjectDataManager {
-    var projects = mutableListOf<Note>()
+    var projects: MutableList<Note> = java.util.Collections.synchronizedList(mutableListOf<Note>())
     
     var projectAutoArchive: Boolean = false
     var projectSynergySync: Boolean = false
     var projectDeadlineAlerts: Boolean = true
     var projectAnalyticsEnabled: Boolean = false
-    var projectCustomTags = mutableListOf("TASKS", "NOTES", "FEATURES", "BUGS", "RESOURCES")
+    var projectCustomTags = java.util.Collections.synchronizedList(mutableListOf("TASKS", "NOTES", "FEATURES", "BUGS", "RESOURCES"))
     var projectSortCompletedToBottom: Boolean = true
     var projectActiveExpanded: Boolean = true
     var projectCompletedExpanded: Boolean = false
@@ -21,11 +21,11 @@ object ProjectDataManager {
     var projectIdeasEnabled: Boolean = true
     var projectRoadmapsEnabled: Boolean = true
     
-    var projectTemplates: MutableMap<String, List<String>> = mutableMapOf(
+    var projectTemplates: MutableMap<String, List<String>> = java.util.Collections.synchronizedMap(mutableMapOf(
         "App Feature" to listOf("UI Design", "Business Logic", "Integration", "Testing", "Deployment"),
         "Personal Goal" to listOf("Planning", "Execution", "Review"),
         "Bug Fix" to listOf("Reproduction", "Debugging", "Fix", "Verification")
-    )
+    ))
     
     var globalProjectColor: Int = -1
     var projectAddThemeColor: Int = -1

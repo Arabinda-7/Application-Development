@@ -73,8 +73,12 @@ class PerformanceHistoryComposeHandler(
 
         return if (dateKey == today) {
             val todayIndex = (DataManager.getTrackingCalendar().get(Calendar.DAY_OF_WEEK) - 1)
-            val todaysHabits = DataManager.habits.filter { (it.repeatType != "SPECIFIC_DAYS" || it.repeatDays.contains(todayIndex)) && it.timestamp <= selectedDayEnd }
-            val todaysWorkouts = DataManager.workouts.filter { (it.repeatType != "SPECIFIC_DAYS" || it.repeatDays.contains(todayIndex)) && it.timestamp <= selectedDayEnd }
+            val todaysHabits = synchronized(DataManager.habits) {
+                DataManager.habits.filter { (it.repeatType != "SPECIFIC_DAYS" || it.repeatDays.contains(todayIndex)) && it.timestamp <= selectedDayEnd }
+            }
+            val todaysWorkouts = synchronized(DataManager.workouts) {
+                DataManager.workouts.filter { (it.repeatType != "SPECIFIC_DAYS" || it.repeatDays.contains(todayIndex)) && it.timestamp <= selectedDayEnd }
+            }
             DayHistory(todaysHabits.count { it.isCompleted }, todaysHabits.size, todaysWorkouts.count { it.isCompleted }, todaysWorkouts.size, todaysWorkouts.map { w ->
                 WorkoutProgressEntry(w.name, w.progress, w.target, if (w.trackingMode == "Timer") "s" else if (w.trackingMode == "Sets") "Sets" else w.trackingMode, w.color, w.isCompleted)
             })
@@ -84,8 +88,12 @@ class PerformanceHistoryComposeHandler(
                 val cal = Calendar.getInstance()
                 try { sdf.parse(dateKey)?.let { cal.time = it } } catch (e: Exception) {}
                 val dayIndex = (cal.get(Calendar.DAY_OF_WEEK) - 1)
-                val activeHabits = DataManager.habits.filter { it.timestamp <= selectedDayEnd && (it.repeatType != "SPECIFIC_DAYS" || it.repeatDays.contains(dayIndex)) }
-                val activeWorkouts = DataManager.workouts.filter { it.timestamp <= selectedDayEnd && (it.repeatType != "SPECIFIC_DAYS" || it.repeatDays.contains(dayIndex)) }
+                val activeHabits = synchronized(DataManager.habits) {
+                    DataManager.habits.filter { it.timestamp <= selectedDayEnd && (it.repeatType != "SPECIFIC_DAYS" || it.repeatDays.contains(dayIndex)) }
+                }
+                val activeWorkouts = synchronized(DataManager.workouts) {
+                    DataManager.workouts.filter { it.timestamp <= selectedDayEnd && (it.repeatType != "SPECIFIC_DAYS" || it.repeatDays.contains(dayIndex)) }
+                }
                 DayHistory(activeHabits.count { it.completedDates.contains(dateKey) }, activeHabits.size, activeWorkouts.count { it.completedDates.contains(dateKey) }, activeWorkouts.size, activeWorkouts.map { w ->
                     WorkoutProgressEntry(w.name, if (w.completedDates.contains(dateKey)) w.target else 0, w.target, if (w.trackingMode == "Timer") "s" else if (w.trackingMode == "Sets") "Sets" else w.trackingMode, w.color, w.completedDates.contains(dateKey))
                 })

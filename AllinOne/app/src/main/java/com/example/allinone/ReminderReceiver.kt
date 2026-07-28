@@ -12,25 +12,51 @@ import android.os.VibrationEffect
 import android.os.Vibrator
 import androidx.core.app.NotificationCompat
 
+import kotlinx.coroutines.*
+import kotlinx.coroutines.flow.filter
+import kotlinx.coroutines.flow.first
+
 class ReminderReceiver : BroadcastReceiver() {
+    private val receiverScope = CoroutineScope(Dispatchers.IO + SupervisorJob())
+
     override fun onReceive(context: Context, intent: Intent) {
-        val taskName = intent.getStringExtra("TASK_NAME") ?: return
+        val pendingResult = goAsync()
+        val taskName = intent.getStringExtra("TASK_NAME") ?: run { pendingResult.finish(); return }
         val taskTimestamp = intent.getLongExtra("TASK_TIMESTAMP", -1L)
         
         if (taskName.startsWith("Note:") || taskName.startsWith("Milestone:")) {
             triggerNotification(context, taskName)
             triggerVibration(context)
+            pendingResult.finish()
             return
         }
 
-        // Reload data to check completion status
-        DataManager.loadData(context)
-        val task = DataManager.tasks.find { it.timestamp == taskTimestamp }
-        
-        // Only notify if task exists and is NOT completed
-        if (task != null && !task.isCompleted) {
-            triggerNotification(context, taskName)
-            triggerVibration(context)
+        receiverScope.launch {
+            try {
+                // Ensure DataManager is initialized if process was killed
+                if (!DataManager.isDataLoaded.value) {
+                    DataManager.initialize(context.applicationContext)
+                    // Wait for initial load
+                    withTimeoutOrNull(3000) {
+                        DataManager.isDataLoaded.filter { it }.first()
+                    }
+                }
+
+                // Query for task status
+                val task = synchronized(DataManager) {
+                    DataManager.tasks.find { it.timestamp == taskTimestamp }
+                }
+                
+                // Only notify if task exists and is NOT completed
+                if (task != null && !task.isCompleted) {
+                    triggerNotification(context, taskName)
+                    triggerVibration(context)
+                }
+            } catch (e: Exception) {
+                e.printStackTrace()
+            } finally {
+                pendingResult.finish()
+            }
         }
     }
 

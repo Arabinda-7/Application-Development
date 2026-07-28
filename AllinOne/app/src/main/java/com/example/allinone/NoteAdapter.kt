@@ -11,6 +11,7 @@ import androidx.core.content.ContextCompat
 import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.RecyclerView
 import com.google.android.material.card.MaterialCardView
+import kotlinx.coroutines.*
 import java.text.SimpleDateFormat
 import java.util.*
 
@@ -19,6 +20,7 @@ class NoteAdapter(
     private val onProgressChanged: () -> Unit
 ) : RecyclerView.Adapter<NoteAdapter.NoteViewHolder>() {
 
+    private val adapterScope = CoroutineScope(Dispatchers.Main + SupervisorJob())
     private var notes = initialNotes.toMutableList()
     private var isDeleteMode = false
     private val selectedNotes = mutableSetOf<Note>()
@@ -171,12 +173,14 @@ class NoteAdapter(
     override fun getItemCount() = notes.size
 
     fun updateNotes(newNotes: List<Note>) {
-        val oldNotes = notes.toList() // Create a copy for DiffUtil
-        val diffCallback = NoteDiffCallback(oldNotes, newNotes)
-        val diffResult = DiffUtil.calculateDiff(diffCallback)
-        notes.clear()
-        notes.addAll(newNotes)
-        diffResult.dispatchUpdatesTo(this)
+        adapterScope.launch {
+            val diffResult = withContext(Dispatchers.Default) {
+                DiffUtil.calculateDiff(NoteDiffCallback(notes, newNotes))
+            }
+            notes.clear()
+            notes.addAll(newNotes)
+            diffResult.dispatchUpdatesTo(this@NoteAdapter)
+        }
     }
 
     class NoteViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {

@@ -32,19 +32,19 @@
             </intent-filter>
         </activity>
         <activity android:name=".HabitTrackerActivity"
-            android:exported="true"
+            android:exported="false"
             tools:ignore="MissingClass" />
-        <activity android:name=".TaskActivity" android:exported="true" />
-        <activity android:name=".WorkoutRoutineActivity" android:exported="true" />
+        <activity android:name=".TaskActivity" android:exported="false" />
+        <activity android:name=".WorkoutRoutineActivity" android:exported="false" />
         <activity android:name=".NotesActivity"
-            android:exported="true"
+            android:exported="false"
             tools:ignore="MissingClass" />
-        <activity android:name=".FinanceActivity" android:exported="true" />
+        <activity android:name=".FinanceActivity" android:exported="false" />
         <activity android:name=".SettingsActivity"
-            android:exported="true"
+            android:exported="false"
             tools:ignore="MissingClass" />
-        <activity android:name=".ProjectActivity" android:exported="true" />
-        <activity android:name=".ProfileActivity" android:exported="true" />
+        <activity android:name=".ProjectActivity" android:exported="false" />
+        <activity android:name=".ProfileActivity" android:exported="false" />
         <activity android:name=".OnboardingActivity" />
         <activity android:name=".PerformanceHistoryActivity" />
         <activity android:name=".ProjectHistoryActivity" />

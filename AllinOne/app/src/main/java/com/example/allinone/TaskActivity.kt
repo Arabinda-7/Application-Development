@@ -97,12 +97,19 @@ class TaskActivity : BaseActivity() {
 
         findViewById<FloatingActionButton>(R.id.btn_create_new_task).setOnClickListener {
             if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.TIRAMISU) {
-                requestPermissions(arrayOf(android.Manifest.permission.POST_NOTIFICATIONS), 101)
+                checkAndRequestPermission(android.Manifest.permission.POST_NOTIFICATIONS) {
+                    openAddTask()
+                }
+            } else {
+                openAddTask()
             }
-            startActivity(Intent(this, AddTaskActivity::class.java).apply {
-                putExtra("SECTION", viewModel.currentSection)
-            })
         }
+    }
+
+    private fun openAddTask() {
+        startActivity(Intent(this, AddTaskActivity::class.java).apply {
+            putExtra("SECTION", viewModel.currentSection)
+        })
     }
 
     private fun applyFilters() {

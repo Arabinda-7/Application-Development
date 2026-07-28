@@ -109,8 +109,10 @@ fun HomeHeader(
                                 val context = LocalContext.current
                                 val bitmap = remember(state.userProfileImageUri) {
                                     try {
-                                        context.contentResolver.openInputStream(Uri.parse(state.userProfileImageUri!!))?.use {
-                                            BitmapFactory.decodeStream(it)
+                                        state.userProfileImageUri?.let { uriString ->
+                                            context.contentResolver.openInputStream(Uri.parse(uriString))?.use {
+                                                BitmapFactory.decodeStream(it)
+                                            }
                                         }
                                     } catch (e: Exception) {
                                         null
@@ -199,13 +201,16 @@ fun HomeHeader(
                     Spacer(modifier = Modifier.width(8.dp))
 
                     Box(
-                        modifier = Modifier
-                            .size(36.dp)
-                            .clip(CircleShape)
-                            .background(Color.White.copy(alpha = 0.08f))
-                            .clickable { onNotificationsClick(); isMessageExpanded = false },
+                        modifier = Modifier.size(36.dp),
                         contentAlignment = Alignment.Center
                     ) {
+                        Box(
+                            modifier = Modifier
+                                .fillMaxSize()
+                                .clip(CircleShape)
+                                .background(Color.White.copy(alpha = 0.08f))
+                                .clickable { onNotificationsClick(); isMessageExpanded = false }
+                        )
                         Icon(
                             imageVector = Icons.Default.Notifications,
                             contentDescription = "Notifications",
@@ -215,11 +220,11 @@ fun HomeHeader(
                         if (showRedDot) {
                             Box(
                                 modifier = Modifier
-                                    .size(8.dp)
+                                    .size(9.dp)
+                                    .align(Alignment.TopEnd)
+                                    .offset(x = 1.dp, y = (-1).dp)
                                     .background(Color.Red, CircleShape)
                                     .border(1.5.dp, Color.Black, CircleShape)
-                                    .align(Alignment.TopEnd)
-                                    .offset(x = (2).dp, y = (-2).dp)
                             )
                         }
                     }

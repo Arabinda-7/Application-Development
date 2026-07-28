@@ -117,6 +117,10 @@ object UIUtils {
             }
     }
 
+    fun dpToPx(context: Context, dp: Int): Int {
+        return (dp * context.resources.displayMetrics.density).toInt()
+    }
+
     fun darkenColor(color: Int, factor: Float): Int {
         val a = android.graphics.Color.alpha(color)
         val r = Math.round(android.graphics.Color.red(color) * factor)
@@ -128,6 +132,14 @@ object UIUtils {
             Math.min(g, 255),
             Math.min(b, 255)
         )
+    }
+
+    fun adjustAlpha(color: Int, factor: Float): Int {
+        val alpha = Math.round(android.graphics.Color.alpha(color) * factor)
+        val red = android.graphics.Color.red(color)
+        val green = android.graphics.Color.green(color)
+        val blue = android.graphics.Color.blue(color)
+        return android.graphics.Color.argb(alpha, red, green, blue)
     }
 
     fun showPasswordDialog(context: Context, title: String, onConfirm: (CharArray) -> Unit) {

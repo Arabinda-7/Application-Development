@@ -16,4 +16,9 @@ class ProfileDataGovernanceSection(
         
         exportItem.setOnClickListener { onExportClicked() }
     }
+
+    fun applyTint(color: Int) {
+        val exportItem = rootView.findViewById<View>(R.id.item_export_data)
+        exportItem.findViewById<ImageView>(R.id.iv_item_icon).imageTintList = android.content.res.ColorStateList.valueOf(color)
+    }
 }

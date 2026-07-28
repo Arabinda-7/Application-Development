@@ -223,8 +223,10 @@ class FinanceHistoryActivity : BaseActivity() {
         val yearKey = currentYear.toString()
         val sdf = SimpleDateFormat("yyyy", Locale.getDefault())
 
-        val yearlyTransactions = DataManager.transactions.filter {
-            sdf.format(Date(it.timestamp)) == yearKey
+        val yearlyTransactions = synchronized(DataManager.transactions) {
+            DataManager.transactions.filter {
+                sdf.format(Date(it.timestamp)) == yearKey
+            }
         }
         
         findViewById<TextView>(R.id.tv_pill_total).text = String.format(Locale.US, "Total Spent: %s%.0f", currency, yearlyTransactions.filter { it.type == "Expense" }.sumOf { it.amount })

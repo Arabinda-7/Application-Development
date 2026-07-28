@@ -293,7 +293,7 @@ class PersonalLedgerBookActivity : BaseActivity() {
             holder.tvDate.text = SimpleDateFormat("MMM dd, yyyy", Locale.getDefault()).format(Date(entry.timestamp))
             holder.progressBar.progress = if (entry.amount > 0) ((entry.paidAmount / entry.amount) * 100).toInt() else 0
 
-            val isOverdue = entry.dueDate != null && entry.dueDate!! < System.currentTimeMillis() && !entry.isSettled
+            val isOverdue = entry.dueDate?.let { it < System.currentTimeMillis() && !entry.isSettled } ?: false
             
             if (showHistory) {
                 holder.cardView.setCardBackgroundColor(Color.parseColor("#0DFFFFFF"))

@@ -1,30 +1,31 @@
-# Implementation Plan - Reduce Task Card Free Space
+# Implementation Plan - Workout Section Expansion Logic
 
-The user wants to reduce the "free space" in the task card, especially when there are subtasks. The current layout has multiple layers of padding and margins that accumulate, resulting in excessive empty space at the bottom and between elements.
+Modify the workout list to ensure only one item can be expanded at a time and collapse all items when navigating away from the screen.
+
+## User Review Required
+
+> [!IMPORTANT]
+> The "collapse on leave" will be implemented in `onStop()` to ensure items are collapsed when the user moves to another activity or the home screen.
 
 ## Proposed Changes
 
-### 1. Update Task Card Layouts
-Modify the XML layouts to reduce vertical margins and padding.
+### [Workout Section]
 
-#### [MODIFY] [item_task_tasks.xml](file:///C:/Users/arabi/OneDrive/Desktop/App Development/AllinOne/app/src/main/res/layout/item_task_tasks.xml)
-- Reduce parent `ConstraintLayout` vertical padding from `16dp` to `12dp`.
-- Reduce `subtask_list_container` `layout_marginTop` from `12dp` to `8dp`.
-- Change `subtask_list_container` `layout_marginBottom` from `12dp` to `4dp`.
+#### [MODIFY] [WorkoutAdapter.kt](file:///C:/Users/arabi/OneDrive/Desktop/App Development/AllinOne/app/src/main/java/com/example/allinone/WorkoutAdapter.kt)
+- Update click listeners for `workoutCard` and `expandChevron` to collapse any other expanded workout when a new one is expanded.
+- Add a public `collapseAll()` method that resets `isExpanded` for all workouts.
 
-#### [MODIFY] [item_task_list.xml](file:///C:/Users/arabi/OneDrive/Desktop/App Development/AllinOne/app/src/main/res/layout/item_task_list.xml)
-- Apply the same changes as in `item_task_tasks.xml`.
-
-### 2. Update Task Adapter
-Reduce the programmatic padding applied to subtask items.
-
-#### [MODIFY] [TaskAdapter.kt](file:///C:/Users/arabi/OneDrive/Desktop/App Development/AllinOne/app/src/main/java/com/example/allinone/TaskAdapter.kt)
-- In `renderSubtasks`, change `ctView.setPadding(0, 16, 0, 16)` to `ctView.setPadding(0, 8, 0, 8)`.
+#### [MODIFY] [WorkoutRoutineActivity.kt](file:///C:/Users/arabi/OneDrive/Desktop/App Development/AllinOne/app/src/main/java/com/example/allinone/WorkoutRoutineActivity.kt)
+- Override `onStop()` and call `listSection.workoutAdapter.collapseAll()`.
 
 ## Verification Plan
 
+### Automated Tests
+- None planned as this is mostly UI/Adapter logic.
+
 ### Manual Verification
-- Deploy the app to a device or emulator.
-- Add a task with one or more subtasks.
-- Expand the task to see the subtasks.
-- Verify that the vertical space inside the card is significantly reduced and more compact.
+1. Open the Workout Routine screen.
+2. Expand a workout item.
+3. Click on another workout item and verify the first one collapses while the second one expands.
+4. Expand an item and then press "Back" or navigate to another screen (e.g., Settings).
+5. Return to the Workout Routine screen and verify all items are collapsed.

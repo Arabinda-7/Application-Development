@@ -58,7 +58,7 @@
                 android:id="@+id/iv_edit_icon"
                 android:layout_width="24dp"
                 android:layout_height="24dp"
-                android:src="@drawable/icons8_edit_pencil_100"
+                android:src="@drawable/ic_edit"
                 app:tint="@color/white" />
 
             <TextView

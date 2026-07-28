@@ -1,47 +1,26 @@
-# Full App Modular Refactor Walkthrough
+# Walkthrough - Task Card Priority Colors (App Only)
 
-All major functional sections and activities of the app have been refactored from monolithic classes into a modular architecture. Each section now follows a consistent pattern of delegation to specialized managers, ViewModels, and handlers.
+I have updated the task card rendering in the main app to dynamically change colors based on the task's priority level.
 
-## Refactored Components
+## Changes Made
 
-### 1. Dashboard & Core
-- **MainActivity**: Now uses `MainActivityViewModel`, `MainNavigationHandler`, `MainQuickActionsHandler`, and `MainSearchSection`.
-- **ProfileActivity**: Modularized into `ProfileIdentitySection`, `ProfileImpactSummarySection`, `ProfileSecurityHubSection`, and `ProfileDataGovernanceSection`.
-- **OnboardingActivity**: Broken down into `OnboardingModels`, `OnboardingPages`, and `OnboardingComponents` for better flow management.
+### [Task UI Component]
 
-### 2. Productivity & Tasks
-- **TaskActivity**: Separated into `TaskListSection`, `TaskHeaderSection`, `TaskFilterSection`, `TaskNavigationSection`, and `TaskThemeManager`.
-- **NotesActivity**: Refactored with `NotesListSection`, `NotesHeaderSection`, `NotesNavigationSection`, and `NotesThemeManager`.
-- **ProjectActivity**: Organized with `ProjectListSection`, `ProjectHeaderSection`, `ProjectNavigationSection`, and `ProjectThemeManager`.
-- **Workspace (ProjectWorkspaceScreen)**: Modularized into `WorkspaceModels`, `WorkspaceDialogs`, `WorkspaceRouter`, and `WorkspaceMainComponents`.
+#### [TaskAdapter.kt](file:///C:/Users/arabi/OneDrive/Desktop/App Development/AllinOne/app/src/main/java/com/example/allinone/TaskAdapter.kt)
+- **Priority-Based Styling:** Updated `onBindViewHolder` to apply colors based on `task.priority`:
+    - **Low (0):** Primary Blue
+    - **Medium (1):** Orange
+    - **High (2):** Red (#FF5252)
+- **Visual Enhancements:**
+    - The card's **stroke (border)** now matches the priority color.
+    - Added a **subtle background tint** (10% opacity) using the priority color for better visual grouping.
+    - Updated the checkbox tint and subtask checkmark tints to match the priority color.
+- **Scope Limitation:** These changes are strictly within `TaskAdapter.kt`, ensuring they only affect the main app's task list and not the Workspace module.
 
-### 3. Health & Wellness
-- **HabitTrackerActivity**: Extracted into `HabitProgressSection`, `HabitCalendarSection`, `HabitFilterSection`, `HabitListSection`, and `HabitThemeManager`.
-- **WorkoutRoutineActivity**: Mirroring the Habit Tracker structure with `WorkoutProgressSection`, `WorkoutCalendarSection`, `WorkoutListSection`, and `WorkoutThemeManager`.
-- **PerformanceHistoryActivity**: Now utilizes a dedicated `PerformanceHistoryComposeHandler` to bridge data to the Jetpack Compose dashboard.
+## Verification Results
 
-### 4. Finance & Ledger
-- **FinanceActivity**: Divided into `FinanceSummarySection`, `FinanceListSection`, `FinanceFilterSection`, and `FinanceThemeManager`.
-- **FinanceMonthHistoryActivity**: Refactored with `FinanceHistorySelectorSection` and `FinanceHistoryDetailsSection`.
-- **PersonalLedgerHubActivity**: Extracted `PersonalLedgerListSection` and `PersonalLedgerThemeManager`.
-- **LedgerActivity**: Modularized with `FinanceLedgerSummarySection`, `FinanceLedgerListSection`, and `FinanceLedgerThemeManager`.
-- **LedgerHistoryActivity**: Uses `LedgerHistoryListSection` and `LedgerHistoryThemeManager`.
-
-### 5. Settings
-- **SettingsActivity**: Completely overhauled using `SettingsViewModel`, `SettingsHubSection`, and specialized handlers: `SettingsAppearanceHandler`, `SettingsBehaviorHandler` (part of Hub/Sections), `SettingsHelpHandler`, and `SettingsBackupHandler`.
-
-## Key Benefits
-
-> [!TIP]
-> **Maintainability**: Features are now isolated. Changing the logic of the Finance summary doesn't require touching the transaction list code.
-
-> [!IMPORTANT]
-> **State Consistency**: By introducing ViewModels across all screens, the UI state is preserved more reliably, especially in the Compose-based Workspace and Onboarding sections.
-
-> [!NOTE]
-> **Theming**: Centralized `ThemeManager` and `AppearanceHandler` classes ensure that dynamic color updates (syncing with `DataManager`) are applied consistently across all UI elements.
-
-## Verification Summary
-- **Logic Integrity**: All original functionalities (swipe to delete, completion logic, date filtering, project import, etc.) were preserved during extraction.
-- **Resource Linking**: Correct view IDs and resource references were verified across all refactored activities and their new section managers.
-- **Compose Integration**: The Workspace and Onboarding sections now use a cleaner, modularized Composable structure.
+### Manual Verification
+- Verified that Low priority tasks appear with Blue borders and tints.
+- Verified that Medium priority tasks appear with Orange borders and tints.
+- Verified that High priority tasks appear with Red borders and tints.
+- Verified that completed tasks still maintain their reduced alpha (0.6f) and strike-through text.

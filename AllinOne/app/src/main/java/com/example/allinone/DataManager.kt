@@ -5,20 +5,123 @@ import android.content.SharedPreferences
 import androidx.room.withTransaction
 import com.example.allinone.data.*
 import com.example.allinone.workspace.data.*
-import com.example.allinone.workspace.data.WorkspaceDatabase
+import com.example.allinone.data.repository.*
+import com.example.allinone.workspace.data.AppDatabase
 import com.google.gson.Gson
 import com.google.gson.reflect.TypeToken
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.flow.MutableSharedFlow
-import kotlinx.coroutines.withContext
+import kotlinx.coroutines.*
+import kotlinx.coroutines.flow.*
 import java.text.SimpleDateFormat
 import java.util.*
 
 object DataManager {
+    private val persistenceScope = CoroutineScope(Dispatchers.IO + SupervisorJob())
+    private var saveJob: Job? = null
+    
+    private var taskRepo: TaskRepository? = null
+    private var habitRepo: HabitRepository? = null
+    private var workoutRepo: WorkoutRepository? = null
+    private var noteRepo: NoteRepository? = null
+    private var financeRepo: FinanceRepository? = null
+
     val dataChangeSignal = MutableSharedFlow<Unit>(extraBufferCapacity = 1)
+    val isDataLoaded = MutableStateFlow(false)
 
     fun notifyDataChanged() {
         dataChangeSignal.tryEmit(Unit)
+    }
+
+    fun initialize(context: Context) {
+        persistenceScope.launch {
+            try {
+                val db = AppDatabase.getDatabase(context)
+                val t = TaskRepository(db.taskDao())
+                val h = HabitRepository(db.habitDao())
+                val w = WorkoutRepository(db.workoutDao())
+                val n = NoteRepository(db.noteDao())
+                val f = FinanceRepository(db.financeDao())
+                
+                synchronized(this@DataManager) {
+                    taskRepo = t
+                    habitRepo = h
+                    workoutRepo = w
+                    noteRepo = n
+                    financeRepo = f
+                }
+                
+                LegacyMigrationManager(context).migrateIfNeeded()
+                loadData(context)
+                observeDatabase()
+                isDataLoaded.value = true
+            } catch (e: Exception) {
+                e.printStackTrace()
+            }
+        }
+    }
+
+    private fun observeDatabase() {
+        val tRepo = taskRepo ?: return
+        val hRepo = habitRepo ?: return
+        val wRepo = workoutRepo ?: return
+        val nRepo = noteRepo ?: return
+        val fRepo = financeRepo ?: return
+
+        persistenceScope.launch {
+            combine(
+                tRepo.getAllTasks(),
+                hRepo.getAllHabits(),
+                wRepo.getAllWorkouts(),
+                nRepo.getAllNotes(),
+                fRepo.getAllTransactions()
+            ) { t, h, w, n, trans ->
+                synchronized(this@DataManager) {
+                    // Update contents of stable references to avoid breaking Adapters
+                    HabitDataManager.habits.clear()
+                    HabitDataManager.habits.addAll(h)
+                    
+                    WorkoutDataManager.workouts.clear()
+                    WorkoutDataManager.workouts.addAll(w)
+                    
+                    TaskDataManager.tasks.clear()
+                    TaskDataManager.tasks.addAll(t)
+                    
+                    // Notes and projects are trickier as they share NoteDataManager
+                    val newNotes = n.filter { !it.isGlobalProject }
+                    val newProjects = n.filter { it.isGlobalProject }
+                    
+                    NoteDataManager.notes.clear()
+                    NoteDataManager.notes.addAll(newNotes)
+                    
+                    ProjectDataManager.projects.clear()
+                    ProjectDataManager.projects.addAll(newProjects)
+
+                    transactions.clear()
+                    transactions.addAll(trans)
+                }
+            }.collect {
+                notifyDataChanged()
+            }
+        }
+        
+        persistenceScope.launch {
+            financeRepo?.getAllPersonalLedgers()?.collect { newList ->
+                synchronized(this@DataManager) {
+                    personalLedgers.clear()
+                    personalLedgers.addAll(newList)
+                }
+                notifyDataChanged()
+            }
+        }
+        
+        persistenceScope.launch {
+            financeRepo?.getAllLedgerEntries()?.collect { newList ->
+                synchronized(this@DataManager) {
+                    ledgerEntries.clear()
+                    ledgerEntries.addAll(newList)
+                }
+                notifyDataChanged()
+            }
+        }
     }
 
     // Delegated Data
@@ -115,6 +218,7 @@ object DataManager {
     
     var lastViewedNotificationDate: String get() = WorkspaceDataManager.lastViewedNotificationDate; set(value) { WorkspaceDataManager.lastViewedNotificationDate = value }
     var lastSummaryNotificationDate: String get() = WorkspaceDataManager.lastSummaryNotificationDate; set(value) { WorkspaceDataManager.lastSummaryNotificationDate = value }
+    var hasNewTodayNotifications: Boolean get() = WorkspaceDataManager.hasNewTodayNotifications; set(value) { WorkspaceDataManager.hasNewTodayNotifications = value }
     var workspaceTodayAgenda: MutableMap<String, List<AgendaItem>> get() = WorkspaceDataManager.workspaceTodayAgenda; set(value) { WorkspaceDataManager.workspaceTodayAgenda = value }
 
     var userXP: Int get() = UserDataManager.userXP; set(value) { UserDataManager.userXP = value }
@@ -186,15 +290,12 @@ object DataManager {
     }
 
     fun getHabitProgress() = HabitDataManager.getHabitProgress()
-    fun getHabitStreak() = HabitDataManager.getHabitStreak()
     fun getTotalHabitsFinished() = HabitDataManager.getTotalHabitsFinished()
     
     fun getWorkoutProgress() = WorkoutDataManager.getWorkoutProgress()
-    fun getWorkoutStreak() = WorkoutDataManager.getWorkoutStreak()
     fun getWorkoutStreaks() = WorkoutDataManager.getWorkoutStreaks()
     fun getWorkoutsThisMonth() = WorkoutDataManager.getWorkoutsThisMonth()
     fun getTotalWorkoutsFinished() = WorkoutDataManager.getTotalWorkoutsFinished()
-    fun getTodayCaloriesBurned() = WorkoutDataManager.getTodayCaloriesBurned()
     
     fun getCurrentMonthExpenditure() = FinanceDataManager.getCurrentMonthExpenditure()
     fun getCurrentMonthIncome() = FinanceDataManager.getCurrentMonthIncome()
@@ -203,7 +304,7 @@ object DataManager {
     fun getTotalDailyProgress(): Int {
         val hp = getHabitProgress()
         val wp = getWorkoutProgress()
-        return if (hp == 0 && wp == 0) 0 else (hp + wp) / 2
+        return if ((hp == 0 && wp == 0)) 0 else (hp + wp) / 2
     }
 
     fun getGrowthAdvice(mood: String?): String {
@@ -217,6 +318,126 @@ object DataManager {
 
     fun getManagementAdvice(mood: String?): String {
         return "Organize your workflow and prioritize your high-impact tasks."
+    }
+
+    suspend fun getComprehensiveTodayAgenda(context: Context): Map<String, List<AgendaItem>> = withContext(Dispatchers.IO) {
+        val list = mutableListOf<AgendaItem>()
+        val todayStart = Calendar.getInstance().apply {
+            set(Calendar.HOUR_OF_DAY, 0)
+            set(Calendar.MINUTE, 0)
+            set(Calendar.SECOND, 0)
+            set(Calendar.MILLISECOND, 0)
+        }.timeInMillis
+        val todayEnd = todayStart + 86400000
+
+        // 1. Global Tasks
+        synchronized(tasks) {
+            tasks.forEach { task ->
+                task.reminderTime?.let { time ->
+                    if (!task.isCompleted && time in todayStart until todayEnd) {
+                        list.add(AgendaItem(
+                            id = task.name,
+                            title = task.name,
+                            time = time,
+                            category = "TASKS",
+                            priority = when(task.priority) { 2 -> "HIGH"; 1 -> "MED"; else -> "LOW" },
+                            navigationTarget = "TASK_ACTIVITY",
+                            color = if (task.color != -1) task.color else globalTaskColor
+                        ))
+                    }
+                }
+            }
+        }
+
+        // 2. Global Projects & Subfeatures
+        synchronized(projects) {
+            projects.forEachIndexed { index, project ->
+                val projColor = if (project.color != -1) project.color else globalProjectColor
+                
+                project.deadline?.let { deadline ->
+                    if (project.status != "Completed" && deadline in todayStart until todayEnd) {
+                        list.add(AgendaItem(
+                            id = index.toString(),
+                            title = project.title,
+                            time = deadline,
+                            category = "PROJECTS",
+                            priority = when(project.priority) { 2 -> "HIGH"; 1 -> "MED"; else -> "LOW" },
+                            navigationTarget = "PROJECT_ACTIVITY",
+                            color = projColor
+                        ))
+                    }
+                }
+                
+                project.subFeatures.forEach { f ->
+                    f.dueDate?.let { dueDate ->
+                        if (!f.isCompleted && dueDate in todayStart until todayEnd) {
+                            list.add(AgendaItem(
+                                id = f.id,
+                                parentId = index.toString(),
+                                title = f.name,
+                                time = dueDate,
+                                category = "SUBFEATURES",
+                                priority = when(f.priority) { 2 -> "HIGH"; 1 -> "MED"; else -> "LOW" },
+                                navigationTarget = "PROJECT_ACTIVITY",
+                                color = projColor
+                            ))
+                        }
+                    }
+                }
+            }
+        }
+
+        // 4. Workspaces (Room)
+        try {
+            val db = AppDatabase.getDatabase(context)
+            val dao = db.workspaceDao()
+            
+            dao.getProjectsDueBetween(todayStart, todayEnd).forEach {
+                it.deadline?.let { deadline ->
+                    list.add(AgendaItem(
+                        id = it.id, 
+                        title = it.name, 
+                        time = deadline, 
+                        category = "WORKSPACES", 
+                        navigationTarget = "WORKSPACE",
+                        color = if (it.color != -1) it.color else globalProjectColor
+                    ))
+                }
+            }
+            
+            dao.getGoalsDueBetween(todayStart, todayEnd).forEach {
+                it.deadline?.let { deadline ->
+                    list.add(AgendaItem(
+                        id = it.id, 
+                        title = it.title, 
+                        time = deadline, 
+                        category = "WORKSPACES", 
+                        navigationTarget = "WORKSPACE",
+                        color = if (it.color != -1) it.color else globalProjectColor
+                    ))
+                }
+            }
+            
+            dao.getTasksDueBetween(todayStart, todayEnd).forEach {
+                it.dueDate?.let { dueDate ->
+                    list.add(AgendaItem(
+                        id = it.id, 
+                        title = it.title, 
+                        time = dueDate, 
+                        category = "WORKSPACES", 
+                        navigationTarget = "WORKSPACE",
+                        color = globalTaskColor
+                    ))
+                }
+            }
+        } catch (e: Exception) { e.printStackTrace() }
+
+        // Group and Sort by time
+        if (list.isEmpty()) return@withContext emptyMap<String, List<AgendaItem>>()
+        
+        list.groupBy { it.category }.mapValues { (_, items) -> 
+            items.sortedBy { it.time } 
+        }.toList().sortedBy { (_, items) -> items.firstOrNull()?.time ?: 0L }.toMap()
     }
 
     fun getTodayAgendaNotifications(): Map<String, List<AgendaItem>> {
@@ -296,6 +517,7 @@ object DataManager {
     private const val KEY_PROJ_ANALYTICS = "project_analytics_enabled"
     private const val KEY_PROJ_TEMPLATES = "project_templates"
     private const val KEY_PROJ_ROADMAPS = "project_roadmaps_enabled"
+    private const val KEY_HAS_NEW_TODAY_NOTIF = "has_new_today_notification"
     private const val KEY_APP_LOCK = "app_lock_enabled"
     private const val KEY_BIOMETRIC_LOCK = "biometric_lock_enabled"
     private const val KEY_SCREENSHOT_PROTECTION = "screenshot_protection_enabled"
@@ -310,6 +532,8 @@ object DataManager {
     private const val KEY_USER_IMAGE_URI = "user_profile_image_uri"
     private const val KEY_CUSTOM_COLORS = "user_custom_colors_data"
     private const val KEY_PROJ_TAGS = "project_custom_tags_data"
+    private const val KEY_LAST_VIEWED_NOTIF = "last_viewed_notification_date"
+    private const val KEY_LAST_SUMMARY_NOTIF = "last_summary_notification_date"
     private const val KEY_PROJ_DUAL_EXIST = "project_dual_exist_enabled"
     private const val KEY_PROJ_IDEAS_ENABLED = "project_ideas_enabled"
     private const val KEY_LAST_MOOD_TIMESTAMP = "last_mood_timestamp"
@@ -385,18 +609,48 @@ object DataManager {
 
     fun saveData(context: Context?) {
         if (context == null) return
+        val appContext = context.applicationContext
+        
+        saveJob?.cancel()
+        saveJob = persistenceScope.launch {
+            delay(500L) // Debounce for 500ms
+            performSave(appContext)
+        }
+    }
+
+    private suspend fun performSave(context: Context) = withContext(NonCancellable) {
+        val tRepo = taskRepo ?: return@withContext
+        val hRepo = habitRepo ?: return@withContext
+        val wRepo = workoutRepo ?: return@withContext
+        val nRepo = noteRepo ?: return@withContext
+        val fRepo = financeRepo ?: return@withContext
+
         val prefs = getPrefs(context)
         val gson = Gson()
         
+        // Save to Repositories (Room) using thread-safe snapshots
+        val tList = synchronized(this) { tasks.toList() }
+        val hList = synchronized(this) { habits.toList() }
+        val wList = synchronized(this) { workouts.toList() }
+        val nList = synchronized(this) { notes.toList() }
+        val pList = synchronized(this) { projects.toList() }
+        val transList = synchronized(this) { transactions.toList() }
+        val plList = synchronized(this) { personalLedgers.toList() }
+        val leList = synchronized(this) { ledgerEntries.toList() }
+
+        try {
+            tRepo.insertAllTasks(tList)
+            hRepo.insertAllHabits(hList)
+            wRepo.insertAllWorkouts(wList)
+            nRepo.insertAllNotes(nList.map { it.apply { isGlobalProject = false } })
+            nRepo.insertAllNotes(pList.map { it.apply { isGlobalProject = true } })
+            fRepo.insertAllTransactions(transList)
+            fRepo.insertAllPersonalLedgers(plList)
+            fRepo.insertAllLedgerEntries(leList)
+        } catch (e: Exception) { e.printStackTrace() }
+
+        // Keep SharedPreferences only for settings and cross-domain history
         prefs.edit().apply {
-            putString(KEY_HABITS, gson.toJson(habits))
-            putString(KEY_WORKOUTS, gson.toJson(workouts))
-            putString(KEY_TASKS, gson.toJson(tasks))
-            putString(KEY_NOTES, gson.toJson(notes))
-            putString(KEY_PROJECTS, gson.toJson(projects))
-            putString(KEY_TRANSACTIONS, gson.toJson(transactions))
-            putString(KEY_LEDGER, gson.toJson(ledgerEntries))
-            putString(KEY_PERSONAL_LEDGER, gson.toJson(personalLedgers))
             putString(KEY_SAVINGS_GOAL_NAME, financeSavingsGoalName)
             putFloat(KEY_BUDGET, monthlyBudget.toFloat())
             putFloat(KEY_SAVINGS_GOAL, monthlySavingsGoal.toFloat())
@@ -439,6 +693,7 @@ object DataManager {
             putBoolean(KEY_PROJ_ANALYTICS, projectAnalyticsEnabled)
             putBoolean(KEY_PROJ_DUAL_EXIST, projectDualExistEnabled)
             putBoolean(KEY_PROJ_IDEAS_ENABLED, projectIdeasEnabled)
+            putBoolean(KEY_PROJ_ROADMAPS, projectRoadmapsEnabled)
             putBoolean(KEY_APP_LOCK, isAppLockEnabled)
             putBoolean(KEY_BIOMETRIC_LOCK, isBiometricLockEnabled)
             putBoolean(KEY_SCREENSHOT_PROTECTION, isScreenshotProtectionEnabled)
@@ -464,6 +719,10 @@ object DataManager {
             putInt(KEY_STARTUP_LOADING_TIME, startupLoadingTime)
             putInt(KEY_USER_XP, userXP)
             putInt(KEY_USER_LEVEL, userLevel)
+
+            putString(KEY_LAST_VIEWED_NOTIF, lastViewedNotificationDate)
+            putString(KEY_LAST_SUMMARY_NOTIF, lastSummaryNotificationDate)
+            putBoolean(KEY_HAS_NEW_TODAY_NOTIF, hasNewTodayNotifications)
 
             putBoolean(KEY_SHOW_HABITS, showHabitSection)
             putBoolean(KEY_SHOW_WORKOUTS, showWorkoutSection)
@@ -505,167 +764,262 @@ object DataManager {
             putString(KEY_PROJ_TEMPLATES, gson.toJson(projectTemplates))
             apply()
         }
-        notifyDataChanged()
+    }
+
+    fun loadTasksOnly(context: Context) {
+        try {
+            val prefs = getPrefs(context)
+            val gson = Gson()
+            tasks = try {
+                gson.fromJson(prefs.getString(KEY_TASKS, "[]"), object : TypeToken<MutableList<Task>>() {}.type) ?: mutableListOf()
+            } catch (e: Exception) { mutableListOf() }
+            tasks.forEach { if (it.subtasks == null) it.subtasks = mutableListOf() }
+        } catch (e: Exception) { e.printStackTrace() }
     }
 
     // Load logic remains complex and central for now
     fun loadData(context: Context) {
-        migrateToEncryptedPrefs(context)
-        val prefs = getPrefs(context)
-        val gson = Gson()
-        
-        habits = gson.fromJson(prefs.getString(KEY_HABITS, "[]"), object : TypeToken<MutableList<Habit>>() {}.type) ?: mutableListOf()
-        // Ensure new fields are initialized for older data
-        habits.forEach { 
-            if (it.completedDates == null) it.completedDates = mutableListOf()
-            if (it.dailyProgress == null) it.dailyProgress = mutableMapOf()
-            if (it.repeatDays == null) it.repeatDays = listOf(0, 1, 2, 3, 4, 5, 6)
+        try {
+            migrateToEncryptedPrefs(context)
+            val prefs = getPrefs(context)
+            val gson = Gson()
+            
+            habits = try {
+                gson.fromJson(prefs.getString(KEY_HABITS, "[]"), object : TypeToken<MutableList<Habit>>() {}.type) ?: mutableListOf()
+            } catch (e: Exception) { mutableListOf() }
+            
+            // Ensure new fields are initialized for older data
+            habits.forEach { 
+                if (it.completedDates == null) it.completedDates = mutableListOf()
+                if (it.dailyProgress == null) it.dailyProgress = mutableMapOf()
+                if (it.repeatDays == null) it.repeatDays = listOf(0, 1, 2, 3, 4, 5, 6)
+            }
+
+            workouts = try {
+                gson.fromJson(prefs.getString(KEY_WORKOUTS, "[]"), object : TypeToken<MutableList<Workout>>() {}.type) ?: mutableListOf()
+            } catch (e: Exception) { mutableListOf() }
+
+            // Ensure new fields are initialized for older data
+            workouts.forEach { 
+                if (it.completedDates == null) it.completedDates = mutableListOf()
+                if (it.dailyProgress == null) it.dailyProgress = mutableMapOf()
+                if (it.repeatDays == null) it.repeatDays = listOf(0, 1, 2, 3, 4, 5, 6)
+                if (it.muscleGroups == null) it.muscleGroups = listOf("General")
+            }
+
+            tasks = try {
+                gson.fromJson(prefs.getString(KEY_TASKS, "[]"), object : TypeToken<MutableList<Task>>() {}.type) ?: mutableListOf()
+            } catch (e: Exception) { mutableListOf() }
+
+            // Ensure new fields are initialized for older data
+            tasks.forEach {
+                if (it.subtasks == null) it.subtasks = mutableListOf()
+            }
+
+            notes = try {
+                gson.fromJson(prefs.getString(KEY_NOTES, "[]"), object : TypeToken<MutableList<Note>>() {}.type) ?: mutableListOf()
+            } catch (e: Exception) { mutableListOf() }
+
+            projects = try {
+                gson.fromJson(prefs.getString(KEY_PROJECTS, "[]"), object : TypeToken<MutableList<Note>>() {}.type) ?: mutableListOf()
+            } catch (e: Exception) { mutableListOf() }
+
+            transactions = try {
+                gson.fromJson(prefs.getString(KEY_TRANSACTIONS, "[]"), object : TypeToken<MutableList<Transaction>>() {}.type) ?: mutableListOf()
+            } catch (e: Exception) { mutableListOf() }
+
+            ledgerEntries = try {
+                gson.fromJson(prefs.getString(KEY_LEDGER, "[]"), object : TypeToken<MutableList<LedgerEntry>>() {}.type) ?: mutableListOf()
+            } catch (e: Exception) { mutableListOf() }
+
+            personalLedgers = try {
+                gson.fromJson(prefs.getString(KEY_PERSONAL_LEDGER, "[]"), object : TypeToken<MutableList<PersonalLedger>>() {}.type) ?: mutableListOf()
+            } catch (e: Exception) { mutableListOf() }
+            
+            monthlyBudget = prefs.getFloat(KEY_BUDGET, 0.0f).toDouble()
+            monthlySavingsGoal = prefs.getFloat(KEY_SAVINGS_GOAL, 0.0f).toDouble()
+            financeSavingsGoalName = prefs.getString(KEY_SAVINGS_GOAL_NAME, "Monthly Savings") ?: "Monthly Savings"
+            
+            monthlyBudgets = try {
+                gson.fromJson(prefs.getString(KEY_MONTHLY_BUDGETS, "{}"), object : TypeToken<MutableMap<String, Double>>() {}.type) ?: mutableMapOf()
+            } catch (e: Exception) { mutableMapOf() }
+
+            monthlySavingsGoals = try {
+                gson.fromJson(prefs.getString(KEY_MONTHLY_SAVINGS_GOALS, "{}"), object : TypeToken<MutableMap<String, Double>>() {}.type) ?: mutableMapOf()
+            } catch (e: Exception) { mutableMapOf() }
+            
+            history = try {
+                gson.fromJson(prefs.getString(KEY_HISTORY, "{}"), object : TypeToken<MutableMap<String, DayHistory>>() {}.type) ?: mutableMapOf()
+            } catch (e: Exception) { mutableMapOf() }
+            
+            taskShowCompleted = prefs.getBoolean(KEY_TASK_SHOW_COMPLETED, true)
+            taskShowHidden = prefs.getBoolean(KEY_TASK_SHOW_HIDDEN, false)
+            taskSortOrder = prefs.getString(KEY_TASK_SORT_ORDER, "Priority") ?: "Priority"
+            taskCustomCategories = try {
+                gson.fromJson(prefs.getString(KEY_TASK_CUSTOM_CATEGORIES, "[\"General\", \"Personal\", \"Work\", \"Shopping\"]"), object : TypeToken<MutableList<String>>() {}.type)
+            } catch (e: Exception) { mutableListOf("General", "Personal", "Work", "Shopping") }
+
+            taskAutoArchive = prefs.getBoolean(KEY_TASK_AUTO_ARCHIVE, false)
+            taskEditModeEnabled = prefs.getBoolean(KEY_TASK_EDIT_MODE, false)
+            taskDefaultSection = prefs.getString(KEY_TASK_DEFAULT_SECTION, "Tasks") ?: "Tasks"
+            taskVisibleSections = try {
+                gson.fromJson(prefs.getString(KEY_TASK_VISIBLE_SECTIONS, "[\"Tasks\"]"), object : TypeToken<MutableList<String>>() {}.type)
+            } catch (e: Exception) { mutableListOf("Tasks") }
+
+            workoutFilterType = prefs.getString(KEY_WORKOUT_FILTER_TYPE, "TIME") ?: "TIME"
+            workoutMuscleGroups = try {
+                gson.fromJson(prefs.getString(KEY_WORKOUT_MUSCLE_GROUPS, "[\"Chest\", \"Back\", \"Legs\", \"Shoulders\", \"Arms\", \"Cardio\", \"Full Body\"]"), object : TypeToken<MutableList<String>>() {}.type) ?: mutableListOf("Chest", "Back", "Legs", "Shoulders", "Arms", "Cardio", "Full Body")
+            } catch (e: Exception) { mutableListOf("Chest", "Back", "Legs", "Shoulders", "Arms", "Cardio", "Full Body") }
+
+            financeCustomCategories = try {
+                gson.fromJson(prefs.getString(KEY_FINANCE_CUSTOM_CATEGORIES, "[\"Food\", \"Rent\", \"Transport\", \"Shopping\", \"Entertainment\", \"Health\", \"Other\"]"), object : TypeToken<MutableList<String>>() {}.type)
+            } catch (e: Exception) { mutableListOf("Food", "Rent", "Transport", "Shopping", "Entertainment", "Health", "Other") }
+
+            financeCategoryIcons = try {
+                gson.fromJson(prefs.getString(KEY_FINANCE_CATEGORY_ICONS, "{}"), object : TypeToken<MutableMap<String, Int>>() {}.type) ?: mutableMapOf()
+            } catch (e: Exception) { mutableMapOf() }
+
+            financeCategoryColors = try {
+                gson.fromJson(prefs.getString(KEY_FINANCE_CATEGORY_COLORS, "{}"), object : TypeToken<MutableMap<String, Int>>() {}.type) ?: mutableMapOf()
+            } catch (e: Exception) { mutableMapOf() }
+
+            financeCurrency = prefs.getString(KEY_FINANCE_CURRENCY, "₹") ?: "₹"
+            financeGraphStartMonth = prefs.getInt(KEY_FINANCE_GRAPH_START_MONTH, 0)
+            financeGraphColor = prefs.getInt(KEY_FINANCE_GRAPH_COLOR, -1)
+            financeGraphSavingsColor = prefs.getInt(KEY_FINANCE_GRAPH_SAVINGS_COLOR, -1)
+            isFinanceLedgerEnabled = prefs.getBoolean(KEY_FINANCE_LEDGER_ENABLED, true)
+
+            noteAutoCleanupDays = prefs.getInt(KEY_NOTE_AUTO_CLEANUP, 0)
+            noteShowHidden = prefs.getBoolean(KEY_NOTE_SHOW_HIDDEN, false)
+            noteVoiceInputEnabled = prefs.getBoolean(KEY_NOTE_VOICE_INPUT, true)
+            noteVisibleSections = try {
+                gson.fromJson(prefs.getString(KEY_NOTE_VISIBLE_SECTIONS, "[\"Notes\"]"), object : TypeToken<MutableList<String>>() {}.type) ?: mutableListOf("Notes")
+            } catch (e: Exception) { mutableListOf("Notes") }
+
+            noteDefaultCategory = prefs.getString(KEY_NOTE_DEFAULT_CAT, "Notes") ?: "Notes"
+            noteTemplates = try {
+                gson.fromJson(prefs.getString(KEY_NOTE_TEMPLATES, "{}"), object : TypeToken<MutableMap<String, String>>() {}.type) ?: mutableMapOf()
+            } catch (e: Exception) { mutableMapOf() }
+
+            projectAutoArchive = prefs.getBoolean(KEY_PROJ_ARCHIVE, false)
+            projectSynergySync = prefs.getBoolean(KEY_PROJ_SYNC, false)
+            projectDeadlineAlerts = prefs.getBoolean(KEY_PROJ_ALERTS, true)
+            projectSortCompletedToBottom = prefs.getBoolean(KEY_PROJ_SORT_BOTTOM, true)
+            projectActiveExpanded = prefs.getBoolean("project_active_expanded", true)
+            projectCompletedExpanded = prefs.getBoolean(KEY_PROJ_COMPLETED_EXP, false)
+            ideaActiveExpanded = prefs.getBoolean(KEY_IDEA_ACTIVE_EXP, true)
+            ideaCompletedExpanded = prefs.getBoolean(KEY_IDEA_COMPLETED_EXP, false)
+            projectAutoSaveIdeas = prefs.getBoolean(KEY_PROJ_AUTOSAVE_IDEAS, true)
+            projectAnalyticsEnabled = prefs.getBoolean(KEY_PROJ_ANALYTICS, false)
+            projectDualExistEnabled = prefs.getBoolean(KEY_PROJ_DUAL_EXIST, false)
+            projectIdeasEnabled = prefs.getBoolean(KEY_PROJ_IDEAS_ENABLED, true)
+            projectRoadmapsEnabled = prefs.getBoolean(KEY_PROJ_ROADMAPS, true)
+
+            isAppLockEnabled = prefs.getBoolean(KEY_APP_LOCK, false)
+            isBiometricLockEnabled = prefs.getBoolean(KEY_BIOMETRIC_LOCK, false)
+            isScreenshotProtectionEnabled = prefs.getBoolean(KEY_SCREENSHOT_PROTECTION, false)
+            appLockPin = prefs.getString(KEY_APP_LOCK_PIN, null)
+            appLockQuestion = prefs.getString("app_lock_question", null)
+            appLockAnswer = prefs.getString("app_lock_answer", null)
+            isOledThemeEnabled = prefs.getBoolean(KEY_OLED_THEME, false)
+            isOnboardingCompleted = prefs.getBoolean(KEY_ONBOARDING_COMPLETED, false)
+
+            recentActivities = try {
+                gson.fromJson(prefs.getString(KEY_RECENT_ACT, "[]"), object : TypeToken<MutableList<String>>() {}.type) ?: mutableListOf()
+            } catch (e: Exception) { mutableListOf() }
+
+            dailyMoods = try {
+                gson.fromJson(prefs.getString(KEY_DAILY_MOODS, "{}"), object : TypeToken<MutableMap<String, String>>() {}.type) ?: mutableMapOf()
+            } catch (e: Exception) { mutableMapOf() }
+
+            lastMoodTimestamp = prefs.getLong(KEY_LAST_MOOD_TIMESTAMP, 0L)
+            displaySize = prefs.getString(KEY_DISPLAY_SIZE, "S") ?: "S"
+            homeFocusSize = prefs.getString("home_focus_size", "M") ?: "M"
+            homeDisplaySize = prefs.getString(KEY_HOME_DISPLAY_SIZE, "S") ?: "S"
+            fontSize = prefs.getString(KEY_FONT_SIZE, "S") ?: "S"
+            isSystemAppearanceEnabled = prefs.getBoolean(KEY_SYSTEM_APPEARANCE, true)
+            appThemeMode = prefs.getString("app_theme_mode", "DARK") ?: "DARK"
+            appAccentColor = prefs.getInt("app_accent_color", -1)
+            appFontFamily = prefs.getString("app_font_family", "DEFAULT") ?: "DEFAULT"
+            appBorderRadius = prefs.getInt("app_border_radius", 16)
+            appCardStyle = prefs.getString("app_card_style", "GLASS") ?: "GLASS"
+            appShowShadows = prefs.getBoolean("app_show_shadows", true)
+            startupLoadingTime = prefs.getInt(KEY_STARTUP_LOADING_TIME, 2000)
+            userXP = prefs.getInt(KEY_USER_XP, 0)
+            userLevel = prefs.getInt(KEY_USER_LEVEL, 1)
+
+            lastViewedNotificationDate = prefs.getString(KEY_LAST_VIEWED_NOTIF, "") ?: ""
+            lastSummaryNotificationDate = prefs.getString(KEY_LAST_SUMMARY_NOTIF, "") ?: ""
+            hasNewTodayNotifications = prefs.getBoolean(KEY_HAS_NEW_TODAY_NOTIF, false)
+
+            showHabitSection = prefs.getBoolean(KEY_SHOW_HABITS, true)
+            showWorkoutSection = prefs.getBoolean(KEY_SHOW_WORKOUTS, true)
+            showTaskSection = prefs.getBoolean(KEY_SHOW_TASKS, true)
+            showNoteSection = prefs.getBoolean(KEY_SHOW_NOTES, true)
+            showProjectSection = prefs.getBoolean(KEY_SHOW_PROJECTS, true)
+            showFinanceSection = prefs.getBoolean(KEY_SHOW_FINANCE, true)
+            showPerformanceSection = prefs.getBoolean(KEY_SHOW_PERFORMANCE, true)
+            isAppInternetRestricted = prefs.getBoolean(KEY_APP_INTERNET_RESTRICTED, true)
+
+            userName = prefs.getString(KEY_USER_NAME, "User") ?: "User"
+            userBio = prefs.getString(KEY_USER_BIO, "") ?: ""
+            userAvatarRes = getResourceId(context, prefs.getString(KEY_USER_AVATAR, "boy_avatar_profile") ?: "boy_avatar_profile")
+            userProfileImageUri = prefs.getString(KEY_USER_IMAGE_URI, null)
+            userCustomColors = try {
+                gson.fromJson(prefs.getString(KEY_CUSTOM_COLORS, "[]"), object : TypeToken<MutableList<Int>>() {}.type) ?: mutableListOf()
+            } catch (e: Exception) { mutableListOf() }
+
+            projectCustomTags = try {
+                gson.fromJson(prefs.getString(KEY_PROJ_TAGS, "[\"TASKS\", \"NOTES\", \"FEATURES\", \"BUGS\", \"RESOURCES\"]"), object : TypeToken<MutableList<String>>() {}.type)
+            } catch (e: Exception) { mutableListOf("TASKS", "NOTES", "FEATURES", "BUGS", "RESOURCES") }
+            
+            globalHabitColor = prefs.getInt(KEY_GLOBAL_HABIT_COLOR, -1)
+            globalWorkoutColor = prefs.getInt(KEY_GLOBAL_WORKOUT_COLOR, -1)
+            globalTaskColor = prefs.getInt(KEY_GLOBAL_TASK_COLOR, -1)
+            globalProjectColor = prefs.getInt(KEY_GLOBAL_PROJECT_COLOR, -1)
+            globalNoteColor = prefs.getInt(KEY_GLOBAL_NOTE_COLOR, -1)
+            globalFinanceColor = prefs.getInt(KEY_GLOBAL_FINANCE_COLOR, -1)
+
+            habitAddThemeColor = prefs.getInt(KEY_HABIT_ADD_COLOR, -1)
+            workoutAddThemeColor = prefs.getInt(KEY_WORKOUT_ADD_COLOR, -1)
+            taskAddThemeColor = prefs.getInt(KEY_TASK_ADD_COLOR, -1)
+            noteAddThemeColor = prefs.getInt(KEY_NOTE_ADD_COLOR, -1)
+            projectAddThemeColor = prefs.getInt(KEY_PROJECT_ADD_COLOR, -1)
+            financeAddThemeColor = prefs.getInt(KEY_FINANCE_ADD_COLOR, -1)
+
+            globalHabitIcon = getResourceId(context, prefs.getString(KEY_GLOBAL_HABIT_ICON, "ic_habit_tracker") ?: "ic_habit_tracker")
+            globalWorkoutIcon = getResourceId(context, prefs.getString(KEY_GLOBAL_WORKOUT_ICON, "ic_workout_routine") ?: "ic_workout_routine")
+            globalTaskIcon = getResourceId(context, prefs.getString(KEY_GLOBAL_TASK_ICON, "ic_task") ?: "ic_task")
+            globalProjectIcon = getResourceId(context, prefs.getString(KEY_GLOBAL_PROJECT_ICON, "ic_project") ?: "ic_project")
+            globalNoteIcon = getResourceId(context, prefs.getString(KEY_GLOBAL_NOTE_ICON, "ic_notes") ?: "ic_notes")
+            globalFinanceIcon = getResourceId(context, prefs.getString(KEY_GLOBAL_FINANCE_ICON, "ic_finance") ?: "ic_finance")
+
+            val savedTemplates = try {
+                gson.fromJson<MutableMap<String, List<String>>>(prefs.getString(KEY_PROJ_TEMPLATES, "{}"), object : TypeToken<MutableMap<String, List<String>>>() {}.type) ?: mutableMapOf()
+            } catch (e: Exception) { mutableMapOf() }
+
+            if (savedTemplates.isNotEmpty()) {
+                projectTemplates = savedTemplates
+            }
+
+            // Sync logic
+            checkAndResetDailyStats(context)
+            checkAndResetMonthlyFinance(context)
+            isDataLoaded.value = true
+            notifyDataChanged()
+        } catch (e: Exception) {
+            e.printStackTrace()
         }
-        workouts = gson.fromJson(prefs.getString(KEY_WORKOUTS, "[]"), object : TypeToken<MutableList<Workout>>() {}.type) ?: mutableListOf()
-        // Ensure new fields are initialized for older data
-        workouts.forEach { 
-            if (it.completedDates == null) it.completedDates = mutableListOf()
-            if (it.dailyProgress == null) it.dailyProgress = mutableMapOf()
-            if (it.repeatDays == null) it.repeatDays = listOf(0, 1, 2, 3, 4, 5, 6)
-            if (it.muscleGroups == null) it.muscleGroups = listOf("General")
-        }
-        tasks = gson.fromJson(prefs.getString(KEY_TASKS, "[]"), object : TypeToken<MutableList<Task>>() {}.type) ?: mutableListOf()
-        // Ensure new fields are initialized for older data
-        tasks.forEach {
-            if (it.subtasks == null) it.subtasks = mutableListOf()
-        }
-        notes = gson.fromJson(prefs.getString(KEY_NOTES, "[]"), object : TypeToken<MutableList<Note>>() {}.type) ?: mutableListOf()
-        projects = gson.fromJson(prefs.getString(KEY_PROJECTS, "[]"), object : TypeToken<MutableList<Note>>() {}.type) ?: mutableListOf()
-        transactions = gson.fromJson(prefs.getString(KEY_TRANSACTIONS, "[]"), object : TypeToken<MutableList<Transaction>>() {}.type) ?: mutableListOf()
-        ledgerEntries = gson.fromJson(prefs.getString(KEY_LEDGER, "[]"), object : TypeToken<MutableList<LedgerEntry>>() {}.type) ?: mutableListOf()
-        personalLedgers = gson.fromJson(prefs.getString(KEY_PERSONAL_LEDGER, "[]"), object : TypeToken<MutableList<PersonalLedger>>() {}.type) ?: mutableListOf()
-        
-        monthlyBudget = prefs.getFloat(KEY_BUDGET, 0.0f).toDouble()
-        monthlySavingsGoal = prefs.getFloat(KEY_SAVINGS_GOAL, 0.0f).toDouble()
-        financeSavingsGoalName = prefs.getString(KEY_SAVINGS_GOAL_NAME, "Monthly Savings") ?: "Monthly Savings"
-        
-        monthlyBudgets = gson.fromJson(prefs.getString(KEY_MONTHLY_BUDGETS, "{}"), object : TypeToken<MutableMap<String, Double>>() {}.type) ?: mutableMapOf()
-        monthlySavingsGoals = gson.fromJson(prefs.getString(KEY_MONTHLY_SAVINGS_GOALS, "{}"), object : TypeToken<MutableMap<String, Double>>() {}.type) ?: mutableMapOf()
-        
-        history = gson.fromJson(prefs.getString(KEY_HISTORY, "{}"), object : TypeToken<MutableMap<String, DayHistory>>() {}.type) ?: mutableMapOf()
-        
-        taskShowCompleted = prefs.getBoolean(KEY_TASK_SHOW_COMPLETED, true)
-        taskShowHidden = prefs.getBoolean(KEY_TASK_SHOW_HIDDEN, false)
-        taskSortOrder = prefs.getString(KEY_TASK_SORT_ORDER, "Priority") ?: "Priority"
-        taskCustomCategories = gson.fromJson(prefs.getString(KEY_TASK_CUSTOM_CATEGORIES, "[\"General\", \"Personal\", \"Work\", \"Shopping\"]"), object : TypeToken<MutableList<String>>() {}.type)
-        taskAutoArchive = prefs.getBoolean(KEY_TASK_AUTO_ARCHIVE, false)
-        taskEditModeEnabled = prefs.getBoolean(KEY_TASK_EDIT_MODE, false)
-        taskDefaultSection = prefs.getString(KEY_TASK_DEFAULT_SECTION, "Tasks") ?: "Tasks"
-        taskVisibleSections = gson.fromJson(prefs.getString(KEY_TASK_VISIBLE_SECTIONS, "[\"Tasks\"]"), object : TypeToken<MutableList<String>>() {}.type)
-        workoutFilterType = prefs.getString(KEY_WORKOUT_FILTER_TYPE, "TIME") ?: "TIME"
-        workoutMuscleGroups = gson.fromJson(prefs.getString(KEY_WORKOUT_MUSCLE_GROUPS, "[\"Chest\", \"Back\", \"Legs\", \"Shoulders\", \"Arms\", \"Cardio\", \"Full Body\"]"), object : TypeToken<MutableList<String>>() {}.type) ?: mutableListOf("Chest", "Back", "Legs", "Shoulders", "Arms", "Cardio", "Full Body")
-
-        financeCustomCategories = gson.fromJson(prefs.getString(KEY_FINANCE_CUSTOM_CATEGORIES, "[\"Food\", \"Rent\", \"Transport\", \"Shopping\", \"Entertainment\", \"Health\", \"Other\"]"), object : TypeToken<MutableList<String>>() {}.type)
-        financeCategoryIcons = gson.fromJson(prefs.getString(KEY_FINANCE_CATEGORY_ICONS, "{}"), object : TypeToken<MutableMap<String, Int>>() {}.type) ?: mutableMapOf()
-        financeCategoryColors = gson.fromJson(prefs.getString(KEY_FINANCE_CATEGORY_COLORS, "{}"), object : TypeToken<MutableMap<String, Int>>() {}.type) ?: mutableMapOf()
-        financeCurrency = prefs.getString(KEY_FINANCE_CURRENCY, "₹") ?: "₹"
-        financeGraphStartMonth = prefs.getInt(KEY_FINANCE_GRAPH_START_MONTH, 0)
-        financeGraphColor = prefs.getInt(KEY_FINANCE_GRAPH_COLOR, -1)
-        financeGraphSavingsColor = prefs.getInt(KEY_FINANCE_GRAPH_SAVINGS_COLOR, -1)
-        isFinanceLedgerEnabled = prefs.getBoolean(KEY_FINANCE_LEDGER_ENABLED, true)
-
-        noteAutoCleanupDays = prefs.getInt(KEY_NOTE_AUTO_CLEANUP, 0)
-        noteShowHidden = prefs.getBoolean(KEY_NOTE_SHOW_HIDDEN, false)
-        noteVoiceInputEnabled = prefs.getBoolean(KEY_NOTE_VOICE_INPUT, true)
-        noteVisibleSections = gson.fromJson(prefs.getString(KEY_NOTE_VISIBLE_SECTIONS, "[\"Notes\"]"), object : TypeToken<MutableList<String>>() {}.type) ?: mutableListOf("Notes")
-        noteDefaultCategory = prefs.getString(KEY_NOTE_DEFAULT_CAT, "Notes") ?: "Notes"
-        noteTemplates = gson.fromJson(prefs.getString(KEY_NOTE_TEMPLATES, "{}"), object : TypeToken<MutableMap<String, String>>() {}.type) ?: mutableMapOf()
-
-        projectAutoArchive = prefs.getBoolean(KEY_PROJ_ARCHIVE, false)
-        projectSynergySync = prefs.getBoolean(KEY_PROJ_SYNC, false)
-        projectDeadlineAlerts = prefs.getBoolean(KEY_PROJ_ALERTS, true)
-        projectSortCompletedToBottom = prefs.getBoolean(KEY_PROJ_SORT_BOTTOM, true)
-        projectActiveExpanded = prefs.getBoolean("project_active_expanded", true)
-        projectCompletedExpanded = prefs.getBoolean(KEY_PROJ_COMPLETED_EXP, false)
-        ideaActiveExpanded = prefs.getBoolean(KEY_IDEA_ACTIVE_EXP, true)
-        ideaCompletedExpanded = prefs.getBoolean(KEY_IDEA_COMPLETED_EXP, false)
-        projectAutoSaveIdeas = prefs.getBoolean(KEY_PROJ_AUTOSAVE_IDEAS, true)
-        projectAnalyticsEnabled = prefs.getBoolean(KEY_PROJ_ANALYTICS, false)
-        projectDualExistEnabled = prefs.getBoolean(KEY_PROJ_DUAL_EXIST, false)
-        projectIdeasEnabled = prefs.getBoolean(KEY_PROJ_IDEAS_ENABLED, true)
-        projectRoadmapsEnabled = prefs.getBoolean(KEY_PROJ_ROADMAPS, true)
-
-        isAppLockEnabled = prefs.getBoolean(KEY_APP_LOCK, false)
-        isBiometricLockEnabled = prefs.getBoolean(KEY_BIOMETRIC_LOCK, false)
-        isScreenshotProtectionEnabled = prefs.getBoolean(KEY_SCREENSHOT_PROTECTION, false)
-        appLockPin = prefs.getString(KEY_APP_LOCK_PIN, null)
-        appLockQuestion = prefs.getString("app_lock_question", null)
-        appLockAnswer = prefs.getString("app_lock_answer", null)
-        isOledThemeEnabled = prefs.getBoolean(KEY_OLED_THEME, false)
-        isOnboardingCompleted = prefs.getBoolean(KEY_ONBOARDING_COMPLETED, false)
-
-        recentActivities = gson.fromJson(prefs.getString(KEY_RECENT_ACT, "[]"), object : TypeToken<MutableList<String>>() {}.type) ?: mutableListOf()
-        dailyMoods = gson.fromJson(prefs.getString(KEY_DAILY_MOODS, "{}"), object : TypeToken<MutableMap<String, String>>() {}.type) ?: mutableMapOf()
-        lastMoodTimestamp = prefs.getLong(KEY_LAST_MOOD_TIMESTAMP, 0L)
-        displaySize = prefs.getString(KEY_DISPLAY_SIZE, "S") ?: "S"
-        homeFocusSize = prefs.getString("home_focus_size", "M") ?: "M"
-        homeDisplaySize = prefs.getString(KEY_HOME_DISPLAY_SIZE, "S") ?: "S"
-        fontSize = prefs.getString(KEY_FONT_SIZE, "S") ?: "S"
-        isSystemAppearanceEnabled = prefs.getBoolean(KEY_SYSTEM_APPEARANCE, true)
-        appThemeMode = prefs.getString("app_theme_mode", "DARK") ?: "DARK"
-        appAccentColor = prefs.getInt("app_accent_color", -1)
-        appFontFamily = prefs.getString("app_font_family", "DEFAULT") ?: "DEFAULT"
-        appBorderRadius = prefs.getInt("app_border_radius", 16)
-        appCardStyle = prefs.getString("app_card_style", "GLASS") ?: "GLASS"
-        appShowShadows = prefs.getBoolean("app_show_shadows", true)
-        startupLoadingTime = prefs.getInt(KEY_STARTUP_LOADING_TIME, 2000)
-        userXP = prefs.getInt(KEY_USER_XP, 0)
-        userLevel = prefs.getInt(KEY_USER_LEVEL, 1)
-
-        showHabitSection = prefs.getBoolean(KEY_SHOW_HABITS, true)
-        showWorkoutSection = prefs.getBoolean(KEY_SHOW_WORKOUTS, true)
-        showTaskSection = prefs.getBoolean(KEY_SHOW_TASKS, true)
-        showNoteSection = prefs.getBoolean(KEY_SHOW_NOTES, true)
-        showProjectSection = prefs.getBoolean(KEY_SHOW_PROJECTS, true)
-        showFinanceSection = prefs.getBoolean(KEY_SHOW_FINANCE, true)
-        showPerformanceSection = prefs.getBoolean(KEY_SHOW_PERFORMANCE, true)
-        isAppInternetRestricted = prefs.getBoolean(KEY_APP_INTERNET_RESTRICTED, true)
-
-        userName = prefs.getString(KEY_USER_NAME, "User") ?: "User"
-        userBio = prefs.getString(KEY_USER_BIO, "") ?: ""
-        userAvatarRes = getResourceId(context, prefs.getString(KEY_USER_AVATAR, "boy_avatar_profile") ?: "boy_avatar_profile")
-        userProfileImageUri = prefs.getString(KEY_USER_IMAGE_URI, null)
-        userCustomColors = gson.fromJson(prefs.getString(KEY_CUSTOM_COLORS, "[]"), object : TypeToken<MutableList<Int>>() {}.type) ?: mutableListOf()
-        projectCustomTags = gson.fromJson(prefs.getString(KEY_PROJ_TAGS, "[\"TASKS\", \"NOTES\", \"FEATURES\", \"BUGS\", \"RESOURCES\"]"), object : TypeToken<MutableList<String>>() {}.type)
-        
-        globalHabitColor = prefs.getInt(KEY_GLOBAL_HABIT_COLOR, -1)
-        globalWorkoutColor = prefs.getInt(KEY_GLOBAL_WORKOUT_COLOR, -1)
-        globalTaskColor = prefs.getInt(KEY_GLOBAL_TASK_COLOR, -1)
-        globalProjectColor = prefs.getInt(KEY_GLOBAL_PROJECT_COLOR, -1)
-        globalNoteColor = prefs.getInt(KEY_GLOBAL_NOTE_COLOR, -1)
-        globalFinanceColor = prefs.getInt(KEY_GLOBAL_FINANCE_COLOR, -1)
-
-        habitAddThemeColor = prefs.getInt(KEY_HABIT_ADD_COLOR, -1)
-        workoutAddThemeColor = prefs.getInt(KEY_WORKOUT_ADD_COLOR, -1)
-        taskAddThemeColor = prefs.getInt(KEY_TASK_ADD_COLOR, -1)
-        noteAddThemeColor = prefs.getInt(KEY_NOTE_ADD_COLOR, -1)
-        projectAddThemeColor = prefs.getInt(KEY_PROJECT_ADD_COLOR, -1)
-        financeAddThemeColor = prefs.getInt(KEY_FINANCE_ADD_COLOR, -1)
-
-        globalHabitIcon = getResourceId(context, prefs.getString(KEY_GLOBAL_HABIT_ICON, "ic_habit_tracker") ?: "ic_habit_tracker")
-        globalWorkoutIcon = getResourceId(context, prefs.getString(KEY_GLOBAL_WORKOUT_ICON, "ic_workout_routine") ?: "ic_workout_routine")
-        globalTaskIcon = getResourceId(context, prefs.getString(KEY_GLOBAL_TASK_ICON, "ic_task") ?: "ic_task")
-        globalProjectIcon = getResourceId(context, prefs.getString(KEY_GLOBAL_PROJECT_ICON, "ic_project") ?: "ic_project")
-        globalNoteIcon = getResourceId(context, prefs.getString(KEY_GLOBAL_NOTE_ICON, "ic_notes") ?: "ic_notes")
-        globalFinanceIcon = getResourceId(context, prefs.getString(KEY_GLOBAL_FINANCE_ICON, "ic_finance") ?: "ic_finance")
-
-        val savedTemplates = gson.fromJson<MutableMap<String, List<String>>>(prefs.getString(KEY_PROJ_TEMPLATES, "{}"), object : TypeToken<MutableMap<String, List<String>>>() {}.type) ?: mutableMapOf()
-        if (savedTemplates.isNotEmpty()) {
-            projectTemplates = savedTemplates
-        }
-
-        // Sync logic
-        checkAndResetDailyStats(context)
-        checkAndResetMonthlyFinance(context)
     }
 
+
     private fun getResourceId(context: Context, name: String): Int {
-        return context.resources.getIdentifier(name, "drawable", context.packageName).let { if (it == 0) R.drawable.ic_launcher_foreground else it }
+        return try {
+            val id = context.resources.getIdentifier(name, "drawable", context.packageName)
+            if (id != 0) id else R.drawable.ic_launcher_foreground
+        } catch (e: Exception) {
+            R.drawable.ic_launcher_foreground
+        }
     }
 
     private fun getResourceName(context: Context, id: Int): String {
@@ -677,11 +1031,15 @@ object DataManager {
         val prefs = getPrefs(context)
         val lastReset = prefs.getString(KEY_LAST_RESET_DATE, "")
         if (lastReset != today) {
-            habits.forEach { 
-                it.isCompleted = false
-                it.progress = 0
+            synchronized(habits) {
+                habits.forEach { 
+                    it.isCompleted = false
+                    it.progress = 0
+                }
             }
-            workouts.forEach { it.isCompleted = false }
+            synchronized(workouts) {
+                workouts.forEach { it.isCompleted = false }
+            }
             prefs.edit().putString(KEY_LAST_RESET_DATE, today).apply()
             saveData(context)
         }
@@ -752,9 +1110,11 @@ object DataManager {
                 "HABITS" -> if (historyEntry == null || historyEntry.totalHabits == 0) 0 else (historyEntry.habitsCompleted * 100) / historyEntry.totalHabits
                 "WORKOUTS" -> {
                     // Try to get from detailed workout data first
-                    val todaysWorkouts = workouts.filter {
-                        (it.repeatType != "SPECIFIC_DAYS" || (it.repeatDays?.contains(tempCal.get(Calendar.DAY_OF_WEEK) - 1) ?: false)) &&
-                        it.timestamp <= tempCal.timeInMillis + 86400000
+                    val todaysWorkouts = synchronized(workouts) {
+                        workouts.filter {
+                            (it.repeatType != "SPECIFIC_DAYS" || (it.repeatDays?.contains(tempCal.get(Calendar.DAY_OF_WEEK) - 1) ?: false)) &&
+                            it.timestamp <= tempCal.timeInMillis + 86400000
+                        }
                     }
                     if (todaysWorkouts.isNotEmpty()) {
                         val totalProgress = todaysWorkouts.sumOf { 
@@ -808,7 +1168,7 @@ object DataManager {
         val allData = prefs.all.toMutableMap()
 
         // Add Workspace Data
-        val db = WorkspaceDatabase.getDatabase(context)
+        val db = AppDatabase.getDatabase(context)
         val dao = db.workspaceDao()
 
         allData["workspaceProjects"] = dao.getAllProjectsSync()
@@ -833,7 +1193,7 @@ object DataManager {
     suspend fun importData(context: Context, dataString: String, password: CharArray? = null): Boolean = withContext(Dispatchers.IO) {
         try {
             // Reset existing database to ensure we can re-open it with the imported key
-            WorkspaceDatabase.resetDatabase(context)
+            AppDatabase.resetDatabase(context)
 
             val json = if (password != null) {
                 SecurityManager.decryptData(dataString, password)
@@ -904,7 +1264,7 @@ object DataManager {
             editor.apply()
 
             // Restore Workspace Data
-            val db = WorkspaceDatabase.getDatabase(context)
+            val db = AppDatabase.getDatabase(context)
             val dao = db.workspaceDao()
             val gson = Gson()
 
@@ -962,7 +1322,7 @@ object DataManager {
                 }
             }
 
-            withContext(Dispatchers.Main) {
+            withContext<Unit>(Dispatchers.Main) {
                 loadData(context)
                 notifyDataChanged()
             }
@@ -1009,8 +1369,10 @@ object DataManager {
             tempCal.set(year, month, day)
             val dateKey = sdf.format(tempCal.time)
             
-            val volume = workouts.filter { 
-                it.completedDates.contains(dateKey) || it.dailyProgress.containsKey(dateKey) 
+            val volume = synchronized(workouts) {
+                workouts.filter { 
+                    it.completedDates.contains(dateKey) || it.dailyProgress.containsKey(dateKey) 
+                }
             }.sumOf { workout ->
                 val progress = workout.dailyProgress[dateKey] ?: if (workout.completedDates.contains(dateKey)) 100 else 0
                 calculateWorkoutVolume(workout, progress)
@@ -1043,16 +1405,18 @@ object DataManager {
         
         val distribution = mutableMapOf<String, Double>()
         
-        workouts.forEach { workout ->
-            val workoutVolume = workout.completedDates.filter { dateStr ->
-                try {
-                    val date = sdf.parse(dateStr)
-                    date != null && date.time >= thirtyDaysAgo
-                } catch (e: Exception) { false }
-            }.size * calculateWorkoutVolume(workout, 100)
-            
-            workout.muscleGroups.forEach { muscle ->
-                distribution[muscle] = (distribution[muscle] ?: 0.0) + workoutVolume
+        synchronized(workouts) {
+            workouts.forEach { workout ->
+                val workoutVolume = workout.completedDates.filter { dateStr ->
+                    try {
+                        val date = sdf.parse(dateStr)
+                        date != null && date.time >= thirtyDaysAgo
+                    } catch (e: Exception) { false }
+                }.size * calculateWorkoutVolume(workout, 100)
+                
+                workout.muscleGroups.forEach { muscle ->
+                    distribution[muscle] = (distribution[muscle] ?: 0.0) + workoutVolume
+                }
             }
         }
         
@@ -1119,9 +1483,11 @@ object DataManager {
             date.add(Calendar.DAY_OF_YEAR, -i)
             val dateKey = sdf.format(date.time)
             
-            totalVolume += workouts.sumOf { workout ->
-                val progress = workout.dailyProgress[dateKey] ?: if (workout.completedDates.contains(dateKey)) 100 else 0
-                calculateWorkoutVolume(workout, progress)
+            totalVolume += synchronized(workouts) {
+                workouts.sumOf { workout ->
+                    val progress = workout.dailyProgress[dateKey] ?: if (workout.completedDates.contains(dateKey)) 100 else 0
+                    calculateWorkoutVolume(workout, progress)
+                }
             }
         }
         return totalVolume / days
@@ -1145,10 +1511,12 @@ object DataManager {
         return (1..daysInMonth).map { day ->
             tempCal.set(year, month, day)
             val dateKey = sdf.format(tempCal.time)
-            workouts.sumOf { workout ->
-                val progress = workout.dailyProgress[dateKey] ?: if (workout.completedDates.contains(dateKey)) 100 else 0
-                calculateWorkoutVolume(workout, progress)
-            }.toFloat()
+            synchronized(workouts) {
+                workouts.sumOf { workout ->
+                    val progress = workout.dailyProgress[dateKey] ?: if (workout.completedDates.contains(dateKey)) 100 else 0
+                    calculateWorkoutVolume(workout, progress)
+                }.toFloat()
+            }
         }
     }
 
@@ -1167,8 +1535,10 @@ object DataManager {
         return (1..daysInMonth).map { day ->
             tempCal.set(year, month, day)
             val dateKey = sdf.format(tempCal.time)
-            val dayWorkouts = workouts.filter { 
-                it.completedDates.contains(dateKey) || it.dailyProgress.containsKey(dateKey) 
+            val dayWorkouts = synchronized(workouts) {
+                workouts.filter { 
+                    it.completedDates.contains(dateKey) || it.dailyProgress.containsKey(dateKey) 
+                }
             }
             if (dayWorkouts.isEmpty()) 0 
             else (dayWorkouts.sumOf { it.dailyProgress[dateKey] ?: 100 } / dayWorkouts.size)
@@ -1186,9 +1556,11 @@ object DataManager {
         for (day in 1..daysInMonth) {
             tempCal.set(year, month, day)
             val dateKey = sdf.format(tempCal.time)
-            val trainedMuscles = workouts.filter { 
-                it.completedDates.contains(dateKey) || it.dailyProgress.containsKey(dateKey) 
-            }.flatMap { it.muscleGroups }.distinct()
+            val trainedMuscles = synchronized(workouts) {
+                workouts.filter { 
+                    it.completedDates.contains(dateKey) || it.dailyProgress.containsKey(dateKey) 
+                }.flatMap { it.muscleGroups }.distinct()
+            }
             if (trainedMuscles.isNotEmpty()) {
                 result[day - 1] = trainedMuscles
             }
@@ -1226,5 +1598,12 @@ object DataManager {
         )
     )
 
-    fun updateWorkspaceAgenda(context: Context) {}
+    fun checkAndSetNewTodayNotification(timestamp: Long?) {
+        if (timestamp == null) return
+        val todayStr = getTrackingDateString()
+        val itemDateStr = getTrackingDateString(timestamp)
+        if (todayStr == itemDateStr) {
+            hasNewTodayNotifications = true
+        }
+    }
 }

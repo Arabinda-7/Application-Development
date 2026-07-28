@@ -76,7 +76,7 @@ class AddFinanceActivity : BaseActivity() {
                 "Saving" -> rgType.check(R.id.radio_saving)
                 else -> rgType.check(R.id.radio_expense)
             }
-            calendar.timeInMillis = existingTransaction!!.timestamp
+            existingTransaction?.let { calendar.timeInMillis = it.timestamp }
         }
 
         val currency = DataManager.financeCurrency

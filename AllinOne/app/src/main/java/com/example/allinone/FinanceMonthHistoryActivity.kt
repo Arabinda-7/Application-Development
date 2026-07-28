@@ -18,6 +18,12 @@ class FinanceMonthHistoryActivity : BaseActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_finance_month_history)
 
+        val initialYear = intent.getIntExtra("year", viewModel.selectedYear)
+        val initialMonth = intent.getIntExtra("month", viewModel.currentMonthIndex)
+        
+        viewModel.selectedYear = initialYear
+        viewModel.currentMonthIndex = initialMonth
+
         initSections()
         setupLogic()
     }

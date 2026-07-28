@@ -5,9 +5,9 @@ import com.example.allinone.R
 import java.util.*
 
 object WorkoutDataManager {
-    var workouts = mutableListOf<Workout>()
+    var workouts: MutableList<Workout> = java.util.Collections.synchronizedList(mutableListOf<Workout>())
     
-    var workoutMuscleGroups = mutableListOf("Chest", "Back", "Legs", "Shoulders", "Arms", "Cardio", "Full Body")
+    var workoutMuscleGroups = java.util.Collections.synchronizedList(mutableListOf("Chest", "Back", "Legs", "Shoulders", "Arms", "Cardio", "Full Body"))
     var workoutFilterType: String = "TIME"
     var workoutAutoRestTimer: Boolean = false
     var workoutWeightUnit: String = "Kg"
@@ -21,8 +21,10 @@ object WorkoutDataManager {
 
     fun getWorkoutProgress(): Int {
         val todayIndex = (Calendar.getInstance().get(Calendar.DAY_OF_WEEK) - 1)
-        val todaysWorkouts = workouts.filter {
-            (it.repeatType != "SPECIFIC_DAYS" || it.repeatDays.contains(todayIndex))
+        val todaysWorkouts = synchronized(workouts) {
+            workouts.filter {
+                (it.repeatType != "SPECIFIC_DAYS" || it.repeatDays.contains(todayIndex))
+            }
         }
         if (todaysWorkouts.isEmpty()) return 0
         val completed = todaysWorkouts.count { it.isCompleted }
@@ -30,46 +32,73 @@ object WorkoutDataManager {
     }
 
     fun getWorkoutStreaks(): Pair<Int, Int> {
-        val allCompletedDates = workouts.flatMap { it.completedDates }.distinct().sortedDescending()
+        val allCompletedDates = synchronized(workouts) {
+            workouts.flatMap { it.completedDates }.distinct().toSet()
+        }
         if (allCompletedDates.isEmpty()) return 0 to 0
 
         val sdf = java.text.SimpleDateFormat("yyyyMMdd", java.util.Locale.getDefault())
-        val today = sdf.format(Date())
-        val yesterday = Calendar.getInstance().apply { add(Calendar.DAY_OF_YEAR, -1) }.let { sdf.format(it.time) }
-
+        
+        // 1. Calculate Current Streak
         var currentStreak = 0
-        var bestStreak = 0
-        var tempStreak = 0
-
-        // Best Streak Calculation
-        val allSortedAsc = allCompletedDates.reversed()
-        var lastDate: Calendar? = null
-        for (dateStr in allSortedAsc) {
-            val date = Calendar.getInstance().apply { time = sdf.parse(dateStr)!! }
-            if (lastDate == null) {
-                tempStreak = 1
-            } else {
-                val diff = (date.timeInMillis - lastDate.timeInMillis) / (1000 * 60 * 60 * 24)
-                if (diff == 1L) {
-                    tempStreak++
-                } else if (diff > 1L) {
-                    tempStreak = 1
-                }
-            }
-            lastDate = date
-            if (tempStreak > bestStreak) bestStreak = tempStreak
+        val checkCal = Calendar.getInstance()
+        val today = sdf.format(checkCal.time)
+        
+        // If nothing today, check yesterday to see if streak is still alive
+        if (!allCompletedDates.contains(today)) {
+            checkCal.add(Calendar.DAY_OF_YEAR, -1)
         }
 
-        // Current Streak Calculation
-        if (allCompletedDates.contains(today) || allCompletedDates.contains(yesterday)) {
-            val checkCal = Calendar.getInstance()
-            if (!allCompletedDates.contains(today)) checkCal.add(Calendar.DAY_OF_YEAR, -1)
-
-            while (allCompletedDates.contains(sdf.format(checkCal.time))) {
-                currentStreak++
-                checkCal.add(Calendar.DAY_OF_YEAR, -1)
-                if (currentStreak > 1000) break
+        while (currentStreak < 1000) {
+            val dateStr = sdf.format(checkCal.time)
+            val dayOfWeek = (checkCal.get(Calendar.DAY_OF_WEEK) - 1)
+            
+            val wasAnythingScheduled = synchronized(workouts) {
+                workouts.any { 
+                    (it.repeatType != "SPECIFIC_DAYS" || it.repeatDays.contains(dayOfWeek)) &&
+                    it.timestamp <= checkCal.timeInMillis + 86400000
+                }
             }
+
+            if (allCompletedDates.contains(dateStr)) {
+                currentStreak++
+            } else if (wasAnythingScheduled) {
+                // Was scheduled but not completed -> streak breaks
+                break
+            } else {
+                // Not scheduled -> streak continues through this day
+            }
+            checkCal.add(Calendar.DAY_OF_YEAR, -1)
+        }
+
+        // 2. Calculate Best Streak (Simplified for now, but respects gaps)
+        var bestStreak = 0
+        var tempStreak = 0
+        
+        // We iterate from the first workout ever to today
+        val firstWorkoutTime = synchronized(workouts) { workouts.minByOrNull { it.timestamp }?.timestamp } ?: return currentStreak to currentStreak
+        val iterCal = Calendar.getInstance().apply { timeInMillis = firstWorkoutTime }
+        val endCal = Calendar.getInstance()
+
+        while (!iterCal.after(endCal)) {
+            val dateStr = sdf.format(iterCal.time)
+            val dayOfWeek = (iterCal.get(Calendar.DAY_OF_WEEK) - 1)
+            
+            val wasAnythingScheduled = synchronized(workouts) {
+                workouts.any { 
+                    (it.repeatType != "SPECIFIC_DAYS" || it.repeatDays.contains(dayOfWeek)) &&
+                    it.timestamp <= iterCal.timeInMillis + 86400000
+                }
+            }
+
+            if (allCompletedDates.contains(dateStr)) {
+                tempStreak++
+            } else if (wasAnythingScheduled) {
+                tempStreak = 0
+            }
+
+            if (tempStreak > bestStreak) bestStreak = tempStreak
+            iterCal.add(Calendar.DAY_OF_YEAR, 1)
         }
 
         return currentStreak to bestStreak
@@ -82,17 +111,19 @@ object WorkoutDataManager {
     fun getWorkoutsThisMonth(): Int {
         val sdf = java.text.SimpleDateFormat("yyyyMM", java.util.Locale.getDefault())
         val currentMonth = sdf.format(Date())
-        return workouts.flatMap { it.completedDates }
-            .distinct()
-            .count { it.startsWith(currentMonth) }
+        return synchronized(workouts) {
+            workouts.flatMap { it.completedDates }
+                .distinct()
+                .count { it.startsWith(currentMonth) }
+        }
     }
 
     fun getTotalWorkoutsFinished(): Int {
-        return workouts.sumOf { it.completedDates.size }
+        return synchronized(workouts) { workouts.sumOf { it.completedDates.size } }
     }
     
     fun getTodayCaloriesBurned(): Int {
-        val todayWorkouts = workouts.filter { it.isCompleted }
+        val todayWorkouts = synchronized(workouts) { workouts.filter { it.isCompleted } }
         var total = 0.0
         todayWorkouts.forEach { workout ->
             total += when (workout.trackingMode) {

@@ -160,9 +160,18 @@ class WorkoutAdapter(
                     }
                     context.startActivity(intent)
                 } else {
+                    val wasExpanded = workout.isExpanded
+                    if (!wasExpanded) {
+                        // Collapse others
+                        displayItems.forEach { 
+                            if (it is Workout && it.isExpanded) {
+                                it.isExpanded = false
+                            }
+                        }
+                    }
                     TransitionManager.beginDelayedTransition(holder.itemView as ViewGroup)
-                    workout.isExpanded = !workout.isExpanded
-                    notifyItemChanged(position)
+                    workout.isExpanded = !wasExpanded
+                    notifyDataSetChanged() // Use notifyDataSetChanged to refresh all items to show collapses
                 }
             }
 
@@ -183,9 +192,18 @@ class WorkoutAdapter(
                 if (selectedDateString != todayDateString) {
                     android.widget.Toast.makeText(context, "You can only track workouts for today!", android.widget.Toast.LENGTH_SHORT).show()
                 } else if (!isCompleted) {
+                    val wasExpanded = workout.isExpanded
+                    if (!wasExpanded) {
+                        // Collapse others
+                        displayItems.forEach { 
+                            if (it is Workout && it.isExpanded) {
+                                it.isExpanded = false
+                            }
+                        }
+                    }
                     TransitionManager.beginDelayedTransition(holder.itemView as ViewGroup)
-                    workout.isExpanded = !workout.isExpanded
-                    notifyItemChanged(position)
+                    workout.isExpanded = !wasExpanded
+                    notifyDataSetChanged()
                 }
             }
 
@@ -408,6 +426,11 @@ class WorkoutAdapter(
 
     fun setShowCompleted(show: Boolean) {
         showCompleted = show
+        applyFilterAndSort()
+    }
+
+    fun collapseAll() {
+        allWorkouts.forEach { it.isExpanded = false }
         applyFilterAndSort()
     }
 

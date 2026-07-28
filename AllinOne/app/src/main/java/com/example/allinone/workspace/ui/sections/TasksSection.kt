@@ -543,7 +543,7 @@ fun TaskAddEditSection(
                         Spacer(modifier = Modifier.width(12.dp))
                         Text(
                             text = if (dueDate != null) {
-                                SimpleDateFormat("MMM dd, h:mm a", Locale.getDefault()).format(Date(dueDate!!))
+                                dueDate?.let { SimpleDateFormat("MMM dd, h:mm a", Locale.getDefault()).format(Date(it)) } ?: ""
                             } else {
                                 "Set reminder time..."
                             },

@@ -72,15 +72,49 @@ class WorkoutSettingsActivity : BaseActivity() {
     }
 
     private fun showManageMuscleGroupsDialog() {
-        val dialog = Dialog(this); dialog.setContentView(R.layout.dialog_manage_categories_workout)
+        val dialog = Dialog(this)
+        dialog.setContentView(R.layout.dialog_manage_categories_workout)
+        
         val container = dialog.findViewById<LinearLayout>(R.id.categories_container)
         val et = dialog.findViewById<EditText>(R.id.et_new_category)
+        val btnAdd = dialog.findViewById<View>(R.id.btn_add_category)
+        val accentLine = dialog.findViewById<View>(R.id.title_accent_line)
+        val root = dialog.findViewById<View>(R.id.dialog_root)
+        val inputContainer = dialog.findViewById<View>(R.id.container_add_category)
+
+        val accentColor = if (DataManager.appAccentColor != -1) DataManager.appAccentColor else android.graphics.Color.parseColor("#1A73E8")
+        val radius = DataManager.appBorderRadius.toFloat() * resources.displayMetrics.density
+
+        // Apply theme to dialog components
+        accentLine.setBackgroundColor(accentColor)
+        (btnAdd.background as? android.graphics.drawable.GradientDrawable)?.let {
+            it.setColor(accentColor)
+            it.cornerRadius = 1000f // Circular
+        }
+
+        // Backgrounds with dynamic radius
+        root.background = android.graphics.drawable.GradientDrawable().apply {
+            setColor(if (DataManager.appThemeMode == "OLED") android.graphics.Color.BLACK else android.graphics.Color.parseColor("#121212"))
+            cornerRadius = radius
+        }
         
+        inputContainer.background = android.graphics.drawable.GradientDrawable().apply {
+            setColor(android.graphics.Color.parseColor("#2A2A2A"))
+            cornerRadius = radius * 0.6f
+        }
+
         fun refresh() {
             container.removeAllViews()
             DataManager.workoutMuscleGroups.forEach { g ->
                 val iv = LayoutInflater.from(this).inflate(R.layout.item_category_manage_workout, container, false)
                 iv.findViewById<TextView>(R.id.tv_category_name).text = g
+                
+                // Apply dynamic radius to item
+                iv.findViewById<View>(R.id.item_container).background = android.graphics.drawable.GradientDrawable().apply {
+                    setColor(android.graphics.Color.parseColor("#2A2A2A"))
+                    cornerRadius = radius * 0.5f
+                }
+
                 iv.findViewById<View>(R.id.btn_remove_category).setOnClickListener { 
                     DataManager.workoutMuscleGroups.remove(g)
                     DataManager.saveData(this)
@@ -90,7 +124,7 @@ class WorkoutSettingsActivity : BaseActivity() {
             }
         }
         
-        dialog.findViewById<View>(R.id.btn_add_category).setOnClickListener {
+        btnAdd.setOnClickListener {
             val n = et.text.toString().trim()
             if (n.isNotEmpty()) { 
                 DataManager.workoutMuscleGroups.add(n)

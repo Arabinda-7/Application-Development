@@ -12,12 +12,15 @@ import androidx.core.content.ContextCompat
 import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.RecyclerView
 import com.google.android.material.card.MaterialCardView
+import kotlinx.coroutines.*
 import java.util.*
 
 class TaskAdapter(
     private val allTasks: MutableList<Task>,
     private val onProgressChanged: () -> Unit
 ) : RecyclerView.Adapter<RecyclerView.ViewHolder>() {
+
+    private val adapterScope = CoroutineScope(Dispatchers.Main + SupervisorJob())
 
     companion object {
         private const val TYPE_HEADER = 1
@@ -77,7 +80,7 @@ class TaskAdapter(
             holder.selectionCheckbox.visibility = if (isDeleteMode) View.VISIBLE else View.GONE
             holder.selectionCheckbox.isChecked = task.isSelected
             
-            // Priority Indicator
+            // Priority Indicator & Color
             val priorityColor = when(task.priority) {
                 1 -> ContextCompat.getColor(context, R.color.card_orange)
                 2 -> Color.parseColor("#FF5252")
@@ -85,12 +88,13 @@ class TaskAdapter(
             }
             holder.priorityIndicator.setBackgroundColor(priorityColor)
             
-            // Dynamic Card Styling
-            val taskColor = if (DataManager.globalTaskColor != -1) DataManager.globalTaskColor else ContextCompat.getColor(context, R.color.primary_blue)
-            holder.taskCard.setCardBackgroundColor(Color.TRANSPARENT)
-            holder.taskCard.strokeColor = taskColor
+            // Dynamic Card Styling - Priority Based
+            holder.taskCard.setCardBackgroundColor(UIUtils.adjustAlpha(priorityColor, 0.1f))
+            holder.taskCard.strokeColor = priorityColor
             holder.taskCard.strokeWidth = (1.5 * context.resources.displayMetrics.density).toInt()
-            holder.taskCompleted.backgroundTintList = android.content.res.ColorStateList.valueOf(taskColor)
+            
+            val checkTint = if (task.isCompleted) Color.GRAY else priorityColor
+            holder.taskCompleted.backgroundTintList = android.content.res.ColorStateList.valueOf(checkTint)
             
             // Metadata
             holder.tvCategory.text = task.category ?: "General"
@@ -258,39 +262,45 @@ class TaskAdapter(
     }
 
     fun updateDisplayList() {
-        val newList = mutableListOf<Any>()
-        
-        val filtered = allTasks.filter { task ->
-            val matchesCategory = if (currentCategory == "All") true else task.category == currentCategory
-            val matchesSearch = task.name.contains(currentSearchQuery, ignoreCase = true)
-            val matchesSection = task.section == currentSection
-            val isNotHidden = DataManager.taskShowHidden || !task.isHidden
-            matchesCategory && matchesSearch && matchesSection && isNotHidden
-        }
+        adapterScope.launch {
+            val newList = withContext(Dispatchers.Default) {
+                val list = mutableListOf<Any>()
+                val filtered = synchronized(allTasks) {
+                    allTasks.filter { task ->
+                        val matchesCategory = if (currentCategory == "All") true else task.category == currentCategory
+                        val matchesSearch = task.name.contains(currentSearchQuery, ignoreCase = true)
+                        val matchesSection = task.section == currentSection
+                        val isNotHidden = DataManager.taskShowHidden || !task.isHidden
+                        matchesCategory && matchesSearch && matchesSection && isNotHidden
+                    }
+                }
 
-        val activeTasks = when (currentSortOrder) {
-            "Newest" -> filtered.filter { !it.isCompleted }.sortedByDescending { it.timestamp }
-            "Alphabetical" -> filtered.filter { !it.isCompleted }.sortedBy { it.name.lowercase() }
-            else -> filtered.filter { !it.isCompleted }.sortedWith(compareByDescending<Task> { it.priority }.thenByDescending { it.timestamp })
-        }
+                val activeTasks = when (currentSortOrder) {
+                    "Newest" -> filtered.filter { !it.isCompleted }.sortedByDescending { it.timestamp }
+                    "Alphabetical" -> filtered.filter { !it.isCompleted }.sortedBy { it.name.lowercase() }
+                    else -> filtered.filter { !it.isCompleted }.sortedWith(compareByDescending<Task> { it.priority }.thenByDescending { it.timestamp })
+                }
 
-        val completedTasks = if (showCompleted) filtered.filter { it.isCompleted }.sortedByDescending { it.timestamp } else emptyList()
+                val completedTasks = if (showCompleted) filtered.filter { it.isCompleted }.sortedByDescending { it.timestamp } else emptyList()
 
-        newList.addAll(activeTasks)
-        
-        if (completedTasks.isNotEmpty()) {
-            newList.add("Completed ${completedTasks.size}")
-            if (isCompletedExpanded) {
-                newList.addAll(completedTasks)
+                list.addAll(activeTasks)
+                if (completedTasks.isNotEmpty()) {
+                    list.add("Completed ${completedTasks.size}")
+                    if (isCompletedExpanded) {
+                        list.addAll(completedTasks)
+                    }
+                }
+                list
             }
-        }
 
-        val diffCallback = TaskDiffCallback(displayItems, newList)
-        val diffResult = DiffUtil.calculateDiff(diffCallback)
-        
-        displayItems.clear()
-        displayItems.addAll(newList)
-        diffResult.dispatchUpdatesTo(this)
+            val diffResult = withContext(Dispatchers.Default) {
+                DiffUtil.calculateDiff(TaskDiffCallback(displayItems, newList))
+            }
+            
+            displayItems.clear()
+            displayItems.addAll(newList)
+            diffResult.dispatchUpdatesTo(this@TaskAdapter)
+        }
     }
 
     fun setShowCompleted(show: Boolean) {
@@ -333,6 +343,12 @@ class TaskAdapter(
         container.removeAllViews()
         val context = container.context
         
+        val priorityColor = when(task.priority) {
+            1 -> ContextCompat.getColor(context, R.color.card_orange)
+            2 -> Color.parseColor("#FF5252")
+            else -> ContextCompat.getColor(context, R.color.primary_blue)
+        }
+
         task.subtasks.forEach { subtask ->
             val subView = LayoutInflater.from(context).inflate(android.R.layout.simple_list_item_multiple_choice, container, false)
             val ctView = subView as CheckedTextView
@@ -341,8 +357,7 @@ class TaskAdapter(
             ctView.textSize = 14f
             ctView.isChecked = subtask.isCompleted
             
-            val taskColor = if (DataManager.globalTaskColor != -1) DataManager.globalTaskColor else ContextCompat.getColor(context, R.color.primary_blue)
-            ctView.setCheckMarkTintList(android.content.res.ColorStateList.valueOf(taskColor))
+            ctView.setCheckMarkTintList(android.content.res.ColorStateList.valueOf(priorityColor))
             ctView.setPadding(0, 8, 0, 8)
             
             ctView.setOnClickListener {

@@ -305,4 +305,9 @@ class WorkoutRoutineActivity : BaseActivity() {
         progressSection.update()
         navigationSection.updateNavUI(viewModel.currentTab)
     }
+
+    override fun onStop() {
+        super.onStop()
+        listSection.workoutAdapter.collapseAll()
+    }
 }

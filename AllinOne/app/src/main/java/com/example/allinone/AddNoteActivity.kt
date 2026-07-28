@@ -61,11 +61,15 @@ class AddNoteActivity : BaseActivity() {
     }
 
     private fun setupLogic() {
-        selectedColor = if (existingNote?.color != null && existingNote?.color != -1) existingNote!!.color else ContextCompat.getColor(this, R.color.card_blue)
+        selectedColor = if (existingNote?.color != null && existingNote?.color != -1) {
+            existingNote?.color ?: ContextCompat.getColor(this, R.color.card_blue)
+        } else {
+            ContextCompat.getColor(this, R.color.card_blue)
+        }
         colorPreview.backgroundTintList = android.content.res.ColorStateList.valueOf(selectedColor)
 
         val sdf = SimpleDateFormat("dd MMMM h:mm a", Locale.getDefault())
-        val dateStr = if (existingNote != null) sdf.format(Date(existingNote!!.timestamp)) else sdf.format(Date())
+        val dateStr = existingNote?.let { sdf.format(Date(it.timestamp)) } ?: sdf.format(Date())
 
         if (existingNote != null) {
             titleInput.setText(existingNote?.title)
@@ -172,7 +176,13 @@ class AddNoteActivity : BaseActivity() {
             val pendingIntent = android.app.PendingIntent.getBroadcast(this, title.hashCode(), intent, android.app.PendingIntent.FLAG_UPDATE_CURRENT or android.app.PendingIntent.FLAG_IMMUTABLE)
             val alarmManager = getSystemService(android.content.Context.ALARM_SERVICE) as android.app.AlarmManager
             
-            if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.M) {
+            if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.S) {
+                if (alarmManager.canScheduleExactAlarms()) {
+                    alarmManager.setExactAndAllowWhileIdle(android.app.AlarmManager.RTC_WAKEUP, calendar.timeInMillis, pendingIntent)
+                } else {
+                    alarmManager.setAndAllowWhileIdle(android.app.AlarmManager.RTC_WAKEUP, calendar.timeInMillis, pendingIntent)
+                }
+            } else if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.M) {
                 alarmManager.setExactAndAllowWhileIdle(android.app.AlarmManager.RTC_WAKEUP, calendar.timeInMillis, pendingIntent)
             } else {
                 alarmManager.setExact(android.app.AlarmManager.RTC_WAKEUP, calendar.timeInMillis, pendingIntent)
@@ -191,12 +201,14 @@ class AddNoteActivity : BaseActivity() {
             } else {
                 val index = DataManager.notes.indexOf(existingNote)
                 if (index != -1) {
-                    val updatedNote = existingNote!!.copy(
-                        title = title,
-                        content = content,
-                        color = selectedColor
-                    )
-                    DataManager.notes[index] = updatedNote
+                    existingNote?.let { note ->
+                        val updatedNote = note.copy(
+                            title = title,
+                            content = content,
+                            color = selectedColor
+                        )
+                        DataManager.notes[index] = updatedNote
+                    }
                 }
             }
             DataManager.saveData(this)

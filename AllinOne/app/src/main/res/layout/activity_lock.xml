@@ -83,7 +83,7 @@
             <!-- Row 4 -->
             <ImageButton android:id="@+id/btn_backspace" style="@style/LockKeyIcon" android:src="@android:drawable/ic_input_delete" />
             <TextView android:id="@+id/btn_0" style="@style/LockKey" android:text="0" />
-            <ImageButton android:id="@+id/btn_done" style="@style/LockKeyIcon" android:src="@drawable/icons8_done_100" app:tint="#1A73E8" />
+            <ImageButton android:id="@+id/btn_done" style="@style/LockKeyIcon" android:src="@drawable/ic_done" app:tint="#1A73E8" />
 
         </GridLayout>
 

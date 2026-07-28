@@ -10,6 +10,7 @@ import android.os.Bundle
 import android.view.View
 import android.view.ViewGroup
 import android.widget.EditText
+import android.widget.ImageView
 import android.widget.TextView
 import android.widget.Toast
 import androidx.activity.result.contract.ActivityResultContracts
@@ -17,6 +18,7 @@ import androidx.activity.viewModels
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
 import androidx.lifecycle.lifecycleScope
+import com.google.android.material.bottomsheet.BottomSheetDialog
 import kotlinx.coroutines.launch
 
 class ProfileActivity : BaseActivity() {
@@ -38,6 +40,7 @@ class ProfileActivity : BaseActivity() {
                 DataManager.userProfileImageUri = it.toString()
                 DataManager.saveData(this)
                 viewModel.refresh()
+                updateUI()
                 Toast.makeText(this, "Profile Picture Updated", Toast.LENGTH_SHORT).show()
             }
         }
@@ -80,7 +83,7 @@ class ProfileActivity : BaseActivity() {
                 }
                 imagePickerLauncher.launch(intent)
             },
-            onNameClicked = { showEditProfileDialog() }
+            onNameClicked = { showEditProfileBottomSheet() }
         )
 
         impactSection = ProfileImpactSummarySection(findViewById(R.id.profile_root))
@@ -96,23 +99,27 @@ class ProfileActivity : BaseActivity() {
                     DataManager.isAppLockEnabled = isChecked
                     DataManager.saveData(this)
                     viewModel.refresh()
+                    updateUI()
                 }
             },
             onBiometricToggled = { isChecked ->
                 DataManager.isBiometricLockEnabled = isChecked
                 DataManager.saveData(this)
                 viewModel.refresh()
+                updateUI()
             },
             onScreenshotToggled = { isChecked ->
                 DataManager.isScreenshotProtectionEnabled = isChecked
                 DataManager.saveData(this)
                 SecurityManager.setScreenshotProtection(this, isChecked)
                 viewModel.refresh()
+                updateUI()
             },
             onOledToggled = { isChecked ->
                 DataManager.isOledThemeEnabled = isChecked
                 DataManager.saveData(this)
                 viewModel.refresh()
+                updateUI()
                 Toast.makeText(this, "Restart app to apply theme fully", Toast.LENGTH_SHORT).show()
             }
         )
@@ -141,7 +148,9 @@ class ProfileActivity : BaseActivity() {
         }
 
         btnBack.setOnClickListener { finish() }
-        findViewById<View>(R.id.btn_edit_profile_top).setOnClickListener { showEditProfileDialog() }
+        findViewById<View>(R.id.btn_edit_profile_top).setOnClickListener { showEditProfileBottomSheet() }
+
+        setupQuickActions()
 
         identitySection.setup()
         securitySection.setup(
@@ -155,9 +164,48 @@ class ProfileActivity : BaseActivity() {
         updateUI()
     }
 
+    private fun setupQuickActions() {
+        // Share
+        val actionShare = findViewById<View>(R.id.action_share)
+        actionShare.findViewById<ImageView>(R.id.iv_action_icon).setImageResource(R.drawable.icons8_share_100_apng)
+        actionShare.findViewById<TextView>(R.id.tv_action_label).text = "SHARE"
+        actionShare.setOnClickListener {
+            val sendIntent: Intent = Intent().apply {
+                action = Intent.ACTION_SEND
+                putExtra(Intent.EXTRA_TEXT, "Hey, check out my profile on All in One app! I'm in the ${viewModel.userBio}.")
+                type = "text/plain"
+            }
+            val shareIntent = Intent.createChooser(sendIntent, null)
+            startActivity(shareIntent)
+        }
+
+        // Settings
+        val actionSettings = findViewById<View>(R.id.action_settings)
+        actionSettings.findViewById<ImageView>(R.id.iv_action_icon).setImageResource(R.drawable.baseline_settings_24)
+        actionSettings.findViewById<TextView>(R.id.tv_action_label).text = "SETTINGS"
+        actionSettings.setOnClickListener {
+            // Future: Navigate to general settings
+            Toast.makeText(this, "Global settings coming soon", Toast.LENGTH_SHORT).show()
+        }
+
+        // Help
+        val actionHelp = findViewById<View>(R.id.action_help)
+        actionHelp.findViewById<ImageView>(R.id.iv_action_icon).setImageResource(R.drawable.icons8_info_100)
+        actionHelp.findViewById<TextView>(R.id.tv_action_label).text = "HELP"
+        actionHelp.setOnClickListener {
+            Toast.makeText(this, "Need help? Check documentation.", Toast.LENGTH_SHORT).show()
+        }
+    }
+
     private fun updateUI() {
+        val today = DataManager.getTrackingDateString()
+        val currentTime = System.currentTimeMillis()
+        val isMoodExpired = DataManager.lastMoodTimestamp != 0L && (currentTime - DataManager.lastMoodTimestamp) > 3600000
+        val effectiveMood = if (isMoodExpired) null else DataManager.dailyMoods[today]
+        val moodColor = UIUtils.getMoodColor(effectiveMood, UIUtils.getAccentColor(this))
+
         identitySection.update(viewModel.userName, viewModel.userBio, viewModel.userProfileImageUri, viewModel.userAvatarRes)
-        impactSection.update()
+        impactSection.update(moodColor)
         setupHeaderBackground()
     }
 
@@ -178,21 +226,36 @@ class ProfileActivity : BaseActivity() {
             )
         )
         headerAura.background = gradient
+
+        // Propagate Tint
+        identitySection.applyTint(moodColor)
+        impactSection.applyTint(moodColor)
+        securitySection.applyTint(moodColor)
+        dataSection.applyTint(moodColor)
+        
+        // Tint Quick Action icons
+        tintQuickActions(moodColor)
     }
 
-    private fun showEditProfileDialog() {
-        val dialog = Dialog(this)
-        dialog.setContentView(R.layout.dialog_edit_identity)
-        dialog.window?.setBackgroundDrawableResource(android.R.color.transparent)
-        dialog.window?.setLayout(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT)
-        
-        val etName = dialog.findViewById<EditText>(R.id.et_edit_name)
-        val etBio = dialog.findViewById<EditText>(R.id.et_edit_bio)
-        val btnSave = dialog.findViewById<View>(R.id.btn_save_identity)
+    private fun tintQuickActions(color: Int) {
+        val colorStateList = android.content.res.ColorStateList.valueOf(color)
+        findViewById<View>(R.id.action_share).findViewById<ImageView>(R.id.iv_action_icon).imageTintList = colorStateList
+        findViewById<View>(R.id.action_settings).findViewById<ImageView>(R.id.iv_action_icon).imageTintList = colorStateList
+        findViewById<View>(R.id.action_help).findViewById<ImageView>(R.id.iv_action_icon).imageTintList = colorStateList
+    }
+
+    private fun showEditProfileBottomSheet() {
+        val bottomSheet = BottomSheetDialog(this, R.style.BottomSheetDialogTheme)
+        val view = layoutInflater.inflate(R.layout.dialog_edit_profile_bottom, null)
+        bottomSheet.setContentView(view)
+
+        val etName = view.findViewById<EditText>(R.id.et_edit_name)
+        val etBio = view.findViewById<EditText>(R.id.et_edit_bio)
+        val btnSave = view.findViewById<View>(R.id.btn_save_profile)
 
         etName.setText(viewModel.userName)
         etBio.setText(viewModel.userBio)
-        
+
         btnSave.setOnClickListener {
             val newName = etName.text.toString().trim()
             val newBio = etBio.text.toString().trim()
@@ -202,13 +265,13 @@ class ProfileActivity : BaseActivity() {
                 DataManager.saveData(this)
                 viewModel.refresh()
                 updateUI()
-                dialog.dismiss()
+                bottomSheet.dismiss()
                 Toast.makeText(this, "Profile Updated", Toast.LENGTH_SHORT).show()
             } else {
                 Toast.makeText(this, "Name cannot be empty", Toast.LENGTH_SHORT).show()
             }
         }
-        dialog.show()
+        bottomSheet.show()
     }
 
     override fun finish() {

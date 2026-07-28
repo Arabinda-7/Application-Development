@@ -10,7 +10,7 @@ import androidx.lifecycle.ViewModelProvider
 import com.example.allinone.AppStyle
 import com.example.allinone.BaseActivity
 import com.example.allinone.LocalAppStyle
-import com.example.allinone.workspace.data.WorkspaceDatabase
+import com.example.allinone.workspace.data.AppDatabase
 import com.example.allinone.workspace.domain.WorkspaceRepository
 import com.example.allinone.workspace.ui.ProjectWorkspaceScreen
 import com.example.allinone.workspace.ui.WorkspaceViewModel
@@ -21,7 +21,7 @@ class WorkspaceActivity : BaseActivity() {
         super.onCreate(savedInstanceState)
 
         try {
-            val database = WorkspaceDatabase.getDatabase(this)
+            val database = AppDatabase.getDatabase(this)
             val repository = WorkspaceRepository(database.workspaceDao())
             
             val viewModel = ViewModelProvider(this, object : ViewModelProvider.Factory {
@@ -31,7 +31,7 @@ class WorkspaceActivity : BaseActivity() {
             })[WorkspaceViewModel::class.java]
 
             setContent {
-                val style = AppStyle() 
+                val style = AppStyle.fromSettings() 
 
                 CompositionLocalProvider(LocalAppStyle provides style) {
                     ProjectWorkspaceScreen(

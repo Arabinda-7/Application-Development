@@ -162,9 +162,7 @@ class WorkoutDetailActivity : BaseActivity() {
             inputType = android.text.InputType.TYPE_CLASS_NUMBER
             setPadding(padding, padding, padding, padding)
             // Get current value if exists
-            val currentVal = if (w.dailyProgress.containsKey(dateKey)) {
-                (w.dailyProgress[dateKey]!! * w.target) / 100
-            } else 0
+            val currentVal = w.dailyProgress[dateKey]?.let { (it * w.target) / 100 } ?: 0
             setText(currentVal.toString())
         }
 

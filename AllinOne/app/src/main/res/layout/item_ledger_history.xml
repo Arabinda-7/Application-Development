@@ -81,7 +81,7 @@
             android:layout_width="24dp"
             android:layout_height="24dp"
             android:layout_marginStart="12dp"
-            android:src="@drawable/icons8_done_100"
+            android:src="@drawable/ic_done"
             app:tint="#4CAF50" />
     </LinearLayout>
 </com.google.android.material.card.MaterialCardView>

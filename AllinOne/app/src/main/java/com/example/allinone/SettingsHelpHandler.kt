@@ -17,6 +17,11 @@ class SettingsHelpHandler(private val context: Context) {
     fun showMasterGuideDetail(article: HelpArticle) {
         val dialog = Dialog(context); dialog.setContentView(R.layout.dialog_help_detail)
         dialog.window?.let { it.setBackgroundDrawableResource(android.R.color.transparent); if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.S) it.attributes.blurBehindRadius = 20; it.addFlags(android.view.WindowManager.LayoutParams.FLAG_BLUR_BEHIND) }
+        
+        // Set width to 90%
+        val width = (context.resources.displayMetrics.widthPixels * 0.9).toInt()
+        dialog.window?.setLayout(width, ViewGroup.LayoutParams.WRAP_CONTENT)
+
         dialog.findViewById<TextView>(R.id.tv_help_title).text = article.title.uppercase()
         dialog.findViewById<TextView>(R.id.tv_help_content).text = article.content
         dialog.findViewById<View>(R.id.btn_close_help).setOnClickListener { dialog.dismiss() }
@@ -28,6 +33,11 @@ class SettingsHelpHandler(private val context: Context) {
         if (features.isEmpty()) { android.widget.Toast.makeText(context, "Guide coming soon", android.widget.Toast.LENGTH_SHORT).show(); return }
         val dialog = Dialog(context); dialog.setContentView(R.layout.dialog_help_guide)
         dialog.window?.let { it.setBackgroundDrawableResource(android.R.color.transparent); if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.S) it.attributes.blurBehindRadius = 20; it.addFlags(android.view.WindowManager.LayoutParams.FLAG_BLUR_BEHIND) }
+        
+        // Set width to 90%
+        val width = (context.resources.displayMetrics.widthPixels * 0.9).toInt()
+        dialog.window?.setLayout(width, ViewGroup.LayoutParams.WRAP_CONTENT)
+
         val viewPager = dialog.findViewById<ViewPager2>(R.id.vp_help_features)
         dialog.findViewById<TextView>(R.id.tv_help_title).text = "${section.uppercase()} GUIDE"
         viewPager.adapter = HelpGuideAdapter(features)

@@ -45,7 +45,7 @@ class LedgerAdapter(
         val progress = if (entry.amount > 0) ((entry.paidAmount / entry.amount) * 100).toInt() else 0
         holder.progressBar.progress = progress
 
-        val isOverdue = entry.dueDate != null && entry.dueDate!! < System.currentTimeMillis() && !entry.isSettled
+        val isOverdue = entry.dueDate?.let { it < System.currentTimeMillis() && !entry.isSettled } ?: false
         val typeColor = if (entry.type == "Borrowed") Color.parseColor("#FF5252") else Color.parseColor("#4CAF50")
         
         holder.cardView.setCardBackgroundColor(Color.TRANSPARENT)
@@ -109,9 +109,11 @@ class LedgerAdapter(
 
         if (entry.dueDate != null && !entry.isSettled) {
             val sdfDue = SimpleDateFormat("MMM dd", Locale.getDefault())
-            holder.tvDueDate.text = if (isOverdue) "OVERDUE: ${sdfDue.format(Date(entry.dueDate!!))}" else "DUE: ${sdfDue.format(Date(entry.dueDate!!))}"
-            holder.tvDueDate.visibility = View.VISIBLE
-            holder.tvDueDate.setTextColor(if (isOverdue) Color.RED else Color.parseColor("#FFB800"))
+            entry.dueDate?.let { dueDate ->
+                holder.tvDueDate.text = if (isOverdue) "OVERDUE: ${sdfDue.format(Date(dueDate))}" else "DUE: ${sdfDue.format(Date(dueDate))}"
+                holder.tvDueDate.visibility = View.VISIBLE
+                holder.tvDueDate.setTextColor(if (isOverdue) Color.RED else Color.parseColor("#FFB800"))
+            } ?: run { holder.tvDueDate.visibility = View.GONE }
         } else {
             holder.tvDueDate.visibility = View.GONE
         }

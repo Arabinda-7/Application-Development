@@ -1,0 +1,5 @@
+- [x] Update `libs.versions.toml` with 16 KB compatible libraries
+- [x] Update `app/build.gradle.kts` for SQLCipher migration
+- [x] Update `AllInOneApplication.kt` initialization
+- [x] Update `AppDatabase.kt` for modern SQLCipher factory
+- [x] Run Gradle Sync and Build to verify

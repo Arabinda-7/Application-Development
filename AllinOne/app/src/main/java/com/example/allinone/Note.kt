@@ -15,6 +15,7 @@ data class Note(
     var deadline: Long? = null,
     var isArchived: Boolean = false,
     var isDualExist: Boolean = false,
+    var isGlobalProject: Boolean = false,
     val journalEntries: MutableList<JournalEntry> = mutableListOf(),
     val ideaGoals: MutableList<JournalEntry> = mutableListOf(),
     val subFeatures: MutableList<ProjectFeature> = mutableListOf(),

@@ -9,8 +9,8 @@ object UserDataManager {
     var userBio: String = ""
     var userAvatarRes: Int = R.drawable.boy_avatar_profile
     var userProfileImageUri: String? = null
-    var recentActivities = mutableListOf<String>()
-    var dailyMoods = mutableMapOf<String, String>()
+    var recentActivities: MutableList<String> = java.util.Collections.synchronizedList(mutableListOf<String>())
+    var dailyMoods: MutableMap<String, String> = java.util.Collections.synchronizedMap(mutableMapOf<String, String>())
     var lastMoodTimestamp: Long = 0
     
     var displaySize: String = "S"
@@ -45,7 +45,7 @@ object UserDataManager {
     var appLockQuestion: String? = null
     var appLockAnswer: String? = null
     
-    var userCustomColors = mutableListOf<Int>()
+    var userCustomColors: MutableList<Int> = java.util.Collections.synchronizedList(mutableListOf<Int>())
 
     fun addActivity(activity: String) {
         recentActivities.add(0, activity)

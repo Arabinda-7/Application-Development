@@ -22,6 +22,7 @@ class FinanceHistoryDetailsSection(
     private val onPageSelected: (Int) -> Unit
 ) {
     private val monthNames = listOf("January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December")
+    private var isCallbackRegistered = false
 
     fun setup(selectedYear: Int) {
         viewPager.adapter = object : RecyclerView.Adapter<MonthDetailsViewHolder>() {
@@ -35,9 +36,14 @@ class FinanceHistoryDetailsSection(
             override fun getItemCount() = 12
         }
 
-        viewPager.registerOnPageChangeCallback(object : ViewPager2.OnPageChangeCallback() {
-            override fun onPageSelected(position: Int) { onPageSelected(position) }
-        })
+        if (!isCallbackRegistered) {
+            viewPager.registerOnPageChangeCallback(object : ViewPager2.OnPageChangeCallback() {
+                override fun onPageSelected(position: Int) {
+                    this@FinanceHistoryDetailsSection.onPageSelected(position)
+                }
+            })
+            isCallbackRegistered = true
+        }
     }
 
     fun setCurrentItem(index: Int) {

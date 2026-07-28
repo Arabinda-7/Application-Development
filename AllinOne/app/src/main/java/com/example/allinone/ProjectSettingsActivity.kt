@@ -93,17 +93,36 @@ class ProjectSettingsActivity : BaseActivity() {
     private fun showManageTemplatesDialog() {
         val dialog = Dialog(this)
         dialog.setContentView(R.layout.dialog_manage_categories_project)
-        dialog.window?.setBackgroundDrawableResource(android.R.color.transparent)
-        dialog.window?.setLayout(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT)
-
+        
         val container = dialog.findViewById<LinearLayout>(R.id.categories_container)
         val etNew = dialog.findViewById<EditText>(R.id.et_new_category)
         val btnAdd = dialog.findViewById<View>(R.id.btn_add_category)
         val title = dialog.findViewById<TextView>(R.id.tv_categories_title)
         val btnDeleteMode = dialog.findViewById<ImageButton>(R.id.btn_toggle_delete_mode)
+        val accentLine = dialog.findViewById<View>(R.id.title_accent_line)
+        val root = dialog.findViewById<View>(R.id.dialog_root)
+        val inputContainer = dialog.findViewById<View>(R.id.container_add_category)
 
-        title.text = "Project Templates"
+        val accentColor = if (DataManager.appAccentColor != -1) DataManager.appAccentColor else Color.parseColor("#1A73E8")
+        val radius = DataManager.appBorderRadius.toFloat() * resources.displayMetrics.density
+
+        title.text = "PROJECT\nTEMPLATES"
         etNew.hint = "Template Name..."
+        accentLine.setBackgroundColor(accentColor)
+        root.background = android.graphics.drawable.GradientDrawable().apply {
+            setColor(if (DataManager.appThemeMode == "OLED") Color.BLACK else Color.parseColor("#121212"))
+            cornerRadius = radius
+        }
+        
+        inputContainer.background = android.graphics.drawable.GradientDrawable().apply {
+            setColor(Color.parseColor("#2A2A2A"))
+            cornerRadius = radius * 0.6f
+        }
+
+        (btnAdd.background as? android.graphics.drawable.GradientDrawable)?.let {
+            it.setColor(accentColor)
+            it.cornerRadius = 1000f
+        }
 
         var isDeleteMode = false
 
@@ -114,6 +133,12 @@ class ProjectSettingsActivity : BaseActivity() {
             DataManager.projectTemplates.keys.forEach { templateName ->
                 val itemView = LayoutInflater.from(this).inflate(R.layout.item_category_manage_project, container, false)
                 itemView.findViewById<TextView>(R.id.tv_category_name).text = templateName
+
+                // Item Background
+                itemView.findViewById<View>(R.id.item_container)?.background = android.graphics.drawable.GradientDrawable().apply {
+                    setColor(Color.parseColor("#2A2A2A"))
+                    cornerRadius = radius * 0.5f
+                }
 
                 val btnRemove = itemView.findViewById<View>(R.id.btn_remove_category)
                 btnRemove.visibility = if (isDeleteMode) View.VISIBLE else View.GONE
@@ -163,30 +188,59 @@ class ProjectSettingsActivity : BaseActivity() {
     private fun showCreateTemplateStepsDialog(templateName: String, onComplete: () -> Unit) {
         val dialog = Dialog(this)
         dialog.setContentView(R.layout.dialog_manage_categories_project)
-        dialog.window?.setBackgroundDrawableResource(android.R.color.transparent)
-        dialog.window?.setLayout(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT)
-
+        
         val container = dialog.findViewById<LinearLayout>(R.id.categories_container)
         val etStep = dialog.findViewById<EditText>(R.id.et_new_category)
         val btnAddStep = dialog.findViewById<View>(R.id.btn_add_category)
         val title = dialog.findViewById<TextView>(R.id.tv_categories_title)
+        val accentLine = dialog.findViewById<View>(R.id.title_accent_line)
+        val root = dialog.findViewById<View>(R.id.dialog_root)
+        val inputContainer = dialog.findViewById<View>(R.id.container_add_category)
+        dialog.findViewById<View>(R.id.btn_toggle_delete_mode).visibility = View.GONE
+
+        val accentColor = if (DataManager.appAccentColor != -1) DataManager.appAccentColor else Color.parseColor("#1A73E8")
+        val radius = DataManager.appBorderRadius.toFloat() * resources.displayMetrics.density
+
+        title.text = "ADD STEPS:\n${templateName.uppercase()}"
+        etStep.hint = "Step name (e.g. Design)..."
+        accentLine.setBackgroundColor(accentColor)
+        root.background = android.graphics.drawable.GradientDrawable().apply {
+            setColor(if (DataManager.appThemeMode == "OLED") Color.BLACK else Color.parseColor("#121212"))
+            cornerRadius = radius
+        }
+        
+        inputContainer.background = android.graphics.drawable.GradientDrawable().apply {
+            setColor(Color.parseColor("#2A2A2A"))
+            cornerRadius = radius * 0.6f
+        }
+
+        (btnAddStep.background as? android.graphics.drawable.GradientDrawable)?.let {
+            it.setColor(accentColor)
+            it.cornerRadius = 1000f
+        }
 
         val btnSave = TextView(this).apply {
             text = "SAVE TEMPLATE"
-            setTextColor(Color.parseColor("#1A73E8"))
+            setTextColor(Color.WHITE)
             textSize = 16f
             setTypeface(null, android.graphics.Typeface.BOLD)
             gravity = android.view.Gravity.CENTER
-            setPadding(0, 40, 0, 40)
+            setPadding(0, 48, 0, 48)
             isClickable = true
             isFocusable = true
-            val outValue = android.util.TypedValue()
-            theme.resolveAttribute(android.R.attr.selectableItemBackground, outValue, true)
-            setBackgroundResource(outValue.resourceId)
+            
+            background = android.graphics.drawable.GradientDrawable().apply {
+                setColor(accentColor)
+                cornerRadius = radius * 0.5f
+            }
+            
+            layoutParams = LinearLayout.LayoutParams(
+                LinearLayout.LayoutParams.MATCH_PARENT,
+                LinearLayout.LayoutParams.WRAP_CONTENT
+            ).apply {
+                setMargins(0, 32, 0, 0)
+            }
         }
-
-        title.text = "Add Steps for: $templateName"
-        etStep.hint = "Step name (e.g. Design)..."
 
         val steps = mutableListOf<String>()
 
@@ -195,13 +249,20 @@ class ProjectSettingsActivity : BaseActivity() {
             steps.forEach { step ->
                 val itemView = LayoutInflater.from(this).inflate(R.layout.item_category_manage_project, container, false)
                 itemView.findViewById<TextView>(R.id.tv_category_name).text = step
+                
+                // Item Background
+                itemView.findViewById<View>(R.id.item_container)?.background = android.graphics.drawable.GradientDrawable().apply {
+                    setColor(Color.parseColor("#2A2A2A"))
+                    cornerRadius = radius * 0.5f
+                }
+
                 itemView.findViewById<View>(R.id.btn_remove_category).setOnClickListener {
                     steps.remove(step)
                     refreshSteps()
                 }
                 container.addView(itemView)
             }
-            container.addView(btnSave)
+            if (steps.isNotEmpty()) container.addView(btnSave)
         }
 
         btnAddStep.setOnClickListener {

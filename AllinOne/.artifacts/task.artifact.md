@@ -1,3 +1,5 @@
-- [x] Update `item_task_tasks.xml` to reduce padding and margins
-- [x] Update `item_task_list.xml` to reduce padding and margins
-- [x] Update `TaskAdapter.kt` to reduce subtask item padding
+# Tasks - Workout Section Expansion Logic
+
+- [x] Modify `WorkoutAdapter.kt` to enforce single expansion and provide `collapseAll()`
+- [x] Update `WorkoutRoutineActivity.kt` to call `collapseAll()` in `onStop()`
+- [/] Verify changes

@@ -56,20 +56,24 @@ fun ProjectWorkspaceScreen(
         }
     }
 
-    AnimatedContent(
-        targetState = activeCreationPage,
-        transitionSpec = {
-            val duration = 300
-            if (targetState != null) {
-                slideInHorizontally(animationSpec = tween(duration)) { it } + fadeIn(animationSpec = tween(duration)) togetherWith 
-                fadeOut(animationSpec = tween(duration))
-            } else {
-                fadeIn(animationSpec = tween(duration)) togetherWith 
-                slideOutHorizontally(animationSpec = tween(duration)) { it } + fadeOut(animationSpec = tween(duration))
-            }
-        },
-        label = "CreationPageTransition"
-    ) { page ->
+    Surface(
+        modifier = Modifier.fillMaxSize(),
+        color = style.backgroundColor
+    ) {
+        AnimatedContent(
+            targetState = activeCreationPage,
+            transitionSpec = {
+                val duration = 300
+                if (targetState != null) {
+                    slideInHorizontally(animationSpec = tween(duration)) { it } + fadeIn(animationSpec = tween(duration)) togetherWith 
+                    fadeOut(animationSpec = tween(duration))
+                } else {
+                    fadeIn(animationSpec = tween(duration)) togetherWith 
+                    slideOutHorizontally(animationSpec = tween(duration)) { it } + fadeOut(animationSpec = tween(duration))
+                }
+            },
+            label = "CreationPageTransition"
+        ) { page ->
         if (page != null) {
             WorkspaceDetailRouter(
                 action = page,
@@ -159,7 +163,11 @@ fun ProjectWorkspaceScreen(
                 ) { padding ->
                     val blurRadius by animateDpAsState(targetValue = if (isSidebarExpanded || projectForStats != null) 8.dp else 0.dp, label = "BlurRadius")
 
-                    if (projectForStats != null) { ProjectStatsDialog(project = projectForStats!!, viewModel = viewModel, onDismiss = { projectForStats = null }) }
+                    if (projectForStats != null) { 
+                        projectForStats?.let { project ->
+                            ProjectStatsDialog(project = project, viewModel = viewModel, onDismiss = { projectForStats = null })
+                        }
+                    }
 
                     Column(modifier = Modifier.fillMaxSize().padding(padding).blur(blurRadius)) {
                         if (uiState.isLoading && uiState.projects.isEmpty()) { 
@@ -181,7 +189,8 @@ fun ProjectWorkspaceScreen(
                                                     val d = 250
                                                     fadeIn(tween(d)) togetherWith fadeOut(tween(d))
                                                 },
-                                                label = "TabTransition", modifier = Modifier.weight(1f)
+                                                label = "TabTransition", 
+                                                modifier = Modifier.weight(1f).background(style.backgroundColor)
                                             ) { targetTab ->
                                                     Box(modifier = Modifier.fillMaxSize()) {
                                                         when (targetTab) {
@@ -212,23 +221,28 @@ fun ProjectWorkspaceScreen(
     if (showImportDialog) { ImportSelectionDialog(onDismiss = { showImportDialog = false }, onImport = { pendingImportNote = it; showImportDialog = false; showTransferChoiceDialog = true }) }
     if (showTransferChoiceDialog && pendingImportNote != null) {
         TransferCopyChoiceDialog(onDismiss = { showTransferChoiceDialog = false; pendingImportNote = null }, onChoice = { isTransfer ->
-            viewModel.importNote(pendingImportNote!!, isTransfer)
-            if (isTransfer) com.example.allinone.DataManager.saveData(context)
+            pendingImportNote?.let { note ->
+                viewModel.importNote(note, isTransfer)
+                if (isTransfer) com.example.allinone.DataManager.saveData(context)
+            }
             showTransferChoiceDialog = false; pendingImportNote = null
         })
     }
     if (entityToDelete != null) {
-        DeleteConfirmationDialog(entity = entityToDelete!!, onDismiss = { entityToDelete = null }, onConfirm = {
-            when (entityToDelete) {
-                is NoteEntity -> viewModel.deleteNote(entityToDelete as NoteEntity)
-                is TaskEntity -> viewModel.deleteTask(entityToDelete as TaskEntity)
-                is GoalEntity -> viewModel.deleteGoal(entityToDelete as GoalEntity)
-                is FeatureEntity -> viewModel.deleteFeature(entityToDelete as FeatureEntity)
-                is BugEntity -> viewModel.deleteBug(entityToDelete as BugEntity)
-                is IdeaEntity -> viewModel.deleteIdea(entityToDelete as IdeaEntity)
-                is ResourceEntity -> viewModel.deleteResource(entityToDelete as ResourceEntity)
-            }
-            entityToDelete = null; activeCreationPage = null; editingEntity = null
-        })
+        entityToDelete?.let { entity ->
+            DeleteConfirmationDialog(entity = entity, onDismiss = { entityToDelete = null }, onConfirm = {
+                when (entity) {
+                    is NoteEntity -> viewModel.deleteNote(entity)
+                    is TaskEntity -> viewModel.deleteTask(entity)
+                    is GoalEntity -> viewModel.deleteGoal(entity)
+                    is FeatureEntity -> viewModel.deleteFeature(entity)
+                    is BugEntity -> viewModel.deleteBug(entity)
+                    is IdeaEntity -> viewModel.deleteIdea(entity)
+                    is ResourceEntity -> viewModel.deleteResource(entity)
+                }
+                entityToDelete = null; activeCreationPage = null; editingEntity = null
+            })
+        }
     }
+}
 }

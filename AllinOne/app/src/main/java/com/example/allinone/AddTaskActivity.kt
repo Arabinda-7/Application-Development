@@ -211,7 +211,9 @@ class AddTaskActivity : BaseActivity() {
         
         if (hasReminder) {
             val sdf = SimpleDateFormat("MMM dd, HH:mm", Locale.getDefault())
-            tvSelectedReminder.text = sdf.format(Date(selectedReminder!!))
+            selectedReminder?.let { time ->
+                tvSelectedReminder.text = sdf.format(Date(time))
+            }
         }
 
         // Realtime update if editing existing task
@@ -274,6 +276,7 @@ class AddTaskActivity : BaseActivity() {
                 if (time > System.currentTimeMillis()) {
                     scheduleReminder(task)
                 }
+                DataManager.checkAndSetNewTodayNotification(time)
             }
 
             DataManager.saveData(this)
@@ -290,6 +293,18 @@ class AddTaskActivity : BaseActivity() {
         }
         val requestCode = (task.timestamp % Int.MAX_VALUE).toInt()
         val pendingIntent = PendingIntent.getBroadcast(this, requestCode, intent, PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE)
-        alarmManager.setExactAndAllowWhileIdle(AlarmManager.RTC_WAKEUP, task.reminderTime!!, pendingIntent)
+        
+        task.reminderTime?.let { time ->
+            if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.S) {
+                if (alarmManager.canScheduleExactAlarms()) {
+                    alarmManager.setExactAndAllowWhileIdle(AlarmManager.RTC_WAKEUP, time, pendingIntent)
+                } else {
+                    // Fallback to non-exact alarm
+                    alarmManager.setAndAllowWhileIdle(AlarmManager.RTC_WAKEUP, time, pendingIntent)
+                }
+            } else {
+                alarmManager.setExactAndAllowWhileIdle(AlarmManager.RTC_WAKEUP, time, pendingIntent)
+            }
+        }
     }
 }
