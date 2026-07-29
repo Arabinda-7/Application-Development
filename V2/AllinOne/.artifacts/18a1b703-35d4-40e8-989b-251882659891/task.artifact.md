@@ -1,0 +1,13 @@
+- [x] Update `DataManager.kt` with session unlock state
+- [x] Update `DashboardState.kt` to track unlock status
+- [x] Implement lock check in `MainActivity.kt`
+- [x] Handle back press in `LockActivity.kt` for security
+- [x] Verify App Lock functionality
+- [x] Delay loading screen until after unlock
+- [x] Optimize transition speed and remove startup delays
+- [x] Implement App Lock recovery (Security Questions)
+- [x] Implement custom UI for security question selection
+- [x] Transition recovery setup to full-page UI
+    - [x] Update `activity_lock.xml` with full-page setup layout
+    - [x] Update `LockActivity.kt` logic
+    - [x] (Skipped) Delete `dialog_recovery_setup.xml`

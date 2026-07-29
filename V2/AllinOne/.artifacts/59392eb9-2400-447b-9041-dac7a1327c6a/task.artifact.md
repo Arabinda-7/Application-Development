@@ -1,0 +1,4 @@
+- [x] Implement `showHub()` in `SettingsActivity`
+- [x] Update `handleBackNavigation` to use `showHub()`
+- [x] Update `onCreate` initialization
+- [x] Verify fix

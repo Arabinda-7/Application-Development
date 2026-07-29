@@ -1,0 +1,5 @@
+- [x] Update `WorkspaceDao.kt` with deadline queries
+- [x] Implement `updateWorkspaceAgenda` in `DataManager.kt`
+- [x] Add summary notification logic in `ReminderReceiver.kt`
+- [x] Integrate agenda updates and system notifications in `MainActivity.kt`
+- [x] Verify functionality with mock data

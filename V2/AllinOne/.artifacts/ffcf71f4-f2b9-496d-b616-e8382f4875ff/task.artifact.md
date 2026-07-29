@@ -1,0 +1,3 @@
+- [x] Fix stale UI in `AddIdeaActivity` by adding `onResume` refresh
+- [x] Improve `IdeaViewSection` in `IdeasSection.kt` to show more description lines
+- [x] Verify changes and create walkthrough

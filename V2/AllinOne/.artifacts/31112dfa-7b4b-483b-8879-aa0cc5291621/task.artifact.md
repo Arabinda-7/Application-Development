@@ -1,0 +1,9 @@
+- [x] Add dependencies for Security, Biometric, and SQLCipher
+- [x] Create `SecurityManager` for encryption utilities
+- [x] Update `DataManager` to use `EncryptedSharedPreferences` and handle migration
+- [x] Update `WorkspaceDatabase` to use `SQLCipher` for Room encryption
+- [x] Implement `BiometricPrompt` in `LockActivity`
+- [x] Update `ProfileSecurityHubSection` with Biometric toggle
+- [x] Implement `FLAG_SECURE` in `BaseActivity`
+- [x] Encrypt exported backups in `SettingsBackupHandler`
+- [x] Verify all security features

@@ -1,0 +1,3 @@
+- `[x]` Fix missing LayoutManager in `SettingsActivity`
+- `[x]` Ensure proper initialization of `SettingsHubSection`
+- `[x]` Verify changes in `SettingsActivity` and `SettingsHubSection`

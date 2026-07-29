@@ -1,0 +1,6 @@
+- [x] Update `Workout` data model to track historical partial progress
+- [x] Update `DataManager` to use progress percentages in heatmap
+- [x] Update `activity_workout_routine.xml` to include detailed performance cards
+- [x] Implement history grid logic in `WorkoutRoutineActivity`
+- [x] Update `WorkoutAdapter` to save partial progress
+- [x] Verify changes on device

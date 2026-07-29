@@ -1,0 +1,3 @@
+- [x] Update `MetricCard` in `CommonWorkspaceComponents.kt` to the transparent aesthetic
+- [x] Verify UI consistency in Dashboard metrics
+- [x] Verify UI consistency in Tasks, Features, and Bugs metrics

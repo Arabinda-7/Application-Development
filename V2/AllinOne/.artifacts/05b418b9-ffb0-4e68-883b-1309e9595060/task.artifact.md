@@ -1,0 +1,19 @@
+- [x] **Thread Safety Migration**
+    - [x] `DataManager.kt`: Synchronize collections and protect iterations
+    - [x] Specialized DataManagers: `HabitDataManager`, `TaskDataManager`, etc.
+- [x] **Eliminate Unsafe Null Assertions (!!)**
+    - [x] `AddIdeaActivity.kt`
+    - [x] `AddSubFeatureActivity.kt`
+    - [x] `MainActivityViewModel.kt`
+    - [x] `WorkoutDetailActivity.kt`
+    - [x] `ProjectNoteAdapter.kt`
+    - [x] `LedgerAdapter.kt`
+    - [x] `PersonalLedgerBookActivity.kt`
+    - [x] `ProjectWorkspaceScreen.kt`
+    - [x] `TasksSection.kt`
+- [x] **UI & Lifecycle Robustness**
+    - [x] `BaseActivity.kt`: Runtime permission helper
+    - [x] `TaskActivity.kt`: Integrated permission check
+    - [x] `HomeHeader.kt`: Safe image loading
+- [x] **Verification**
+    - [x] Run build and verify stability

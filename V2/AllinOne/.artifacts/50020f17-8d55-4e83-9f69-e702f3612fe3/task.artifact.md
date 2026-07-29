@@ -1,0 +1,4 @@
+- [x] Update default fallback color in `HabitTrackerActivity#updateDynamicBackground`
+- [x] Update filter chips background and text color in `HabitTrackerActivity#applySectionTheme`
+- [x] Update frequency chip color in `HabitDetailActivity#setupUI`
+- [x] Create walkthrough

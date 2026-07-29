@@ -1,0 +1,10 @@
+- [x] Standardize Item Titles
+    - [x] Modify `IdeasSection.kt` (Remove index prefix)
+    - [x] Modify `NotesSection.kt` (Update font size/weight)
+    - [x] Modify `GoalsSection.kt` (Remove index prefix)
+    - [x] Modify `TasksSection.kt` (Update font size, remove index prefix)
+    - [x] Modify `ResourcesSection.kt` (Update font size)
+    - [x] Modify `CommonWorkspaceComponents.kt` (Update Feature/Bug titles)
+- [x] Standardize Section Headers
+    - [x] Modify `ProjectWorkspaceScreen.kt` (Update tab title styling)
+- [x] Verification (Cleanup & Compilation check)

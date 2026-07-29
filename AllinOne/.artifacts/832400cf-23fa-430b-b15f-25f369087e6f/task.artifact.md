@@ -1,0 +1,3 @@
+- `[x]` Fix database version mismatch in `AppDatabase.kt`
+- `[x]` Improve initialization resilience in `DataManager.kt`
+- `[x]` Verify app launch success

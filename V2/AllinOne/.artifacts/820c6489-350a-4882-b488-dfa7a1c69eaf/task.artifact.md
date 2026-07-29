@@ -1,0 +1,11 @@
+- [x] Increase edit icon size in Workspace header
+    - [x] [ProjectWorkspaceScreen.kt](file:///C:/Users/arabi/OneDrive/Desktop/App Development/AllinOne/app/src/main/java/com/example/allinone/workspace/ui/ProjectWorkspaceScreen.kt)
+- [x] Increase edit icon size in Workspace detail sections
+    - [x] [GoalsSection.kt](file:///C:/Users/arabi/OneDrive/Desktop/App Development/AllinOne/app/src/main/java/com/example/allinone/workspace/ui/sections/GoalsSection.kt)
+    - [x] [TasksSection.kt](file:///C:/Users/arabi/OneDrive/Desktop/App Development/AllinOne/app/src/main/java/com/example/allinone/workspace/ui/sections/TasksSection.kt)
+    - [x] [FeaturesSection.kt](file:///C:/Users/arabi/OneDrive/Desktop/App Development/AllinOne/app/src/main/java/com/example/allinone/workspace/ui/sections/FeaturesSection.kt)
+    - [x] [BugsSection.kt](file:///C:/Users/arabi/OneDrive/Desktop/App Development/AllinOne/app/src/main/java/com/example/allinone/workspace/ui/sections/BugsSection.kt)
+    - [x] [NotesSection.kt](file:///C:/Users/arabi/OneDrive/Desktop/App Development/AllinOne/app/src/main/java/com/example/allinone/workspace/ui/sections/NotesSection.kt)
+    - [x] [IdeasSection.kt](file:///C:/Users/arabi/OneDrive/Desktop/App Development/AllinOne/app/src/main/java/com/example/allinone/workspace/ui/sections/IdeasSection.kt)
+    - [x] [ResourcesSection.kt](file:///C:/Users/arabi/OneDrive/Desktop/App Development/AllinOne/app/src/main/java/com/example/allinone/workspace/ui/sections/ResourcesSection.kt)
+- [x] Verify changes

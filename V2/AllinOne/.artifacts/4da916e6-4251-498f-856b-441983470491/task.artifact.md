@@ -1,0 +1,6 @@
+- [x] Update `AppData.kt` to include workspace entities in `AllAppData`
+- [x] Update `WorkspaceDao.kt` with export/import helper methods
+- [x] Update `DataManager.kt` export/import logic to include workspace data
+- [x] Update `SettingsActivity.kt` to use updated export/import
+- [x] Update `ProfileActivity.kt` to use updated export
+- [x] Verify changes

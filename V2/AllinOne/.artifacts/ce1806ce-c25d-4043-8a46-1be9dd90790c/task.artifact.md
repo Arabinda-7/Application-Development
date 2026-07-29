@@ -1,0 +1,13 @@
+- [x] Modify `activity_workout_routine.xml`
+    - [x] Add `ComposeView` for Volume Progression
+    - [x] Add `ComposeView` for Workout Diversity
+    - [x] Add `ComposeView` for Muscle Focus
+- [x] Update `WorkoutPerformanceSection.kt`
+    - [x] Add references to the new `ComposeView`s
+    - [x] Implement chart rendering logic in `update()`
+- [x] Update `WorkoutNavigationSection.kt`
+    - [x] Revert "HISTORY" tab to show `history_layout` (XML)
+- [x] Update `WorkoutRoutineActivity.kt`
+    - [x] Re-enable legacy UI updates (streaks, efficiency)
+- [x] Verification
+    - [x] Verify both History views have the new analytics

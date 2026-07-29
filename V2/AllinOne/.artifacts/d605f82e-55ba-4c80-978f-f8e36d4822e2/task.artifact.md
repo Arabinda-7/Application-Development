@@ -1,0 +1,4 @@
+- `[x]` Simplify `activity_add_project.xml` by removing compact layouts.
+- `[x]` Update `AddProjectActivity.kt` to unify "Add" and "View" UI logic.
+- `[x]` Delete redundant `dialog_project_details.xml`.
+- `[x]` Verify that viewing a project now looks identical to adding one.

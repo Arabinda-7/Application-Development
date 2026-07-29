@@ -1,0 +1,3 @@
+- `[x]` Update Onboarding top spacing in `OnboardingPages.kt`
+- `[x]` Implement robust swipe blocking in `OnboardingActivity.kt`
+- `[x]` Verify changes manually in the app

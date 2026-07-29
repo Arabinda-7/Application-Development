@@ -1,0 +1,4 @@
+- [ ] Implement `addActivity` in `UserDataManager`
+- [ ] Add `addActivity` delegate in `DataManager`
+- [ ] Implement missing logic methods in `DataManager`
+- [ ] Verify build

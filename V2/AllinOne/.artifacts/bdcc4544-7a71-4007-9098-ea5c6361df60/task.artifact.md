@@ -1,0 +1,12 @@
+- [x] Fix `NoteAdapter.kt` long-press deletion logic
+- [x] Add delete buttons to XML layouts:
+    - [x] `activity_add_note.xml`
+    - [x] `activity_add_project.xml`
+    - [x] `activity_add_idea.xml`
+    - [x] `dialog_add_note.xml`
+- [x] Implement deletion logic in Activities:
+    - [x] `AddNoteActivity.kt`
+    - [x] `AddProjectActivity.kt`
+    - [x] `AddIdeaActivity.kt`
+- [x] Update `NotesActivity.kt` for dialog deletion support
+- [x] Verify fix by manual deletion in app

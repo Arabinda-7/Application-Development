@@ -1,0 +1,5 @@
+- [x] Improve `setupKeyboardHandling` in `BaseActivity.kt`
+- [x] Fix edge-to-edge and add back navigation in `WorkoutRoutineActivity.kt`
+- [x] Fix edge-to-edge and add back navigation in `HabitTrackerActivity.kt`
+- [x] Make bottom navigation mock visible in workout and habit layouts
+- [ ] Verify navigation and UI layout

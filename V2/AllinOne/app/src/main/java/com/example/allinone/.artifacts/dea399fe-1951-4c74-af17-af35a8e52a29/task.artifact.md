@@ -1,0 +1,6 @@
+- [x] Fix crash in `ProjectSettingsActivity` by updating `dialog_manage_categories_project.xml`
+- [x] Implement `ProjectHistoryActivity` and its layout
+- [x] Update `ProjectActivity` to launch new history activity
+- [x] Add aura background to `activity_add_project.xml`
+- [x] Update `AddProjectActivity` (Aura Background & Interaction Restrictions)
+- [x] Verify all refinements

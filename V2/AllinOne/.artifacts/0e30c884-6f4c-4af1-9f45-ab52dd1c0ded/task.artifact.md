@@ -1,0 +1,5 @@
+- [x] Fix flickering in Workspace Section
+    - [x] Update `WorkspaceViewModel` state handling
+    - [x] Implement smooth loading and state transitions in `ProjectWorkspaceScreen`
+    - [x] Optimize `WorkspaceHeader` layout transitions
+    - [x] Verify UI smoothness

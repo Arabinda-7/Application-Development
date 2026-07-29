@@ -1,0 +1,15 @@
+- [x] Update `WorkspaceSpeedDial` filter in `ProjectWorkspaceScreen.kt`
+- [x] Verify FAB behavior in Dashboard tab
+- [x] Verify FAB behavior in other tabs (Goals, Tasks, etc.)
+- [x] Refactor `HabitCard` layout in `HomeScreen.kt` to move progress indicator to bottom right.
+- [x] Implement `SweepGradient` "Aura" borders for all Dashboard cards.
+- [x] Add "Glow" effects (colored shadows) to cards for enhanced Aura look.
+- [x] Add subtle pulse animation to borders.
+- [x] Verify the layout on the device.
+- [x] Reinforce stability in activities (View Caching)
+    - [x] Update `FinanceHistoryActivity.kt`
+    - [x] Update `LedgerActivity.kt`
+    - [x] Update `SettingsActivity.kt`
+    - [x] Update `HabitDetailActivity.kt`
+    - [x] Update `WorkoutDetailActivity.kt`
+- [x] Verify fix by building project

@@ -1,0 +1,4 @@
+- `[ ]` Update `DataManager.kt` to maintain list references during `loadData`
+- `[ ]` Fix `NoteAdapter.kt` `DiffUtil` logic
+- `[ ]` Fix `NotesActivity.kt` intent handling and list update logic
+- `[ ]` Improve `AddNoteActivity.kt` with title validation and UX enhancements

@@ -1,0 +1,5 @@
+- [x] Fix Template Loading in `DataManager.kt`
+- [x] Remove Delete Icon and Enable Templates in `AddProjectActivity.kt`
+- [x] Add Template UI to `activity_add_idea.xml`
+- [x] Implement Template Logic in `AddIdeaActivity.kt`
+- [x] Verification

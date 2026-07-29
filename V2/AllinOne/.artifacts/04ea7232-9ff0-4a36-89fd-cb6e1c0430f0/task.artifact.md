@@ -1,0 +1,6 @@
+- `[x]` Remove `bottom_nav_mock` from `activity_habit_tracker.xml`
+- `[x]` Remove `bottom_nav_mock` from `activity_workout_routine.xml`
+- `[x]` Update `HabitNavigationSection.kt` (remove footer refs)
+- `[x]` Update `WorkoutNavigationSection.kt` (remove footer refs)
+- `[x]` Update `HabitTrackerActivity.kt` (update init)
+- `[x]` Update `WorkoutRoutineActivity.kt` (update init)

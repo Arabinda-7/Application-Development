@@ -1,0 +1,6 @@
+- [x] Redesign `ProjectStatsDialog` for a modern look in `CommonWorkspaceComponents.kt`
+    - [x] Implement header with icon and refined typography
+    - [x] Create a summary overview row
+    - [x] Redesign `StatsSection` with cards and status chips
+- [x] Verify UI and functionality
+- [x] Create walkthrough

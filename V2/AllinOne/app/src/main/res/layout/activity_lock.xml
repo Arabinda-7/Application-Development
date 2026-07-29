@@ -1,0 +1,284 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:id="@+id/lock_root_layout"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="#000000">
+
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:id="@+id/lock_content_container"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:padding="24dp">
+
+        <TextView
+            android:id="@+id/tv_lock_title"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="80dp"
+            android:text="ENTER PIN"
+            android:textColor="@color/white"
+            android:textSize="20sp"
+            android:textStyle="bold"
+            android:letterSpacing="0.1"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent" />
+
+        <TextView
+            android:id="@+id/tv_lock_sub"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="8dp"
+            android:text="Please enter your security code"
+            android:textColor="#80FFFFFF"
+            android:textSize="14sp"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/tv_lock_title" />
+
+        <!-- PIN Visual Indicator (Dots) -->
+        <LinearLayout
+            android:id="@+id/layout_pin_dots"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="40dp"
+            android:orientation="horizontal"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/tv_lock_sub">
+
+            <View android:id="@+id/dot_1" android:layout_width="16dp" android:layout_height="16dp" android:layout_margin="8dp" android:background="@drawable/circle_selected_bg" android:backgroundTint="#33FFFFFF" />
+            <View android:id="@+id/dot_2" android:layout_width="16dp" android:layout_height="16dp" android:layout_margin="8dp" android:background="@drawable/circle_selected_bg" android:backgroundTint="#33FFFFFF" />
+            <View android:id="@+id/dot_3" android:layout_width="16dp" android:layout_height="16dp" android:layout_margin="8dp" android:background="@drawable/circle_selected_bg" android:backgroundTint="#33FFFFFF" />
+            <View android:id="@+id/dot_4" android:layout_width="16dp" android:layout_height="16dp" android:layout_margin="8dp" android:background="@drawable/circle_selected_bg" android:backgroundTint="#33FFFFFF" />
+
+        </LinearLayout>
+
+        <!-- Keypad Grid -->
+        <GridLayout
+            android:id="@+id/lock_keypad"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="40dp"
+            android:columnCount="3"
+            app:layout_constraintBottom_toBottomOf="parent">
+
+            <!-- Row 1 -->
+            <TextView android:id="@+id/btn_1" style="@style/LockKey" android:text="1" />
+            <TextView android:id="@+id/btn_2" style="@style/LockKey" android:text="2" />
+            <TextView android:id="@+id/btn_3" style="@style/LockKey" android:text="3" />
+
+            <!-- Row 2 -->
+            <TextView android:id="@+id/btn_4" style="@style/LockKey" android:text="4" />
+            <TextView android:id="@+id/btn_5" style="@style/LockKey" android:text="5" />
+            <TextView android:id="@+id/btn_6" style="@style/LockKey" android:text="6" />
+
+            <!-- Row 3 -->
+            <TextView android:id="@+id/btn_7" style="@style/LockKey" android:text="7" />
+            <TextView android:id="@+id/btn_8" style="@style/LockKey" android:text="8" />
+            <TextView android:id="@+id/btn_9" style="@style/LockKey" android:text="9" />
+
+            <!-- Row 4 -->
+            <ImageButton android:id="@+id/btn_backspace" style="@style/LockKeyIcon" android:src="@android:drawable/ic_input_delete" />
+            <TextView android:id="@+id/btn_0" style="@style/LockKey" android:text="0" />
+            <ImageButton android:id="@+id/btn_done" style="@style/LockKeyIcon" android:src="@drawable/ic_done" app:tint="#1A73E8" />
+
+        </GridLayout>
+
+        <TextView
+            android:id="@+id/btn_forgot_pin"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="16dp"
+            android:text="Forgot PIN?"
+            android:textColor="#1A73E8"
+            android:textSize="14sp"
+            android:textStyle="bold"
+            android:visibility="gone"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/lock_keypad" />
+
+    </androidx.constraintlayout.widget.ConstraintLayout>
+
+    <!-- Recovery UI Overlay (Outside main container to avoid being hidden with it) -->
+    <View
+        android:id="@+id/recovery_dim_overlay"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:background="#CC000000"
+        android:visibility="gone" />
+
+    <!-- Recovery UI -->
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:id="@+id/layout_recovery"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_margin="24dp"
+        android:background="@drawable/bg_dialog_rounded"
+        android:backgroundTint="#1A1A1A"
+        android:elevation="8dp"
+        android:padding="24dp"
+        android:visibility="gone"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintTop_toTopOf="parent">
+
+        <TextView
+            android:id="@+id/btn_back_recovery"
+            android:layout_width="wrap_content"
+            android:layout_height="40dp"
+            android:background="?attr/selectableItemBackgroundBorderless"
+            android:gravity="center"
+            android:paddingHorizontal="8dp"
+            android:text="BACK"
+            android:textColor="#80FFFFFF"
+            android:textSize="12sp"
+            android:textStyle="bold"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent" />
+
+        <TextView
+            android:id="@+id/tv_recovery_title"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="8dp"
+            android:text="RECOVERY"
+            android:textColor="@color/white"
+            android:textSize="18sp"
+            android:textStyle="bold"
+            app:layout_constraintBottom_toBottomOf="@id/btn_back_recovery"
+            app:layout_constraintStart_toEndOf="@id/btn_back_recovery"
+            app:layout_constraintTop_toTopOf="@id/btn_back_recovery" />
+
+        <TextView
+            android:id="@+id/tv_security_question"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="24dp"
+            android:text="Security Question Placeholder"
+            android:textColor="#80FFFFFF"
+            android:textSize="14sp"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/tv_recovery_title" />
+
+        <EditText
+            android:id="@+id/et_recovery_answer"
+            android:layout_width="match_parent"
+            android:layout_height="56dp"
+            android:layout_marginTop="16dp"
+            android:background="@drawable/edittext_bg"
+            android:hint="Your Answer"
+            android:inputType="text"
+            android:paddingStart="16dp"
+            android:textColor="@color/white"
+            android:textColorHint="#40FFFFFF"
+            app:layout_constraintTop_toBottomOf="@id/tv_security_question" />
+
+        <TextView
+            android:id="@+id/btn_verify_recovery"
+            android:layout_width="match_parent"
+            android:layout_height="56dp"
+            android:layout_marginTop="32dp"
+            android:background="@drawable/button_bg"
+            android:gravity="center"
+            android:text="VERIFY &amp; UNLOCK"
+            android:textColor="@color/white"
+            android:textStyle="bold"
+            app:layout_constraintTop_toBottomOf="@id/et_recovery_answer" />
+
+    </androidx.constraintlayout.widget.ConstraintLayout>
+
+    <!-- Full-Page Recovery Setup UI -->
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:id="@+id/layout_setup_recovery"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:background="#000000"
+        android:padding="24dp"
+        android:visibility="gone">
+
+        <TextView
+            android:id="@+id/btn_back_setup"
+            android:layout_width="wrap_content"
+            android:layout_height="40dp"
+            android:layout_marginTop="24dp"
+            android:background="?attr/selectableItemBackgroundBorderless"
+            android:gravity="center"
+            android:paddingHorizontal="8dp"
+            android:text="BACK"
+            android:textColor="#80FFFFFF"
+            android:textSize="12sp"
+            android:textStyle="bold"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent" />
+
+        <TextView
+            android:id="@+id/tv_setup_title"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="24dp"
+            android:text="RECOVERY SETUP"
+            android:textColor="@color/white"
+            android:textSize="20sp"
+            android:textStyle="bold"
+            android:letterSpacing="0.1"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/btn_back_setup" />
+
+        <TextView
+            android:id="@+id/tv_setup_sub"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="8dp"
+            android:text="Choose a question to recover your PIN if forgotten"
+            android:textColor="#80FFFFFF"
+            android:textSize="14sp"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/tv_setup_title" />
+
+        <TextView
+            android:id="@+id/tv_setup_selected_question"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="40dp"
+            android:background="@drawable/edittext_bg"
+            android:drawablePadding="12dp"
+            android:gravity="center_vertical"
+            android:minHeight="56dp"
+            android:paddingHorizontal="16dp"
+            android:text="Select a security question"
+            android:textColor="@color/white"
+            android:textSize="14sp"
+            app:layout_constraintTop_toBottomOf="@id/tv_setup_sub" />
+
+        <EditText
+            android:id="@+id/et_setup_recovery_answer"
+            android:layout_width="match_parent"
+            android:layout_height="56dp"
+            android:layout_marginTop="16dp"
+            android:background="@drawable/edittext_bg"
+            android:hint="Your Answer"
+            android:inputType="text"
+            android:paddingStart="16dp"
+            android:textColor="@color/white"
+            android:textColorHint="#40FFFFFF"
+            app:layout_constraintTop_toBottomOf="@id/tv_setup_selected_question" />
+
+        <TextView
+            android:id="@+id/btn_save_setup"
+            android:layout_width="match_parent"
+            android:layout_height="56dp"
+            android:layout_marginTop="40dp"
+            android:background="@drawable/button_bg"
+            android:gravity="center"
+            android:text="SAVE RECOVERY"
+            android:textColor="@color/white"
+            android:textStyle="bold"
+            app:layout_constraintTop_toBottomOf="@id/et_setup_recovery_answer" />
+
+    </androidx.constraintlayout.widget.ConstraintLayout>
+
+</androidx.constraintlayout.widget.ConstraintLayout>

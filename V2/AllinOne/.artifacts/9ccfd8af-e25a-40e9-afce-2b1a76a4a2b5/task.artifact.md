@@ -1,0 +1,14 @@
+- `[x]` Update `item_settings_selection.xml` for icon support
+- `[x]` Enhance `ConfigAdapter.kt` to show selection checkmark
+- `[x]` Update `SettingsActivity.kt` multi-option items
+- `[x]` Update `HabitSettingsActivity.kt` multi-option items
+- `[x]` Update `WorkoutSettingsActivity.kt` multi-option items
+- `[x]` Update `TaskSettingsActivity.kt` multi-option items
+- `[x]` Update `NoteSettingsActivity.kt` multi-option items
+- `[x]` Update `FinanceSettingsActivity.kt` multi-option items
+- `[x]` Verify changes across settings sections
+- `[x]` Refine Dialog Visuals (Floating Pills & Compact)
+    - `[x]` Create `bg_item_selection_ripple.xml`
+    - `[x]` Update `item_settings_selection.xml` (pill style)
+    - `[x]` Update `dialog_settings_selection.xml` (compact width)
+    - `[x]` Update `ConfigAdapter.kt` (window layout)

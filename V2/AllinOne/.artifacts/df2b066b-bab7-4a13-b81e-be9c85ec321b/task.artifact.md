@@ -1,0 +1,10 @@
+- [x] Update `WorkoutDataManager` with streak and monthly calculations
+- [x] Expose new methods in `DataManager`
+- [x] Update `activity_workout_routine.xml` styling and IDs
+- [x] Update `WorkoutRoutineActivity.updateHistoryUI()` to populate all subtexts
+- [x] Verify UI and data consistency (Build successful)
+- [x] Convert stat cards to glassmorphic `MaterialCardView`
+- [x] Update card stroke and background transparency
+- [x] Apply "neon" colors to statistics text
+- [x] Update history grid container to be glassmorphic
+- [x] Verify final UI consistency (Migrated all 7+ cards in history section)

@@ -1,0 +1,5 @@
+- [x] Refactor `DataManager.getGlobalCompletionRate` for better accuracy
+- [x] Update `DataManager.checkAndResetDailyStats` to capture daily snapshots
+- [x] Integrate `updateHistoryUI` into the main UI update flow in `WorkoutRoutineActivity.kt`
+- [x] Ensure `updateHistoryUI` is called on Activity resume and tab switch
+- [x] Verify that stats update immediately after manual completion

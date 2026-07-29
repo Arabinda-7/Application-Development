@@ -1,0 +1,5 @@
+- `[x]` Update deletion logic to use ID matching in `LedgerHistoryActivity`, `LedgerActivity`, and `PersonLedgerActivity`
+- `[x]` Add "CLEAR ALL" functionality to `LedgerHistoryActivity`
+- `[x]` Improve delete icon touch target in `item_ledger_history.xml`
+- `[x]` Update `LedgerHistoryListSection.kt` for better delete feedback
+- `[x]` Verification

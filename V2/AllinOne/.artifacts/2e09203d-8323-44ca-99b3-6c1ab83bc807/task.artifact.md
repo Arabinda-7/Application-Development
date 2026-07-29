@@ -1,0 +1,2 @@
+- `[x]` Update `FeatureCapabilitiesGrid` in `OnboardingComponents.kt` with dynamic feature lists
+- `[x]` Verify varied feature counts across onboarding sections
