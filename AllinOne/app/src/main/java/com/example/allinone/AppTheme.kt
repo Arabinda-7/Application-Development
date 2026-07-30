@@ -13,6 +13,7 @@ data class AppStyle(
     val backgroundColor: Color = Color.Black,
     val isOled: Boolean = false,
     val showShadows: Boolean = true,
+    val isDynamicColorEnabled: Boolean = false,
     val fontFamily: FontFamily = FontFamily.Default,
     val cardStyle: String = "GLASS"
 ) {
@@ -25,9 +26,9 @@ data class AppStyle(
                 borderRadius = DataManager.appBorderRadius.dp,
                 accentColor = if (DataManager.appAccentColor != -1) Color(DataManager.appAccentColor) else Color(0xFF1A73E8),
                 surfaceColor = when {
-                    isLight -> Color(0xFFF5F5F5)
-                    isOled -> Color.Black
-                    else -> Color(0xFF1A1A1A)
+                    isOled -> Color.Black.copy(alpha = 0.05f)
+                    isLight -> if (DataManager.appCardStyle == "GLASS") Color.White.copy(alpha = 0.7f) else Color(0xFFF5F5F5)
+                    else -> if (DataManager.appCardStyle == "GLASS") Color.White.copy(alpha = 0.02f) else Color(0xFF1A1A1A)
                 },
                 backgroundColor = when {
                     isLight -> Color.White
@@ -36,6 +37,7 @@ data class AppStyle(
                 },
                 isOled = isOled,
                 showShadows = DataManager.appShowShadows,
+                isDynamicColorEnabled = DataManager.isDynamicColorEnabled,
                 cardStyle = DataManager.appCardStyle
             )
         }

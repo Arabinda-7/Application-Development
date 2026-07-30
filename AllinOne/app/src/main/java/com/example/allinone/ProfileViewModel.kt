@@ -11,7 +11,7 @@ class ProfileViewModel : ViewModel() {
     var userProfileImageUri by mutableStateOf(DataManager.userProfileImageUri)
     var userAvatarRes by mutableStateOf(DataManager.userAvatarRes)
     var isAppLockEnabled by mutableStateOf(DataManager.isAppLockEnabled)
-    var isOledThemeEnabled by mutableStateOf(DataManager.isOledThemeEnabled)
+    var isOledThemeEnabled by mutableStateOf(DataManager.appThemeMode == "OLED")
 
     fun refresh() {
         userName = DataManager.userName
@@ -19,6 +19,6 @@ class ProfileViewModel : ViewModel() {
         userProfileImageUri = DataManager.userProfileImageUri
         userAvatarRes = DataManager.userAvatarRes
         isAppLockEnabled = DataManager.isAppLockEnabled
-        isOledThemeEnabled = DataManager.isOledThemeEnabled
+        isOledThemeEnabled = DataManager.appThemeMode == "OLED"
     }
 }

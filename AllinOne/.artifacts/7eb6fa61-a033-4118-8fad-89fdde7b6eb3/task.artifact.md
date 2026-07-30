@@ -1,0 +1,5 @@
+- [x] Refine `WorkspaceDashboard` in `DashboardSection.kt`
+    - [x] Restore Metrics cards (Progress, Shipped, Health, Active Tasks)
+    - [x] Keep Active Features section removed
+    - [x] Keep Critical Bugs section removed
+- [x] Verify Dashboard shows Metrics and Projects

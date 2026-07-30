@@ -1,0 +1,8 @@
+- `[x]` Revert `DashboardState.kt` default icons
+- `[x]` Revert `DataManager.kt` and sub-managers global icons
+- `[x]` Revert `ui/home/HomeScreen.kt` footer, FAB, and quick actions to `ImageVector`
+- `[x]` Revert `ui/home/components/HomeHeader.kt` header icons
+- `[x]` Revert `ui/home/components/HomeCards.kt` icons and remove custom tinting logic
+- `[x]` Revert `AssistantActivity.kt` and `AssistantHistoryActivity.kt` icons
+- `[x]` Revert Onboarding flow models and icons
+- `[x]` Verify UI and build

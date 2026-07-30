@@ -25,6 +25,9 @@ interface AppTaskDao {
 
     @Query("DELETE FROM app_tasks")
     suspend fun deleteAll()
+
+    @Query("SELECT * FROM app_tasks")
+    suspend fun getAllTasksSync(): List<TaskEntity>
 }
 
 @Dao
@@ -46,6 +49,9 @@ interface AppHabitDao {
 
     @Query("DELETE FROM app_habits")
     suspend fun deleteAll()
+
+    @Query("SELECT * FROM app_habits")
+    suspend fun getAllHabitsSync(): List<HabitEntity>
 }
 
 @Dao
@@ -67,6 +73,9 @@ interface AppWorkoutDao {
 
     @Query("DELETE FROM app_workouts")
     suspend fun deleteAll()
+
+    @Query("SELECT * FROM app_workouts")
+    suspend fun getAllWorkoutsSync(): List<WorkoutEntity>
 }
 
 @Dao
@@ -88,6 +97,9 @@ interface AppNoteDao {
 
     @Query("DELETE FROM app_notes")
     suspend fun deleteAll()
+
+    @Query("SELECT * FROM app_notes")
+    suspend fun getAllNotesSync(): List<NoteEntity>
 }
 
 @Dao
@@ -136,4 +148,19 @@ interface AppFinanceDao {
 
     @Query("SELECT SUM(amount) FROM app_transactions WHERE type = :type AND timestamp >= :startTime AND timestamp < :endTime")
     suspend fun getSumByTypeInRange(type: String, startTime: Long, endTime: Long): Double?
+
+    @Query("SELECT * FROM app_transactions")
+    suspend fun getAllTransactionsSync(): List<TransactionEntity>
+
+    @Query("SELECT * FROM app_personal_ledgers")
+    suspend fun getAllPersonalLedgersSync(): List<PersonalLedgerEntity>
+
+    @Query("SELECT * FROM app_standalone_ledger_entries")
+    suspend fun getAllLedgerEntriesSync(): List<LedgerEntryEntity>
+
+    @Query("DELETE FROM app_personal_ledgers")
+    suspend fun deleteAllPersonalLedgers()
+
+    @Query("DELETE FROM app_standalone_ledger_entries")
+    suspend fun deleteAllLedgerEntries()
 }

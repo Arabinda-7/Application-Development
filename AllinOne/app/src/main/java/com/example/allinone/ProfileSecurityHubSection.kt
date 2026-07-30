@@ -50,12 +50,29 @@ class ProfileSecurityHubSection(
 
     fun applyTint(color: Int) {
         currentAccentColor = color
-        val colorStateList = android.content.res.ColorStateList.valueOf(color)
+        val iconTintList = android.content.res.ColorStateList.valueOf(color)
+
+        // Dynamic thumb tint: accent for checked, grey for unchecked
+        val thumbTintList = android.content.res.ColorStateList(
+            arrayOf(intArrayOf(android.R.attr.state_checked), intArrayOf()),
+            intArrayOf(color, android.graphics.Color.parseColor("#9E9E9E"))
+        )
+
+        // Dynamic track tint: transparent accent for checked, subtle grey for unchecked
+        val trackTintList = android.content.res.ColorStateList(
+            arrayOf(intArrayOf(android.R.attr.state_checked), intArrayOf()),
+            intArrayOf(
+                UIUtils.adjustAlpha(color, 0.3f),
+                android.graphics.Color.parseColor("#22FFFFFF")
+            )
+        )
         
         listOf(R.id.item_app_lock, R.id.item_biometric_lock, R.id.item_screenshot_protection, R.id.item_oled_mode).forEach { id ->
             val container = rootView.findViewById<View>(id)
-            container.findViewById<ImageView>(R.id.iv_setting_icon).imageTintList = colorStateList
-            container.findViewById<SwitchCompat>(R.id.sw_profile_toggle).thumbTintList = colorStateList
+            container.findViewById<ImageView>(R.id.iv_setting_icon).imageTintList = iconTintList
+            val sw = container.findViewById<SwitchCompat>(R.id.sw_profile_toggle)
+            sw.thumbTintList = thumbTintList
+            sw.trackTintList = trackTintList
         }
     }
 

@@ -420,14 +420,19 @@ class EditProjectActivity : BaseActivity() {
 
     private fun addSubfeatureRow(sub: ProjectFeature) {
         val layout = LinearLayout(this).apply {
-            orientation = LinearLayout.HORIZONTAL
+            orientation = LinearLayout.VERTICAL
             setPadding(0, 4.dpToPx(), 0, 4.dpToPx())
-            gravity = android.view.Gravity.CENTER_VERTICAL
             isClickable = true
             isFocusable = true
             background = ContextCompat.getDrawable(this@EditProjectActivity, R.drawable.glass_card_bg)
             backgroundTintList = ColorStateList.valueOf(Color.TRANSPARENT)
         }
+
+        val header = LinearLayout(this).apply {
+            orientation = LinearLayout.HORIZONTAL
+            gravity = android.view.Gravity.CENTER_VERTICAL
+        }
+
         val tv = TextView(this).apply {
             text = "${sub.position}. ${sub.name}"
             setTextColor(Color.WHITE)
@@ -487,6 +492,7 @@ class EditProjectActivity : BaseActivity() {
                 visibility = View.GONE
             }
         }
+
         val btnEdit = ImageView(this).apply {
             setImageResource(R.drawable.icons8_edit_pencil_100)
             val iconSize = 20.dpToPx()
@@ -500,10 +506,29 @@ class EditProjectActivity : BaseActivity() {
                 })
             }
         }
-        layout.addView(tv)
-        layout.addView(containerMeta)
-        layout.addView(tvDate)
-        layout.addView(btnEdit)
+
+        val tvDetails = TextView(this).apply {
+            text = sub.details
+            setTextColor(Color.GRAY)
+            textSize = 12f
+            setPadding(24.dpToPx(), 4.dpToPx(), 8.dpToPx(), 8.dpToPx())
+            visibility = if (sub.isExpanded && sub.details.isNotEmpty()) View.VISIBLE else View.GONE
+        }
+
+        header.addView(tv)
+        header.addView(containerMeta)
+        header.addView(tvDate)
+        header.addView(btnEdit)
+        
+        layout.addView(header)
+        layout.addView(tvDetails)
+
+        layout.setOnClickListener {
+            if (sub.details.isNotEmpty()) {
+                sub.isExpanded = !sub.isExpanded
+                tvDetails.visibility = if (sub.isExpanded) View.VISIBLE else View.GONE
+            }
+        }
         
         layout.setOnLongClickListener {
             showSubFeatureMenu(it, sub)

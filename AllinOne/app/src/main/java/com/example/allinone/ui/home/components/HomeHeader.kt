@@ -36,6 +36,7 @@ import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.unit.Density
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.example.allinone.R
 import com.example.allinone.DashboardState
 import com.example.allinone.LocalAppStyle
 import com.example.allinone.UIUtils
@@ -47,7 +48,6 @@ fun HomeHeader(
     isSearchVisible: Boolean,
     onSearchToggle: () -> Unit,
     onNotificationsClick: () -> Unit,
-    onSettingsClick: () -> Unit,
     onProfileClick: () -> Unit,
     onMoodSelected: (String) -> Unit,
     onSearchRequested: (String) -> Unit,
@@ -181,48 +181,28 @@ fun HomeHeader(
 
                 Spacer(modifier = Modifier.width(16.dp))
 
-                Row(verticalAlignment = Alignment.CenterVertically) {
+                Row(
+                    verticalAlignment = Alignment.CenterVertically,
+                    modifier = Modifier.padding(end = 12.dp)
+                ) {
                     Box(
                         modifier = Modifier
                             .size(36.dp)
-                            .clip(CircleShape)
-                            .background(Color.White.copy(alpha = 0.08f))
-                            .clickable { onSearchToggle(); isMessageExpanded = false },
+                            .clickable { onNotificationsClick(); isMessageExpanded = false },
                         contentAlignment = Alignment.Center
                     ) {
-                        Icon(
-                            imageVector = if (isSearchVisible) Icons.Default.Close else Icons.Default.Search,
-                            contentDescription = "Toggle Search",
-                            tint = Color.White.copy(alpha = 0.8f),
-                            modifier = Modifier.size(18.dp)
-                        )
-                    }
-                    
-                    Spacer(modifier = Modifier.width(8.dp))
-
-                    Box(
-                        modifier = Modifier.size(36.dp),
-                        contentAlignment = Alignment.Center
-                    ) {
-                        Box(
-                            modifier = Modifier
-                                .fillMaxSize()
-                                .clip(CircleShape)
-                                .background(Color.White.copy(alpha = 0.08f))
-                                .clickable { onNotificationsClick(); isMessageExpanded = false }
-                        )
                         Icon(
                             imageVector = Icons.Default.Notifications,
                             contentDescription = "Notifications",
                             tint = Color.White,
-                            modifier = Modifier.size(18.dp)
+                            modifier = Modifier.size(22.dp)
                         )
                         if (showRedDot) {
                             Box(
                                 modifier = Modifier
                                     .size(9.dp)
                                     .align(Alignment.TopEnd)
-                                    .offset(x = 1.dp, y = (-1).dp)
+                                    .offset(x = (-2).dp, y = 2.dp)
                                     .background(Color.Red, CircleShape)
                                     .border(1.5.dp, Color.Black, CircleShape)
                             )
@@ -230,20 +210,18 @@ fun HomeHeader(
                     }
 
                     Spacer(modifier = Modifier.width(8.dp))
-                    
+
                     Box(
                         modifier = Modifier
                             .size(36.dp)
-                            .clip(CircleShape)
-                            .background(Color.White.copy(alpha = 0.08f))
-                            .clickable { onSettingsClick(); isMessageExpanded = false },
+                            .clickable { onSearchToggle(); isMessageExpanded = false },
                         contentAlignment = Alignment.Center
                     ) {
                         Icon(
-                            imageVector = Icons.Default.Settings,
-                            contentDescription = "Settings",
-                            tint = Color.White,
-                            modifier = Modifier.size(18.dp)
+                            imageVector = if (isSearchVisible) Icons.Default.Close else Icons.Default.Search,
+                            contentDescription = "Toggle Search",
+                            tint = Color.White.copy(alpha = 0.8f),
+                            modifier = Modifier.size(22.dp)
                         )
                     }
                 }
@@ -272,12 +250,15 @@ fun HomeHeader(
                         ),
                         leadingIcon = { Icon(Icons.Default.Search, "Search", tint = Color.White.copy(alpha = 0.4f), modifier = Modifier.size(18.dp)) },
                         trailingIcon = { 
-                            IconButton(onClick = { 
-                                if (searchQuery.isNotEmpty()) {
-                                    onSearchRequested(searchQuery)
-                                    keyboardController?.hide()
-                                }
-                            }) {
+                            IconButton(
+                                onClick = { 
+                                    if (searchQuery.isNotEmpty()) {
+                                        onSearchRequested(searchQuery)
+                                        keyboardController?.hide()
+                                    }
+                                },
+                                modifier = Modifier.padding(end = 12.dp)
+                            ) {
                                 Icon(
                                     imageVector = if (searchQuery.isEmpty()) Icons.Default.Mic else Icons.AutoMirrored.Filled.Send, 
                                     "Action", 

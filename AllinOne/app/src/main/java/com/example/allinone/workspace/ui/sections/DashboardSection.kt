@@ -33,15 +33,10 @@ import com.example.allinone.workspace.ui.WorkspaceViewModel
 fun WorkspaceDashboard(
     state: WorkspaceUIState,
     viewModel: WorkspaceViewModel,
-    onViewFeature: (FeatureEntity) -> Unit,
-    onEditFeature: (FeatureEntity) -> Unit,
-    onViewBug: (BugEntity) -> Unit,
-    onEditBug: (BugEntity) -> Unit,
     onShowStats: (ProjectEntity) -> Unit,
     isStatsShowing: Boolean
 ) {
     val style = LocalAppStyle.current
-    
     val blurRadius by animateDpAsState(
         targetValue = if (isStatsShowing) 10.dp else 0.dp,
         label = "BlurRadius"
@@ -65,40 +60,29 @@ fun WorkspaceDashboard(
                 Spacer(modifier = Modifier.width(16.dp))
                 Box(modifier = Modifier.weight(1f)) { MetricCard("Active Tasks", state.tasks.count { it.status != "Done" }.toString(), Color(0xFFFFB800)) }
             }
+            Spacer(modifier = Modifier.height(32.dp))
         }
-        if (state.selectedProject != null) {
-            val activeFeatures = state.features.filter { it.status != "Shipped" }.take(3)
-            if (activeFeatures.isNotEmpty()) {
-                item { Spacer(modifier = Modifier.height(32.dp)); Text("Active Features", color = Color.White, fontSize = 18.sp, fontWeight = FontWeight.Black); Spacer(modifier = Modifier.height(16.dp)) }
-                items(activeFeatures) { feature ->
-                    FeatureItemCard(
-                        feature = feature,
-                        linkedTasks = state.tasks.filter { it.milestoneId == feature.id },
-                        onUpdate = { viewModel.updateFeature(it) },
-                        onViewFeature = onViewFeature,
-                        onEditFeature = onEditFeature,
-                        onDeleteFeature = viewModel::deleteFeature,
-                        onQuickTasks = viewModel::quickTasks
-                    )
-                    Spacer(modifier = Modifier.height(12.dp))
-                }
+        item {
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Text(
+                    "Your Ecosystem",
+                    color = Color.White,
+                    fontSize = 18.sp,
+                    fontWeight = FontWeight.Black
+                )
+                Text(
+                    "${state.projects.size} Projects",
+                    color = Color.White.copy(alpha = 0.4f),
+                    fontSize = 12.sp
+                )
             }
-            val criticalBugs = state.bugs.filter { it.status != "Verified" && (it.severity == "Critical" || it.priority == 2) }.take(3)
-            if (criticalBugs.isNotEmpty()) {
-                item { Spacer(modifier = Modifier.height(32.dp)); Text("Critical Bugs", color = Color.White, fontSize = 18.sp, fontWeight = FontWeight.Black); Spacer(modifier = Modifier.height(16.dp)) }
-                items(criticalBugs) { bug ->
-                    BugItemCard(
-                        bug = bug,
-                        onUpdate = { viewModel.updateBug(it) },
-                        onViewBug = onViewBug,
-                        onEditBug = onEditBug,
-                        onDeleteBug = viewModel::deleteBug
-                    )
-                    Spacer(modifier = Modifier.height(12.dp))
-                }
-            }
+            Spacer(modifier = Modifier.height(16.dp))
         }
-        item { Spacer(modifier = Modifier.height(32.dp)); Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween, verticalAlignment = Alignment.CenterVertically) { Text("Your Ecosystem", color = Color.White, fontSize = 18.sp, fontWeight = FontWeight.Black); Text("${state.projects.size} Projects", color = Color.White.copy(alpha = 0.4f), fontSize = 12.sp) }; Spacer(modifier = Modifier.height(16.dp)) }
         items(state.projects, key = { it.id }) { project ->
             Box(modifier = Modifier.animateItem()) {
                 ProjectOverviewItem(

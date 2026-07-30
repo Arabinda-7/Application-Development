@@ -80,7 +80,7 @@ fun WorkspaceSidebar(selectedTab: WorkspaceTab, onTabSelected: (WorkspaceTab) ->
     val configuration = androidx.compose.ui.platform.LocalConfiguration.current
     val expandedWidth = configuration.screenWidthDp.dp / 4
     val sidebarWidth by animateDpAsState(targetValue = if (isExpanded) expandedWidth else 0.dp, animationSpec = spring(stiffness = Spring.StiffnessLow), label = "SidebarWidth")
-    val sidebarBg by animateColorAsState(targetValue = if (isExpanded) style.surfaceColor else Color.Transparent, label = "SidebarBg")
+    val sidebarBg by animateColorAsState(targetValue = if (isExpanded) Color.Black.copy(alpha = 0.5f) else Color.Transparent, label = "SidebarBg")
 
     if (isExpanded || sidebarWidth > 0.dp) {
         AnimatedVisibility(

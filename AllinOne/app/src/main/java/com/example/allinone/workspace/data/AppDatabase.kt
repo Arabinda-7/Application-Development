@@ -28,9 +28,11 @@ import com.example.allinone.data.database.*
         WorkoutEntity::class,
         TransactionEntity::class,
         PersonalLedgerEntity::class,
-        LedgerEntryEntity::class
+        LedgerEntryEntity::class,
+        AiChatEntity::class,
+        AiChatSessionEntity::class
     ],
-    version = 8, // Incremented version to resolve schema mismatch
+    version = 10, // Incremented version for AI Chat Sessions
     exportSchema = false
 )
 @TypeConverters(AppTypeConverters::class)
@@ -41,6 +43,7 @@ abstract class AppDatabase : RoomDatabase() {
     abstract fun workoutDao(): AppWorkoutDao
     abstract fun noteDao(): AppNoteDao
     abstract fun financeDao(): AppFinanceDao
+    abstract fun aiChatDao(): AiChatDao
 
     companion object {
         @Volatile

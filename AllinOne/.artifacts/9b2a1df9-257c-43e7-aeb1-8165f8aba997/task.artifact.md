@@ -1,0 +1,10 @@
+- `[x]` Make dashboard sections transparent in dark mode
+    - `[x]` Update `AppStyle` surface color logic in `AppTheme.kt`
+    - `[x]` Update `HabitCard` background alpha in `HomeCards.kt`
+    - `[x]` Update `WorkoutCard` background alpha in `HomeCards.kt`
+    - `[x]` Update `TaskCard` background alpha in `HomeCards.kt`
+    - `[x]` Update `NoteCard` background alpha in `HomeCards.kt`
+    - `[x]` Update `ProjectCard` background alpha in `HomeCards.kt`
+    - `[x]` Update `FinanceCard` background alpha in `HomeCards.kt`
+- `[x]` Verify transparency in Dark and OLED modes
+- `[x]` Create walkthrough

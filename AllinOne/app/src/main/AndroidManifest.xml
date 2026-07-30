@@ -1,11 +1,12 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools">
-
     <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
     <uses-permission android:name="android.permission.SCHEDULE_EXACT_ALARM" />
     <uses-permission android:name="android.permission.USE_EXACT_ALARM" />
     <uses-permission android:name="android.permission.VIBRATE" />
+    <uses-permission android:name="android.permission.RECORD_AUDIO" />
+    <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED" />
 
     <application
         android:name=".AllInOneApplication"
@@ -19,10 +20,17 @@
         android:theme="@style/Theme.AllinOne">
 
         <receiver android:name=".ReminderReceiver" android:exported="false" />
+        <receiver android:name=".DailyReminderReceiver" android:exported="false" />
+        <receiver android:name=".BootReceiver" android:exported="true">
+            <intent-filter>
+                <action android:name="android.intent.action.BOOT_COMPLETED" />
+            </intent-filter>
+        </receiver>
 
         <activity
             android:name=".MainActivity"
             android:exported="true"
+            android:theme="@style/Theme.App.Starting"
             tools:ignore="MissingClass">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
@@ -45,6 +53,10 @@
         <activity android:name=".ProjectActivity" android:exported="false" />
         <activity android:name=".ProfileActivity" android:exported="false" />
         <activity android:name=".OnboardingActivity" />
+        <activity android:name=".AssistantActivity" />
+        <activity android:name=".AssistantFeedActivity" />
+        <activity android:name=".AssistantHistoryActivity" />
+        <activity android:name=".AssistantSessionDetailActivity" />
         <activity android:name=".PerformanceHistoryActivity" />
         <activity android:name=".ProjectHistoryActivity" />
         <activity android:name=".LockActivity" android:windowSoftInputMode="adjustResize" />
@@ -64,6 +76,7 @@
         <activity android:name=".NoteSettingsActivity" android:windowSoftInputMode="adjustResize" />
         <activity android:name=".FinanceSettingsActivity" android:windowSoftInputMode="adjustResize" />
         <activity android:name=".ProjectSettingsActivity" android:windowSoftInputMode="adjustResize" />
+        <activity android:name=".NotificationSettingsActivity" android:windowSoftInputMode="adjustResize" />
         <activity android:name=".LedgerActivity" />
         <activity android:name=".LedgerHistoryActivity" />
         <activity android:name=".PersonLedgerActivity" />

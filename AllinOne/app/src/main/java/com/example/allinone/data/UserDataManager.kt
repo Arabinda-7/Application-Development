@@ -25,6 +25,7 @@ object UserDataManager {
     var appBorderRadius: Int = 16
     var appCardStyle: String = "GLASS"
     var appShowShadows: Boolean = true
+    var isDynamicColorEnabled: Boolean = false
     var startupLoadingTime: Int = 2000
     
     var showHabitSection: Boolean = true

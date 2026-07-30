@@ -32,13 +32,16 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.Density
 import androidx.compose.ui.unit.Dp
+import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.allinone.*
+import com.example.allinone.R
 import com.example.allinone.ui.home.components.*
 import java.text.SimpleDateFormat
 import java.util.*
 
+@OptIn(ExperimentalFoundationApi::class)
 @Composable
 fun HomeScreen(
     state: DashboardState,
@@ -49,6 +52,7 @@ fun HomeScreen(
     onNavigateToProjects: () -> Unit,
     onNavigateToFinance: () -> Unit,
     onNavigateToSettings: () -> Unit,
+    onNavigateToAssistant: () -> Unit,
     onNavigateToWorkspace: () -> Unit = {},
     onNavigateToProfile: () -> Unit = {},
     onNavigateToPerformanceHistory: () -> Unit = {},
@@ -57,7 +61,10 @@ fun HomeScreen(
     onQuickAddNote: () -> Unit = {},
     onColorSelected: (String, Int) -> Unit = { _, _ -> },
     onMoodSelected: (String) -> Unit = {},
-    onSearchRequested: (String) -> Unit = {}
+    onSearchRequested: (String) -> Unit = {},
+    isVoiceListening: Boolean = false,
+    isVoiceThinking: Boolean = false,
+    onVoiceMicClick: () -> Unit = {}
 ) {
     var showColorPicker by remember { mutableStateOf<String?>(null) }
     var searchQuery by remember { mutableStateOf("") }
@@ -65,7 +72,8 @@ fun HomeScreen(
     var isSearchVisible by remember { mutableStateOf(false) }
     
     var showNotificationsDialog by remember { mutableStateOf(false) }
-    var showVoiceComingSoon by remember { mutableStateOf(false) }
+    var showVoiceAssistant by remember { mutableStateOf(false) }
+    var selectedTab by remember { mutableIntStateOf(0) }
 
     val context = LocalContext.current
     val infiniteTransition = rememberInfiniteTransition(label = "Aura")
@@ -118,13 +126,38 @@ fun HomeScreen(
     val transition = updateTransition(targetState = showSpeedDial, label = "SpeedDial")
     val dialRotation by transition.animateFloat(label = "Rotation") { if (it) 45f else 0f }
 
+    val scrollState = rememberScrollState()
+    
+    // FAB Offset Logic: Move up when footer appears
+    val footerHeightPx = with(LocalDensity.current) { 83.dp.toPx() } // Reduced by 1dp more
+    val fabOffset by remember(scrollState.value, scrollState.maxValue) {
+        derivedStateOf {
+            if (scrollState.maxValue > 0) {
+                val distanceToBottom = scrollState.maxValue - scrollState.value
+                if (distanceToBottom < footerHeightPx) {
+                    (footerHeightPx - distanceToBottom).coerceAtLeast(0f)
+                } else 0f
+            } else 0f
+        }
+    }
+    val animatedFabOffset by animateDpAsState(
+        targetValue = with(LocalDensity.current) { fabOffset.toDp() },
+        animationSpec = spring(stiffness = Spring.StiffnessLow),
+        label = "FabScrollOffset"
+    )
+
     val todayDateString = remember { SimpleDateFormat("yyyyMMdd", Locale.getDefault()).format(Date()) }
     val showRedDot = state.todayAgenda.isNotEmpty() && (DataManager.lastViewedNotificationDate != todayDateString || DataManager.hasNewTodayNotifications)
 
     Scaffold(
         contentWindowInsets = WindowInsets(0, 0, 0, 0),
         floatingActionButton = {
-            Box(contentAlignment = Alignment.BottomEnd) {
+            Box(
+                modifier = Modifier
+                    .offset { IntOffset(0, -animatedFabOffset.roundToPx()) }
+                    .padding(bottom = 2.dp), 
+                contentAlignment = Alignment.BottomEnd
+            ) {
                 QuickActionItem(
                     label = "Task",
                     icon = Icons.Default.Add,
@@ -170,12 +203,12 @@ fun HomeScreen(
                         containerColor = style.accentColor,
                         contentColor = Color.White,
                         shape = CircleShape,
-                        modifier = Modifier.size(50.dp)
+                        modifier = Modifier.size(51.dp)
                     ) {
                         Icon(
                             imageVector = if (showSpeedDial) Icons.Default.Close else Icons.Default.Add,
                             contentDescription = "Quick Action",
-                            modifier = Modifier.size(26.dp).graphicsLayer(rotationZ = dialRotation)
+                            modifier = Modifier.size(27.dp).graphicsLayer(rotationZ = dialRotation)
                         )
                     }
                 }
@@ -192,7 +225,7 @@ fun HomeScreen(
                         keyboardController?.hide()
                     })
                 }
-                .verticalScroll(rememberScrollState())
+                .verticalScroll(scrollState)
         ) {
             HomeHeader(
                 state = state,
@@ -204,7 +237,6 @@ fun HomeScreen(
                     DataManager.hasNewTodayNotifications = false
                     DataManager.saveData(context)
                 },
-                onSettingsClick = onNavigateToSettings,
                 onProfileClick = onNavigateToProfile,
                 onMoodSelected = onMoodSelected,
                 onSearchRequested = onSearchRequested,
@@ -429,160 +461,262 @@ fun HomeScreen(
                 }
             }
 
-            Spacer(modifier = Modifier.height(40.dp))
-        }
-    }
+            Spacer(modifier = Modifier.height(32.dp))
 
-    if (showColorPicker != null) {
-        AlertDialog(
-            onDismissRequest = { showColorPicker = null },
-            title = { Text("Choose Theme Color", color = Color.White) },
-            containerColor = Color(0xFF1A1A1A),
-            text = {
-                val colors = listOf(0xFFFF7A59, 0xFFFFB800, 0xFF2EC4B6, 0xFF3A86F0, 0xFF1A73E8, 0xFFE91E63, 0xFF9C27B0, 0xFF673AB7, 0xFF4CAF50)
-                Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceEvenly) {
-                    colors.forEach { colorInt ->
-                        Box(modifier = Modifier.size(32.dp).clip(CircleShape).background(Color(colorInt)).clickable { onColorSelected(showColorPicker!!, colorInt.toInt()); showColorPicker = null }.border(1.dp, Color.White.copy(alpha = 0.2f), CircleShape))
+            // Footer Section
+            Box(modifier = Modifier.fillMaxWidth()) {
+                Surface(
+                    color = Color.Black,
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .height(65.dp)
+                        .align(Alignment.BottomCenter),
+                    border = BorderStroke(1.dp, style.accentColor.copy(alpha = 0.3f))
+                ) {
+                    Column {
+                        Row(
+                            modifier = Modifier
+                                .fillMaxSize()
+                                .padding(bottom = 4.dp),
+                            horizontalArrangement = Arrangement.SpaceEvenly,
+                            verticalAlignment = Alignment.CenterVertically
+                        ) {
+                            FooterItem(
+                                selected = selectedTab == 0,
+                                onClick = { selectedTab = 0 },
+                                icon = Icons.Default.Home,
+                                label = "Home",
+                                accentColor = style.accentColor,
+                                modifier = Modifier.weight(1f)
+                            )
+
+                            Spacer(modifier = Modifier.width(80.dp))
+
+                            FooterItem(
+                                selected = selectedTab == 2,
+                                onClick = { 
+                                    selectedTab = 2
+                                    onNavigateToSettings()
+                                },
+                                icon = Icons.Default.Settings,
+                                label = "Settings",
+                                accentColor = style.accentColor,
+                                modifier = Modifier.weight(1f)
+                            )
+                        }
                     }
                 }
-            },
-            confirmButton = { TextButton(onClick = { showColorPicker = null }) { Text("CLOSE", color = Color(0xFF1A73E8)) } }
-        )
-    }
 
-    if (showNotificationsDialog) {
-        AlertDialog(
-            onDismissRequest = { showNotificationsDialog = false },
-            title = { Text("Today's Agenda", color = Color.White, fontWeight = FontWeight.Bold, letterSpacing = 1.sp) },
-            containerColor = Color(0xFF1A1A1A),
-            text = {
-                Column(modifier = Modifier.verticalScroll(rememberScrollState())) {
-                    if (state.todayAgenda.isEmpty()) {
-                        Text("Your agenda is clear for today!", color = Color.White.copy(alpha = 0.6f), fontSize = 14.sp)
-                    } else {
-                        state.todayAgenda.forEach { (section, items) ->
-                            Text(
-                                text = section,
-                                color = style.accentColor,
-                                fontSize = 10.sp,
-                                fontWeight = FontWeight.Bold,
-                                letterSpacing = 1.sp,
-                                modifier = Modifier.padding(top = 16.dp, bottom = 8.dp)
-                            )
-                            
-                            var lastColorInt: Int? = null
-                            
-                            items.forEach { item ->
-                                val rawItemColor = if (item.color != -1) item.color else style.accentColor.toArgb()
-                                // Logic: If same as previous color, use a slight variation or a fixed fallback to ensure distinction
-                                val finalItemColorInt = if (lastColorInt != null && lastColorInt == rawItemColor) {
-                                    // Fallback: If it's a conflict, use a secondary color or darken it
-                                    UIUtils.darkenColor(rawItemColor, 0.7f)
-                                } else {
-                                    rawItemColor
+                // Prominent AI Button (Drawn on top of Surface to avoid clipping)
+                Box(
+                    modifier = Modifier
+                        .size(68.dp)
+                        .align(Alignment.TopCenter)
+                        .offset(y = (-24).dp)
+                        .background(Color.Black, CircleShape)
+                        .padding(4.dp)
+                ) {
+                    Box(
+                        modifier = Modifier
+                            .fillMaxSize()
+                            .clip(CircleShape)
+                            .background(style.accentColor)
+                            .combinedClickable(
+                                onClick = { onNavigateToAssistant(); selectedTab = 1 },
+                                onLongClick = { 
+                                    showVoiceAssistant = true
+                                    selectedTab = 1
                                 }
-                                lastColorInt = finalItemColorInt
-                                val itemColor = Color(finalItemColorInt)
+                            ),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        Icon(
+                            imageVector = Icons.Default.AutoAwesome,
+                            contentDescription = "AI Assistant",
+                            tint = Color.White,
+                            modifier = Modifier.size(32.dp)
+                        )
+                    }
+                }
+                
+                    Text(
+                        text = "AI",
+                        color = if (selectedTab == 1 || showVoiceAssistant) style.accentColor else Color.White.copy(alpha = 0.4f),
+                        fontSize = 11.sp,
+                        fontWeight = FontWeight.Bold,
+                        modifier = Modifier.align(Alignment.BottomCenter).padding(bottom = 6.dp)
+                    )
+            }
+        }
 
-                                Surface(
-                                    onClick = {
-                                        when (item.navigationTarget) {
-                                            "TASK_ACTIVITY" -> onNavigateToTodos()
-                                            "PROJECT_ACTIVITY" -> {
-                                                val intent = Intent(context, ViewProjectActivity::class.java).apply {
-                                                    val idStr = item.parentId ?: item.id
-                                                    val id = idStr.toLongOrNull() ?: -1L
-                                                    putExtra("PROJECT_ID", id)
-                                                }
-                                                context.startActivity(intent)
-                                            }
-                                            "WORKSPACE" -> onNavigateToWorkspace()
-                                            "NOTE_ACTIVITY" -> onNavigateToNotes()
-                                        }
-                                        showNotificationsDialog = false
-                                    },
-                                    color = Color.White.copy(alpha = 0.05f),
-                                    shape = RoundedCornerShape(12.dp),
-                                    modifier = Modifier.padding(vertical = 4.dp).fillMaxWidth()
-                                ) {
-                                    Box(modifier = Modifier.padding(12.dp)) {
-                                        Column {
-                                            Row(
-                                                verticalAlignment = Alignment.CenterVertically,
-                                                modifier = Modifier.fillMaxWidth().padding(end = 80.dp)
-                                            ) {
-                                                val icon = when(item.category) {
-                                                    "TASKS" -> Icons.Default.CheckCircle
-                                                    "PROJECTS" -> Icons.Default.DateRange
-                                                    "SUBFEATURES" -> Icons.Default.Info
-                                                    else -> Icons.Default.Notifications
-                                                }
-                                                Icon(
-                                                    imageVector = icon,
-                                                    contentDescription = null,
-                                                    tint = itemColor,
-                                                    modifier = Modifier.size(16.dp)
-                                                )
-                                                Spacer(modifier = Modifier.width(12.dp))
-                                                Text(
-                                                    text = item.title,
-                                                    color = Color.White,
-                                                    fontSize = 15.sp,
-                                                    fontWeight = FontWeight.Bold,
-                                                    maxLines = 1,
-                                                    overflow = androidx.compose.ui.text.style.TextOverflow.Ellipsis
-                                                )
-                                            }
-                                            
-                                            val timeStr = if (item.time != 0L) {
-                                                SimpleDateFormat("hh:mm a", Locale.getDefault()).format(Date(item.time))
-                                            } else ""
-                                            
-                                            Row(modifier = Modifier.padding(start = 28.dp, top = 2.dp), verticalAlignment = Alignment.CenterVertically) {
-                                                if (timeStr.isNotEmpty()) {
-                                                    Text(
-                                                        text = timeStr,
-                                                        color = itemColor.copy(alpha = 0.8f),
-                                                        fontSize = 11.sp,
-                                                        fontWeight = FontWeight.Bold
-                                                    )
-                                                    Spacer(modifier = Modifier.width(8.dp))
-                                                }
-                                                if (item.details.isNotEmpty()) {
-                                                    Text(
-                                                        text = item.details,
-                                                        color = Color.White.copy(alpha = 0.5f),
-                                                        fontSize = 12.sp
-                                                    )
-                                                }
-                                            }
-                                        }
+        VoiceAssistantOverlay(
+            isVisible = showVoiceAssistant,
+            onDismiss = { showVoiceAssistant = false },
+            isListening = isVoiceListening,
+            isThinking = isVoiceThinking,
+            onMicClick = onVoiceMicClick
+        )
 
-                                        Row(
-                                            modifier = Modifier.align(Alignment.TopEnd),
-                                            verticalAlignment = Alignment.CenterVertically
-                                        ) {
-                                            val tagText = buildString {
-                                                append(item.category)
-                                                if (item.priority.isNotEmpty()) {
-                                                    append(" | ")
-                                                    append(item.priority.uppercase())
+        if (showColorPicker != null) {
+            AlertDialog(
+                onDismissRequest = { showColorPicker = null },
+                confirmButton = { 
+                    TextButton(onClick = { showColorPicker = null }) { 
+                        Text("CLOSE", color = style.accentColor) 
+                    } 
+                },
+                title = { Text("Choose Theme Color", color = Color.White) },
+                containerColor = Color(0xFF1A1A1A),
+                text = {
+                    val colors = listOf(0xFFFF7A59, 0xFFFFB800, 0xFF2EC4B6, 0xFF3A86F0, 0xFF1A73E8, 0xFFE91E63, 0xFF9C27B0, 0xFF673AB7, 0xFF4CAF50)
+                    Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceEvenly) {
+                        colors.forEach { colorInt ->
+                            Box(modifier = Modifier.size(32.dp).clip(CircleShape).background(Color(colorInt)).clickable { onColorSelected(showColorPicker!!, colorInt.toInt()); showColorPicker = null }.border(1.dp, Color.White.copy(alpha = 0.2f), CircleShape))
+                        }
+                    }
+                }
+            )
+        }
+
+        if (showNotificationsDialog) {
+            AlertDialog(
+                onDismissRequest = { showNotificationsDialog = false },
+                confirmButton = { 
+                    TextButton(onClick = { showNotificationsDialog = false }) { 
+                        Text("DISMISS", color = style.accentColor, fontWeight = FontWeight.Bold) 
+                    } 
+                },
+                title = { Text("Today's Agenda", color = Color.White, fontWeight = FontWeight.Bold, letterSpacing = 1.sp) },
+                containerColor = Color(0xFF1A1A1A),
+                text = {
+                    Column(modifier = Modifier.verticalScroll(rememberScrollState())) {
+                        if (state.todayAgenda.isEmpty()) {
+                            Text("Your agenda is clear for today!", color = Color.White.copy(alpha = 0.6f), fontSize = 14.sp)
+                        } else {
+                            state.todayAgenda.forEach { (section, items) ->
+                                Text(
+                                    text = section,
+                                    color = style.accentColor,
+                                    fontSize = 10.sp,
+                                    fontWeight = FontWeight.Bold,
+                                    letterSpacing = 1.sp,
+                                    modifier = Modifier.padding(top = 16.dp, bottom = 8.dp)
+                                )
+                                
+                                var lastColorInt: Int? = null
+                                
+                                items.forEach { item ->
+                                    val rawItemColor = if (item.color != -1) item.color else style.accentColor.toArgb()
+                                    // Logic: If same as previous color, use a slight variation or a fixed fallback to ensure distinction
+                                    val finalItemColorInt = if (lastColorInt != null && lastColorInt == rawItemColor) {
+                                        // Fallback: If it's a conflict, use a secondary color or darken it
+                                        UIUtils.darkenColor(rawItemColor, 0.7f)
+                                    } else {
+                                        rawItemColor
+                                    }
+                                    lastColorInt = finalItemColorInt
+                                    val itemColor = Color(finalItemColorInt)
+
+                                    Surface(
+                                        onClick = {
+                                            when (item.navigationTarget) {
+                                                "TASK_ACTIVITY" -> onNavigateToTodos()
+                                                "PROJECT_ACTIVITY" -> {
+                                                    val intent = Intent(context, ViewProjectActivity::class.java).apply {
+                                                        val idStr = item.parentId ?: item.id
+                                                        val id = idStr.toLongOrNull() ?: -1L
+                                                        putExtra("PROJECT_ID", id)
+                                                    }
+                                                    context.startActivity(intent)
                                                 }
+                                                "WORKSPACE" -> onNavigateToWorkspace()
+                                                "NOTE_ACTIVITY" -> onNavigateToNotes()
                                             }
-                                            
-                                            if (tagText.isNotEmpty()) {
-                                                Surface(
-                                                    color = itemColor.copy(alpha = 0.15f),
-                                                    shape = RoundedCornerShape(4.dp),
-                                                    border = BorderStroke(0.5.dp, itemColor.copy(alpha = 0.3f))
+                                            showNotificationsDialog = false
+                                        },
+                                        color = Color.White.copy(alpha = 0.05f),
+                                        shape = RoundedCornerShape(12.dp),
+                                        modifier = Modifier.padding(vertical = 4.dp).fillMaxWidth()
+                                    ) {
+                                        Box(modifier = Modifier.padding(12.dp)) {
+                                            Column {
+                                                Row(
+                                                    verticalAlignment = Alignment.CenterVertically,
+                                                    modifier = Modifier.fillMaxWidth().padding(end = 80.dp)
                                                 ) {
-                                                    Text(
-                                                        text = tagText,
-                                                        color = itemColor,
-                                                        fontSize = 8.sp,
-                                                        fontWeight = FontWeight.Bold,
-                                                        modifier = Modifier.padding(horizontal = 6.dp, vertical = 2.dp)
+                                                    val icon = when(item.category) {
+                                                        "TASKS" -> Icons.Default.CheckCircle
+                                                        "PROJECTS" -> Icons.Default.DateRange
+                                                        "SUBFEATURES" -> Icons.Default.Info
+                                                        else -> Icons.Default.Notifications
+                                                    }
+                                                    Icon(
+                                                        imageVector = icon,
+                                                        contentDescription = null,
+                                                        tint = itemColor,
+                                                        modifier = Modifier.size(16.dp)
                                                     )
+                                                    Spacer(modifier = Modifier.width(12.dp))
+                                                    Text(
+                                                        text = item.title,
+                                                        color = Color.White,
+                                                        fontSize = 15.sp,
+                                                        fontWeight = FontWeight.Bold,
+                                                        maxLines = 1,
+                                                        overflow = androidx.compose.ui.text.style.TextOverflow.Ellipsis
+                                                    )
+                                                }
+                                                
+                                                val timeStr = if (item.time != 0L) {
+                                                    SimpleDateFormat("hh:mm a", Locale.getDefault()).format(Date(item.time))
+                                                } else ""
+                                                
+                                                Row(modifier = Modifier.padding(start = 28.dp, top = 2.dp), verticalAlignment = Alignment.CenterVertically) {
+                                                    if (timeStr.isNotEmpty()) {
+                                                        Text(
+                                                            text = timeStr,
+                                                            color = itemColor.copy(alpha = 0.8f),
+                                                            fontSize = 11.sp,
+                                                            fontWeight = FontWeight.Bold
+                                                        )
+                                                        Spacer(modifier = Modifier.width(8.dp))
+                                                    }
+                                                    if (item.details.isNotEmpty()) {
+                                                        Text(
+                                                            text = item.details,
+                                                            color = Color.White.copy(alpha = 0.5f),
+                                                            fontSize = 12.sp
+                                                        )
+                                                    }
+                                                }
+                                            }
+
+                                            Row(
+                                                modifier = Modifier.align(Alignment.TopEnd),
+                                                verticalAlignment = Alignment.CenterVertically
+                                            ) {
+                                                val tagText = buildString {
+                                                    append(item.category)
+                                                    if (item.priority.isNotEmpty()) {
+                                                        append(" | ")
+                                                        append(item.priority.uppercase())
+                                                    }
+                                                }
+                                                
+                                                if (tagText.isNotEmpty()) {
+                                                    Surface(
+                                                        color = itemColor.copy(alpha = 0.15f),
+                                                        shape = RoundedCornerShape(4.dp),
+                                                        border = BorderStroke(0.5.dp, itemColor.copy(alpha = 0.3f))
+                                                    ) {
+                                                        Text(
+                                                            text = tagText,
+                                                            color = itemColor,
+                                                            fontSize = 8.sp,
+                                                            fontWeight = FontWeight.Bold,
+                                                            modifier = Modifier.padding(horizontal = 6.dp, vertical = 2.dp)
+                                                        )
+                                                    }
                                                 }
                                             }
                                         }
@@ -592,28 +726,51 @@ fun HomeScreen(
                         }
                     }
                 }
-            },
-            confirmButton = { 
-                TextButton(onClick = { showNotificationsDialog = false }) { 
-                    Text("DISMISS", color = Color(0xFF1A73E8), fontWeight = FontWeight.Bold) 
-                } 
-            }
-        )
+            )
+        }
     }
+}
 
-    if (showVoiceComingSoon) {
-        AlertDialog(
-            onDismissRequest = { showVoiceComingSoon = false },
-            containerColor = Color(0xFF1A1A1A),
-            text = {
-                Column(horizontalAlignment = Alignment.CenterHorizontally, modifier = Modifier.fillMaxWidth()) {
-                    Icon(Icons.Default.Mic, null, tint = Color(0xFF1A73E8), modifier = Modifier.size(48.dp))
-                    Spacer(modifier = Modifier.height(16.dp))
-                    Text("Voice Assistant Coming Soon", color = Color.White, fontWeight = FontWeight.Bold, textAlign = TextAlign.Center)
-                    Text("We are currently training the AI to recognize your specific productivity commands.", color = Color.White.copy(alpha = 0.6f), fontSize = 12.sp, textAlign = TextAlign.Center)
-                }
-            },
-            confirmButton = { TextButton(onClick = { showVoiceComingSoon = false }) { Text("UNDERSTOOD", color = Color(0xFF1A73E8)) } }
+@Composable
+fun FooterItem(
+    selected: Boolean,
+    onClick: () -> Unit,
+    icon: ImageVector,
+    label: String,
+    accentColor: Color,
+    showBadge: Boolean = false,
+    modifier: Modifier = Modifier
+) {
+    Column(
+        horizontalAlignment = Alignment.CenterHorizontally,
+        modifier = modifier
+            .clip(RoundedCornerShape(12.dp))
+            .clickable { onClick() }
+            .padding(horizontal = 8.dp, vertical = 4.dp)
+    ) {
+        Box {
+            Icon(
+                imageVector = icon,
+                contentDescription = null,
+                tint = if (selected) accentColor else Color.White.copy(alpha = 0.4f),
+                modifier = Modifier.size(24.dp)
+            )
+            if (showBadge) {
+                Box(
+                    modifier = Modifier
+                        .size(8.dp)
+                        .align(Alignment.TopEnd)
+                        .background(Color.Red, CircleShape)
+                        .border(1.dp, Color.Black, CircleShape)
+                )
+            }
+        }
+        Spacer(modifier = Modifier.height(4.dp))
+        Text(
+            text = label,
+            color = if (selected) accentColor else Color.White.copy(alpha = 0.4f),
+            fontSize = 10.sp,
+            fontWeight = FontWeight.Bold
         )
     }
 }
@@ -689,6 +846,112 @@ fun DashboardPair(item1: (@Composable () -> Unit)?, item2: (@Composable () -> Un
         
         if (item2 != null) {
             Box(modifier = Modifier.weight(1f)) { item2() }
+        }
+    }
+}
+
+@Composable
+fun VoiceAssistantOverlay(
+    isVisible: Boolean,
+    onDismiss: () -> Unit,
+    isListening: Boolean = false,
+    isThinking: Boolean = false,
+    onMicClick: () -> Unit = {}
+) {
+    val style = LocalAppStyle.current
+    AnimatedVisibility(
+        visible = isVisible,
+        enter = slideInVertically(initialOffsetY = { it }) + fadeIn(),
+        exit = slideOutVertically(targetOffsetY = { it }) + fadeOut()
+    ) {
+        Box(
+            modifier = Modifier
+                .fillMaxSize()
+        ) {
+            VoiceAuraGlow(
+                isListening = isListening,
+                isThinking = isThinking,
+                accentColor = style.accentColor
+            )
+
+            Box(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .background(Color.Black.copy(alpha = if (style.isOled) 0.6f else 0.4f))
+                    .pointerInput(Unit) {
+                        detectTapGestures(onTap = { onDismiss() })
+                    }
+            ) {
+                Surface(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .align(Alignment.BottomCenter)
+                        .clickable(enabled = false) {}, // Prevent clicks from going through
+                    color = Color.Black,
+                    shape = RoundedCornerShape(topStart = 32.dp, topEnd = 32.dp),
+                    border = BorderStroke(1.dp, style.accentColor.copy(alpha = 0.5f)),
+                    shadowElevation = if (style.showShadows) 8.dp else 0.dp
+                ) {
+                    Column(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(24.dp),
+                        horizontalAlignment = Alignment.CenterHorizontally
+                    ) {
+                        Box(
+                            modifier = Modifier
+                                .size(40.dp, 4.dp)
+                                .clip(CircleShape)
+                                .background(Color.White.copy(alpha = 0.1f))
+                        )
+                        
+                        Spacer(modifier = Modifier.height(24.dp))
+                        
+                        Text(
+                            when {
+                                isThinking -> "Thinking..."
+                                isListening -> "I'm listening..."
+                                else -> "How can I help?"
+                            },
+                            color = Color.White,
+                            fontSize = 20.sp,
+                            fontWeight = FontWeight.Medium
+                        )
+                        
+                        Spacer(modifier = Modifier.height(32.dp))
+                        
+                        GoogleVoiceBars(isListening = isListening || isThinking)
+                        
+                        Spacer(modifier = Modifier.height(32.dp))
+                        
+                        Box(
+                            modifier = Modifier
+                                .size(72.dp)
+                                .clip(CircleShape)
+                                .background(Color.White.copy(alpha = 0.05f))
+                                .clickable { onMicClick() },
+                            contentAlignment = Alignment.Center
+                        ) {
+                            Box(
+                                modifier = Modifier
+                                    .size(56.dp)
+                                    .clip(CircleShape)
+                                    .background(if (isListening) Color(0xFFEA4335) else if (isThinking) Color(0xFFFBBC05) else Color(0xFF4285F4)),
+                                contentAlignment = Alignment.Center
+                            ) {
+                                Icon(
+                                    imageVector = if (isThinking) Icons.Default.AutoAwesome else Icons.Default.Mic,
+                                    contentDescription = "Action",
+                                    tint = Color.White,
+                                    modifier = Modifier.size(32.dp)
+                                )
+                            }
+                        }
+                        
+                        Spacer(modifier = Modifier.height(16.dp))
+                    }
+                }
+            }
         }
     }
 }

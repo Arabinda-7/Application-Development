@@ -78,9 +78,7 @@ class ConfigAdapter(
                 android.view.ViewGroup.LayoutParams.WRAP_CONTENT
             )
             window.addFlags(android.view.WindowManager.LayoutParams.FLAG_BLUR_BEHIND)
-            if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.S) {
-                window.attributes.blurBehindRadius = 20
-            }
+            window.attributes.blurBehindRadius = 20
         }
 
         val title = dialog.findViewById<TextView>(R.id.tv_dialog_title)

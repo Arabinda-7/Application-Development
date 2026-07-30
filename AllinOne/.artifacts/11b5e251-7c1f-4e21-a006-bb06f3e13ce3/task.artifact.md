@@ -1,0 +1,3 @@
+- `[x]` Fix switch tinting in `ProfileSecurityHubSection.kt`
+- `[x]` Update card backgrounds for OLED mode in `ProfileActivity.kt`
+- `[x]` Verify changes

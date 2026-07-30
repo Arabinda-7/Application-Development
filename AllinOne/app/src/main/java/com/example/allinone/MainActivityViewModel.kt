@@ -74,6 +74,7 @@ class MainActivityViewModel : ViewModel() {
                 appBorderRadius = DataManager.appBorderRadius,
                 appCardStyle = DataManager.appCardStyle,
                 appShowShadows = DataManager.appShowShadows,
+                isDynamicColorEnabled = DataManager.isDynamicColorEnabled,
                 globalDisplaySize = DataManager.displaySize,
                 fontSize = DataManager.fontSize,
                 isSystemAppearanceEnabled = DataManager.isSystemAppearanceEnabled,

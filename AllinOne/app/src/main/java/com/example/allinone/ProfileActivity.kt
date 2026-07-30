@@ -116,11 +116,11 @@ class ProfileActivity : BaseActivity() {
                 updateUI()
             },
             onOledToggled = { isChecked ->
-                DataManager.isOledThemeEnabled = isChecked
+                DataManager.appThemeMode = if (isChecked) "OLED" else "DARK"
                 DataManager.saveData(this)
                 viewModel.refresh()
                 updateUI()
-                Toast.makeText(this, "Restart app to apply theme fully", Toast.LENGTH_SHORT).show()
+                recreate()
             }
         )
 
@@ -157,7 +157,7 @@ class ProfileActivity : BaseActivity() {
             DataManager.isAppLockEnabled,
             DataManager.isBiometricLockEnabled,
             DataManager.isScreenshotProtectionEnabled,
-            DataManager.isOledThemeEnabled
+            DataManager.appThemeMode == "OLED"
         )
         dataSection.setup()
         
@@ -226,6 +226,12 @@ class ProfileActivity : BaseActivity() {
             )
         )
         headerAura.background = gradient
+
+        // Adjust card backgrounds for OLED
+        val isOled = DataManager.appThemeMode == "OLED"
+        val cardColor = if (isOled) Color.BLACK else Color.parseColor("#1A1A1A")
+        findViewById<com.google.android.material.card.MaterialCardView>(R.id.card_impact_summary).setCardBackgroundColor(cardColor)
+        findViewById<com.google.android.material.card.MaterialCardView>(R.id.card_security_hub).setCardBackgroundColor(cardColor)
 
         // Propagate Tint
         identitySection.applyTint(moodColor)

@@ -18,16 +18,27 @@ class LegacyMigrationManager(private val context: Context) {
 
     suspend fun migrateIfNeeded() = withContext(Dispatchers.IO) {
         val hasMigrated = prefs.getBoolean("data_migrated_to_sql", false)
-        if (hasMigrated) return@withContext
+        Log.d(TAG, "Checking migration status. hasMigrated: $hasMigrated")
+        
+        // Even if hasMigrated is true, we perform a safety check on each domain 
+        // to ensure no data was left behind during an import or interrupted migration.
+        Log.i(TAG, "Checking for legacy data that needs migration...")
+        try {
+            migrateTasks()
+            migrateHabits()
+            migrateWorkouts()
+            migrateFinance()
+            migrateNotes()
+            migrateProjects()
 
-        migrateTasks()
-        migrateHabits()
-        migrateWorkouts()
-        migrateFinance()
-        migrateNotes()
-        migrateProjects()
-
-        prefs.edit().putBoolean("data_migrated_to_sql", true).apply()
+            if (!hasMigrated) {
+                prefs.edit().putBoolean("data_migrated_to_sql", true).apply()
+                Log.i(TAG, "Migration flag updated to true.")
+            }
+            Log.i(TAG, "Migration check completed.")
+        } catch (e: Exception) {
+            Log.e(TAG, "Migration encountered errors.", e)
+        }
     }
 
     private suspend fun migrateTasks() {

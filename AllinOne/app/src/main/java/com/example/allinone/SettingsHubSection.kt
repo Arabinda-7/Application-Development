@@ -41,7 +41,10 @@ class SettingsHubSection(
             
             SettingsHubItem("Security & Support", isHeader = true),
             SettingsHubItem("Lock & Security", "App PIN lock and privacy settings", R.drawable.baseline_settings_24, "SECURITY"),
-            SettingsHubItem("Help & Guide", "Support and feature documentation", R.drawable.baseline_settings_24, "HELP")
+            SettingsHubItem("Help & Guide", "Support and feature documentation", R.drawable.baseline_settings_24, "HELP"),
+            
+            SettingsHubItem("System", isHeader = true),
+            SettingsHubItem("Notifications", "Daily reminders and summaries", R.drawable.baseline_settings_24, "NOTIFICATIONS")
         )
 
         recyclerView.adapter = SettingsHubAdapter(menuItems) { section ->
@@ -52,6 +55,7 @@ class SettingsHubSection(
                 "NOTES" -> context.startActivity(Intent(context, NoteSettingsActivity::class.java))
                 "FINANCE" -> context.startActivity(Intent(context, FinanceSettingsActivity::class.java))
                 "PROJECTS" -> context.startActivity(Intent(context, ProjectSettingsActivity::class.java))
+                "NOTIFICATIONS" -> context.startActivity(Intent(context, NotificationSettingsActivity::class.java))
                 else -> onSectionSelected(section)
             }
         }

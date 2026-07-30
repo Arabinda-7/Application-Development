@@ -13,7 +13,7 @@ android {
     }
     defaultConfig {
         applicationId = "com.example.allinone"
-        minSdk = 24
+        minSdk = 31
         targetSdk = 36
         versionCode = 2
         versionName = "2.0"
@@ -45,6 +45,7 @@ android {
 
 dependencies {
     implementation(libs.androidx.core.ktx)
+    implementation(libs.androidx.core.splashscreen)
     implementation(libs.androidx.appcompat)
     implementation(libs.material)
     implementation(libs.androidx.activity)

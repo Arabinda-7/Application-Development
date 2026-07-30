@@ -14,6 +14,8 @@ import androidx.core.view.WindowInsetsCompat
 import androidx.core.content.ContextCompat
 import androidx.recyclerview.widget.RecyclerView
 import androidx.viewpager2.widget.ViewPager2
+import androidx.lifecycle.lifecycleScope
+import kotlinx.coroutines.launch
 import java.text.SimpleDateFormat
 import java.util.*
 
@@ -77,10 +79,8 @@ class FinanceHistoryActivity : BaseActivity() {
         dialog.setContentView(R.layout.dialog_year_roller)
         dialog.window?.let { window ->
             window.setBackgroundDrawableResource(android.R.color.transparent)
-            if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.S) {
-                window.addFlags(android.view.WindowManager.LayoutParams.FLAG_BLUR_BEHIND)
-                window.attributes.blurBehindRadius = 20
-            }
+            window.addFlags(android.view.WindowManager.LayoutParams.FLAG_BLUR_BEHIND)
+            window.attributes.blurBehindRadius = 20
             window.setDimAmount(0.6f)
         }
         
@@ -443,9 +443,11 @@ class FinanceHistoryActivity : BaseActivity() {
 
     override fun onResume() {
         super.onResume()
-        DataManager.loadData(this)
-        updateYearlyAnalytics()
-        updateDynamicBackground()
+        lifecycleScope.launch {
+            DataManager.loadData(this@FinanceHistoryActivity)
+            updateYearlyAnalytics()
+            updateDynamicBackground()
+        }
     }
 
     private fun updateDynamicBackground() {

@@ -150,6 +150,26 @@ object UIUtils {
         return (dp * context.resources.displayMetrics.density).toInt()
     }
 
+    fun performSuccessHaptic(context: Context) {
+        val vibrator = context.getSystemService(Context.VIBRATOR_SERVICE) as android.os.Vibrator
+        vibrator.vibrate(
+            android.os.VibrationEffect.startComposition()
+                .addPrimitive(android.os.VibrationEffect.Composition.PRIMITIVE_CLICK)
+                .addPrimitive(android.os.VibrationEffect.Composition.PRIMITIVE_TICK, 0.5f, 50)
+                .compose()
+        )
+    }
+
+    fun performErrorHaptic(context: Context) {
+        val vibrator = context.getSystemService(Context.VIBRATOR_SERVICE) as android.os.Vibrator
+        vibrator.vibrate(
+            android.os.VibrationEffect.startComposition()
+                .addPrimitive(android.os.VibrationEffect.Composition.PRIMITIVE_SLOW_RISE, 0.8f)
+                .addPrimitive(android.os.VibrationEffect.Composition.PRIMITIVE_QUICK_FALL, 1.0f, 100)
+                .compose()
+        )
+    }
+
     fun darkenColor(color: Int, factor: Float): Int {
         val a = android.graphics.Color.alpha(color)
         val r = Math.round(android.graphics.Color.red(color) * factor)
@@ -181,9 +201,7 @@ object UIUtils {
                 android.view.ViewGroup.LayoutParams.WRAP_CONTENT
             )
             window.addFlags(android.view.WindowManager.LayoutParams.FLAG_BLUR_BEHIND)
-            if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.S) {
-                window.attributes.blurBehindRadius = 20
-            }
+            window.attributes.blurBehindRadius = 20
         }
 
         val tvTitle = dialog.findViewById<android.widget.TextView>(R.id.tv_password_title)

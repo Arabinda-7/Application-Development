@@ -16,7 +16,7 @@ import com.google.android.material.tabs.TabLayoutMediator
 class SettingsHelpHandler(private val context: Context) {
     fun showMasterGuideDetail(article: HelpArticle) {
         val dialog = Dialog(context); dialog.setContentView(R.layout.dialog_help_detail)
-        dialog.window?.let { it.setBackgroundDrawableResource(android.R.color.transparent); if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.S) it.attributes.blurBehindRadius = 20; it.addFlags(android.view.WindowManager.LayoutParams.FLAG_BLUR_BEHIND) }
+        dialog.window?.let { it.setBackgroundDrawableResource(android.R.color.transparent); it.attributes.blurBehindRadius = 20; it.addFlags(android.view.WindowManager.LayoutParams.FLAG_BLUR_BEHIND) }
         
         // Set width to 90%
         val width = (context.resources.displayMetrics.widthPixels * 0.9).toInt()
@@ -32,7 +32,7 @@ class SettingsHelpHandler(private val context: Context) {
         val features = HelpData.getGuideForSection(section)
         if (features.isEmpty()) { android.widget.Toast.makeText(context, "Guide coming soon", android.widget.Toast.LENGTH_SHORT).show(); return }
         val dialog = Dialog(context); dialog.setContentView(R.layout.dialog_help_guide)
-        dialog.window?.let { it.setBackgroundDrawableResource(android.R.color.transparent); if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.S) it.attributes.blurBehindRadius = 20; it.addFlags(android.view.WindowManager.LayoutParams.FLAG_BLUR_BEHIND) }
+        dialog.window?.let { it.setBackgroundDrawableResource(android.R.color.transparent); it.attributes.blurBehindRadius = 20; it.addFlags(android.view.WindowManager.LayoutParams.FLAG_BLUR_BEHIND) }
         
         // Set width to 90%
         val width = (context.resources.displayMetrics.widthPixels * 0.9).toInt()

@@ -287,6 +287,7 @@ class AddTaskActivity : BaseActivity() {
             }
 
             DataManager.saveData(this)
+            UIUtils.performSuccessHaptic(this)
             setResult(RESULT_OK)
             finish()
         }
@@ -302,15 +303,11 @@ class AddTaskActivity : BaseActivity() {
         val pendingIntent = PendingIntent.getBroadcast(this, requestCode, intent, PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE)
         
         task.reminderTime?.let { time ->
-            if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.S) {
-                if (alarmManager.canScheduleExactAlarms()) {
-                    alarmManager.setExactAndAllowWhileIdle(AlarmManager.RTC_WAKEUP, time, pendingIntent)
-                } else {
-                    // Fallback to non-exact alarm
-                    alarmManager.setAndAllowWhileIdle(AlarmManager.RTC_WAKEUP, time, pendingIntent)
-                }
-            } else {
+            if (alarmManager.canScheduleExactAlarms()) {
                 alarmManager.setExactAndAllowWhileIdle(AlarmManager.RTC_WAKEUP, time, pendingIntent)
+            } else {
+                // Fallback to non-exact alarm
+                alarmManager.setAndAllowWhileIdle(AlarmManager.RTC_WAKEUP, time, pendingIntent)
             }
         }
     }

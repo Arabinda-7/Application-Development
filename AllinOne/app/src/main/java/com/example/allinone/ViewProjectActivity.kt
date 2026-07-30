@@ -241,13 +241,17 @@ class ViewProjectActivity : BaseActivity() {
 
     private fun createSubFeatureItem(sub: ProjectFeature): View {
         val layout = LinearLayout(this).apply {
-            orientation = LinearLayout.HORIZONTAL
+            orientation = LinearLayout.VERTICAL
             setPadding(0, 4.dpToPx(), 0, 4.dpToPx())
-            gravity = android.view.Gravity.CENTER_VERTICAL
             isClickable = true
             isFocusable = true
             background = ContextCompat.getDrawable(this@ViewProjectActivity, R.drawable.glass_card_bg)
             backgroundTintList = ColorStateList.valueOf(Color.TRANSPARENT)
+        }
+
+        val header = LinearLayout(this).apply {
+            orientation = LinearLayout.HORIZONTAL
+            gravity = android.view.Gravity.CENTER_VERTICAL
         }
 
         val tvName = TextView(this).apply {
@@ -310,13 +314,25 @@ class ViewProjectActivity : BaseActivity() {
             }
         }
 
-        layout.addView(tvName)
-        layout.addView(containerMeta)
-        layout.addView(tvDate)
+        val tvDetails = TextView(this).apply {
+            text = sub.details
+            setTextColor(Color.GRAY)
+            textSize = 12f
+            setPadding(24.dpToPx(), 4.dpToPx(), 8.dpToPx(), 8.dpToPx())
+            visibility = if (sub.isExpanded && sub.details.isNotEmpty()) View.VISIBLE else View.GONE
+        }
+
+        header.addView(tvName)
+        header.addView(containerMeta)
+        header.addView(tvDate)
         
+        layout.addView(header)
+        layout.addView(tvDetails)
+
         layout.setOnClickListener {
             if (sub.details.isNotEmpty()) {
-                // Toggle details visibility if we add a details view here
+                sub.isExpanded = !sub.isExpanded
+                tvDetails.visibility = if (sub.isExpanded) View.VISIBLE else View.GONE
             }
         }
         

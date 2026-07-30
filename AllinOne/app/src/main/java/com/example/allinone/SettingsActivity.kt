@@ -116,7 +116,6 @@ class SettingsActivity : BaseActivity() {
                     SecurityManager.setScreenshotProtection(this, DataManager.isScreenshotProtectionEnabled)
                     showSectionSettings("SECURITY")
                 })
-                settings.add(ConfigItem("OLED Mode", "Pure black theme", isToggle = true, isChecked = DataManager.isOledThemeEnabled) { DataManager.isOledThemeEnabled = !DataManager.isOledThemeEnabled; DataManager.saveData(this) })
             }
             "OTHERS" -> {
                 settings.add(ConfigItem("Offline Integrity", "No Internet permission requested", isHeader = true))
@@ -155,6 +154,11 @@ class SettingsActivity : BaseActivity() {
                 }))
 
                 settings.add(ConfigItem("Advanced Look & Feel", isHeader = true))
+                settings.add(ConfigItem("Dynamic Coloring", "Use wallpaper colors (Android 12+)", isToggle = true, isChecked = DataManager.isDynamicColorEnabled) {
+                    DataManager.isDynamicColorEnabled = !DataManager.isDynamicColorEnabled
+                    DataManager.saveData(this)
+                    recreate()
+                })
                 settings.add(ConfigItem("Theme Mode", "Override system theme (Current: ${DataManager.appThemeMode})", options = listOf("LIGHT", "DARK", "OLED"), selectedIndex = listOf("LIGHT", "DARK", "OLED").indexOf(DataManager.appThemeMode), onOptionSelected = { i ->
                     DataManager.appThemeMode = listOf("LIGHT", "DARK", "OLED")[i]
                     DataManager.saveData(this)

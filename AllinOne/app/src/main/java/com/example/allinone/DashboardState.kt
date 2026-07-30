@@ -26,7 +26,7 @@ data class DashboardState(
     val noteIcon: Int = R.drawable.ic_notes,
     val projectIcon: Int = R.drawable.ic_project,
     val financeIcon: Int = R.drawable.ic_finance,
-    val userAvatarRes: Int = R.drawable.icons8_profile_100,
+    val userAvatarRes: Int = R.drawable.boy_avatar_profile,
     val userProfileImageUri: String? = null,
     val homeDisplaySize: String = "S",
     val homeFocusSize: String = "M",
@@ -39,6 +39,7 @@ data class DashboardState(
     val appBorderRadius: Int = 16,
     val appCardStyle: String = "GLASS",
     val appShowShadows: Boolean = true,
+    val isDynamicColorEnabled: Boolean = false,
 
     val showHabitSection: Boolean = true,
     val showWorkoutSection: Boolean = true,

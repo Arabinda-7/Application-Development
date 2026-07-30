@@ -17,12 +17,14 @@ import java.util.*
 object DataManager {
     private val persistenceScope = CoroutineScope(Dispatchers.IO + SupervisorJob())
     private var saveJob: Job? = null
+    private var observationJob: Job? = null
     
     private var taskRepo: TaskRepository? = null
     private var habitRepo: HabitRepository? = null
     private var workoutRepo: WorkoutRepository? = null
     private var noteRepo: NoteRepository? = null
     private var financeRepo: FinanceRepository? = null
+    private var aiChatRepo: AiChatRepository? = null
 
     val dataChangeSignal = MutableSharedFlow<Unit>(extraBufferCapacity = 1)
     val isDataLoaded = MutableStateFlow(false)
@@ -32,7 +34,9 @@ object DataManager {
     }
 
     fun initialize(context: Context) {
-        persistenceScope.launch {
+        isDataLoaded.value = false // Lock saves during initialization
+        observationJob?.cancel()
+        observationJob = persistenceScope.launch {
             try {
                 val db = AppDatabase.getDatabase(context)
                 val t = TaskRepository(db.taskDao())
@@ -40,6 +44,7 @@ object DataManager {
                 val w = WorkoutRepository(db.workoutDao())
                 val n = NoteRepository(db.noteDao())
                 val f = FinanceRepository(db.financeDao())
+                val ai = AiChatRepository(db.aiChatDao())
                 
                 synchronized(this@DataManager) {
                     taskRepo = t
@@ -47,11 +52,13 @@ object DataManager {
                     workoutRepo = w
                     noteRepo = n
                     financeRepo = f
+                    aiChatRepo = ai
                 }
                 
-                LegacyMigrationManager(context).migrateIfNeeded()
                 loadData(context)
-                observeDatabase()
+                LegacyMigrationManager(context).migrateIfNeeded()
+                AssistantBrain.initialize(context)
+                startDatabaseObservation()
             } catch (e: Exception) {
                 e.printStackTrace()
             } finally {
@@ -60,62 +67,85 @@ object DataManager {
         }
     }
 
-    private fun observeDatabase() {
+    private fun CoroutineScope.startDatabaseObservation() {
         val tRepo = taskRepo ?: return
         val hRepo = habitRepo ?: return
         val wRepo = workoutRepo ?: return
         val nRepo = noteRepo ?: return
         val fRepo = financeRepo ?: return
 
-        persistenceScope.launch {
-            combine(
-                tRepo.getAllTasks(),
-                hRepo.getAllHabits(),
-                wRepo.getAllWorkouts(),
-                nRepo.getAllNotes(),
-                fRepo.getAllTransactions()
-            ) { t, h, w, n, trans ->
-                // Update contents of stable references to avoid breaking Adapters
-                synchronized(habits) {
-                    habits.clear()
-                    habits.addAll(h)
-                }
-                
-                synchronized(workouts) {
-                    workouts.clear()
-                    workouts.addAll(w)
-                }
-                
+        // 1. Tasks
+        launch {
+            tRepo.getAllTasks().collect { newList ->
+                // Wipe Guard: Prevent UI from flickering to empty if Room emits empty list during transient states
+                // unless it's a deliberate reset (which we handle by setting isDataLoaded to false)
+                if (newList.isEmpty() && tasks.isNotEmpty() && isDataLoaded.value) return@collect 
                 synchronized(tasks) {
                     tasks.clear()
-                    tasks.addAll(t)
+                    tasks.addAll(newList)
                 }
-                
-                // Notes and projects are trickier as they share NoteDataManager
-                val newNotes = n.filter { !it.isGlobalProject }
-                val newProjects = n.filter { it.isGlobalProject }
+                notifyDataChanged()
+            }
+        }
+
+        // 2. Habits
+        launch {
+            hRepo.getAllHabits().collect { newList ->
+                if (newList.isEmpty() && habits.isNotEmpty() && isDataLoaded.value) return@collect 
+                synchronized(habits) {
+                    habits.clear()
+                    habits.addAll(newList)
+                }
+                notifyDataChanged()
+            }
+        }
+
+        // 3. Workouts
+        launch {
+            wRepo.getAllWorkouts().collect { newList ->
+                if (newList.isEmpty() && workouts.isNotEmpty() && isDataLoaded.value) return@collect 
+                synchronized(workouts) {
+                    workouts.clear()
+                    workouts.addAll(newList)
+                }
+                notifyDataChanged()
+            }
+        }
+
+        // 4. Notes & Projects
+        launch {
+            nRepo.getAllNotes().collect { newList ->
+                if (newList.isEmpty() && (notes.isNotEmpty() || projects.isNotEmpty()) && isDataLoaded.value) return@collect 
+                val newNotes = newList.filter { !it.isGlobalProject }
+                val newProjects = newList.filter { it.isGlobalProject }
                 
                 synchronized(notes) {
                     notes.clear()
                     notes.addAll(newNotes)
                 }
-                
                 synchronized(projects) {
                     projects.clear()
                     projects.addAll(newProjects)
                 }
-
-                synchronized(transactions) {
-                    transactions.clear()
-                    transactions.addAll(trans)
-                }
-            }.collect {
                 notifyDataChanged()
             }
         }
-        
-        persistenceScope.launch {
-            financeRepo?.getAllPersonalLedgers()?.collect { newList ->
+
+        // 5. Finance Transactions
+        launch {
+            fRepo.getAllTransactions().collect { newList ->
+                if (newList.isEmpty() && transactions.isNotEmpty() && isDataLoaded.value) return@collect 
+                synchronized(transactions) {
+                    transactions.clear()
+                    transactions.addAll(newList)
+                }
+                notifyDataChanged()
+            }
+        }
+
+        // 6. Finance Ledgers
+        launch {
+            fRepo.getAllPersonalLedgers().collect { newList ->
                 synchronized(personalLedgers) {
                     personalLedgers.clear()
                     personalLedgers.addAll(newList)
@@ -123,9 +153,10 @@ object DataManager {
                 notifyDataChanged()
             }
         }
-        
-        persistenceScope.launch {
-            financeRepo?.getAllLedgerEntries()?.collect { newList ->
+
+        // 7. Finance Ledger Entries
+        launch {
+            fRepo.getAllLedgerEntries().collect { newList ->
                 synchronized(ledgerEntries) {
                     ledgerEntries.clear()
                     ledgerEntries.addAll(newList)
@@ -221,7 +252,6 @@ object DataManager {
     var isBiometricLockEnabled: Boolean get() = UserDataManager.isBiometricLockEnabled; set(value) { UserDataManager.isBiometricLockEnabled = value }
     var isScreenshotProtectionEnabled: Boolean get() = UserDataManager.isScreenshotProtectionEnabled; set(value) { UserDataManager.isScreenshotProtectionEnabled = value }
     var isAppUnlocked: Boolean get() = UserDataManager.isAppUnlocked; set(value) { UserDataManager.isAppUnlocked = value }
-    var isOledThemeEnabled: Boolean = false // Legacy
     var isOnboardingCompleted: Boolean get() = UserDataManager.isOnboardingCompleted; set(value) { UserDataManager.isOnboardingCompleted = value }
     var appLockPin: String? get() = UserDataManager.appLockPin; set(value) { UserDataManager.appLockPin = value }
     var appLockQuestion: String? get() = UserDataManager.appLockQuestion; set(value) { UserDataManager.appLockQuestion = value }
@@ -253,8 +283,15 @@ object DataManager {
     var appBorderRadius: Int get() = UserDataManager.appBorderRadius; set(value) { UserDataManager.appBorderRadius = value }
     var appCardStyle: String get() = UserDataManager.appCardStyle; set(value) { UserDataManager.appCardStyle = value }
     var appShowShadows: Boolean get() = UserDataManager.appShowShadows; set(value) { UserDataManager.appShowShadows = value }
+    var isDynamicColorEnabled: Boolean get() = UserDataManager.isDynamicColorEnabled; set(value) { UserDataManager.isDynamicColorEnabled = value }
     var startupLoadingTime: Int get() = UserDataManager.startupLoadingTime; set(value) { UserDataManager.startupLoadingTime = value }
     
+    // Notification Settings
+    var isMorningReminderEnabled: Boolean get() = NotificationDataManager.isMorningReminderEnabled; set(value) { NotificationDataManager.isMorningReminderEnabled = value }
+    var morningReminderTime: String get() = NotificationDataManager.morningReminderTime; set(value) { NotificationDataManager.morningReminderTime = value }
+    var isNightReminderEnabled: Boolean get() = NotificationDataManager.isNightReminderEnabled; set(value) { NotificationDataManager.isNightReminderEnabled = value }
+    var nightReminderTime: String get() = NotificationDataManager.nightReminderTime; set(value) { NotificationDataManager.nightReminderTime = value }
+
     var showHabitSection: Boolean get() = UserDataManager.showHabitSection; set(value) { UserDataManager.showHabitSection = value }
     var showWorkoutSection: Boolean get() = UserDataManager.showWorkoutSection; set(value) { UserDataManager.showWorkoutSection = value }
     var showTaskSection: Boolean get() = UserDataManager.showTaskSection; set(value) { UserDataManager.showTaskSection = value }
@@ -312,6 +349,8 @@ object DataManager {
         val end = calendar.timeInMillis
         return start to end
     }
+
+    fun getAiChatRepository() = aiChatRepo
 
     fun getHabitProgress() = HabitDataManager.getHabitProgress()
     fun getTotalHabitsFinished() = HabitDataManager.getTotalHabitsFinished()
@@ -609,6 +648,11 @@ object DataManager {
     private const val KEY_GLOBAL_FINANCE_ICON = "global_finance_icon"
     private const val KEY_STARTUP_LOADING_TIME = "startup_loading_time"
 
+    private const val KEY_MORNING_REMINDER_ENABLED = "morning_reminder_enabled"
+    private const val KEY_MORNING_REMINDER_TIME = "morning_reminder_time"
+    private const val KEY_NIGHT_REMINDER_ENABLED = "night_reminder_enabled"
+    private const val KEY_NIGHT_REMINDER_TIME = "night_reminder_time"
+
     private fun getPrefs(context: Context): SharedPreferences {
         return SecurityManager.getEncryptedPrefs(context)
     }
@@ -661,6 +705,8 @@ object DataManager {
     }
 
     private suspend fun performSave(context: Context) = withContext(NonCancellable) {
+        if (!isDataLoaded.value) return@withContext
+        
         val tRepo = taskRepo ?: return@withContext
         val hRepo = habitRepo ?: return@withContext
         val wRepo = workoutRepo ?: return@withContext
@@ -681,17 +727,19 @@ object DataManager {
         val leList = synchronized(ledgerEntries) { ledgerEntries.toList() }
 
         try {
-            tRepo.syncAll(tList)
-            hRepo.syncAll(hList)
-            wRepo.syncAll(wList)
+            if (tList.isNotEmpty()) tRepo.syncAll(tList)
+            if (hList.isNotEmpty()) hRepo.syncAll(hList)
+            if (wList.isNotEmpty()) wRepo.syncAll(wList)
             
-            val allNotesToSave = nList.map { it.copy(isGlobalProject = false) } + 
-                                 pList.map { it.copy(isGlobalProject = true) }
-            nRepo.syncAll(allNotesToSave)
+            if (nList.isNotEmpty() || pList.isNotEmpty()) {
+                val allNotesToSave = nList.map { it.copy(isGlobalProject = false) } + 
+                                     pList.map { it.copy(isGlobalProject = true) }
+                nRepo.syncAll(allNotesToSave)
+            }
             
-            fRepo.syncTransactions(transList)
-            fRepo.syncPersonalLedgers(plList)
-            fRepo.syncLedgerEntries(leList)
+            if (transList.isNotEmpty()) fRepo.syncTransactions(transList)
+            if (plList.isNotEmpty()) fRepo.syncPersonalLedgers(plList)
+            if (leList.isNotEmpty()) fRepo.syncLedgerEntries(leList)
         } catch (e: Exception) { e.printStackTrace() }
 
         // Keep SharedPreferences only for settings and cross-domain history
@@ -743,9 +791,6 @@ object DataManager {
             putBoolean(KEY_BIOMETRIC_LOCK, isBiometricLockEnabled)
             putBoolean(KEY_SCREENSHOT_PROTECTION, isScreenshotProtectionEnabled)
             putString(KEY_APP_LOCK_PIN, appLockPin)
-            putString("app_lock_question", appLockQuestion)
-            putString("app_lock_answer", appLockAnswer)
-            putBoolean(KEY_OLED_THEME, isOledThemeEnabled)
             putBoolean(KEY_ONBOARDING_COMPLETED, isOnboardingCompleted)
             putString(KEY_RECENT_ACT, gson.toJson(recentActivities))
             putString(KEY_DAILY_MOODS, gson.toJson(dailyMoods))
@@ -761,9 +806,15 @@ object DataManager {
             putInt("app_border_radius", appBorderRadius)
             putString("app_card_style", appCardStyle)
             putBoolean("app_show_shadows", appShowShadows)
+            putBoolean("is_dynamic_color_enabled", isDynamicColorEnabled)
             putInt(KEY_STARTUP_LOADING_TIME, startupLoadingTime)
             putInt(KEY_USER_XP, userXP)
             putInt(KEY_USER_LEVEL, userLevel)
+
+            putBoolean(KEY_MORNING_REMINDER_ENABLED, isMorningReminderEnabled)
+            putString(KEY_MORNING_REMINDER_TIME, morningReminderTime)
+            putBoolean(KEY_NIGHT_REMINDER_ENABLED, isNightReminderEnabled)
+            putString(KEY_NIGHT_REMINDER_TIME, nightReminderTime)
 
             putString(KEY_LAST_VIEWED_NOTIF, lastViewedNotificationDate)
             putString(KEY_LAST_SUMMARY_NOTIF, lastSummaryNotificationDate)
@@ -822,15 +873,82 @@ object DataManager {
     }
 
     // Load logic remains complex and central for now
-    fun loadData(context: Context) {
+    suspend fun loadData(context: Context) {
         try {
             migrateToEncryptedPrefs(context)
             val prefs = getPrefs(context)
             val gson = Gson()
             
-            habits = try {
-                gson.fromJson(prefs.getString(KEY_HABITS, "[]"), object : TypeToken<MutableList<Habit>>() {}.type) ?: mutableListOf()
-            } catch (e: Exception) { mutableListOf() }
+            val hasMigrated = prefs.getBoolean("data_migrated_to_sql", false)
+
+            if (!hasMigrated) {
+                // Legacy load (only if not migrated yet)
+                try {
+                    val h: List<Habit> = gson.fromJson(prefs.getString(KEY_HABITS, "[]"), object : TypeToken<List<Habit>>() {}.type) ?: emptyList()
+                    synchronized(habits) { habits.clear(); habits.addAll(h) }
+                } catch (e: Exception) { e.printStackTrace() }
+                
+                try {
+                    val w: List<Workout> = gson.fromJson(prefs.getString(KEY_WORKOUTS, "[]"), object : TypeToken<List<Workout>>() {}.type) ?: emptyList()
+                    synchronized(workouts) { workouts.clear(); workouts.addAll(w) }
+                } catch (e: Exception) { e.printStackTrace() }
+
+                try {
+                    val t: List<Task> = gson.fromJson(prefs.getString(KEY_TASKS, "[]"), object : TypeToken<List<Task>>() {}.type) ?: emptyList()
+                    synchronized(tasks) { tasks.clear(); tasks.addAll(t) }
+                } catch (e: Exception) { e.printStackTrace() }
+
+                try {
+                    val n: List<Note> = gson.fromJson(prefs.getString(KEY_NOTES, "[]"), object : TypeToken<List<Note>>() {}.type) ?: emptyList()
+                    synchronized(notes) { notes.clear(); notes.addAll(n) }
+                } catch (e: Exception) { e.printStackTrace() }
+
+                try {
+                    val p: List<Note> = gson.fromJson(prefs.getString(KEY_PROJECTS, "[]"), object : TypeToken<List<Note>>() {}.type) ?: emptyList()
+                    synchronized(projects) { projects.clear(); projects.addAll(p) }
+                } catch (e: Exception) { e.printStackTrace() }
+
+                try {
+                    val tr: List<Transaction> = gson.fromJson(prefs.getString(KEY_TRANSACTIONS, "[]"), object : TypeToken<List<Transaction>>() {}.type) ?: emptyList()
+                    synchronized(transactions) { transactions.clear(); transactions.addAll(tr) }
+                } catch (e: Exception) { e.printStackTrace() }
+
+                try {
+                    val le: List<LedgerEntry> = gson.fromJson(prefs.getString(KEY_LEDGER, "[]"), object : TypeToken<List<LedgerEntry>>() {}.type) ?: emptyList()
+                    synchronized(ledgerEntries) { ledgerEntries.clear(); ledgerEntries.addAll(le) }
+                } catch (e: Exception) { e.printStackTrace() }
+
+                try {
+                    val pl: List<PersonalLedger> = gson.fromJson(prefs.getString(KEY_PERSONAL_LEDGER, "[]"), object : TypeToken<List<PersonalLedger>>() {}.type) ?: emptyList()
+                    synchronized(personalLedgers) { personalLedgers.clear(); personalLedgers.addAll(pl) }
+                } catch (e: Exception) { e.printStackTrace() }
+            } else {
+                // Initial load from Room to avoid empty in-memory lists before observation starts
+                habitRepo?.getAllHabits()?.first()?.let { 
+                    synchronized(habits) { habits.clear(); habits.addAll(it) } 
+                }
+                workoutRepo?.getAllWorkouts()?.first()?.let { 
+                    synchronized(workouts) { workouts.clear(); workouts.addAll(it) } 
+                }
+                taskRepo?.getAllTasks()?.first()?.let { 
+                    synchronized(tasks) { tasks.clear(); tasks.addAll(it) } 
+                }
+                noteRepo?.getAllNotes()?.first()?.let { n ->
+                    val newNotes = n.filter { !it.isGlobalProject }
+                    val newProjects = n.filter { it.isGlobalProject }
+                    synchronized(notes) { notes.clear(); notes.addAll(newNotes) }
+                    synchronized(projects) { projects.clear(); projects.addAll(newProjects) }
+                }
+                financeRepo?.getAllTransactions()?.first()?.let { 
+                    synchronized(transactions) { transactions.clear(); transactions.addAll(it) } 
+                }
+                financeRepo?.getAllPersonalLedgers()?.first()?.let { 
+                    synchronized(personalLedgers) { personalLedgers.clear(); personalLedgers.addAll(it) } 
+                }
+                financeRepo?.getAllLedgerEntries()?.first()?.let { 
+                    synchronized(ledgerEntries) { ledgerEntries.clear(); ledgerEntries.addAll(it) } 
+                }
+            }
             
             // Ensure new fields are initialized for older data
             habits.forEach { 
@@ -839,10 +957,6 @@ object DataManager {
                 if (it.repeatDays == null) it.repeatDays = listOf(0, 1, 2, 3, 4, 5, 6)
                 if (it.iconResId != -1 && !UIUtils.isDrawableResource(context, it.iconResId)) it.iconResId = -1
             }
-
-            workouts = try {
-                gson.fromJson(prefs.getString(KEY_WORKOUTS, "[]"), object : TypeToken<MutableList<Workout>>() {}.type) ?: mutableListOf()
-            } catch (e: Exception) { mutableListOf() }
 
             // Ensure new fields are initialized for older data
             workouts.forEach { 
@@ -853,35 +967,19 @@ object DataManager {
                 if (it.iconResId != -1 && !UIUtils.isDrawableResource(context, it.iconResId)) it.iconResId = -1
             }
 
-            tasks = try {
-                gson.fromJson(prefs.getString(KEY_TASKS, "[]"), object : TypeToken<MutableList<Task>>() {}.type) ?: mutableListOf()
-            } catch (e: Exception) { mutableListOf() }
-
             // Ensure new fields are initialized for older data
             tasks.forEach {
-                if (it.subtasks == null) it.subtasks = mutableListOf()
+                if (it.subtasks == null) {
+                    try {
+                        val field = it.javaClass.getDeclaredField("subtasks")
+                        field.isAccessible = true
+                        field.set(it, mutableListOf<Subtask>())
+                    } catch (e: Exception) {}
+                }
             }
 
-            notes = try {
-                gson.fromJson(prefs.getString(KEY_NOTES, "[]"), object : TypeToken<MutableList<Note>>() {}.type) ?: mutableListOf()
-            } catch (e: Exception) { mutableListOf() }
+            projects.forEach { it.isGlobalProject = true }
 
-            projects = try {
-                gson.fromJson(prefs.getString(KEY_PROJECTS, "[]"), object : TypeToken<MutableList<Note>>() {}.type) ?: mutableListOf()
-            } catch (e: Exception) { mutableListOf() }
-
-            transactions = try {
-                gson.fromJson(prefs.getString(KEY_TRANSACTIONS, "[]"), object : TypeToken<MutableList<Transaction>>() {}.type) ?: mutableListOf()
-            } catch (e: Exception) { mutableListOf() }
-
-            ledgerEntries = try {
-                gson.fromJson(prefs.getString(KEY_LEDGER, "[]"), object : TypeToken<MutableList<LedgerEntry>>() {}.type) ?: mutableListOf()
-            } catch (e: Exception) { mutableListOf() }
-
-            personalLedgers = try {
-                gson.fromJson(prefs.getString(KEY_PERSONAL_LEDGER, "[]"), object : TypeToken<MutableList<PersonalLedger>>() {}.type) ?: mutableListOf()
-            } catch (e: Exception) { mutableListOf() }
-            
             monthlyBudget = prefs.getFloat(KEY_BUDGET, 0.0f).toDouble()
             monthlySavingsGoal = prefs.getFloat(KEY_SAVINGS_GOAL, 0.0f).toDouble()
             financeSavingsGoalName = prefs.getString(KEY_SAVINGS_GOAL_NAME, "Monthly Savings") ?: "Monthly Savings"
@@ -967,7 +1065,6 @@ object DataManager {
             appLockPin = prefs.getString(KEY_APP_LOCK_PIN, null)
             appLockQuestion = prefs.getString("app_lock_question", null)
             appLockAnswer = prefs.getString("app_lock_answer", null)
-            isOledThemeEnabled = prefs.getBoolean(KEY_OLED_THEME, false)
             isOnboardingCompleted = prefs.getBoolean(KEY_ONBOARDING_COMPLETED, false)
 
             recentActivities = try {
@@ -990,9 +1087,15 @@ object DataManager {
             appBorderRadius = prefs.getInt("app_border_radius", 16)
             appCardStyle = prefs.getString("app_card_style", "GLASS") ?: "GLASS"
             appShowShadows = prefs.getBoolean("app_show_shadows", true)
+            isDynamicColorEnabled = prefs.getBoolean("is_dynamic_color_enabled", false)
             startupLoadingTime = prefs.getInt(KEY_STARTUP_LOADING_TIME, 2000)
             userXP = prefs.getInt(KEY_USER_XP, 0)
             userLevel = prefs.getInt(KEY_USER_LEVEL, 1)
+
+            isMorningReminderEnabled = prefs.getBoolean(KEY_MORNING_REMINDER_ENABLED, false)
+            morningReminderTime = prefs.getString(KEY_MORNING_REMINDER_TIME, "08:00") ?: "08:00"
+            isNightReminderEnabled = prefs.getBoolean(KEY_NIGHT_REMINDER_ENABLED, false)
+            nightReminderTime = prefs.getString(KEY_NIGHT_REMINDER_TIME, "21:00") ?: "21:00"
 
             lastViewedNotificationDate = prefs.getString(KEY_LAST_VIEWED_NOTIF, "") ?: ""
             lastSummaryNotificationDate = prefs.getString(KEY_LAST_SUMMARY_NOTIF, "") ?: ""
@@ -1048,6 +1151,7 @@ object DataManager {
             }
 
             // Sync logic
+            reconstructWorkoutHistoryFromGlobalLog()
             checkAndResetDailyStats(context)
             checkAndResetMonthlyFinance(context)
             isDataLoaded.value = true
@@ -1320,13 +1424,24 @@ object DataManager {
     }
     
     suspend fun exportData(context: Context, password: CharArray? = null): String = withContext(Dispatchers.IO) {
+        // Ensure Room is up to date with latest in-memory changes before exporting
+        performSave(context)
+
         val prefs = getPrefs(context)
         val allData = prefs.all.toMutableMap()
 
-        // Add Workspace Data
+        // Remove legacy list keys from SharedPreferences export to avoid bloat and conflicts
+        val legacyKeys = setOf(
+            KEY_HABITS, KEY_WORKOUTS, KEY_TASKS, KEY_NOTES, KEY_PROJECTS,
+            KEY_TRANSACTIONS, KEY_LEDGER, KEY_PERSONAL_LEDGER
+        )
+        legacyKeys.forEach { allData.remove(it) }
+
+        // Add Room Data
         val db = AppDatabase.getDatabase(context)
         val dao = db.workspaceDao()
 
+        // Workspace
         allData["workspaceProjects"] = dao.getAllProjectsSync()
         allData["workspaceGoals"] = dao.getAllGoalsSync()
         allData["workspaceTasks"] = dao.getAllTasksSync()
@@ -1337,6 +1452,17 @@ object DataManager {
         allData["workspaceResources"] = dao.getAllResourcesSync()
         allData["workspaceLogs"] = dao.getAllActivityLogsSync()
         allData["workspaceRefs"] = dao.getAllNoteCrossReferencesSync()
+        
+        // Global
+        allData["appTasks"] = db.taskDao().getAllTasksSync()
+        allData["appHabits"] = db.habitDao().getAllHabitsSync()
+        allData["appWorkouts"] = db.workoutDao().getAllWorkoutsSync()
+        allData["appNotes"] = db.noteDao().getAllNotesSync()
+        
+        val fDao = db.financeDao()
+        allData["appTransactions"] = fDao.getAllTransactionsSync()
+        allData["appPersonalLedgers"] = fDao.getAllPersonalLedgersSync()
+        allData["appLedgerEntries"] = fDao.getAllLedgerEntriesSync()
 
         val json = Gson().toJson(allData)
         if (password != null) {
@@ -1348,7 +1474,7 @@ object DataManager {
 
     suspend fun importData(context: Context, dataString: String, password: CharArray? = null): Boolean = withContext(Dispatchers.IO) {
         try {
-            // Reset existing database to ensure we can re-open it with the imported key
+            // 1. Reset existing database
             AppDatabase.resetDatabase(context)
 
             val json = if (password != null) {
@@ -1359,7 +1485,12 @@ object DataManager {
             
             val type = object : TypeToken<Map<String, Any>>() {}.type
             val data: Map<String, Any> = Gson().fromJson(json, type)
+            
+            // 2. Clear all local preferences for a clean restore
+            getLegacyPrefs(context).edit().clear().apply()
             val prefs = getPrefs(context)
+            prefs.edit().clear().apply()
+            
             val editor = prefs.edit()
 
             val legacyKeyMap = mapOf(
@@ -1380,10 +1511,25 @@ object DataManager {
                 "monthlySavingsGoals" to KEY_MONTHLY_SAVINGS_GOALS
             )
 
-            val workspaceKeys = setOf(
+            val databaseKeys = setOf(
                 "workspaceProjects", "workspaceGoals", "workspaceTasks", "workspaceFeatures",
                 "workspaceBugs", "workspaceIdeas", "workspaceNotes", "workspaceResources",
-                "workspaceLogs", "workspaceRefs"
+                "workspaceLogs", "workspaceRefs",
+                "appTasks", "appHabits", "appWorkouts", "appNotes",
+                "appTransactions", "appPersonalLedgers", "appLedgerEntries"
+            )
+
+            val hasRoomData = databaseKeys.any { data.containsKey(it) }
+
+            // Keys that should NOT be restored to SharedPreferences if Room data exists in JSON
+            val legacyToIgnoreIfRoomExists = mapOf(
+                "appTasks" to KEY_TASKS,
+                "appHabits" to KEY_HABITS,
+                "appWorkouts" to KEY_WORKOUTS,
+                "appNotes" to KEY_NOTES,
+                "appTransactions" to KEY_TRANSACTIONS,
+                "appPersonalLedgers" to KEY_PERSONAL_LEDGER,
+                "appLedgerEntries" to KEY_LEDGER
             )
 
             val floatKeys = setOf(KEY_BUDGET, KEY_SAVINGS_GOAL)
@@ -1391,40 +1537,76 @@ object DataManager {
 
             data.forEach { (key, value) ->
                 val targetKey = legacyKeyMap[key] ?: key
-                if (targetKey !in workspaceKeys) {
-                    when (value) {
-                        is String -> editor.putString(targetKey, value)
-                        is Boolean -> editor.putBoolean(targetKey, value)
-                        is List<*>, is Map<*, *> -> {
-                            // Handle legacy JSON structures (convert to JSON string for SharedPreferences)
-                            editor.putString(targetKey, Gson().toJson(value))
+                
+                // Skip if it's a dedicated database key
+                if (targetKey in databaseKeys) return@forEach
+                
+                // Skip legacy key if new equivalent Room data is present in the same JSON
+                val isRedundantLegacy = legacyToIgnoreIfRoomExists.any { (newKey, oldKey) ->
+                    oldKey == targetKey && data.containsKey(newKey)
+                }
+                if (isRedundantLegacy) return@forEach
+
+                val valueToStore = when (value) {
+                    is List<*>, is Map<*, *> -> {
+                        val jsonValue = Gson().toJson(value)
+                        when (targetKey) {
+                            KEY_HABITS -> mapHabitFields(jsonValue)
+                            KEY_WORKOUTS -> mapWorkoutFields(jsonValue)
+                            KEY_TASKS -> mapTaskFields(jsonValue)
+                            KEY_NOTES -> mapNoteFields(jsonValue, false)
+                            KEY_PROJECTS -> mapNoteFields(jsonValue, true)
+                            else -> jsonValue
                         }
-                        is Double -> {
+                    }
+                    is String -> {
+                        // Crucial: Handle stringified JSON from even older versions
+                        if (value.trim().startsWith("[") || value.trim().startsWith("{")) {
                             when (targetKey) {
-                                in floatKeys -> editor.putFloat(targetKey, value.toFloat())
-                                in longKeys -> editor.putLong(targetKey, value.toLong())
-                                else -> {
-                                    val longValue = value.toLong()
-                                    if (value == longValue.toDouble()) {
-                                        if (longValue in Int.MIN_VALUE..Int.MAX_VALUE) editor.putInt(targetKey, longValue.toInt())
-                                        else editor.putLong(targetKey, longValue)
-                                    } else {
-                                        editor.putFloat(targetKey, value.toFloat())
-                                    }
+                                KEY_HABITS -> mapHabitFields(value)
+                                KEY_WORKOUTS -> mapWorkoutFields(value)
+                                KEY_TASKS -> mapTaskFields(value)
+                                KEY_NOTES -> mapNoteFields(value, false)
+                                KEY_PROJECTS -> mapNoteFields(value, true)
+                                else -> value
+                            }
+                        } else value
+                    }
+                    else -> value
+                }
+
+                when (valueToStore) {
+                    is String -> editor.putString(targetKey, valueToStore)
+                    is Boolean -> editor.putBoolean(targetKey, valueToStore)
+                    is Double -> {
+                        when (targetKey) {
+                            in floatKeys -> editor.putFloat(targetKey, valueToStore.toFloat())
+                            in longKeys -> editor.putLong(targetKey, valueToStore.toLong())
+                            else -> {
+                                val longValue = valueToStore.toLong()
+                                if (valueToStore == longValue.toDouble()) {
+                                    if (longValue in Int.MIN_VALUE..Int.MAX_VALUE) editor.putInt(targetKey, longValue.toInt())
+                                    else editor.putLong(targetKey, longValue)
+                                } else {
+                                    editor.putFloat(targetKey, valueToStore.toFloat())
                                 }
                             }
                         }
                     }
                 }
             }
-            editor.apply()
 
-            // Restore Workspace Data
+            // Important: Set migration flag to false to force LegacyMigrationManager 
+            // to check the restored SharedPreferences data for migration.
+            editor.putBoolean("data_migrated_to_sql", false)
+            editor.commit() // Use commit for synchronous save before re-initialization
+
+            // Restore Room Data
             val db = AppDatabase.getDatabase(context)
-            val dao = db.workspaceDao()
             val gson = Gson()
 
             db.withTransaction {
+                val dao = db.workspaceDao()
                 dao.deleteAllProjects()
                 dao.deleteAllGoals()
                 dao.deleteAllTasks()
@@ -1436,6 +1618,21 @@ object DataManager {
                 dao.deleteAllActivityLogs()
                 dao.deleteAllNoteCrossReferences()
 
+                val tDao = db.taskDao()
+                val hDao = db.habitDao()
+                val wDao = db.workoutDao()
+                val nDao = db.noteDao()
+                val fDao = db.financeDao()
+                
+                tDao.deleteAll()
+                hDao.deleteAll()
+                wDao.deleteAll()
+                nDao.deleteAll()
+                fDao.deleteAllTransactions()
+                fDao.deleteAllPersonalLedgers()
+                fDao.deleteAllLedgerEntries()
+
+                // Restore Workspace
                 data["workspaceProjects"]?.let {
                     val listType = object : TypeToken<List<ProjectEntity>>() {}.type
                     dao.insertAllProjects(gson.fromJson(gson.toJson(it), listType))
@@ -1445,7 +1642,7 @@ object DataManager {
                     dao.insertAllGoals(gson.fromJson(gson.toJson(it), listType))
                 }
                 data["workspaceTasks"]?.let {
-                    val listType = object : TypeToken<List<TaskEntity>>() {}.type
+                    val listType = object : TypeToken<List<com.example.allinone.workspace.data.TaskEntity>>() {}.type
                     dao.insertAllTasks(gson.fromJson(gson.toJson(it), listType))
                 }
                 data["workspaceFeatures"]?.let {
@@ -1461,7 +1658,7 @@ object DataManager {
                     dao.insertAllIdeas(gson.fromJson(gson.toJson(it), listType))
                 }
                 data["workspaceNotes"]?.let {
-                    val listType = object : TypeToken<List<NoteEntity>>() {}.type
+                    val listType = object : TypeToken<List<com.example.allinone.workspace.data.NoteEntity>>() {}.type
                     dao.insertAllNotes(gson.fromJson(gson.toJson(it), listType))
                 }
                 data["workspaceResources"]?.let {
@@ -1476,16 +1673,150 @@ object DataManager {
                     val listType = object : TypeToken<List<NoteCrossReferenceEntity>>() {}.type
                     dao.insertAllNoteCrossReferences(gson.fromJson(gson.toJson(it), listType))
                 }
+
+                // Restore Global
+                data["appTasks"]?.let {
+                    val listType = object : TypeToken<List<com.example.allinone.data.database.TaskEntity>>() {}.type
+                    tDao.insertAllTasks(gson.fromJson(gson.toJson(it), listType))
+                }
+                data["appHabits"]?.let {
+                    val listType = object : TypeToken<List<com.example.allinone.data.database.HabitEntity>>() {}.type
+                    hDao.insertAllHabits(gson.fromJson(gson.toJson(it), listType))
+                }
+                data["appWorkouts"]?.let {
+                    val listType = object : TypeToken<List<com.example.allinone.data.database.WorkoutEntity>>() {}.type
+                    wDao.insertAllWorkouts(gson.fromJson(gson.toJson(it), listType))
+                }
+                data["appNotes"]?.let {
+                    val listType = object : TypeToken<List<com.example.allinone.data.database.NoteEntity>>() {}.type
+                    nDao.insertAllNotes(gson.fromJson(gson.toJson(it), listType))
+                }
+                data["appTransactions"]?.let {
+                    val listType = object : TypeToken<List<com.example.allinone.data.database.TransactionEntity>>() {}.type
+                    fDao.insertAllTransactions(gson.fromJson(gson.toJson(it), listType))
+                }
+                data["appPersonalLedgers"]?.let {
+                    val listType = object : TypeToken<List<com.example.allinone.data.database.PersonalLedgerEntity>>() {}.type
+                    fDao.insertAllPersonalLedgers(gson.fromJson(gson.toJson(it), listType))
+                }
+                data["appLedgerEntries"]?.let {
+                    val listType = object : TypeToken<List<com.example.allinone.data.database.LedgerEntryEntity>>() {}.type
+                    fDao.insertAllLedgerEntries(gson.fromJson(gson.toJson(it), listType))
+                }
             }
 
+            reconstructWorkoutHistoryFromGlobalLog()
+            
             withContext<Unit>(Dispatchers.Main) {
-                loadData(context)
-                notifyDataChanged()
+                initialize(context)
             }
             true
         } catch (e: Exception) {
+            e.printStackTrace()
             false
         }
+    }
+
+    private fun mapHabitFields(json: String): String {
+        try {
+            val listType = object : TypeToken<List<MutableMap<String, Any>>>() {}.type
+            val list: List<MutableMap<String, Any>> = Gson().fromJson(json, listType) ?: return json
+            list.forEach { map ->
+                if (map.containsKey("habitName") && !map.containsKey("name")) map["name"] = map["habitName"]!!
+                if (map.containsKey("isDone") && !map.containsKey("isCompleted")) map["isCompleted"] = map["isDone"]!!
+                if (!map.containsKey("repeatDays")) map["repeatDays"] = listOf(0, 1, 2, 3, 4, 5, 6)
+                
+                // Map History/Completion fields
+                val historyKeys = listOf("history", "completedDays", "completionDates", "completionLog", "logs")
+                historyKeys.forEach { oldKey ->
+                    if (map.containsKey(oldKey) && (!map.containsKey("completedDates") || (map["completedDates"] as? List<*>)?.isEmpty() == true)) {
+                        map["completedDates"] = map[oldKey]!!
+                    }
+                }
+                
+                if (!map.containsKey("completedDates")) map["completedDates"] = mutableListOf<String>()
+                if (!map.containsKey("dailyProgress")) map["dailyProgress"] = mutableMapOf<String, Int>()
+            }
+            return Gson().toJson(list)
+        } catch (e: Exception) { return json }
+    }
+
+    private fun mapWorkoutFields(json: String): String {
+        try {
+            val listType = object : TypeToken<List<MutableMap<String, Any>>>() {}.type
+            val list: List<MutableMap<String, Any>> = Gson().fromJson(json, listType) ?: return json
+            list.forEach { map ->
+                if (map.containsKey("workoutName") && !map.containsKey("name")) map["name"] = map["workoutName"]!!
+                if (map.containsKey("isDone") && !map.containsKey("isCompleted")) map["isCompleted"] = map["isDone"]!!
+                if (!map.containsKey("muscleGroups")) map["muscleGroups"] = listOf("General")
+                
+                // Map History/Completion fields
+                val historyKeys = listOf("history", "completedDays", "completionDates", "completionLog", "logs")
+                historyKeys.forEach { oldKey ->
+                    if (map.containsKey(oldKey) && (!map.containsKey("completedDates") || (map["completedDates"] as? List<*>)?.isEmpty() == true)) {
+                        map["completedDates"] = map[oldKey]!!
+                    }
+                }
+                
+                if (!map.containsKey("completedDates")) map["completedDates"] = mutableListOf<String>()
+                if (!map.containsKey("dailyProgress")) map["dailyProgress"] = mutableMapOf<String, Int>()
+            }
+            return Gson().toJson(list)
+        } catch (e: Exception) { return json }
+    }
+
+    private fun mapTaskFields(json: String): String {
+        try {
+            val listType = object : TypeToken<List<MutableMap<String, Any>>>() {}.type
+            val list: List<MutableMap<String, Any>> = Gson().fromJson(json, listType) ?: return json
+            list.forEach { map ->
+                if (map.containsKey("taskName") && !map.containsKey("name")) map["name"] = map["taskName"]!!
+                if (map.containsKey("isDone") && !map.containsKey("isCompleted")) map["isCompleted"] = map["isDone"]!!
+                if (!map.containsKey("subtasks")) map["subtasks"] = mutableListOf<Any>()
+            }
+            return Gson().toJson(list)
+        } catch (e: Exception) { return json }
+    }
+
+    private fun reconstructWorkoutHistoryFromGlobalLog() {
+        if (history.isEmpty() || workouts.isEmpty()) return
+        
+        synchronized(workouts) {
+            history.forEach { (dateKey, dayData) ->
+                dayData.workoutDetails?.forEach { detail ->
+                    // Find matching workout by name
+                    val workout = workouts.find { it.name.equals(detail.name, ignoreCase = true) }
+                    if (workout != null) {
+                        // 1. Add to completedDates if completed
+                        if (detail.isCompleted && !workout.completedDates.contains(dateKey)) {
+                            workout.completedDates.add(dateKey)
+                        }
+                        
+                        // 2. Add to dailyProgress
+                        val progressPercent = if (detail.target > 0) (detail.progress * 100) / detail.target else 100
+                        if (!workout.dailyProgress.containsKey(dateKey) || workout.dailyProgress[dateKey] == 0) {
+                            workout.dailyProgress[dateKey] = progressPercent
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    private fun mapNoteFields(json: String, forceGlobalProject: Boolean): String {
+        try {
+            val listType = object : TypeToken<List<MutableMap<String, Any>>>() {}.type
+            val list: List<MutableMap<String, Any>> = Gson().fromJson(json, listType) ?: return json
+            list.forEach { map ->
+                if (map.containsKey("noteTitle") && !map.containsKey("title")) map["title"] = map["noteTitle"]!!
+                if (map.containsKey("noteBody") && !map.containsKey("content")) map["content"] = map["noteBody"]!!
+                if (map.containsKey("body") && !map.containsKey("content")) map["content"] = map["body"]!!
+                if (!map.containsKey("journalEntries")) map["journalEntries"] = mutableListOf<Any>()
+                if (!map.containsKey("subFeatures")) map["subFeatures"] = mutableListOf<Any>()
+                if (forceGlobalProject) map["isGlobalProject"] = true
+            }
+            return Gson().toJson(list)
+        } catch (e: Exception) { return json }
     }
 
     fun resetAppearanceIcons(context: Context) {

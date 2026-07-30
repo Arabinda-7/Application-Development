@@ -62,7 +62,7 @@ class SettingsBackupHandler(
 
     private fun showConfirmationDialog(title: String, message: String, pos: String, onConfirm: () -> Unit) {
         val dialog = Dialog(context); dialog.setContentView(R.layout.dialog_confirm_backup)
-        dialog.window?.let { it.setBackgroundDrawableResource(android.R.color.transparent); if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.S) it.attributes.blurBehindRadius = 20; it.addFlags(android.view.WindowManager.LayoutParams.FLAG_BLUR_BEHIND) }
+        dialog.window?.let { it.setBackgroundDrawableResource(android.R.color.transparent); it.attributes.blurBehindRadius = 20; it.addFlags(android.view.WindowManager.LayoutParams.FLAG_BLUR_BEHIND) }
         dialog.findViewById<TextView>(R.id.tv_confirm_title).text = title
         dialog.findViewById<TextView>(R.id.tv_confirm_message).text = message
         dialog.findViewById<TextView>(R.id.btn_confirm_positive).apply { text = pos; setOnClickListener { onConfirm(); dialog.dismiss() } }

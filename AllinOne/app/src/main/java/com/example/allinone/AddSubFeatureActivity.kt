@@ -350,16 +350,14 @@ class AddSubFeatureActivity : BaseActivity() {
     private fun scheduleMilestoneReminder(feature: ProjectFeature) {
         val alarmManager = getSystemService(Context.ALARM_SERVICE) as android.app.AlarmManager
         
-        if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.S) {
-            if (!alarmManager.canScheduleExactAlarms()) {
-                try {
-                    val intent = Intent(android.provider.Settings.ACTION_REQUEST_SCHEDULE_EXACT_ALARM)
-                    startActivity(intent)
-                } catch (e: Exception) {
-                    Toast.makeText(this, "Permission required for exact alarms", Toast.LENGTH_SHORT).show()
-                }
-                return
+        if (!alarmManager.canScheduleExactAlarms()) {
+            try {
+                val intent = Intent(android.provider.Settings.ACTION_REQUEST_SCHEDULE_EXACT_ALARM)
+                startActivity(intent)
+            } catch (e: Exception) {
+                Toast.makeText(this, "Permission required for exact alarms", Toast.LENGTH_SHORT).show()
             }
+            return
         }
 
         val dueDate = feature.dueDate ?: return

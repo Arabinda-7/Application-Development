@@ -1,28 +1,40 @@
 package com.example.allinone
 
+
+import android.app.AlarmManager
+import android.content.Context
 import android.content.Intent
+
+import android.os.Build
 import android.os.Bundle
+import android.provider.Settings
 import androidx.activity.compose.setContent
 import androidx.activity.result.ActivityResultLauncher
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.activity.viewModels
-import androidx.compose.animation.core.Animatable
-import androidx.compose.animation.core.LinearEasing
-import androidx.compose.animation.core.tween
 import androidx.compose.foundation.background
+import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.LocalTextStyle
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.dynamicDarkColorScheme
+import androidx.compose.material3.dynamicLightColorScheme
 import androidx.compose.runtime.*
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.unit.Density
 import androidx.compose.ui.unit.dp
-import com.example.allinone.MainSplashScreenHandler.SplashScreen
+import androidx.lifecycle.lifecycleScope
+import kotlinx.coroutines.launch
+
+import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
+import com.example.allinone.ui.components.LoadingScreen
 import com.example.allinone.ui.home.HomeScreen
-import kotlinx.coroutines.delay
 
 class MainActivity : BaseActivity() {
 
@@ -30,6 +42,9 @@ class MainActivity : BaseActivity() {
     private lateinit var navigationHandler: MainNavigationHandler
     private lateinit var quickActionsHandler: MainQuickActionsHandler
     private lateinit var searchSection: MainSearchSection
+    private var voiceHandler: VoiceAssistantHandler? = null
+
+    private var isVoiceListening by mutableStateOf(false)
 
     private val lockLauncher: ActivityResultLauncher<Intent> = registerForActivityResult(
         ActivityResultContracts.StartActivityForResult()
@@ -43,27 +58,43 @@ class MainActivity : BaseActivity() {
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
+        val splashScreen = installSplashScreen()
         super.onCreate(savedInstanceState)
         
+        // Immediate redirect to Onboarding if not completed to bypass LoadingScreen
+        val prefs = SecurityManager.getEncryptedPrefs(this)
+        val isCompleted = DataManager.isOnboardingCompleted || prefs.getBoolean("onboarding_completed", false)
+        if (!isCompleted) {
+            startActivity(Intent(this, OnboardingActivity::class.java))
+            finish()
+            return
+        }
+
+        // Removed setKeepOnScreenCondition to allow custom LoadingScreen to animate immediately
+        
+
+        // Alarm Manager Check
+        val alarmManager = getSystemService(Context.ALARM_SERVICE) as AlarmManager
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) { // API 31 check
+            if (!alarmManager.canScheduleExactAlarms()) {
+                Intent(Settings.ACTION_REQUEST_SCHEDULE_EXACT_ALARM).also { intent ->
+                    startActivity(intent)
+                }
+            }
+        }
+
         initHandlers()
+        initVoiceHandler()
         viewModel.refreshState(this)
 
         setContent {
-            var showSplash by remember { mutableStateOf(true) }
-            val splashProgress = remember { Animatable(0f) }
-            
+            var animationFinished by remember { mutableStateOf(false) }
             val dashboardState = viewModel.dashboardState
             val isLoaded = dashboardState.isDataLoaded
             val isUnlocked = dashboardState.isAppUnlocked
             
             LaunchedEffect(isLoaded) {
                 if (isLoaded) {
-                    if (!DataManager.isOnboardingCompleted) {
-                        startActivity(Intent(this@MainActivity, OnboardingActivity::class.java))
-                        finish()
-                        return@LaunchedEffect
-                    }
-
                     if (DataManager.isAppLockEnabled && !DataManager.isAppUnlocked && DataManager.appLockPin != null) {
                         val intent = Intent(this@MainActivity, LockActivity::class.java).apply {
                             putExtra(LockActivity.EXTRA_MODE, LockActivity.MODE_AUTH)
@@ -88,28 +119,10 @@ class MainActivity : BaseActivity() {
                 }
             }
             
-            LaunchedEffect(isUnlocked) {
-                if (isUnlocked) {
-                    val totalTime = DataManager.startupLoadingTime
-                    splashProgress.animateTo(
-                        targetValue = 1f,
-                        animationSpec = tween(
-                            durationMillis = totalTime,
-                            easing = LinearEasing
-                        )
-                    )
-                    delay(500)
-                    showSplash = false
-                }
-            }
-            
             Box(modifier = Modifier.fillMaxSize()) {
                 when {
-                    showSplash -> {
-                        SplashScreen(splashProgress.value)
-                    }
-                    !isLoaded || !isUnlocked -> {
-                        Box(modifier = Modifier.fillMaxSize().background(Color.Black))
+                    !isLoaded || !isUnlocked || !animationFinished -> {
+                        LoadingScreen(onFinished = { animationFinished = true })
                     }
                     else -> {
                         val customDensity = remember(dashboardState.homeDisplaySize, dashboardState.fontSize) {
@@ -128,12 +141,31 @@ class MainActivity : BaseActivity() {
                             Density(density = currentDensity * dScale, fontScale = currentFontScale * fScale)
                         }
 
-                        val appStyle = remember(dashboardState.appThemeMode, dashboardState.appAccentColor, dashboardState.appBorderRadius, dashboardState.appShowShadows, dashboardState.appFontFamily) {
+                        val context = LocalContext.current
+                        val isDarkTheme = when (dashboardState.appThemeMode) {
+                            "LIGHT" -> false
+                            "DARK", "OLED" -> true
+                            else -> isSystemInDarkTheme()
+                        }
+
+                        val appStyle = remember(dashboardState.appThemeMode, dashboardState.appAccentColor, dashboardState.appBorderRadius, dashboardState.appShowShadows, dashboardState.appFontFamily, dashboardState.isDynamicColorEnabled) {
                             val isOled = dashboardState.appThemeMode == "OLED"
                             val isLight = dashboardState.appThemeMode == "LIGHT"
+                            
+                            val dynamicColor = dashboardState.isDynamicColorEnabled
+                            val colorScheme = if (dynamicColor) {
+                                if (isDarkTheme) dynamicDarkColorScheme(context) else dynamicLightColorScheme(context)
+                            } else null
+
+                            val accentColor = when {
+                                colorScheme != null -> colorScheme.primary
+                                dashboardState.appAccentColor != -1 -> Color(dashboardState.appAccentColor)
+                                else -> Color(0xFF1A73E8)
+                            }
+
                             AppStyle(
                                 borderRadius = dashboardState.appBorderRadius.dp,
-                                accentColor = if (dashboardState.appAccentColor != -1) Color(dashboardState.appAccentColor) else Color(0xFF1A73E8),
+                                accentColor = accentColor,
                                 surfaceColor = when {
                                     isOled -> Color.Black
                                     isLight -> if (dashboardState.appCardStyle == "GLASS") Color.White.copy(alpha = 0.8f) else Color(0xFFF5F5F5)
@@ -146,6 +178,7 @@ class MainActivity : BaseActivity() {
                                 },
                                 isOled = isOled,
                                 showShadows = dashboardState.appShowShadows,
+                                isDynamicColorEnabled = dashboardState.isDynamicColorEnabled,
                                 fontFamily = when(dashboardState.appFontFamily) {
                                     "SERIF" -> androidx.compose.ui.text.font.FontFamily.Serif
                                     "SANS_SERIF" -> androidx.compose.ui.text.font.FontFamily.SansSerif
@@ -172,6 +205,7 @@ class MainActivity : BaseActivity() {
                                     onNavigateToProjects = { navigationHandler.navigateToProjects() },
                                     onNavigateToFinance = { navigationHandler.navigateToFinance() },
                                     onNavigateToSettings = { navigationHandler.navigateToSettings() },
+                                    onNavigateToAssistant = { navigationHandler.navigateToAssistant() },
                                     onNavigateToWorkspace = { navigationHandler.navigateToWorkspace() },
                                     onNavigateToProfile = { navigationHandler.navigateToProfile() },
                                     onNavigateToPerformanceHistory = { navigationHandler.navigateToPerformanceHistory() },
@@ -190,7 +224,14 @@ class MainActivity : BaseActivity() {
                                     },
                                     onSearchRequested = { query ->
                                         searchSection.performSearch(query)
-                                    }
+                                    },
+                                    isVoiceListening = isVoiceListening,
+                                    onVoiceMicClick = {
+                                        checkAndRequestPermission(android.Manifest.permission.RECORD_AUDIO) {
+                                            voiceHandler?.startListening()
+                                        }
+                                    },
+                                    isVoiceThinking = voiceHandler?.isThinking ?: false
                                 )
                             }
                         }
@@ -204,6 +245,87 @@ class MainActivity : BaseActivity() {
         navigationHandler = MainNavigationHandler(this)
         quickActionsHandler = MainQuickActionsHandler(this)
         searchSection = MainSearchSection(this)
+    }
+
+    private fun initVoiceHandler() {
+        voiceHandler = VoiceAssistantHandler(
+            context = this,
+            onResults = { command ->
+                handleVoiceCommand(command)
+            },
+            onListeningStateChanged = { listening ->
+                isVoiceListening = listening
+            },
+            onError = { _ ->
+                isVoiceListening = false
+            }
+        ).apply {
+            isMuted = false // Or get from preferences
+        }
+    }
+
+    private fun handleVoiceCommand(command: String) {
+        if (command.isBlank()) return
+        
+        voiceHandler?.isThinking = true
+        
+        lifecycleScope.launch {
+            val action = AssistantBrain.parseCommand(command)
+            if (action != null) {
+                var response = ""
+                when (action.type) {
+                    "ADD_HABIT" -> {
+                        val habit = Habit(name = action.payload, isCompleted = false, frequency = "Anytime")
+                        DataManager.habits.add(habit)
+                        DataManager.saveData(this@MainActivity)
+                        response = "Created habit: ${action.payload}"
+                    }
+                    "ADD_TASK" -> {
+                        val task = Task(name = action.payload)
+                        DataManager.tasks.add(0, task)
+                        DataManager.saveData(this@MainActivity)
+                        response = "Added task: ${action.payload}"
+                    }
+                    "ADD_WORKOUT" -> {
+                        val workout = Workout(name = action.payload, isCompleted = false, frequency = "Anytime")
+                        DataManager.workouts.add(workout)
+                        DataManager.saveData(this@MainActivity)
+                        response = "Created workout: ${action.payload}"
+                    }
+                    "ADD_NOTE" -> {
+                        val note = Note(title = action.payload, content = "")
+                        DataManager.notes.add(0, note)
+                        DataManager.saveData(this@MainActivity)
+                        response = "Saved note: ${action.payload}"
+                    }
+                    "LOG_EXPENSE" -> {
+                        response = "Ready to log expense: ${DataManager.financeCurrency}${action.payload}"
+                        val intent = Intent(this@MainActivity, AddFinanceActivity::class.java).apply {
+                            putExtra("QUICK_AMOUNT", action.payload)
+                        }
+                        startActivity(intent)
+                    }
+                    "NAVIGATE" -> {
+                        response = "Opening ${action.payload}..."
+                        when (action.payload) {
+                            "FINANCE" -> startActivity(Intent(this@MainActivity, FinanceActivity::class.java))
+                            "HABITS" -> startActivity(Intent(this@MainActivity, HabitTrackerActivity::class.java))
+                        }
+                    }
+                    "CHAT_RESPONSE" -> {
+                        response = action.payload
+                    }
+                }
+                voiceHandler?.speak(response, response.trim().endsWith("?"))
+            } else {
+                voiceHandler?.speak("I'm not sure how to do that yet.")
+            }
+        }
+    }
+
+    override fun onDestroy() {
+        voiceHandler?.shutdown()
+        super.onDestroy()
     }
 
     override fun onResume() {

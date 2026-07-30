@@ -175,7 +175,7 @@ class OnboardingActivity : BaseActivity() {
             }
         }
         DataManager.isOnboardingCompleted = true
-        DataManager.saveData(this)
+        DataManager.saveData(this, immediate = true)
         startActivity(Intent(this, MainActivity::class.java))
         finish()
     }

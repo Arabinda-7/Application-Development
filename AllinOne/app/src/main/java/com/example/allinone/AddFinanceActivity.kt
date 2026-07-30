@@ -44,6 +44,12 @@ class AddFinanceActivity : BaseActivity() {
         }
 
         initViews()
+        
+        val quickAmount = intent.getStringExtra("QUICK_AMOUNT")
+        if (quickAmount != null && existingTransaction == null) {
+            etAmount.setText(quickAmount)
+        }
+
         setupLogic()
         setupKeyboardHandling(findViewById(R.id.add_finance_root), findViewById(R.id.add_finance_content_container), 12)
     }

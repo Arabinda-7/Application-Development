@@ -194,7 +194,12 @@ fun ProjectWorkspaceScreen(
                                             ) { targetTab ->
                                                     Box(modifier = Modifier.fillMaxSize()) {
                                                         when (targetTab) {
-                                                            WorkspaceTab.Dashboard -> WorkspaceDashboard(state = uiState, viewModel = viewModel, onViewFeature = { editingEntity = it; activeCreationPage = WorkspaceAction.ViewFeature }, onEditFeature = { editingEntity = it; activeCreationPage = WorkspaceAction.EditFeature }, onViewBug = { editingEntity = it; activeCreationPage = WorkspaceAction.ViewBug }, onEditBug = { editingEntity = it; activeCreationPage = WorkspaceAction.EditBug }, onShowStats = { projectForStats = it }, isStatsShowing = projectForStats != null)
+                                                            WorkspaceTab.Dashboard -> WorkspaceDashboard(
+                                                                state = uiState, 
+                                                                viewModel = viewModel, 
+                                                                onShowStats = { projectForStats = it }, 
+                                                                isStatsShowing = projectForStats != null
+                                                            )
                                                             WorkspaceTab.Goals -> GoalViewSection(goals = uiState.goals, onViewGoal = { editingEntity = it; activeCreationPage = WorkspaceAction.ViewGoal }, onEditGoal = { editingEntity = it; activeCreationPage = WorkspaceAction.EditGoal }, onDeleteGoal = { viewModel.deleteGoal(it) })
                                                             WorkspaceTab.Notes -> NoteViewSection(notes = uiState.notes, onViewNote = { editingEntity = it; activeCreationPage = WorkspaceAction.ViewNote }, onEditNote = { editingEntity = it; activeCreationPage = WorkspaceAction.EditNote }, onDeleteNote = { entityToDelete = it })
                                                             WorkspaceTab.Tasks -> TaskViewSection(tasks = uiState.tasks, onUpdateTask = { viewModel.updateTask(it) }, onViewTask = { editingEntity = it; activeCreationPage = WorkspaceAction.ViewTask }, onEditTask = { editingEntity = it; activeCreationPage = WorkspaceAction.EditTask }, onDeleteTask = { viewModel.deleteTask(it) })

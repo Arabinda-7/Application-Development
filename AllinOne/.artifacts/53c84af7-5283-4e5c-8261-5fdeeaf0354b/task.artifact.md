@@ -1,0 +1,6 @@
+- [x] Update `VoiceAssistantOverlay` to use `Color.Black` and accent border
+- [x] Update `AssistantActivity` to use `Color.Black` for background and accent border
+- [x] Update AI Footer background to black
+- [x] Add accent-colored border to AI Footer
+- [x] Set circular background of AI button to black
+- [x] Fix compilation and syntax errors

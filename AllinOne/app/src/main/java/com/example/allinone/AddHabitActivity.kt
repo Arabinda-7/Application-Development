@@ -277,6 +277,7 @@ class AddHabitActivity : BaseActivity() {
             }
         }
         DataManager.saveData(this, true)
+        UIUtils.performSuccessHaptic(this)
         setResult(RESULT_OK)
         finish()
     }

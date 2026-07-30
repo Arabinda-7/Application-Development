@@ -34,6 +34,10 @@ class MainNavigationHandler(private val context: Context) {
         context.startActivity(Intent(context, SettingsActivity::class.java))
     }
 
+    fun navigateToAssistant() {
+        context.startActivity(Intent(context, AssistantActivity::class.java))
+    }
+
     fun navigateToWorkspace() {
         context.startActivity(Intent(context, WorkspaceActivity::class.java))
     }

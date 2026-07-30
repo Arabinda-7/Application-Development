@@ -468,14 +468,14 @@ fun WorkspaceDropdown(
 ) {
     val style = LocalAppStyle.current
     MaterialTheme(
-        colorScheme = MaterialTheme.colorScheme.copy(surface = style.surfaceColor),
+        colorScheme = MaterialTheme.colorScheme.copy(surface = Color.Black.copy(alpha = 0.5f)),
         shapes = MaterialTheme.shapes.copy(extraSmall = RoundedCornerShape(style.borderRadius))
     ) {
         DropdownMenu(
             expanded = expanded,
             onDismissRequest = onDismissRequest,
             modifier = modifier
-                .background(style.surfaceColor)
+                .background(Color.Black.copy(alpha = 0.5f))
                 .border(1.dp, Color.White.copy(alpha = 0.1f), RoundedCornerShape(style.borderRadius)),
             content = content
         )
