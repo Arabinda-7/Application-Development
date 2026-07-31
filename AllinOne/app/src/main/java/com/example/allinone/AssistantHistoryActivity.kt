@@ -16,8 +16,10 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.ChatBubbleOutline
 import androidx.compose.material.icons.filled.DeleteSweep
+import androidx.compose.material.icons.filled.Mic
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material3.*
+import androidx.compose.material3.TabRowDefaults.tabIndicatorOffset
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -39,12 +41,14 @@ class AssistantHistoryActivity : BaseActivity() {
     private val aiChatRepo = DataManager.getAiChatRepository()
     private var groupedSessions by mutableStateOf<Map<String, List<AiChatSessionEntity>>>(emptyMap())
     private var searchQuery by mutableStateOf("")
+    private var selectedTabIndex by mutableIntStateOf(0)
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
         lifecycleScope.launch {
-            aiChatRepo?.getAllSessions()?.collect { sessions ->
+            val type = if (selectedTabIndex == 0) "chat" else "voice"
+            aiChatRepo?.getSessionsByType(type)?.collect { sessions ->
                 groupedSessions = groupSessionsByDate(sessions.filter { 
                     it.title.contains(searchQuery, ignoreCase = true) 
                 })
@@ -57,16 +61,14 @@ class AssistantHistoryActivity : BaseActivity() {
                 AssistantHistoryScreen(
                     groupedSessions = groupedSessions,
                     searchQuery = searchQuery,
+                    selectedTabIndex = selectedTabIndex,
+                    onTabChange = { index ->
+                        selectedTabIndex = index
+                        refreshSessions()
+                    },
                     onSearchChange = { 
                         searchQuery = it 
-                        // Refresh grouping (in a real app this would be in a ViewModel)
-                        lifecycleScope.launch {
-                            aiChatRepo?.getAllSessions()?.collect { sessions ->
-                                groupedSessions = groupSessionsByDate(sessions.filter { s -> 
-                                    s.title.contains(searchQuery, ignoreCase = true) 
-                                })
-                            }
-                        }
+                        refreshSessions()
                     },
                     onBack = { finish() },
                     onClearAll = {
@@ -87,6 +89,17 @@ class AssistantHistoryActivity : BaseActivity() {
                         }
                     }
                 )
+            }
+        }
+    }
+
+    private fun refreshSessions() {
+        lifecycleScope.launch {
+            val type = if (selectedTabIndex == 0) "chat" else "voice"
+            aiChatRepo?.getSessionsByType(type)?.collect { sessions ->
+                groupedSessions = groupSessionsByDate(sessions.filter { s -> 
+                    s.title.contains(searchQuery, ignoreCase = true) 
+                })
             }
         }
     }
@@ -118,6 +131,8 @@ class AssistantHistoryActivity : BaseActivity() {
 fun AssistantHistoryScreen(
     groupedSessions: Map<String, List<AiChatSessionEntity>>,
     searchQuery: String,
+    selectedTabIndex: Int,
+    onTabChange: (Int) -> Unit,
     onSearchChange: (String) -> Unit,
     onBack: () -> Unit,
     onClearAll: () -> Unit,
@@ -165,6 +180,31 @@ fun AssistantHistoryScreen(
                 .padding(padding)
                 .background(Color.Black)
         ) {
+            // Tabs
+            TabRow(
+                selectedTabIndex = selectedTabIndex,
+                containerColor = Color.Black,
+                contentColor = style.accentColor,
+                indicator = { tabPositions ->
+                    TabRowDefaults.SecondaryIndicator(
+                        Modifier.tabIndicatorOffset(tabPositions[selectedTabIndex]),
+                        color = style.accentColor
+                    )
+                },
+                divider = {}
+            ) {
+                Tab(
+                    selected = selectedTabIndex == 0,
+                    onClick = { onTabChange(0) },
+                    text = { Text("CHAT", fontSize = 12.sp, fontWeight = FontWeight.Bold) }
+                )
+                Tab(
+                    selected = selectedTabIndex == 1,
+                    onClick = { onTabChange(1) },
+                    text = { Text("VOICE", fontSize = 12.sp, fontWeight = FontWeight.Bold) }
+                )
+            }
+
             // Search Bar
             TextField(
                 value = searchQuery,
@@ -270,13 +310,16 @@ fun SessionItem(
             Box(
                 modifier = Modifier
                     .size(40.dp)
-                    .background(Color(0xFF4285F4).copy(alpha = 0.1f), CircleShape),
+                    .background(
+                        (if (session.type == "voice") Color(0xFFEA4335) else Color(0xFF4285F4)).copy(alpha = 0.1f), 
+                        CircleShape
+                    ),
                 contentAlignment = Alignment.Center
             ) {
                 Icon(
-                    Icons.Default.ChatBubbleOutline,
+                    if (session.type == "voice") Icons.Default.Mic else Icons.Default.ChatBubbleOutline,
                     contentDescription = null,
-                    tint = Color(0xFF4285F4),
+                    tint = if (session.type == "voice") Color(0xFFEA4335) else Color(0xFF4285F4),
                     modifier = Modifier.size(20.dp)
                 )
             }

@@ -1,14 +1,17 @@
 package com.example.allinone.ui.home
 
 import android.content.Intent
+import android.widget.Toast
 import androidx.compose.animation.*
 import androidx.compose.animation.core.*
 import androidx.compose.foundation.*
 import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
@@ -36,6 +39,7 @@ import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.allinone.*
+import com.example.allinone.data.ChatMessage
 import com.example.allinone.R
 import com.example.allinone.ui.home.components.*
 import java.text.SimpleDateFormat
@@ -64,7 +68,9 @@ fun HomeScreen(
     onSearchRequested: (String) -> Unit = {},
     isVoiceListening: Boolean = false,
     isVoiceThinking: Boolean = false,
-    onVoiceMicClick: () -> Unit = {}
+    onVoiceMicClick: () -> Unit = {},
+    onVoiceSessionStarted: () -> Unit = {},
+    voiceMessages: List<ChatMessage> = emptyList()
 ) {
     var showColorPicker by remember { mutableStateOf<String?>(null) }
     var searchQuery by remember { mutableStateOf("") }
@@ -420,7 +426,10 @@ fun HomeScreen(
                             ProjectCard(
                                 color = Color(if (state.projectColor == -1) 0xFF1A73E8 else state.projectColor.toLong()),
                                 icon = state.projectIcon,
-                                onClick = { onNavigateToProjects() },
+                                onClick = { 
+                                    if (state.hasProjects) onNavigateToProjects()
+                                    else android.widget.Toast.makeText(context, "Please create or import a project to access this section.", android.widget.Toast.LENGTH_SHORT).show()
+                                },
                                 onColorClick = { showColorPicker = "PROJECT" },
                                 auraAlpha = auraAlpha)
                         }
@@ -524,8 +533,15 @@ fun HomeScreen(
                             .combinedClickable(
                                 onClick = { onNavigateToAssistant(); selectedTab = 1 },
                                 onLongClick = { 
-                                    showVoiceAssistant = true
-                                    selectedTab = 1
+                                    if (DataManager.isAiVoiceChatEnabled) {
+                                        if (!showVoiceAssistant) {
+                                            onVoiceSessionStarted()
+                                        }
+                                        showVoiceAssistant = true
+                                        selectedTab = 1
+                                    } else {
+                                        Toast.makeText(context, "AI Voice Chat is disabled in settings", Toast.LENGTH_SHORT).show()
+                                    }
                                 }
                             ),
                         contentAlignment = Alignment.Center
@@ -554,6 +570,7 @@ fun HomeScreen(
             onDismiss = { showVoiceAssistant = false },
             isListening = isVoiceListening,
             isThinking = isVoiceThinking,
+            messages = voiceMessages,
             onMicClick = onVoiceMicClick
         )
 
@@ -856,9 +873,19 @@ fun VoiceAssistantOverlay(
     onDismiss: () -> Unit,
     isListening: Boolean = false,
     isThinking: Boolean = false,
+    messages: List<ChatMessage> = emptyList(),
     onMicClick: () -> Unit = {}
 ) {
     val style = LocalAppStyle.current
+    val scrollState = rememberLazyListState()
+    
+    // Auto scroll to bottom when messages change
+    LaunchedEffect(messages.size) {
+        if (messages.isNotEmpty()) {
+            scrollState.animateScrollToItem(messages.size - 1)
+        }
+    }
+
     AnimatedVisibility(
         visible = isVisible,
         enter = slideInVertically(initialOffsetY = { it }) + fadeIn(),
@@ -906,6 +933,32 @@ fun VoiceAssistantOverlay(
                         )
                         
                         Spacer(modifier = Modifier.height(24.dp))
+
+                        // Conversation History
+                        if (messages.isNotEmpty()) {
+                            LazyColumn(
+                                state = scrollState,
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .heightIn(max = 480.dp) // Increased height to fit more conversation
+                                    .padding(horizontal = 8.dp),
+                                horizontalAlignment = Alignment.CenterHorizontally,
+                                verticalArrangement = Arrangement.spacedBy(16.dp)
+                            ) {
+                                items(messages) { msg ->
+                                    val isLast = messages.last() == msg
+                                    Text(
+                                        text = msg.text,
+                                        color = if (msg.isUser) Color.White else Color.White.copy(alpha = if (isLast) 0.8f else 0.5f),
+                                        fontSize = if (msg.isUser) 18.sp else 16.sp,
+                                        fontWeight = if (msg.isUser) FontWeight.Bold else FontWeight.Normal,
+                                        textAlign = TextAlign.Center,
+                                        modifier = Modifier.fillMaxWidth()
+                                    )
+                                }
+                            }
+                            Spacer(modifier = Modifier.height(24.dp))
+                        }
                         
                         Text(
                             when {

@@ -27,6 +27,8 @@ import com.example.allinone.LocalAppStyle
 import com.example.allinone.workspace.data.BugEntity
 import com.example.allinone.workspace.ui.WorkspaceViewModel
 import kotlinx.coroutines.launch
+import java.text.SimpleDateFormat
+import java.util.*
 
 @Composable
 fun BugViewSection(
@@ -220,7 +222,10 @@ fun BugAddEditSection(
     var priority by remember(bug) { mutableIntStateOf(bug?.priority ?: 1) }
     var env by remember(bug) { mutableStateOf(bug?.environment ?: "Production") }
     var version by remember(bug) { mutableStateOf(bug?.version ?: "") }
+    var deadline by remember(bug) { mutableStateOf(bug?.deadline) }
     var steps by remember(bug) { mutableStateOf(bug?.stepsToReproduce ?: "") }
+
+    val context = androidx.compose.ui.platform.LocalContext.current
 
     val dynamicAccentColor = when (severity) {
         "Critical" -> Color.Red
@@ -248,6 +253,7 @@ fun BugAddEditSection(
                             priority = priority,
                             environment = env,
                             version = version,
+                            deadline = deadline,
                             stepsToReproduce = steps
                         ) ?: BugEntity(
                             projectId = projectId,
@@ -257,9 +263,10 @@ fun BugAddEditSection(
                             priority = priority,
                             environment = env,
                             version = version,
+                            deadline = deadline,
                             stepsToReproduce = steps
                         )
-                        if (bug == null) viewModel.addBug(title, projectId, description, severity, priority, env, version, steps)
+                        if (bug == null) viewModel.addBug(title, projectId, description, severity, priority, env, version, steps, deadline)
                         else viewModel.updateBug(updated)
                         onBack()
                     },
@@ -348,6 +355,62 @@ fun BugAddEditSection(
                     colors = OutlinedTextFieldDefaults.colors(focusedTextColor = Color.White, unfocusedTextColor = Color.White, focusedBorderColor = dynamicAccentColor, unfocusedBorderColor = Color.White.copy(alpha = 0.1f)),
                     shape = RoundedCornerShape(12.dp)
                 )
+
+                Spacer(modifier = Modifier.height(24.dp))
+                Text("DEADLINE / FIX DATE", color = dynamicAccentColor, fontSize = 10.sp, fontWeight = FontWeight.Black, letterSpacing = 1.5.sp)
+                Spacer(modifier = Modifier.height(12.dp))
+                Surface(
+                    onClick = {
+                        val calendar = Calendar.getInstance()
+                        deadline?.let { calendar.timeInMillis = it }
+                        
+                        android.app.DatePickerDialog(
+                            context,
+                            { _, year, month, day ->
+                                calendar.set(Calendar.YEAR, year)
+                                calendar.set(Calendar.MONTH, month)
+                                calendar.set(Calendar.DAY_OF_MONTH, day)
+                                deadline = calendar.timeInMillis
+                            },
+                            calendar.get(Calendar.YEAR),
+                            calendar.get(Calendar.MONTH),
+                            calendar.get(Calendar.DAY_OF_MONTH)
+                        ).show()
+                    },
+                    shape = RoundedCornerShape(12.dp),
+                    color = Color.White.copy(alpha = 0.05f),
+                    border = BorderStroke(1.dp, Color.White.copy(alpha = 0.1f)),
+                    modifier = Modifier.fillMaxWidth()
+                ) {
+                    Row(
+                        modifier = Modifier.padding(16.dp),
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        Icon(
+                            imageVector = Icons.Default.Event,
+                            contentDescription = null,
+                            tint = if (deadline != null) dynamicAccentColor else Color.White.copy(alpha = 0.3f),
+                            modifier = Modifier.size(20.dp)
+                        )
+                        Spacer(modifier = Modifier.width(12.dp))
+                        Text(
+                            text = if (deadline != null) {
+                                SimpleDateFormat("MMM dd, yyyy", Locale.getDefault()).format(Date(deadline!!))
+                            } else {
+                                "Set target fix date..."
+                            },
+                            color = if (deadline != null) Color.White else Color.White.copy(alpha = 0.3f),
+                            fontSize = 14.sp,
+                            fontWeight = FontWeight.Bold
+                        )
+                        Spacer(modifier = Modifier.weight(1f))
+                        if (deadline != null) {
+                            IconButton(onClick = { deadline = null }, modifier = Modifier.size(24.dp)) {
+                                Icon(Icons.Default.Close, contentDescription = "Clear", tint = Color.White.copy(alpha = 0.5f))
+                            }
+                        }
+                    }
+                }
 
                 Spacer(modifier = Modifier.height(100.dp))
             }

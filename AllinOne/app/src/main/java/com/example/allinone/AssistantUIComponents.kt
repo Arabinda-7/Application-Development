@@ -20,6 +20,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import java.text.SimpleDateFormat
 import java.util.*
+import com.example.allinone.data.ChatMessage
 
 @Composable
 fun ChatBubble(message: ChatMessage) {

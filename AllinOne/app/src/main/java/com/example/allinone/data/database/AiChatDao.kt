@@ -9,6 +9,9 @@ interface AiChatDao {
     @Query("SELECT * FROM ai_chat_sessions ORDER BY timestamp DESC")
     fun getAllSessions(): Flow<List<AiChatSessionEntity>>
 
+    @Query("SELECT * FROM ai_chat_sessions WHERE type = :type ORDER BY timestamp DESC")
+    fun getSessionsByType(type: String): Flow<List<AiChatSessionEntity>>
+
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun insertSession(session: AiChatSessionEntity): Long
 
@@ -47,5 +50,17 @@ interface AiChatDao {
     suspend fun clearEverything() {
         clearAllMessages()
         clearAllSessions()
+    }
+
+    @Query("DELETE FROM ai_chat_sessions WHERE timestamp < :threshold")
+    suspend fun deleteOldSessions(threshold: Long)
+
+    @Query("DELETE FROM ai_chat_messages WHERE sessionId NOT IN (SELECT id FROM ai_chat_sessions)")
+    suspend fun deleteOrphanedMessages()
+
+    @Transaction
+    suspend fun cleanupOldHistory(threshold: Long) {
+        deleteOldSessions(threshold)
+        deleteOrphanedMessages()
     }
 }

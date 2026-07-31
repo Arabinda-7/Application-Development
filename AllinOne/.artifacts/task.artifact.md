@@ -1,14 +1,5 @@
-# Tasks - Fix Habit/Workout Completion Sync Issues
+# Task List - AI Assistant Conversational Expansion
 
-- [x] Update `DataManager.kt` for immediate save support
-- [x] Update Habit Section
-    - [x] `HabitTrackerActivity.kt`: Listen to `dataChangeSignal`
-    - [x] `HabitAdapter.kt`: Update callback and trigger immediate save
-    - [x] `HabitListSection.kt`: Pass immediate flag
-- [x] Update Workout Section
-    - [x] `WorkoutRoutineActivity.kt`: Listen to `dataChangeSignal`
-    - [x] `WorkoutAdapter.kt`: Update callback and trigger immediate save
-    - [x] `WorkoutListSection.kt`: Pass immediate flag
-- [x] Verification
-    - [x] Build project
-    - [x] Manual verification of completion persistence
+- [x] Modify `AssistantBrain.kt` to enhance loading and matching logic
+- [x] Verify build and basic conversational triggers
+- [x] Create walkthrough

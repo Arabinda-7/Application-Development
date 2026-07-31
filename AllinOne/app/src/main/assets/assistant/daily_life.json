@@ -1,0 +1,902 @@
+[
+  {
+    "keys": ["starting my morning", "morning routine time", "beginning my morning", "starting morning routine", "morning routine underway", "starting the morning routine"],
+    "values": [
+      "Good morning! Starting the day with a solid routine sets such a wonderful tone.",
+      "Morning! What's the first thing on your morning routine checklist today?",
+      "Hope your morning routine goes smoothly and gives you great energy!",
+      "A gentle morning routine makes the whole day feel brighter. Enjoy your start!"
+    ]
+  },
+  {
+    "keys": ["ending my day", "wrapping up the day", "heading off for the night", "ending the day now", "wrapping up my day", "day is coming to an end"],
+    "values": [
+      "You did great today! Time to put work away and enjoy a peaceful night.",
+      "Wrapping up the day feels so satisfying. What was the best part of your day?",
+      "Rest up well tonight! You earned a tranquil and quiet evening.",
+      "Wishing you a serene night as you wind down your day. Take care!"
+    ]
+  },
+  {
+    "keys": ["weekend is here", "excited for the weekend", "happy weekend time", "weekend plans today", "enjoying the weekend", "weekend vibes right now"],
+    "values": [
+      "Happy weekend! Any fun plans or are you taking it easy and relaxing?",
+      "Woohoo, weekend time! Hope it's filled with laughter and great moments.",
+      "Weekends are the best for recharging. Enjoy every minute of your time off!",
+      "Hope your weekend brings you plenty of rest and joyful adventures."
+    ]
+  },
+  {
+    "keys": ["holiday season", "celebrating the holidays", "happy holiday time", "holiday celebrations today", "enjoying the holiday", "festive holiday vibes"],
+    "values": [
+      "Happy holidays! Celebrating with loved ones brings so much warmth.",
+      "Wishing you a wonderful, festive holiday filled with joy and delicious food!",
+      "Holidays are so special! What's your favorite tradition during this time?",
+      "Hope your holiday celebration is bright, cheerful, and memorable!"
+    ]
+  },
+  {
+    "keys": ["it's my birthday", "celebrating my birthday today", "birthday time today", "my birthday today", "happy birthday to me", "birthday celebration today"],
+    "values": [
+      "Happy Birthday! Wishing you a fantastic year filled with health and happiness!",
+      "Happy Birthday! Hope you get spoiled with love, cake, and great memories today.",
+      "Cheers to another wonderful year around the sun! Enjoy your special day to the fullest.",
+      "Happy Birthday! May all your wishes for the coming year come true."
+    ]
+  },
+  {
+    "keys": ["on vacation now", "going on vacation soon", "vacation trip time", "vacation time today", "heading on vacation", "enjoying vacation trip"],
+    "values": [
+      "Vacation mode activated! Have an incredible and relaxing trip.",
+      "Awesome, Travelling and taking a vacation is so refreshing. Where are you heading?",
+      "Enjoy every single moment of your vacation! Take lots of photos and memories.",
+      "Wishing you smooth travels and a restful, fun-filled vacation!"
+    ]
+  },
+  {
+    "keys": ["having lunch now", "lunchtime break", "eating my lunch", "lunch time today", "taking a lunch break", "eating lunch right now"],
+    "values": [
+      "Enjoy your lunch break! What delicious food are you eating today?",
+      "Lunchtime! Step away from work and savor every bite of your meal.",
+      "Hope you have a tasty and satisfying lunch! Enjoy the midday breather.",
+      "Bon appétit! Take your time and recharge over lunch."
+    ]
+  },
+  {
+    "keys": ["having dinner now", "dinnertime break", "eating my dinner", "dinner time today", "eating dinner right now", "dinnertime with family"],
+    "values": [
+      "Enjoy your dinner! A warm evening meal is the perfect way to wrap up the day.",
+      "Dinnertime! What's on the menu for dinner tonight?",
+      "Hope your dinner is super tasty! Have a cozy and pleasant evening meal.",
+      "Bon appétit! Enjoy your dinner and a relaxing evening afterwards."
+    ]
+  },
+  {
+    "keys": ["having breakfast now", "breakfast time", "eating my morning meal", "breakfast time today", "eating breakfast right now", "morning breakfast routine"],
+    "values": [
+      "Breakfast is the fuel for a great day! What are you having this morning?",
+      "Good morning! Enjoy your breakfast and have a wonderful day ahead.",
+      "Nothing beats a delicious morning breakfast! Enjoy every bite.",
+      "Hope your breakfast gives you awesome energy for the day!"
+    ]
+  },
+  {
+    "keys": ["relaxing at home", "lounging around home", "home relaxation time", "relaxing at home today", "quiet time at home", "home chill time"],
+    "values": [
+      "Home is where the heart relaxes! Enjoy your peaceful time at home.",
+      "Lounging around at home is so cozy. Are you reading, watching TV, or just resting?",
+      "Hope your home relaxation time brings you total peace and comfort.",
+      "Enjoy your cozy sanctuary! Put your feet up and unwind."
+    ]
+  },
+  {
+    "keys": ["working hard today", "busy with work tasks", "focused on work today", "working hard right now", "putting in hard work", "work mode on today"],
+    "values": [
+      "Your hard work and dedication are admirable! Keep pushing forward.",
+      "Focused work brings great results! Remember to take short stretch breaks.",
+      "You're putting in solid effort today! Hope work goes smoothly for you.",
+      "Keep up that great work ethic! Take pride in what you're accomplishing."
+    ]
+  },
+  {
+    "keys": ["studying for exams", "study session time", "hitting the books today", "studying for exam now", "exam study prep", "deep study session"],
+    "values": [
+      "Good luck with your studying! Take it one topic at a time, you've got this.",
+      "Study sessions take focus and patience. Remember to take quick brain breaks!",
+      "You're preparing so well! Wishing you sharp recall and great success.",
+      "Keep going! Your hard work studying will pay off on exam day."
+    ]
+  },
+  {
+    "keys": ["commuting to work", "on my morning commute", "riding the bus to work", "commuting right now", "work commute today", "traveling to work"],
+    "values": [
+      "Hope your commute is smooth and hassle-free today! Listening to music or a podcast?",
+      "Commuting can be a nice transition time. Have a safe and comfortable ride!",
+      "Wishing you clear roads and a calm commute on your way to work.",
+      "Enjoy your commute time! Hope your workday starts off great."
+    ]
+  },
+  {
+    "keys": ["grocery shopping today", "at the store shopping", "buying groceries now", "grocery store run", "doing grocery shopping", "buying food groceries"],
+    "values": [
+      "Grocery runs keep the kitchen stocked! Don't forget your favorite snacks.",
+      "Hope you find all the fresh ingredients you need today! Happy shopping.",
+      "Getting groceries done feels so satisfying once you're back home.",
+      "Hope the checkout lines are short and sweet for you today!"
+    ]
+  },
+  {
+    "keys": ["cleaning the house", "tidying up the home", "deep cleaning today", "cleaning house right now", "house cleaning session", "cleaning up my home"],
+    "values": [
+      "A clean house brings such peace of mind! Put on some fun music while cleaning.",
+      "Tidying up makes your living space feel brand new. Great job!",
+      "Hope the house cleaning goes quickly and easily for you today.",
+      "Enjoy the fresh, spotless home when you finish up! Take care."
+    ]
+  },
+  {
+    "keys": ["exercising at the gym", "gym workout session", "hitting the gym today", "gym exercise time", "working out at gym", "exercising right now"],
+    "values": [
+      "Crush that workout! Getting exercise in brings such fantastic energy.",
+      "Awesome job prioritizing health! Don't forget to stretch and stay hydrated.",
+      "Gym sessions build strength and mood! Have a powerful workout today.",
+      "Great dedication! Take care of your body and enjoy the post-workout high."
+    ]
+  },
+  {
+    "keys": ["reading a chapter", "enjoying a reading session", "reading my book now", "reading a chapter today", "chapter reading time", "reading some pages"],
+    "values": [
+      "Diving into a good chapter is such a delight! What book are you reading?",
+      "Enjoy your reading time! Getting lost in pages is pure relaxation.",
+      "Hope the story keeps you hooked! Have a wonderful reading session.",
+      "Books open up whole new worlds! Enjoy every sentence."
+    ]
+  },
+  {
+    "keys": ["watching tv shows", "basking in tv time", "enjoying a show right now", "watching tv right now", "tv show time today", "watching a show"],
+    "values": [
+      "TV time is great for kicking back! What show are you watching right now?",
+      "Grab a cozy blanket and snack! Enjoy your show.",
+      "Hope the plot is super engaging! Enjoy watching TV today.",
+      "Sit back, relax, and enjoy your favorite episodes!"
+    ]
+  },
+  {
+    "keys": ["going to sleep now", "heading to sleep", "sleep time for me", "going to sleep pal", "heading off to sleep", "time to sleep now"],
+    "values": [
+      "Good night! Wishing you deep, uninterrupted, and peaceful sleep.",
+      "Sleep tight! Get comfortable and let your mind rest completely.",
+      "Rest up well! Catch you again tomorrow morning.",
+      "Wishing you sweet dreams and a restful sleep tonight."
+    ]
+  },
+  {
+    "keys": ["waking up early", "early morning wake up", "up early today", "woke up early today", "early morning wake up time", "waking up at dawn"],
+    "values": [
+      "Waking up early gives you such a calm head start on the day! Good morning.",
+      "Morning, The early quiet hours are so peaceful. Enjoy your early start.",
+      "Hope your early morning starts off bright and productive!",
+      "Good morning! Grab a warm drink and stretch out into the day."
+    ]
+  },
+  {
+    "keys": ["meeting up with friends", "hanging with friends today", "friends meetup time", "meeting my friends today", "hanging out with my crew", "friends meetup now"],
+    "values": [
+      "Meeting friends is the best highlight of any day! Have a fantastic time.",
+      "Enjoy your friends meetup! Cherish the laughter and good conversations.",
+      "Good company makes life sweet! Have fun catching up with your friends.",
+      "Hope you all have an awesome time together today! Take care."
+    ]
+  },
+  {
+    "keys": ["spending time with family", "family time today", "reuniting with family", "family time right now", "spending time with relatives", "family gathering today"],
+    "values": [
+      "Family time is priceless! Enjoy every moment together today.",
+      "So nice! Warm family moments create lifelong memories.",
+      "Hope your family time is full of warmth, love, and laughter.",
+      "Cherish the quality time with your family! Have a wonderful day."
+    ]
+  },
+  {
+    "keys": ["enjoying my favorite hobby", "hobby time today", "doing my hobby right now", "enjoying my hobby", "hobby session today", "spending time on hobby"],
+    "values": [
+      "Dedicating time to your hobby is so fulfilling! What hobby are you enjoying?",
+      "Hobbies bring so much passion and joy to life. Have fun creating/doing!",
+      "Awesome! Hope your hobby time brings you complete relaxation.",
+      "Enjoy every minute of your creative hobby time today!"
+    ]
+  },
+  {
+    "keys": ["celebrating an achievement", "celebrating a big win", "accomplished a goal today", "celebrating my success", "achievement celebration today", "celebrating my achievement"],
+    "values": [
+      "Congratulations—Celebrating your achievements is so important. Take pride in your success!",
+      "Woohoo, You worked hard for this win. Enjoy every second of your celebration!",
+      "So happy for your accomplishment! Cheers to your well-deserved victory.",
+      "Awesome news! Keep reaching high—you're doing fantastic!"
+    ]
+  },
+  {
+    "keys": ["feeling so busy today", "busy schedule today", "swamped with tasks today", "so busy right now", "busy day ahead today", "feeling super busy"],
+    "values": [
+      "Busy days can be intense! Take it one task at a time and take deep breaths.",
+      "Hang in there! You'll get through your busy schedule step by step.",
+      "Remember to take short rest breaks, even on busy days!",
+      "Wishing you calm efficiency as you handle your busy tasks today."
+    ]
+  },
+  {
+    "keys": ["taking a quick break", "break time for me", "taking a short rest break", "taking a quick breather", "quick break right now", "short rest break time"],
+    "values": [
+      "Breaks are well deserved! Step away, stretch out, and relax.",
+      "Enjoy your breather! Giving your mind a rest works wonders.",
+      "Good call taking a break! Come back refreshed whenever you're ready.",
+      "Relax and recharge! Hope your break gives you great fresh energy."
+    ]
+  },
+  {
+    "keys": ["staying productive today", "productive mindset today", "getting things done today", "keeping productive today", "productive work day", "staying productive right now"],
+    "values": [
+      "Productive days feel so empowering! Keep up that great momentum.",
+      "Awesome! Ticking items off your list brings so much satisfaction.",
+      "You're in the flow! Hope your productive streak continues smoothly.",
+      "Great focus today! Don't forget to celebrate your progress afterwards."
+    ]
+  },
+  {
+    "keys": ["enjoying my free time", "free time right now", "loving my free hours", "free time today", "enjoying leisure time", "having some free time"],
+    "values": [
+      "Free time is precious! Spend it doing whatever makes your heart happy.",
+      "Enjoy your leisure hours! Whether resting or playing, have fun.",
+      "Nothing beats unplanned free time. Relax and enjoy every second!",
+      "Wishing you a completely restful and enjoyable free time today."
+    ]
+  },
+  {
+    "keys": ["planning for tomorrow", "setting tomorrow's schedule", "preparing for tomorrow", "planning tomorrow's tasks", "tomorrow prep right now", "planning tomorrow today"],
+    "values": [
+      "Planning ahead sets you up for a calm, successful day tomorrow!",
+      "Great initiative! Organising tomorrow's tasks brings peace of mind tonight.",
+      "Hope tomorrow's plan goes smoothly and effortlessly for you.",
+      "Preparation makes everything easier! Enjoy a peaceful night after planning."
+    ]
+  },
+  {
+    "keys": ["reflecting on today", "thinking back on my day", "daily reflection time", "reflecting on the day", "daily reflection right now", "thinking about today's events"],
+    "values": [
+      "Reflecting on your day is a beautiful way to process and grow. How was today overall?",
+      "Taking time to reflect brings clarity. Focus on the positive moments!",
+      "Hope your reflection brings you peace and gratitude for today.",
+      "Reflecting helps us appreciate life's small steps. Have a quiet evening."
+    ]
+  },
+  {
+    "keys": ["morning coffee time routine", "drinking morning coffee routine", "morning coffee ritual", "coffee routine in morning", "starting day with coffee"],
+    "values": [
+      "The morning coffee ritual is pure bliss! Enjoy that fresh warm brew.",
+      "Sipping morning coffee sets such a cozy tone for the day ahead.",
+      "Hope your morning coffee gives you the perfect boost! Have a great day.",
+      "Nothing beats that morning coffee aroma! Enjoy your peaceful coffee time."
+    ]
+  },
+  {
+    "keys": ["evening wind down routine", "unwinding in the evening", "evening wind down time", "unwinding after a long day", "evening relaxation routine"],
+    "values": [
+      "Evening wind-downs are so comforting. Dim the lights and relax!",
+      "Unwinding in the evening restores your energy for tomorrow. Enjoy your quiet time.",
+      "Hope your evening wind-down brings you complete rest and calm.",
+      "Take it easy tonight! Put away stress and enjoy your evening."
+    ]
+  },
+  {
+    "keys": ["sunday relaxation time", "lazy sunday vibes", "relaxing on sunday", "sunday chill time", "peaceful sunday afternoon"],
+    "values": [
+      "Lazy Sundays are for recharging completely! Enjoy your peaceful day.",
+      "Happy Sunday! Soak in the calm before the new week begins.",
+      "Sunday relaxation is well deserved. Put your feet up and enjoy!",
+      "Wishing you a cozy, quiet, and tranquil Sunday afternoon."
+    ]
+  },
+  {
+    "keys": ["friday night vibes", "finally friday night", "friday night feeling", "friday night relaxation", "weekend starts friday night"],
+    "values": [
+      "Finally Friday night! Time to kick back and enjoy the weekend energy.",
+      "Friday night is here! What are your relaxation plans for tonight?",
+      "Woohoo, The workweek is done. Enjoy your Friday night to the fullest!",
+      "Happy Friday night! Wishing you a fun and restorative start to the weekend."
+    ]
+  },
+  {
+    "keys": ["summer vacation time", "enjoying summer break", "summer vacation trip", "summer holiday vibes", "summer vacation days"],
+    "values": [
+      "Summer vacation vibes are sunshine and joy! Enjoy every warm day.",
+      "Have a fantastic summer vacation! Take in the outdoors and fresh air.",
+      "Summer break is all about fun and relaxation. Make great memories!",
+      "Wishing you a bright, cheerful, and sunny summer vacation!"
+    ]
+  },
+  {
+    "keys": ["winter holiday vibes", "cozy winter holiday", "winter vacation time", "enjoying winter holidays", "cozy winter break"],
+    "values": [
+      "Cozy winter holidays are warm tea, blankets, and good cheer! Enjoy.",
+      "Winter holiday magic! Stay warm and enjoy the cozy season.",
+      "Hope your winter break is filled with warmth and peaceful moments.",
+      "Enjoy the crisp winter air and cozy indoor relaxation!"
+    ]
+  },
+  {
+    "keys": ["eating a healthy lunch", "healthy salad for lunch", "nutritious lunch break", "healthy lunch option", "eating clean for lunch"],
+    "values": [
+      "Fueling your body with a healthy lunch brings awesome sustained energy!",
+      "Yum! Healthy, colorful lunches make you feel great all afternoon.",
+      "Great choice prioritizing nutrition! Enjoy your fresh meal.",
+      "Hope your healthy lunch is super tasty and energizing!"
+    ]
+  },
+  {
+    "keys": ["having a late night snack", "midnight snack time", "grabbing a late night snack", "late night munchies", "midnight snack break"],
+    "values": [
+      "Midnight snacks hit different! What treat are you enjoying right now?",
+      "Late night treats are cozy comfort! Enjoy your quiet midnight bite.",
+      "Yum! Enjoy your snack and get cozy for sleep afterwards.",
+      "Hope your late night snack hits the spot! Sleep tight when you head to bed."
+    ]
+  },
+  {
+    "keys": ["drinking warm morning tea", "morning tea routine", "warm tea in morning", "starting day with tea", "morning herbal tea"],
+    "values": [
+      "Warm morning tea is such a gentle, soothing start to the day.",
+      "Sipping tea in the quiet morning brings pure peace. Enjoy!",
+      "Hope your morning tea warms you up and starts your day bright.",
+      "Have a lovely, tranquil morning tea break today!"
+    ]
+  },
+  {
+    "keys": ["couch potato afternoon", "lounging on the couch today", "couch chill afternoon", "couch lounge afternoon", "spending afternoon on couch"],
+    "values": [
+      "Couch potato days are essential for complete rest! Enjoy lounging.",
+      "Nothing wrong with a cozy couch afternoon. Relax and take it easy!",
+      "Comfort level 100! Enjoy your cozy afternoon on the couch.",
+      "Rest up well! Couch afternoons are the best recharge time."
+    ]
+  },
+  {
+    "keys": ["working from home today", "remote work day", "wfh today", "working remotely today", "home office workday"],
+    "values": [
+      "Remote work days offer great flexibility! Enjoy working in your comfortable space.",
+      "WFH vibes! Remember to step outside for fresh air during breaks.",
+      "Hope your remote work day is super productive and stress-free!",
+      "Enjoy your comfortable home office setup today! Have a good workday."
+    ]
+  },
+  {
+    "keys": ["group study session", "studying with classmates", "studying together in group", "group study time", "classmates study session"],
+    "values": [
+      "Group study sessions make learning fun and collaborative! Good luck.",
+      "Awesome! Brainstorming together makes tough subjects much easier.",
+      "Hope your group study session is super productive and helpful!",
+      "Teamwork in studying leads to great success. Have a good session!"
+    ]
+  },
+  {
+    "keys": ["stuck in commute traffic", "traffic jam on the way", "heavy traffic commute", "traffic jam right now", "slow traffic commute"],
+    "values": [
+      "Traffic jams require patience! Put on some calm music or a good podcast.",
+      "Hang in there! Take deep breaths and drive safely in the traffic.",
+      "Traffic delays can be annoying, but safety comes first. Take care!",
+      "Hope the traffic clears up quickly for you! Drive safely."
+    ]
+  },
+  {
+    "keys": ["shopping for new clothes", "clothes shopping trip", "apparel shopping today", "shopping spree for outfits", "buying new clothes"],
+    "values": [
+      "Clothes shopping is so fun! Hope you find awesome outfits.",
+      "Fresh outfits bring such a fun style boost! Enjoy shopping.",
+      "Have fun trying on new clothes! Hope you get great deals.",
+      "Enjoy your shopping spree! Take care and have fun."
+    ]
+  },
+  {
+    "keys": ["spring cleaning session", "cleaning out closets", "spring cleaning today", "decluttering house session", "spring clean time"],
+    "values": [
+      "Decluttering and spring cleaning brings fresh new energy to your home!",
+      "Sorting out closets feels so liberating once it's done. Great job!",
+      "Hope your spring cleaning session goes quickly and smoothly.",
+      "Enjoy your freshly organized, clutter-free space!"
+    ]
+  },
+  {
+    "keys": ["doing a home workout", "bodyweight exercise at home", "home workout routine", "exercising at home today", "home fitness session"],
+    "values": [
+      "Home workouts are so convenient and effective! Crush those reps.",
+      "Great dedication getting your workout done at home! Keep it up.",
+      "Awesome fitness momentum! Stretch out and hydrate after your home workout.",
+      "Hope your home workout gives you an amazing energy boost!"
+    ]
+  },
+  {
+    "keys": ["reading a book before bed", "nighttime reading routine", "reading bedtime chapter", "reading before sleeping", "cozy bed reading"],
+    "values": [
+      "Reading before bed calms the mind and prepares you for sweet dreams.",
+      "A bedtime chapter is the ultimate relaxing routine. Enjoy reading!",
+      "Hope your book brings cozy evening quiet! Sleep tight afterwards.",
+      "Wishing you a peaceful bedtime reading moment and good night's sleep."
+    ]
+  },
+  {
+    "keys": ["movie marathon night", "watching movies all evening", "movie marathon session", "film marathon tonight", "binge watching movies tonight"],
+    "values": [
+      "Movie marathons are so fun! Grab popcorn and your favorite drinks.",
+      "Awesome! What theme or series are you watching for your marathon?",
+      "Enjoy every single movie tonight! Have a blast watching.",
+      "Movie night perfection! Relax and enjoy the show marathon."
+    ]
+  },
+  {
+    "keys": ["sleeping in late today", "enjoying sleeping in", "slept in late today", "sleeping late morning", "lazy morning sleep in"],
+    "values": [
+      "Sleeping in late is pure luxury! Enjoy catching up on rest.",
+      "Lazy mornings sleeping in are so well deserved. Good morning!",
+      "Hope you woke up feeling completely refreshed and restored!",
+      "Enjoy your slow, relaxed start to the day after sleeping in."
+    ]
+  },
+  {
+    "keys": ["morning stretch routine", "stretching after waking up", "morning body stretch", "stretching out in morning", "wake up stretch routine"],
+    "values": [
+      "Stretching in the morning wakes up every muscle so gently! Good habit.",
+      "Morning stretches bring flexibility and flow to your day. Enjoy!",
+      "Hope your morning stretch session leaves you feeling nimble and refreshed.",
+      "Great morning routine! Stretch out and have a brilliant day."
+    ]
+  },
+  {
+    "keys": ["coffee date with a friend", "meeting friend for coffee", "coffee meetup with friend", "coffee date today", "drinking coffee with buddy"],
+    "values": [
+      "Coffee dates with friends bring the best conversations! Have fun.",
+      "Enjoy your coffee meetup! Good friends and hot coffee make the best combo.",
+      "Hope you have a delightful catch-up over coffee today!",
+      "Cherish the fun chat over coffee! Have a lovely time."
+    ]
+  },
+  {
+    "keys": ["family dinner night", "eating dinner with family", "family dinner time", "evening family dinner", "dinner with my family"],
+    "values": [
+      "Family dinners nourish both body and soul! Enjoy the shared meal.",
+      "Gathering around the table with family is so special. Have fun!",
+      "Hope your family dinner is filled with delicious food and laughter.",
+      "Enjoy your cozy family dinner night! Take care."
+    ]
+  },
+  {
+    "keys": ["working on a DIY craft", "crafting hobby session", "diy project hobby", "crafting time today", "making diy crafts"],
+    "values": [
+      "DIY crafting is so creative and hands-on! What are you building/making?",
+      "Awesome! Making things with your own hands brings so much pride.",
+      "Enjoy your crafting time! Let your imagination shine.",
+      "Hope your DIY craft turns out looking amazing! Have fun."
+    ]
+  },
+  {
+    "keys": ["celebrating graduation", "graduation day achievement", "graduating today celebration", "graduation milestone celebration", "celebrating my graduation"],
+    "values": [
+      "Congratulations on graduating! Your hard work and dedication paid off big time.",
+      "What a huge milestone! So proud of your graduation success.",
+      "Cheers to your bright future! Celebrate big on your graduation day.",
+      "Happy Graduation! Wishing you massive success in your next chapter."
+    ]
+  },
+  {
+    "keys": ["feeling overwhelmed with tasks", "too much on my plate today", "overwhelmed by work today", "feeling overwhelmed right now", "task overload today"],
+    "values": [
+      "Take a slow, deep breath. Focus on just ONE small task at a time.",
+      "It's completely okay to pause. Step back for 5 minutes to clear your mind.",
+      "You don't have to finish everything at once. Be kind to yourself today.",
+      "I'm here for support. Break things down gently and take it step by step."
+    ]
+  },
+  {
+    "keys": ["afternoon tea break", "taking a tea breather", "midday tea break", "afternoon tea time", "relaxing tea break afternoon"],
+    "values": [
+      "Afternoon tea breaks are the perfect way to conquer the midday slump!",
+      "Sip slowly and enjoy your tea! A warm breather works wonders.",
+      "Hope your afternoon tea break gives you peaceful fresh energy.",
+      "Enjoy your tea time! Take a moment for yourself."
+    ]
+  },
+  {
+    "keys": ["crushing my daily goals", "hitting all my daily targets", "completed daily goals today", "achieved my goals today", "smashing daily targets"],
+    "values": [
+      "Crushing those daily goals! Taking control of your day feels awesome.",
+      "Way to go! You set your mind to it and nailed every target.",
+      "Great job getting things accomplished today! Take pride in your effort.",
+      "Fantastic productivity! Reward yourself with some great rest tonight."
+    ]
+  },
+  {
+    "keys": ["peaceful afternoon free time", "quiet afternoon leisure", "relaxing afternoon hours", "free afternoon time", "calm afternoon leisure"],
+    "values": [
+      "Quiet afternoon free time is so soothing. Enjoy the stillness!",
+      "So peaceful! Spend your afternoon doing whatever brings you happiness.",
+      "Hope your leisure afternoon brings you complete relaxation.",
+      "Enjoy every moment of your calm afternoon free time today."
+    ]
+  },
+  {
+    "keys": ["nighttime journal entry", "writing journal before sleep", "evening journal prep", "night journal entry", "journaling before bed"],
+    "values": [
+      "Nighttime journaling empties your mind of clutter for sleep. Great habit!",
+      "Reflecting in your journal before bed brings peace to your evening.",
+      "Enjoy your quiet writing time tonight! Sleep tight afterwards.",
+      "Wishing you a peaceful evening journaling session and sweet dreams."
+    ]
+  },
+  {
+    "keys": ["evening reflection walk", "walking and reflecting on the day", "strolling and reflecting evening", "evening walk reflection", "reflective evening walk"],
+    "values": [
+      "Evening walks in the cool air clear your mind so gently.",
+      "Reflecting while walking is such a peaceful habit. Enjoy your stroll!",
+      "Hope your evening walk helps you unwind from the day's hustle.",
+      "Enjoy the sunset or quiet night breeze on your walk! Take care."
+    ]
+  },
+  {
+    "keys": ["fresh morning air walk", "morning walk routine", "walking in fresh morning air", "crisp morning walk", "early walk outdoors"],
+    "values": [
+      "Fresh morning air wakes up your senses so naturally! Have a great walk.",
+      "Morning walks set a bright, positive tone for the whole day ahead.",
+      "Enjoy the quiet morning streets and crisp breeze! Take care.",
+      "Hope your morning walk leaves you feeling energized and refreshed!"
+    ]
+  },
+  {
+    "keys": ["cozy night in bed", "tucked in bed ready for sleep", "cozy bed night", "snug in bed tonight", "tucked in bed relaxing"],
+    "values": [
+      "Being tucked in cozy bed is the best feeling in the world! Good night.",
+      "Snuggle in under the blankets and let go of all stress. Sleep tight!",
+      "Wishing you the coziest, warmest, and most restful night in bed.",
+      "Rest your mind and body completely tonight. Sweet dreams!"
+    ]
+  },
+  {
+    "keys": ["saturday morning bliss", "relaxing saturday morning", "saturday morning vibes", "enjoying saturday morning", "peaceful saturday morning"],
+    "values": [
+      "Saturday mornings have a special kind of magic! Enjoy your slow start.",
+      "Happy Saturday! No rush, no stress—just pure weekend bliss.",
+      "Hope your Saturday morning is filled with warm coffee and smiles!",
+      "Enjoy your beautiful Saturday morning to the fullest!"
+    ]
+  },
+  {
+    "keys": ["new year celebration", "welcoming the new year", "happy new year time", "celebrating new year", "new year festival celebration"],
+    "values": [
+      "Happy New Year! Wishing you fresh beginnings, joy, and grand success!",
+      "Cheers to a brand new year filled with new opportunities and happiness!",
+      "Hope your New Year celebration is unforgettable and joyful!",
+      "May the New Year bring you peace, health, and bright milestones!"
+    ]
+  },
+  {
+    "keys": ["planning a birthday party", "birthday party prep", "organizing birthday party", "birthday celebration planning", "preparing birthday party"],
+    "values": [
+      "Party planning is exciting! Hope the birthday celebration turns out awesome.",
+      "Awesome! Cake, decorations, and friends make the best party.",
+      "Hope your birthday party planning goes smoothly and effortlessly!",
+      "Have fun preparing for the big celebration! It'll be great."
+    ]
+  },
+  {
+    "keys": ["beach vacation day", "spending the day at the beach", "sunny beach day vacation", "beach vacation vibes", "relaxing at the beach today"],
+    "values": [
+      "Beach days are paradise! Listen to the waves and soak in the sun.",
+      "Ocean breezes and sandy toes! Enjoy your wonderful beach day.",
+      "Don't forget sun protection! Have a blast by the ocean shore.",
+      "Wishing you a sunny, relaxing, and beautiful day at the beach!"
+    ]
+  },
+  {
+    "keys": ["quick 15-minute lunch break", "grabbing a fast lunch", "fast lunch break", "quick lunch break today", "hasty lunch break"],
+    "values": [
+      "Even a quick lunch break helps recharge your battery! Enjoy your food.",
+      "Make sure to chew slowly and relax for those 15 minutes!",
+      "Hope your quick lunch break gives you a nice little boost.",
+      "Eat well and take a deep breath before jumping back into tasks!"
+    ]
+  },
+  {
+    "keys": ["fancy dinner out", "eating at a nice restaurant", "dining out tonight", "fancy dinner night", "eating a special dinner out"],
+    "values": [
+      "Dining out is such a treat! Enjoy the wonderful food and atmosphere.",
+      "Ooh, fancy dinner! What delicious dish are you ordering tonight?",
+      "Bon appétit! Have a delightful and memorable evening out.",
+      "Enjoy the great service and tasty food tonight! Have fun."
+    ]
+  },
+  {
+    "keys": ["pancake breakfast morning", "making pancakes for breakfast", "pancake morning feast", "eating pancakes for breakfast", "pancake breakfast today"],
+    "values": [
+      "Pancake mornings are elite! Warm syrup and fluffy pancakes—yum!",
+      "Delicious start to the day! Enjoy your delicious pancake breakfast.",
+      "Nothing beats homemade pancakes on a cozy morning! Enjoy every bite.",
+      "Yum! Hope your pancake breakfast gives you happy morning energy."
+    ]
+  },
+  {
+    "keys": ["reading in a hammock", "hammock relaxation time", "swinging in hammock reading", "reading outdoors in hammock", "hammock book session"],
+    "values": [
+      "Reading in a hammock in the breeze is peak relaxation! Enjoy.",
+      "Gentle swaying and a good book—what a dream combination!",
+      "Hope your hammock reading session brings total peaceful vibes.",
+      "Enjoy the gentle outdoor breeze while reading today!"
+    ]
+  },
+  {
+    "keys": ["office workday session", "at the office working today", "in office workday", "working at office today", "office work day"],
+    "values": [
+      "Hope your office workday is productive and smooth-sailing!",
+      "Have a great day at the office! Say hi to your coworkers.",
+      "Remember to take desk stretches and coffee breaks at the office today.",
+      "Wishing you a successful and stress-free office workday!"
+    ]
+  },
+  {
+    "keys": ["library study day", "studying at the library", "quiet library study session", "library study time", "hitting the library today"],
+    "values": [
+      "The library is the ultimate sanctuary for focus! Enjoy your study session.",
+      "Quiet surroundings make studying so productive. Good luck!",
+      "Hope you accomplish all your reading and research at the library today.",
+      "Wishing you deep focus and smooth studying at the library!"
+    ]
+  },
+  {
+    "keys": ["train ride commute", "commuting by train today", "riding the train to work", "train commute session", "on the train commuting"],
+    "values": [
+      "Train rides are great for gazing out the window or reading! Enjoy the commute.",
+      "Hope your train ride commute is comfortable and on time today.",
+      "Relax on the train ride! Have a safe and pleasant journey to your destination.",
+      "Wishing you a smooth train commute today. Take care!"
+    ]
+  },
+  {
+    "keys": ["waiting for online delivery", "online order arriving today", "package delivery today", "online shopping delivery time", "delivery box arriving today"],
+    "values": [
+      "Waiting for packages is like waiting for a mini holiday gift! Hope it arrives soon.",
+      "Package delivery day! Hope everything inside is in perfect condition.",
+      "Exciting! Enjoy unboxing your online order when it gets delivered.",
+      "Fingers crossed for a swift delivery today! Enjoy your purchase."
+    ]
+  },
+  {
+    "keys": ["doing laundry today", "laundry day chores", "washing clothes today", "doing laundry chores", "laundry day session"],
+    "values": [
+      "Laundry day keeps everything fresh! Enjoy the scent of clean clothes.",
+      "Getting laundry washed and folded feels so satisfying once finished.",
+      "Put on some music while folding laundry! Makes chores fly by.",
+      "Hope your laundry day chores go quickly and easily today!"
+    ]
+  },
+  {
+    "keys": ["outdoor jog routine", "going for a morning jog", "jogging outdoors today", "outdoor jog workout", "going for a jog routine"],
+    "values": [
+      "Jogging in the fresh air brings such an incredible cardio high!",
+      "Great effort getting outdoors for a jog! Stay hydrated and paced.",
+      "Enjoy the rhythm of your run! Hope your outdoor jog feels great.",
+      "Awesome stamina! Stretch well after your jog today."
+    ]
+  },
+  {
+    "keys": ["audiobook while walking routine", "listening to audiobook on walk", "audiobook walk session", "walking and listening to audiobook", "walking with audiobook"],
+    "values": [
+      "Combining exercise with a good story is brilliant! What book are you listening to?",
+      "Audiobook walks make miles fly by effortlessly. Enjoy your walk!",
+      "Hope the narrator's voice and plot make your walk extra enjoyable.",
+      "Have a lovely, engaging audiobook walk today! Take care."
+    ]
+  },
+  {
+    "keys": ["binge watching a new season", "watching whole season today", "season premiere binge", "bingeing a new season", "tv season binge session"],
+    "values": [
+      "Binge watching a fresh season is so thrilling! Hope the cliffhangers are amazing.",
+      "Grab your favorite snacks and get comfortable! Enjoy the season marathon.",
+      "No spoilers! Have a blast watching episode after episode.",
+      "Enjoy your epic season binge today! Relax and watch away."
+    ]
+  },
+  {
+    "keys": ["woke up after deep sleep", "slept deeply last night", "restorative deep sleep", "deep sleep last night", "slept so deeply"],
+    "values": [
+      "Deep sleep is the ultimate cure for mind and body! Glad you slept well.",
+      "Waking up after deep, restorative sleep feels like magic. Good morning!",
+      "You must feel so recharged today! Make the most of your great energy.",
+      "Awesome! Solid sleep sets up such a wonderful day ahead."
+    ]
+  },
+  {
+    "keys": ["waking up with the sunrise", "watching sunrise wake up", "woke up at sunrise", "sunrise morning wake up", "waking at golden hour sunrise"],
+    "values": [
+      "Waking up with the golden sunrise is so majestic! Good morning.",
+      "The world is quiet and peaceful at sunrise. Enjoy the morning dawn.",
+      "Sunrise wakeups bring so much natural warmth. Have a brilliant day!",
+      "Good morning! Soak in the beautiful morning light."
+    ]
+  },
+  {
+    "keys": ["catching up with an old friend", "reconnecting with old friend", "reconnecting with old friends", "catching up old friends", "reconnecting with old pal"],
+    "values": [
+      "Reconnecting with old friends feels like no time has passed! Enjoy catching up.",
+      "Old friends hold so many fond memories. Have a wonderful reunion chat!",
+      "So heartwarming! Enjoy sharing stories and laughing about old times.",
+      "Cherish the connection! Hope your catch-up with your old friend goes great."
+    ]
+  },
+  {
+    "keys": ["family game night", "playing games with family", "family board game night", "game night with family", "family fun game night"],
+    "values": [
+      "Family game nights bring out the best laughs and friendly competition!",
+      "Awesome, Board games or card games? Have a fantastic time together.",
+      "Hope your family game night is full of joy and fun memories.",
+      "Enjoy the quality time playing together! May the best player win!"
+    ]
+  },
+  {
+    "keys": ["painting and drawing hobby", "art hobby session today", "painting hobby session", "sketching and drawing hobby", "doing art hobby today"],
+    "values": [
+      "Painting and drawing let your soul speak through colors! Enjoy creating.",
+      "Awesome! Creative art sessions bring so much peaceful joy.",
+      "Let the colors and lines flow freely today. Have fun painting/drawing!",
+      "Hope your art hobby session turns out to be deeply relaxing and fun!"
+    ]
+  },
+  {
+    "keys": ["celebrating a promotion", "got promoted today achievement", "career promotion celebration", "celebrating work promotion", "promoted at work celebration"],
+    "values": [
+      "Huge congratulations on your promotion! Your hard work got recognized.",
+      "Woohoo! Step up in your career—you earned every bit of this success.",
+      "So proud of your achievement! Celebrate big on your promotion today.",
+      "Wishing you massive success in your new role! Cheers to your promotion."
+    ]
+  },
+  {
+    "keys": ["crazy busy workday", "non-stop work today", "hectic busy workday", "crazy busy day at work", "non stop workday today"],
+    "values": [
+      "Hectic days test our focus! Take deep breaths and take it one email/task at a time.",
+      "You're powering through a tough, busy workday! Hang in there.",
+      "Remember to step away for a quick drink of water during non-stop tasks.",
+      "Wishing you strength and calm through this crazy busy workday!"
+    ]
+  },
+  {
+    "keys": ["10 minute coffee break", "quick coffee breather", "short 10 min coffee break", "quick coffee pause", "taking a 10 min coffee break"],
+    "values": [
+      "A 10-minute coffee breather is just enough to reset your focus! Enjoy.",
+      "Sip your coffee slowly and let your mind rest for these 10 minutes.",
+      "Hope your quick coffee break gives you a nice fresh boost!",
+      "Enjoy your quick coffee pause! Recharge and jump back in when ready."
+    ]
+  },
+  {
+    "keys": ["high energy productivity day", "burst of productivity today", "high energy work day", "feeling high energy and productive", "productive energy burst"],
+    "values": [
+      "Riding a wave of high energy feels unstoppable! Crush those tasks.",
+      "Awesome momentum! Make the most of this fantastic productivity burst.",
+      "You're in peak performance mode today! Keep up that great drive.",
+      "Enjoy accomplishing so much today! Remember to rest when finished."
+    ]
+  },
+  {
+    "keys": ["unwinding with music free time", "listening to music in free time", "music leisure time", "unwinding to tunes free time", "free time music listening"],
+    "values": [
+      "Unwinding to great tunes in your free time is pure bliss!",
+      "Music has a magical way of melting away stress. Enjoy your tunes.",
+      "Hope your playlist brings cozy, relaxing vibes to your free hours.",
+      "Enjoy listening to your favorite songs and relaxing today!"
+    ]
+  },
+  {
+    "keys": ["weekly goal planning session", "setting goals for next week", "weekly plan session", "planning my upcoming week", "weekly goal setting today"],
+    "values": [
+      "Planning your week ahead brings such clarity and confidence! Good job.",
+      "Setting clear weekly targets makes execution so much easier.",
+      "Hope your weekly planning session sets you up for a triumphant week!",
+      "Great initiative! Organize your goals and crush them step by step."
+    ]
+  },
+  {
+    "keys": ["daily grateful reflection", "reflecting on gratitude today", "daily gratitude reflection", "grateful thoughts reflection", "reflecting with gratitude today"],
+    "values": [
+      "Gratitude shifts our perspective to abundance and joy. Beautiful practice!",
+      "Reflecting on small daily blessings brings immense peace to the heart.",
+      "Hope your grateful reflection fills your evening with warmth and peace.",
+      "Wishing you a peaceful evening filled with gratitude and contentment."
+    ]
+  },
+  {
+    "keys": ["early morning workout session", "working out at dawn", "dawn workout routine", "early morning exercise session", "sunrise workout session"],
+    "values": [
+      "Dawn workouts prove such strong discipline! You're starting the day like a champion.",
+      "Crushing a workout early morning sets an incredible tone for the entire day!",
+      "Awesome effort getting your sweat in early! Enjoy your post-workout high.",
+      "Hope your early workout leaves you feeling unstoppable today!"
+    ]
+  },
+  {
+    "keys": ["night owl hours right now", "staying up late night owl", "night owl mode active", "up late at night owl", "late night owl hours"],
+    "values": [
+      "Night owl hours have a quiet, peaceful charm. Enjoy the quiet night!",
+      "Late night focus is real! Make sure to get good rest when you turn in.",
+      "Night owl vibes! Hope whatever you're working on or watching is enjoyable.",
+      "Enjoy the stillness of late night hours! Sleep well when it's time."
+    ]
+  },
+  {
+    "keys": ["long weekend holiday time", "enjoying long weekend break", "long weekend trip time", "long weekend vibes today", "enjoying a long weekend"],
+    "values": [
+      "Long weekends are the ultimate treat! Extra days to relax and enjoy.",
+      "Happy long weekend! Hope you get a wonderful balance of fun and rest.",
+      "Enjoy every single extra hour of your long weekend break!",
+      "Wishing you an awesome, memorable, and relaxing long weekend!"
+    ]
+  },
+  {
+    "keys": ["festival meal celebration", "enjoying a feast meal", "festive feast dinner", "holiday festival meal", "festive family feast meal"],
+    "values": [
+      "Festive feasts are all about good food and great company! Bon appétit.",
+      "Enjoy the delicious feast meal! Celebrate and savor every flavor.",
+      "Hope your festival meal is filled with laughter, love, and tasty dishes.",
+      "Wishing you a wonderful celebration feast with your loved ones!"
+    ]
+  },
+  {
+    "keys": ["got a surprise birthday gift", "surprise birthday present", "received surprise birthday gift", "surprise gift for birthday", "unexpected birthday present"],
+    "values": [
+      "Surprise birthday gifts are the sweetest! What did you get?",
+      "How wonderful! Being surprised by loved ones brings so much joy.",
+      "Awesome! Hope your surprise birthday gift brings you big smiles.",
+      "So thoughtful! Enjoy your special surprise birthday present."
+    ]
+  },
+  {
+    "keys": ["road trip vacation adventure", "scenic road trip trip", "going on a road trip", "road trip adventure today", "scenic road trip adventure"],
+    "values": [
+      "Road trips mean open highways, scenic views, and great music! Enjoy.",
+      "Have an incredible road trip adventure! Drive safely and take photos.",
+      "Nothing beats a road trip with good company. Have a blast!",
+      "Wishing you clear roads and unforgettable moments on your road trip!"
+    ]
+  },
+  {
+    "keys": ["eating homemade lunch box", "bringing lunch box to work", "homemade lunch box meal", "packed lunch box today", "eating homemade lunch"],
+    "values": [
+      "Homemade lunch boxes are healthier, tastier, and made with love! Enjoy.",
+      "Yum! Packing your own lunch feels so organized and satisfying.",
+      "Hope your homemade lunch box hits the spot today! Bon appétit.",
+      "Enjoy your homemade lunch break! Have a wonderful afternoon."
+    ]
+  },
+  {
+    "keys": ["candlelight dinner evening", "romantic candlelight dinner", "candlelight dinner night", "enjoying a candlelight dinner", "candlelight dinner setting"],
+    "values": [
+      "Candlelight dinners create such a cozy, special ambiance! Enjoy.",
+      "How lovely! Enjoy the warm firelight and delicious food tonight.",
+      "Wishing you a peaceful and romantic candlelight dinner evening.",
+      "Enjoy the serene atmosphere and wonderful meal! Have fun."
+    ]
+  },
+  {
+    "keys": ["eating smoothie breakfast bowl", "fruit smoothie bowl morning", "acai smoothie bowl breakfast", "smoothie bowl morning meal", "healthy smoothie bowl breakfast"],
+    "values": [
+      "Smoothie bowls look like art and taste delicious! Enjoy your breakfast.",
+      "Fresh fruit and toppings—what a vibrant way to start the morning!",
+      "Yum! Hope your smoothie breakfast bowl gives you glowing morning energy.",
+      "Enjoy your fresh, healthy morning bowl! Have a bright day."
+    ]
+  },
+  {
+    "keys": ["glad to share daily life with you my friend", "sharing my daily routine with you dear friend", "daily life conversations with you friend", "sharing daily moments my friend", "glad we share daily life chats friend"],
+    "values": [
+      "I'm so glad to share in your daily life moments too, my friend!",
+      "Thank you my friend! Sharing daily life chats with you is a true joy.",
+      "Always happy to hear about your day and keep you company, dear friend.",
+      "Wishing you peace, happiness, and smooth days ahead, my dear friend!"
+    ]
+  }
+]

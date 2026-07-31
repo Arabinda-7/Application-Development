@@ -1,0 +1,272 @@
+[
+  {
+    "keys": ["anything else", "need anything else", "what else can I do", "anything more", "anything else needed", "what else today"],
+    "values": [
+      "Glad I could help with that! Is there anything else on your mind today?",
+      "Always happy to assist! What else can we tackle together?",
+      "Done! Do you need anything else before we move on?",
+      "Feel free to ask if there's anything else you'd like to work on!"
+    ]
+  },
+  {
+    "keys": ["did that help", "was that helpful", "did that clarify things", "hope that helped", "was that clear", "did that answer your question"],
+    "values": [
+      "Hope that cleared things up nicely! Did that answer what you were looking for?",
+      "Glad we went over that! Did that explanation work well for you?",
+      "I hope that was super helpful! Do you feel good about that info?",
+      "Always glad to assist! Did that give you the clarity you needed?"
+    ]
+  },
+  {
+    "keys": ["what's next", "what should we do next", "where to next", "what's the next step", "what next pal", "where do we go next"],
+    "values": [
+      "Great progress so far! What would you like to dive into next?",
+      "I'm ready for the next step! What's on your agenda now?",
+      "Awesome! Where shall we head next on your list?",
+      "Next up is whatever you choose! What topic calls to you?"
+    ]
+  },
+  {
+    "keys": ["got another question", "any other questions", "feel free to ask more", "what else are you curious about", "ask another question", "have another question"],
+    "values": [
+      "I love answering questions! What else are you curious about today?",
+      "Feel free to ask away! What other topic would you like to explore?",
+      "Always happy to chat! Got any other questions on your mind?",
+      "I'm all ears! What else would you like to discuss?"
+    ]
+  },
+  {
+    "keys": ["want to continue", "let's keep talking about this", "shall we discuss more", "continue the conversation", "keep talking about it"],
+    "values": [
+      "I'd love to keep going! What other detail about this interests you?",
+      "Awesome discussion! What additional point should we explore?",
+      "Let's definitely keep talking about this! Where should we take it next?",
+      "I'm enjoying this topic too! What else do you think about it?"
+    ]
+  },
+  {
+    "keys": ["want to explore deeper", "shall we dig deeper into this", "curious to explore more", "explore deeper pal", "dig deeper into topic"],
+    "values": [
+      "Exploring deeper is where the best insights live! Ready to uncover the next layer?",
+      "I love diving into the details! What specific part shall we analyze deeper?",
+      "Awesome enthusiasm! What aspect of this topic calls for a deeper look?",
+      "Let's dig right in! What deeper question do you have about it?"
+    ]
+  },
+  {
+    "keys": ["change the subject", "talk about something else", "ready for a new topic", "switch topics", "move to another subject"],
+    "values": [
+      "A fresh topic sounds fun! What new subject would you like to jump into?",
+      "Switching gears is great! What else would you like to talk about today?",
+      "I'm ready for something new! What topic is on your radar now?",
+      "Awesome! What brand new subject shall we explore together?"
+    ]
+  },
+  {
+    "keys": ["how about you", "what about your thoughts", "keeping the conversation going", "casual chat continue", "how about your end"],
+    "values": [
+      "I'm doing great and enjoying our conversation! How is the rest of your day shaping up?",
+      "It's a pleasure chatting with you! What's something fun you have planned today?",
+      "I'm having a wonderful time assisting you! What else is happening in your day?",
+      "Always nice to chat casually! What's been the best part of your week so far?"
+    ]
+  },
+  {
+    "keys": ["does that make sense", "makes sense right", "is that clear", "does that sound right", "make sense to you"],
+    "values": [
+      "Hope that made complete sense! Would you like me to clarify any part of it?",
+      "Does that concept feel clear and easy to follow?",
+      "Glad we went through that! Does everything sound good so far?",
+      "Hope that clicked nicely! Want to double check any specific point?"
+    ]
+  },
+  {
+    "keys": ["ready for the next task", "onto the next item", "what task is next", "next task pal", "ready for next action"],
+    "values": [
+      "Ticking off tasks feels great! What item is next on your list?",
+      "Great momentum! What task would you like to conquer now?",
+      "Ready when you are! What is our next objective for today?",
+      "Awesome focus! Which task shall we get started on next?"
+    ]
+  },
+  {
+    "keys": ["glad we solved that", "now that it's fixed", "problem solved what next", "issue resolved next", "solved that problem"],
+    "values": [
+      "Awesome job getting that solved! Feels so good to cross that off, right?",
+      "Glad that issue is officially resolved! What shall we focus on now?",
+      "Boom, Problem solved. What's the next goal on your horizon?",
+      "Great teamwork fixing that! Ready for the next adventure?"
+    ]
+  },
+  {
+    "keys": ["hope that explanation was clear", "got the idea", "how does that explanation sound", "clear explanation pal", "explanation made sense"],
+    "values": [
+      "Hope that explanation was easy to grasp! Want an example to see it in action?",
+      "Glad we broke that down! Does that give you what you needed?",
+      "Hope that shed some light on the topic! Any follow-up questions about it?",
+      "Clear and simple is always the goal! How does that explanation feel?"
+    ]
+  },
+  {
+    "keys": ["great brainstorming", "any of those ideas stand out", "which idea do you like best", "brainstorming wrapped up", "good set of ideas"],
+    "values": [
+      "That was a fun brainstorming session! Which idea feels like the winner to you?",
+      "Lots of great options there! Do any of those ideas spark your interest most?",
+      "Awesome creative flow! Want to start planning the top idea?",
+      "Great brainstorming! Which direction would you like to take first?"
+    ]
+  },
+  {
+    "keys": ["did you enjoy that joke", "brought a smile right", "want another joke", "funny line pal", "joke was good"],
+    "values": [
+      "Hope that brought a quick smile to your face! Want to hear another one?",
+      "Laughter makes every day better! Did that joke hit the spot?",
+      "Glad we could share a quick laugh! What else can I brighten your day with?",
+      "Always happy to share some light humor! Ready for a fresh topic or another joke?"
+    ]
+  },
+  {
+    "keys": ["hope that advice helps", "ready to try that out", "what do you think of that approach", "advice sounds good", "good advice pal"],
+    "values": [
+      "Hope that perspective gives you a solid path forward! How do you feel about trying it?",
+      "Glad to offer some thoughts! Does that approach feel comfortable for you?",
+      "Hope that helps clear the path! What step will you try out first?",
+      "Wishing you great success with that! Let me know how it turns out whenever you like."
+    ]
+  },
+  {
+    "keys": ["reminder is set", "anything else to remind you about", "need another alarm set", "reminder locked in", "alarm created"],
+    "values": [
+      "Your reminder is all set and ready! Need any other alerts scheduled for today?",
+      "Locked in! Is there any other event or task you'd like to set a reminder for?",
+      "All set—That's one less thing to hold in your memory today. What's next?",
+      "Scheduled! Feel free to let me know if you need any other reminders."
+    ]
+  },
+  {
+    "keys": ["want to add more to the list", "is that list complete", "anything missing from list", "list is updated", "items added to list"],
+    "values": [
+      "Got all those listed! Are there any other items you'd like to add?",
+      "Your list is updated and neat! Does that cover everything you needed?",
+      "Awesome! Want to review the full list or add one more thing?",
+      "All added! Let me know if you remember any other items later."
+    ]
+  },
+  {
+    "keys": ["cool fact right", "want another fun fact", "did you know that before", "fascinating fact pal", "fact was cool"],
+    "values": [
+      "Facts like that are so mind-blowing! Want another random cool fact?",
+      "Isn't nature/science amazing? Did you already know that one or was it new?",
+      "I love discovering cool facts! What other topic are you curious about?",
+      "Fascinating, right? Want to explore another fun fact together?"
+    ]
+  },
+  {
+    "keys": ["how are things now", "feeling better now", "how's the rest of your day looking", "things looking up", "how is it going now"],
+    "values": [
+      "Glad to hear things are settling down! How is the rest of your afternoon looking?",
+      "Hope you're feeling much more relaxed now! What are your plans for tonight?",
+      "So glad to hear that update! What's the next highlight of your day?",
+      "Awesome to hear! Wishing you smooth sailing for the rest of the day."
+    ]
+  },
+  {
+    "keys": ["how is progress going", "making good headway", "how are you coming along", "progress check pal", "headway on task"],
+    "values": [
+      "You're doing great! How is the progress coming along on your task?",
+      "Pacing yourself is key! Are you happy with how things are moving?",
+      "Steady effort pays off! Do you feel like you're making good headway?",
+      "Keep up that great effort! Need any assistance with the next part?"
+    ]
+  },
+  {
+    "keys": ["ready for a break", "time to take a breather", "want to take a short pause", "break time pal", "time for a pause"],
+    "values": [
+      "You've been working hard! Ready to step away for a quick 5-minute break?",
+      "Taking breathers keeps your mind sharp! How about grabbing a glass of water?",
+      "A short rest is well deserved! Want to pause here and pick up later?",
+      "Resting is productive too! Enjoy a cozy breather right now."
+    ]
+  },
+  {
+    "keys": ["everything look good", "look right to you", "happy with these details", "details verified", "looks good pal"],
+    "values": [
+      "Everything looks super clean and accurate! Does it look good on your end too?",
+      "Checked and double-checked! Are you happy with how those details turned out?",
+      "Looks great from here! Want to make any small adjustments before finishing?",
+      "Solid results! Feel free to double-check whenever you're ready."
+    ]
+  },
+  {
+    "keys": ["ready to write or create", "want to draft something new", "shall we create something", "creative mode pal", "ready to draft"],
+    "values": [
+      "Creative mode activated! What story, essay, or message are we drafting?",
+      "I love creative sessions! What project are we bringing to life today?",
+      "Ready to write when you are! What is the main vision for this draft?",
+      "Awesome! Let's get those creative thoughts flowing onto the page."
+    ]
+  },
+  {
+    "keys": ["fascinating science right", "want to know more science details", "curious about related science", "science is cool pal", "science question answered"],
+    "values": [
+      "Science is so endlessly fascinating! Want to know another related science detail?",
+      "I love exploring how nature works! Did that answer your science query?",
+      "Awesome curiosity! What other scientific phenomenon would you like to look at?",
+      "Nature has so many cool secrets! Want to explore another one?"
+    ]
+  },
+  {
+    "keys": ["schedule looks solid", "ready to tackle your schedule", "anything else to schedule", "calendar looks good", "schedule organized"],
+    "values": [
+      "Your schedule looks organized and super manageable! Ready to conquer the day?",
+      "An organized day brings so much peace of mind! Anything else to add?",
+      "All structured and ready! How are you feeling about your day now?",
+      "Calendar locked in! Wishing you great focus as you work through it."
+    ]
+  },
+  {
+    "keys": ["how are you feeling now", "feeling more relaxed", "in good spirits now", "mood check pal", "feeling better now buddy"],
+    "values": [
+      "Hope you're feeling calm, relaxed, and in great spirits right now!",
+      "Checking in on your comfort! Are you feeling a bit more at ease now?",
+      "Glad we had a chance to talk! Hope your day feels much brighter now.",
+      "Wishing you continued peace and warmth for the rest of your day!"
+    ]
+  },
+  {
+    "keys": ["want to wrap up or keep going", "shall we continue or pause", "ready to stop or proceed", "wrap up or continue pal", "keep going or stop"],
+    "values": [
+      "We've covered a lot today! Would you like to wrap up here or keep going?",
+      "I'm happy either way! Should we continue with another task or pause for now?",
+      "Great work so far! Do you want to call it a day or tackle one more thing?",
+      "Ready whenever you are! Would you like to keep chatting or take a break?"
+    ]
+  },
+  {
+    "keys": ["which option do you prefer", "got a favorite among these", "which one sounds best", "favorite option pal", "which choice do you like"],
+    "values": [
+      "We have a few good choices here! Which option sounds best to you?",
+      "Both paths have great benefits! Which one do you feel like picking?",
+      "Which of these choices catches your eye the most?",
+      "All solid options! Which one fits your style best today?"
+    ]
+  },
+  {
+    "keys": ["what's your take on this", "how do you feel about this idea", "thoughts on this", "what's your opinion pal", "feedback on this idea"],
+    "values": [
+      "That's the concept! How do you feel about that idea or approach?",
+      "What's your take on that direction? Does it fit what you were imagining?",
+      "I'd love to hear your thoughts on this! What do you think?",
+      "Does that idea sound appealing to you, or should we tweak it?"
+    ]
+  },
+  {
+    "keys": ["always here to chat my friend", "what shall we talk about next dear friend", "happy to continue with you my friend", "always companion follow up friend", "chatting with you my friend"],
+    "values": [
+      "It is always such a joy chatting with you, my friend! What shall we discuss next?",
+      "Thank you for being such a wonderful conversation partner, dear friend! What's next?",
+      "Always happy to continue our warm chat, my friend! How can I help you right now?",
+      "Wishing you so much happiness and peace, my dear friend! What would you like to do?"
+    ]
+  }
+]

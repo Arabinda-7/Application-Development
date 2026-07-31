@@ -1,0 +1,362 @@
+[
+  {
+    "keys": ["why", "why is that", "why though", "why does that happen", "tell me why", "why is it so"],
+    "values": [
+      "Curiosity is where all great discoveries begin! What part of it are you most curious about?",
+      "That's a fantastic question! Exploring the 'why' makes learning so much fun.",
+      "I love that you're asking why! Every process has a fascinating reason behind it.",
+      "Great curiosity! What idea or topic shall we explore next?"
+    ]
+  },
+  {
+    "keys": ["how", "how does that work", "how is that possible", "how do you do that", "how is it done", "tell me how"],
+    "values": [
+      "Exploring 'how' things work is so exciting! It all comes down to a few clever steps.",
+      "Awesome question! Understanding how things function makes everything click into place.",
+      "I love breaking down the 'how'! Want to dive into a quick example?",
+      "Fascinating curiosity! What other mechanics would you like to explore?"
+    ]
+  },
+  {
+    "keys": ["really", "really?", "really!", "is that really true", "no way really", "are you sure really"],
+    "values": [
+      "Really! Truth is often cooler and stranger than fiction.",
+      "Yes, really! It sounds wild, but it's completely true.",
+      "I know, right? It blew my mind when I first learned it too!",
+      "Isn't that amazing? Nature and facts are full of awesome surprises."
+    ]
+  },
+  {
+    "keys": ["that's interesting", "thats interesting", "that is so interesting", "sounds interesting", "that's very interesting", "interesting point"],
+    "values": [
+      "Isn't it fascinating? The deeper you look, the more interesting it gets!",
+      "Glad you find it interesting! What specific detail caught your eye?",
+      "Awesome! Discovering cool facts always makes the day brighter.",
+      "Totally agree! Would you like to explore another cool angle on this?"
+    ]
+  },
+  {
+    "keys": ["tell me more", "tell me more about it", "tell me more please", "elaborate more", "tell me more details", "want to hear more"],
+    "values": [
+      "I'd love to! There's an awesome story behind how this all unfolds.",
+      "Gladly! The next part of the story is even more fascinating.",
+      "With pleasure! What particular angle do you want to explore further?",
+      "Awesome enthusiasm! Let's uncover more cool details together."
+    ]
+  },
+  {
+    "keys": ["explain", "explain this to me", "please explain", "give me an explanation", "explain this pal", "explain it simply"],
+    "values": [
+      "Let's break it down simply! It's like putting together pieces of a fun puzzle.",
+      "I'd love to explain! The core idea is actually super neat and simple.",
+      "Here's the fun explanation! Imagine taking the simplest step first.",
+      "Awesome! Making complex ideas easy to grasp is my favorite thing."
+    ]
+  },
+  {
+    "keys": ["can you explain", "can u explain", "could you explain this", "can you explain it simply", "could u explain", "can you explain pal"],
+    "values": [
+      "Absolutely! In simple terms, it all connects through one core idea.",
+      "You got it! I love making explanations fun and easy to follow.",
+      "Of course! Think of it like a chain reaction where every step triggers the next.",
+      "Gladly! What specific part would you like me to highlight first?"
+    ]
+  },
+  {
+    "keys": ["what does that mean", "what's that mean", "meaning of that", "what does it mean", "what does that mean pal", "what's the meaning"],
+    "values": [
+      "In plain and simple words, it means everything connects in a neat way!",
+      "Great question! It simply refers to how a key process comes together.",
+      "Think of it as a clear shorthand for a very cool concept!",
+      "It means you're uncovering something super neat! Want a quick example?"
+    ]
+  },
+  {
+    "keys": ["i don't understand", "im confused don't get it", "i don't quite get it", "didn't understand", "confused don't get it", "i don't get it"],
+    "values": [
+      "No problem at all! Let's look at it from a fresh, easy angle.",
+      "That's completely fine! Asking when confused is how real learning happens.",
+      "Let's simplify it even more! Picture a super basic everyday example.",
+      "Don't worry! We'll take it one simple step at a time until it clicks."
+    ]
+  },
+  {
+    "keys": ["how does it work", "how does this work", "how do things work", "how does it work pal", "how does this system work"],
+    "values": [
+      "It works through a clever flow of steps! First step sets everything in motion.",
+      "Fascinating question! The mechanism behind it is surprisingly elegant.",
+      "Think of it like gears turning together in perfect harmony! Want to see how?",
+      "It works by taking simple inputs and turning them into awesome outputs!"
+    ]
+  },
+  {
+    "keys": ["why is that so", "why is that the case", "why is it like that", "why is that pal", "why is it this way"],
+    "values": [
+      "It's because nature/design loves efficiency! Everything has a purpose.",
+      "Great observation! That specific detail developed for a very practical reason.",
+      "Fascinating, right? It happens that way to keep everything balanced.",
+      "I love that you noticed! The reason behind it is super interesting."
+    ]
+  },
+  {
+    "keys": ["what happens next", "what comes next", "what occurs next", "what happens next pal", "what's the next step"],
+    "values": [
+      "The next part is the most exciting! One action triggers a fantastic chain reaction.",
+      "What comes next will surprise you! Things take a really cool turn.",
+      "Next up is where all the pieces come together! Ready to find out?",
+      "Awesome enthusiasm! The next phase brings everything to life."
+    ]
+  },
+  {
+    "keys": ["teach me", "teach me something", "teach me a skill", "teach me a topic", "teach me pal", "teach me something new"],
+    "values": [
+      "I'd love to! What subject sparks your curiosity today?",
+      "Learning time is the best time! What would you like to master today?",
+      "Awesome! Let's explore something fun and brand new together.",
+      "Ready when you are! What topic shall we dive into first?"
+    ]
+  },
+  {
+    "keys": ["i'm curious", "im curious about this", "so curious today", "curious mind", "i'm curious pal", "feeling curious"],
+    "values": [
+      "A curious mind is a powerful thing! What are we exploring today?",
+      "Love that curious spirit! What question is on your mind?",
+      "Curiosity makes life an exciting adventure! Ask away.",
+      "Awesome! Being curious leads to the best discoveries."
+    ]
+  },
+  {
+    "keys": ["i want to learn", "want to learn new things", "ready to learn", "i want to learn pal", "eager to learn today"],
+    "values": [
+      "Your eagerness to learn is inspiring! Where should we start?",
+      "Awesome! Learning expands your horizon every single day.",
+      "Let's do it! Pick any topic and let's explore it together.",
+      "Fantastic attitude! What exciting subject calls to you today?"
+    ]
+  },
+  {
+    "keys": ["can i know more", "can i learn more about this", "would love to know more", "can i know more pal", "want to know more details"],
+    "values": [
+      "Absolutely! The deeper we go, the cooler the details get.",
+      "Of course! There are so many neat facts to uncover here.",
+      "Gladly! What specific aspect of this would you like to explore?",
+      "You got it! Let's uncover the next layer of fascinating info."
+    ]
+  },
+  {
+    "keys": ["interesting fact please", "got an interesting fact", "share an interesting fact", "tell an interesting fact", "interesting fact pal"],
+    "values": [
+      "Did you know honey never spoils? Archaeologists found 3,000-year-old edible honey!",
+      "Octopuses have three hearts and blue blood! Nature is wild, right?",
+      "Bananas are technically berries, but strawberries aren't! How cool is that?",
+      "Wombat poop is cube-shaped so it doesn't roll away! Got a favorite fact?"
+    ]
+  },
+  {
+    "keys": ["surprise me", "surprise me with knowledge", "surprise me with something cool", "surprise me pal", "give me a surprise fact"],
+    "values": [
+      "Here's a surprise: A day on Venus is longer than a year on Venus!",
+      "Surprise! Sea otters hold hands while sleeping so they don't drift apart!",
+      "Did you know cows have best friends and get stressed when separated?",
+      "Surprise, Clouds look light, but an average cumulus cloud weighs 1.1 million pounds!"
+    ]
+  },
+  {
+    "keys": ["how did that start", "where did that originate", "origin of that", "how did that begin", "how did it start pal"],
+    "values": [
+      "It all started with a simple idea that grew over time! Origin stories are awesome.",
+      "Fascinating history! It began as a small experiment that took off globally.",
+      "Great question! The origin goes back to a very practical necessity.",
+      "I love origin stories! It started in the most unexpected way."
+    ]
+  },
+  {
+    "keys": ["what's the secret behind it", "secret behind this", "how does it secretly work", "secret behind it pal", "what's the secret"],
+    "values": [
+      "The secret is actually a clever mix of simplicity and smart design!",
+      "No magic needed—the secret is just a super smart application of science!",
+      "It seems mysterious, but the secret comes down to one key trick.",
+      "Aha! The secret behind it is easier to understand than you'd think!"
+    ]
+  },
+  {
+    "keys": ["can you break it down", "break it down simply", "break it down for me", "break it down pal", "break it into small steps"],
+    "values": [
+      "Sure thing! Step one is the foundation, and step two builds right on top.",
+      "Let's break it down into bite-sized pieces! Piece one is super simple.",
+      "Awesome! Breaking big ideas into tiny steps makes everything crystal clear.",
+      "You got it! Here is the simplest way to look at it."
+    ]
+  },
+  {
+    "keys": ["what's the story behind this", "tell me the backstory", "backstory of this", "story behind it pal", "what's the backstory"],
+    "values": [
+      "The story behind this is full of twists and clever ideas! Want the highlights?",
+      "It's a great tale of trial, error, and sudden discovery! Here's how it went.",
+      "Awesome backstory! It all began when someone noticed a small detail.",
+      "Love a good story! This one has a super cool turning point."
+    ]
+  },
+  {
+    "keys": ["is there a trick to this", "cool trick behind it", "how is it done so easily", "trick to it pal", "is there a secret trick"],
+    "values": [
+      "There is a neat trick! It's all about changing the angle of approach.",
+      "Yes! The trick is to simplify the first step so the rest flows easily.",
+      "Aha! Once you know the trick, it suddenly becomes effortless.",
+      "Clever observation! The trick saves so much time and effort."
+    ]
+  },
+  {
+    "keys": ["what makes it special", "why is it unique", "what's special about it", "why is it special pal", "what makes it stand out"],
+    "values": [
+      "What makes it special is how unique and reliable it is under any condition!",
+      "It stands out because no other method combines simplicity with such great results.",
+      "Its special power is how easy it makes complex tasks feel!",
+      "Great question! Its uniqueness comes from a brilliant design feature."
+    ]
+  },
+  {
+    "keys": ["how was this discovered", "how did people find out", "discovery process", "how was it discovered pal", "how did they discover it"],
+    "values": [
+      "It was discovered through pure curiosity and a lucky accident! Science is wild.",
+      "People discovered it while observing nature very closely! Observation is key.",
+      "A scientist noticed an unexpected pattern during an everyday test!",
+      "Accidental discoveries are the best! Someone stumbled on it while experimenting."
+    ]
+  },
+  {
+    "keys": ["what's the main idea", "core concept", "main takeaway", "main concept pal", "what's the core idea"],
+    "values": [
+      "The main idea is that small consistent actions lead to huge results!",
+      "Core concept: keep things simple, focus on the base, and build up.",
+      "In a nutshell: it's all about balance and smart efficiency!",
+      "The big picture is super clean and easy to understand."
+    ]
+  },
+  {
+    "keys": ["why do we do it like this", "why this method", "reason for this way", "why do it this way pal", "why this approach"],
+    "values": [
+      "We do it this way because trial and error proved it's the safest and fastest route!",
+      "Great question! This method avoids common mistakes and saves energy.",
+      "It evolved over time to become the most reliable approach we have.",
+      "Because this way brings the most consistent and clear results!"
+    ]
+  },
+  {
+    "keys": ["can we explore deeper", "let's dive deeper", "explore more deeply", "dive deeper pal", "explore deeper details"],
+    "values": [
+      "Let's dive right in! The next layer of detail is fascinating.",
+      "I love going deep into topics! What specific layer shall we unpack?",
+      "Awesome enthusiasm! Exploring deeper reveals so many hidden gems.",
+      "Ready when you are! Let's explore the core mechanics together."
+    ]
+  },
+  {
+    "keys": ["what's a mystery about this", "fun mystery concept", "unsolved detail", "mystery about it pal", "fun mystery fact"],
+    "values": [
+      "Here's a fun mystery: scientists still aren't 100% sure why we yawn!",
+      "A cool mystery is that we've mapped more of Mars than our ocean floor!",
+      "The mystery is why sound travels so differently through ice than water!",
+      "Unsolved mysteries make learning so exciting! Got a guess about it?"
+    ]
+  },
+  {
+    "keys": ["how can i try this myself", "how to practice this", "can i test this", "how to try it pal", "how do I test this"],
+    "values": [
+      "You can easily test it with everyday items right at home! Want a simple guide?",
+      "Try a quick 2-minute hands-on test! Hands-on learning is the best.",
+      "Awesome initiative! Set up a safe, simple experiment to see it live.",
+      "Trying it yourself makes it stick forever! Start with the basic step."
+    ]
+  },
+  {
+    "keys": ["what's the coolest part", "best part about it", "most fascinating detail", "coolest part pal", "what's the best detail"],
+    "values": [
+      "The coolest part is how seamlessly everything interacts without friction!",
+      "Hands down, the coolest detail is how fast the reaction occurs!",
+      "The best part is that anyone can learn to master it with a little practice.",
+      "My favorite part is seeing the unexpected result at the end!"
+    ]
+  },
+  {
+    "keys": ["why is it important", "why does it matter", "importance of this topic", "why is it important pal", "why does this matter"],
+    "values": [
+      "It's important because it forms the foundation for so many modern technologies!",
+      "It matters because understanding it helps us make smarter daily decisions.",
+      "Great question! Without it, many things we rely on wouldn't function smoothly.",
+      "Its importance lies in keeping systems balanced and efficient."
+    ]
+  },
+  {
+    "keys": ["what's the difference", "how are they different", "difference between these two", "what's the difference pal", "how do they differ"],
+    "values": [
+      "The key difference comes down to structure: one is rigid, the other flexible!",
+      "Option A focuses on speed, while Option B prioritizes accuracy!",
+      "Think of it like marathon running vs. sprinting—both run, but differently!",
+      "Great comparison! One is designed for power, the other for efficiency."
+    ]
+  },
+  {
+    "keys": ["is this common", "does this happen often", "how rare is this", "is this common pal", "is it rare or common"],
+    "values": [
+      "It's actually super common! You probably see it every day without noticing.",
+      "It's quite rare in nature, which makes spotting it extra special!",
+      "It happens more often than you'd think under the right conditions.",
+      "Common enough to be useful, but unique enough to stay cool!"
+    ]
+  },
+  {
+    "keys": ["what else can i discover", "what else is there to learn", "more to discover", "what else can I discover pal", "what more to learn"],
+    "values": [
+      "There's a whole universe of related topics! Want to look at space or ocean science?",
+      "You can discover how history, tech, and nature all intertwine here!",
+      "So much more! Exploring related mysteries is where the real fun starts.",
+      "The deeper you dig, the more exciting questions appear! What calls to you?"
+    ]
+  },
+  {
+    "keys": ["cool science detail", "fascinating science fact", "cool scientific detail", "cool science fact pal", "give me a science detail"],
+    "values": [
+      "Water can boil and freeze at the exact same time under special pressure! Cool, right?",
+      "Light takes about 8 minutes and 20 seconds to travel from the Sun to Earth!",
+      "A single bolt of lightning has enough energy to toast 100,000 slices of bread!",
+      "Science is mind-blowing! Got a science topic you love most?"
+    ]
+  },
+  {
+    "keys": ["how fast does it happen", "speed of this process", "how quick is it", "how fast is it pal", "speed of process"],
+    "values": [
+      "It happens at near-lightning speed! Faster than a blink of an eye.",
+      "Some processes take milliseconds, while others take millions of years!",
+      "It occurs in a fraction of a second under the right conditions.",
+      "Speed depends on energy—it can be instant or a slow, steady burn!"
+    ]
+  },
+  {
+    "keys": ["what's the biggest takeaway", "key lesson", "most important takeaway", "biggest takeaway pal", "what's the main takeaway"],
+    "values": [
+      "The biggest takeaway: small, smart adjustments yield massive results!",
+      "Key lesson: understanding the basics makes advanced steps easy.",
+      "Main takeaway: curiosity and practice unlock almost any subject!",
+      "The top takeaway: simple design always beats unnecessary complexity."
+    ]
+  },
+  {
+    "keys": ["give me an easy example", "simple example please", "easy example for this", "give me an example pal", "simple example"],
+    "values": [
+      "Sure! Think of it like making tea: heat, time, and leaves blend into something great.",
+      "Imagine riding a bike downhill—gravity does the work once you get momentum!",
+      "Picture a sponge absorbing water—it holds what it needs until full.",
+      "Easy example: pressing a light switch sends a signal that lights up the room instantly!"
+    ]
+  },
+  {
+    "keys": ["always love learning with you my friend", "curious to chat with you dear friend", "learning together my friend", "love discovering with you friend", "always curious with you my friend"],
+    "values": [
+      "I always love exploring new ideas with you too, my friend! What shall we learn next?",
+      "Exploring the world with a curious friend like you is pure joy. Take care!",
+      "Thank you my friend! Your curiosity makes every conversation bright and fun.",
+      "Keep asking great questions, my dear friend! Curiosity looks awesome on you."
+    ]
+  }
+]

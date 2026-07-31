@@ -1,0 +1,722 @@
+[
+  {
+    "keys": ["i don't feel motivated", "zero motivation today", "no motivation to do anything", "feeling unmotivated today", "can't find any motivation", "lacking motivation right now"],
+    "values": [
+      "Motivation follows action, not the other way around. Try doing just 2 minutes of work right now.",
+      "You don't need motivation to make progress. Pick the smallest, easiest task and start there.",
+      "Motivation comes and goes. Relying on routine and taking one small step will pull you through.",
+      "Acknowledge the feeling without letting it stop you. What's one tiny task you can do right now?"
+    ]
+  },
+  {
+    "keys": ["i want to quit", "feel like giving up", "thinking of quitting", "want to give up today", "ready to quit right now", "giving up on this"],
+    "values": [
+      "Take a rest before you make any big decisions. Never quit on a bad or exhausting day.",
+      "Remember why you started in the first place. Rest for a while, then take one small step forward.",
+      "Setbacks feel heavy, but quitting erases your progress. Give yourself permission to pause instead.",
+      "It's completely normal to feel like quitting when it gets hard. Take a break, breathe, and re-evaluate tomorrow."
+    ]
+  },
+  {
+    "keys": ["i feel lazy today", "so lazy right now", "feeling sluggish and lazy", "can't shake off laziness", "lazy mood today", "feeling super lazy"],
+    "values": [
+      "Laziness is often just a sign of low energy or overwhelm. Drink some water and do a quick 2-minute task.",
+      "Don't beat yourself up over feeling lazy. Start with something so small it requires almost zero effort.",
+      "Lower the bar for today. Accomplishing even one minor thing breaks the cycle of inertia.",
+      "Sluggish days happen to everyone. Take action in tiny increments to get your momentum back."
+    ]
+  },
+  {
+    "keys": ["i don't want to study", "can't bring myself to study", "zero mood to study", "hate studying today", "don't feel like studying", "reluctant to study today"],
+    "values": [
+      "Commit to studying for just 5 minutes. If you still want to stop after that, you can.",
+      "Clear your desk and open the textbook to the right page. Starting is 90% of the friction.",
+      "Don't worry about mastering the whole chapter today. Just review one concept or single page.",
+      "Break your study session into tiny, manageable chunks. Focus on progress, not perfection."
+    ]
+  },
+  {
+    "keys": ["i don't want to work today", "hate working right now", "no desire to work", "can't focus on work", "don't want to do work today", "dreading work today"],
+    "values": [
+      "Pick the easiest item on your task list to get the ball rolling. Action creates focus.",
+      "Dreading work is exhausting. Set a timer for 10 minutes and focus on just one simple item.",
+      "You don't have to be super passionate today. Just show up and do the bare minimum first step.",
+      "Work in short spurts. Give yourself credit for every task you complete, no matter how small."
+    ]
+  },
+  {
+    "keys": ["i failed", "i failed at this task", "total failure today", "i failed again", "failed miserably today", "failure hits hard"],
+    "values": [
+      "Failure is information, not an identity. Look at what went wrong, adjust, and try again.",
+      "Every successful person has a trail of failures behind them. Learn the lesson and keep moving.",
+      "A failure is just an attempt that didn't work out. It doesn't define your future potential.",
+      "Acknowledge the disappointment, but don't stay there. What can you tweak for your next try?"
+    ]
+  },
+  {
+    "keys": ["i made mistakes", "messed up big time", "made so many mistakes", "i messed up today", "screwed up my work", "making mistakes again"],
+    "values": [
+      "Mistakes mean you're active and taking action. Own the error, fix what you can, and move on.",
+      "Don't dwell on the mistake. Focus your energy on what you can do right now to correct it.",
+      "Errors are proof that you're pushing your boundaries. Learn from it and keep growing.",
+      "Forgive yourself for making a mistake. Everyone makes them—what matters is how you respond."
+    ]
+  },
+  {
+    "keys": ["i'm scared", "feeling terrified of what's next", "scared of stepping out", "afraid of what's coming", "feeling scared today", "scared to move forward"],
+    "values": [
+      "Courage isn't the absence of fear; it's taking action despite it. Take one gentle step.",
+      "Fear is a natural response to stepping into the unknown. Focus on what you can control right now.",
+      "Breathe deeply and ground yourself. Take things one single moment at a time.",
+      "It's okay to feel scared. You don't have to feel brave to take a small, positive action."
+    ]
+  },
+  {
+    "keys": ["i don't have confidence", "lacking self confidence", "zero confidence in myself", "no confidence today", "feeling insecure about myself", "lack of confidence"],
+    "values": [
+      "Confidence is built through small kept promises to yourself. Complete one tiny goal today.",
+      "Don't wait to feel confident before acting. Action generates confidence over time.",
+      "Remind yourself of past challenges you successfully navigated. You are capable.",
+      "Focus on competence over confidence. Practice the skill, and confidence will naturally follow."
+    ]
+  },
+  {
+    "keys": ["i'm nervous about the future", "feeling anxious about tomorrow", "scared of the future", "nervous about what's ahead", "anxious about future plans"],
+    "values": [
+      "The future is built by what you do today. Bring your attention back to the present moment.",
+      "Anxiety thrives on uncertainty. Focus on the immediate next step in front of you.",
+      "You don't need to have the next five years figured out. Just focus on making today count.",
+      "Take a deep breath. You've handled uncertainty before, and you'll handle this too."
+    ]
+  },
+  {
+    "keys": ["i keep procrastinating", "procrastinating all day", "can't stop delaying tasks", "procrastination taking over", "delaying everything today"],
+    "values": [
+      "Procrastination is an emotional response to a task, not laziness. Break the task into 5-minute pieces.",
+      "Reduce the friction. Make starting as easy and small as humanly possible.",
+      "Stop waiting for the perfect moment. Doing something imperfectly now is better than waiting.",
+      "Forgive your past procrastination and focus on doing one tiny action right now."
+    ]
+  },
+  {
+    "keys": ["i can't stay consistent", "struggling with consistency", "hard to maintain routine", "inconsistent with my goals", "can't keep up consistency"],
+    "values": [
+      "Consistency isn't about perfection; it's about never quitting. Missing one day isn't failure.",
+      "Scale back your habit until it's impossible to fail. Consistency is built on tiny wins.",
+      "Focus on showing up, even if it's for just two minutes. Habit formation takes patience.",
+      "Don't let a minor slip turn into a total stop. Just get back on track with your next action."
+    ]
+  },
+  {
+    "keys": ["i need discipline", "lacking self discipline", "need more discipline in life", "want to build discipline", "discipline is hard for me"],
+    "values": [
+      "Discipline is simply choosing what you want most over what you want right now. Start small.",
+      "Design your environment to make good choices easy and distraction hard.",
+      "Discipline is a muscle that grows stronger with use. Practice saying no to small distractions.",
+      "Focus on building solid systems rather than relying purely on willpower."
+    ]
+  },
+  {
+    "keys": ["i'm starting again", "starting over from scratch", "restarting my journey", "beginning again today", "starting fresh today"],
+    "values": [
+      "Starting again isn't going back to square one. You're starting with experience this time.",
+      "Proud of you for having the courage to restart. Take it one steady day at a time.",
+      "The past is behind you. Focus entirely on the fresh start in front of you.",
+      "Rebuilding takes time, but every effort counts. Welcome your new beginning."
+    ]
+  },
+  {
+    "keys": ["i lost my progress", "feels like I lost all progress", "reset back to zero", "lost all my gains", "progress set back"],
+    "values": [
+      "You haven't lost your knowledge or skills. Rebuilding progress is always faster the second time.",
+      "Setbacks happen, but your foundation remains. Take a deep breath and start rebuilding.",
+      "Don't let lost progress stop your long-term journey. Focus on the next small gain.",
+      "It's frustrating to lose ground, but you know the way now. Take step one again."
+    ]
+  },
+  {
+    "keys": ["i don't know what to do", "feeling directionless", "lost on next steps", "don't know what step to take", "confused about next steps"],
+    "values": [
+      "When you don't know what to do, pause and simplify. Pick the single most obvious task.",
+      "Clarity comes from action, not overthinking. Try one small experiment and see how it goes.",
+      "Write down all your options on paper to clear your mind. Then pick one and start.",
+      "It's okay to feel directionless for a moment. Take a rest and regain your perspective."
+    ]
+  },
+  {
+    "keys": ["i need encouragement", "could use some encouragement", "need a boost of encouragement", "feeling low need encouragement", "need positive words"],
+    "values": [
+      "You are doing better than you give yourself credit for. Keep going, step by step.",
+      "Every small effort you make adds up over time. You have what it takes to succeed.",
+      "Be patient with yourself. You are making progress, even when it feels slow.",
+      "I believe in your resilience. Take a breath and trust your ability to work through this."
+    ]
+  },
+  {
+    "keys": ["i want to succeed", "striving for success", "hungry for success", "want success in life", "aiming for great success"],
+    "values": [
+      "Success is the sum of small efforts repeated day in and day out. Stay patient and consistent.",
+      "Define what success means to you personally, then focus on daily execution.",
+      "Work on mastering the process, and success will naturally follow as a result.",
+      "Stay committed to your standards and keep refining your efforts every day."
+    ]
+  },
+  {
+    "keys": ["i have big dreams", "aiming high with big dreams", "dreaming big for the future", "got big dreams to achieve", "big ambitions in life"],
+    "values": [
+      "Big dreams require small, disciplined daily steps. Focus on today's action.",
+      "Never let the size of your dream intimidate you. Break it down into tiny achievable goals.",
+      "Keep your vision grand, but keep your daily focus grounded in practical work.",
+      "Believing in your big dreams is step one. Now build the daily habits to match them."
+    ]
+  },
+  {
+    "keys": ["i need inspiration", "looking for inspiration", "seeking creative inspiration", "need an inspiring boost", "lacking creative inspiration"],
+    "values": [
+      "Inspiration often strikes while you're already working. Start creating and let it catch up.",
+      "Step outside, change your environment, or read something new to spark fresh ideas.",
+      "Look back at your own journey and past wins for a quiet dose of inspiration.",
+      "Inspiration is everywhere if you slow down and observe. Take a short walk and rest your mind."
+    ]
+  },
+  {
+    "keys": ["i feel stuck", "stuck in a rut", "feeling completely stuck", "stuck in my progress", "feeling stuck right now"],
+    "values": [
+      "Feeling stuck usually means it's time to change your approach or take a short break.",
+      "To get un-stuck, take the smallest possible action in any direction to create motion.",
+      "Shift your perspective. Ask yourself what one small change you can make today.",
+      "Being stuck is a temporary state. Pause, reset, and tackle the problem from a new angle."
+    ]
+  },
+  {
+    "keys": ["i feel overwhelmed", "overwhelmed by everything", "too much pressure on me", "feeling overwhelmed today", "overwhelmed with work"],
+    "values": [
+      "When overwhelmed, write everything down and pick just ONE thing to focus on.",
+      "Step back and take three slow, deep breaths. You don't have to solve everything today.",
+      "Lower your immediate expectations. Focus exclusively on the very next step.",
+      "It's completely okay to pause and say no to extra tasks when you're overwhelmed."
+    ]
+  },
+  {
+    "keys": ["i want to improve myself", "working on self improvement", "becoming better every day", "want to self improve", "focused on self improvement"],
+    "values": [
+      "Self-improvement is a continuous journey. Focus on 1% daily progress over time.",
+      "Be proud of your desire to grow. Pick one habit or skill to focus on right now.",
+      "Real self-improvement comes from consistent daily practice, not drastic sudden changes.",
+      "Invest in yourself patiently. Small positive choices compound into big transformations."
+    ]
+  },
+  {
+    "keys": ["i want to become better", "aiming to be a better person", "striving for personal growth", "want to be better today", "becoming a better version"],
+    "values": [
+      "Aiming to be better than yesterday is the true goal. Focus on your own growth curve.",
+      "Personal growth takes self-compassion and patience. Celebrate your small daily wins.",
+      "Keep learning, practicing, and reflecting. You are evolving every single day.",
+      "Stay dedicated to your values and habits. Growth happens gradually through daily effort."
+    ]
+  },
+  {
+    "keys": ["i'm afraid of failure", "fear of failing holds me back", "scared to fail", "fear of failure today", "afraid to fail at this"],
+    "values": [
+      "Failure is not the opposite of success; it's part of the process. Shift your focus to learning.",
+      "The only true failure is not trying at all. Every attempt builds your experience.",
+      "Reframe failure as feedback. What's the worst that could happen, and can you handle it?",
+      "Don't let the fear of failure rob you of potential success. Take a small, safe risk."
+    ]
+  },
+  {
+    "keys": ["i feel behind in life", "everyone is ahead of me", "feeling left behind", "feeling behind everyone else", "behind on my goals"],
+    "values": [
+      "Life is not a race against others. You are on your own unique timeline.",
+      "Stop comparing your chapter 1 to someone else's chapter 20. Focus on your own path.",
+      "Where you are right now is your starting point. Make choices that serve your future.",
+      "Everyone progresses at different paces. Stay committed to your own daily progress."
+    ]
+  },
+  {
+    "keys": ["i keep comparing myself to others", "comparing my progress", "comparing myself to people", "can't stop comparing myself", "comparing my life"],
+    "values": [
+      "Comparison is the thief of joy. Compare yourself only to who you were yesterday.",
+      "Social media shows highlight reels, not reality. Focus on your own real growth.",
+      "Everyone has different strengths and challenges. Stay focused on your own journey.",
+      "Redirect that energy into self-improvement. Let others inspire you rather than discourage you."
+    ]
+  },
+  {
+    "keys": ["imposter syndrome hits", "feel like an imposter", "feeling incompetent", "feeling like a fraud", "imposter syndrome today"],
+    "values": [
+      "Imposter syndrome often affects high achievers. Recognize your real effort and growth.",
+      "You earned your place here through effort. Accept your progress without self-doubt.",
+      "Fact-check your negative thoughts. Look at concrete evidence of what you've accomplished.",
+      "Everyone feels like they're figuring things out as they go. You belong here."
+    ]
+  },
+  {
+    "keys": ["i don't see results yet", "working hard but no results", "results are taking long", "not seeing any results", "no visible results yet"],
+    "values": [
+      "Results often lag behind effort. Keep putting in the work—the compound effect takes time.",
+      "Seeds grow underground before breaking through the surface. Trust your invisible progress.",
+      "Focus on your inputs and habits rather than obsessing over immediate outputs.",
+      "Consistency without immediate results requires faith. Stay the course; changes are building."
+    ]
+  },
+  {
+    "keys": ["i'm mentally exhausted", "feeling burnt out and exhausted", "exhausted from trying", "totally exhausted today", "physically and mentally exhausted"],
+    "values": [
+      "Rest is productive. Give yourself permission to shut down and recharge completely.",
+      "Burnout requires real rest, not just waiting. Take time for sleep, hydration, and peace.",
+      "Listen to your body. Recovery is an essential part of long-term consistency.",
+      "Put your work aside for today. Taking care of your health comes first."
+    ]
+  },
+  {
+    "keys": ["i lost my focus today", "can't concentrate on work", "distracted and unfocused", "losing focus constantly", "hard to stay focused"],
+    "values": [
+      "Focus is like a lens; it gets blurry when tired. Take a 5-minute break and stretch.",
+      "Remove all visible distractions from your desk and phone. Work on one item at a time.",
+      "Try using a timer for 15 minutes of uninterrupted work. Small blocks build focus.",
+      "Forgive the distraction and gently return your attention to your main task."
+    ]
+  },
+  {
+    "keys": ["i doubt my abilities", "doubting if I can do it", "second guessing myself", "doubting my skill level", "lack faith in my abilities"],
+    "values": [
+      "Skills are developed, not born. You can improve your ability through practice.",
+      "Don't let temporary self-doubt stop your long-term effort. Keep practicing.",
+      "Remember a time when you mastered something that once felt difficult. You can do it again.",
+      "Focus on learning and refining your skill rather than expecting perfection immediately."
+    ]
+  },
+  {
+    "keys": ["routine feels monotonous", "bored with daily routine", "uninspired by my routine", "routine is feeling stale", "need fresh routine"],
+    "values": [
+      "Add a small fresh activity to your day, like a new route or different music.",
+      "Routines provide stability, but tiny changes keep them engaging. Tweak one habit today.",
+      "Re-evaluate your routine to make sure it still aligns with your current priorities.",
+      "Spouse your routine with a new hobby or project to bring back excitement."
+    ]
+  },
+  {
+    "keys": ["afraid of rejection", "scared of being rejected", "fear of rejection", "fearing rejection today", "dreading rejection"],
+    "values": [
+      "Rejection is just redirection or lack of alignment, not a judgment of your worth.",
+      "Taking the risk of rejection is the price of seeking opportunities. Courage builds resilience.",
+      "Focus on putting yourself out there rather than worrying about the response.",
+      "Every rejection brings you closer to finding the right fit. Keep putting in effort."
+    ]
+  },
+  {
+    "keys": ["don't know where to start", "overwhelmed where to begin", "unsure where to start", "where do I begin today", "confused where to start"],
+    "values": [
+      "Start anywhere. The first step clarifies the second step.",
+      "Pick the easiest or smallest piece of the project and handle that first.",
+      "Write down three tiny steps on paper. Execute step one immediately.",
+      "Don't worry about the perfect starting point. Taking any action breaks inaction."
+    ]
+  },
+  {
+    "keys": ["feel like nobody understands my goals", "misunderstood in my path", "people don't get my vision", "feeling misunderstood today", "alone in my vision"],
+    "values": [
+      "Your vision doesn't need everyone's understanding to be valid. Stay true to your goals.",
+      "Focus on doing the work rather than explaining yourself to people who don't see it.",
+      "Align yourself with communities that share your values and aspirations.",
+      "Trust your inner compass. Your path is yours to walk and build."
+    ]
+  },
+  {
+    "keys": ["waiting for perfection", "paralyzed by perfectionism", "trying to make everything perfect", "perfectionism holding me back", "stuck in perfectionism"],
+    "values": [
+      "Perfectionism is procrastination in a fancy coat. Aim for completed, not perfect.",
+      "Done is better than perfect. You can always edit and refine later.",
+      "Release the need for flawless work. Focus on delivering solid, honest progress.",
+      "Set a strict time limit for your work to prevent endless polishing."
+    ]
+  },
+  {
+    "keys": ["hit a huge setback", "suffered a big setback today", "major setback in my plan", "facing a big setback", "setback happened today"],
+    "values": [
+      "Setbacks are part of every meaningful journey. Take time to process it, then rebuild.",
+      "A setback is a setup for a resilient comeback. Focus on your next move.",
+      "Analyze what happened without judging yourself. Adjust your plan and step forward.",
+      "Hang in there. Difficult moments test your strength, but they don't stop your progress."
+    ]
+  },
+  {
+    "keys": ["trying to break a bad habit", "breaking bad habits", "want to stop bad habit", "struggling to quit bad habit", "breaking a negative habit"],
+    "values": [
+      "Replace the bad habit with a healthier alternative rather than relying on pure willpower.",
+      "Identify the trigger for the bad habit and make it inconvenient to perform.",
+      "Breaking habits takes repeated effort. Don't let one slip ruin your overall streak.",
+      "Focus on building positive habits that crowd out the bad ones naturally."
+    ]
+  },
+  {
+    "keys": ["trying to build a good habit", "struggling to build habit", "building a new positive habit", "establishing a fresh habit", "working on new habit"],
+    "values": [
+      "Make your new habit so small that it takes less than two minutes to do.",
+      "Attach your new habit to an existing daily routine for consistency.",
+      "Focus on frequency and showing up daily rather than intensity.",
+      "Track your daily habit visually to build momentum and pride."
+    ]
+  },
+  {
+    "keys": ["feeling hopeless about my goal", "losing hope in my project", "feeling hopeless today", "no hope for my goals", "feeling hopeless right now"],
+    "values": [
+      "Hopelessness is a feeling, not a permanent fact. Rest today and take care of yourself.",
+      "When things feel dark, focus on taking care of your basic needs right now.",
+      "Reach out to someone you trust or take a complete rest break. Tomorrow brings new light.",
+      "Be very gentle with yourself today. Focus on small comfort and rest."
+    ]
+  },
+  {
+    "keys": ["doubting my life choices", "wondering if I chose wrong path", "second guessing my choices", "doubting my decisions today", "questioning my path"],
+    "values": [
+      "No decision is wasted; every choice teaches you valuable experience.",
+      "If a past choice no longer serves you, you have the power to make a new choice today.",
+      "Trust that you made the best decision you could with the information you had then.",
+      "Focus on making the most of your current path, or gently pivot if needed."
+    ]
+  },
+  {
+    "keys": ["feeling alone on this journey", "solitary path to goals", "lonely working on my goals", "feeling isolated in my journey", "lonely path today"],
+    "values": [
+      "Pursuing growth can feel lonely at times, but you are building inner strength.",
+      "Seek out like-minded communities online or locally who share your goals.",
+      "Remember that many people are silently walking similar paths. Stay committed.",
+      "Treat yourself as a good friend on this journey. You are growing every day."
+    ]
+  },
+  {
+    "keys": ["want to regain deep focus", "rebuilding my concentration", "rebuilding deep focus", "trying to regain focus", "restoring my focus"],
+    "values": [
+      "Rebuilding focus takes practice. Start with 10-minute blocks of zero distractions.",
+      "Turn off notifications and clear your workspace to give your mind a calm environment.",
+      "Focus improves like physical fitness. Gradually increase your uninterrupted work time.",
+      "Be patient with your attention span. Gently bring your focus back whenever it wanders."
+    ]
+  },
+  {
+    "keys": ["need someone to hold me accountable", "struggling with accountability", "need accountability partner", "lacking accountability", "want accountability for goals"],
+    "values": [
+      "Share your daily goals with a friend or write them down publicly for accountability.",
+      "Set up concrete deadlines and check-ins to keep yourself on track.",
+      "Commit to a daily log where you record what you accomplished each day.",
+      "Accountability builds momentum. Find a partner who inspires you to stay consistent."
+    ]
+  },
+  {
+    "keys": ["sluggish morning low energy", "hard to start the day", "sluggish start today", "feeling sluggish this morning", "low morning energy"],
+    "values": [
+      "Drink a large glass of water, stretch out, and get some morning sunlight.",
+      "Don't worry about being high energy immediately. Take small, calm steps into your day.",
+      "A cold splash of water or a quick walk will help wake up your body.",
+      "Ease into your morning gently. Give yourself time to warm up."
+    ]
+  },
+  {
+    "keys": ["stuck in overanalysis paralysis", "overthinking my decision", "taking too long to decide", "paralyzed by decisions", "overanalyzing options"],
+    "values": [
+      "Indecision is also a choice. Give yourself a 5-minute deadline to pick an option.",
+      "Most decisions are reversible. Pick the best option available and test it out.",
+      "Stop gathering endless information. Trust your judgment and make the call.",
+      "Action gives you feedback faster than endless analysis ever will."
+    ]
+  },
+  {
+    "keys": ["lost passion for what I do", "rekindling my passion", "no passion for work", "lost my creative spark", "feeling unpassionate"],
+    "values": [
+      "Passion follows curiosity and effort, not just luck. Try exploring a new angle.",
+      "Take a complete rest from your work. Distance often brings back appreciation.",
+      "Remind yourself of what initially drew you to this field or project.",
+      "Focus on the craft and helping others; passion often returns naturally."
+    ]
+  },
+  {
+    "keys": ["feeling not good enough", "feeling inadequate today", "feeling insufficient", "doubt if I'm good enough", "feeling inadequate"],
+    "values": [
+      "You are enough as you are right now. Growth is about developing skills, not worth.",
+      "Separate your self-worth from your daily output or performance.",
+      "Speak to yourself with the same kindness you would offer a good friend.",
+      "Focus on your progress over time rather than comparing yourself to ideal standards."
+    ]
+  },
+  {
+    "keys": ["striving for work life balance", "finding balance in life", "seeking better balance", "struggling to find balance", "work life balance goal"],
+    "values": [
+      "Balance isn't equal time for everything; it's being present in whatever you do.",
+      "Set clear boundaries for work and rest to protect your energy.",
+      "Prioritize what truly matters to you and let go of minor low-value tasks.",
+      "Adjust your expectations daily. Balance is a continuous fine-tuning process."
+    ]
+  },
+  {
+    "keys": ["starting a difficult 30 day challenge", "facing a tough challenge", "starting hard challenge", "tackling a big challenge", "beginning a hard goal"],
+    "values": [
+      "Respect the challenge, but focus strictly on Day 1. Don't worry about Day 30 yet.",
+      "Embrace the difficulty. Challenges are designed to build your character and skill.",
+      "Break the challenge into daily micro-goals to keep it manageable.",
+      "Stay committed to the process. You are stronger than the challenge in front of you."
+    ]
+  },
+  {
+    "keys": ["scrolling too much social media", "distracted by phone", "wasting time on social media", "social media distraction", "can't put down my phone"],
+    "values": [
+      "Put your phone in another room while working. Out of sight, out of mind.",
+      "Delete distracting apps for a few days to reset your attention span.",
+      "Notice the urge to scroll without acting on it. Breathe and return to work.",
+      "Replace phone scrolling with a physical habit like reading or stretching."
+    ]
+  },
+  {
+    "keys": ["want to face my fears", "conquering my fear today", "overcoming fear today", "facing fear head on", "want to conquer fear"],
+    "values": [
+      "Facing fear in small doses builds your tolerance. Take one small brave step.",
+      "Focus on the positive outcome on the other side of fear.",
+      "Prepare as best as you can, then step forward despite the discomfort.",
+      "Courage is built through practice. Every time you face fear, you grow."
+    ]
+  },
+  {
+    "keys": ["recovering from burnout slowly", "getting over burnout", "recovering from burnout", "healing from burnout", "overcoming burnout slowly"],
+    "values": [
+      "Burnout recovery takes real time and lower expectations. Don't rush it.",
+      "Prioritize deep sleep, healthy food, and gentle movement.",
+      "Say no to non-essential tasks while your energy recharges.",
+      "Rebuild your work habits slowly with strict boundaries for rest."
+    ]
+  },
+  {
+    "keys": ["need clarity on my goals", "cloudy goals need focus", "seeking goal clarity", "unclear about my goals", "need clear direction"],
+    "values": [
+      "Write down what you want to achieve in plain, simple language.",
+      "Filter out extra goals. Focus on your top one or two priorities.",
+      "Define what success looks like for your goal in measurable terms.",
+      "Review your goals regularly to ensure they still align with your values."
+    ]
+  },
+  {
+    "keys": ["impatient for fast progress", "want faster results", "impatient with progress", "progress feels too slow", "frustrated by slow progress"],
+    "values": [
+      "Meaningful progress takes time. Focus on masterfulness, not speed.",
+      "Patience is maintaining a positive attitude while doing the work.",
+      "Trust the timeline of your growth. Consistent daily effort compounds.",
+      "Remind yourself that rush often leads to mistakes. Slow and steady wins."
+    ]
+  },
+  {
+    "keys": ["afraid of stepping out of comfort zone", "fear of change", "scared of changing my life", "afraid to change habits", "fear of stepping out"],
+    "values": [
+      "Change feels uncomfortable because it's unfamiliar, not because it's bad.",
+      "Growth lies right outside your comfort zone. Take a small step.",
+      "Focus on the positive benefits that change will bring to your life.",
+      "Embrace the uncertainty. You are adaptable and resilient."
+    ]
+  },
+  {
+    "keys": ["doubting if hard work is worth it", "wondering if effort pays off", "doubting if it's worth it", "is the effort worth it", "doubting my effort"],
+    "values": [
+      "Honest effort is never wasted; it builds your skills and discipline.",
+      "Trust that your hard work will pay off, even if in unexpected ways.",
+      "Keep investing in your goals. Perseverance separates success from regret.",
+      "Remind yourself why this goal mattered to you when you started."
+    ]
+  },
+  {
+    "keys": ["want to be more resilient", "building mental toughness", "building resilience today", "developing resilience", "want inner strength"],
+    "values": [
+      "Resilience is built by facing small difficulties with a calm attitude.",
+      "Reframe challenges as growth opportunities for your mind.",
+      "Focus on how you respond to events rather than complaining about them.",
+      "Celebrate every time you bounce back from a setback. That is resilience."
+    ]
+  },
+  {
+    "keys": ["drained by negative feedback", "hurt by criticism", "drained by criticism today", "taking criticism hard", "affected by negative comments"],
+    "values": [
+      "Separate constructive feedback from baseless criticism. Take what helps, leave the rest.",
+      "Don't let outside opinions define your self-worth or effort.",
+      "Consider the source of criticism before taking it to heart.",
+      "Focus on improving your work rather than trying to please everyone."
+    ]
+  },
+  {
+    "keys": ["rebuilding my self-esteem", "working on self worth", "rebuilding self confidence", "improving self-esteem", "working on my self worth"],
+    "values": [
+      "Rebuilding self-esteem starts with treating yourself with gentleness and respect.",
+      "Acknowledge your strengths and keep track of your daily achievements.",
+      "Surround yourself with supportive people who encourage your growth.",
+      "Forgive past mistakes and focus on building positive habits today."
+    ]
+  },
+  {
+    "keys": ["wasted so much time today", "regretting wasted hours", "wasted my day today", "regret wasting time", "felt like I wasted time"],
+    "values": [
+      "Regretting wasted time only wastes more time. Focus on the present moment.",
+      "The past is unchangeable. Make the remaining hours of today count.",
+      "Learn what caused the distraction and adjust your setup for tomorrow.",
+      "Forgive yourself for losing focus. Start fresh right now with one task."
+    ]
+  },
+  {
+    "keys": ["afraid to ask for help", "too proud to ask for assistance", "scared to ask for help", "reluctant to ask for help", "hesitant to ask for assistance"],
+    "values": [
+      "Asking for help is a sign of strength and self-awareness, not weakness.",
+      "People are often happy to help if you ask clearly and respectfully.",
+      "Don't struggle alone when guidance can save you time and stress.",
+      "Reaching out for help accelerates your learning and progress."
+    ]
+  },
+  {
+    "keys": ["neglecting self care", "needing to prioritize self care", "struggling with self care", "forgetting self care", "poor self care lately"],
+    "values": [
+      "Self-care isn't selfish; it's necessary for sustained effort and health.",
+      "Prioritize sleep, nutrition, and downtime as essential daily tasks.",
+      "Take time to relax without feeling guilty about not working.",
+      "Treating your body and mind well improves every area of your life."
+    ]
+  },
+  {
+    "keys": ["unmotivated coming back from break", "hard to resume after break", "post break unmotivated", "struggling after vacation", "hard to restart work"],
+    "values": [
+      "Transitioning back to work is always slow. Ease in with minor tasks.",
+      "Don't expect peak efficiency immediately. Focus on getting back into rhythm.",
+      "Set up a simple checklist for your first hour to regain momentum.",
+      "Give yourself time to adjust. Step by step, your focus will return."
+    ]
+  },
+  {
+    "keys": ["staying committed to long term goals", "marathon mindset", "working on long term goals", "focused on long term success", "long term vision"],
+    "values": [
+      "Long-term goals are won through quiet daily consistency. Pace yourself.",
+      "Keep your long-term vision clear, but execute with daily short-term focus.",
+      "Stay patient during slow periods. Deep progress takes sustained time.",
+      "Celebrate small milestones along the way to stay motivated for the long haul."
+    ]
+  },
+  {
+    "keys": ["feeling high expectations pressure", "pressure to perform", "overwhelmed by expectations", "feeling pressure from others", "high pressure today"],
+    "values": [
+      "Focus on your own standards rather than worrying about pleasing everyone else.",
+      "Do your honest best and let go of the need to control outcomes.",
+      "Communicate your boundaries clearly if expectations become unrealistic.",
+      "Focus on executing one task well rather than carrying the weight of all expectations."
+    ]
+  },
+  {
+    "keys": ["staying calm under pressure", "managing stress gracefully", "staying calm under stress", "keeping calm during stress", "handling stress well"],
+    "values": [
+      "Take a slow breath. Your calm response is your greatest advantage under stress.",
+      "Focus on what you can control and release what is out of your hands.",
+      "Break stressful problems into clear, manageable action steps.",
+      "Maintain your perspective. This stressful moment will pass."
+    ]
+  },
+  {
+    "keys": ["stop making excuses", "no more excuses today", "want to stop making excuses", "cutting out excuses", "ending excuses today"],
+    "values": [
+      "Own your choices completely. Eliminating excuses puts you in control.",
+      "Focus on solutions rather than listing reasons why things are hard.",
+      "Hold yourself accountable to your promises. Action over excuses.",
+      "Be honest with yourself about your effort. Real growth starts with ownership."
+    ]
+  },
+  {
+    "keys": ["feeling envious of someone's success", "envious of others", "feeling envious today", "jealous of someone's progress", "dealing with envy"],
+    "values": [
+      "Envy tells you what you value. Use it as motivation to build your own success.",
+      "Be happy for others' success; it proves that achievement is possible.",
+      "Channel envy into positive action for your own personal goals.",
+      "Focus on your own path and daily effort. Your journey is yours alone."
+    ]
+  },
+  {
+    "keys": ["learning self forgiveness", "forgiving past mistakes", "forgiving my mistakes", "stopping self blame", "learning to forgive myself"],
+    "values": [
+      "Forgive yourself for not knowing earlier what you know now.",
+      "Treat past mistakes as valuable lessons, not permanent flaws.",
+      "Release past regret so you can focus your energy on building today.",
+      "Self-forgiveness opens the door to genuine progress and growth."
+    ]
+  },
+  {
+    "keys": ["giving up on my project", "ready to abandon project", "want to quit my project", "giving up project", "considering quitting project"],
+    "values": [
+      "Pause before deciding. Ask if you need a break or an actual change of direction.",
+      "Reflect on whether small adjustments could make the project enjoyable again.",
+      "If the project no longer aligns with your goals, it's okay to pivot consciously.",
+      "Give it one last honest attempt after a good rest before making your final call."
+    ]
+  },
+  {
+    "keys": ["seeking inner peace and focus", "striving for quiet mind", "seeking inner peace", "want inner calm", "looking for mental peace"],
+    "values": [
+      "Inner peace begins when you stop letting outside events control your mood.",
+      "Practice quiet moments daily without phone or digital distractions.",
+      "Focus on gratitude and breathing to cultivate a calm, quiet mind.",
+      "Protect your mental environment by limiting exposure to negative noise."
+    ]
+  },
+  {
+    "keys": ["staying humble while succeeding", "humble growth", "want to stay humble", "remaining humble as I grow", "staying grounded in success"],
+    "values": [
+      "Humility is keeping your mind open to learning regardless of your progress.",
+      "Remember that success comes from consistent effort and support from others.",
+      "Stay focused on service and learning rather than seeking external praise.",
+      "True strength is quiet confidence combined with continuous learning."
+    ]
+  },
+  {
+    "keys": ["environment feels dull", "needing fresh surroundings", "uninspired by surroundings", "dull environment today", "need environmental change"],
+    "values": [
+      "Clean and declutter your workspace to instantly refresh your energy.",
+      "Work from a new location today, like a library, park, or different room.",
+      "Add fresh plants, lighting, or art to inspire your daily space.",
+      "A small change in your physical environment can spark fresh focus."
+    ]
+  },
+  {
+    "keys": ["taking full ownership of my life", "owning my decisions", "taking responsibility for life", "taking personal responsibility", "owning my life choices"],
+    "values": [
+      "Taking full ownership gives you the power to change your outcomes.",
+      "Stop waiting for external conditions to change. Build your own path.",
+      "When you accept responsibility, every choice becomes an opportunity to grow.",
+      "Owning your actions builds true self-respect and confidence."
+    ]
+  },
+  {
+    "keys": ["moving at a snail pace", "progress feels super slow", "feeling moving too slow", "too slow progress", "sluggish progress today"],
+    "values": [
+      "Slow progress is still progress. What matters is that you're moving forward.",
+      "Building solid foundations takes time. Don't trade quality for speed.",
+      "Trust the quiet process of daily accumulation. Stay consistent.",
+      "Focus on today's single step rather than worrying about the whole distance."
+    ]
+  },
+  {
+    "keys": ["celebrating small wins", "small wins matter", "want to celebrate small victories", "celebrating small progress", "acknowledging small wins"],
+    "values": [
+      "Celebrating small victories builds momentum and keeps your spirits high.",
+      "Every step forward counts. Acknowledge your daily efforts proudly.",
+      "Small wins compound into major achievements over time. Celebrate them!",
+      "Recognizing minor progress trains your brain to stay positive and active."
+    ]
+  },
+  {
+    "keys": ["consistency over intensity", "small daily efforts", "choosing consistency over intensity", "steady effort over quick bursts", "striving for steady consistency"],
+    "values": [
+      "Consistency beats intensity every time. Small daily steps lead to lasting change.",
+      "Focus on showing up every day rather than burning out in single bursts.",
+      "Steady, manageable progress is sustainable for the long run.",
+      "Build habits that fit comfortably into your life for true long-term success."
+    ]
+  },
+  {
+    "keys": ["always here to cheer you on my friend", "supportive companion motivation my friend", "cheering you on dear friend", "supportive words my friend", "always encouraging you my friend"],
+    "values": [
+      "I'm always here to cheer you on, my friend! Keep taking steady steps forward.",
+      "You have so much resilience in you, my dear friend. Keep going at your own pace!",
+      "Thank you my friend! Always right here whenever you need a boost or quiet encouragement.",
+      "Believe in your journey, my friend! Wishing you continuous progress and inner peace."
+    ]
+  }
+]

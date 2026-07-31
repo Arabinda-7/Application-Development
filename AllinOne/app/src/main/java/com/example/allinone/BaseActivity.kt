@@ -28,6 +28,11 @@ open class BaseActivity : AppCompatActivity() {
         }
     }
 
+    private var onPermissionsResult: ((Map<String, Boolean>) -> Unit)? = null
+    private val multiplePermissionsLauncher = registerForActivityResult(ActivityResultContracts.RequestMultiplePermissions()) { result ->
+        onPermissionsResult?.invoke(result)
+    }
+
     fun checkAndRequestPermission(permission: String, onGranted: () -> Unit) {
         when {
             ContextCompat.checkSelfPermission(this, permission) == PackageManager.PERMISSION_GRANTED -> {
@@ -37,6 +42,20 @@ open class BaseActivity : AppCompatActivity() {
                 onPermissionGranted = onGranted
                 permissionLauncher.launch(permission)
             }
+        }
+    }
+
+    fun checkAndRequestPermissions(permissions: Array<String>, onResult: (Map<String, Boolean>) -> Unit) {
+        val permissionsToRequest = permissions.filter {
+            ContextCompat.checkSelfPermission(this, it) != PackageManager.PERMISSION_GRANTED
+        }.toTypedArray()
+
+        if (permissionsToRequest.isEmpty()) {
+            val allGranted = permissions.associateWith { true }
+            onResult(allGranted)
+        } else {
+            onPermissionsResult = onResult
+            multiplePermissionsLauncher.launch(permissionsToRequest)
         }
     }
 

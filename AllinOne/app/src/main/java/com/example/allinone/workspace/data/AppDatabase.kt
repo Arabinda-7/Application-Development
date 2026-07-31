@@ -32,7 +32,7 @@ import com.example.allinone.data.database.*
         AiChatEntity::class,
         AiChatSessionEntity::class
     ],
-    version = 10, // Incremented version for AI Chat Sessions
+    version = 11, // Incremented version for AI Chat Session Type
     exportSchema = false
 )
 @TypeConverters(AppTypeConverters::class)

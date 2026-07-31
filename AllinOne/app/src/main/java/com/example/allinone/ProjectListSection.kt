@@ -39,7 +39,7 @@ class ProjectListSection(
         }
         
         val roadmapList = activeNotes.filter {
-            DataManager.projectDualExistEnabled || it.isDualExist || it.category == "Project" || it.subFeatures.isNotEmpty()
+            DataManager.projectDualExistEnabled || it.isDualExist || it.category == "Project" || (it.subFeatures?.isNotEmpty() == true)
         }
         val visibleRoadmaps = if (DataManager.projectAutoArchive) {
             roadmapList.filter { it.status != "Completed" }
@@ -51,7 +51,7 @@ class ProjectListSection(
             .thenByDescending { it.timestamp })
 
         val ideasList = activeNotes.filter {
-            (DataManager.projectDualExistEnabled || it.isDualExist || it.category == "ProjectIdea" || (it.category != "Project" && it.subFeatures.isEmpty()))
+            (DataManager.projectDualExistEnabled || it.isDualExist || it.category == "ProjectIdea" || (it.category != "Project" && (it.subFeatures?.isEmpty() != false)))
             && it.category != "Project"
         }
         val sortedIdeas = ideasList.sortedByDescending { it.timestamp }

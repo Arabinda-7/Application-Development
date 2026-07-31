@@ -70,7 +70,7 @@ fun IdeaViewSection(
                             Column(modifier = Modifier.weight(1f)) {
                                 Text(
                                     idea.title, 
-                                    color = Color.White, 
+                                    color = ideaAccentColor, 
                                     fontWeight = FontWeight.Bold, 
                                     fontSize = 20.sp,
                                     maxLines = 1,

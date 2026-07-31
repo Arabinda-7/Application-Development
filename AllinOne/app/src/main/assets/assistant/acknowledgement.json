@@ -1,0 +1,542 @@
+[
+  {
+    "keys": ["okay", "okay!", "okay.", "OKAY", "okayy", "okayyy", "okay there", "okay pal", "okay buddy", "okay friend"],
+    "values": [
+      "Got it! What would you like to focus on next?",
+      "Awesome! Ready whenever you are to keep moving forward.",
+      "Sounds good! How can I assist you with the next step?",
+      "Perfect! Feel free to share whatever is on your mind."
+    ]
+  },
+  {
+    "keys": ["ok", "ok!", "ok.", "OK", "okk", "okkk", "k", "kk", "ok buddy", "ok pal"],
+    "values": [
+      "All set! What shall we tackle next?",
+      "Got it! Let me know if you need anything else.",
+      "Sounds great! Ready whenever you want to continue.",
+      "Awesome! How are things looking for you now?"
+    ]
+  },
+  {
+    "keys": ["alright", "alright!", "alright.", "ALRIGHT", "alrighty", "alrighty then boss", "alright there", "alright pal", "alright buddy"],
+    "values": [
+      "Alright! Let's get right into the next step.",
+      "Alrighty! What's our next task today?",
+      "Sounds like a plan! How can I help you out now?",
+      "All good! Ready whenever you are."
+    ]
+  },
+  {
+    "keys": ["sure", "sure!", "sure thing for sure", "SURE", "sure pal", "sure buddy", "sure thing for sure pal", "sure thing for sure buddy"],
+    "values": [
+      "Sure thing! Let's keep moving forward.",
+      "You got it! What would you like to work on next?",
+      "Absolutely! Ready for your next idea or question.",
+      "Sure! How else can I assist you today?"
+    ]
+  },
+  {
+    "keys": ["got it", "got it!", "got it.", "GOT IT", "got it pal", "got it buddy", "got it thanks", "got it friend"],
+    "values": [
+      "Glad that was clear! What's next on your agenda?",
+      "Awesome! Ready whenever you want to take another step.",
+      "Got it! Let me know if any other questions pop up.",
+      "Perfect! Feel free to ask about anything else."
+    ]
+  },
+  {
+    "keys": ["understood", "understood!", "UNDERSTOOD", "fully understood", "completely understood", "understood pal", "understood friend"],
+    "values": [
+      "Great! Glad we're on the same page.",
+      "Understood! How would you like to proceed now?",
+      "Clear as day! What shall we explore next?",
+      "Awesome! Let me know what you'd like to do next."
+    ]
+  },
+  {
+    "keys": ["sounds good", "sounds good!", "sounds good to me", "sounds good pal", "sounds great", "sounds good buddy"],
+    "values": [
+      "Sounds like a solid plan! Let's get right to it.",
+      "Great! Looking forward to working through this with you.",
+      "Awesome! Let me know whenever you're ready to start.",
+      "Perfect! How can I help you kick things off?"
+    ]
+  },
+  {
+    "keys": ["makes sense", "makes sense!", "makes total sense", "makes sense pal", "that makes sense", "makes total sense pal"],
+    "values": [
+      "Glad it's all clear! Makes things much smoother.",
+      "Awesome! What's the next step you'd like to take?",
+      "Makes sense! Feel free to ask if anything else comes up.",
+      "Great! Ready whenever you want to continue."
+    ]
+  },
+  {
+    "keys": ["i understand", "im understand", "i understand now", "i understand completely", "i understand pal", "i understand friend"],
+    "values": [
+      "Wonderful! Glad everything is crystal clear.",
+      "Awesome! How can I help you with your next task?",
+      "Great to hear! Let me know if you need more details.",
+      "Perfect! What would you like to focus on next?"
+    ]
+  },
+  {
+    "keys": ["noted", "noted!", "NOTED", "noted down", "noted pal", "duly noted", "noted friend", "duly noted pal"],
+    "values": [
+      "Noted! Everything is set and ready.",
+      "Got it noted down! What shall we tackle next?",
+      "Perfect! Let me know whenever you want to proceed.",
+      "All noted! How else can I assist you right now?"
+    ]
+  },
+  {
+    "keys": ["perfect", "perfect!", "PERFECT", "perfect then", "perfect pal", "sounds perfect", "perfect buddy"],
+    "values": [
+      "Perfect! Glad we've got everything lined up.",
+      "Awesome! What's the next task on your list?",
+      "Sounds great! Ready whenever you are.",
+      "Perfect! Let me know if you need anything else."
+    ]
+  },
+  {
+    "keys": ["cool", "cool!", "COOL", "cool cool", "cool beans", "super cool", "cool deal", "cool pal"],
+    "values": [
+      "Cool! Ready to dive into the next thing whenever you are.",
+      "Awesome! How can I help you out next?",
+      "Cool deal! What's on your mind now?",
+      "Great! Let's keep the momentum going."
+    ]
+  },
+  {
+    "keys": ["awesome", "awesome!", "AWESOME", "awesome then", "awesome pal", "sounds awesome", "awesome buddy"],
+    "values": [
+      "Awesome! Love that we're making great progress.",
+      "Great energy! What would you like to work on next?",
+      "Sounds awesome! Ready whenever you are to continue.",
+      "Perfect! How else can I assist you today?"
+    ]
+  },
+  {
+    "keys": ["fine", "fine!", "fine by me", "that's fine for now", "sounds fine", "fine pal", "that's fine pal"],
+    "values": [
+      "Fine by me too! Let's get right to it.",
+      "Sounds good! What's our next step?",
+      "Alright! Ready whenever you want to move forward.",
+      "Great! Let me know how you'd like to proceed."
+    ]
+  },
+  {
+    "keys": ["alright then", "alrighty then", "alright then pal", "alright then buddy", "alrighty then pal"],
+    "values": [
+      "Alrighty then! Let me know where we should start.",
+      "Sounds good! Ready for whatever is next.",
+      "Alright then! What's on the agenda now?",
+      "Perfect! Let's keep moving along."
+    ]
+  },
+  {
+    "keys": ["okay thanks", "ok thanks", "okay thank you", "ok thx", "okay thx pal", "ok thanks pal"],
+    "values": [
+      "You're very welcome! What would you like to check next?",
+      "Glad to help! Let me know if you need anything else.",
+      "Anytime! Hope your day stays productive and smooth.",
+      "My pleasure! Ready whenever you need another quick hand."
+    ]
+  },
+  {
+    "keys": ["gotcha", "gotcha!", "GOTCHA", "gotcha pal", "gotcha buddy", "gotcha friend", "gotcha boss"],
+    "values": [
+      "Gotcha! Everything is ready on my end.",
+      "Awesome! What's the next step for us?",
+      "Gotcha! Let me know whenever you want to proceed.",
+      "Sounds good! Ready for your next instruction."
+    ]
+  },
+  {
+    "keys": ["understood now", "i get it now", "get it now", "fully understood now", "all understood now"],
+    "values": [
+      "Awesome! Glad everything makes sense now.",
+      "Great! Ready whenever you want to tackle the next task.",
+      "Wonderful! Feel free to ask if anything else comes up.",
+      "Perfect! How can I assist you further?"
+    ]
+  },
+  {
+    "keys": ["fair enough", "fair enough!", "fair enough pal", "fair enough then", "fair enough buddy"],
+    "values": [
+      "Fair enough! Let's go with that plan.",
+      "Sounds reasonable! How should we proceed from here?",
+      "Agreed! Ready whenever you are to keep moving.",
+      "All good! What's our next focus?"
+    ]
+  },
+  {
+    "keys": ["good to know", "good to know!", "good to know pal", "great to know", "good to know friend"],
+    "values": [
+      "Glad it was useful to know! What else can I look up for you?",
+      "Awesome! Knowledge is power. Let me know what's next.",
+      "Great! Feel free to ask if you need more details on that.",
+      "Hope that info helps you out! Have a great day."
+    ]
+  },
+  {
+    "keys": ["crystal clear", "crystal clear!", "crystal clear now", "loud and clear", "loud and clear pal"],
+    "values": [
+      "Loud and clear! Ready for the next command or question.",
+      "Awesome! Glad everything came across so clearly.",
+      "Perfect! How can I help you carry out the next step?",
+      "Great! Let's keep moving forward smoothly."
+    ]
+  },
+  {
+    "keys": ["roger that", "roger that!", "roger", "roger pal", "roger roger", "roger that buddy"],
+    "values": [
+      "Roger that! All systems ready for your next move.",
+      "Copied loud and clear! What's our next objective?",
+      "Roger! Ready whenever you give the word.",
+      "Got it! Let me know how you'd like to proceed."
+    ]
+  },
+  {
+    "keys": ["that works", "that works!", "that works for me", "that works for me boss", "works great", "that works pal"],
+    "values": [
+      "Awesome! Glad that plan works for you.",
+      "Great! Let me know when you'd like to get started.",
+      "Works for me too! What's next on our list?",
+      "Perfect! Let me know if you need any adjustments."
+    ]
+  },
+  {
+    "keys": ["absolutely", "absolutely!", "ABSOLUTELY", "absolutely pal", "absolutely friend", "absolutely buddy"],
+    "values": [
+      "Absolutely! Let's get right to work on that.",
+      "You got it! Ready whenever you are to start.",
+      "100%! How can I help you execute this next?",
+      "Perfect! Let's keep up this great momentum."
+    ]
+  },
+  {
+    "keys": ["definitely", "definitely!", "DEFINITELY", "definitely pal", "definitely friend", "definitely buddy"],
+    "values": [
+      "Definitely! Glad we're completely aligned.",
+      "For sure! What would you like to tackle next?",
+      "Definitely! Ready to help you with the next step.",
+      "Awesome! Let me know whenever you're ready."
+    ]
+  },
+  {
+    "keys": ["no problem", "no problem!", "no prob", "no problemo", "no prob pal", "no problem buddy"],
+    "values": [
+      "Glad I could help out! What's next on your mind?",
+      "No problem at all! Feel free to ask anything else.",
+      "Anytime! Hope your day keeps running smoothly.",
+      "Easy peasy! Ready for whatever comes next."
+    ]
+  },
+  {
+    "keys": ["you bet", "you bet!", "you betcha", "you bet pal", "you bet friend", "you bet buddy"],
+    "values": [
+      "You bet! Ready to assist with whatever comes next.",
+      "Awesome! Let's keep pushing forward together.",
+      "You got it! What else can I do for you today?",
+      "Glad to help out! Take care and talk soon."
+    ]
+  },
+  {
+    "keys": ["right on", "right on!", "right on pal", "right on brother", "right on buddy", "right on friend"],
+    "values": [
+      "Right on! Love the positive momentum.",
+      "Awesome! What's our next goal for today?",
+      "Right on! Ready whenever you give the signal.",
+      "Great vibes! Let's keep moving along."
+    ]
+  },
+  {
+    "keys": ["works for me", "works for me!", "works fine for me", "works great for me", "works for me pal"],
+    "values": [
+      "Works for me too! Let's proceed with that.",
+      "Awesome! Happy we agreed on a great path forward.",
+      "Sounds like a plan! Ready when you are.",
+      "Great! Let me know what step comes next."
+    ]
+  },
+  {
+    "keys": ["deal", "deal!", "DEAL", "deal pal", "sounds like a deal", "deal buddy", "deal friend"],
+    "values": [
+      "It's a deal! Let's get right to action.",
+      "Deal! Looking forward to seeing this through.",
+      "Awesome deal! How would you like to start?",
+      "Sounds like a plan! Talk to you soon."
+    ]
+  },
+  {
+    "keys": ["copy that", "copy that!", "copy", "copy roger", "copy pal", "copy that buddy"],
+    "values": [
+      "Copy that! Standing by for your next direction.",
+      "Received loud and clear! What's next?",
+      "Copy! Ready whenever you want to begin.",
+      "All set! Let me know what to focus on now."
+    ]
+  },
+  {
+    "keys": ["clear", "clear!", "clear enough", "all clear", "clear pal", "all clear pal"],
+    "values": [
+      "All clear! Ready to jump into the next step.",
+      "Awesome! Glad everything makes complete sense.",
+      "Clear as crystal! How else can I assist?",
+      "Great! Let's keep moving forward smoothly."
+    ]
+  },
+  {
+    "keys": ["agreed", "agreed!", "AGREED", "agreed pal", "totally agreed", "agreed buddy"],
+    "values": [
+      "Agreed! Glad we're on the exact same page.",
+      "Totally agreed! What's our next course of action?",
+      "100% agreed! Ready whenever you are to proceed.",
+      "Awesome! Let me know how you'd like to start."
+    ]
+  },
+  {
+    "keys": ["exactly", "exactly!", "EXACTLY", "exactly pal", "exactly right", "spot on exact", "exactly buddy"],
+    "values": [
+      "Exactly! Glad we nailed the detail.",
+      "Spot on! Ready to take on the next part.",
+      "Exactly right! What would you like to focus on now?",
+      "Great! Let me know whenever you're ready."
+    ]
+  },
+  {
+    "keys": ["indeed", "indeed!", "INDEED", "indeed pal", "very true indeed", "indeed buddy"],
+    "values": [
+      "Indeed! Glad we see eye to eye on this.",
+      "Very true! What's the next step in your plan?",
+      "Indeed! Let me know how I can assist further.",
+      "Awesome! Ready whenever you want to continue."
+    ]
+  },
+  {
+    "keys": ["gladly", "gladly!", "gladly pal", "most gladly", "gladly buddy", "gladly friend"],
+    "values": [
+      "Most gladly! Happy to help out anytime.",
+      "Gladly done! What else can I take off your plate?",
+      "Always a pleasure! Let me know what comes next.",
+      "Awesome! Wishing you a smooth rest of your day."
+    ]
+  },
+  {
+    "keys": ["sure thing", "sure thing!", "sure thing pal", "sure thing buddy", "sure thing friend"],
+    "values": [
+      "Sure thing! Always happy to lend a quick hand.",
+      "You got it! Let me know if you need anything else.",
+      "Sure thing! Hope your tasks go smoothly today.",
+      "Anytime at all! Have an awesome day."
+    ]
+  },
+  {
+    "keys": ["i see", "i see!", "i see now", "ah i see", "i see pal", "ah i see now"],
+    "values": [
+      "Ah, glad it clicked! Understanding the core idea makes everything easier.",
+      "I see too! Ready whenever you want to take the next step.",
+      "Awesome! Let me know if you want to explore further.",
+      "Great! Feel free to ask any other questions."
+    ]
+  },
+  {
+    "keys": ["that's fine", "thats fine", "that's fine by me", "thats fine pal", "thats fine buddy"],
+    "values": [
+      "That's completely fine! We'll proceed accordingly.",
+      "Sounds good to me! Ready for the next phase.",
+      "All good! Let me know when you'd like to begin.",
+      "Awesome! Have a smooth and stress-free day."
+    ]
+  },
+  {
+    "keys": ["very well", "very well!", "very well then", "very well pal", "very well buddy"],
+    "values": [
+      "Very well! Let's proceed as planned.",
+      "Very well then! What shall we tackle next?",
+      "Sounds good! Standing by for your next thought.",
+      "All set! Let me know what comes next."
+    ]
+  },
+  {
+    "keys": ["all good", "all good!", "all good pal", "all good buddy", "all good friend"],
+    "values": [
+      "All good! Glad everything is smooth and sorted.",
+      "Awesome! Ready whenever you want to continue.",
+      "All good on my end! What's next for you?",
+      "Great! Hope your day stays pleasant and easy."
+    ]
+  },
+  {
+    "keys": ["great", "great!", "GREAT", "great then", "great pal", "sounds great pal", "great buddy"],
+    "values": [
+      "Great! Love seeing things come together so smoothly.",
+      "Awesome! What's the next objective for today?",
+      "Sounds great! Ready whenever you are.",
+      "Perfect! Let me know if you need anything else."
+    ]
+  },
+  {
+    "keys": ["super", "super!", "SUPER", "super pal", "super cool pal", "super buddy"],
+    "values": [
+      "Super! Glad we're making fast progress.",
+      "Awesome! How can I help you out next?",
+      "Super cool! Let me know what to focus on now.",
+      "Great! Have a fantastic rest of your day."
+    ]
+  },
+  {
+    "keys": ["splendid", "splendid!", "SPLENDID", "splendid pal", "sounds splendid", "splendid friend"],
+    "values": [
+      "Splendid! Glad everything turned out so well.",
+      "Wonderful! What would you like to explore next?",
+      "Sounds splendid! Ready whenever you give the word.",
+      "Appreciate that! Wishing you a brilliant day."
+    ]
+  },
+  {
+    "keys": ["brilliant", "brilliant!", "BRILLIANT", "brilliant pal", "sounds brilliant", "brilliant buddy"],
+    "values": [
+      "Brilliant! Love the progress we're making.",
+      "Awesome! How can I assist you with the next part?",
+      "Sounds brilliant! Ready to roll whenever you are.",
+      "Great! Have a productive and pleasant day."
+    ]
+  },
+  {
+    "keys": ["wonderful", "wonderful!", "WONDERFUL", "wonderful pal", "sounds wonderful", "wonderful buddy"],
+    "values": [
+      "Wonderful! So happy everything is falling into place.",
+      "Glad to hear that! What shall we tackle next?",
+      "Sounds wonderful! Standing by for your next instruction.",
+      "Awesome! Hope the rest of your day is just as great."
+    ]
+  },
+  {
+    "keys": ["fantastic", "fantastic!", "FANTASTIC", "fantastic pal", "sounds fantastic", "fantastic buddy"],
+    "values": [
+      "Fantastic! Love that everything is going so smoothly.",
+      "Awesome! Let me know what step you'd like to take next.",
+      "Sounds fantastic! Ready when you are.",
+      "Great! Wishing you an awesome rest of your day."
+    ]
+  },
+  {
+    "keys": ["terrific", "terrific!", "TERRIFIC", "terrific pal", "sounds terrific", "terrific buddy"],
+    "values": [
+      "Terrific! Glad we're making steady headway.",
+      "Awesome! Ready whenever you want to continue.",
+      "Sounds terrific! How else can I help out today?",
+      "Great news! Take care and talk soon."
+    ]
+  },
+  {
+    "keys": ["neat", "neat!", "NEAT", "neat pal", "sounds neat", "neat buddy"],
+    "values": [
+      "Neat! Love how clean and simple that is.",
+      "Awesome! Ready for whatever comes next.",
+      "Sounds neat! Let me know what we're working on.",
+      "Great! Enjoy your day."
+    ]
+  },
+  {
+    "keys": ["sweet", "sweet!", "SWEET", "sweeet", "sweet pal", "sounds sweet", "sweet buddy"],
+    "values": [
+      "Sweet! Glad everything is set to go.",
+      "Awesome! Ready to dive into the next part.",
+      "Sounds sweet! What's on your schedule next?",
+      "Great! Have a fantastic day."
+    ]
+  },
+  {
+    "keys": ["got it clear", "got it clearly", "got it loud and clear pal", "got it clear buddy", "got it clearly pal"],
+    "values": [
+      "Awesome! Glad everything is crystal clear.",
+      "Clear as day! Ready for your next move.",
+      "Got it! Let me know what to handle next.",
+      "Great! Have a smooth rest of your day."
+    ]
+  },
+  {
+    "keys": ["makes sense to me", "makes total sense to me", "makes sense to me pal", "makes sense to me buddy"],
+    "values": [
+      "Glad it makes total sense to you! Clarity is the goal.",
+      "Awesome! Ready whenever you want to move forward.",
+      "Makes sense to me too! How should we proceed?",
+      "Great! Let me know if you need anything else."
+    ]
+  },
+  {
+    "keys": ["okey dokey", "okey dokey!", "okdokey", "okey doke", "okey dokey pal", "okey dokey buddy"],
+    "values": [
+      "Okey dokey! Ready to roll on the next task.",
+      "Awesome! Let me know what we're tackling next.",
+      "Okey doke! Standing by whenever you're ready.",
+      "Great! Have a cheerful day ahead."
+    ]
+  },
+  {
+    "keys": ["kk cool", "kk thx", "kk got it", "kk sounds good", "kk cool pal", "kk alright"],
+    "values": [
+      "KK cool! All set on my end.",
+      "Got it! Ready for your next prompt or question.",
+      "Sounds good! Let me know if you need anything else.",
+      "Awesome! Catch you on the next step."
+    ]
+  },
+  {
+    "keys": ["de acuerdo", "esta bien", "comprendido", "vale", "entendido", "vale vale"],
+    "values": [
+      "¡De acuerdo! Everything is ready for you.",
+      "¡Entendido! How can I help with the next step?",
+      "¡Está bien! Ready whenever you are.",
+      "Awesome! Have a wonderful day."
+    ]
+  },
+  {
+    "keys": ["d'accord", "compris", "bien compris", "c'est bon", "d'accord pal", "d'accord friend"],
+    "values": [
+      "D'accord! Everything is lined up nicely.",
+      "Compris! What would you like to work on next?",
+      "C'est bon! Ready whenever you give the signal.",
+      "Great! Have a lovely day."
+    ]
+  },
+  {
+    "keys": ["d'accordo", "ho capito", "va bene", "capito", "d'accordo friend", "va bene pal"],
+    "values": [
+      "D'accordo! All set and ready on my end.",
+      "Ho capito! How can I assist you with the next step?",
+      "Va bene! Ready whenever you want to proceed.",
+      "Awesome! Take care and enjoy your day."
+    ]
+  },
+  {
+    "keys": ["fair enough mate", "right you are", "fair play mate", "right you are mate", "spot on mate"],
+    "values": [
+      "Right you are mate! Let's get straight to it.",
+      "Fair enough! How should we handle the next part?",
+      "Spot on! Ready whenever you are.",
+      "Cheers mate! Have an awesome day."
+    ]
+  },
+  {
+    "keys": ["all clear buddy", "all set buddy", "ready to go buddy", "all set pal", "ready to roll buddy"],
+    "values": [
+      "All set buddy! Ready to launch into the next task.",
+      "All clear! What's our next objective?",
+      "Ready to roll! Let me know where we begin.",
+      "Awesome! Hope your day stays smooth."
+    ]
+  },
+  {
+    "keys": ["understood my friend", "got it dear friend", "sounds great my friend", "understood dear friend", "got it my friend"],
+    "values": [
+      "Understood my friend! Always a pleasure moving forward with you.",
+      "Glad everything is clear, my friend! What's next on your mind?",
+      "Sounds great to me too, dear friend! Ready whenever you are.",
+      "Awesome! Take care and let's keep having a great day."
+    ]
+  }
+]

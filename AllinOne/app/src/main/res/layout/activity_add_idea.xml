@@ -165,37 +165,6 @@
 
                 </LinearLayout>
 
-                <!-- Templates Section -->
-                <LinearLayout
-                    android:id="@+id/container_templates_header"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:layout_marginTop="16dp"
-                    android:orientation="horizontal"
-                    android:gravity="center_vertical">
-                    <TextView
-                        android:layout_width="0dp"
-                        android:layout_height="wrap_content"
-                        android:layout_weight="1"
-                        android:text="TEMPLATES"
-                        android:textColor="@color/white"
-                        android:textSize="12sp"
-                        android:textStyle="bold" />
-                </LinearLayout>
-
-                <HorizontalScrollView
-                    android:id="@+id/scroll_templates"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:layout_marginTop="8dp"
-                    android:scrollbars="none">
-                    <LinearLayout
-                        android:id="@+id/container_templates"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:orientation="horizontal" />
-                </HorizontalScrollView>
-
                 <TextView
                     android:id="@+id/btn_toggle_description"
                     android:layout_width="match_parent"

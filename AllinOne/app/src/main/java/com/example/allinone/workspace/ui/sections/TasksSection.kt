@@ -198,7 +198,7 @@ fun TaskItemUI(task: TaskEntity, onUpdateTask: (TaskEntity) -> Unit, onViewTask:
                                 Text(
                                     titleText,
                                     fontWeight = FontWeight.Bold,
-                                    color = if (isDone) Color.White.copy(alpha = 0.4f) else Color.White,
+                                    color = if (isDone) Color.White.copy(alpha = 0.4f) else priorityColor,
                                     textDecoration = if (isDone) androidx.compose.ui.text.style.TextDecoration.LineThrough else null,
                                     fontSize = 18.sp,
                                     maxLines = 1,
@@ -283,10 +283,10 @@ fun TaskItemUI(task: TaskEntity, onUpdateTask: (TaskEntity) -> Unit, onViewTask:
                     }
                 }
                 
-                val displayTime = task.dueDate ?: task.createdAt
                 CreatedAtText(
-                    timestamp = displayTime,
-                    modifier = Modifier.align(Alignment.BottomEnd).padding(8.dp)
+                    timestamp = task.createdAt,
+                    modifier = Modifier.align(Alignment.BottomEnd).padding(8.dp),
+                    deadline = task.dueDate
                 )
             }
         }

@@ -41,7 +41,6 @@ class AddIdeaActivity : BaseActivity() {
     private lateinit var containerSubfeatures: LinearLayout
     private lateinit var etNewSubfeature: EditText
     private lateinit var btnAddSubfeature: View
-    private lateinit var containerTemplates: LinearLayout
     private lateinit var btnConvert: TextView
     private lateinit var btnConvertIcon: View
     private lateinit var tvCreatedAt: TextView
@@ -95,7 +94,6 @@ class AddIdeaActivity : BaseActivity() {
         btnToggleFeatures = findViewById(R.id.btn_toggle_subfeatures)
         layoutFeaturesContainer = findViewById(R.id.layout_features_container)
         containerSubfeatures = findViewById(R.id.container_subfeatures)
-        containerTemplates = findViewById(R.id.container_templates)
         etNewSubfeature = findViewById(R.id.et_new_subfeature)
         btnAddSubfeature = findViewById(R.id.btn_add_subfeature)
         btnConvert = findViewById(R.id.btn_convert_project)
@@ -111,6 +109,7 @@ class AddIdeaActivity : BaseActivity() {
             currentPriority = existingIdea?.priority ?: 0
             tempGoals.addAll(existingIdea?.ideaGoals ?: emptyList())
             btnSave.text = "UPDATE"
+            btnDelete.visibility = View.VISIBLE
             btnConvertIcon.visibility = View.VISIBLE
             tvCharCount.text = "${existingIdea?.content?.length ?: 0} characters"
 
@@ -145,6 +144,7 @@ class AddIdeaActivity : BaseActivity() {
 
         btnClose.setOnClickListener { finish() }
         btnSave.setOnClickListener { saveIdea() }
+        btnDelete.setOnClickListener { showDeleteConfirmation() }
         setupListeners()
     }
 
@@ -208,22 +208,6 @@ class AddIdeaActivity : BaseActivity() {
                 putExtra("SUB_FEATURE_ID", newFeature.id)
                 putExtra("IS_IDEA", true)
             })
-        }
-
-        // Templates
-        DataManager.projectTemplates.forEach { (name, steps) ->
-            val templateBtn = TextView(this).apply {
-                text = name; setTextColor(Color.WHITE); textSize = 12f
-                setPadding(24.dpToPx(), 12.dpToPx(), 24.dpToPx(), 12.dpToPx())
-                background = ContextCompat.getDrawable(this@AddIdeaActivity, R.drawable.priority_chip_bg)
-                layoutParams = LinearLayout.LayoutParams(ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT).apply { marginEnd = 12.dpToPx() }
-                setOnClickListener {
-                    DataManager.currentEditingIdeaSubFeatures.clear()
-                    steps.forEachIndexed { i, step -> DataManager.currentEditingIdeaSubFeatures.add(ProjectFeature(step, position = i + 1)) }
-                    refreshSubFeatures()
-                }
-            }
-            containerTemplates.addView(templateBtn)
         }
 
         btnPriority.setOnClickListener {

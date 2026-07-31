@@ -68,7 +68,7 @@ fun NoteViewSection(
                                 Text(
                                     note.title, 
                                     fontWeight = FontWeight.Bold, 
-                                    color = Color.White, 
+                                    color = style.accentColor, 
                                     fontSize = 20.sp,
                                     maxLines = 1,
                                     overflow = TextOverflow.Ellipsis

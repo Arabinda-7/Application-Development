@@ -14,9 +14,11 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.Description
 import androidx.compose.material.icons.filled.Edit
+import androidx.compose.material.icons.filled.Event
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -93,6 +95,7 @@ fun GoalViewSection(
                         }
                         CreatedAtText(
                             timestamp = goal.createdAt,
+                            deadline = goal.deadline,
                             modifier = Modifier.align(Alignment.BottomEnd).padding(8.dp)
                         )
                     }
@@ -186,8 +189,11 @@ fun GoalAddEditSection(
     var description by remember(goal) { mutableStateOf(goal?.description ?: "") }
     var colorInt by remember(goal) { mutableIntStateOf(goal?.color ?: -1) }
     var priority by remember(goal) { mutableIntStateOf(goal?.priority ?: 1) }
+    var deadline by remember(goal) { mutableStateOf(goal?.deadline) }
 
     val dynamicAccentColor = if (colorInt != -1) Color(colorInt) else projectColor
+
+    val context = androidx.compose.ui.platform.LocalContext.current
 
     Box(modifier = Modifier.fillMaxSize().background(style.backgroundColor)) {
         Box(modifier = Modifier.fillMaxWidth().height(160.dp).background(dynamicAccentColor.copy(alpha = 0.15f)))
@@ -201,10 +207,10 @@ fun GoalAddEditSection(
                 IconButton(onClick = onBack) { Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Back", tint = Color.White) }
                 TextButton(
                     onClick = {
-                        val updated = goal?.copy(title = title, description = description, priority = priority, color = colorInt)
-                            ?: GoalEntity(projectId = projectId, title = title, description = description, priority = priority, color = colorInt)
+                        val updated = goal?.copy(title = title, description = description, priority = priority, color = colorInt, deadline = deadline)
+                            ?: GoalEntity(projectId = projectId, title = title, description = description, priority = priority, color = colorInt, deadline = deadline)
                         
-                        if (goal == null) viewModel.addGoal(title, projectId, description, colorInt, priority)
+                        if (goal == null) viewModel.addGoal(title, projectId, description, colorInt, priority, deadline)
                         else viewModel.updateGoal(updated)
                         onBack()
                     },
@@ -255,6 +261,62 @@ fun GoalAddEditSection(
                     }
                 }
                 
+                Spacer(modifier = Modifier.height(32.dp))
+                Text("DEADLINE / REMINDER", color = dynamicAccentColor, fontSize = 10.sp, fontWeight = FontWeight.Black, letterSpacing = 1.5.sp)
+                Spacer(modifier = Modifier.height(12.dp))
+                Surface(
+                    onClick = {
+                        val calendar = Calendar.getInstance()
+                        deadline?.let { calendar.timeInMillis = it }
+                        
+                        android.app.DatePickerDialog(
+                            context,
+                            { _, year, month, day ->
+                                calendar.set(Calendar.YEAR, year)
+                                calendar.set(Calendar.MONTH, month)
+                                calendar.set(Calendar.DAY_OF_MONTH, day)
+                                deadline = calendar.timeInMillis
+                            },
+                            calendar.get(Calendar.YEAR),
+                            calendar.get(Calendar.MONTH),
+                            calendar.get(Calendar.DAY_OF_MONTH)
+                        ).show()
+                    },
+                    shape = RoundedCornerShape(12.dp),
+                    color = Color.White.copy(alpha = 0.05f),
+                    border = BorderStroke(1.dp, Color.White.copy(alpha = 0.1f)),
+                    modifier = Modifier.fillMaxWidth()
+                ) {
+                    Row(
+                        modifier = Modifier.padding(16.dp),
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        Icon(
+                            imageVector = Icons.Default.Event,
+                            contentDescription = null,
+                            tint = if (deadline != null) dynamicAccentColor else Color.White.copy(alpha = 0.3f),
+                            modifier = Modifier.size(20.dp)
+                        )
+                        Spacer(modifier = Modifier.width(12.dp))
+                        Text(
+                            text = if (deadline != null) {
+                                SimpleDateFormat("MMM dd, yyyy", Locale.getDefault()).format(Date(deadline!!))
+                            } else {
+                                "Set deadline date..."
+                            },
+                            color = if (deadline != null) Color.White else Color.White.copy(alpha = 0.3f),
+                            fontSize = 14.sp,
+                            fontWeight = FontWeight.Bold
+                        )
+                        Spacer(modifier = Modifier.weight(1f))
+                        if (deadline != null) {
+                            IconButton(onClick = { deadline = null }, modifier = Modifier.size(24.dp)) {
+                                Icon(Icons.Default.Close, contentDescription = "Clear", tint = Color.White.copy(alpha = 0.5f))
+                            }
+                        }
+                    }
+                }
+
                 Spacer(modifier = Modifier.height(32.dp))
                 Text("DESCRIPTION", color = dynamicAccentColor, fontSize = 10.sp, fontWeight = FontWeight.Black, letterSpacing = 1.5.sp)
                 Spacer(modifier = Modifier.height(12.dp))

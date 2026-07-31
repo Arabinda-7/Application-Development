@@ -9,8 +9,10 @@ class AiChatRepository(private val aiChatDao: AiChatDao) {
     // Sessions
     fun getAllSessions(): Flow<List<AiChatSessionEntity>> = aiChatDao.getAllSessions()
 
-    suspend fun createSession(title: String): Long {
-        return aiChatDao.insertSession(AiChatSessionEntity(title = title))
+    fun getSessionsByType(type: String): Flow<List<AiChatSessionEntity>> = aiChatDao.getSessionsByType(type)
+
+    suspend fun createSession(title: String, type: String = "chat"): Long {
+        return aiChatDao.insertSession(AiChatSessionEntity(title = title, type = type))
     }
 
     suspend fun updateSessionTitle(sessionId: Long, newTitle: String) {
@@ -23,6 +25,11 @@ class AiChatRepository(private val aiChatDao: AiChatDao) {
 
     suspend fun clearAllHistory() {
         aiChatDao.clearEverything()
+    }
+
+    suspend fun cleanupOldHistory(days: Int) {
+        val threshold = System.currentTimeMillis() - (days * 24 * 60 * 60 * 1000L)
+        aiChatDao.cleanupOldHistory(threshold)
     }
 
     // Messages

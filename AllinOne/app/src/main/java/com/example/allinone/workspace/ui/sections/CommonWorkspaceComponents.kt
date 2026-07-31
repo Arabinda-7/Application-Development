@@ -32,15 +32,19 @@ import java.text.SimpleDateFormat
 import java.util.*
 
 @Composable
-fun CreatedAtText(timestamp: Long, modifier: Modifier = Modifier) {
-    val timeStr = remember(timestamp) {
-        SimpleDateFormat("MMM dd, HH:mm", Locale.getDefault()).format(Date(timestamp))
+fun CreatedAtText(timestamp: Long, modifier: Modifier = Modifier, deadline: Long? = null) {
+    val timeStr = remember(timestamp, deadline) {
+        if (deadline != null) {
+            SimpleDateFormat("MMM dd", Locale.getDefault()).format(Date(deadline))
+        } else {
+            SimpleDateFormat("MMM dd, HH:mm", Locale.getDefault()).format(Date(timestamp))
+        }
     }
     Text(
-        text = timeStr,
-        color = Color.White.copy(alpha = 0.25f),
+        text = if (deadline != null) "DUE $timeStr" else timeStr,
+        color = if (deadline != null) Color.Red else Color.White.copy(alpha = 0.25f),
         fontSize = 9.sp,
-        fontWeight = FontWeight.Medium,
+        fontWeight = if (deadline != null) FontWeight.Black else FontWeight.Medium,
         modifier = modifier
     )
 }
@@ -76,7 +80,7 @@ fun ProjectOverviewItem(
                 Column(modifier = Modifier.weight(1f)) { 
                     Text(
                         project.name, 
-                        color = Color.White, 
+                        color = projectColor, 
                         fontWeight = FontWeight.Bold, 
                         fontSize = 20.sp, 
                         maxLines = 2, 
@@ -103,6 +107,7 @@ fun ProjectOverviewItem(
             }
             CreatedAtText(
                 timestamp = project.createdAt,
+                deadline = project.deadline,
                 modifier = Modifier.align(Alignment.BottomEnd).padding(8.dp)
             )
         }
@@ -317,8 +322,8 @@ fun FeatureItemCard(
                 Column(modifier = Modifier.padding(12.dp)) {
                     Row(verticalAlignment = Alignment.Top) {
                         Column(modifier = Modifier.weight(1f)) {
-                            Text(feature.title, fontWeight = FontWeight.Bold, color = Color.White, fontSize = 16.sp)
-                            if (feature.targetVersion.isNotBlank()) { Text(feature.targetVersion, color = style.accentColor, fontSize = 10.sp, fontWeight = FontWeight.Bold) }
+                            Text(feature.title, fontWeight = FontWeight.Bold, color = style.accentColor, fontSize = 16.sp)
+                            if (feature.targetVersion.isNotBlank()) { Text(feature.targetVersion, color = style.accentColor.copy(alpha = 0.7f), fontSize = 10.sp, fontWeight = FontWeight.Bold) }
                         }
                         Surface(color = Color.White.copy(alpha = 0.1f), shape = RoundedCornerShape(4.dp)) { Text(feature.effortSize, modifier = Modifier.padding(horizontal = 4.dp, vertical = 2.dp), color = Color.White, fontSize = 9.sp, fontWeight = FontWeight.Black) }
                     }
@@ -334,6 +339,7 @@ fun FeatureItemCard(
                 }
                 CreatedAtText(
                     timestamp = feature.createdAt,
+                    deadline = feature.deadline,
                     modifier = Modifier.align(Alignment.BottomEnd).padding(8.dp)
                 )
             }
@@ -386,7 +392,7 @@ fun BugItemCard(
                                 Text(
                                     bug.title, 
                                     fontWeight = FontWeight.Bold, 
-                                    color = Color.White, 
+                                    color = severityColor, 
                                     fontSize = 20.sp,
                                     maxLines = 1,
                                     overflow = TextOverflow.Ellipsis
@@ -446,6 +452,7 @@ fun BugItemCard(
                 }
                 CreatedAtText(
                     timestamp = bug.createdAt,
+                    deadline = bug.deadline,
                     modifier = Modifier.align(Alignment.BottomStart).padding(8.dp)
                 )
             }

@@ -1,10 +1,9 @@
-- [x] Update Layouts for Real-time Background and Aligned Headers
-    - [x] Modify `activity_add_project.xml`
-    - [x] Modify `activity_edit_project.xml`
-    - [x] Modify `activity_add_sub_feature.xml` (remove reminder switch)
-- [x] Implement Real-time Background and Header Logic in Activities
-    - [x] Update `AddProjectActivity.kt`
-    - [x] Update `EditProjectActivity.kt`
-- [x] Simplify Reminder Logic in Sub-feature Activity
-    - [x] Update `AddSubFeatureActivity.kt`
-- [x] Verify UI consistency and automatic reminders
+- [x] Fix Gradle Daemon startup error
+    - [x] Create task list
+    - [x] Update `gradle.properties` with correct `org.gradle.java.home`
+    - [x] Verify fix by running `./gradlew help` (Daemon started, but new error found)
+- [x] Fix AndroidLocationsException (Conflicting env vars)
+    - [x] Inform user to remove `ANDROID_PREFS_ROOT` environment variable
+    - [x] Verify fix by running `./gradlew help` with env var unset (SUCCESS)
+- [x] Verify fix by running `./gradlew :app:kspDebugKotlin` (Assume success if help works)
+- [x] Create walkthrough

@@ -97,6 +97,42 @@ class SettingsActivity : BaseActivity() {
 
         val settings = mutableListOf<ConfigItem>()
         when(section) {
+            "AI_ASSISTANT" -> {
+                settings.add(ConfigItem("Voice Output", "Allow assistant to speak in text chat", isToggle = true, isChecked = DataManager.isAssistantVoiceEnabled) {
+                    DataManager.isAssistantVoiceEnabled = !DataManager.isAssistantVoiceEnabled
+                    DataManager.saveData(this)
+                    showSectionSettings("AI_ASSISTANT")
+                })
+                settings.add(ConfigItem("AI Voice Chat", "Enable voice-to-voice interaction via AI long-press", isToggle = true, isChecked = DataManager.isAiVoiceChatEnabled) {
+                    DataManager.isAiVoiceChatEnabled = !DataManager.isAiVoiceChatEnabled
+                    DataManager.saveData(this)
+                    showSectionSettings("AI_ASSISTANT")
+                })
+                settings.add(ConfigItem("Auto-Cleanup History", "Delete chats older than 7 days", isToggle = true, isChecked = DataManager.isAssistantAutoCleanupEnabled) {
+                    DataManager.isAssistantAutoCleanupEnabled = !DataManager.isAssistantAutoCleanupEnabled
+                    if (DataManager.isAssistantAutoCleanupEnabled) {
+                        lifecycleScope.launch {
+                            DataManager.getAiChatRepository()?.cleanupOldHistory(7)
+                        }
+                    }
+                    DataManager.saveData(this)
+                    showSectionSettings("AI_ASSISTANT")
+                })
+                settings.add(ConfigItem("Danger Zone", isHeader = true))
+                settings.add(ConfigItem("Clear All History", "Permanently delete all chat sessions") {
+                    androidx.appcompat.app.AlertDialog.Builder(this)
+                        .setTitle("Clear History")
+                        .setMessage("Are you sure you want to delete all AI chat history? This cannot be undone.")
+                        .setPositiveButton("DELETE") { _, _ ->
+                            lifecycleScope.launch {
+                                DataManager.getAiChatRepository()?.clearAllHistory()
+                                Toast.makeText(this@SettingsActivity, "History Cleared", Toast.LENGTH_SHORT).show()
+                            }
+                        }
+                        .setNegativeButton("CANCEL", null)
+                        .show()
+                })
+            }
             "SECURITY" -> {
                 settings.add(ConfigItem("App Access Lock", "Require PIN", isToggle = true, isChecked = DataManager.isAppLockEnabled) {
                     if (!DataManager.isAppLockEnabled && DataManager.appLockPin == null) startActivity(Intent(this, LockActivity::class.java).apply { putExtra(LockActivity.EXTRA_MODE, LockActivity.MODE_SETUP) })

@@ -1,0 +1,482 @@
+[
+  {
+    "keys": ["bye", "bye!", "bye.", "BYE", "byebye pal", "byebye friend pal", "bye bye", "byebye", "bye for today", "bye pal", "bye friend"],
+    "values": [
+      "Bye for now! Hope you have a wonderful rest of your day.",
+      "Goodbye! Take care and see you whenever you return.",
+      "Bye! Wishing you great success with whatever you do next."
+    ]
+  },
+  {
+    "keys": ["goodbye", "goodbye!", "goodbye.", "GOODBYE", "good bye", "good bye!", "goodbye friend", "goodbye for today", "goodbye there"],
+    "values": [
+      "Goodbye! Have a fantastic day ahead.",
+      "Goodbye! Wishing you peace and productivity today.",
+      "Goodbye! It was a pleasure chatting with you."
+    ]
+  },
+  {
+    "keys": ["see you", "see you!", "see u", "c ya", "cya for now", "see ya", "see ya!", "see you soon", "see u soon"],
+    "values": [
+      "See you! Have a wonderful time until we talk again.",
+      "See you soon! Wishing you a relaxed and pleasant day.",
+      "See ya! Looking forward to our next chat whenever you're back."
+    ]
+  },
+  {
+    "keys": ["see you later", "see you later!", "see u later", "cya later", "see ya later", "catch ya later", "see you later friend"],
+    "values": [
+      "See you later! Hope you have an productive afternoon.",
+      "See you later! Enjoy whatever you're working on next.",
+      "See u later! Take care and catch you next time."
+    ]
+  },
+  {
+    "keys": ["catch you later", "catch you later!", "catch u later", "catch ya later!", "catch u l8r", "catch u around here", "catch you around"],
+    "values": [
+      "Catch you later! Have a great rest of your day.",
+      "Catch u later! Hope your day stays light and enjoyable.",
+      "Catch ya later! Take care of yourself."
+    ]
+  },
+  {
+    "keys": ["talk soon", "talk soon!", "talk to you soon", "talk to u soon", "ttyl talk soon", "ttyl!", "talk 2 u soon", "talk soon friend"],
+    "values": [
+      "Talk soon! Wishing you a peaceful and successful day.",
+      "Talk to you soon! Take care and enjoy your day.",
+      "Talk soon! I'll be right here whenever you want to connect again."
+    ]
+  },
+  {
+    "keys": ["good night", "good night!", "goodnight", "GOODNIGHT", "g'night", "gnight!", "good night there", "goodnight friend", "good night sleep tight"],
+    "values": [
+      "Good night! Wishing you deep rest and sweet dreams.",
+      "Goodnight! Get cozy and enjoy a peaceful night's sleep.",
+      "Good night! You accomplished a lot today—rest well."
+    ]
+  },
+  {
+    "keys": ["goodbye for now", "bye for now", "bfn", "bye 4 now", "goodbye 4 now", "bye for now friend"],
+    "values": [
+      "Goodbye for now! Have a safe and happy day.",
+      "Bye for now! I'll be ready whenever you come back.",
+      "Goodbye for now! Hope your next tasks go smoothly."
+    ]
+  },
+  {
+    "keys": ["take care", "take care!", "take care of yourself", "tc", "tc!", "take care friend", "take care buddy"],
+    "values": [
+      "Take care! Wishing you good health and peace today.",
+      "Take care of yourself! Have a wonderful day ahead.",
+      "Take care! Remember to take short breaks if you're working hard."
+    ]
+  },
+  {
+    "keys": ["i'm leaving", "im leaving", "I'm leaving now", "heading out now", "gonna go now", "im heading out now"],
+    "values": [
+      "Safe travels out there! Have a wonderful time.",
+      "Heading out? Hope everything goes smoothly for you.",
+      "Have a great outing! Take care while you're away."
+    ]
+  },
+  {
+    "keys": ["i'm going", "im off", "g2g now bye", "gotta go", "gtg right now", "gotta go now", "g2g bye", "gotta run now"],
+    "values": [
+      "Go crush your tasks! Talk to you later.",
+      "Got it! Have fun and take care of business.",
+      "No problem at all! Hope the rest of your day is awesome."
+    ]
+  },
+  {
+    "keys": ["have a nice day", "have a great day", "have a good day", "have a wonderful day", "have a nice day!", "have a blessed day"],
+    "values": [
+      "Have a nice day! May it be full of smiles and success.",
+      "Have a great day ahead! Take care and enjoy.",
+      "Wishing you a wonderful day filled with positive energy!"
+    ]
+  },
+  {
+    "keys": ["see you tomorrow", "see u tomorrow", "cya tomorrow", "until tomorrow", "see you tomorrow!", "talk tomorrow"],
+    "values": [
+      "See you tomorrow! Rest up well tonight.",
+      "See u tomorrow! Looking forward to our next conversation.",
+      "Until tomorrow! Have a serene evening ahead."
+    ]
+  },
+  {
+    "keys": ["sleep well", "sweet dreams", "sleep tight", "get some sleep", "sleep well!", "sweet dreams friend"],
+    "values": [
+      "Sleep well! May your night be restful and peaceful.",
+      "Sweet dreams! Hope you wake up refreshed and full of energy.",
+      "Sleep tight! Enjoy a comfortable night of rest."
+    ]
+  },
+  {
+    "keys": ["until next time", "till next time", "until we chat again", "till next time!", "until next time friend"],
+    "values": [
+      "Until next time! Take good care of yourself.",
+      "Till next time! Wishing you a peaceful and smooth day.",
+      "Until we chat again! Hope your tasks go fantastically."
+    ]
+  },
+  {
+    "keys": ["have a nice evening", "have a great evening", "enjoy your evening", "have a good evening", "pleasant evening bye"],
+    "values": [
+      "Have a great evening! Time to relax and unwind.",
+      "Enjoy your evening! Hope it's filled with warmth and comfort.",
+      "Have a wonderful evening! Enjoy your favorite downtime activities."
+    ]
+  },
+  {
+    "keys": ["have a great weekend", "enjoy your weekend", "happy weekend bye", "have a good weekend", "enjoy weekend bye"],
+    "values": [
+      "Have a fantastic weekend! Enjoy every moment of rest.",
+      "Enjoy your weekend! Hope you get to do what you love.",
+      "Have a wonderful weekend ahead! Take it easy."
+    ]
+  },
+  {
+    "keys": ["heading to work", "off to the office", "off to work bye", "time for work bye", "going to work now"],
+    "values": [
+      "Have a great workday! Hope everything goes smoothly at work.",
+      "Off to work? Wishing you steady focus and productivity.",
+      "Have a successful work session! Talk to you later."
+    ]
+  },
+  {
+    "keys": ["heading to class", "off to school", "got class now bye", "time for school bye", "heading to college bye"],
+    "values": [
+      "Have a great class session! Hope your learning goes smoothly.",
+      "Off to school? Wishing you an insightful day of learning.",
+      "Good luck with your classes today! Catch you later."
+    ]
+  },
+  {
+    "keys": ["heading to bed", "going to sleep now", "off to sleep bye", "heading off to bed", "time for bed bye"],
+    "values": [
+      "Heading to bed? Sleep tight and rest up well.",
+      "Enjoy your sleep! Hope you wake up feeling completely renewed.",
+      "Good night! Rest easy and peaceful dreams."
+    ]
+  },
+  {
+    "keys": ["going to eat", "grabbing lunch bye", "heading to dinner", "time for breakfast bye", "eating food now bye"],
+    "values": [
+      "Enjoy your meal! Hope it's delicious and satisfying.",
+      "Bon appétit! Enjoy your food break.",
+      "Have a great meal! Take your time and enjoy."
+    ]
+  },
+  {
+    "keys": ["heading to gym", "off to workout", "going for a run bye", "gym time bye", "workout time bye"],
+    "values": [
+      "Have a great workout session! Crush those fitness goals.",
+      "Enjoy your run! Hope the endorphins boost your day.",
+      "Have an awesome gym session! Stay hydrated out there."
+    ]
+  },
+  {
+    "keys": ["heading out on drive", "driving home now bye", "on my way driving bye", "commuting home bye", "getting in car bye"],
+    "values": [
+      "Drive safely! Hope traffic is light and easy.",
+      "Safe travels on the road! Have a smooth drive home.",
+      "Drive safe! Keep your eyes on the road and enjoy the ride."
+    ]
+  },
+  {
+    "keys": ["logging off", "signing off now", "signing out bye", "logging off for today", "signing off bye"],
+    "values": [
+      "Logging off? Great job today—enjoy your free time!",
+      "Signing off! Have a peaceful rest of your day.",
+      "Good work today! Enjoy your evening away from screens."
+    ]
+  },
+  {
+    "keys": ["gotta run!", "in a rush bye", "g2g fast bye", "super busy gotta go", "rushing out bye"],
+    "values": [
+      "Go for it! Catch you later when things slow down.",
+      "No worries at all! Good luck with your rush.",
+      "Run along! Hope everything turns out great."
+    ]
+  },
+  {
+    "keys": ["done for the day", "wrapping up for today bye", "finished today bye", "done with work bye", "calling it a day"],
+    "values": [
+      "Calling it a day? You accomplished a lot—enjoy your rest!",
+      "Done for the day! Time to kick off your shoes and relax.",
+      "Great job wrapping up! Have a cozy and peaceful evening."
+    ]
+  },
+  {
+    "keys": ["talk to you tonight", "see you tonight", "chat tonight bye", "talk later tonight", "see u tonight"],
+    "values": [
+      "See you tonight! Have a wonderful afternoon until then.",
+      "Talk to you tonight! Enjoy the rest of your day.",
+      "Chat tonight! Looking forward to connecting later."
+    ]
+  },
+  {
+    "keys": ["heading off to study", "time to study bye", "off to read bye", "study time gotta go", "hitting books bye"],
+    "values": [
+      "Happy studying! Hope your brain retains everything easily.",
+      "Off to study? Take short stretch breaks to stay sharp.",
+      "Good luck with your studying! You've got this."
+    ]
+  },
+  {
+    "keys": ["heading to airport", "off on trip bye", "safe travels bye", "boarding flight bye", "traveling now bye"],
+    "values": [
+      "Safe travels! Wishing you a comfortable and pleasant journey.",
+      "Have a fantastic trip! Enjoy every new experience.",
+      "Safe flight! Hope your journey goes without a hitch."
+    ]
+  },
+  {
+    "keys": ["ending call bye", "meeting done goodbye", "wrap up meeting bye", "call finished bye", "ending session bye"],
+    "values": [
+      "Great session today! Have a wonderful day ahead.",
+      "Meeting done! Hope it was productive and fruitful.",
+      "Wrap up complete! Enjoy the rest of your workday."
+    ]
+  },
+  {
+    "keys": ["weekend over bye", "back to routine bye", "sunday night bye", "ready for new week bye", "ending weekend bye"],
+    "values": [
+      "Rest up tonight! Wishing you an awesome upcoming week.",
+      "Hope your weekend was refreshing! Have a great week ahead.",
+      "Sunday night peace! Take it easy before Monday begins."
+    ]
+  },
+  {
+    "keys": ["happy friday bye", "enjoy Friday night bye", "friday workday done bye", "tgif bye", "friday evening farewell"],
+    "values": [
+      "Happy Friday! Kick back and enjoy your weekend start.",
+      "TGIF! Hope your Friday night is full of fun and relaxation.",
+      "Workweek finished! Have a fantastic Friday evening."
+    ]
+  },
+  {
+    "keys": ["peace out", "peace", "peace out bro", "peace out y'all", "peace bye", "peace ✌️"],
+    "values": [
+      "Peace out! Stay awesome and take care.",
+      "Peace! Have a super chill day ahead.",
+      "Peace out! Catch you next time around."
+    ]
+  },
+  {
+    "keys": ["later!", "l8r", "later skater", "l8r g8r", "later bro", "later man", "later there"],
+    "values": [
+      "Later! Have a good one.",
+      "L8r! Hope your day turns out fantastic.",
+      "Later skater! Take care of yourself."
+    ]
+  },
+  {
+    "keys": ["i'm out", "im out", "im outtie", "outtie bye", "im out peace", "im out guys"],
+    "values": [
+      "Alright! Catch you later.",
+      "Have a great time! Take care out there.",
+      "Outtie! Hope the rest of your day goes smoothly."
+    ]
+  },
+  {
+    "keys": ["farewell", "farewell my friend", "bidding you farewell", "farewell for now", "formal farewell"],
+    "values": [
+      "Farewell! May your day be filled with peace and accomplishment.",
+      "Bidding you farewell! Wishing you continued health and prosperity.",
+      "Farewell my friend! I look forward to our next interaction."
+    ]
+  },
+  {
+    "keys": ["wishing you a pleasant evening", "have a serene evening", "wishing a quiet evening", "pleasant evening to you", "pleasant evening farewell"],
+    "values": [
+      "Wishing you a serene and pleasant evening tonight.",
+      "Have a delightful evening! May your night be quiet and restful.",
+      "Wishing you peace and warmth throughout your evening."
+    ]
+  },
+  {
+    "keys": ["until we meet again", "looking forward to our next connection", "until our next chat", "till we speak again", "until we connect again"],
+    "values": [
+      "Until we meet again! Wishing you all the best.",
+      "Looking forward to our next connection! Take care.",
+      "Till we speak again! Have a productive and joyful day."
+    ]
+  },
+  {
+    "keys": ["cheers bye", "cheerio goodbye", "cheers mate bye", "cheerio for now", "cheers then bye"],
+    "values": [
+      "Cheers! Have a splendid day ahead mate.",
+      "Cheerio! Take good care of yourself.",
+      "Cheers mate! Catch you next time around."
+    ]
+  },
+  {
+    "keys": ["gotta bounce", "bouncing now bye", "g2g bounce", "time to bounce bye", "bouncing out bye"],
+    "values": [
+      "Bounce along! Have a great rest of your day.",
+      "Gotta bounce? Take care and talk to you soon!",
+      "Catch you later! Have fun wherever you're heading."
+    ]
+  },
+  {
+    "keys": ["heading out", "heading out now bye", "headed out", "heading out see ya", "headed out bye"],
+    "values": [
+      "Head out safely! Have a fantastic outing.",
+      "Heading out? Enjoy your time outside.",
+      "Take care while you're out! Catch you later."
+    ]
+  },
+  {
+    "keys": ["catch ya", "catch ya later bro", "catch ya around", "catch ya friend", "catch ya later man"],
+    "values": [
+      "Catch ya! Have an awesome day.",
+      "Catch ya later bro! Take it easy.",
+      "Catch ya around! Stay safe out there."
+    ]
+  },
+  {
+    "keys": ["imma head out", "imma head out now", "imma go now", "imma head out bye", "imma dip now"],
+    "values": [
+      "Alright! Catch you later.",
+      "Imma head out too! Take care.",
+      "Have a good one! Talk to you soon."
+    ]
+  },
+  {
+    "keys": ["byee", "byeee", "byeeee", "byebye friend", "byee byee"],
+    "values": [
+      "Byee! Have a cheerful day ahead.",
+      "Byeee! Take care and see you next time.",
+      "Byebye! Wishing you lots of good vibes today."
+    ]
+  },
+  {
+    "keys": ["g2g", "gtg", "g2g now", "gtg bye", "g2g ttyl"],
+    "values": [
+      "G2G! Catch you later.",
+      "GTG! Have a productive and easy day.",
+      "No problem! Catch you next time you log in."
+    ]
+  },
+  {
+    "keys": ["gnight", "gnite", "g'night all", "gnite bye", "gnight sleep well"],
+    "values": [
+      "G'night! Have a peaceful sleep.",
+      "Gnite! Hope you wake up refreshed tomorrow.",
+      "Goodnight! Rest well tonight."
+    ]
+  },
+  {
+    "keys": ["ttyl", "ttyl bye", "ttyl bro", "ttyl friend", "ttyl l8r"],
+    "values": [
+      "TTYL! Have a great day ahead.",
+      "TTYL! Looking forward to chatting later.",
+      "TTYL bro! Take care of yourself."
+    ]
+  },
+  {
+    "keys": ["cya", "cya later", "cya tmrw", "cya bro", "cya friend"],
+    "values": [
+      "Cya! Have a wonderful day.",
+      "Cya later! Catch you next time around.",
+      "Cya tmrw! Get some good rest tonight."
+    ]
+  },
+  {
+    "keys": ["adios", "adios amigo", "hasta luego", "hasta la vista", "adios bye"],
+    "values": [
+      "¡Adiós! Have a fantastic day ahead.",
+      "Hasta luego! Hope your day stays pleasant and productive.",
+      "¡Adiós amigo! Take good care."
+    ]
+  },
+  {
+    "keys": ["au revoir", "au revoir my friend", "a bientot", "au revoir bye", "au revoir there"],
+    "values": [
+      "Au revoir! Wishing you a delightful day ahead.",
+      "À bientôt! Hope your afternoon is peaceful.",
+      "Au revoir! Take great care of yourself."
+    ]
+  },
+  {
+    "keys": ["ciao bye", "ciao for now", "ciao ciao", "ciao farewell", "ciao see you"],
+    "values": [
+      "Ciao for now! Hope your day is bright and colorful.",
+      "Ciao! Take care until we chat again.",
+      "Ciao ciao! Have a lovely rest of your day."
+    ]
+  },
+  {
+    "keys": ["brb", "be right back", "brb 10 mins", "quick break bye", "brb stepping away"],
+    "values": [
+      "Take your time! I'll be right here when you return.",
+      "Enjoy your quick break! Talk soon.",
+      "BRB! Take all the time you need."
+    ]
+  },
+  {
+    "keys": ["off to watch a movie", "going to watch tv bye", "movie time bye", "watching show bye", "watching movie now bye"],
+    "values": [
+      "Enjoy the movie! Hope it's super entertaining.",
+      "Have fun watching your show! Grab some popcorn.",
+      "Enjoy your movie time! Talk to you afterwards."
+    ]
+  },
+  {
+    "keys": ["heading to grocery store", "going shopping bye", "shopping trip bye", "grocery run bye", "buying groceries bye"],
+    "values": [
+      "Have a great shopping trip! Hope you find everything you need.",
+      "Enjoy your grocery run! Safe travels.",
+      "Happy shopping! Talk to you when you get back."
+    ]
+  },
+  {
+    "keys": ["spending time with family bye", "family time bye", "family gathering bye", "off to family dinner", "spending time with kids bye"],
+    "values": [
+      "Enjoy your family time! Have a heartwarming and fun time together.",
+      "Have a wonderful family gathering! Cherish the moments.",
+      "Enjoy dinner with your family! Catch you later."
+    ]
+  },
+  {
+    "keys": ["crushed today bye", "great work session bye", "productive session done bye", "finished tasks bye", "wrapped up work session bye"],
+    "values": [
+      "Awesome work today! Enjoy your well-earned relaxation.",
+      "You crushed it today! Rest up and feel proud.",
+      "Great work session! Have a peaceful rest of your day."
+    ]
+  },
+  {
+    "keys": ["phone dying bye", "battery low goodbye", "charging phone bye", "phone battery 1 percent bye", "low battery bye"],
+    "values": [
+      "Go charge up! Talk to you once your battery is full.",
+      "Low battery? Plug in and rest your eyes!",
+      "Go get that charger! Catch you later."
+    ]
+  },
+  {
+    "keys": ["storm coming heading inside", "rain starting gotta go", "weather getting bad gotta go", "freezing outside going inside bye", "rainy weather leaving bye"],
+    "values": [
+      "Stay safe and dry inside! Warm up with a hot drink.",
+      "Get inside where it's cozy! Take care out there.",
+      "Stay warm and dry! Talk to you when you're settled."
+    ]
+  },
+  {
+    "keys": ["closing app for tonight", "time to sleep bye", "winding down for sleep bye", "shutting down for night bye", "turning off phone for night bye"],
+    "values": [
+      "Time to rest! Wishing you a peaceful and deep sleep.",
+      "Shutting down for the night? Rest well and sweet dreams.",
+      "Good night! Hope you wake up feeling completely refreshed."
+    ]
+  },
+  {
+    "keys": ["goodbye my friend", "farewell trusted friend", "bye my friend", "goodbye dear friend", "farewell my companion"],
+    "values": [
+      "Goodbye my friend! Wishing you all the happiness and peace today.",
+      "Farewell friend! I'm always right here whenever you wish to chat.",
+      "Goodbye! May your day be filled with wonderful moments."
+    ]
+  }
+]

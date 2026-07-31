@@ -184,6 +184,11 @@ object DataManager {
     
     var history = mutableMapOf<String, DayHistory>() // Keep core history here for now as it's cross-domain
 
+    // Assistant Settings
+    var isAssistantVoiceEnabled: Boolean = false
+    var isAiVoiceChatEnabled: Boolean = true
+    var isAssistantAutoCleanupEnabled: Boolean = false
+
     // To-Do List Settings
     var taskShowCompleted: Boolean get() = TaskDataManager.taskShowCompleted; set(value) { TaskDataManager.taskShowCompleted = value }
     var taskShowHidden: Boolean get() = TaskDataManager.taskShowHidden; set(value) { TaskDataManager.taskShowHidden = value }
@@ -352,6 +357,31 @@ object DataManager {
 
     fun getAiChatRepository() = aiChatRepo
 
+    suspend fun addIncome(context: Context, amount: Double, category: String, source: String = "Income") {
+        val transaction = Transaction(
+            title = source,
+            amount = amount,
+            type = "Income",
+            category = category,
+            timestamp = System.currentTimeMillis()
+        )
+        synchronized(transactions) {
+            transactions.add(0, transaction)
+        }
+        financeRepo?.insertTransaction(transaction)
+        saveData(context, immediate = true)
+        notifyDataChanged()
+    }
+
+    fun searchNotes(query: String): List<Note> {
+        return synchronized(notes) {
+            notes.filter { 
+                it.title.contains(query, ignoreCase = true) || 
+                it.content.contains(query, ignoreCase = true) 
+            }
+        }
+    }
+
     fun getHabitProgress() = HabitDataManager.getHabitProgress()
     fun getTotalHabitsFinished() = HabitDataManager.getTotalHabitsFinished()
     
@@ -442,7 +472,7 @@ object DataManager {
                     }
                 }
                 
-                project.subFeatures.forEach { f ->
+                project.subFeatures?.forEach { f ->
                     f.dueDate?.let { dueDate ->
                         if (!f.isCompleted && dueDate in todayStart until todayEnd) {
                             list.add(AgendaItem(
@@ -452,7 +482,6 @@ object DataManager {
                                 time = dueDate,
                                 category = "SUBFEATURES",
                                 priority = when(f.priority) { 2 -> "HIGH"; 1 -> "MED"; else -> "LOW" },
-                                navigationTarget = "PROJECT_ACTIVITY",
                                 color = projColor
                             ))
                         }
@@ -623,6 +652,9 @@ object DataManager {
     private const val KEY_SHOW_TASKS = "show_task_section"
     private const val KEY_SHOW_NOTES = "show_note_section"
     private const val KEY_SHOW_PROJECTS = "show_project_section"
+    private const val KEY_ASSISTANT_VOICE = "assistant_voice_enabled"
+    private const val KEY_AI_VOICE_CHAT = "ai_voice_chat_enabled"
+    private const val KEY_ASSISTANT_CLEANUP = "assistant_auto_cleanup_enabled"
     private const val KEY_SHOW_FINANCE = "show_finance_section"
     private const val KEY_SHOW_PERFORMANCE = "show_performance_section"
 
@@ -825,6 +857,9 @@ object DataManager {
             putBoolean(KEY_SHOW_TASKS, showTaskSection)
             putBoolean(KEY_SHOW_NOTES, showNoteSection)
             putBoolean(KEY_SHOW_PROJECTS, showProjectSection)
+            putBoolean(KEY_ASSISTANT_VOICE, isAssistantVoiceEnabled)
+            putBoolean(KEY_AI_VOICE_CHAT, isAiVoiceChatEnabled)
+            putBoolean(KEY_ASSISTANT_CLEANUP, isAssistantAutoCleanupEnabled)
             putBoolean(KEY_SHOW_FINANCE, showFinanceSection)
             putBoolean(KEY_SHOW_PERFORMANCE, showPerformanceSection)
 
@@ -978,7 +1013,13 @@ object DataManager {
                 }
             }
 
-            projects.forEach { it.isGlobalProject = true }
+            notes.forEach { note ->
+                initializeNoteFields(note)
+            }
+            projects.forEach { note ->
+                note.isGlobalProject = true
+                initializeNoteFields(note)
+            }
 
             monthlyBudget = prefs.getFloat(KEY_BUDGET, 0.0f).toDouble()
             monthlySavingsGoal = prefs.getFloat(KEY_SAVINGS_GOAL, 0.0f).toDouble()
@@ -1106,6 +1147,9 @@ object DataManager {
             showTaskSection = prefs.getBoolean(KEY_SHOW_TASKS, true)
             showNoteSection = prefs.getBoolean(KEY_SHOW_NOTES, true)
             showProjectSection = prefs.getBoolean(KEY_SHOW_PROJECTS, true)
+            isAssistantVoiceEnabled = prefs.getBoolean(KEY_ASSISTANT_VOICE, false)
+            isAiVoiceChatEnabled = prefs.getBoolean(KEY_AI_VOICE_CHAT, true)
+            isAssistantAutoCleanupEnabled = prefs.getBoolean(KEY_ASSISTANT_CLEANUP, false)
             showFinanceSection = prefs.getBoolean(KEY_SHOW_FINANCE, true)
             showPerformanceSection = prefs.getBoolean(KEY_SHOW_PERFORMANCE, true)
 
@@ -1162,6 +1206,21 @@ object DataManager {
     }
 
 
+    private fun initializeNoteFields(note: Note) {
+        try {
+            val fields = listOf("journalEntries", "ideaGoals", "subFeatures", "changeHistory")
+            fields.forEach { fieldName ->
+                val field = note.javaClass.getDeclaredField(fieldName)
+                field.isAccessible = true
+                if (field.get(note) == null) {
+                    field.set(note, mutableListOf<Any>())
+                }
+            }
+        } catch (e: Exception) {
+            e.printStackTrace()
+        }
+    }
+
     private fun getResourceId(context: Context, name: String, fallbackId: Int): Int {
         return try {
             val id = context.resources.getIdentifier(name, "drawable", context.packageName)
@@ -1193,6 +1252,13 @@ object DataManager {
             synchronized(workouts) {
                 workouts.forEach { it.isCompleted = false }
             }
+
+            if (isAssistantAutoCleanupEnabled) {
+                persistenceScope.launch {
+                    aiChatRepo?.cleanupOldHistory(7)
+                }
+            }
+
             prefs.edit().putString(KEY_LAST_RESET_DATE, today).apply()
             saveData(context)
         } else if (lastReset == "") {

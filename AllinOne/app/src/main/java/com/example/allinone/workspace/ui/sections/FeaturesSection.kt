@@ -29,6 +29,8 @@ import com.example.allinone.workspace.data.FeatureEntity
 import com.example.allinone.workspace.data.TaskEntity
 import com.example.allinone.workspace.ui.WorkspaceViewModel
 import kotlinx.coroutines.launch
+import java.text.SimpleDateFormat
+import java.util.*
 
 @Composable
 fun FeatureViewSection(
@@ -224,6 +226,9 @@ fun FeatureAddEditSection(
     var requirements by remember(feature) { mutableStateOf(feature?.requirements ?: "") }
     var version by remember(feature) { mutableStateOf(feature?.targetVersion ?: "") }
     var status by remember(feature) { mutableStateOf(feature?.status ?: "Backlog") }
+    var deadline by remember(feature) { mutableStateOf(feature?.deadline) }
+
+    val context = androidx.compose.ui.platform.LocalContext.current
 
     Box(modifier = Modifier.fillMaxSize().background(style.backgroundColor)) {
         Box(modifier = Modifier.fillMaxWidth().height(160.dp).background(projectColor.copy(alpha = 0.15f)))
@@ -244,7 +249,8 @@ fun FeatureAddEditSection(
                             effortSize = effort,
                             requirements = requirements,
                             targetVersion = version,
-                            status = status
+                            status = status,
+                            deadline = deadline
                         ) ?: FeatureEntity(
                             projectId = projectId,
                             title = title,
@@ -253,9 +259,10 @@ fun FeatureAddEditSection(
                             effortSize = effort,
                             requirements = requirements,
                             targetVersion = version,
-                            status = status
+                            status = status,
+                            deadline = deadline
                         )
-                        if (feature == null) viewModel.addFeature(title, projectId, description, complexity, effort, requirements, version, status)
+                        if (feature == null) viewModel.addFeature(title, projectId, description, complexity, effort, requirements, version, status, deadline)
                         else viewModel.updateFeature(updated)
                         onBack()
                     },
@@ -359,6 +366,62 @@ fun FeatureAddEditSection(
                     colors = OutlinedTextFieldDefaults.colors(focusedTextColor = Color.White, unfocusedTextColor = Color.White, focusedBorderColor = projectColor, unfocusedBorderColor = Color.White.copy(alpha = 0.1f)),
                     shape = RoundedCornerShape(12.dp)
                 )
+
+                Spacer(modifier = Modifier.height(24.dp))
+                Text("DEADLINE / RELEASE DATE", color = projectColor, fontSize = 10.sp, fontWeight = FontWeight.Black, letterSpacing = 1.5.sp)
+                Spacer(modifier = Modifier.height(12.dp))
+                Surface(
+                    onClick = {
+                        val calendar = Calendar.getInstance()
+                        deadline?.let { calendar.timeInMillis = it }
+                        
+                        android.app.DatePickerDialog(
+                            context,
+                            { _, year, month, day ->
+                                calendar.set(Calendar.YEAR, year)
+                                calendar.set(Calendar.MONTH, month)
+                                calendar.set(Calendar.DAY_OF_MONTH, day)
+                                deadline = calendar.timeInMillis
+                            },
+                            calendar.get(Calendar.YEAR),
+                            calendar.get(Calendar.MONTH),
+                            calendar.get(Calendar.DAY_OF_MONTH)
+                        ).show()
+                    },
+                    shape = RoundedCornerShape(12.dp),
+                    color = Color.White.copy(alpha = 0.05f),
+                    border = BorderStroke(1.dp, Color.White.copy(alpha = 0.1f)),
+                    modifier = Modifier.fillMaxWidth()
+                ) {
+                    Row(
+                        modifier = Modifier.padding(16.dp),
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        Icon(
+                            imageVector = Icons.Default.Event,
+                            contentDescription = null,
+                            tint = if (deadline != null) projectColor else Color.White.copy(alpha = 0.3f),
+                            modifier = Modifier.size(20.dp)
+                        )
+                        Spacer(modifier = Modifier.width(12.dp))
+                        Text(
+                            text = if (deadline != null) {
+                                SimpleDateFormat("MMM dd, yyyy", Locale.getDefault()).format(Date(deadline!!))
+                            } else {
+                                "Set target release date..."
+                            },
+                            color = if (deadline != null) Color.White else Color.White.copy(alpha = 0.3f),
+                            fontSize = 14.sp,
+                            fontWeight = FontWeight.Bold
+                        )
+                        Spacer(modifier = Modifier.weight(1f))
+                        if (deadline != null) {
+                            IconButton(onClick = { deadline = null }, modifier = Modifier.size(24.dp)) {
+                                Icon(Icons.Default.Close, contentDescription = "Clear", tint = Color.White.copy(alpha = 0.5f))
+                            }
+                        }
+                    }
+                }
 
                 Spacer(modifier = Modifier.height(100.dp))
             }

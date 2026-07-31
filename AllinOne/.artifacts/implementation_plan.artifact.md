@@ -1,31 +1,26 @@
-# Implementation Plan - Workout Section Expansion Logic
+# Implementation Plan - AI Assistant Conversational Expansion
 
-Modify the workout list to ensure only one item can be expanded at a time and collapse all items when navigating away from the screen.
+The user has added 20 new JSON files to `app/src/main/assets/assistant/` to enhance the AI Assistant's conversational range. I will analyze these files and ensure they are perfectly integrated into the app's intelligence engine.
 
 ## User Review Required
 
 > [!IMPORTANT]
-> The "collapse on leave" will be implemented in `onStop()` to ensure items are collapsed when the user moves to another activity or the home screen.
+> I am enhancing the matching logic in `AssistantBrain.kt` to be more robust (ignoring punctuation and better handling case-insensitivity). This will make the assistant much more responsive to the new conversational data.
 
 ## Proposed Changes
 
-### [Workout Section]
+### AI Engine
 
-#### [MODIFY] [WorkoutAdapter.kt](file:///C:/Users/arabi/OneDrive/Desktop/App Development/AllinOne/app/src/main/java/com/example/allinone/WorkoutAdapter.kt)
-- Update click listeners for `workoutCard` and `expandChevron` to collapse any other expanded workout when a new one is expanded.
-- Add a public `collapseAll()` method that resets `isExpanded` for all workouts.
-
-#### [MODIFY] [WorkoutRoutineActivity.kt](file:///C:/Users/arabi/OneDrive/Desktop/App Development/AllinOne/app/src/main/java/com/example/allinone/WorkoutRoutineActivity.kt)
-- Override `onStop()` and call `listSection.workoutAdapter.collapseAll()`.
+#### [MODIFY] [AssistantBrain.kt](file:///C:/Users/arabi/OneDrive/Desktop/App Development/AllinOne/app/src/main/java/com/example/allinone/AssistantBrain.kt)
+- Enhance the `initialize` method with defensive try-catch blocks per file to prevent a single malformed JSON from breaking the entire assistant.
+- Optimize the matching logic in `getChatResponse` to strip punctuation and handle "fuzzy" matches for keywords.
+- Ensure all 20 new categories (Humor, Emotions, Personality, etc.) are effectively searched.
 
 ## Verification Plan
 
 ### Automated Tests
-- None planned as this is mostly UI/Adapter logic.
+- I will verify the build to ensure no regression in `AssistantBrain` logic.
 
 ### Manual Verification
-1. Open the Workout Routine screen.
-2. Expand a workout item.
-3. Click on another workout item and verify the first one collapses while the second one expands.
-4. Expand an item and then press "Back" or navigate to another screen (e.g., Settings).
-5. Return to the Workout Routine screen and verify all items are collapsed.
+- I will test a few specific triggers from the new files (e.g., "tell me a joke", "how are you feeling", "I'm stressed") to confirm the AI responds with data from the new JSON files.
+- Verify that `nlu_commands.json` still works as expected for action-based commands.

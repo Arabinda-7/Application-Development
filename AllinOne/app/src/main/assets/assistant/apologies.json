@@ -1,0 +1,362 @@
+[
+  {
+    "keys": ["sorry", "sorry!", "sorry.", "SORRY", "soory", "sry", "sry!", "sorry there", "sorry pal", "sorry friend"],
+    "values": [
+      "No need to apologize at all! Everything is completely fine.",
+      "Don't worry about it for a second! How can I help you move forward?",
+      "No problem whatsoever! Mistakes happen to all of us.",
+      "It's all good! Take a breath and let's keep going."
+    ]
+  },
+  {
+    "keys": ["i'm sorry", "im sorry", "I'm sorry!", "IM SORRY", "im so sorry", "i am sorry", "im sorry pal", "i am so sorry"],
+    "values": [
+      "Please don't worry! There is absolutely no harm done.",
+      "No apologies necessary at all! I completely understand.",
+      "It's totally okay! We can easily fix or adjust whatever you need.",
+      "All good! Reaching out is what matters—how can I assist now?"
+    ]
+  },
+  {
+    "keys": ["my bad", "my bad!", "my bad bro", "my bad man", "my bad pal", "my bad friend", "my bad guys"],
+    "values": [
+      "No worries at all! It happens to the best of us.",
+      "All good, my friend! Don't sweat it for a second.",
+      "No stress at all! Ready whenever you are to continue.",
+      "Not a problem! Let's just pick up right where we left off."
+    ]
+  },
+  {
+    "keys": ["forgive me", "please forgive me", "forgive me please", "forgive me pal", "forgive me friend", "please forgive me friend"],
+    "values": [
+      "Nothing to forgive at all! You're doing just fine.",
+      "Of course! Please don't stress over a simple mistake.",
+      "No forgiveness needed! Everything is perfectly okay.",
+      "It's all good! Let's move ahead whenever you're ready."
+    ]
+  },
+  {
+    "keys": ["i made a mistake", "imade a mistake", "i made a slight mistake", "made a mistake", "made a mistake sorry", "i made a mistake pal"],
+    "values": [
+      "Mistakes happen to everyone! It's super easy to correct.",
+      "No problem at all! Let me know what needs adjusting and we'll fix it.",
+      "Don't worry about making mistakes! That's how we figure things out.",
+      "All good! What would you like to change or fix?"
+    ]
+  },
+  {
+    "keys": ["oops", "oops!", "oopsie", "oopsies", "oops sorry", "oops my bad", "oops typo", "oopsie sorry"],
+    "values": [
+      "Oops moments happen all the time! No worries at all.",
+      "Haha, no problem! Easy fix whenever you're ready.",
+      "All good! Don't worry about a minor bump.",
+      "No stress! Let's get right back on track."
+    ]
+  },
+  {
+    "keys": ["didn't mean it", "didnt mean it", "i didn't mean that", "didn't mean to do that", "didnt mean to sorry", "didn't mean to pal"],
+    "values": [
+      "I know you didn't mean any harm! Everything is completely okay.",
+      "No worries whatsoever! We can easily brush it off.",
+      "Don't sweat it! I completely understand what you meant.",
+      "All good! Let me know how you'd like to proceed."
+    ]
+  },
+  {
+    "keys": ["excuse me", "excuse me!", "excuse me please", "excuse me pal", "excuse me friend", "excuse me sorry"],
+    "values": [
+      "No problem at all! How can I help you right now?",
+      "Yes, absolutely! What's on your mind?",
+      "You're all good! Feel free to ask or share whatever you need.",
+      "All clear! How can I assist you today?"
+    ]
+  },
+  {
+    "keys": ["pardon me", "pardon me!", "pardon", "pardon please", "pardon me friend", "pardon me pal"],
+    "values": [
+      "No need to pardon! How can I assist you right now?",
+      "You're totally fine! What would you like to cover?",
+      "No trouble at all! Feel free to rephrase or ask away.",
+      "All clear! I'm listening whenever you're ready."
+    ]
+  },
+  {
+    "keys": ["my fault", "it's my fault", "its my fault", "all my fault", "entirely my fault", "my fault sorry", "it was my fault"],
+    "values": [
+      "Don't place blame on yourself! It's a simple thing to fix.",
+      "No need to take the blame! Things go off course sometimes and that's okay.",
+      "All good! We can resolve it together in no time.",
+      "Please don't worry about it! Everything is fine."
+    ]
+  },
+  {
+    "keys": ["i was wrong", "im wrong", "i got it wrong", "i was mistaken", "my mistake", "my mistake sorry", "i was wrong sorry"],
+    "values": [
+      "That's completely fine! Getting things wrong is just part of the process.",
+      "No problem at all! Thanks for clarifying—let's adjust it now.",
+      "Don't worry about it! It's super easy to update.",
+      "All good! What's the correct detail you'd like to use?"
+    ]
+  },
+  {
+    "keys": ["apologies", "apologies!", "my apologies", "sincere apologies", "deepest apologies", "my apologies friend", "apologies pal"],
+    "values": [
+      "Apologies are truly not necessary! Everything is completely okay.",
+      "Please, don't worry about it for a moment! I understand completely.",
+      "All accepted with warmth, though no harm was done at all!",
+      "No stress whatsoever! How can I help you right now?"
+    ]
+  },
+  {
+    "keys": ["sorry for the delay", "sorry for late reply", "sry for late reply", "apologies for the wait", "sorry for keeping u waiting", "sorry late reply"],
+    "values": [
+      "No worries about the delay at all! Take all the time you need.",
+      "Don't stress over response time! I'm right here whenever you return.",
+      "All good! Hope everything went well while you were busy.",
+      "No problem at all! Ready whenever you are to continue."
+    ]
+  },
+  {
+    "keys": ["sorry to bother you", "sorry to disturb you", "apologies for disturbing", "sorry for bothering", "hope I'm not bothering you"],
+    "values": [
+      "You are never a bother at all! I'm always happy to help.",
+      "Please don't feel that way! Connecting with you is always a pleasure.",
+      "No disturbance whatsoever! What can I help you with today?",
+      "Not bothering me for a second! Feel free to ask anything."
+    ]
+  },
+  {
+    "keys": ["sorry for the confusion", "apologies for confusion", "my bad for confusing you", "sorry if I confused you", "sorry about confusion"],
+    "values": [
+      "Confusion happens easily! Let's break it down together.",
+      "No problem at all! Let me know which part to clarify for you.",
+      "Don't worry about it! We can take it one step at a time.",
+      "All good! Happy to clarify whatever you need."
+    ]
+  },
+  {
+    "keys": ["sorry i was slow", "sorry for taking long", "sry so slow", "sorry taking so long", "apologies for being slow"],
+    "values": [
+      "Take all the time you need! There's absolutely no rush.",
+      "No stress at all! Go at your own comfortable pace.",
+      "Don't worry! I'm patient and ready whenever you are.",
+      "All good! Take your time with whatever you're doing."
+    ]
+  },
+  {
+    "keys": ["sorry for typo", "typo sorry", "spelling mistake sorry", "typo my bad", "sorry about typo", "autocorrect sorry"],
+    "values": [
+      "Typos happen to everyone! I understood what you meant easily.",
+      "No worries at all! Autocorrect gets us all sometimes.",
+      "Don't worry about spelling! Everything made total sense.",
+      "All good! Feel free to carry on without stress."
+    ]
+  },
+  {
+    "keys": ["sorry for interrupting", "sorry to cut in", "apologies for interrupting", "sorry for interupting", "sorry to interrupt you"],
+    "values": [
+      "No problem at all! Jump in whenever you need.",
+      "Don't worry about interrupting! What's on your mind?",
+      "All good! Feel free to share your thought right now.",
+      "No stress whatsoever! How can I help you out?"
+    ]
+  },
+  {
+    "keys": ["sorry i didn't understand", "sorry got confused", "my bad didn't get it", "sorry didn't catch that", "apologies didn't understand"],
+    "values": [
+      "No need to apologize! I can explain it in a simpler way.",
+      "That's totally fine! Let me rephrase it so it's clearer for you.",
+      "Don't worry at all! Asking for clarity is always great.",
+      "All good! Let's look at it from another angle together."
+    ]
+  },
+  {
+    "keys": ["sorry to keep you waiting", "apologies for keeping you waiting", "sorry to make you wait", "sorry for the wait time"],
+    "values": [
+      "No problem at all! Take all the time you need on your end.",
+      "Don't worry about keeping me waiting! I'm right here whenever you're ready.",
+      "All good! Hope whatever you were handling went smoothly.",
+      "No rush whatsoever! What would you like to work on now?"
+    ]
+  },
+  {
+    "keys": ["sorry about that", "sry about that", "sorry about that pal", "so sorry about that", "sorry about that friend"],
+    "values": [
+      "Don't worry about it at all! Everything is totally fine.",
+      "No problem whatsoever! Water under the bridge.",
+      "All good, my friend! Let me know how I can help next.",
+      "No stress at all! Ready whenever you are."
+    ]
+  },
+  {
+    "keys": ["sorry for the mess", "apologies for the mess", "my bad about the mess", "sorry mess up", "apologies for mess"],
+    "values": [
+      "No mess at all! Things get untidy sometimes and that's okay.",
+      "Don't worry about it! We can clean up the details easily.",
+      "All good! Let's sort through it step by step.",
+      "No stress! Happy to help organize things for you."
+    ]
+  },
+  {
+    "keys": ["sorry i disappeared", "sorry was away", "apologies for being away", "sorry stepped away", "sorry AFK"],
+    "values": [
+      "No problem at all! Hope your break or errand went well.",
+      "Don't worry about stepping away! Life comes first.",
+      "All good! I'm right here whenever you get back.",
+      "No stress! Welcome back whenever you're ready to continue."
+    ]
+  },
+  {
+    "keys": ["sorry for asking so much", "sorry for many questions", "apologies for endless questions", "sorry for bothering with questions"],
+    "values": [
+      "Never apologize for asking questions! Curiosity is wonderful.",
+      "Ask as many questions as you like! I'm always happy to answer.",
+      "No burden at all! The more questions, the better we get things done.",
+      "All good! Fire away with whatever else you want to know."
+    ]
+  },
+  {
+    "keys": ["sorry for misunderstanding", "apologies for misunderstanding", "sorry I misunderstood", "my bad misunderstood"],
+    "values": [
+      "Misunderstandings happen to everyone! Glad we cleared it up.",
+      "No worries at all! It's super easy to get back on the same page.",
+      "Don't stress! We can easily re-align whenever needed.",
+      "All good! Ready to move forward together."
+    ]
+  },
+  {
+    "keys": ["my mistake entirely", "completely my mistake", "totally my mistake", "entirely my fault sorry", "100 percent my mistake"],
+    "values": [
+      "Please don't be hard on yourself! Mistakes are totally normal.",
+      "No harm done at all! We can fix it in two seconds.",
+      "All good! Thank you for clarifying—let's update it now.",
+      "Don't worry! We'll handle it smoothly together."
+    ]
+  },
+  {
+    "keys": ["didn't notice sorry", "didn't see that sorry", "missed that sorry", "didn't catch that sorry", "completely missed that sorry"],
+    "values": [
+      "Easy to miss! No problem at all.",
+      "Don't worry about it! There's a lot of info out there.",
+      "All good! Glad we caught it now.",
+      "No stress whatsoever! Let's keep moving forward."
+    ]
+  },
+  {
+    "keys": ["got mixed up sorry", "mixed up numbers sorry", "got things mixed up", "mixed up sorry", "mixed up details sorry"],
+    "values": [
+      "Details get mixed up all the time! No worries at all.",
+      "Don't stress! Let's sort out the right details now.",
+      "All good! Easy fix whenever you're ready.",
+      "No problem! Let me know what the correct info should be."
+    ]
+  },
+  {
+    "keys": ["sorry changed my mind", "apologies for changing mind", "sorry changed plan", "my bad changed mind"],
+    "values": [
+      "Changing your mind is totally fine! Flexibility is key.",
+      "No problem at all! Let's pivot to your new preference.",
+      "Don't worry! Tell me what you'd like to do instead.",
+      "All good! Adaptability makes everything smoother."
+    ]
+  },
+  {
+    "keys": ["sorry for noise", "apologies for background noise", "sorry noisy environment", "my bad about noise"],
+    "values": [
+      "No worries about background noise at all!",
+      "Don't stress! I can understand you just fine.",
+      "All good! Take your time and communicate comfortably.",
+      "No problem whatsoever! Continue whenever you're ready."
+    ]
+  },
+  {
+    "keys": ["forgot about that sorry", "forgot to mention sorry", "my bad forgot", "sorry I forgot", "completely forgot sorry"],
+    "values": [
+      "Forgetting happens to all of us! No big deal.",
+      "No problem at all! Glad you remembered now.",
+      "Don't worry! We can easily add or update that information.",
+      "All good! Let's take care of it right now."
+    ]
+  },
+  {
+    "keys": ["sent wrong info sorry", "wrong message sorry", "pasted wrong text sorry", "sent wrong file sorry"],
+    "values": [
+      "Easy mistake to make! No worries at all.",
+      "Don't worry about it! Just send over the correct details when you can.",
+      "All good! We can ignore the previous one completely.",
+      "No stress! Ready for the right info whenever you are."
+    ]
+  },
+  {
+    "keys": ["sorry for being late", "late coming sorry", "apologies for tardiness", "sorry running late"],
+    "values": [
+      "No problem at all! Glad you made it safely.",
+      "Don't worry about being late! Life happens.",
+      "All good! Take your time and get settled in.",
+      "No stress! Ready whenever you are to dive in."
+    ]
+  },
+  {
+    "keys": ["sorry for overthinking", "overthinking it sorry", "my bad overthought it", "sorry overthinking things"],
+    "values": [
+      "Overthinking is totally natural! Take a deep breath.",
+      "No need to apologize for being thorough!",
+      "Don't stress! Keeping it simple helps us both.",
+      "All good! Let's take it one gentle step at a time."
+    ]
+  },
+  {
+    "keys": ["sry bro", "sry man", "sry friend", "so sry bro", "sry about it"],
+    "values": [
+      "No worries bro! All good on my end.",
+      "Don't sweat it man! We're all cool.",
+      "No problem at all, friend! Easy fix.",
+      "All good! Let's keep rolling."
+    ]
+  },
+  {
+    "keys": ["please accept my apologies", "I tender my apologies", "please accept my sincere apologies", "humbly offer my apologies"],
+    "values": [
+      "Your apologies are accepted with warmth, but please know no harm was done!",
+      "Thank you, but please don't be formal or stress over it!",
+      "All is completely well! I appreciate your thoughtful attitude.",
+      "No worries at all! Wishing you a peaceful day ahead."
+    ]
+  },
+  {
+    "keys": ["lo siento", "disculpa", "perdon", "lo siento mucho", "mil disculpas"],
+    "values": [
+      "¡No te preocupes! Everything is completely fine.",
+      "¡No hay problema! Take it easy and don't stress.",
+      "All good! Feel free to continue whenever you're ready.",
+      "¡Tranquilo! Glad to help out anytime."
+    ]
+  },
+  {
+    "keys": ["désolé", "desole", "pardon desole", "je suis désolé", "desole mon ami"],
+    "values": [
+      "Pas de problème! No worries at all.",
+      "Ce n'est rien! Everything is completely okay.",
+      "All good! Take a breath and let's carry on.",
+      "No stress at all! Happy to assist."
+    ]
+  },
+  {
+    "keys": ["mi dispiace", "scusa", "scusami", "scusa friend", "scusami tanto"],
+    "values": [
+      "Nessun problema! Everything is totally okay.",
+      "Non ti preoccupare! Don't worry for a second.",
+      "All good! Ready whenever you are to continue.",
+      "No stress at all! Enjoy your day."
+    ]
+  },
+  {
+    "keys": ["so sorry my friend", "deeply sorry friend", "apologies dear friend", "sry my friend", "sorry dear friend"],
+    "values": [
+      "Please don't apologize my friend! There is zero harm done.",
+      "No need for apologies between friends! Everything is good.",
+      "All is completely well, dear friend! Take care.",
+      "Don't stress for a moment! I'm right here whenever you need."
+    ]
+  }
+]

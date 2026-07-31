@@ -1,0 +1,452 @@
+[
+  {
+    "keys": ["yes", "yes!", "yes.", "YES", "yess", "yesss", "yes please", "yes pal", "yes buddy", "yes friend"],
+    "values": [
+      "Awesome! Let me get right to work on that for you.",
+      "Great! Moving forward with the next step right now.",
+      "Perfect! Glad we're on the same page.",
+      "Sounds like a plan! Let me know if you want to make any tweaks."
+    ]
+  },
+  {
+    "keys": ["yeah", "yeah!", "yeah.", "YEAH", "yeahh", "yeahhh", "yeah buddy", "yeah pal", "yeah friend"],
+    "values": [
+      "All right! Let's dive into the next part.",
+      "Awesome! Ready to take on the next task with you.",
+      "Sounds great! How would you like to proceed?",
+      "Perfect! Let's keep up this great momentum."
+    ]
+  },
+  {
+    "keys": ["yep", "yep!", "yep.", "YEP", "yepp", "yepp!", "yep pal", "yep buddy", "yep friend"],
+    "values": [
+      "Got it! Ready whenever you give the word to start.",
+      "Awesome! Moving right along with your task.",
+      "Sounds good! Feel free to share the next detail.",
+      "Perfect! Let me know how I can assist further."
+    ]
+  },
+  {
+    "keys": ["absolutelyyes", "absolutely!", "ABSOLUTELY YES", "absolutely correct", "absolutely right", "absolutely pal", "absolutely buddy confirmation"],
+    "values": [
+      "Glad to hear that! Let's jump right into action.",
+      "Wonderful! Everything is lined up and ready to go.",
+      "Fantastic! Excited to carry out the next step for you.",
+      "100%! Ready whenever you are to keep moving."
+    ]
+  },
+  {
+    "keys": ["definitely yes", "definitely!", "DEFINITELY YES", "definitely correct", "definitely right", "definitely pal confirmation", "definitely buddy"],
+    "values": [
+      "Awesome! Glad we're fully aligned on this.",
+      "Great news! Let's get right into the details.",
+      "Definitely! Excited to make progress with you today.",
+      "Perfect! What would you like to focus on next?"
+    ]
+  },
+  {
+    "keys": ["exactly yes", "exactly!", "EXACTLY RIGHT", "exactly correct", "spot on exact yes", "exactly pal confirmation"],
+    "values": [
+      "Glad we hit the nail on the head! Moving forward now.",
+      "Awesome! Always nice when everything aligns perfectly.",
+      "Spot on! Let's take the next step together.",
+      "Perfect! How would you like to handle what's next?"
+    ]
+  },
+  {
+    "keys": ["correct", "correct!", "CORRECT", "that is correct", "correct answer", "100% correct", "correct pal confirmation"],
+    "values": [
+      "Great! Thanks for confirming that detail.",
+      "Awesome! Now that we have that verified, let's keep going.",
+      "Perfect! Glad we got the exact info right.",
+      "Sounds good! Ready whenever you want to move to the next task."
+    ]
+  },
+  {
+    "keys": ["that's right", "thats right", "that is right", "that's right pal", "you're right", "you got that right", "that's right buddy"],
+    "values": [
+      "Glad we got it right! Let's take action on that now.",
+      "Awesome! Ready whenever you're ready to proceed.",
+      "Great! Everything is aligned for the next step.",
+      "Perfect! Let me know if you need anything else adjusted."
+    ]
+  },
+  {
+    "keys": ["i agree", "im agree", "i agree completely", "i totally agree", "i agree pal", "fully agree", "i agree buddy"],
+    "values": [
+      "Glad we're in total agreement! Makes everything smoother.",
+      "Awesome! Let's put that agreed plan into motion.",
+      "Great minds think alike! Ready for the next step.",
+      "Perfect! Let me know how you'd like to begin."
+    ]
+  },
+  {
+    "keys": ["sure yes", "sure do", "sure thing yes", "sure pal yes", "sure go ahead", "sure thing yes pal"],
+    "values": [
+      "Sure thing! Let's get right to it.",
+      "Awesome! Moving forward with confidence.",
+      "You got it! What shall we tackle next?",
+      "Perfect! Ready to assist with whatever comes up."
+    ]
+  },
+  {
+    "keys": ["of course", "of course!", "OF COURSE", "of course yes", "of course pal", "of course buddy", "of course friend"],
+    "values": [
+      "Of course! Happy to take care of that for you.",
+      "Naturally! Let's get straight to action.",
+      "Gladly! Excited to help you move to the next phase.",
+      "Perfect! Let me know if you have any questions along the way."
+    ]
+  },
+  {
+    "keys": ["certainly", "certainly!", "CERTAINLY", "certainly yes", "most certainly", "certainly pal", "certainly friend"],
+    "values": [
+      "Most certainly! Everything is ready for action.",
+      "Gladly! Ready to proceed with total focus.",
+      "Awesome! Let's take care of this right now.",
+      "Perfect! What else would you like to manage today?"
+    ]
+  },
+  {
+    "keys": ["indeed yes", "indeed!", "INDEED YES", "indeed correct", "indeed right", "indeed pal", "indeed buddy"],
+    "values": [
+      "Indeed! Glad we have complete clarity on this.",
+      "Awesome! Let me know where we should direct our focus next.",
+      "Great! Everything is set up nicely.",
+      "Perfect! Let's keep up this great momentum."
+    ]
+  },
+  {
+    "keys": ["sounds right", "sounds right to me", "sounds correct", "that sounds right", "sounds right pal", "sounds right buddy"],
+    "values": [
+      "Glad that sounds right to you! Let's carry it out.",
+      "Awesome! Moving forward with this plan.",
+      "Great! Let me know if you want to refine any details.",
+      "Perfect! Ready whenever you are to continue."
+    ]
+  },
+  {
+    "keys": ["that's correct", "thats correct", "that is correct pal", "that's 100% correct", "that's correct buddy"],
+    "values": [
+      "Confirmed! Thanks for verifying that for me.",
+      "Awesome! Moving right along now that it's confirmed.",
+      "Great! Let's dive straight into the next step.",
+      "Perfect! How else can I assist you right now?"
+    ]
+  },
+  {
+    "keys": ["you betcha yes", "betcha", "you bet yes", "you betcha pal", "you betcha friend", "you betcha buddy"],
+    "values": [
+      "You betcha! Let's make it happen.",
+      "Awesome! Ready whenever you want to jump in.",
+      "Great energy! Let's carry out the next task.",
+      "Perfect! Take a look and let me know what's next."
+    ]
+  },
+  {
+    "keys": ["affirmative", "affirmative!", "AFFIRMATIVE", "affirmative sir", "affirmative pal", "affirmative buddy"],
+    "values": [
+      "Affirmative! Executing the next step now.",
+      "Copied! All systems ready to proceed.",
+      "Awesome! Ready for your next instruction.",
+      "Perfect! Let me know how you'd like to proceed."
+    ]
+  },
+  {
+    "keys": ["total agreement", "totally agree pal", "100 percent agreement yes", "completely yes", "total agreement pal"],
+    "values": [
+      "Wonderful! Total agreement makes work so easy.",
+      "Awesome! Let's put this plan into action.",
+      "Great! Ready to carry out the next step with you.",
+      "Perfect! Feel free to share your next idea."
+    ]
+  },
+  {
+    "keys": ["for sure", "for sure!", "FOR SURE", "for sure yes", "for sure pal", "for sure buddy"],
+    "values": [
+      "For sure! Let's get right to work on that.",
+      "Awesome! Ready to dive in whenever you are.",
+      "Great! Let's keep this momentum rolling.",
+      "Perfect! Let me know what comes next."
+    ]
+  },
+  {
+    "keys": ["100 percent", "100%", "100 percent yes", "100% yes", "hundred percent yes", "100 percent pal"],
+    "values": [
+      "100%! Love the clarity. Let's move forward.",
+      "Awesome! All set and ready to proceed.",
+      "Great! Let's execute the next part smoothly.",
+      "Perfect! How else can I help out today?"
+    ]
+  },
+  {
+    "keys": ["without a doubt", "without any doubt", "no doubt about it", "no doubt yes", "without a doubt pal"],
+    "values": [
+      "Without a doubt! Let's move forward with complete confidence.",
+      "Awesome! Glad everything is crystal clear.",
+      "Great! Ready whenever you're ready to start.",
+      "Perfect! Let me know if you need anything else."
+    ]
+  },
+  {
+    "keys": ["spot on yes", "spot on right", "spot on correct", "dead on correct", "spot on confirmation"],
+    "values": [
+      "Glad it's spot on! Moving forward now.",
+      "Awesome! Always great when we nail the detail.",
+      "Great! What would you like to focus on next?",
+      "Perfect! Let's keep making great progress."
+    ]
+  },
+  {
+    "keys": ["you got it yes", "you got it right", "got it right pal", "you nailed it", "you got it confirmation"],
+    "values": [
+      "Glad we got it right! Let's proceed immediately.",
+      "Awesome! Ready for your next idea or task.",
+      "Great! Let me know how you want to handle what's next.",
+      "Perfect! Feel free to ask about anything else."
+    ]
+  },
+  {
+    "keys": ["by all means", "by all means yes", "by all means pal", "by all means go ahead", "by all means friend"],
+    "values": [
+      "By all means! Let's jump right into it.",
+      "Gladly! Excited to carry out your next step.",
+      "Awesome! Ready whenever you are to proceed.",
+      "Perfect! Feel free to share your thoughts."
+    ]
+  },
+  {
+    "keys": ["gladly yes", "most gladly yes", "willingly yes", "happily yes", "gladly confirmation"],
+    "values": [
+      "Happily! Let me take care of that for you.",
+      "Gladly! Excited to move to the next phase.",
+      "Awesome! Everything is set up and ready.",
+      "Perfect! Let me know if you need anything else."
+    ]
+  },
+  {
+    "keys": ["affirmative roger", "roger yes", "roger that yes", "affirmative copy", "roger confirmation"],
+    "values": [
+      "Roger that! All set to take the next step.",
+      "Affirmative! Ready for your next instruction.",
+      "Awesome! Let's keep moving forward.",
+      "Perfect! Standing by for what's next."
+    ]
+  },
+  {
+    "keys": ["true", "true!", "TRUE", "that's true", "very true", "so true", "true pal"],
+    "values": [
+      "Very true! Glad we're on the same page.",
+      "So true! Let me know what you'd like to do next.",
+      "Awesome! Ready whenever you are to proceed.",
+      "Perfect! Let's keep up this great progress."
+    ]
+  },
+  {
+    "keys": ["right on target", "right on target yes", "bullseye yes", "hit target yes", "target confirmed"],
+    "values": [
+      "Bullseye! Glad we hit the target accurately.",
+      "Awesome! Now that we're on target, let's keep going.",
+      "Great! Ready to take on the next part.",
+      "Perfect! What shall we focus on next?"
+    ]
+  },
+  {
+    "keys": ["unquestionably", "unquestionably yes", "undoubtedly yes", "undoubtedly", "unquestionably pal"],
+    "values": [
+      "Unquestionably! Moving forward with full confidence.",
+      "Awesome! Everything is lined up for success.",
+      "Great! Let me know what step comes next.",
+      "Perfect! Ready whenever you are."
+    ]
+  },
+  {
+    "keys": ["positive", "positive!", "I'm positive", "im positive", "100% positive", "positive pal"],
+    "values": [
+      "Glad you're positive! Let's proceed immediately.",
+      "Awesome! Ready to execute the next phase.",
+      "Great! Let me know if you need any further checks.",
+      "Perfect! Catch you on the next step."
+    ]
+  },
+  {
+    "keys": ["yaas", "yaass", "yaasss", "yass queen", "yasss pal", "yasss buddy"],
+    "values": [
+      "Yasss! Love the great energy.",
+      "Awesome! Let's keep this momentum going.",
+      "Haha, awesome! Ready for whatever is next.",
+      "Perfect! Let's get right into it."
+    ]
+  },
+  {
+    "keys": ["yup", "yup!", "YUP", "yupp", "yuppp", "yup pal", "yup buddy"],
+    "values": [
+      "Yup! Got it all ready for you.",
+      "Awesome! Moving forward with the next part.",
+      "Great! Let me know what you'd like to check next.",
+      "Perfect! Ready whenever you are."
+    ]
+  },
+  {
+    "keys": ["yea", "yea!", "YEA", "yeaa", "yeaaa", "yea pal", "yea buddy"],
+    "values": [
+      "Yea! Let's get right into action.",
+      "Awesome! Ready to tackle the next task.",
+      "Great! Feel free to share what's next.",
+      "Perfect! Let's keep moving along."
+    ]
+  },
+  {
+    "keys": ["you bet mate", "right you are yes", "spot on mate yes", "too right mate", "you bet mate confirmation"],
+    "values": [
+      "Right you are mate! Let's get straight to it.",
+      "Too right! Ready whenever you are.",
+      "Awesome mate! What's next on our list?",
+      "Perfect! Have a great day ahead."
+    ]
+  },
+  {
+    "keys": ["sí", "si", "si por favor", "si claro", "claro que si", "si amigo"],
+    "values": [
+      "¡Claro que sí! Let me take care of that for you.",
+      "¡Excelente! Moving forward with the next step.",
+      "Awesome! Ready whenever you are.",
+      "Perfect! Let me know how else I can help."
+    ]
+  },
+  {
+    "keys": ["oui", "oui!", "oui s'il vous plaît", "tout à fait", "absolument oui", "oui friend"],
+    "values": [
+      "Tout à fait! Everything is set to go.",
+      "Oui! Let's move to the next part.",
+      "Awesome! Ready whenever you are.",
+      "Perfect! Have a wonderful day."
+    ]
+  },
+  {
+    "keys": ["sì certo", "si certo", "certamente si", "proprio così", "si certamente"],
+    "values": [
+      "Certamente! Let me handle that right now.",
+      "Proprio così! Everything is set up nicely.",
+      "Awesome! Ready whenever you'd like to proceed.",
+      "Perfect! Take care and enjoy your day."
+    ]
+  },
+  {
+    "keys": ["go ahead", "proceed", "go ahead yes", "feel free yes", "please proceed", "go ahead pal"],
+    "values": [
+      "Proceeding now! I'll get right on it.",
+      "Awesome! Moving forward with full focus.",
+      "You got it! Let me know if you need any adjustments.",
+      "Perfect! Standing by for your next thought."
+    ]
+  },
+  {
+    "keys": ["that one", "that choice yes", "select that one", "that's the one", "that one pal"],
+    "values": [
+      "Selected! That choice is locked in.",
+      "Awesome! That one is picked and ready to go.",
+      "Great choice! What would you like to do next with it?",
+      "Perfect! Let me know what step comes next."
+    ]
+  },
+  {
+    "keys": ["plan sounds great yes", "stick to plan yes", "execute plan yes", "plan confirmed"],
+    "values": [
+      "Plan confirmed! Let's execute it smoothly.",
+      "Awesome! Sticking to the plan and moving forward.",
+      "Great! Let's get right into action.",
+      "Perfect! Ready whenever you give the word."
+    ]
+  },
+  {
+    "keys": ["that time works", "that time works yes", "time is good yes", "time confirmed"],
+    "values": [
+      "Time confirmed! Everything is scheduled nicely.",
+      "Awesome! Glad that time fits your schedule perfectly.",
+      "Great! Let me know if any other details need setting.",
+      "Perfect! All set for that time."
+    ]
+  },
+  {
+    "keys": ["that's the name", "name is correct", "correct name yes", "name confirmed"],
+    "values": [
+      "Name confirmed! Updated and saved.",
+      "Awesome! Glad we have the exact name verified.",
+      "Great! What would you like to edit or add next?",
+      "Perfect! Moving along to the next step."
+    ]
+  },
+  {
+    "keys": ["address is right", "correct address yes", "right address yes", "address confirmed"],
+    "values": [
+      "Address confirmed! Everything is set properly.",
+      "Awesome! Glad the address is verified.",
+      "Great! What else can I confirm or update for you?",
+      "Perfect! Ready whenever you are."
+    ]
+  },
+  {
+    "keys": ["detail is right", "correct detail yes", "right detail yes", "detail confirmed"],
+    "values": [
+      "Detail confirmed! Everything is in place.",
+      "Awesome! Thanks for double-checking that detail.",
+      "Great! Let's move forward to the next part.",
+      "Perfect! Ready whenever you give the word."
+    ]
+  },
+  {
+    "keys": ["order is correct", "correct order yes", "right order yes", "order confirmed"],
+    "values": [
+      "Order confirmed! Everything is set up accurately.",
+      "Awesome! Glad the order is verified.",
+      "Great! Ready for your next instruction.",
+      "Perfect! Let me know if you need anything else."
+    ]
+  },
+  {
+    "keys": ["setting is right", "correct setting yes", "right setting yes", "setting confirmed"],
+    "values": [
+      "Setting confirmed! Configured and ready to go.",
+      "Awesome! Glad the setting is right on target.",
+      "Great! Let's keep moving smoothly.",
+      "Perfect! Feel free to check anything else."
+    ]
+  },
+  {
+    "keys": ["option is correct", "right option yes", "correct option yes", "option confirmed"],
+    "values": [
+      "Option confirmed! Selected and ready.",
+      "Awesome! Glad that option fits your needs.",
+      "Great! Moving to the next step now.",
+      "Perfect! Let me know if you want to make further tweaks."
+    ]
+  },
+  {
+    "keys": ["status is correct", "right status yes", "status confirmed", "status verified"],
+    "values": [
+      "Status confirmed! Everything is updated accurately.",
+      "Awesome! Glad the status is verified.",
+      "Great! Ready to carry out the next step.",
+      "Perfect! Let me know if you need any more info."
+    ]
+  },
+  {
+    "keys": ["file is correct", "right file yes", "correct file yes", "file confirmed"],
+    "values": [
+      "File confirmed! Loaded and ready for action.",
+      "Awesome! Glad we got the right file selected.",
+      "Great! Let's proceed with whatever task you have for it.",
+      "Perfect! Ready whenever you are."
+    ]
+  },
+  {
+    "keys": ["yes my friend", "absolutely dear friend", "indeed my friend", "yes dear friend", "certainly my friend"],
+    "values": [
+      "Awesome, my friend! Let's move forward together.",
+      "Glad we're aligned, dear friend! What's next on your mind?",
+      "Great! Ready whenever you are, my friend.",
+      "Perfect! Wishing you a wonderful rest of your day."
+    ]
+  }
+]

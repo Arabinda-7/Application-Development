@@ -158,7 +158,8 @@ class WorkspaceViewModel(private val repository: WorkspaceRepository) : ViewMode
         effort: String = "M",
         requirements: String = "",
         version: String = "",
-        status: String = "Backlog"
+        status: String = "Backlog",
+        deadline: Long? = null
     ) {
         viewModelScope.launch {
             repository.insertFeature(FeatureEntity(
@@ -169,7 +170,8 @@ class WorkspaceViewModel(private val repository: WorkspaceRepository) : ViewMode
                 effortSize = effort,
                 requirements = requirements,
                 targetVersion = version,
-                status = status
+                status = status,
+                deadline = deadline
             ))
         }
     }
@@ -198,7 +200,8 @@ class WorkspaceViewModel(private val repository: WorkspaceRepository) : ViewMode
         priority: Int = 1,
         environment: String = "Production",
         version: String = "",
-        steps: String = ""
+        steps: String = "",
+        deadline: Long? = null
     ) {
         viewModelScope.launch {
             repository.insertBug(BugEntity(
@@ -209,7 +212,8 @@ class WorkspaceViewModel(private val repository: WorkspaceRepository) : ViewMode
                 priority = priority,
                 environment = environment,
                 version = version,
-                stepsToReproduce = steps
+                stepsToReproduce = steps,
+                deadline = deadline
             ))
         }
     }

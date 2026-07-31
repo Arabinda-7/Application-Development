@@ -6,6 +6,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.lifecycle.viewModelScope
+import com.example.allinone.workspace.data.AppDatabase
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 import java.text.SimpleDateFormat
@@ -38,6 +39,10 @@ class MainActivityViewModel : ViewModel() {
 
             val agenda = DataManager.getComprehensiveTodayAgenda(context)
             val currentSpent = DataManager.getCurrentMonthExpenditure()
+            val db = AppDatabase.getDatabase(context)
+            val hasProjects = synchronized(DataManager.projects) {
+                DataManager.projects.isNotEmpty()
+            } || db.workspaceDao().getAllProjectsSync().isNotEmpty()
 
             dashboardState = DashboardState(
                 userName = DataManager.userName,
@@ -85,6 +90,7 @@ class MainActivityViewModel : ViewModel() {
                 showProjectSection = DataManager.showProjectSection,
                 showFinanceSection = DataManager.showFinanceSection,
                 showPerformanceSection = DataManager.showPerformanceSection,
+                hasProjects = hasProjects,
                 isAppUnlocked = DataManager.isAppUnlocked,
                 isDataLoaded = true
             )

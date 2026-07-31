@@ -74,7 +74,7 @@ fun ResourceViewSection(
                             Column(modifier = Modifier.weight(1f)) {
                                 Text(
                                     text = res.title, 
-                                    color = Color.White, 
+                                    color = accentColor, 
                                     fontWeight = FontWeight.Bold, 
                                     fontSize = 20.sp,
                                     maxLines = 1,

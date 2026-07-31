@@ -1,0 +1,1262 @@
+[
+  {
+    "keys": ["how are you", "how are you today", "how r u", "how r u doing", "how are you feeling today", "how's it going with you", "hru doing today"],
+    "values": [
+      "I'm doing wonderfully, thanks for asking! How is your day coming along?",
+      "Doing great over here! What fun things are you up to today?",
+      "Feeling fantastic and ready to help! How are you feeling today?",
+      "All good on my end! How's everything going in your world?"
+    ]
+  },
+  {
+    "keys": ["what's up", "whats up today", "sup buddy", "sup pal", "wassup friend", "whatcha up to today", "what's crackin today"],
+    "values": [
+      "Not much, just staying relaxed and ready to chat! What's up with you?",
+      "Hey, just keeping things smooth over here! What are you up to?",
+      "All good on my side! Anything exciting going on today?",
+      "Just enjoying the day! How is your day treating you?"
+    ]
+  },
+  {
+    "keys": ["what are you doing", "whatcha doing right now", "wbu doing today", "what are u up to", "what's on your agenda right now", "what are you working on"],
+    "values": [
+      "Just hanging out and ready for a good chat! What are you working on?",
+      "Staying focused and keeping things organized! How about you?",
+      "Just enjoying a quiet moment right now. What are you up to today?",
+      "Ready to assist whenever you need anything! What's on your mind?"
+    ]
+  },
+  {
+    "keys": ["how's your day", "hows ur day going", "how is your day going so far", "how's day treating you", "how has your day been"],
+    "values": [
+      "My day has been lovely, thank you! How has your day been shaping up?",
+      "Everything is going smooth and steady over here! How's your day going?",
+      "Doing great so far! Did you get a chance to do something fun today?",
+      "All good over here! Hope your day is treating you wonderfully."
+    ]
+  },
+  {
+    "keys": ["how have you been", "how've u been keeping", "how have u been doing", "how've you been lately", "how have things been with you"],
+    "values": [
+      "I've been doing great, thanks for checking in! How have you been lately?",
+      "Things have been peaceful and good! What have you been up to recently?",
+      "Been doing wonderfully! Always happy when we get to reconnect.",
+      "All good on my end! Hope life has been treating you amazingly."
+    ]
+  },
+  {
+    "keys": ["what are you thinking", "what's on your mind right now", "penny for your thoughts today", "what are u thinking about", "thinking about anything cool"],
+    "values": [
+      "Just thinking about how nice it is to chat! What's on your mind?",
+      "Thinking about all the cool projects we could work on! Got any fun ideas?",
+      "Just reflecting on the day so far. What are you pondering today?",
+      "Wondering what interesting things you're up to! How's your afternoon?"
+    ]
+  },
+  {
+    "keys": ["tell me something interesting", "share something interesting today", "got anything interesting to share", "tell me an interesting story", "share something cool today"],
+    "values": [
+      "Did you know honey never spoils? Archaeologists have found 3,000-year-old honey that's still edible!",
+      "Octopuses have three hearts and blue blood! Isn't nature fascinating?",
+      "Bananas are actually berries botanically, but strawberries aren't! Pretty wild fact, right?",
+      "Wombat poop is cube-shaped so it doesn't roll away! What kind of facts do you enjoy?"
+    ]
+  },
+  {
+    "keys": ["i'm bored", "im bored right now", "so bored right now", "feeling bored today", "bored out of my mind"],
+    "values": [
+      "Boredom is just a chance for adventure! Want to play a quick trivia game or learn a fun fact?",
+      "I hear you! Want to brainstorm something fun to do right now?",
+      "Let's beat that boredom together! Should we talk about music, movies, or hobbies?",
+      "How about listening to a favorite song or taking a short walk? What sounds good?"
+    ]
+  },
+  {
+    "keys": ["i'm back", "im back again today", "returned now pal", "back on the app", "hey i'm back now"],
+    "values": [
+      "Welcome back! Hope everything went smoothly while you were away.",
+      "Hey, welcome back! What shall we dive into next?",
+      "Good to see you back! How did your task or break go?",
+      "Welcome back! Ready whenever you are to continue."
+    ]
+  },
+  {
+    "keys": ["guess what", "guess what happened today", "guess what!", "you won't believe guess what", "guess what pal"],
+    "values": [
+      "Ooh, tell me! What happened?",
+      "I'm all ears! What's the exciting news?",
+      "I'm terrible at guessing! Spill the details!",
+      "What is it? Tell me everything!"
+    ]
+  },
+  {
+    "keys": ["did you miss me", "did u miss me pal", "miss me today", "missed me right", "did u miss me buddy"],
+    "values": [
+      "Of course! It's always much better when you're around.",
+      "Always! Glad you're back to chat.",
+      "Definitely! How has your day been treating you?",
+      "You know it! Welcome back, my friend."
+    ]
+  },
+  {
+    "keys": ["what's new", "whats new today", "anything new today", "what's new with you", "what's new in your world"],
+    "values": [
+      "Not much, just staying relaxed and enjoying our chat! What's new with you?",
+      "Just keeping up the positive vibes today! Anything exciting happen on your end?",
+      "All peaceful over here! What new things have you been up to?",
+      "Just ready for a great conversation! What's new in your world?"
+    ]
+  },
+  {
+    "keys": ["how's life", "hows life treating you", "how's life going lately", "how is life treating u", "how's life buddy"],
+    "values": [
+      "Life is good and peaceful, thank you! How is life treating you?",
+      "Can't complain at all! Hope life is bringing you plenty of smiles.",
+      "Things are running smoothly over here! How are things in your life?",
+      "Life is sweet! How have your recent days been?"
+    ]
+  },
+  {
+    "keys": ["nice weather today", "weather is great today", "lovely weather outside", "beautiful weather today", "gorgeous weather outside"],
+    "values": [
+      "Nice weather is such a mood booster! Are you getting a chance to step outside?",
+      "Sounds lovely! Perfect day for a walk or just soaking in the fresh air.",
+      "Wonderful—nothing beats a clear, beautiful day! Enjoy it to the fullest.",
+      "Great weather makes everything better! What are your plans for today?"
+    ]
+  },
+  {
+    "keys": ["it's raining", "its raining outside", "pouring rain today", "heavy rain outside today", "rainy weather today"],
+    "values": [
+      "Rainy days are perfect for getting cozy with a warm drink! Are you indoors?",
+      "I love the sound of rain! Great weather to relax or catch up on reading.",
+      "Hope you stay dry and warm out there! Enjoy the cozy rainy atmosphere.",
+      "Rainy weather has a nice calming vibe. What are you up to inside?"
+    ]
+  },
+  {
+    "keys": ["it's hot today", "its sweltering today", "so hot outside today", "burning heat today", "very hot weather today"],
+    "values": [
+      "Stay cool out there! Don't forget to grab an ice-cold glass of water.",
+      "High heat days call for AC and cold beverages! How are you staying cool?",
+      "Sounds like a scorcher! Stay in the shade and take it easy today.",
+      "Hot days can be draining. Make sure to stay hydrated!"
+    ]
+  },
+  {
+    "keys": ["it's cold today", "freezing outside today", "so chilly today", "brrr cold weather today", "very cold today"],
+    "values": [
+      "Brrr! Time for thick sweaters and a hot mug of cocoa or tea.",
+      "Stay warm out there! Cold days are best spent bundled up inside.",
+      "Chilly weather definitely calls for cozy blankets! How are you keeping warm?",
+      "Hope you stay nice and warm today! Take care in the cold."
+    ]
+  },
+  {
+    "keys": ["i'm hungry", "im hungry right now", "starving right now", "feeling hungry today", "stomach growling hungry"],
+    "values": [
+      "Time for a delicious meal break! What are you craving right now?",
+      "Don't stay hungry! What's on the menu for you today?",
+      "Ooh, go grab a tasty snack or meal! Food always makes everything better.",
+      "Hope you get some delicious food soon! What's your favorite comfort meal?"
+    ]
+  },
+  {
+    "keys": ["i'm sleepy", "im sleepy right now", "feeling sleepy now", "so sleepy today", "yawning sleepy right now"],
+    "values": [
+      "Sounds like your body is asking for a rest! Can you take a short nap?",
+      "Take it easy today! A warm cup of tea or a short break might help.",
+      "Don't push too hard if you're feeling sleepy. Get some cozy rest soon!",
+      "Sleepy vibes happen to all of us. Hope you get a good rest tonight."
+    ]
+  },
+  {
+    "keys": ["i can't sleep", "cant sleep tonight", "insomnia strikes today", "trouble sleeping tonight", "having trouble falling asleep"],
+    "values": [
+      "Late night restlessness is tough. Try listening to soft music or deep breathing.",
+      "Sorry to hear that! Maybe putting screens away and relaxing your eyes will help.",
+      "Quiet night hours can feel long. Hope you drift off into sweet sleep soon.",
+      "Try drinking a warm glass of milk or tea. Sleep tight when it comes!"
+    ]
+  },
+  {
+    "keys": ["i'm excited", "im so excited today", "super hyped right now", "feeling excited today", "thrilled about something"],
+    "values": [
+      "Love that awesome energy! What are you so excited about?",
+      "Excitement is the best feeling! Tell me all about what's coming up!",
+      "That's fantastic! Hope whatever you're excited for turns out amazing.",
+      "Woohoo! Spill the details—what's making you so happy?"
+    ]
+  },
+  {
+    "keys": ["i'm nervous", "feeling anxious today", "got butterflies in stomach", "feeling nervous right now", "a bit nervous today"],
+    "values": [
+      "Take a slow, deep breath. You're stronger than you think, and you've got this!",
+      "Nerves just mean you care about what's happening. You'll do great!",
+      "It's completely natural to feel nervous. Take it one gentle step at a time.",
+      "I'm rooting for you! Do you want to talk through what's making you nervous?"
+    ]
+  },
+  {
+    "keys": ["i have good news", "got great news today", "guess what good news i have", "sharing good news today", "awesome news to share"],
+    "values": [
+      "Yay! I love good news! What happened?",
+      "That's wonderful! Tell me all about it!",
+      "Awesome! Ready to celebrate your good news with you. What is it?",
+      "Good news is the best! Don't keep me waiting—what's the update?"
+    ]
+  },
+  {
+    "keys": ["i have bad news", "got sad news today", "not so great news today", "sharing bad news today", "unfortunate news today"],
+    "values": [
+      "I'm so sorry to hear that. I'm right here if you want to vent or talk.",
+      "Oh no, I'm here for you. Take your time if you want to share what happened.",
+      "Sending you a warm hug. Take it easy today, okay?",
+      "I'm sorry things aren't going well. Hope things brighten up for you soon."
+    ]
+  },
+  {
+    "keys": ["i watched a movie", "just finished a movie", "saw a great film today", "watched a movie recently", "movie night today"],
+    "values": [
+      "Nice! What movie did you watch? Was it good?",
+      "Movie nights are great! Would you recommend it to a friend?",
+      "Awesome! What genre was it—action, comedy, drama, or sci-fi?",
+      "Nothing like a solid film! Who was your favorite character in it?"
+    ]
+  },
+  {
+    "keys": ["i love music", "listening to music right now", "music is my favorite thing", "jamming to music today", "playing good music right now"],
+    "values": [
+      "Music makes life so much richer! What genre or artist are you listening to?",
+      "Awesome! What song is on repeat for you lately?",
+      "Music is great for the soul! Do you like upbeat tracks or relaxing acoustic tunes?",
+      "Nothing beats a great soundtrack! Who is your absolute favorite musician?"
+    ]
+  },
+  {
+    "keys": ["what's your favorite thing", "whats ur favorite topic", "what do you enjoy most", "favorite things to talk about", "what's your favorite subject"],
+    "values": [
+      "I love learning about people's hobbies, favorite foods, and fun facts! What about you?",
+      "I enjoy cheerful chats and hearing about good news! What's your favorite pastime?",
+      "Discovering creative ideas and bright stories is my favorite! What do you enjoy?",
+      "Connecting with you and keeping things positive! What's your favorite thing to do?"
+    ]
+  },
+  {
+    "keys": ["tell me a fun fact", "got any fun facts today", "share a cool fun fact", "give me a fun fact", "fun fact of the day"],
+    "values": [
+      "Sea otters hold hands while sleeping so they don't drift away! Cute, right?",
+      "A day on Venus is longer than a year on Venus! Space facts are so mind-blowing.",
+      "Cows have best friends and get stressed when separated! Nature is full of surprises.",
+      "Flamingos are born gray and turn pink from eating shrimp! Got a favorite fact?"
+    ]
+  },
+  {
+    "keys": ["do you like jokes", "tell me a funny joke", "know any good jokes", "share a joke with me", "crack a joke for me"],
+    "values": [
+      "Why don't scientists trust atoms? Because they make up everything!",
+      "What do you call a fake noodle? An impasta! Did that get a chuckle?",
+      "Why did the scarecrow win an award? Because he was outstanding in his field!",
+      "What do you call a sleeping dinosaur? A dino-snore! Hope that brought a smile."
+    ]
+  },
+  {
+    "keys": ["i'm happy today", "feeling so happy today", "in a great mood today", "feeling joyful today", "super happy right now"],
+    "values": [
+      "That's wonderful to hear! Happiness looks great on you. What made today so good?",
+      "I'm so glad! Your positive vibe is completely contagious today.",
+      "Awesome! Hope that joyful mood carries you through the rest of the week.",
+      "Hearing you're happy brightens my day too! Enjoy every single moment."
+    ]
+  },
+  {
+    "keys": ["today's been difficult", "had a rough day today", "tough day today", "hard day today", "today was exhausting"],
+    "values": [
+      "I'm sorry today was tough. Take a deep breath and treat yourself gently tonight.",
+      "Rough days happen, but you made it through! Be proud of your resilience.",
+      "Sending you warm, comforting thoughts. You deserve a restful evening.",
+      "I'm here for you! Make sure to relax and recharge your energy tonight."
+    ]
+  },
+  {
+    "keys": ["i'm relaxing", "just chilling out right now", "relaxing on the couch", "unwinding right now", "chill vibes right now"],
+    "values": [
+      "Relaxing is so well deserved! Enjoy your peaceful downtime.",
+      "Nice! Putting your feet up and unwinding is the best feeling.",
+      "Sounds cozy! Are you listening to music or watching something good?",
+      "Enjoy every moment of your chill time! Take care and relax."
+    ]
+  },
+  {
+    "keys": ["i finished work", "clocked out for today", "done with work for the day", "wrapped up work today", "off work now"],
+    "values": [
+      "Woohoo! Time to transition into relaxation mode and enjoy your evening.",
+      "Great job finishing up work today! How are you planning to unwind?",
+      "Workday complete! Put your tasks away and enjoy your free time.",
+      "You made it through the workday! Time for some well-deserved rest."
+    ]
+  },
+  {
+    "keys": ["i need a break", "taking a short breather", "time for a rest break", "need a quick break", "stepping away for a break"],
+    "values": [
+      "Breaks are essential! Step away, stretch out, and grab a fresh drink.",
+      "Definitely take that break! Resting your mind does wonders.",
+      "Enjoy your breather! Come back refreshed whenever you're ready.",
+      "Good call! Give yourself a relaxing moment to recharge."
+    ]
+  },
+  {
+    "keys": ["i'm learning something new", "started a new skill today", "learning new stuff", "picking up a new hobby", "learning a new topic"],
+    "values": [
+      "That's so exciting! Learning new things keeps life fresh and fun. What are you learning?",
+      "Awesome! Expanding your knowledge is always rewarding. How's it going so far?",
+      "That takes curiosity and effort! Hope you're enjoying the learning process.",
+      "Great choice! What inspired you to pick up this new skill?"
+    ]
+  },
+  {
+    "keys": ["recommend something interesting", "got any good recommendations", "what should i try out", "recommend a cool activity", "any recommendations for me"],
+    "values": [
+      "How about listening to a new genre of music or going for a sunset walk?",
+      "Trying a new recipe or starting a cozy book is always a great choice!",
+      "You could try sketching something around you or learning a fun trivia topic!",
+      "Maybe a 15-minute digital stretch break or exploring a cool podcast?"
+    ]
+  },
+  {
+    "keys": ["i'm drinking coffee", "drinking coffee right now", "sipping morning coffee", "got my coffee ready", "enjoying a warm coffee"],
+    "values": [
+      "Coffee moments are bliss! How do you like your coffee—black or creamy?",
+      "Nothing beats that fresh coffee aroma! Enjoy every single sip.",
+      "Fueling up with coffee! Hope it gives you wonderful energy today.",
+      "Enjoy your coffee break! Great way to start or boost your day."
+    ]
+  },
+  {
+    "keys": ["i'm drinking tea", "drinking hot tea right now", "cozy cup of tea", "tea time right now", "sipping herbal tea"],
+    "values": [
+      "A warm cup of tea is so soothing! What flavor are you drinking?",
+      "Tea breaks are pure comfort. Enjoy your quiet, cozy moment!",
+      "Lovely! Chamomile, green tea, or black tea? Enjoy your warm cup.",
+      "So relaxing! Wishing you a peaceful tea break."
+    ]
+  },
+  {
+    "keys": ["i'm cooking food", "cooking dinner right now", "making food in kitchen", "baking something nice", "preparing a meal right now"],
+    "values": [
+      "Ooh, cooking smells amazing! What delicious meal are you making?",
+      "Baking and cooking are such fun creative outlets! Hope it turns out tasty.",
+      "Nice! Nothing beats home-cooked food. Bon appétit in advance!",
+      "Yum! Enjoy the cooking process and your delicious food afterwards."
+    ]
+  },
+  {
+    "keys": ["i'm going for a walk", "going for a stroll outside", "walking in the park", "taking a walk right now", "out for a walk today"],
+    "values": [
+      "Walks are so invigorating! Enjoy the fresh air and surroundings.",
+      "Have a lovely stroll! Great way to clear your mind and stretch.",
+      "Wonderful! Taking a walk outside is great for energy. Take care!",
+      "Enjoy your walk! Hope you see something pretty along the way."
+    ]
+  },
+  {
+    "keys": ["i'm reading a book", "reading a great book", "reading a novel right now", "got a good book to read", "diving into a book"],
+    "values": [
+      "Book time is the best escape! What genre or title are you reading?",
+      "Nice! Getting lost in a good story is so satisfying. Enjoy reading!",
+      "Awesome! Is it a thriller, fiction, or non-fiction book?",
+      "Happy reading! Hope it keeps you hooked till the very last page."
+    ]
+  },
+  {
+    "keys": ["i'm playing a video game", "playing video games right now", "gaming session time", "playing a fun game", "gaming right now"],
+    "values": [
+      "Gaming time! What game are you playing right now?",
+      "Awesome! Hope you win your matches or complete the level!",
+      "Gaming is a great way to unwind! Are you playing single-player or multiplayer?",
+      "Have a blast with your game session! Enjoy the gameplay."
+    ]
+  },
+  {
+    "keys": ["i'm listening to a podcast", "listening to a cool podcast", "got a good podcast on", "enjoying a podcast right now", "podcast time today"],
+    "values": [
+      "Podcasts are great company! What topic is the episode covering?",
+      "Nice! Storytelling or educational podcast? Enjoy listening!",
+      "Awesome! I love how podcasts let you learn while doing chores.",
+      "Hope it's an engaging episode! Have fun listening."
+    ]
+  },
+  {
+    "keys": ["i bought something new", "got a cool new item", "went shopping today", "purchased something nice", "bought a new item today"],
+    "values": [
+      "Ooh, new stuff is exciting! What did you buy?",
+      "Nice! Hope your new item brings you lots of joy.",
+      "Awesome! Treat yourself once in a while. What is it?",
+      "Shopping wins! Hope you enjoy your new purchase."
+    ]
+  },
+  {
+    "keys": ["i'm cleaning my room", "cleaning up my place", "tidying up the room", "doing chores right now", "organizing my space right now"],
+    "values": [
+      "A clean space feels so refreshing! Put on some fun tunes while cleaning.",
+      "Getting chores done feels so satisfying once it's finished! You've got this.",
+      "Nice! Tackling cleaning step by step makes everything feel organized.",
+      "Enjoy the fresh clean room when you're done! Take care."
+    ]
+  },
+  {
+    "keys": ["i'm hanging out with friends", "hanging out with my buddies", "chilling with friends", "friends coming over", "spending time with friends"],
+    "values": [
+      "Hanging with friends is the absolute best! Have a wonderful time together.",
+      "Awesome! Good company makes great memories. Enjoy your time!",
+      "Have fun! What are you all planning to do today?",
+      "Nice! Cherish the laughter and good times with your friends."
+    ]
+  },
+  {
+    "keys": ["i'm working on a project", "building something new", "focused on my project", "starting a project today", "project work in progress"],
+    "values": [
+      "Project mode on! What kind of project are you creating?",
+      "Awesome! Wishing you great focus and smooth progress.",
+      "Working on projects is so rewarding! Hope everything flows smoothly.",
+      "Good luck with your project! Let me know if you need brainstorming help."
+    ]
+  },
+  {
+    "keys": ["i'm feeling creative", "feeling full of ideas", "in a creative mood today", "ready to craft something", "creative spark today"],
+    "values": [
+      "Love that creative spark! What craft or idea are you bringing to life?",
+      "Riding a wave of creativity is amazing! Let your ideas flow freely.",
+      "Awesome! Enjoy creating something uniquely yours today.",
+      "Fantastic energy! What's your creative project going to be?"
+    ]
+  },
+  {
+    "keys": ["i'm going to travel", "planning a trip soon", "going on vacation", "traveling to a new place", "trip planning right now"],
+    "values": [
+      "Travel is so enriching! Where are you planning to go?",
+      "Vacation time! Hope you have an incredible and safe trip.",
+      "Exploring new places is so exciting! Have a wonderful journey ahead.",
+      "Safe travels in advance! Make sure to take lots of memories."
+    ]
+  },
+  {
+    "keys": ["i'm taking a photo", "snapped a cool picture", "taking photos today", "photography time", "captured a cool photo"],
+    "values": [
+      "Photography catches moments in time! What are you taking pictures of?",
+      "Nice! Capturing good lighting makes all the difference. Have fun!",
+      "Awesome! Taking photos is a great creative outlet.",
+      "Hope you got some beautiful shots! Take care."
+    ]
+  },
+  {
+    "keys": ["i'm watching a TV show", "bingeing a new series", "watching my favorite show", "tv show marathon", "watching episodes right now"],
+    "values": [
+      "TV show marathons are so fun! What series are you bingeing?",
+      "Nice! Hope the plot twists keep you entertained.",
+      "Awesome! Sit back, grab a snack, and enjoy your show.",
+      "Is it a comedy, drama, or mystery? Enjoy watching!"
+    ]
+  },
+  {
+    "keys": ["i'm feeling peaceful", "feeling so calm right now", "peaceful atmosphere today", "tranquil vibes right now", "calm state of mind"],
+    "values": [
+      "Inner peace is a true blessing. Soak in every second of that calm.",
+      "So glad you're feeling peaceful! Have a tranquil and gentle day.",
+      "Wonderful! A quiet, calm mind brings so much joy.",
+      "Enjoy that peaceful harmony! Take care and relax."
+    ]
+  },
+  {
+    "keys": ["i'm feeling productive", "getting so much done today", "super productive morning", "crushing my to-do list", "productive day today"],
+    "values": [
+      "Crushing that to-do list! That sense of accomplishment is awesome.",
+      "Way to go! Being in the productive flow feels fantastic.",
+      "Great job getting things done today! Don't forget to rest afterwards.",
+      "Super work! Keep up that awesome momentum."
+    ]
+  },
+  {
+    "keys": ["i'm waiting for something", "waiting for a delivery", "waiting on a friend", "patiently waiting right now", "waiting for news today"],
+    "values": [
+      "Anticipation can be exciting! Hope whatever you're waiting for arrives soon.",
+      "Waiting can take patience! What are you expecting today?",
+      "Hope the wait isn't too long! Take it easy while waiting.",
+      "Fingers crossed it arrives/happens smoothly! Take care."
+    ]
+  },
+  {
+    "keys": ["i'm trying a new recipe", "cooking a new dish", "trying out a new recipe", "testing a kitchen recipe", "new recipe today"],
+    "values": [
+      "Kitchen experiments are so fun! What new recipe are you trying?",
+      "Yum! Hope it turns out delicious and mouth-watering.",
+      "Cooking new dishes keeps meals exciting! Have fun making it.",
+      "Good luck with the recipe! Enjoy every bite when it's done."
+    ]
+  },
+  {
+    "keys": ["i'm exercising", "doing a quick workout", "getting some exercise in", "stretching out right now", "working out today"],
+    "values": [
+      "Way to stay active! Workouts bring so much good energy.",
+      "Awesome job getting moving! Don't forget to hydrate.",
+      "Crush that workout! You'll feel so accomplished afterwards.",
+      "Great dedication! Take care of your body and enjoy the session."
+    ]
+  },
+  {
+    "keys": ["i'm feeling nostalgic", "reminiscing about old times", "feeling nostalgic today", "thinking of good memories", "old memories coming up"],
+    "values": [
+      "Nostalgia brings back such warm feelings. What memory are you thinking of?",
+      "Looking back at good times is so heartwarming. Enjoy those memories!",
+      "Old memories have a unique sweetness. Hope it brings a gentle smile.",
+      "Reminiscing can be lovely. Cherish those good past moments!"
+    ]
+  },
+  {
+    "keys": ["i'm organizing my schedule", "planning out my week", "setting up my schedule", "organizing my calendar", "weekly planning session"],
+    "values": [
+      "Planning ahead makes everything run smoothly! Good luck organizing.",
+      "Awesome! Having a clear schedule brings so much peace of mind.",
+      "Great job getting organized! Remember to schedule some downtime too.",
+      "Organized calendars lead to calm days! Hope your week goes great."
+    ]
+  },
+  {
+    "keys": ["i'm waking up", "just woke up", "morning alarm just went off", "getting out of bed", "waking up now"],
+    "values": [
+      "Good morning! Hope you woke up feeling rested and ready.",
+      "Morning! Take a gentle stretch before jumping into your day.",
+      "Good morning! Wishing you a bright and beautiful start today.",
+      "Morning! Hope you have a wonderful day ahead."
+    ]
+  },
+  {
+    "keys": ["i'm getting ready for bed", "winding down for sleep", "getting ready for bed now", "flossing and brushing teeth", "bedtime routine right now"],
+    "values": [
+      "Winding down is so important. Hope you sleep deeply tonight!",
+      "Good night! Get comfortable and enjoy peaceful dreams.",
+      "Rest up well tonight! Catch you again tomorrow morning.",
+      "Sleep tight! Wishing you a quiet and restorative night."
+    ]
+  },
+  {
+    "keys": ["i love pets", "playing with my pet", "pets are the best", "spending time with my pet", "animal lover today"],
+    "values": [
+      "Pets bring so much unconditional joy! What kind of pet do you have?",
+      "Animals are wonderful companions! Give your pet a gentle pat for me.",
+      "Pets make every day happier! Enjoy spending time with your furry friend.",
+      "So sweet! Having a pet is truly special."
+    ]
+  },
+  {
+    "keys": ["i'm going to a party", "heading to a celebration", "going to a party tonight", "festive mood today", "party time tonight"],
+    "values": [
+      "Party time! Have an absolute blast celebrating tonight.",
+      "Awesome! Enjoy the music, food, and great company.",
+      "Have fun! Hope you make wonderful memories tonight.",
+      "Celebrations are great! Stay safe and enjoy the party!"
+    ]
+  },
+  {
+    "keys": ["i'm feeling silly", "in a goofy mood", "feeling silly right now", "cracking myself up", "playful mood today"],
+    "values": [
+      "Goofy moods are the funnest! Laughter keeps life light.",
+      "Haha! Enjoy the playful mood—silliness is great medicine.",
+      "Love the cheerful energy! Keep smiling and enjoying yourself.",
+      "Haha! Nothing wrong with a silly, cheerful moment."
+    ]
+  },
+  {
+    "keys": ["i'm feeling focused", "in the zone right now", "deep focus mode", "totally locked in", "focus mode activated"],
+    "values": [
+      "Locked in! I won't distract you—get those goals accomplished!",
+      "Focus mode is awesome. Wishing you maximum productivity!",
+      "Being in the zone feels great. Crush those tasks!",
+      "Keep up that sharp focus! Talk to you when you finish."
+    ]
+  },
+  {
+    "keys": ["i'm shopping online", "browsing online stores", "online shopping spree", "checking items online", "window shopping online"],
+    "values": [
+      "Online browsing can be fun! Are you looking for anything specific?",
+      "Nice! Window shopping online is a great pastime.",
+      "Hope you find great deals and cool finds today!",
+      "Have fun browsing! Take care of your budget too."
+    ]
+  },
+  {
+    "keys": ["i'm watching the sunset", "watching the sun go down", "gorgeous sunset right now", "sunset beauty today", "watching evening sunset"],
+    "values": [
+      "Sunsets are nature's artwork! Enjoy the beautiful evening sky.",
+      "So peaceful! Watching the colors change in the sky is magical.",
+      "Sunsets bring such a lovely end to the day. Enjoy the view!",
+      "Breathe in the quiet evening calm as the sun sets."
+    ]
+  },
+  {
+    "keys": ["i'm watching the sunrise", "watching early sunrise", "beautiful morning dawn", "sunrise view today", "watching morning sunrise"],
+    "values": [
+      "Sunrises bring fresh hope and energy! Enjoy the early dawn view.",
+      "Waking up with the sun is so peaceful. Have a beautiful day!",
+      "Gorgeous! Early mornings have a quiet magic of their own.",
+      "Enjoy the morning light! Wishing you a brilliant day ahead."
+    ]
+  },
+  {
+    "keys": ["i'm feeling inspired", "inspired by a great quote", "got fresh inspiration", "feeling motivated today", "inspired energy today"],
+    "values": [
+      "Inspiration is powerful! What sparked your motivation today?",
+      "Awesome! Channel that inspired energy into something you love.",
+      "Feeling motivated feels fantastic! Keep that momentum going.",
+      "Love that! Pursue your ideas with enthusiasm today."
+    ]
+  },
+  {
+    "keys": ["i'm feeling lazy", "feeling like a couch potato", "too lazy to move today", "lazy day vibes", "lazy lounge today"],
+    "values": [
+      "Lazy days are necessary for recharging! Enjoy lounging around.",
+      "Nothing wrong with a low-energy lazy day. Take it easy!",
+      "Put on a comfy blanket and just relax—you earned it.",
+      "Enjoy doing absolutely nothing today! Take care."
+    ]
+  },
+  {
+    "keys": ["i'm feeling adventurous", "want to explore somewhere new", "feeling adventurous today", "ready for adventure", "adventure mood today"],
+    "values": [
+      "Adventure calls! What new place or activity are you exploring?",
+      "Awesome! Exploring new sights makes life an exciting journey.",
+      "Have fun on your adventure today! Stay safe and enjoy.",
+      "Exciting! Tell me all about your adventure when you get back."
+    ]
+  },
+  {
+    "keys": ["i'm taking care of plants", "watering my house plants", "gardening right now", "tending to my garden", "plant care today"],
+    "values": [
+      "Plant care is so therapeutic! How are your green friends doing?",
+      "Gardening brings life into your home. Enjoy tending to them!",
+      "Nice! Watching plants grow under your care is very satisfying.",
+      "Happy gardening! Hope your plants bloom wonderfully."
+    ]
+  },
+  {
+    "keys": ["i'm writing in a journal", "journaling my thoughts", "writing down my day", "keeping a diary", "journal entry right now"],
+    "values": [
+      "Journaling is such a great way to clear and process your mind.",
+      "Writing down thoughts brings clarity and calm. Enjoy your writing!",
+      "Reflecting in a journal is a lovely quiet habit. Take your time.",
+      "Wishing you a peaceful journaling session!"
+    ]
+  },
+  {
+    "keys": ["i'm practicing an instrument", "playing piano right now", "playing guitar right now", "practicing music right now", "jamming out on instrument"],
+    "values": [
+      "Practicing music is so enriching! What instrument are you playing?",
+      "Awesome! Keep practicing—music is a beautiful gift.",
+      "Jamming out is the best feeling! Enjoy your music session.",
+      "Hope the chords and melody flow effortlessly for you!"
+    ]
+  },
+  {
+    "keys": ["i'm eating dessert", "having a sweet treat", "eating delicious cake", "eating ice cream", "dessert time right now"],
+    "values": [
+      "Dessert time! Enjoy every delicious, sweet bite.",
+      "Yum! What sweet treat are you enjoying right now?",
+      "Savoring dessert is one of life's simple joys! Enjoy!",
+      "Treating yourself is great! Hope it's super delicious."
+    ]
+  },
+  {
+    "keys": ["i'm drinking water", "staying hydrated right now", "drinking a cold glass of water", "hydration break", "sipping water right now"],
+    "values": [
+      "Hydration is key! Great job taking care of your health.",
+      "A cold glass of water is so refreshing. Drink up!",
+      "Staying hydrated keeps your energy high! Good habit.",
+      "Awesome! Keep taking care of yourself today."
+    ]
+  },
+  {
+    "keys": ["i'm listening to nature sounds", "listening to birds singing", "ocean wave sounds", "nature rain sounds", "relaxing nature sounds"],
+    "values": [
+      "Nature sounds are so soothing and peaceful! Enjoy the calm.",
+      "Ocean waves and rain sounds bring such tranquil vibes.",
+      "Lovely choice! Nature's calm is the best way to unwind.",
+      "Wishing you a deeply relaxing listening moment."
+    ]
+  },
+  {
+    "keys": ["i'm solving a puzzle", "working on a crossword", "working on a jigsaw puzzle", "solving a brain teaser", "puzzle time right now"],
+    "values": [
+      "Puzzles are great exercise for the brain! How's it coming along?",
+      "Awesome! Finding that missing piece is so satisfying.",
+      "Have fun teasing your brain! Take your time solving it.",
+      "Enjoy the puzzle! Hope you get it solved smoothly."
+    ]
+  },
+  {
+    "keys": ["i'm feeling curious", "curious about how things work", "wondering about something", "in a curious mood", "curious mind today"],
+    "values": [
+      "Curiosity leads to the best discoveries! What are you wondering about?",
+      "Being curious keeps the mind sharp! Ask away if you want to explore.",
+      "Love a curious mind! What topic caught your interest today?",
+      "Curiosity makes life fun! What are we discovering today?"
+    ]
+  },
+  {
+    "keys": ["i'm celebrating something", "celebrating a milestone", "toast to a small win", "celebration time today", "celebrating a win"],
+    "values": [
+      "Congratulations! Celebrating wins—big or small—is so important.",
+      "Woohoo! Cheers to your accomplishment! What are we celebrating?",
+      "So happy for you! Enjoy every moment of your celebration.",
+      "Awesome news! You earned this victory. Celebrate big!"
+    ]
+  },
+  {
+    "keys": ["i'm reorganizing furniture", "rearranging my living room", "moving furniture around", "decorating my space", "reorganizing room setup"],
+    "values": [
+      "Rearranging furniture gives your home a whole new fresh feel!",
+      "Nice! Changing up your space can bring brand new energy.",
+      "Take care of your back while lifting! Enjoy your new room setup.",
+      "Hope your space turns out looking super cozy and fresh!"
+    ]
+  },
+  {
+    "keys": ["i'm planning my weekend", "figuring out weekend plans", "brainstorming weekend ideas", "weekend prep today", "planning weekend activities"],
+    "values": [
+      "Weekend planning is fun! What activities are on your wishlist?",
+      "Nice! Hope you balance fun plans with good rest.",
+      "Sounds like a great weekend ahead! Make sure to relax too.",
+      "Awesome! Hope your weekend turns out exactly as planned."
+    ]
+  },
+  {
+    "keys": ["i'm trying to focus", "trying to eliminate distractions", "focusing on my goals", "getting back to work now", "focusing right now"],
+    "values": [
+      "You can do this! Put away distractions and get in the zone.",
+      "Wishing you quiet, uninterrupted focus right now. Go for it!",
+      "Focus mode engaged! Catch you when your work session is done.",
+      "Stay strong and stay focused! You've got this."
+    ]
+  },
+  {
+    "keys": ["i'm feeling grateful", "feeling thankful today", "counting my blessings", "appreciation for life today", "heart full of gratitude"],
+    "values": [
+      "Gratitude makes what we have enough. What are you grateful for today?",
+      "A grateful heart brings so much peace. So beautiful to hear!",
+      "Practicing gratitude is a wonderful habit. Wishing you continued joy.",
+      "Warm thoughts to you! Hope your gratitude brings you happiness."
+    ]
+  },
+  {
+    "keys": ["i'm looking forward to something", "can't wait for upcoming event", "super eager for tomorrow", "looking forward to it", "excited for upcoming event"],
+    "values": [
+      "Having something fun to look forward to is the best! What is it?",
+      "Awesome! Hope the time flies till that event arrives.",
+      "Exciting! Countdowns to fun events make everyday life brighter.",
+      "Fingers crossed it turns out even better than expected!"
+    ]
+  },
+  {
+    "keys": ["i'm taking a mental health day", "taking a day for myself", "self-care day today", "resting my mind today", "mental recharge day"],
+    "values": [
+      "Self-care is so important! Enjoy your quiet, peaceful day of rest.",
+      "Good for you! Put your feet up and do whatever restores your spirit.",
+      "Resting your mind is necessary and healthy. Take good care today!",
+      "Wishing you a restorative, calm, and soothing self-care day."
+    ]
+  },
+  {
+    "keys": ["i'm wearing cozy clothes", "wearing a soft hoodie", "in comfortable pajamas", "cozy clothes day", "wearing sweatpants today"],
+    "values": [
+      "Cozy clothes make everything 10x better! Enjoy the comfort.",
+      "Soft hoodies and comfy clothes are top tier comfort. Enjoy!",
+      "Nothing beats relaxing in pure comfort! Stay warm and cozy.",
+      "Comfy clothes day for the win! Take it easy today."
+    ]
+  },
+  {
+    "keys": ["i'm watching the rain from inside", "watching raindrops on window", "cozy window rainy view", "indoor rain watching", "watching rain falling outside"],
+    "values": [
+      "Watching rain fall through a window with a hot drink is pure bliss.",
+      "So relaxing! Enjoy the quiet rain view from your cozy spot.",
+      "Rainy window views are so peaceful and calming. Enjoy!",
+      "Stay warm inside while the rain falls outside. Take care!"
+    ]
+  },
+  {
+    "keys": ["i'm feeling energetic after sleep", "woke up full of energy", "slept so well last night", "feeling refreshed today", "full of energy today"],
+    "values": [
+      "A good night's sleep makes a world of difference! Harness that energy!",
+      "Awesome! Waking up refreshed is the best start to any day.",
+      "Love to hear that! Make the most of your great energy today.",
+      "Fantastic! Go conquer whatever tasks you have planned."
+    ]
+  },
+  {
+    "keys": ["i'm enjoying a quiet moment", "peace and quiet right now", "enjoying quiet solitude", "calm moment alone", "quiet peaceful moment"],
+    "values": [
+      "Quiet moments are precious. Enjoy the calm and stillness.",
+      "Solitude can be so restorative. Take in the quiet peace.",
+      "Breathe in the tranquility! Enjoy your quiet moment.",
+      "Peaceful moments nourish the soul. Wishing you calm."
+    ]
+  },
+  {
+    "keys": ["i'm trying a new habit", "starting a daily habit", "building a good routine", "testing out a habit", "building a fresh habit"],
+    "values": [
+      "Building good habits takes small daily steps! You can do it.",
+      "Awesome! What new habit are you trying out?",
+      "Consistency is key! Start small and keep going every day.",
+      "Good luck with your new routine! Celebrate your progress."
+    ]
+  },
+  {
+    "keys": ["i'm listening to a new album", "checking out new music release", "listening to a fresh album", "new track playing", "listening to new album"],
+    "values": [
+      "New music discoveries are great! Who's the album by?",
+      "Nice! Is the new album living up to your expectations?",
+      "Awesome! Enjoy diving into the new tracks and lyrics.",
+      "Hope you find some brand new favorite songs on it!"
+    ]
+  },
+  {
+    "keys": ["i'm making a grocery list", "writing down what to buy", "grocery store list prep", "planning meals for the week", "grocery list today"],
+    "values": [
+      "Grocery lists keep shopping organized! Don't forget your favorite snacks.",
+      "Meal planning ahead saves so much time! Good luck prepping.",
+      "Nice! Adding anything special or tasty to your list today?",
+      "Happy shopping prep! Hope you get everything you need."
+    ]
+  },
+  {
+    "keys": ["i'm looking at old photos", "going through photo album", "looking at nostalgic pictures", "old memory photos", "viewing old pictures"],
+    "values": [
+      "Looking at old photos is like traveling back in time! Enjoy the memories.",
+      "Pictures capture such special moments. Hope it brings sweet smiles!",
+      "Nostalgic photos are lovely to revisit. Cherish those good times.",
+      "So sweet! Photo albums hold so many wonderful stories."
+    ]
+  },
+  {
+    "keys": ["i'm preparing a gift", "wrapping a present for a friend", "preparing a nice gift", "getting a gift ready", "gift wrapping today"],
+    "values": [
+      "Gift giving is such a thoughtful gesture! Who is the gift for?",
+      "So sweet of you! Wrapping gifts with care is part of the fun.",
+      "Hope your friend loves the gift! That's very kind of you.",
+      "Wishing you fun preparing and giving your present!"
+    ]
+  },
+  {
+    "keys": ["i'm rearranging my workspace", "cleaning up my desk", "setting up a clean workspace", "organized desk today", "workspace cleanup"],
+    "values": [
+      "A clean workspace leads to a clean mind! Enjoy your tidy desk.",
+      "Organizing your desk boosts productivity so much. Great job!",
+      "Nice! Fresh desk setup brings fresh focus.",
+      "Enjoy working in your neatly arranged workspace!"
+    ]
+  },
+  {
+    "keys": ["i'm enjoying the fresh air", "standing by open window", "breathed in fresh morning air", "outside fresh breeze", "taking in fresh air"],
+    "values": [
+      "Fresh air is so invigorating! Breathe deeply and enjoy.",
+      "Nothing beats a cool, fresh breeze to clear your mind.",
+      "So refreshing! Take in the natural crisp air today.",
+      "Enjoy the gentle breeze! Wishing you a bright day."
+    ]
+  },
+  {
+    "keys": ["i'm learning a new language", "practicing language vocabulary", "learning words in new language", "language practice today", "studying new language"],
+    "values": [
+      "Learning languages connects you to the world! What language is it?",
+      "Awesome effort! Daily practice makes a huge difference.",
+      "That's fantastic! Have fun practicing your new vocabulary.",
+      "Good luck with your language journey! Wishing you great success."
+    ]
+  },
+  {
+    "keys": ["i'm working on art", "drawing right now", "painting right now", "sketching in my sketchbook", "artistic session time", "working on art project"],
+    "values": [
+      "Art is such a wonderful form of expression! What are you drawing/painting?",
+      "Awesome! Let your imagination run wild on canvas or paper.",
+      "Enjoy your art session! Creative expression is good for the soul.",
+      "Hope your art project turns out beautifully! Have fun creating."
+    ]
+  },
+  {
+    "keys": ["i'm drinking a smoothie", "sipping a fruit smoothie", "fresh protein smoothie time", "blending a smoothie", "smoothie break right now"],
+    "values": [
+      "Smoothies are delicious and super healthy! What flavor did you make?",
+      "Yum! Fruit smoothie breaks are so refreshing.",
+      "Fueling up with good nutrients! Enjoy your tasty smoothie.",
+      "Refreshing choice! Enjoy every single sip."
+    ]
+  },
+  {
+    "keys": ["i'm taking a warm bath", "relaxing in warm shower", "warm bath time relaxation", "refreshing shower", "taking a warm shower"],
+    "values": [
+      "A warm bath or shower washes away all the day's stress! Enjoy.",
+      "So relaxing! Nothing beats warm water to soothe your muscles.",
+      "Take your time and unwind completely. Enjoy your bath!",
+      "Wishing you a cozy and refreshing relaxation time."
+    ]
+  },
+  {
+    "keys": ["i'm watching a documentary", "watching an educational documentary", "learning from documentary", "history doc time", "nature documentary right now"],
+    "values": [
+      "Documentaries are so fascinating! What subject is it covering?",
+      "Awesome! Learning real-world facts through films is great.",
+      "Nice! Is it about nature, history, space, or science?",
+      "Hope you discover some mind-blowing information in it!"
+    ]
+  },
+  {
+    "keys": ["i'm feeling optimistic", "feeling optimistic about future", "positive outlook today", "good things coming", "optimistic vibes today"],
+    "values": [
+      "Optimism opens doors to great possibilities! Love that outlook.",
+      "An optimistic mindset brings good energy your way. Keep shining!",
+      "Wonderful! Wishing you success with everything you're looking forward to.",
+      "Positive thoughts bring positive moments. Enjoy your optimistic day!"
+    ]
+  },
+  {
+    "keys": ["i'm trying to stay offline", "digital detox day", "taking a break from screen", "offline relaxation time", "unplugging for today"],
+    "values": [
+      "Digital detoxes are great for mental health! Enjoy your screen-free time.",
+      "Unplugging helps you reconnect with the physical world. Have fun!",
+      "Good for you! Enjoy the quiet offline hours and take care.",
+      "Wishing you a peaceful and present offline break!"
+    ]
+  },
+  {
+    "keys": ["i'm making tea for a friend", "brewing tea for guest", "hosting a friend at home", "making drinks for visitors", "serving tea to friend"],
+    "values": [
+      "Hosting friends with warm tea is such hospitality! Enjoy your chat.",
+      "So sweet of you! Warm tea and good conversation make a great time.",
+      "Have a lovely catch-up with your friend over tea!",
+      "Enjoy hosting! Wishing you a warm and cheerful visit."
+    ]
+  },
+  {
+    "keys": ["i'm listening to an audiobook", "listening to an narrated book", "audiobook while walking", "story time audio", "enjoying an audiobook"],
+    "values": [
+      "Audiobooks make walking or multitasking so enjoyable! What story is it?",
+      "Nice! Having a narrator bring characters to life is awesome.",
+      "Enjoy your book! Hope the narrator has a great voice.",
+      "Happy listening! Audiobooks are such a convenient way to read."
+    ]
+  },
+  {
+    "keys": ["i'm watching cloud shapes", "looking at clouds in sky", "cloud watching relaxing", "sky viewing today", "cloud watching in grass"],
+    "values": [
+      "Cloud watching is a timeless, relaxing habit. Spot any cool shapes?",
+      "So peaceful! Looking up at the sky slows everything down nicely.",
+      "Simple joys like cloud watching bring so much calm. Enjoy!",
+      "Hope you spot some fun cloud shapes in the sky today!"
+    ]
+  },
+  {
+    "keys": ["i'm feeling adventurous in kitchen", "mixing spices in cooking", "kitchen experiment time", "fun cooking experiment", "creative kitchen experiment"],
+    "values": [
+      "Kitchen experiments lead to secret masterpiece recipes! Have fun!",
+      "Awesome! Mixing new flavors is how culinary magic happens.",
+      "Hope your kitchen adventure turns out extra delicious!",
+      "Enjoy experimenting! Let me know how the dish turns out."
+    ]
+  },
+  {
+    "keys": ["i'm stargazing", "looking at stars at night", "stargazing outside tonight", "clear night sky view", "stargazing session"],
+    "values": [
+      "Stargazing puts things in such a peaceful perspective! Enjoy the night sky.",
+      "The cosmos is breathtaking! Spot any constellations tonight?",
+      "Looking up at a clear star-filled sky is pure wonder. Take care!",
+      "Enjoy the quiet night stars! Wishing you clear skies tonight."
+    ]
+  },
+  {
+    "keys": ["i'm listening to acoustic guitar", "acoustic guitar music vibes", "calm guitar tunes playing", "unplugged music time", "acoustic tunes playing"],
+    "values": [
+      "Acoustic guitar melodies are so soothing and warm. Enjoy listening!",
+      "Lovely music choice! Gentle guitar strings bring so much calm.",
+      "Acoustic vibes make any room feel cozy. Enjoy the music!",
+      "Hope the tunes give you a peaceful background for your day."
+    ]
+  },
+  {
+    "keys": ["i'm decorating for holidays", "putting up holiday decorations", "festive room setup", "decorating my space for holidays", "holiday setup today"],
+    "values": [
+      "Decorating brings so much festive cheer! Enjoy setting up.",
+      "Awesome! Making your home look festive is part of the fun.",
+      "Hope your space turns out super warm, bright, and cozy!",
+      "Have fun decorating! Wishing you a joyous festive season."
+    ]
+  },
+  {
+    "keys": ["i'm packing my bags", "packing suitcase for travel", "bag packing prep", "getting luggage ready", "packing for a trip"],
+    "values": [
+      "Packing means an adventure is near! Don't forget your essentials.",
+      "Exciting! Make a quick checklist so nothing gets left behind.",
+      "Safe travels on your upcoming trip! Happy packing.",
+      "Hope packing goes smoothly! Have an amazing trip."
+    ]
+  },
+  {
+    "keys": ["i'm unwinding after exercise", "stretching out post workout", "cooling down after exercise", "resting after gym", "post workout cooldown"],
+    "values": [
+      "Great job getting your workout done! Stretch out and hydrate well.",
+      "Cooldown time is crucial! Relax those muscles and rest up.",
+      "You earned this post-exercise rest! Hope you feel accomplished.",
+      "Awesome work staying active! Enjoy your relaxation now."
+    ]
+  },
+  {
+    "keys": ["i'm trying to improve sleep", "setting up a bedtime routine", "aiming for 8 hours sleep", "better sleep habits", "improving my sleep schedule"],
+    "values": [
+      "Prioritizing sleep is one of the best health choices! Good luck.",
+      "Consistent sleep schedules do wonders for energy. You can do it!",
+      "Dimming lights early and putting screens away really helps!",
+      "Wishing you deep, restorative sleep tonight and every night."
+    ]
+  },
+  {
+    "keys": ["i'm enjoying a warm bowl of soup", "eating hot cozy soup", "noodle soup time", "soup on a chilly day", "warm soup break"],
+    "values": [
+      "A warm bowl of soup is comfort in a bowl! Enjoy every spoonful.",
+      "Yum! Hot soup is perfect for cozying up. What kind of soup is it?",
+      "Nothing hits the spot like delicious hot soup on a cool day!",
+      "Enjoy your cozy meal! Stay warm and take care."
+    ]
+  },
+  {
+    "keys": ["i'm listening to ambient rain", "ambient rain sounds playing", "relaxing background rain", "rainy atmosphere sounds", "listening to rain audio"],
+    "values": [
+      "Ambient rain is the ultimate relaxation sound. Enjoy the calm!",
+      "Rain sounds help with focus and sleep so well. Enjoy the vibes!",
+      "So soothing! Wishing you a peaceful and cozy listening time.",
+      "Rain audio is great background company while working or relaxing."
+    ]
+  },
+  {
+    "keys": ["i'm trying out a new hairstyle", "styling my hair differently", "got a fresh haircut today", "new hair look today", "fresh new hair look"],
+    "values": [
+      "Fresh haircuts bring a whole new confidence boost! Enjoy your new look.",
+      "Nice! A new style is a great way to shake things up.",
+      "Awesome! Bet it looks fantastic on you.",
+      "Love a fresh new look! Hope it brings you lots of smiles."
+    ]
+  },
+  {
+    "keys": ["i'm setting goals for the month", "writing down monthly goals", "monthly goal setting", "setting fresh targets", "goal planning today"],
+    "values": [
+      "Setting clear goals is the first step to achieving them! You've got this.",
+      "Awesome! Break those monthly goals into small daily steps.",
+      "Goal setting brings clarity and direction. Rooting for your success!",
+      "Great initiative! Wishing you total accomplishment this month."
+    ]
+  },
+  {
+    "keys": ["i'm enjoying a picnic", "eating lunch outdoors picnic", "picnic in the park", "outdoor picnic vibes", "having a park picnic"],
+    "values": [
+      "Picnics in the sunshine are magical! Enjoy the good food and fresh air.",
+      "Awesome! Eating outdoors makes food taste even better.",
+      "Have a delightful picnic time! Hope the weather is perfect.",
+      "Enjoy your outdoor feast! Take care and relax."
+    ]
+  },
+  {
+    "keys": ["i'm listening to jazz music", "smooth jazz playing in background", "jazz music relaxation", "cozy jazz vibes", "listening to classic jazz"],
+    "values": [
+      "Smooth jazz brings such sophisticated and relaxed vibes. Enjoy!",
+      "Love jazz music! Soft brass and piano notes are so soothing.",
+      "Perfect background music for reading or working. Enjoy the tunes!",
+      "Jazz vibes create such a cozy atmosphere. Relax and enjoy."
+    ]
+  },
+  {
+    "keys": ["i'm taking a photo of nature", "photographing flowers/trees", "nature snapshot today", "scenic photo capture", "taking outdoor nature photos"],
+    "values": [
+      "Nature photography captures such raw beauty! What are you photographing?",
+      "Nice! Nature offers endless inspiration for photos.",
+      "Hope you capture some stunning lighting and scenery!",
+      "Enjoy photographing the outdoors! Take care."
+    ]
+  },
+  {
+    "keys": ["i'm trying to drink more water", "tracking my water intake", "hydration goal today", "sipping water all day", "focusing on hydration today"],
+    "values": [
+      "Tracking hydration is a fantastic health habit! Keep it up.",
+      "Awesome! Keep a full water bottle near you all day.",
+      "Your body and mind will thank you for drinking more water today!",
+      "Good job staying hydrated! You're doing great."
+    ]
+  },
+  {
+    "keys": ["i'm feeling proud of a friend", "friend achieved something great", "super proud of my buddy", "celebrating friend's win", "proud of friend today"],
+    "values": [
+      "Being proud of a friend shows what a supportive person you are!",
+      "That's so heartwarming! Celebrating friends' wins is the best.",
+      "Awesome news! Make sure to send them your warm congratulations.",
+      "True friendship is lifting each other up. So happy for them!"
+    ]
+  },
+  {
+    "keys": ["i'm watching a sports game", "watching a live sports match", "cheering for my team", "sports game night", "watching sports game today"],
+    "values": [
+      "Sports game night! Hope your team pulls off a great win!",
+      "Awesome! Cheer loud and enjoy the intense competition.",
+      "Game days are so exciting! Grab some snacks and enjoy.",
+      "Fingers crossed for your team! Have a great time watching."
+    ]
+  },
+  {
+    "keys": ["i'm feeling organized", "everything in its place", "super organized today", "got my life sorted today", "feeling in control and organized"],
+    "values": [
+      "Feeling organized brings such calm and control. Great job!",
+      "Awesome! Everything in its place makes tasks flow effortlessly.",
+      "Nothing beats the feeling of a clear, organized space.",
+      "Keep up that great rhythm! Enjoy your organized day."
+    ]
+  },
+  {
+    "keys": ["i'm taking a scenic drive", "driving through scenic routes", "countryside road drive", "relaxing road trip drive", "scenic drive today"],
+    "values": [
+      "Scenic drives with good tunes are pure freedom. Drive safe and enjoy!",
+      "Nice! Watching beautiful landscapes roll by is so relaxing.",
+      "Enjoy the open road and pretty scenery! Take care.",
+      "Wishing you smooth roads and beautiful views along the way."
+    ]
+  },
+  {
+    "keys": ["i'm trying out meditation", "doing a short meditation session", "mindful breathing time", "mindfulness meditation", "meditating right now"],
+    "values": [
+      "Meditation is a wonderful practice for mental clarity and peace.",
+      "Focusing on gentle breaths brings so much calm. Enjoy your session!",
+      "Mindfulness helps center your whole day. Good for you!",
+      "Wishing you a peaceful, quiet, and restoring meditation."
+    ]
+  },
+  {
+    "keys": ["i'm writing a letter/card", "writing a hand-written note", "sending a card to family", "letter writing time", "writing a personal letter"],
+    "values": [
+      "Handwritten letters are so personal and special! Who are you writing to?",
+      "That's such a thoughtful gesture! Receiving mail like that brings big smiles.",
+      "Writing by hand has a quiet charm. Enjoy writing your note!",
+      "So sweet of you! Hope your letter brings joy to the reader."
+    ]
+  },
+  {
+    "keys": ["i'm enjoying a warm fireplace", "sitting by cozy fireplace", "warm fire crackling", "fireplace relaxation", "cozying up by the fire"],
+    "values": [
+      "A crackling fire brings the ultimate cozy atmosphere! Enjoy the warmth.",
+      "So peaceful! Warm firelight and crackling wood sounds are pure bliss.",
+      "Stay warm and cozy by the fire! Perfect for relaxing.",
+      "Wishing you a tranquil and warm evening by the fireplace."
+    ]
+  },
+  {
+    "keys": ["i'm trying out a new game", "testing out a new board game", "fun new game with friends", "new game night", "trying new game today"],
+    "values": [
+      "New game nights are so fun! What kind of game is it?",
+      "Awesome! Hope you learn the rules quickly and have a blast.",
+      "Game nights bring out great laughs! Have fun playing.",
+      "Hope you win or have a great time competing!"
+    ]
+  },
+  {
+    "keys": ["i'm feeling content", "feeling content with life right now", "simple contentment", "everything feels right today", "peaceful contentment"],
+    "values": [
+      "Contentment is quiet happiness. Cherish this beautiful feeling.",
+      "So glad you're feeling content! Simple peace is the true goal.",
+      "Wonderful to hear! Wishing you continued peace and happiness.",
+      "Enjoy this peaceful rhythm in your life right now. Take care!"
+    ]
+  },
+  {
+    "keys": ["i'm making a morning checklist", "writing down my daily tasks", "morning to-do list prep", "checklist for the day", "daily task planning"],
+    "values": [
+      "Checklists keep mornings sharp and productive! Good luck today.",
+      "Awesome! Ticking off tasks one by one feels so satisfying.",
+      "Great planning! Hope you get through your checklist smoothly.",
+      "You've got this! Have a successful and productive day."
+    ]
+  },
+  {
+    "keys": ["i'm trying a new coffee bean", "tasting a specialty coffee roast", "new coffee flavor today", "artisan coffee brew", "specialty coffee tasting"],
+    "values": [
+      "Specialty coffee tasting is so fun! How are the flavor notes?",
+      "Ooh, fresh artisan roasts smell unbelievable! Enjoy your cup.",
+      "Coffee lovers unite! Hope it turns out to be a new favorite brew.",
+      "Enjoy your fresh coffee tasting! Have a wonderful day."
+    ]
+  },
+  {
+    "keys": ["i'm listening to vinyl records", "spinning a classic vinyl record", "record player music time", "retro music listening", "spinning vinyl today"],
+    "values": [
+      "Vinyl records have such warm, rich sound! What record are you spinning?",
+      "Classic vinyl listening is an awesome experience! Enjoy the album.",
+      "Nothing matches the warm needle crackle on vinyl. Great choice!",
+      "Happy listening! Enjoy every track on your record."
+    ]
+  },
+  {
+    "keys": ["i'm watching a sunset at the beach", "watching ocean sunset view", "beach sunset relaxation", "seaside sunset view", "sunset on the beach"],
+    "values": [
+      "Beach sunsets are legendary! Enjoy the ocean waves and golden light.",
+      "Waves crashing and sunset colors—what a stunning combination!",
+      "Breathe in the salty ocean breeze and enjoy the view.",
+      "Nature at its finest! Wishing you a serene evening by the sea."
+    ]
+  },
+  {
+    "keys": ["i'm taking a power nap", "short 20-minute power nap", "recharging with a quick nap", "catnap time right now", "taking a quick power nap"],
+    "values": [
+      "Power naps do wonders for energy! Set a timer for 20 minutes and rest.",
+      "A quick catnap will recharge your battery nicely. Sleep well!",
+      "Enjoy your quick rest break! You'll wake up refreshed.",
+      "Sweet dreams on your quick power nap! Catch you after."
+    ]
+  },
+  {
+    "keys": ["i'm learning history trivia", "reading interesting history facts", "learning cool historical stories", "history trivia fun", "history facts today"],
+    "values": [
+      "History is full of incredible stories! What era are you reading about?",
+      "Fascinating! Learning about past times gives great perspective.",
+      "Awesome! Got any wild history facts to share with me?",
+      "Have fun diving into history! Take care and keep learning."
+    ]
+  },
+  {
+    "keys": ["i'm planting seeds", "planting flower/herb seeds", "potting new plants today", "seed planting time", "planting in pots today"],
+    "values": [
+      "Planting seeds is investing in future growth! What are you growing?",
+      "Gardening from seeds is so rewarding. Hope they sprout quickly!",
+      "Awesome! Give them good soil and sunshine. Happy planting!",
+      "Hope your new plants grow green and healthy. Take care!"
+    ]
+  },
+  {
+    "keys": ["i'm trying out origami", "folding paper origami shapes", "origami craft practice", "paper art folding", "origami folding right now"],
+    "values": [
+      "Origami takes so much precision and patience! What shape are you folding?",
+      "Nice! Turning a square paper into art is so cool.",
+      "Have fun folding cranes, boxes, or animals! Enjoy the craft.",
+      "Origami is very calming! Hope your paper craft turns out great."
+    ]
+  },
+  {
+    "keys": ["i'm enjoying a quiet morning tea", "peaceful morning tea by window", "early tea session alone", "quiet morning tea break", "morning tea solitude"],
+    "values": [
+      "Quiet morning tea is the best way to start the day peacefully.",
+      "Sip slowly and enjoy the stillness before the day gets busy.",
+      "Wishing you a soothing, gentle, and quiet morning tea time.",
+      "Enjoy your peaceful tea break! Have a wonderful day."
+    ]
+  },
+  {
+    "keys": ["always great talking with you my friend", "glad we get to chat my friend", "happy companion conversation", "love our chats my friend", "great conversation my friend"],
+    "values": [
+      "I always love our chats too, my friend! It brightens my whole day.",
+      "Thank you my friend! Always right here whenever you want to talk.",
+      "Connecting with a great friend like you is a pleasure. Take care!",
+      "Happy to chat anytime, my friend! Wishing you a peaceful day ahead."
+    ]
+  }
+]

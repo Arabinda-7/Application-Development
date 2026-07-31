@@ -1,0 +1,272 @@
+[
+  {
+    "keys": ["just opened the app", "starting my app now", "opening up chat", "just opened this up", "opening app today", "just opened up"],
+    "values": [
+      "Welcome, I'm so glad to see you today. How are you doing?",
+      "Hello there—Great to have you here. What's on your mind today?",
+      "Welcome back! Hope your day is going wonderfully so far.",
+      "Hey, Glad you popped in. What can we dive into today?"
+    ]
+  },
+  {
+    "keys": ["good morning first chat today", "first time opening today", "starting my day with you", "first chat of the day", "first interaction today"],
+    "values": [
+      "Good morning! Wishing you a bright and successful day ahead.",
+      "Happy to be your first chat today! What are your plans for the day?",
+      "Good day! Hope your morning is starting off peaceful and cheerful.",
+      "Welcome! Ready to make today a fantastic day?"
+    ]
+  },
+  {
+    "keys": ["haven't chatted in days", "been a few days", "back after a long break", "finally back after days", "been away for a few days"],
+    "values": [
+      "Welcome back! It's so wonderful to see you again after a few days.",
+      "Long time no see! Hope everything has been going well for you.",
+      "Glad to have you back! How have the past few days been treating you?",
+      "Welcome back! Always a pleasure whenever you stop by."
+    ]
+  },
+  {
+    "keys": ["just checking in", "idle check in", "saying a quick hi", "thought I'd check in", "just saying hi", "dropping in to check in"],
+    "values": [
+      "Hey there—Thanks for dropping in to check in. How's your day going?",
+      "Always great to hear from you! Hope you're having a calm, lovely day.",
+      "Hello, I appreciate you stopping by for a quick hello. What's new?",
+      "Hey, Glad you checked in. Anything fun happening today?"
+    ]
+  },
+  {
+    "keys": ["still here", "I'm still here", "sorry got distracted", "back at my keyboard", "still around", "back now"],
+    "values": [
+      "Welcome back! No worries at all about taking your time.",
+      "Glad you're still around! Take all the time you need.",
+      "Hey! Hope everything is going smoothly on your end.",
+      "Welcome back to the chat! What shall we look at next?"
+    ]
+  },
+  {
+    "keys": ["welcome back to me", "glad to be back", "back again", "happy to be back", "back here again", "returned back"],
+    "values": [
+      "Welcome back! It's always a treat to chat with you.",
+      "So glad you're back! Hope your day is going great.",
+      "Welcome back into the space! What would you like to explore?",
+      "Always happy to see you return! How can I help you today?"
+    ]
+  },
+  {
+    "keys": ["up for a friendly chat", "let's have a friendly chat", "want to chat casually", "ready for a friendly chat", "let's talk casually"],
+    "values": [
+      "I'd love a friendly chat! How has your day been unfolding so far?",
+      "Friendly chats are the best! What's something interesting on your mind?",
+      "Count me in! How are you feeling today?",
+      "Awesome! I'm always up for a warm, pleasant conversation."
+    ]
+  },
+  {
+    "keys": ["ready to get work done", "starting a productive session", "time to be productive", "let's get to work", "beginning productive work"],
+    "values": [
+      "Love the productive energy! What main goal are we tackling first?",
+      "Awesome, Let's make this a focused, high-output session. What's on the agenda?",
+      "Ready when you are! Let's turn your ideas into accomplishments today.",
+      "Great focus! What task would you like to start with?"
+    ]
+  },
+  {
+    "keys": ["happy new day", "fresh new day today", "brand new day starting", "excited for a new day", "starting a new day"],
+    "values": [
+      "Happy new day! A fresh start brings endless possibilities.",
+      "Cheers to a brand new day! Hope it brings you joy and clear progress.",
+      "Welcome to a fresh morning! What is one thing you're looking forward to?",
+      "Every new day is a fresh blank page. Make it a great one!"
+    ]
+  },
+  {
+    "keys": ["relaxing this evening", "evening chill chat", "winding down tonight", "quiet evening chat", "relaxing night chat"],
+    "values": [
+      "Good evening! Time to kick back and unwind after your day.",
+      "Relaxing evenings are essential. Hope you have a peaceful night ahead.",
+      "Welcome! Enjoying a cozy, quiet evening is such a great feeling.",
+      "Good evening! How did the rest of your day go?"
+    ]
+  },
+  {
+    "keys": ["midday check in", "afternoon hello", "checking in at lunch", "quick midday chat", "afternoon check in"],
+    "values": [
+      "Good afternoon! Hope your day is going smoothly so far.",
+      "Happy midday! Taking a nice breather during the afternoon?",
+      "Hello! Hope your afternoon is treating you wonderfully.",
+      "Good afternoon! What's been the highlight of your day so far?"
+    ]
+  },
+  {
+    "keys": ["happy monday", "starting the new week", "monday morning chat", "beginning the week", "monday start hello"],
+    "values": [
+      "Happy Monday! Here's to a fresh, productive, and rewarding week.",
+      "Wishing you a great start to your week! What's on your radar today?",
+      "Happy Monday morning! Hope your coffee is warm and your goals are clear.",
+      "Starting the week strong! How are you feeling today?"
+    ]
+  },
+  {
+    "keys": ["happy friday", "weekend is almost here", "friday afternoon chat", "wrapping up the week", "friday finish hello"],
+    "values": [
+      "Happy Friday! Congratulations on pushing through a full week.",
+      "The weekend is right around the corner! Got any fun plans ahead?",
+      "Happy Friday! Hope you finish up your tasks smoothly today.",
+      "Friday vibes! Time to wrap up the work and look forward to rest."
+    ]
+  },
+  {
+    "keys": ["late night chat", "still up late", "night owl check in", "talking late at night", "late night hello"],
+    "values": [
+      "Late night check-in! Hope you're staying cozy and peaceful tonight.",
+      "Hello night owl! What's keeping you up at this hour?",
+      "Late night quiet times are so peaceful. Don't forget to get good sleep soon!",
+      "Quiet hours late at night! How can I help you unwind?"
+    ]
+  },
+  {
+    "keys": ["ready to plan my day", "let's organize my tasks", "time to plan ahead", "planning time now", "ready to plan tasks"],
+    "values": [
+      "Planning ahead sets up a smooth day! What tasks shall we list first?",
+      "Awesome! Organizing your schedule brings so much peace of mind.",
+      "Let's map out your priorities! What's the main focus today?",
+      "Great discipline! Ready whenever you want to structure your tasks."
+    ]
+  },
+  {
+    "keys": ["taking a short break", "quick tea break chat", "taking a breather", "coffee break chat", "short break hello"],
+    "values": [
+      "Enjoy your break! Stepping away for a few minutes refreshes your mind.",
+      "Break time is well deserved! Grab a warm drink and relax.",
+      "Glad you're taking a breather! Rest is just as important as work.",
+      "Hope you enjoy a cozy, peaceful break right now."
+    ]
+  },
+  {
+    "keys": ["looking for inspiration today", "need a spark of inspiration", "ready for fresh ideas", "looking for new inspiration", "need inspiration today"],
+    "values": [
+      "Inspiration is everywhere! What topic or project are we brainstorming?",
+      "A fresh perspective can spark amazing ideas! What area are you focusing on?",
+      "Love seeking new ideas! Let's explore some fresh angles together.",
+      "Inspiration strikes when you least expect it! What sparks your interest today?"
+    ]
+  },
+  {
+    "keys": ["feeling super energetic today", "full of energy right now", "high energy today", "feeling energetic chat", "full of energy hello"],
+    "values": [
+      "Love that high-energy enthusiasm! Channeling that energy feels fantastic.",
+      "Awesome vitality! What big goal are we crushing with all that energy?",
+      "Your high energy is awesome! Let's make the most of it today.",
+      "Fantastic mood! Let me know how we can put that energy to good use."
+    ]
+  },
+  {
+    "keys": ["cozy rainy day greeting", "rainy day chat", "gloomy day check in", "rainy day hello", "cozy weather greeting"],
+    "values": [
+      "Cozy rainy days have such a comforting vibe! Grab a warm drink and relax.",
+      "Hello! Rainy weather is perfect for quiet reading and relaxed chats.",
+      "Warm rainy day greetings! Hope you're staying dry and cozy inside.",
+      "Rain outside, cozy feelings inside! How are you enjoying the day?"
+    ]
+  },
+  {
+    "keys": ["happy saturday morning", "lazy sunday morning chat", "weekend start hello", "weekend morning chat", "happy sunday morning"],
+    "values": [
+      "Happy weekend morning! Hope you get to sleep in and enjoy a slow start.",
+      "Weekend mornings are the absolute best. Enjoy your relaxed pace today!",
+      "Happy weekend! Whether resting or adventuring, hope it's a great day.",
+      "Good morning! Enjoy every minute of your well-earned weekend."
+    ]
+  },
+  {
+    "keys": ["back from lunch", "just finished lunch", "post lunch chat", "finished lunch hello", "back after lunch"],
+    "values": [
+      "Welcome back! Hope you enjoyed a delicious and satisfying lunch.",
+      "Post-lunch check-in! Ready for a smooth afternoon ahead?",
+      "Glad you had lunch! Take a moment to digest before diving back into work.",
+      "Welcome back! Let's tackle the afternoon tasks with a fresh mind."
+    ]
+  },
+  {
+    "keys": ["want to share something", "need to talk things out", "ready to share my day", "want to vent a bit", "looking to share something"],
+    "values": [
+      "I'm all ears! Feel free to share whatever is on your mind.",
+      "I'm right here listening whenever you're ready to share.",
+      "Talking things out helps clear your mind. Go right ahead!",
+      "Take your time! What would you like to share today?"
+    ]
+  },
+  {
+    "keys": ["starting a new project today", "excited for new project", "beginning a fresh project", "new project starting", "excited about new project"],
+    "values": [
+      "Starting a new project is so thrilling! What is it all about?",
+      "Awesome news! New projects bring so much fresh motivation.",
+      "Congratulations on embarking on a new build! How can I assist?",
+      "Love new beginnings! What's the main vision for this project?"
+    ]
+  },
+  {
+    "keys": ["unwinding after hard work", "long day finished finally", "relaxing after work", "unwinding after long day", "hard day over finally"],
+    "values": [
+      "You made it through a long day! Time to put your feet up and rest.",
+      "Glad your work is done for the day! Enjoy a well-deserved evening break.",
+      "Congratulations on finishing a hard day. Take it nice and easy tonight.",
+      "Time to recharge! What's your favorite way to unwind tonight?"
+    ]
+  },
+  {
+    "keys": ["starting my study session", "time to hit the books", "beginning study time", "study session start", "ready to study now"],
+    "values": [
+      "Great study focus! Pace yourself with short breaks for maximum retention.",
+      "Ready to study! What subject or topic are we tackling today?",
+      "Awesome dedication! Wishing you a focused and clear study session.",
+      "Hit the books with confidence! Let me know if you need explanations."
+    ]
+  },
+  {
+    "keys": ["need a light distraction", "distract me for a minute", "quick light conversation", "looking for light distraction", "distract me quick"],
+    "values": [
+      "I can help with a quick mental break! Want a fun fact or a joke?",
+      "Light distraction coming up! Would you like a cool riddle or trivia?",
+      "Happy to offer a short break! What sounds most fun right now?",
+      "Stepping away from work for a minute is great. What shall we talk about?"
+    ]
+  },
+  {
+    "keys": ["just wanted to say hello", "just dropping by to say hi", "simple hello today", "just stopping by to say hi", "saying a warm hello"],
+    "values": [
+      "A warm hello back to you! Hope you're having a lovely day.",
+      "Hello there! It brightens my day when you drop by to say hi.",
+      "Hey, Thanks for stopping by to say hello. Take care today!",
+      "Hello! Wishing you a fantastic and peaceful day ahead."
+    ]
+  },
+  {
+    "keys": ["setting my daily goals", "setting intentions today", "ready to focus on goals", "setting morning intentions", "planning daily intentions"],
+    "values": [
+      "Setting daily intentions builds such great clarity! What's your main focus?",
+      "Awesome mindset! Clear intentions lead to satisfying days.",
+      "Love that daily focus! What top 2 goals are you prioritizing today?",
+      "Great habit! Clear direction makes every step count."
+    ]
+  },
+  {
+    "keys": ["ready to brainstorm", "let me bounce some ideas", "brainstorming session start", "want to brainstorm ideas", "ready for brainstorming"],
+    "values": [
+      "Brainstorming is my favorite! Pitch your first idea and let's build on it.",
+      "Awesome! Let me know your main concept and we'll explore all angles.",
+      "Ready when you are! No bad ideas in a fresh brainstorming session.",
+      "Let's bounce some creative thoughts around! What topic are we on?"
+    ]
+  },
+  {
+    "keys": ["hello my friend nice to see you", "ready to chat dear friend", "always happy to see you my friend", "hello dear friend", "greeting my friend"],
+    "values": [
+      "Hello my dear friend! It is always such a joy to see you.",
+      "Welcome back, my friend! Hope your day is filled with peace and light.",
+      "Thank you my friend! Always right here whenever you want to talk.",
+      "Wishing you a wonderful, happy day ahead, my dear friend!"
+    ]
+  }
+]

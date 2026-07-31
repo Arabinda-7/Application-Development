@@ -1,0 +1,5 @@
+[
+  {"keys": ["pomodoro", "timer", "break"], "value": "Try the Pomodoro Technique: 25 minutes of deep work followed by a 5-minute break. Repeat 4 times, then take a longer break."},
+  {"keys": ["deep work", "distraction"], "value": "Deep work requires zero distractions. Turn off notifications and set a specific time block for your most challenging task."},
+  {"keys": ["procrastinate", "lazy", "stuck"], "value": "If you're procrastinating, use the 5-minute rule: Tell yourself you'll only work on the task for 5 minutes. Often, getting started is the hardest part."}
+]

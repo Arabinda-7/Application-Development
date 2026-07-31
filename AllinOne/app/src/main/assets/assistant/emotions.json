@@ -1,0 +1,722 @@
+[
+  {
+    "keys": ["feeling stressed at work", "work stress is getting to me", "stressed about work today", "work feels so stressful right now", "feeling high work stress", "stressed with job tasks"],
+    "values": [
+      "Work stress can feel heavy. Step away for five minutes to take a deep, slow breath.",
+      "It's completely understandable to feel stressed with work. Try tackling one tiny task at a time.",
+      "Make sure to give yourself short breathers today. Your well-being matters more than any task.",
+      "I hear you. Take a glass of water and stretch out your shoulders to release tension."
+    ]
+  },
+  {
+    "keys": ["overwhelmed by responsibilities", "too many obligations stress", "feeling crushed by responsibilities", "stressed by life duties", "too much responsibility today"],
+    "values": [
+      "When everything feels like a priority, focus on just one immediate thing. The rest can wait.",
+      "Carrying too many responsibilities is exhausting. Be gentle with yourself today.",
+      "Write your tasks down to clear your mind. You don't have to carry it all in your head.",
+      "It's okay to ask for help or pause non-essential duties when pressure builds up."
+    ]
+  },
+  {
+    "keys": ["feeling stressed about money", "financial worries stress", "stressed over expenses", "money stress getting to me", "worrying about bills stress"],
+    "values": [
+      "Financial worries are genuinely tough. Take things one day and one step at a time.",
+      "It's valid to feel stressed about money. Focusing on what you can control today can help.",
+      "Take a deep breath. Try to break your planning into simple, calm steps.",
+      "Don't carry the stress alone; sometimes talking it through with a trusted friend brings calm."
+    ]
+  },
+  {
+    "keys": ["stressed about exams", "exam pressure stress", "feeling stressed for test", "study exam stress getting to me", "anxious and stressed about exams"],
+    "values": [
+      "Exam pressure is real, but your worth is not defined by a test. Take short rest breaks.",
+      "Pace yourself gently. Studying in short blocks with fresh air breaks keeps your mind steady.",
+      "Remember to hydrate and get good sleep tonight. A rested mind performs much better.",
+      "You are doing your best. Take a deep breath and take one topic at a time."
+    ]
+  },
+  {
+    "keys": ["feeling sad today", "feeling blue today", "feeling down and sad", "in a sad mood today", "feeling gloomy and sad"],
+    "values": [
+      "It's completely okay to feel sad today. Give yourself permission to rest and take it easy.",
+      "I'm sorry you're feeling down. Be extra gentle with yourself right now.",
+      "Sad feelings happen, and you don't have to force yourself to smile. Rest when you need to.",
+      "Sending a quiet, warm thought your way. Do something comforting for yourself today."
+    ]
+  },
+  {
+    "keys": ["feeling like crying", "heavy heart today", "crying sad feeling", "heart feels heavy today", "feeling tearful and sad"],
+    "values": [
+      "Crying is a healthy way for your body to release heavy emotions. Let it out.",
+      "A heavy heart takes time to feel lighter. Wrap yourself in comfort and rest.",
+      "It's okay to feel vulnerable. Take a warm shower or drink a soothing cup of tea.",
+      "Your feelings are completely valid. Take a moment to rest quietly."
+    ]
+  },
+  {
+    "keys": ["sad about a lost connection", "grieving a loss", "sad about lost friend", "feeling sad over loss", "grieving a pet loss"],
+    "values": [
+      "Grief and sadness take time to heal. Honor your memories and go gently.",
+      "Losing a connection or pet hurts deeply. Be patient with your healing process.",
+      "It's completely natural to feel a deep void right now. Take all the time you need.",
+      "Sending gentle thoughts. Reach out to a supportive friend if you want to share."
+    ]
+  },
+  {
+    "keys": ["in a melancholy mood", "feeling low and quiet", "melancholy feelings today", "quiet sad mood", "feeling subdued and low"],
+    "values": [
+      "Quiet, low days happen to everyone. Enjoy a peaceful space without pressure.",
+      "Allow yourself a low-key day. Soft music or a cozy blanket might feel nice.",
+      "There's no rush to bounce back immediately. Rest softly today.",
+      "Take care of your comfort right now. Gentle steps are all that matter."
+    ]
+  },
+  {
+    "keys": ["feeling lonely today", "feeling isolated and alone", "feeling so lonely right now", "lonely feeling today", "feeling alone in the world"],
+    "values": [
+      "Feeling lonely can feel very quiet and heavy. I'm right here keeping you company.",
+      "You are not alone, even when it feels that way. Reaching out to a friend might help.",
+      "Loneliness is a tough emotion to carry. Be kind to yourself today.",
+      "Sending you a warm thought. Sometimes a gentle walk or cozy tea brings comfort."
+    ]
+  },
+  {
+    "keys": ["wishing I had someone to talk to", "feeling disconnected", "wishing for deeper connection", "feeling misunderstood and lonely", "disconnected from people"],
+    "values": [
+      "Craving real connection is very human. Be patient while seeking genuine bonds.",
+      "It's tough when you feel disconnected. Focus on being a good friend to yourself today.",
+      "Your feelings are valid. Joining a small hobby group online or locally can help over time.",
+      "Remember that meaningful connections take time to build. Take gentle steps."
+    ]
+  },
+  {
+    "keys": ["lonely weekend at home", "spending weekend alone feeling lonely", "alone for the weekend", "quiet lonely weekend", "spending weekend isolated"],
+    "values": [
+      "A quiet weekend alone can be turned into a self-care retreat. Treat yourself warmly.",
+      "If quiet hours feel too long, put on a cozy podcast or movie for company.",
+      "Enjoy your own space at your own pace today. Do something you love.",
+      "Hope you find small moments of peace and comfort this weekend."
+    ]
+  },
+  {
+    "keys": ["frustrated nothing is working", "everything feels frustrating today", "frustrated nothing goes right", "so frustrated right now", "frustration overload today"],
+    "values": [
+      "It's infuriating when nothing seems to work out. Step away for ten minutes to reset.",
+      "Take a deep breath. Frustration means you care, but pushing harder right now might exhaust you.",
+      "Pause and walk away from the task for a moment. Clear your mind before trying again.",
+      "Acknowledge the annoyance. Take a short breather and drink a glass of water."
+    ]
+  },
+  {
+    "keys": ["frustrated with delays", "stuck in frustrating traffic", "annoyed by delays today", "frustrated with waiting", "stuck in traffic annoyed"],
+    "values": [
+      "Delays are so testing on patience. Put on calm music and unclench your jaw.",
+      "Traffic and delays are out of your control. Focus on taking slow, relaxed breaths.",
+      "Take a moment to relax your shoulders while waiting. It will pass eventually.",
+      "I hear your frustration. Enjoy your tunes or podcast while the time passes."
+    ]
+  },
+  {
+    "keys": ["frustrated people don't listen", "miscommunication frustration", "frustrated by poor communication", "annoyed by miscommunication", "people not understanding me frustration"],
+    "values": [
+      "Miscommunication is so draining. Take a pause before trying to explain again.",
+      "It's frustrating when people don't listen. Give yourself space to calm down.",
+      "Step back from the conversation for a short bit until emotions cool down.",
+      "Clear communication takes patience from both sides. Take a breath."
+    ]
+  },
+  {
+    "keys": ["disappointed with the outcome", "didn't turn out as hoped", "feeling disappointed today", "let down by the result", "disappointment hits hard"],
+    "values": [
+      "Disappointment hurts when you invested effort. Allow yourself time to process it.",
+      "It's completely normal to feel let down when expectations aren't met.",
+      "Give yourself space to feel disappointed without judging yourself.",
+      "Take a breath. When you're ready, you can evaluate your next step."
+    ]
+  },
+  {
+    "keys": ["disappointed plans got cancelled", "let down by cancelled plans", "plans cancelled feeling disappointed", "sad plans got cancelled", "disappointed about cancelled plans"],
+    "values": [
+      "It's annoying and sad when looked-forward-to plans get cancelled. I'm sorry.",
+      "Treat yourself to a cozy activity at home instead to soothe the disappointment.",
+      "Allow yourself a moment to feel let down. Then enjoy a quiet evening in.",
+      "Cancelled plans leave a bummer feeling. Do something nice for yourself tonight."
+    ]
+  },
+  {
+    "keys": ["uncertain about the future", "feeling lost about next steps", "uncertainty about what's coming", "don't know what lies ahead", "feeling uncertain today"],
+    "values": [
+      "Uncertainty is uncomfortable, but you don't have to figure everything out today.",
+      "Focus on the immediate present moment. What is one small step you can take now?",
+      "It's okay not to have all the answers. Take things one day at a time.",
+      "Breathe gently. Ground yourself in what is steady right now in your life."
+    ]
+  },
+  {
+    "keys": ["uncertain about career decision", "doubt about job path", "confused about career choice", "uncertainty in my career", "career path uncertainty"],
+    "values": [
+      "Career choices carry weight. Give yourself time to research without rushing.",
+      "Write down pros and cons calmly. No single choice locks in your whole future.",
+      "It's okay to feel uncertain. Talking to a mentor or trusted friend can help.",
+      "Trust your experience. You can always adapt as you learn more along the way."
+    ]
+  },
+  {
+    "keys": ["nervous about public speaking", "presentation jitters", "nervous for my speech", "feeling nervous for presentation", "butterflies for speech"],
+    "values": [
+      "Nerves just mean your body is energizing you. Take three slow, deep breaths.",
+      "Everyone gets presentation jitters. Focus on sharing your message clearly.",
+      "Remember that the audience wants you to do well. Take your time speaking.",
+      "Ground your feet and breathe. You've prepared, and you'll get through it!"
+    ]
+  },
+  {
+    "keys": ["nervous about first day at work", "new job jitters", "nervous starting new job", "first day nerves at work", "anxious for first day job"],
+    "values": [
+      "First day jitters are completely normal! Everyone expects you to be learning.",
+      "Take a deep breath and smile. Just focus on observing and listening today.",
+      "You were hired because of your capability. Trust yourself and take it easy.",
+      "Wishing you a calm, pleasant first day! You'll settle in soon."
+    ]
+  },
+  {
+    "keys": ["racing thoughts anxiety", "mind won't slow down anxiety", "anxious racing mind", "can't stop racing thoughts", "anxiety and racing thoughts"],
+    "values": [
+      "Try grounding yourself: name 5 things you see, 4 you can touch, and 3 you hear.",
+      "Racing thoughts can feel overwhelming. Take slow, deep belly breaths.",
+      "Write your thoughts down on paper to get them out of your head.",
+      "Remember that thoughts are just thoughts, not facts. Breathe gently."
+    ]
+  },
+  {
+    "keys": ["social anxiety feeling nervous", "anxious in big crowds", "social anxiety acting up", "feeling anxious around people", "scared of social events"],
+    "values": [
+      "Social anxiety is tough. You can step outside for fresh air whenever you need.",
+      "Give yourself permission to take quiet breaks during social events.",
+      "Focus on one person or topic at a time rather than the whole room.",
+      "Be kind to yourself. Going at your own comfortable pace is completely fine."
+    ]
+  },
+  {
+    "keys": ["feeling completely burnt out", "running on empty burnout", "burnout hitting hard", "mental burnout today", "exhausted from burnout"],
+    "values": [
+      "Burnout is a clear signal that your mind and body need genuine rest. Stop and recover.",
+      "You cannot pour from an empty cup. Prioritize sleep, water, and rest today.",
+      "Drop non-essential tasks immediately. Recovery takes quiet time without pressure.",
+      "Be very gentle with yourself. Healing from burnout takes patient resting."
+    ]
+  },
+  {
+    "keys": ["workplace burnout", "exhausted from relentless work", "job burnout getting bad", "fatigued from work burnout", "drained by work burnout"],
+    "values": [
+      "Workplace burnout requires firm boundaries. Protect your evening rest time.",
+      "Step back as much as possible today. Your health is far more important than work.",
+      "Take your full break time without checking emails or work messages.",
+      "Consider talking to a trusted friend or mentor about managing your workload."
+    ]
+  },
+  {
+    "keys": ["feeling physically exhausted", "body feels so tired today", "physically drained today", "body is exhausted", "feeling weak and tired"],
+    "values": [
+      "Listen to your body. Rest, lie down, and give your muscles a break.",
+      "Physical exhaustion needs real downtime. Hydrate and get cozy tonight.",
+      "Don't push your body when it's asking for rest. Sleep well tonight.",
+      "Take a warm bath or shower and rest up. Take good care of your body."
+    ]
+  },
+  {
+    "keys": ["tired from bad sleep", "exhausted after poor sleep", "didn't sleep well feeling tired", "sleep deprived and tired", "low energy from bad sleep"],
+    "values": [
+      "Poor sleep makes everything feel harder. Keep your tasks light today.",
+      "Take it easy on yourself today. Drink water and take short sit-down breaks.",
+      "If possible, take a 20-minute power nap to help refresh your focus.",
+      "Plan for an early, cozy bedtime tonight to make up for lost rest."
+    ]
+  },
+  {
+    "keys": ["missing my family back home", "homesick for family", "missing home and family", "feeling homesick today", "longing for family at home"],
+    "values": [
+      "Missing family is a sign of how deeply you love them. Give them a quick call.",
+      "Homesickness feels very bittersweet. Look at family photos or send a message.",
+      "It's completely okay to feel homesick. Treat yourself to a comforting meal.",
+      "Sending warm thoughts your way. Reaching out to loved ones can bring comfort."
+    ]
+  },
+  {
+    "keys": ["homesick for my hometown", "missing my home city", "longing for my hometown", "missing familiar places at home", "homesick for home country"],
+    "values": [
+      "Missing familiar places and your hometown is very natural. Cook a favorite home dish.",
+      "Listen to music or watch a show connected to home to feel closer.",
+      "It takes time to adjust to new places. Keep a little piece of home in your routine.",
+      "Honor your roots while creating fresh, comfortable moments where you are now."
+    ]
+  },
+  {
+    "keys": ["confused by mixed signals", "don't understand what's happening", "confused by signals", "feeling confused about situation", "confusing situation today"],
+    "values": [
+      "Mixed signals are very confusing. Take a step back and avoid jumping to conclusions.",
+      "Clarity often takes time. Give the situation a moment to settle down.",
+      "Focus on what is clear and direct rather than guessing mixed signals.",
+      "It's okay to feel confused. Ask for clear communication when appropriate."
+    ]
+  },
+  {
+    "keys": ["confused by too much information", "brain feels confused", "information overload confusion", "too much info confusing me", "confused and overwhelmed"],
+    "values": [
+      "Information overload causes mental fog. Close extra tabs and take a short walk.",
+      "Simplify things by focusing on just one detail at a time.",
+      "Give your brain a break from new inputs for an hour. Let your mind settle.",
+      "Write down core facts on paper to clear away confusing noise."
+    ]
+  },
+  {
+    "keys": ["afraid of making a mistake", "scared of picking wrong option", "fear of making wrong choice", "scared of wrong decision", "afraid to choose wrong"],
+    "values": [
+      "Most decisions can be adjusted as you learn more. Don't let fear paralyze you.",
+      "Remember that making a decision brings new feedback. You can handle course corrections.",
+      "Take a slow breath. Pick the best option available right now with your current info.",
+      "Trust your judgment. Whatever happens, you have the capability to handle it."
+    ]
+  },
+  {
+    "keys": ["afraid of the unknown future", "scared of unknown changes", "fear of the unknown today", "anxious about unknown outcome", "scared of uncertainty"],
+    "values": [
+      "The unknown feels scary because it's unfamiliar. Ground yourself in what is steady today.",
+      "Focus on your present daily strength rather than trying to predict the unknown.",
+      "Take things one single day at a time. You've adapted to changes before.",
+      "Breathe deeply. You have inner resilience to navigate whatever comes."
+    ]
+  },
+  {
+    "keys": ["regretting a past decision", "wish I handled it better", "feeling regret about past", "regretting my choice", "wish I did things differently"],
+    "values": [
+      "Hindsight makes past choices look obvious. Be kind to the past version of yourself.",
+      "Regret is a sign that you've grown and learned. Focus on your choices today.",
+      "You cannot rewrite the past, but you can choose how you move forward right now.",
+      "Forgive yourself for past mistakes. Use the lesson to guide your current steps."
+    ]
+  },
+  {
+    "keys": ["regret what I said", "wishing I didn't say that", "regret words spoken in anger", "said something stupid regret", "regretting my harsh words"],
+    "values": [
+      "Anger makes us say things we don't mean. A sincere apology goes a long way.",
+      "Acknowledge the mistake, offer a genuine apology, and give the person space.",
+      "We all make mistakes in emotional moments. Learn from it and make amends.",
+      "Focus on fixing the connection with honesty and humility."
+    ]
+  },
+  {
+    "keys": ["feeling angry right now", "boiling mad today", "so angry right now", "feeling furious today", "mad and angry right now"],
+    "values": [
+      "Anger is a valid emotion, but take deep breaths so it doesn't control your actions.",
+      "Step away from the situation for a few minutes to let your adrenaline settle.",
+      "Channel that intense energy into a physical walk or intense exercise.",
+      "Take a pause before responding. Give your mind time to cool down."
+    ]
+  },
+  {
+    "keys": ["angry about being treated unfairly", "mad at unfairness", "treated unfairly anger", "feeling angry about injustice", "angry at unfair treatment"],
+    "values": [
+      "Unfair treatment is genuinely infuriating. Your anger in this situation is completely valid.",
+      "Take time to cool down before deciding how to address the unfairness calmly.",
+      "Focus on protecting your boundaries and standing up for yourself thoughtfully.",
+      "Talk to a trusted friend or mentor to process the situation clearly."
+    ]
+  },
+  {
+    "keys": ["embarrassed by an awkward mistake", "feeling silly after slip up", "embarrassing moment today", "so embarrassed right now", "awkward slip up embarrassment"],
+    "values": [
+      "Awkward moments happen to everyone! Most people forget about it faster than you think.",
+      "Laughing it off is often the best medicine for minor awkwardness.",
+      "Be gentle with yourself. A minor slip-up doesn't define how people view you.",
+      "In a few days, this will just be a funny minor memory. Take a breath!"
+    ]
+  },
+  {
+    "keys": ["embarrassed in front of people", "mortified by public mistake", "public mistake embarrassment", "so mortified right now", "embarrassed in public today"],
+    "values": [
+      "Public slip-ups feel intense in the moment, but everyone has experienced them.",
+      "People are far more understanding than we assume. Shake it off gently.",
+      "Take a deep breath and move past it. You handled it as best as you could.",
+      "Remember that everyone makes public blunders. Don't replay it in your head."
+    ]
+  },
+  {
+    "keys": ["feeling so happy and cheerful", "bright happy mood today", "radiant joy today", "feeling joyful and happy", "so happy right now"],
+    "values": [
+      "Your happiness is wonderful! Soak in every drop of this joyful feeling.",
+      "I'm so glad you're feeling cheerful today! Joy looks great on you.",
+      "Enjoy this wonderful energy! Happiness makes everything feel brighter.",
+      "Wonderful news! May your bright mood carry you through a great day."
+    ]
+  },
+  {
+    "keys": ["content and happy right now", "feeling quiet happiness", "simple peaceful joy", "calm happiness today", "feeling peaceful and happy"],
+    "values": [
+      "Quiet contentment is one of the sweetest feelings. Enjoy the calm joy.",
+      "So lovely! Simple, peaceful moments bring true happiness.",
+      "Wishing you continued quiet contentment and peaceful hours today.",
+      "Cherish this calm joy! It's a wonderful state of mind."
+    ]
+  },
+  {
+    "keys": ["excited for upcoming trip", "can't wait for vacation excitement", "thrilled about my trip", "trip excitement today", "excited to travel soon"],
+    "values": [
+      "Trip excitement is the best feeling! Have fun counting down the days.",
+      "Awesome! Packing and anticipating the trip is half the adventure.",
+      "Hope your upcoming trip turns out to be everything you're hoping for!",
+      "Enjoy the thrilling anticipation! Safe travels when the day arrives."
+    ]
+  },
+  {
+    "keys": ["excited about awesome news", "thrilled by good news", "excited about good news today", "awesome news excitement", "thrilled right now"],
+    "values": [
+      "Woohoo, So thrilled for your great news! Celebrate every bit of it.",
+      "Awesome, Good news brings such fantastic energy. Enjoy!",
+      "So happy for you! Share the joy with your loved ones today.",
+      "Fantastic! Celebrate your great news to the fullest!"
+    ]
+  },
+  {
+    "keys": ["feeling deeply grateful today", "filled with gratitude", "so thankful today", "feeling immense gratitude", "heart full of gratitude today"],
+    "values": [
+      "Gratitude brings so much warmth to the heart. Enjoy this sweet feeling.",
+      "A thankful mindset makes everyday moments feel extra special.",
+      "So beautiful! Feeling grateful opens up so much peace in life.",
+      "Wishing you continued warm thoughts and a heart full of gratitude."
+    ]
+  },
+  {
+    "keys": ["grateful for supportive friends", "thankful for help received", "appreciating help today", "grateful for support", "thankful for my friends"],
+    "values": [
+      "Having supportive people around is a true blessing. Send them a warm thank you!",
+      "So heartwarming! Good support makes tough journeys much easier.",
+      "Cherish those wonderful connections. It's special to feel supported.",
+      "Expressing appreciation strengthens great relationships. Take care!"
+    ]
+  },
+  {
+    "keys": ["so relieved it's over", "huge sigh of relief today", "feeling so relieved now", "relief after finishing task", "such a relief today"],
+    "values": [
+      "Ah, what a relief! Take a huge sigh of relief and relax now.",
+      "Getting that completed must feel like a massive weight off your shoulders!",
+      "So glad it's wrapped up! Enjoy your newfound peace and rest.",
+      "Awesome! Time to relax now that the pressure is gone."
+    ]
+  },
+  {
+    "keys": ["relieved after getting good news", "worry is gone relief", "relieved everything is fine", "so relieved after good news", "huge relief after worry"],
+    "values": [
+      "Such fantastic news! Let all that accumulated tension melt away.",
+      "What a wonderful relief! Take a deep breath and enjoy the good outcome.",
+      "So glad things turned out well! Relax and celebrate the good news.",
+      "Breathe easy now! The worry is behind you."
+    ]
+  },
+  {
+    "keys": ["stressed by messy room", "clutter causing stress", "messy house stress", "overwhelmed by mess stress", "household clutter stress"],
+    "values": [
+      "Clutter can definitely cause mental stress. Pick just one small surface to clear.",
+      "Don't worry about cleaning everything at once. 10 minutes of tidying helps.",
+      "Clear off your bed or desk first to give yourself one clean spot.",
+      "Take it easy. Step by step, tidying up will bring calm back."
+    ]
+  },
+  {
+    "keys": ["stressed by tight deadline", "deadline pressure hitting hard", "deadline stress today", "too close to deadline stress", "freaking out over deadline"],
+    "values": [
+      "Deadline stress is intense. Focus purely on the next immediate task.",
+      "Take three slow breaths. Doing solid, steady work beats rushing frantically.",
+      "Break the remaining work into clear 15-minute sprints.",
+      "You can handle this. Stay focused on execution and take short breathers."
+    ]
+  },
+  {
+    "keys": ["gloomy rainy day sadness", "feeling low on rainy day", "rainy day low mood", "sad on gloomy rainy day", "gloomy weather low mood"],
+    "values": [
+      "Gloomy weather naturally lowers energy. Make yourself a warm, cozy drink.",
+      "Rainy days are perfect for cozying up under blankets without pressure.",
+      "Turn on warm indoor lighting and listen to soft, soothing music.",
+      "Be gentle with yourself today. Let the rainy day be a quiet rest day."
+    ]
+  },
+  {
+    "keys": ["sad missing old days", "nostalgic sadness today", "feeling sad about past memories", "nostalgic longing sadness", "missing the past sad"],
+    "values": [
+      "Nostalgia carries a sweet sadness. Honor those past memories gently.",
+      "It's natural to miss good past times. Cherish the memories while staying present.",
+      "Look through old photos if it brings warmth, or talk to an old friend.",
+      "Past good times prove how deeply you can enjoy life. Warm thoughts your way."
+    ]
+  },
+  {
+    "keys": ["lonely after moving to new city", "isolated in new city", "lonely in new location", "new city loneliness", "feeling lonely in new place"],
+    "values": [
+      "Moving to a new city takes time to adjust. Explore local cafes and parks gently.",
+      "It's completely normal to feel isolated early on. Connections build gradually.",
+      "Make your new home space as cozy as possible to feel grounded.",
+      "Give yourself credit for taking a brave step. Take it one day at a time."
+    ]
+  },
+  {
+    "keys": ["feeling lonely eating alone", "eating dinner alone feeling down", "lonely eating meals alone", "sad eating dinner alone", "eating lunch alone lonely"],
+    "values": [
+      "Eating alone can feel quiet. Put on a comforting video or favorite music.",
+      "Turn solo meals into a relaxing ritual with good food and warm atmosphere.",
+      "Your company is worthwhile. Enjoy your food slowly and comfortably.",
+      "Sending warm thoughts your way. Hope your meal brings cozy comfort."
+    ]
+  },
+  {
+    "keys": ["frustrated tech isn't working", "computer crash frustration", "phone glitch frustration", "frustrated by computer error", "tech malfunction frustration"],
+    "values": [
+      "Tech glitches are infuriating! Step away from the screen for five minutes.",
+      "Take a deep breath. Save your work if possible and restart the device.",
+      "Frustrating issues happen to technology. Take a quick tea break to cool down.",
+      "Walk away for a short bit so you can troubleshoot with a calm mind."
+    ]
+  },
+  {
+    "keys": ["frustrated by slow progress", "annoyed at slow results", "frustrated progress is slow", "sluggish results frustration", "feeling frustrated by delay"],
+    "values": [
+      "Slow progress is still progress. Remind yourself that deep growth takes time.",
+      "It's frustrating when things take long, but consistent effort always adds up.",
+      "Take a moment to look at how far you've come from where you started.",
+      "Be patient with the process. Focus on today's effort rather than speed."
+    ]
+  },
+  {
+    "keys": ["disappointed in a purchase", "product let down", "disappointed item broke", "disappointed with product quality", "let down by purchase"],
+    "values": [
+      "It's disappointing when something you paid for doesn't work out. Check for return options.",
+      "Frustrating purchase letdowns happen. Contact customer support calmly when ready.",
+      "Take a breath. Hopefully a refund or replacement resolves it easily.",
+      "Sorry it didn't meet expectations! Don't let it ruin your whole day."
+    ]
+  },
+  {
+    "keys": ["disappointed friend cancelled", "let down by flaking", "friend flaked disappointment", "disappointed by friend flaking", "friend cancelled last minute"],
+    "values": [
+      "Last-minute cancellations hurt. It's completely valid to feel disappointed.",
+      "Treat yourself to a cozy movie or favorite activity at home tonight.",
+      "Communicate how you feel calmly when you're ready, or take space.",
+      "Enjoy your own company tonight. Do something relaxing for yourself."
+    ]
+  },
+  {
+    "keys": ["uncertain waiting for results", "nervous waiting on results", "anxious waiting for medical test", "uncertainty waiting for test results", "waiting on important results"],
+    "values": [
+      "Waiting for results is incredibly stressful. Focus on gentle self-care right now.",
+      "Try to keep your mind occupied with gentle, relaxing activities while waiting.",
+      "Take slow deep breaths. Lean on a trusted friend or family member for comfort.",
+      "Sending calm thoughts your way. Take it one gentle hour at a time."
+    ]
+  },
+  {
+    "keys": ["uncertain about weather plans", "unclear weather plans", "unpredictable weather uncertainty", "weather ruining plans uncertainty", "uncertain weather outlook"],
+    "values": [
+      "Unpredictable weather can be annoying. Have a fun indoor backup plan ready!",
+      "Stay flexible! Indoor activities can turn out unexpectedly cozy.",
+      "Check the forecast later and take things as they come today.",
+      "Hope the weather turns out nice for you after all! Take care."
+    ]
+  },
+  {
+    "keys": ["nervous meeting new people", "shyness and nerves meeting others", "nervous for group meetup", "anxious meeting new folks", "social nerves meeting strangers"],
+    "values": [
+      "Meeting new people can cause nerves. Just focus on being polite and listening.",
+      "Remember that others are often nervous too. A warm smile goes a long way.",
+      "Take deep breaths. You don't have to impress anyone—just be yourself.",
+      "Go at your own pace. You can take short quiet breaks if needed."
+    ]
+  },
+  {
+    "keys": ["nervous about driving test", "test jitters today", "nervous for driving exam", "anxious for driving test", "driving test nerves"],
+    "values": [
+      "Driving test jitters are so common! Take slow breaths before turning the key.",
+      "Focus on one maneuver at a time. Trust your preparation and practice.",
+      "You've practiced for this! Stay calm, observe carefully, and take your time.",
+      "Wishing you steady hands and clear focus on your test today!"
+    ]
+  },
+  {
+    "keys": ["anxious overthinking a detail", "overthinking small detail", "obsessing over minor detail anxiety", "anxiety from overthinking detail", "stuck overthinking minor thing"],
+    "values": [
+      "Overthinking small details exhausts your energy. Ask yourself if it will matter in a week.",
+      "Take a deep breath and gently release that minor thought.",
+      "Write the detail down on paper and step away to clear your head.",
+      "Most minor details pass without consequence. Give yourself peace of mind."
+    ]
+  },
+  {
+    "keys": ["feeling anxious FOMO", "anxious seeing others busy", "FOMO anxiety today", "anxious about missing event", "feeling left out FOMO"],
+    "values": [
+      "FOMO is a modern trick of social media. Focus on enjoying your own quiet present.",
+      "You don't have to be everywhere. Embracing your own peaceful routine is lovely.",
+      "Put your phone away for a while and enjoy a cozy offline activity.",
+      "Your own peace and pace matter far more than keeping up with crowds."
+    ]
+  },
+  {
+    "keys": ["academic burnout from studying", "exhausted from continuous exams", "academic burnout today", "burnt out from schoolwork", "studying burnout fatigue"],
+    "values": [
+      "Academic burnout means your brain needs a real rest. Step away from books today.",
+      "Pushing through severe study burnout lowers retention. Rest up and sleep.",
+      "Take a full evening off to relax without guilt. Your mind needs recovery.",
+      "Prioritize health and sleep. A rested mind learns much faster later."
+    ]
+  },
+  {
+    "keys": ["creative block burnout", "exhausted creative energy", "creative burnout today", "drained of creative ideas", "burnt out creatively"],
+    "values": [
+      "Creative energy needs input before output. Consume good art, rest, or walk in nature.",
+      "Don't force creativity when burnt out. Allow your mind to wander freely.",
+      "Step completely away from your creative project for a few days.",
+      "Rest without pressure. Your creative spark will return naturally."
+    ]
+  },
+  {
+    "keys": ["tired from late night studying", "exhausted from late night work", "tired after burning midnight oil", "late night work tiredness", "sleepy from late night study"],
+    "values": [
+      "Late night studying drains your energy quickly. Go get a solid night's sleep.",
+      "Sleep consolidates memory far better than late night cramming. Rest up!",
+      "Call it a night! Your brain needs sleep to process everything you learned.",
+      "Get under the cozy blankets and rest. You worked hard tonight."
+    ]
+  },
+  {
+    "keys": ["tired from heavy lifting", "exhausted after manual labor", "physically tired from hard work", "body aching tiredness", "drained from physical labor"],
+    "values": [
+      "Physical labor takes real toughness. Take a warm shower and stretch out.",
+      "Your muscles need rest and hydration tonight. Take it super easy.",
+      "Rest your body completely. Enjoy a quiet, comfortable evening.",
+      "Great physical effort today! Get deep, restorative sleep tonight."
+    ]
+  },
+  {
+    "keys": ["homesick for home cooked food", "missing mom's cooking", "longing for home food", "homesick for traditional food", "missing taste of home"],
+    "values": [
+      "Food carries so many warm home memories! Try cooking a favorite recipe from home.",
+      "Craving home cooking is so real. Look for a local spot or cook a simple version.",
+      "It's sweet how tastes remind us of family. Treat yourself to comfort food tonight.",
+      "Call home and ask for your favorite recipe! It brings home a little closer."
+    ]
+  },
+  {
+    "keys": ["homesick during holiday away", "spending holiday away from home", "homesick for holiday traditions", "holiday away from family sadness", "lonely holiday away"],
+    "values": [
+      "Holidays away from home can feel tender and quiet. Call your loved ones today.",
+      "Create a mini tradition where you are while honoring your home memories.",
+      "Be extra gentle with yourself today. Light a candle or make a favorite dish.",
+      "Sending warm thoughts your way. Hope you feel connected despite distance."
+    ]
+  },
+  {
+    "keys": ["confused by complicated directions", "don't get the instructions", "confused by complex steps", "confusing manual instructions", "hard to understand instructions"],
+    "values": [
+      "Complex instructions can be frustrating. Break them down one single sentence at a time.",
+      "Take a step back. Sometimes re-reading after a short break makes it click.",
+      "Look for a video diagram or ask someone to explain it simply.",
+      "Don't worry—Complex instructions confuse many people. Take your time."
+    ]
+  },
+  {
+    "keys": ["confused by conflicting opinions", "getting mixed advice", "conflicting advice confusion", "too many different opinions confusion", "confused who to listen to"],
+    "values": [
+      "Conflicting advice creates noise. Step back and tune into your own instincts.",
+      "Filter out extra opinions. Focus on what feels right for your specific situation.",
+      "You don't have to follow everyone's advice. Trust your own judgment.",
+      "Take a quiet pause. Sleep on it before making a choice."
+    ]
+  },
+  {
+    "keys": ["scared of heavy storm night", "afraid during loud thunderstorm", "fear of dark stormy night", "scared of thunder storm", "anxious during heavy storm"],
+    "values": [
+      "Storms can sound scary, but you are safe indoors. Wrap yourself in cozy blankets.",
+      "Put on headphones with soft music or a cozy show to block out storm noise.",
+      "Keep warm lighting on and focus on indoor comfort. The storm will pass.",
+      "Breathe slowly and deeply. You are cozy and safe inside."
+    ]
+  },
+  {
+    "keys": ["nervous about high places", "afraid of flying on plane", "fear of heights nerves", "anxious about flight", "flight nerves fear"],
+    "values": [
+      "Flight or height nerves are very common. Focus on slow, deep belly breathing.",
+      "Keep your eyes on steady indoor points and listen to relaxing music.",
+      "Ground your feet firmly and remind yourself that safety measures are high.",
+      "Take it one quiet minute at a time. Breathe through the discomfort."
+    ]
+  },
+  {
+    "keys": ["regret missing an opportunity", "wishing I took that chance", "regretting missed chance", "missed opportunity regret", "sad I missed that chance"],
+    "values": [
+      "Missed opportunities hurt, but new doors open continuously. Stay alert for what's next.",
+      "Use the regret as motivation to say yes to the next good opportunity.",
+      "Don't beat yourself up for the past. Focus on preparing for future chances.",
+      "What's meant for you will find another way. Keep moving forward."
+    ]
+  },
+  {
+    "keys": ["regret spending too much", "wishing I saved money", "spent too much regret", "buyers regret spending", "regretting impulse purchase"],
+    "values": [
+      "Regretting a purchase happens to everyone. See if you can return or exchange it.",
+      "If it can't be returned, treat it as a lesson for future spending habits.",
+      "Don't stress endlessly over money spent. Focus on your budget moving forward.",
+      "Take a breath. Smart financial habits are built step by step over time."
+    ]
+  },
+  {
+    "keys": ["mad at broken promise", "angry someone broke their word", "broken promise anger", "upset over broken promise", "angry at broken commitment"],
+    "values": [
+      "Broken promises damage trust, and your anger is completely understandable.",
+      "Take time to cool down before discussing it calmly with the person.",
+      "Protect your emotional boundaries moving forward. Give yourself space.",
+      "Focus on what you can control right now. Take care of your peace."
+    ]
+  },
+  {
+    "keys": ["angry at constant interruptions", "mad about wasted time", "interrupted constantly anger", "frustrated and angry by interruptions", "annoyed at wasted time"],
+    "values": [
+      "Constant interruptions disrupt your rhythm and cause anger. Take a short breather.",
+      "Set clear boundaries for your quiet work time when you can.",
+      "Breathe slowly to cool down the frustration. Re-focus on your priority.",
+      "Step into a quiet room or put on headphones to protect your focus."
+    ]
+  },
+  {
+    "keys": ["embarrassed forgot a name", "awkward name slip up", "forgot someone's name embarrassment", "so embarrassed forgot name", "awkward forgetting name"],
+    "values": [
+      "Forgetting names happens to literally everyone! A polite smile and re-asking fixes it.",
+      "Don't stress over a name slip-up. People are very understanding.",
+      "Simply re-ask politely for their name. It's totally fine!",
+      "Laugh it off gently. It's a tiny awkward moment that passes quickly."
+    ]
+  },
+  {
+    "keys": ["embarrassed spilled coffee on shirt", "awkward stain on clothes", "spilled food on clothes embarrassment", "stain on shirt embarrassed", "awkward clothing spill"],
+    "values": [
+      "Clothing spills happen to everyone! Rinse it with cold water and laugh it off.",
+      "Don't worry too much about a spill stain. Most people barely notice.",
+      "Spills are just proof of an active day! Take it lightheartedly.",
+      "Dab it clean as best as you can and carry on with confidence."
+    ]
+  },
+  {
+    "keys": ["happy enjoying morning sun", "cheerful morning light", "peaceful morning sun happiness", "happy morning sunshine", "enjoying morning light happy"],
+    "values": [
+      "Morning sunshine brings such natural warmth and joy! Enjoy the light.",
+      "So peaceful! Morning light is nature's gentle way of greeting your day.",
+      "Wishing you a bright, cheerful, and sunlit day ahead!",
+      "Soak in the morning sun! What a lovely start to your day."
+    ]
+  },
+  {
+    "keys": ["always here to listen my friend", "supportive empathetic ears my friend", "caring companion listening dear friend", "always listening with empathy my friend", "empathetic support my friend"],
+    "values": [
+      "I'm always here to listen with care and warmth, my dear friend. Take your time.",
+      "Your feelings are valid and safe here, my friend. Rest gently today.",
+      "Thank you my friend! Always right here offering a calm, supportive space.",
+      "Wishing you gentle comfort, inner peace, and soft healing, my dear friend!"
+    ]
+  }
+]

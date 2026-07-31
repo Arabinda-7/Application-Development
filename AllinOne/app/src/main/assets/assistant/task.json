@@ -1,0 +1,466 @@
+[
+  {
+    "keys": ["task", "todo", "list"],
+    "values": [
+      "Prioritize your tasks using the Eisenhower Matrix: Urgent/Important, Not Urgent/Important, Urgent/Not Important, Not Urgent/Not Important.",
+      "A task list is a contract with your future self. Keep it clean and actionable to ensure you stay productive.",
+      "Clear the mental clutter. Move your to-dos into this list so your brain can focus on DOING rather than REMEMBERING."
+    ]
+  },
+  {
+    "keys": ["prioritize", "important", "focus"],
+    "values": [
+      "Focus on the 'Big Three'—the three most important tasks that will move the needle for you today.",
+      "If everything is a priority, nothing is. Pick the one task that makes everything else easier or unnecessary.",
+      "Start with the hardest thing. Once your most important task is done, the rest of the day is a downhill cruise."
+    ]
+  },
+  {
+    "keys": ["add task", "create task", "new task"],
+    "values": [
+      "Creating a new task, what will be the title?",
+      "Let's add something to your list. What is the name of the task?",
+      "New task initiated. What do you need to get done?"
+    ]
+  },
+  {
+    "keys": ["mark task", "finish task", "task mark"],
+    "values": [
+      "Which task would you like to mark as completed?",
+      "Ready to check one off! Tell me the name of the task you finished.",
+      "Success logged! Which task are we marking as done?"
+    ]
+  },
+  {
+    "keys": ["mark subtask"],
+    "values": [
+      "Marking subtask...",
+      "Subtask updated. One step closer to finishing the main goal!",
+      "I've logged that sub-step as finished."
+    ]
+  },
+  {
+    "keys": ["show active tasks", "incomplete tasks", "active tasks", "tasks for today"],
+    "values": [
+      "Checking your pending items for today...",
+      "Let's see what's still on your plate. Here are your active tasks.",
+      "Gathering your incomplete tasks. You've got this!"
+    ]
+  },
+  {
+    "keys": ["completed tasks"],
+    "values": [
+      "Let's review your finished tasks!",
+      "Looking at your recent wins. Here is everything you've accomplished.",
+      "Reviewing your completed work. It's great to see that progress!"
+    ]
+  },
+  {
+    "keys": ["list tasks", "what are my tasks", "task names"],
+    "values": [
+      "Gathering your task list...",
+      "Accessing all the items on your current To-Do list.",
+      "Here are the tasks you're currently tracking."
+    ]
+  },
+  {
+    "keys": ["eat the frog", "hardest task first"],
+    "values": [
+      "The 'Eat the Frog' method suggests doing your most difficult task first thing in the morning. Everything else will seem easier!",
+      "Do the hard work early. Bypassing procrastination by tackling the 'Frog' first is the secret to high-output days.",
+      "Identify your most dreaded task and do it NOW. The mental relief will power you through the rest of your list."
+    ]
+  },
+  {
+    "keys": ["pomodoro technique", "time boxing"],
+    "values": [
+      "Try the Pomodoro Technique: Work for 25 minutes, then take a 5-minute break. Great for preventing burnout.",
+      "Break your work into focus blocks. 25 minutes of deep focus followed by 5 minutes of rest keeps your mind sharp all day.",
+      "Focus is a sprint, not a marathon. Use the Pomodoro method to maintain high intensity without the fatigue."
+    ]
+  },
+  {
+    "keys": ["gtd", "getting things done"],
+    "values": [
+      "The GTD method involves capturing everything into a trusted system and then breaking them into actionable 'Next Steps'.",
+      "Empty your head. Capture every obligation and idea here, then process them into physical next actions.",
+      "Trust your system, not your memory. The core of GTD is having a reliable place to store and organize your commitments."
+    ]
+  },
+  {
+    "keys": ["time blocking", "schedule tasks"],
+    "values": [
+      "Time blocking involves dedicated chunks of time for specific tasks. This prevents multi-tasking and ensures deep work.",
+      "A task without a time is just a wish. Block out specific hours in your day for your most important projects.",
+      "Schedule your focus. By assigning specific blocks to specific tasks, you eliminate the 'What should I do next?' hesitation."
+    ]
+  },
+  {
+    "keys": ["kanban", "task flow"],
+    "values": [
+      "Visualizing your tasks in a Kanban flow (To Do, Doing, Done) can help you see bottlenecks and manage your workload.",
+      "Use the Kanban philosophy: limit your 'Work in Progress' to focus on finishing tasks before starting new ones.",
+      "Flow over friction. Organize your tasks into a pipeline so you can visually track their journey from idea to completion."
+    ]
+  },
+  {
+    "keys": ["2 minute rule", "two minute rule tasks"],
+    "values": [
+      "If a task takes less than two minutes, do it immediately. This prevents small items from cluttering your mind.",
+      "Don't add it to the list—just do it. The 2-minute rule keeps your master list focused on significant work.",
+      "Stop procrastinating on small chores. If it's fast, finish it now. Your future self will thank you for the clean list."
+    ]
+  },
+  {
+    "keys": ["deep work", "concentration"],
+    "values": [
+      "Deep work is the ability to focus without distraction on a demanding task. It's a superpower in today's economy.",
+      "Schedule your deep focus. Turn off all notifications and commit to 90 minutes of uninterrupted work on one goal.",
+      "Distraction-free focus is where the real value is created. Protect your concentration like it's your most precious resource."
+    ]
+  },
+  {
+    "keys": ["shallow work", "busy work"],
+    "values": [
+      "Shallow work includes logistical tasks like emails. Batch these together at the end of the day when energy is lower.",
+      "Don't let 'busy work' steal your peak energy hours. Save the admin tasks for your late-afternoon slumps.",
+      "Identify shallow tasks and manage them efficiently. They need to be done, but they shouldn't define your day."
+    ]
+  },
+  {
+    "keys": ["pareto principle", "80/20 rule"],
+    "values": [
+      "The 80/20 rule suggests that 80% of results come from 20% of tasks. Identify that vital 20% and focus on them.",
+      "Focus on impact, not activity. Find the few tasks that will produce the most significant progress and do them first.",
+      "Most items on your list are noise. Use the Pareto Principle to filter for the high-leverage tasks that actually matter."
+    ]
+  },
+  {
+    "keys": ["zeigarnik effect", "brain clutter"],
+    "values": [
+      "The Zeigarnik Effect states that our brains remember uncompleted tasks better. Writing them down 'closes the loop'.",
+      "Reduce mental stress by capturing everything. Once a task is in the app, your brain stops 'looping' on it.",
+      "An open loop is a drain on your energy. Close the loops by recording every commitment into your trusted system here."
+    ]
+  },
+  {
+    "keys": ["decision fatigue", "too many choices"],
+    "values": [
+      "Decision fatigue happens when you make too many choices. Automate routine tasks and plan hard decisions for early in the day.",
+      "Save your willpower for the big stuff. Plan your day the night before to eliminate morning decision fatigue.",
+      "The more choices you make, the worse they become. Simplify your life by building routines for your recurring tasks."
+    ]
+  },
+  {
+    "keys": ["perfectionism", "good enough"],
+    "values": [
+      "Don't let perfection be the enemy of progress. Focus on 'Done is better than perfect' for your first draft.",
+      "Perfectionism is just procrastination in a suit. Get it finished, then you can refine it if necessary.",
+      "Ship early, ship often. Most tasks just need to be 'Good Enough' to move to the next stage. Perfection is a trap."
+    ]
+  },
+  {
+    "keys": ["task inertia", "starting trouble"],
+    "values": [
+      "To overcome inertia, make the first step incredibly small. Instead of 'Write Report', try 'Open Document'.",
+      "Just start. The hardest part of any task is the transition from 'Not doing' to 'Doing'. Reduce that friction.",
+      "Lower the bar. If you can't get started, make the task so easy that it's impossible to fail at starting."
+    ]
+  },
+  {
+    "keys": ["batching", "group tasks"],
+    "values": [
+      "Batching similar tasks saves time by reducing the 'context switching' cost for your brain.",
+      "Group your phone calls, your emails, or your filing into dedicated blocks. Focused repetition is faster than multi-tasking.",
+      "Switching gears is expensive for your mind. Protect your flow by doing all similar work in one go."
+    ]
+  },
+  {
+    "keys": ["flow state", "in the zone"],
+    "values": [
+      "A flow state is when you are fully immersed in a task. To reach it, remove distractions and have a clear goal.",
+      "Find the 'Sweet Spot': a task that is challenging enough to be engaging but doable enough to avoid frustration.",
+      "Flow requires clear feedback and no interruptions. Set up your environment perfectly before you dive into deep work."
+    ]
+  },
+  {
+    "keys": ["motivation trap", "waiting for motivation"],
+    "values": [
+      "The motivation trap is waiting to 'feel like' doing a task. Discipline means doing it regardless of your mood.",
+      "Action creates motivation. Don't wait for the feeling—start the work, and the feeling will follow.",
+      "Professionalism is doing the work when you don't feel like it. Amateurs wait for inspiration; the rest of us show up."
+    ]
+  },
+  {
+    "keys": ["overwhelmed", "too many tasks", "feeling stressed"],
+    "values": [
+      "If you're overwhelmed, take a 'Brain Dump'. Write everything down, then pick just ONE item to start with.",
+      "Stop looking at the whole list. Focus only on the 'Next Action' for your top priority. You can only do one thing at a time.",
+      "Overwhelm is often just a lack of clarity. Break your scariest task into 10 tiny pieces and do the first one now."
+    ]
+  },
+  {
+    "keys": ["procrastination tip", "stop procrastinating"],
+    "values": [
+      "To beat procrastination, try the '5-Second Rule': count 5-4-3-2-1 and physically move. It bypasses hesitation.",
+      "Forgive yourself for procrastinating. Guilt only makes it harder to start. Acknowledge the delay and start fresh right now.",
+      "Procrastination is often a fear of failure. Reframe the task as an 'Experiment' to lower the stakes and get moving."
+    ]
+  },
+  {
+    "keys": ["next action", "what to do next"],
+    "values": [
+      "Every project needs a 'Next Action'. What is the very next physical thing you need to do? If you can't see it, it's too vague.",
+      "Stop planning and start defining. A 'Next Action' should be something you can actually DO in the next 15 minutes.",
+      "If you're stuck, ask: 'What is the smallest possible step I can take right now?' That's your next action."
+    ]
+  },
+  {
+    "keys": ["vague tasks", "unclear goals"],
+    "values": [
+      "Vague tasks like 'Plan Vacation' are hard to start. Be specific: 'Research flight prices' is much easier to process.",
+      "Specificity is the antidote to procrastination. Use verbs in your task titles to make them actionable.",
+      "Vague goals lead to vague results. Turn your 'Shoulds' into specific 'Must-Dos' with clear completion criteria."
+    ]
+  },
+  {
+    "keys": ["task categories", "organizing list"],
+    "values": [
+      "Use categories like 'Work', 'Personal', and 'Urgent'. This helps you focus on the right things at the right time.",
+      "Organize by context. What can you only do at home? At the office? On your computer? Use categories to filter your list.",
+      "Categories provide structure to your chaos. Group related tasks together to make your weekly review much easier."
+    ]
+  },
+  {
+    "keys": ["subtasks", "breaking it down"],
+    "values": [
+      "Large tasks can be scary. Break them into subtasks! Checking off small wins provides the dopamine needed to finish.",
+      "A task is finished when all its subtasks are done. Use this hierarchy to track progress through complex objectives.",
+      "Don't just add a big goal. Map out the path with subtasks so you always know exactly what your next move is."
+    ]
+  },
+  {
+    "keys": ["archiving tasks", "cleaning list"],
+    "values": [
+      "Archive completed tasks to reduce anxiety and keep your focus on current priorities. A clean list is a calm mind.",
+      "Your list isn't a graveyard. Move finished items to the archive to keep your active workspace fast and functional.",
+      "Regularly 'prune' your list. If a task isn't worth doing anymore, archive it. Don't let it sit there and drain your energy."
+    ]
+  },
+  {
+    "keys": ["sorting tasks", "order of work"],
+    "values": [
+      "Sort tasks by priority, date, or age. Experiment with different views to see what helps you stay most productive.",
+      "Smart sorting brings the right work to the top. Use the 'Priority' sort to ensure you're always tackling the high-impact stuff.",
+      "Custom sort orders allow you to organize your day your way. Toggle between 'Alphabetical' and 'Recent' to find what you need."
+    ]
+  },
+  {
+    "keys": ["night before planning", "plan tomorrow"],
+    "values": [
+      "Spend 5 minutes every evening planning your top 3 tasks for the next day. You'll wake up with total clarity.",
+      "The best morning starts the night before. Clear your mind by mapping out tomorrow's mission before you sleep.",
+      "Close your day with a plan. Tomorrow will be much smoother if you already know what your 'Big Three' tasks are."
+    ]
+  },
+  {
+    "keys": ["morning routine tasks", "start day right"],
+    "values": [
+      "Include one 'Quick Win' in your morning routine. Completing a small task early sets a productive momentum.",
+      "Start with success. Checking off one easy item first thing in the morning primes your brain for more difficult work later.",
+      "Establish a 'Launch Sequence'. A consistent set of morning tasks ensures you transition into work mode effortlessly."
+    ]
+  },
+  {
+    "keys": ["weekly review", "reflection"],
+    "values": [
+      "A weekly review helps you look at the big picture. What did you finish? What got stuck? What are next week's goals?",
+      "Once a week, step back from the 'Doing' to focus on the 'Planning'. It ensures you're still heading in the right direction.",
+      "Review your system every Sunday. Archive the old, update the new, and set your intentions for the coming 7 days."
+    ]
+  },
+  {
+    "keys": ["daily standup", "sync with self"],
+    "values": [
+      "Do a 2-minute daily standup: What did I do yesterday? What will I do today? Are there any blockers?",
+      "Sync with your goals every morning. A quick self-audit ensures your daily tasks align with your long-term projects.",
+      "Ask yourself: 'If I only finish one thing today, what would make this day a success?' That's your standup focus."
+    ]
+  },
+  {
+    "keys": ["monthly review", "long term goals"],
+    "values": [
+      "Use the end of the month to reflect on major projects. Are you moving towards your vision or just staying busy?",
+      "Step away from the daily grind once a month. Evaluate your project velocity and adjust your roadmaps for the next month.",
+      "Monthly reviews are for course correction. If your habits or tasks aren't producing results, it's time to change the system."
+    ]
+  },
+  {
+    "keys": ["task audit", "pruning list"],
+    "values": [
+      "Every few weeks, do an audit. If a task has been pending for months, either do it today or delete it.",
+      "Your list should only contain things you actually intend to do. Be ruthless in pruning the 'Maybe someday' items.",
+      "Stale tasks are mental weight. If you haven't touched it in 30 days, it's probably not a priority. Clear the clutter!"
+    ]
+  },
+  {
+    "keys": ["priority levels", "high medium low"],
+    "values": [
+      "Assign priority levels to ensure that if you only finish three things today, they are the most important ones.",
+      "High priority tasks are your 'Non-negotiables'. Everything else is a bonus. Use the color-coding to stay focused.",
+      "Rank your tasks. Visualizing the difference between 'Must-Do' and 'Nice-to-Do' is the first step to elite productivity."
+    ]
+  },
+  {
+    "keys": ["task age", "old tasks"],
+    "values": [
+      "Task age shows how long an item has been pending. Watch out for 'stale' tasks—they often need to be broken down.",
+      "The older a task gets, the harder it is to start. If an item is over a week old, ask: 'Why am I avoiding this?'",
+      "Monitor your task age to identify hidden blockers. Old tasks are usually too vague or too scary—clarify them now."
+    ]
+  },
+  {
+    "keys": ["bulk actions", "manage multiple"],
+    "values": [
+      "Need to move or delete many items? Use Bulk Mode! It's the fastest way to organize a large list at once.",
+      "Save time with multi-select. Group update your tasks' categories or archive them in one tap using the bulk tools.",
+      "Enable bulk mode to perform 'Spring Cleaning' on your list. Managing dozens of tasks is easy when you do it in groups."
+    ]
+  },
+  {
+    "keys": ["task reminders", "setting alarms"],
+    "values": [
+      "Use reminders for time-sensitive tasks. But be careful—too many notifications can lead to 'alarm fatigue'.",
+      "Set a reminder to nudge your future self. I'll make sure you don't miss that important deadline or meeting.",
+      "Reminders are for 'Out of sight, but not out of mind'. Let the app handle the memory work so you can stay present."
+    ]
+  },
+  {
+    "keys": ["hidden tasks", "private items"],
+    "values": [
+      "You can hide sensitive or low-priority tasks. Check your settings to toggle their visibility in the main list.",
+      "Keep your list focused by hiding the 'Someday' items. They are still there, but they won't clutter your daily view.",
+      "Use the 'Hide' feature for personal tasks you don't want visible during work hours. Maintain your boundaries."
+    ]
+  },
+  {
+    "keys": ["task notes", "extra details"],
+    "values": [
+      "If a task needs context (like a link or a phone number), add it to the task notes. Keep all info in one place.",
+      "Task notes are the 'How' for your 'What'. Store instructions, references, or drafts directly inside the task details.",
+      "Don't waste time searching for info. Attach relevant links and details to the task note so you can start working instantly."
+    ]
+  },
+  {
+    "keys": ["delegating", "asking for help"],
+    "values": [
+      "If your list is too long, ask: 'Does this HAVE to be done by me?' If not, consider delegating it.",
+      "Delegation is a productivity multiplier. Focus on what only YOU can do, and find support for the rest.",
+      "You can't do everything. Part of being productive is knowing when to hand off a task to free up your own focus."
+    ]
+  },
+  {
+    "keys": ["saying no", "protecting time"],
+    "values": [
+      "Every 'Yes' is a 'No' to something else. Be protective of your time and only accept what aligns with your goals.",
+      "Master the art of the 'Graceful No'. Protecting your focus is more important than being universally helpful.",
+      "Your energy is finite. Saying no to low-value requests is the only way to say yes to your most important work."
+    ]
+  },
+  {
+    "keys": ["burning out", "taking breaks"],
+    "values": [
+      "If you're feeling burned out, tasks will take twice as long. A 15-minute walk is more productive than 'powering through'.",
+      "Rest is a weapon. If your output is dropping, the most 'productive' thing you can do is take a nap or a day off.",
+      "Listen to your fatigue. Pushing through exhaustion leads to errors and longer recovery times. Strategic rest is key."
+    ]
+  },
+  {
+    "keys": ["habit vs task", "routine vs one off"],
+    "values": [
+      "Tasks are one-off items; Habits are recurring. If you add 'Drink Water' every day, move it to the Habits section!",
+      "Understand the difference: tasks are for 'Getting things done', habits are for 'Becoming someone'.",
+      "Don't clutter your task list with routines. Keep them in the Habit Tracker to maintain a clean, actionable To-Do list."
+    ]
+  },
+  {
+    "keys": ["urgent vs important", "busy vs productive"],
+    "values": [
+      "Urgent tasks demand attention but might not be important. Don't let the urgent crowd out the important work.",
+      "Use the Eisenhower Matrix. Prioritize 'Important but Not Urgent' work to prevent it from BECOMING a crisis later.",
+      "Being busy is not the same as being productive. Always ask: 'Is this task actually moving me toward my long-term goals?'"
+    ]
+  },
+  {
+    "keys": ["focus blocks", "uninterrupted time"],
+    "values": [
+      "A focus block is a period where you turn off notifications and work on just one task. 30 minutes of deep focus is elite.",
+      "Mono-tasking is the path to mastery. Set a 'Focus Block' for your hardest project and watch your progress accelerate.",
+      "Build a 'Fortress of Focus'. Block out time where you are unreachable, allowing your brain to reach peak performance."
+    ]
+  },
+  {
+    "keys": ["energy management", "biological prime time"],
+    "values": [
+      "Manage energy, not just time. Do your hardest tasks during your 'Peak' hours and easiest ones when you're tired.",
+      "Find your 'Biological Prime Time'. Are you a morning lark or a night owl? Schedule your 'Big Three' accordingly.",
+      "Match the task to the mood. Use high-energy blocks for creative work and low-energy blocks for administrative chores."
+    ]
+  },
+  {
+    "keys": ["mental load", "too much to remember"],
+    "values": [
+      "Your brain is for having ideas, not for holding them. Offload your mental load here so your mind is free to work.",
+      "Externalize your memory. Every time you think 'I should...', record it immediately so you can stop worrying about it.",
+      "A clear head starts with a full list. Use this app as your 'External Hard Drive' for all your thoughts and obligations."
+    ]
+  },
+  {
+    "keys": ["small wins", "building confidence"],
+    "values": [
+      "Success breeds success. Check off easy tasks to build confidence before tackling the big project on your list.",
+      "Use 'Momentum Tasks'. Finishing three 5-minute chores can give you the energy boost needed for a 2-hour deep work session.",
+      "Dopamine is your friend. Every checkmark increases your motivation. Build a chain of wins to power through your day."
+    ]
+  },
+  {
+    "keys": ["task friction", "making it easy"],
+    "values": [
+      "Reduce friction by preparing for a task in advance. If you need to write, have the document open and ready.",
+      "Design for the 'Path of Least Resistance'. Set out your tools tonight so you can start your first task tomorrow without delay.",
+      "The hardest part is starting. Eliminate 'Start-up Friction' by keeping your workspace clean and your next step defined."
+    ]
+  },
+  {
+    "keys": ["rewarding yourself", "celebration"],
+    "values": [
+      "Celebrate your big completions! A small reward after a productive day reinforces the habit of finishing what you start.",
+      "Treat yourself for sticking to the plan. Reinforcing the 'Completion Loop' with positive rewards makes you more productive.",
+      "Acknowledge your effort. Whether it's a favorite snack or a 10-minute break, rewarding progress keeps the system fun."
+    ]
+  },
+  {
+    "keys": ["productivity guilt", "not doing enough"],
+    "values": [
+      "Productivity guilt is the feeling that you should always do more. Remember: rest is a part of productivity.",
+      "You are more than your output. Some days are for finishing tasks, and other days are for recharging your batteries.",
+      "Let go of the 'Infinite To-Do List'. If you finished your top priorities, give yourself permission to stop working."
+    ]
+  },
+  {
+    "keys": ["daily limit", "don't overplan"],
+    "values": [
+      "Don't add 20 tasks to a daily list. Aim for 3-5 key items and anything else is a bonus. Quality over quantity.",
+      "Overplanning leads to failure. Be realistic about what you can achieve in 24 hours to maintain your long-term motivation.",
+      "The 'Rule of 3': Pick three things to finish today. If you do more, great. If not, you've still had a successful day."
+    ]
+  },
+  {
+    "keys": ["reviewing finished work", "past wins"],
+    "values": [
+      "Take a moment to look at your 'Completed Tasks' list. Seeing how much you've actually done is a great motivation boost.",
+      "Don't just look forward—look back. Your archive of finished work is a testament to your discipline and growth.",
+      "Remind yourself of your capacity. Reviewing your past wins proves that you can handle whatever is currently on your list."
+    ]
+  }
+]

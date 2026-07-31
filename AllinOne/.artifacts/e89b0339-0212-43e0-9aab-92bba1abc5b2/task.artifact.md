@@ -1,0 +1,3 @@
+- [x] Correct `org.gradle.java.home` in `gradle.properties`
+- [x] Verify fix by running Gradle help task
+- [ ] Update walkthrough artifact

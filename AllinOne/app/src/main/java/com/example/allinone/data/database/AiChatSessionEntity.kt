@@ -7,5 +7,6 @@ import androidx.room.PrimaryKey
 data class AiChatSessionEntity(
     @PrimaryKey(autoGenerate = true) val id: Long = 0,
     val title: String,
+    val type: String = "chat",
     val timestamp: Long = System.currentTimeMillis()
 )

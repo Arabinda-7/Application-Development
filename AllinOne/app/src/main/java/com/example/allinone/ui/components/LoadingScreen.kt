@@ -48,7 +48,7 @@ fun LoadingScreen(onFinished: () -> Unit = {}) {
                 }
                 if (DataManager.showTaskSection) {
                     val color = if (DataManager.globalTaskColor != -1) Color(DataManager.globalTaskColor) else Color(0xFF2EC4B6)
-                    add(LoadingStep(R.drawable.icons8_checkmark_100, "Loading Tasks", color))
+                    add(LoadingStep(R.drawable.icons8_done_100, "Loading Tasks", color))
                 }
                 if (DataManager.showNoteSection) {
                     val color = if (DataManager.globalNoteColor != -1) Color(DataManager.globalNoteColor) else Color(0xFF3A86F0)
@@ -117,13 +117,13 @@ fun LoadingScreen(onFinished: () -> Unit = {}) {
             // Circular Progress with Dynamic Logo
             Box(
                 contentAlignment = Alignment.Center,
-                modifier = Modifier.size(200.dp)
+                modifier = Modifier.size(160.dp)
             ) {
                 // Background Track
                 Canvas(modifier = Modifier.fillMaxSize()) {
                     drawCircle(
                         color = Color.White.copy(alpha = 0.1f),
-                        style = Stroke(width = 4.dp.toPx())
+                        style = Stroke(width = 3.dp.toPx())
                     )
                 }
 
@@ -134,7 +134,7 @@ fun LoadingScreen(onFinished: () -> Unit = {}) {
                         startAngle = -90f,
                         sweepAngle = 360 * progress.value,
                         useCenter = false,
-                        style = Stroke(width = 4.dp.toPx(), cap = StrokeCap.Round)
+                        style = Stroke(width = 3.dp.toPx(), cap = StrokeCap.Round)
                     )
                 }
 
@@ -148,7 +148,7 @@ fun LoadingScreen(onFinished: () -> Unit = {}) {
                         painter = painterResource(id = step.icon),
                         contentDescription = null,
                         tint = animatedColor,
-                        modifier = Modifier.size(100.dp)
+                        modifier = Modifier.size(70.dp)
                     )
                 }
             }

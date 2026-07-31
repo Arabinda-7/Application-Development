@@ -28,6 +28,7 @@ class SettingsHubSection(
         layoutProfileHub.visibility = View.VISIBLE
         val menuItems = listOf(
             SettingsHubItem("Features", isHeader = true),
+            SettingsHubItem("AI Assistant", "Manage voice output and history cleanup", R.drawable.ic_launcher_foreground, "AI_ASSISTANT"),
             SettingsHubItem("Habit Tracker", "Manage your daily rituals and streaks", R.drawable.ic_habit_tracker, "HABITS"),
             SettingsHubItem("Workout Routine", "Configure exercises and rest timers", R.drawable.ic_workout_routine, "WORKOUTS"),
             SettingsHubItem("To-Do List", "Organize tasks and prioritization", R.drawable.ic_task, "TASKS"),

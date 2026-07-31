@@ -35,6 +35,8 @@ import kotlinx.coroutines.launch
 import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
 import com.example.allinone.ui.components.LoadingScreen
 import com.example.allinone.ui.home.HomeScreen
+import com.example.allinone.data.ChatMessage
+import java.util.Calendar
 
 class MainActivity : BaseActivity() {
 
@@ -45,6 +47,10 @@ class MainActivity : BaseActivity() {
     private var voiceHandler: VoiceAssistantHandler? = null
 
     private var isVoiceListening by mutableStateOf(false)
+    private var activeVoiceSessionId by mutableLongStateOf(-1L)
+    private val voiceMessages = mutableStateListOf<ChatMessage>()
+    private val aiChatRepo = DataManager.getAiChatRepository()
+    private var permissionsRequested = false
 
     private val lockLauncher: ActivityResultLauncher<Intent> = registerForActivityResult(
         ActivityResultContracts.StartActivityForResult()
@@ -73,16 +79,6 @@ class MainActivity : BaseActivity() {
         // Removed setKeepOnScreenCondition to allow custom LoadingScreen to animate immediately
         
 
-        // Alarm Manager Check
-        val alarmManager = getSystemService(Context.ALARM_SERVICE) as AlarmManager
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) { // API 31 check
-            if (!alarmManager.canScheduleExactAlarms()) {
-                Intent(Settings.ACTION_REQUEST_SCHEDULE_EXACT_ALARM).also { intent ->
-                    startActivity(intent)
-                }
-            }
-        }
-
         initHandlers()
         initVoiceHandler()
         viewModel.refreshState(this)
@@ -93,6 +89,12 @@ class MainActivity : BaseActivity() {
             val isLoaded = dashboardState.isDataLoaded
             val isUnlocked = dashboardState.isAppUnlocked
             
+            LaunchedEffect(animationFinished) {
+                if (animationFinished) {
+                    requestAppPermissions()
+                }
+            }
+
             LaunchedEffect(isLoaded) {
                 if (isLoaded) {
                     if (DataManager.isAppLockEnabled && !DataManager.isAppUnlocked && DataManager.appLockPin != null) {
@@ -202,11 +204,23 @@ class MainActivity : BaseActivity() {
                                     onNavigateToWorkout = { navigationHandler.navigateToWorkout() },
                                     onNavigateToTodos = { navigationHandler.navigateToTodos() },
                                     onNavigateToNotes = { navigationHandler.navigateToNotes() },
-                                    onNavigateToProjects = { navigationHandler.navigateToProjects() },
+                                    onNavigateToProjects = { 
+                                        if (dashboardState.hasProjects) {
+                                            navigationHandler.navigateToProjects()
+                                        } else {
+                                            android.widget.Toast.makeText(this@MainActivity, "Please create or import a project to access this section.", android.widget.Toast.LENGTH_SHORT).show()
+                                        }
+                                    },
                                     onNavigateToFinance = { navigationHandler.navigateToFinance() },
                                     onNavigateToSettings = { navigationHandler.navigateToSettings() },
                                     onNavigateToAssistant = { navigationHandler.navigateToAssistant() },
-                                    onNavigateToWorkspace = { navigationHandler.navigateToWorkspace() },
+                                    onNavigateToWorkspace = { 
+                                        if (dashboardState.hasProjects) {
+                                            navigationHandler.navigateToWorkspace()
+                                        } else {
+                                            android.widget.Toast.makeText(this@MainActivity, "Please create or import a project to access this section.", android.widget.Toast.LENGTH_SHORT).show()
+                                        }
+                                    },
                                     onNavigateToProfile = { navigationHandler.navigateToProfile() },
                                     onNavigateToPerformanceHistory = { navigationHandler.navigateToPerformanceHistory() },
                                     onQuickAddTodo = { quickActionsHandler.quickAddTask() },
@@ -231,7 +245,11 @@ class MainActivity : BaseActivity() {
                                             voiceHandler?.startListening()
                                         }
                                     },
-                                    isVoiceThinking = voiceHandler?.isThinking ?: false
+                                    isVoiceThinking = voiceHandler?.isThinking ?: false,
+                                    onVoiceSessionStarted = {
+                                        startVoiceAssistantSession()
+                                    },
+                                    voiceMessages = voiceMessages
                                 )
                             }
                         }
@@ -247,6 +265,35 @@ class MainActivity : BaseActivity() {
         searchSection = MainSearchSection(this)
     }
 
+    private fun requestAppPermissions() {
+        if (permissionsRequested) return
+        permissionsRequested = true
+
+        // Alarm Manager Check
+        val alarmManager = getSystemService(Context.ALARM_SERVICE) as AlarmManager
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+            if (!alarmManager.canScheduleExactAlarms()) {
+                try {
+                    Intent(Settings.ACTION_REQUEST_SCHEDULE_EXACT_ALARM).also { intent ->
+                        startActivity(intent)
+                    }
+                } catch (e: Exception) {
+                    e.printStackTrace()
+                }
+            }
+        }
+
+        val permissions = mutableListOf<String>()
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+            permissions.add(android.Manifest.permission.POST_NOTIFICATIONS)
+        }
+        permissions.add(android.Manifest.permission.RECORD_AUDIO)
+        
+        checkAndRequestPermissions(permissions.toTypedArray()) { _ ->
+            // Optional: log or handle result
+        }
+    }
+
     private fun initVoiceHandler() {
         voiceHandler = VoiceAssistantHandler(
             context = this,
@@ -260,8 +307,34 @@ class MainActivity : BaseActivity() {
                 isVoiceListening = false
             }
         ).apply {
-            isMuted = false // Or get from preferences
+            isMuted = false // Voice-to-voice is always audible when triggered
         }
+    }
+
+    private fun startVoiceAssistantSession() {
+        voiceMessages.clear()
+        activeVoiceSessionId = -1L
+        
+        val calendar = Calendar.getInstance()
+        val hour = calendar.get(Calendar.HOUR_OF_DAY)
+        val timeGreeting = when (hour) {
+            in 0..11 -> "Good morning"
+            in 12..16 -> "Good afternoon"
+            else -> "Good evening"
+        }
+        
+        val greeting = "$timeGreeting! I'm here. How can I help you manage your day?"
+        val assistantMsg = ChatMessage(greeting, false)
+        voiceMessages.add(assistantMsg)
+        
+        // We don't save the greeting to DB immediately, wait for first user interaction to create session
+        // or we can create it now:
+        lifecycleScope.launch {
+            activeVoiceSessionId = aiChatRepo?.createSession("Voice Session", "voice") ?: -1L
+            aiChatRepo?.insertMessage(activeVoiceSessionId, assistantMsg.text, assistantMsg.isUser, assistantMsg.timestamp)
+        }
+        
+        voiceHandler?.speak(greeting)
     }
 
     private fun handleVoiceCommand(command: String) {
@@ -269,44 +342,153 @@ class MainActivity : BaseActivity() {
         
         voiceHandler?.isThinking = true
         
+        val userMsg = ChatMessage(command, true)
+        voiceMessages.add(userMsg)
+
+        lifecycleScope.launch {
+            if (activeVoiceSessionId == -1L) {
+                val title = if (command.length > 20) command.take(20) + "..." else command
+                activeVoiceSessionId = aiChatRepo?.createSession(title, "voice") ?: -1L
+            }
+            aiChatRepo?.insertMessage(activeVoiceSessionId, userMsg.text, userMsg.isUser, userMsg.timestamp)
+        }
+        
         lifecycleScope.launch {
             val action = AssistantBrain.parseCommand(command)
             if (action != null) {
-                var response = ""
+                var response = action.dynamicResponse ?: ""
                 when (action.type) {
                     "ADD_HABIT" -> {
-                        val habit = Habit(name = action.payload, isCompleted = false, frequency = "Anytime")
+                        val payload = action.payload
+                        val habit = if (payload.contains("|")) {
+                            val parts = payload.split("|")
+                            val name = parts[0]
+                            val target = parts.getOrNull(1)?.toIntOrNull() ?: 1
+                            val freq = parts.getOrNull(2) ?: "Anytime"
+                            Habit(name = name, isCompleted = false, frequency = freq, target = target)
+                        } else {
+                            Habit(name = payload, isCompleted = false, frequency = "Anytime")
+                        }
                         DataManager.habits.add(habit)
                         DataManager.saveData(this@MainActivity)
-                        response = "Created habit: ${action.payload}"
+                        if (response.isEmpty()) response = "Created habit: ${habit.name}"
                     }
                     "ADD_TASK" -> {
-                        val task = Task(name = action.payload)
+                        val payload = action.payload
+                        val task = if (payload.contains("|")) {
+                            val parts = payload.split("|")
+                            val name = parts[0]
+                            val subsStr = parts.getOrNull(1) ?: ""
+                            val reminderStr = parts.getOrNull(2) ?: ""
+                            val subtasks = if (subsStr.isNotEmpty()) subsStr.split(",").map { Subtask(it, false) }.toMutableList() else mutableListOf()
+                            val reminder = reminderStr.toLongOrNull()
+                            Task(name = name, subtasks = subtasks, reminderTime = reminder)
+                        } else {
+                            Task(name = payload)
+                        }
                         DataManager.tasks.add(0, task)
                         DataManager.saveData(this@MainActivity)
-                        response = "Added task: ${action.payload}"
+                        if (response.isEmpty()) response = "Added task: ${task.name}"
+                    }
+                    "MARK_TASK_COMPLETE" -> {
+                        val name = action.payload
+                        val task = DataManager.tasks.find { it.name.equals(name, ignoreCase = true) }
+                        if (task != null) {
+                            task.isCompleted = true
+                            task.completedTimestamp = System.currentTimeMillis()
+                            DataManager.saveData(this@MainActivity, true)
+                        }
+                    }
+                    "MARK_SUBTASK_COMPLETE" -> {
+                        val parts = action.payload.split("|")
+                        val taskName = parts[0]
+                        val subName = parts.getOrNull(1) ?: ""
+                        val task = DataManager.tasks.find { it.name.equals(taskName, ignoreCase = true) }
+                        val subtask = task?.subtasks?.find { it.name.equals(subName, ignoreCase = true) }
+                        if (subtask != null) {
+                            subtask.isCompleted = true
+                            DataManager.saveData(this@MainActivity, true)
+                            response = "Marked '$subName' as completed in '${task.name}'!"
+                        }
                     }
                     "ADD_WORKOUT" -> {
-                        val workout = Workout(name = action.payload, isCompleted = false, frequency = "Anytime")
+                        val payload = action.payload
+                        val workout = if (payload.contains("|")) {
+                            val parts = payload.split("|")
+                            val name = parts[0]
+                            val mode = parts.getOrNull(1) ?: "Reps"
+                            val target = parts.getOrNull(2)?.toIntOrNull() ?: 0
+                            val rps = parts.getOrNull(3)?.toIntOrNull() ?: 0
+                            val freq = parts.getOrNull(4) ?: "Anytime"
+                            Workout(name = name, trackingMode = mode, target = target, repsPerSet = rps, frequency = freq, isCompleted = false)
+                        } else {
+                            Workout(name = payload, isCompleted = false, frequency = "Anytime")
+                        }
                         DataManager.workouts.add(workout)
                         DataManager.saveData(this@MainActivity)
-                        response = "Created workout: ${action.payload}"
+                        if (response.isEmpty()) response = "Created workout: ${workout.name}"
+                    }
+                    "UPDATE_WORKOUT_PROGRESS" -> {
+                        val parts = action.payload.split("|")
+                        val name = parts[0]
+                        val inc = parts.getOrNull(1)?.toIntOrNull() ?: 0
+                        val workout = DataManager.workouts.find { it.name.equals(name, ignoreCase = true) }
+                        if (workout != null) {
+                            workout.progress += inc
+                            if (workout.progress >= workout.target) {
+                                workout.isCompleted = true
+                                if (!workout.completedDates.contains(DataManager.getTrackingDateString())) {
+                                    workout.completedDates.add(DataManager.getTrackingDateString())
+                                }
+                            }
+                            DataManager.saveData(this@MainActivity, true)
+                        }
+                    }
+                    "COMPLETE_WORKOUT" -> {
+                        val name = action.payload
+                        val workout = DataManager.workouts.find { it.name.equals(name, ignoreCase = true) }
+                        if (workout != null) {
+                            workout.isCompleted = true
+                            workout.progress = workout.target
+                            if (!workout.completedDates.contains(DataManager.getTrackingDateString())) {
+                                workout.completedDates.add(DataManager.getTrackingDateString())
+                            }
+                            DataManager.saveData(this@MainActivity, true)
+                        }
                     }
                     "ADD_NOTE" -> {
-                        val note = Note(title = action.payload, content = "")
+                        val payload = action.payload
+                        val note = if (payload.contains("|")) {
+                            val parts = payload.split("|")
+                            Note(title = parts[0], content = parts.getOrNull(1) ?: "")
+                        } else {
+                            Note(title = payload, content = "")
+                        }
                         DataManager.notes.add(0, note)
                         DataManager.saveData(this@MainActivity)
-                        response = "Saved note: ${action.payload}"
+                        if (response.isEmpty()) response = "Saved note: ${note.title}"
+                    }
+                    "LOG_HABIT" -> {
+                        val habitName = action.payload
+                        val habit = DataManager.habits.find { it.name.equals(habitName, ignoreCase = true) }
+                        if (habit != null) {
+                            habit.isCompleted = true
+                            if (!habit.completedDates.contains(DataManager.getTrackingDateString())) {
+                                habit.completedDates.add(DataManager.getTrackingDateString())
+                            }
+                            DataManager.saveData(this@MainActivity, true)
+                            if (response.isEmpty()) response = "Marked '$habitName' as completed!"
+                        }
                     }
                     "LOG_EXPENSE" -> {
-                        response = "Ready to log expense: ${DataManager.financeCurrency}${action.payload}"
+                        if (response.isEmpty()) response = "Ready to log expense: ${DataManager.financeCurrency}${action.payload}"
                         val intent = Intent(this@MainActivity, AddFinanceActivity::class.java).apply {
                             putExtra("QUICK_AMOUNT", action.payload)
                         }
                         startActivity(intent)
                     }
                     "NAVIGATE" -> {
-                        response = "Opening ${action.payload}..."
+                        if (response.isEmpty()) response = "Opening ${action.payload}..."
                         when (action.payload) {
                             "FINANCE" -> startActivity(Intent(this@MainActivity, FinanceActivity::class.java))
                             "HABITS" -> startActivity(Intent(this@MainActivity, HabitTrackerActivity::class.java))
@@ -316,9 +498,18 @@ class MainActivity : BaseActivity() {
                         response = action.payload
                     }
                 }
+                
+                val assistantMsg = ChatMessage(response, false)
+                voiceMessages.add(assistantMsg)
+                aiChatRepo?.insertMessage(activeVoiceSessionId, assistantMsg.text, assistantMsg.isUser, assistantMsg.timestamp)
+
                 voiceHandler?.speak(response, response.trim().endsWith("?"))
             } else {
-                voiceHandler?.speak("I'm not sure how to do that yet.")
+                val errorResponse = "I'm not sure how to do that yet."
+                val assistantMsg = ChatMessage(errorResponse, false)
+                voiceMessages.add(assistantMsg)
+                aiChatRepo?.insertMessage(activeVoiceSessionId, assistantMsg.text, assistantMsg.isUser, assistantMsg.timestamp)
+                voiceHandler?.speak(errorResponse)
             }
         }
     }

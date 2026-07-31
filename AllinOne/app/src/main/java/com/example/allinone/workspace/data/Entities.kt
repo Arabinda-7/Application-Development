@@ -121,6 +121,7 @@ data class FeatureEntity(
     val requirements: String = "", // Must-haves / Checklist
     val targetVersion: String = "", // e.g., v1.0, MVP
     val successMetrics: String = "", // KPIs
+    val deadline: Long? = null,
     val status: String = "Backlog", // Backlog, Planning, Development, Testing, Shipped
     val lifecycleStage: String = "Proposal",
     val createdAt: Long = System.currentTimeMillis(),
@@ -149,6 +150,7 @@ data class BugEntity(
     val status: String = "Open", // Open, Confirmed, Fixing, Fixed, Verified
     val environment: String = "Production",
     val version: String = "",
+    val deadline: Long? = null,
     val stepsToReproduce: String = "",
     val linkedTaskId: String? = null,
     val linkedFeatureId: String? = null,
