@@ -6,6 +6,8 @@ import android.view.View
 import android.widget.TextView
 import androidx.activity.viewModels
 
+import com.example.allinone.data.model.*
+
 class PersonalLedgerHubActivity : BaseActivity() {
 
     private val viewModel: PersonalLedgerViewModel by viewModels()

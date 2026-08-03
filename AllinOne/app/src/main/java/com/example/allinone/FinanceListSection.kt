@@ -5,6 +5,7 @@ import android.content.Intent
 import android.view.View
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
+import com.example.allinone.data.model.Transaction
 import java.text.SimpleDateFormat
 import java.util.*
 

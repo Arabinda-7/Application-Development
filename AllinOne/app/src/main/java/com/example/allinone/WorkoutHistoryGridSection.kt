@@ -48,7 +48,7 @@ class WorkoutHistoryGridSection(
             dayCalendar.set(displayYear, displayMonth, day)
             val dateKey = sdfDate.format(dayCalendar.time)
             
-            val progress = heatmapData[day - 1] ?: 0
+            val progress = if (day <= heatmapData.size) heatmapData[day - 1] ?: 0 else 0
             grid.addView(createDayView(day.toString(), progress, dateKey, dateKey == todayStr))
         }
     }

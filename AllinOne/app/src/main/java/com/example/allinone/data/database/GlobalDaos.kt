@@ -1,21 +1,27 @@
 package com.example.allinone.data.database
 
-import androidx.room.*
+import androidx.room.Dao
+import androidx.room.Query
+import androidx.room.Insert
+import androidx.room.Update
+import androidx.room.Delete
+import androidx.room.OnConflictStrategy
+import androidx.room.Transaction
 import kotlinx.coroutines.flow.Flow
 
 @Dao
 interface AppTaskDao {
     @Query("SELECT * FROM app_tasks ORDER BY priority DESC, timestamp DESC")
-    fun getAllTasks(): Flow<List<TaskEntity>>
+    fun getAllTasks(): Flow<List<GlobalTaskEntity>>
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
-    suspend fun insertTask(task: TaskEntity)
+    suspend fun insertTask(task: GlobalTaskEntity)
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
-    suspend fun insertAllTasks(tasks: List<TaskEntity>)
+    suspend fun insertAllTasks(tasks: List<GlobalTaskEntity>)
 
     @Delete
-    suspend fun deleteTask(task: TaskEntity)
+    suspend fun deleteTask(task: GlobalTaskEntity)
 
     @Query("DELETE FROM app_tasks WHERE isCompleted = 1")
     suspend fun clearCompletedTasks()
@@ -27,7 +33,7 @@ interface AppTaskDao {
     suspend fun deleteAll()
 
     @Query("SELECT * FROM app_tasks")
-    suspend fun getAllTasksSync(): List<TaskEntity>
+    suspend fun getAllTasksSync(): List<GlobalTaskEntity>
 }
 
 @Dao
@@ -81,16 +87,16 @@ interface AppWorkoutDao {
 @Dao
 interface AppNoteDao {
     @Query("SELECT * FROM app_notes ORDER BY isPinned DESC, updatedAt DESC")
-    fun getAllNotes(): Flow<List<NoteEntity>>
+    fun getAllNotes(): Flow<List<GlobalNoteEntity>>
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
-    suspend fun insertNote(note: NoteEntity)
+    suspend fun insertNote(note: GlobalNoteEntity)
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
-    suspend fun insertAllNotes(notes: List<NoteEntity>)
+    suspend fun insertAllNotes(notes: List<GlobalNoteEntity>)
 
     @Delete
-    suspend fun deleteNote(note: NoteEntity)
+    suspend fun deleteNote(note: GlobalNoteEntity)
 
     @Query("DELETE FROM app_notes WHERE timestamp NOT IN (:ids)")
     suspend fun deleteOthers(ids: List<Long>)
@@ -99,7 +105,7 @@ interface AppNoteDao {
     suspend fun deleteAll()
 
     @Query("SELECT * FROM app_notes")
-    suspend fun getAllNotesSync(): List<NoteEntity>
+    suspend fun getAllNotesSync(): List<GlobalNoteEntity>
 }
 
 @Dao

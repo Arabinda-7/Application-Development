@@ -3,8 +3,8 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:id="@+id/project_note_card"
     android:layout_width="match_parent"
-    android:layout_height="220dp"
-    android:layout_margin="6dp"
+    android:layout_height="200dp"
+    android:layout_margin="4dp"
     app:cardBackgroundColor="@android:color/transparent"
     app:cardCornerRadius="16dp"
     app:cardElevation="0dp"
@@ -79,6 +79,19 @@
                     android:contentDescription="Completed" />
 
                 <ImageView
+                    android:id="@+id/btn_delete_project"
+                    android:layout_width="18dp"
+                    android:layout_height="18dp"
+                    android:layout_marginStart="8dp"
+                    android:src="@drawable/ic_trash"
+                    app:tint="#FF5252"
+                    android:visibility="gone"
+                    android:contentDescription="Delete"
+                    android:clickable="true"
+                    android:focusable="true"
+                    android:background="?attr/selectableItemBackgroundBorderless" />
+
+                <ImageView
                     android:id="@+id/iv_history_icon"
                     android:layout_width="18dp"
                     android:layout_height="18dp"
@@ -98,8 +111,10 @@
                 android:layout_marginTop="8dp"
                 android:text="Project Title"
                 android:textColor="@color/white"
-                android:textSize="20sp"
-                android:textStyle="bold" />
+                android:textSize="16sp"
+                android:textStyle="bold"
+                android:maxLines="2"
+                android:ellipsize="end" />
 
             <TextView
                 android:id="@+id/tv_note_content"
@@ -108,10 +123,10 @@
                 android:layout_weight="1"
                 android:layout_marginTop="4dp"
                 android:ellipsize="end"
-                android:maxLines="4"
+                android:maxLines="3"
                 android:text="Some content for the project note..."
                 android:textColor="@color/text_secondary"
-                android:textSize="13sp" />
+                android:textSize="12sp" />
 
             <LinearLayout
                 android:id="@+id/container_progress"

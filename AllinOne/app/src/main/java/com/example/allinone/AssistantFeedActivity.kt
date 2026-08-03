@@ -13,15 +13,20 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.drawWithContent
-import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.lifecycleScope
+import com.example.allinone.domain.usecase.assistant.GetAssistantInsightsUseCase
+import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.launch
+import javax.inject.Inject
 
+@AndroidEntryPoint
 class AssistantFeedActivity : BaseActivity() {
+
+    @Inject lateinit var getAssistantInsightsUseCase: GetAssistantInsightsUseCase
 
     private var insights by mutableStateOf<List<AssistantBrain.Insight>>(emptyList())
 
@@ -29,7 +34,7 @@ class AssistantFeedActivity : BaseActivity() {
         super.onCreate(savedInstanceState)
 
         lifecycleScope.launch {
-            insights = AssistantBrain.generateInsights(this@AssistantFeedActivity)
+            insights = getAssistantInsightsUseCase()
         }
 
         setContent {

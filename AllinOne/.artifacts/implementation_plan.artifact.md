@@ -1,26 +1,32 @@
-# Implementation Plan - AI Assistant Conversational Expansion
+# Implementation Plan - Root Cause Analysis & Entity Unification
 
-The user has added 20 new JSON files to `app/src/main/assets/assistant/` to enhance the AI Assistant's conversational range. I will analyze these files and ensure they are perfectly integrated into the app's intelligence engine.
-
-## User Review Required
-
-> [!IMPORTANT]
-> I am enhancing the matching logic in `AssistantBrain.kt` to be more robust (ignoring punctuation and better handling case-insensitivity). This will make the assistant much more responsive to the new conversational data.
+The `MissingType` error indicates that KSP cannot resolve a symbol referenced in `AppDatabase`. This is often caused by duplicate class names in different packages, star imports, or broken symbol resolution in the K2 compiler.
 
 ## Proposed Changes
 
-### AI Engine
+### 1. Unique Entity Naming
+To eliminate resolution ambiguity, I will rename the entities that have duplicate names.
+*   `com.example.allinone.workspace.data.NoteEntity` -> `WorkspaceNoteEntity`
+*   `com.example.allinone.workspace.data.TaskEntity` -> `WorkspaceTaskEntity`
+*   `com.example.allinone.data.database.NoteEntity` -> `GlobalNoteEntity`
+*   `com.example.allinone.data.database.TaskEntity` -> `GlobalTaskEntity`
 
-#### [MODIFY] [AssistantBrain.kt](file:///C:/Users/arabi/OneDrive/Desktop/App Development/AllinOne/app/src/main/java/com/example/allinone/AssistantBrain.kt)
-- Enhance the `initialize` method with defensive try-catch blocks per file to prevent a single malformed JSON from breaking the entire assistant.
-- Optimize the matching logic in `getChatResponse` to strip punctuation and handle "fuzzy" matches for keywords.
-- Ensure all 20 new categories (Humor, Emotions, Personality, etc.) are effectively searched.
+### 2. Cleanup star imports and ambiguity
+*   Remove all `import ...*` in Room-related files.
+*   Use fully qualified names in `AppDatabase` entities array to be 100% explicit.
+
+### 3. Stability Reset
+*   Disable KSP 2 temporarily and use KSP 1 (K1) to see if it provides better error messages or bypasses the K2 crash.
+*   Revert `room.generateKotlin` to `false` for maximum compatibility during debugging.
 
 ## Verification Plan
 
-### Automated Tests
-- I will verify the build to ensure no regression in `AssistantBrain` logic.
-
 ### Manual Verification
-- I will test a few specific triggers from the new files (e.g., "tell me a joke", "how are you feeling", "I'm stressed") to confirm the AI responds with data from the new JSON files.
-- Verify that `nlu_commands.json` still works as expected for action-based commands.
+1.  **Daemon Kill**: `./gradlew --stop`
+2.  **Clean**: `./gradlew clean`
+3.  **Step-by-Step Enablement**:
+    *   Start with `AppDatabase` having 0 entities and 0 DAOs.
+    *   Add `WorkspaceDao` and its entities.
+    *   Add Global DAOs and their entities one by one.
+    *   Identify which entity/DAO triggers the `MissingType` error.
+4.  **Logging**: Use `./gradlew :app:kspDebugKotlin --info --stacktrace` at each step.

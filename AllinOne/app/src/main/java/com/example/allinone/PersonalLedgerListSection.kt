@@ -9,6 +9,8 @@ import android.widget.TextView
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 
+import com.example.allinone.data.model.*
+
 class PersonalLedgerListSection(
     private val context: Context,
     private val recyclerView: RecyclerView,
@@ -40,14 +42,20 @@ class PersonalLedgerListSection(
             val ledger = items[position]
             holder.tvName.text = ledger.personName
             
-            val activeEntries = ledger.entries.filter { !it.isSettled }
-            val owe = activeEntries.filter { it.type == "Borrowed" }.sumOf { it.amount - it.paidAmount }
-            val owed = activeEntries.filter { it.type == "Lent" }.sumOf { it.amount - it.paidAmount }
+            var owe = 0.0
+            var owed = 0.0
+            for (entry in ledger.entries) {
+                if (!entry.isSettled) {
+                    val remaining = entry.amount - entry.paidAmount
+                    if (entry.type == "Borrowed") owe += remaining
+                    else if (entry.type == "Lent") owed += remaining
+                }
+            }
             val net = owed - owe
-            
             val currency = DataManager.financeCurrency
-            holder.tvBalance.text = if (net >= 0) "Owes me ${currency}${net.toInt()}" else "I owe ${currency}${Math.abs(net).toInt()}"
-            holder.tvBalance.setTextColor(if (net >= 0) Color.parseColor("#4CAF50") else Color.parseColor("#FF5252"))
+            val netAbs = if (net < 0.0) -net else net
+            holder.tvBalance.text = if (net >= 0.0) "Owes me ${currency}${net.toInt()}" else "I owe ${currency}${netAbs.toInt()}"
+            holder.tvBalance.setTextColor(if (net >= 0.0) Color.parseColor("#4CAF50") else Color.parseColor("#FF5252"))
 
             holder.itemView.setOnClickListener { onClick(ledger) }
         }

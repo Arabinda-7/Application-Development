@@ -12,6 +12,7 @@ import android.view.Window
 import android.widget.FrameLayout
 import android.widget.ImageView
 import android.widget.TextView
+import com.example.allinone.data.model.Note
 
 class IdeaMindMapDialog(context: Context, private val note: Note) : Dialog(context, android.R.style.Theme_Black_NoTitleBar_Fullscreen) {
 

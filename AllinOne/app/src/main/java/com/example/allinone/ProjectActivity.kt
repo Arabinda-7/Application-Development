@@ -4,28 +4,25 @@ import android.content.Intent
 import android.content.res.ColorStateList
 import android.graphics.Color
 import android.os.Bundle
-import android.view.Gravity
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.widget.CheckBox
-import android.widget.HorizontalScrollView
 import android.widget.ImageButton
 import android.widget.ImageView
-import android.widget.LinearLayout
 import android.widget.PopupWindow
-import android.widget.RadioButton
-import android.widget.RadioGroup
 import android.widget.TextView
 import android.widget.Toast
 import androidx.activity.viewModels
 import androidx.core.content.ContextCompat
-import androidx.recyclerview.widget.LinearLayoutManager
-import androidx.recyclerview.widget.RecyclerView
-import java.text.SimpleDateFormat
-import java.util.Date
-import java.util.Locale
+import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.lifecycleScope
+import androidx.lifecycle.repeatOnLifecycle
+import com.example.allinone.data.model.Note
+import com.example.allinone.data.model.ProjectHistory
+import dagger.hilt.android.AndroidEntryPoint
+import kotlinx.coroutines.launch
 
+@AndroidEntryPoint
 class ProjectActivity : BaseActivity() {
 
     private val viewModel: ProjectViewModel by viewModels()
@@ -36,27 +33,28 @@ class ProjectActivity : BaseActivity() {
     private lateinit var themeManager: ProjectThemeManager
     private lateinit var gestureDetector: android.view.GestureDetector
 
+    private var isEditMode = false
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_projects)
 
         if (intent.hasExtra("OPEN_PROJECTS")) {
-            viewModel.isProjectsTab = intent.getBooleanExtra("OPEN_PROJECTS", false)
+            viewModel.setProjectsTab(intent.getBooleanExtra("OPEN_PROJECTS", false))
         }
 
         initSections()
         setupLogic()
+        observeViewModel()
     }
 
     private fun initSections() {
         listSection = ProjectListSection(
             this,
             findViewById(R.id.project_notes_list),
-            findViewById(R.id.project_ideas_list),
-            onProjectClick = { note -> onProjectItemClick(note) },
-            onIdeaClick = { note -> showEditIdeaDialog(note) }
+            findViewById(R.id.project_ideas_list)
         ) {
-            listSection.updateDisplayLists()
+            // Data change callback
         }
 
         headerSection = ProjectHeaderSection(
@@ -76,7 +74,7 @@ class ProjectActivity : BaseActivity() {
             findViewById(R.id.iv_notes_icon),
             findViewById(R.id.tv_notes_label)
         ) { isProjects ->
-            updateTabUI(isProjects)
+            viewModel.setProjectsTab(isProjects)
         }
 
         themeManager = ProjectThemeManager(
@@ -87,13 +85,11 @@ class ProjectActivity : BaseActivity() {
 
     private fun setupLogic() {
         headerSection.setup()
-        navigationSection.setup(viewModel.isProjectsTab)
         themeManager.applyTheme()
-        listSection.updateDisplayLists()
-        updateTabUI(viewModel.isProjectsTab)
+        navigationSection.setup(viewModel.isProjectsTab.value)
 
         findViewById<View>(R.id.btn_add_project_note).setOnClickListener {
-            if (viewModel.isProjectsTab) {
+            if (viewModel.isProjectsTab.value) {
                 startActivity(Intent(this, AddProjectActivity::class.java))
             } else {
                 startActivity(Intent(this, AddIdeaActivity::class.java))
@@ -104,50 +100,87 @@ class ProjectActivity : BaseActivity() {
         setupKeyboardHandling(findViewById(R.id.project_root_layout), findViewById(R.id.project_content_container))
     }
 
-    private fun updateTabUI(isProjects: Boolean) {
-        var target = isProjects
-        if (!DataManager.projectRoadmapsEnabled && target) target = false
-        if (!DataManager.projectIdeasEnabled && !target) target = true
+    private fun observeViewModel() {
+        lifecycleScope.launch {
+            repeatOnLifecycle(Lifecycle.State.STARTED) {
+                launch {
+                    viewModel.projects.collect { projects ->
+                        listSection.updateDisplayLists(projects)
+                    }
+                }
+                launch {
+                    viewModel.isProjectsTab.collect { isProjects ->
+                        updateTabUI(isProjects)
+                    }
+                }
+                launch {
+                    viewModel.settings.collect { settings ->
+                        syncDataManager(settings)
+                        navigationSection.setup(viewModel.isProjectsTab.value)
+                    }
+                }
+            }
+        }
+    }
 
-        viewModel.isProjectsTab = target
-        findViewById<TextView>(R.id.tv_title).text = if (target) "PROJECTS" else "IDEAS"
-        listSection.setVisibility(target)
-        navigationSection.updateNavUI(target)
+    private fun syncDataManager(settings: com.example.allinone.domain.repository.ProjectSettings) {
+        DataManager.projectRoadmapsEnabled = settings.roadmapsEnabled
+        DataManager.projectIdeasEnabled = settings.ideasEnabled
+        DataManager.projectAutoSaveIdeas = settings.autoSaveIdeas
+        DataManager.projectAutoArchive = settings.autoArchive
+        DataManager.projectSynergySync = settings.synergySync
+        DataManager.projectDeadlineAlerts = settings.deadlineAlerts
+        DataManager.projectAnalyticsEnabled = settings.analyticsEnabled
+        DataManager.projectTemplates.clear()
+        DataManager.projectTemplates.putAll(settings.projectTemplates)
+    }
+
+    private fun updateTabUI(isProjects: Boolean) {
+        // Logic for roadmaps/ideas enabled would normally come from settings
+        // For now keeping it simple or assuming enabled
+        findViewById<TextView>(R.id.tv_title).text = if (isProjects) "PROJECTS" else "IDEAS"
+        listSection.setVisibility(isProjects)
+        navigationSection.updateNavUI(isProjects)
         
-        findViewById<View>(R.id.btn_edit_mode).visibility = if (target) View.VISIBLE else View.GONE
-        findViewById<View>(R.id.btn_workspace).visibility = if (target) View.VISIBLE else View.GONE
+        findViewById<View>(R.id.btn_edit_mode).visibility = if (isProjects) View.VISIBLE else View.GONE
+        findViewById<View>(R.id.btn_workspace).visibility = if (isProjects) View.VISIBLE else View.GONE
         
-        val bottomPadding = if (DataManager.projectRoadmapsEnabled && DataManager.projectIdeasEnabled) 100.dpToPx() else 24.dpToPx()
+        val bottomPadding = 100.dpToPx() 
         findViewById<View>(R.id.project_notes_list).setPadding(0, 0, 0, bottomPadding)
         findViewById<View>(R.id.project_ideas_list).setPadding(0, 0, 0, bottomPadding)
     }
 
     private fun toggleEditMode() {
-        viewModel.isEditMode = !viewModel.isEditMode
-        val btnEditMode = findViewById<ImageButton>(R.id.btn_edit_mode)
-        val activeColor = ContextCompat.getColor(this, R.color.chip_selected)
-        val inactiveColor = Color.WHITE
-        
-        btnEditMode.imageTintList = ColorStateList.valueOf(if (viewModel.isEditMode) activeColor else inactiveColor)
-        btnEditMode.backgroundTintList = ColorStateList.valueOf(if (viewModel.isEditMode) Color.parseColor("#33FFFFFF") else Color.parseColor("#11FFFFFF"))
-        
-        Toast.makeText(this, if (viewModel.isEditMode) "Edit Mode: ON" else "Edit Mode: OFF", Toast.LENGTH_SHORT).show()
+        isEditMode = !isEditMode
+        listSection.setEditMode(isEditMode)
+        findViewById<ImageButton>(R.id.btn_edit_mode).imageTintList = ColorStateList.valueOf(
+            if (isEditMode) Color.RED else Color.WHITE
+        )
+        Toast.makeText(this, if (isEditMode) "Edit Mode Active" else "Edit Mode Disabled", Toast.LENGTH_SHORT).show()
     }
 
-    fun onProjectItemClick(note: Note) {
-        if (viewModel.isEditMode) {
-            showEditProjectNoteDialog(note)
-        } else {
-            startActivity(Intent(this, ViewProjectActivity::class.java).apply {
-                putExtra("PROJECT_ID", note.timestamp)
-            })
+    fun showDeleteProjectConfirmation(note: Note) {
+        showStyledConfirmationDialog(
+            title = "Delete Project",
+            message = "Are you sure you want to delete '${note.title}'?",
+            actionText = "DELETE",
+            actionColor = Color.parseColor("#FF5252")
+        ) {
+            lifecycleScope.launch {
+                viewModel.deleteProject(note)
+                DataManager.saveData(this@ProjectActivity)
+            }
         }
     }
 
-    fun showEditProjectNoteDialog(note: Note) {
-        startActivity(Intent(this, EditProjectActivity::class.java).apply {
-            putExtra("PROJECT_ID", note.timestamp)
-        })
+    fun onProjectItemClick(note: Note) {
+        if (note.category == "Project") {
+            startActivity(Intent(this, ViewProjectActivity::class.java).apply {
+                putExtra("PROJECT_ID", note.timestamp)
+            })
+        } else {
+            showEditIdeaDialog(note)
+        }
     }
 
     fun showEditIdeaDialog(note: Note) {
@@ -156,15 +189,21 @@ class ProjectActivity : BaseActivity() {
         })
     }
 
+    fun showEditProjectNoteDialog(note: Note) {
+        startActivity(Intent(this, EditProjectActivity::class.java).apply {
+            putExtra("PROJECT_ID", note.timestamp)
+        })
+    }
+
     private fun Int.dpToPx(): Int = (this * resources.displayMetrics.density).toInt()
 
     private fun setupGestureDetector() {
         gestureDetector = android.view.GestureDetector(this, object : SwipeGestureListener() {
             override fun onSwipeLeft() {
-                if (!viewModel.isProjectsTab && DataManager.projectRoadmapsEnabled) updateTabUI(true)
+                if (!viewModel.isProjectsTab.value) viewModel.setProjectsTab(true)
             }
             override fun onSwipeRight() {
-                if (viewModel.isProjectsTab && DataManager.projectIdeasEnabled) updateTabUI(false)
+                if (viewModel.isProjectsTab.value) viewModel.setProjectsTab(false)
             }
         })
     }
@@ -176,69 +215,26 @@ class ProjectActivity : BaseActivity() {
 
     fun showProjectMenu(anchor: View, note: Note) {
         val inflater = LayoutInflater.from(this)
-        val menuView = inflater.inflate(R.layout.menu_project_item, null)
-
-        val popupWindow = PopupWindow(
-            menuView,
-            ViewGroup.LayoutParams.WRAP_CONTENT,
-            ViewGroup.LayoutParams.WRAP_CONTENT,
-            true
-        )
-        popupWindow.elevation = 10f
-
-        val actionView = menuView.findViewById<View>(R.id.menu_take_day_off)
-        val actionText = menuView.findViewById<TextView>(R.id.tv_action_text)
-        val actionIcon = menuView.findViewById<ImageView>(R.id.iv_action_icon)
-
-        if (note.status == "Completed") {
-            actionText.text = "MARK INCOMPLETE"
-            actionIcon.setImageResource(R.drawable.icons8_coffee_100) // Or some other icon
-        } else {
-            actionText.text = "MARK COMPLETE"
-            actionIcon.setImageResource(R.drawable.icons8_check_mark_100)
-        }
-
-        actionView.setOnClickListener {
-            note.status = if (note.status == "Completed") "In Progress" else "Completed"
-            note.progress = if (note.status == "Completed") 100 else note.progress
-            note.changeHistory.add(ProjectHistory(action = "Status Changed", description = "Manually marked as ${note.status}"))
-            DataManager.saveData(this)
-            listSection.updateDisplayLists()
-            popupWindow.dismiss()
-        }
+        val menuView = inflater.inflate(R.layout.menu_project_feature, null)
+        val popupWindow = PopupWindow(menuView, ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT, true)
+        popupWindow.elevation = 20f
 
         menuView.findViewById<View>(R.id.menu_edit).setOnClickListener {
             popupWindow.dismiss()
-            if (note.category == "Project") {
-                showEditProjectNoteDialog(note)
-            } else {
-                showEditIdeaDialog(note)
-            }
+            showEditProjectNoteDialog(note)
         }
 
         menuView.findViewById<View>(R.id.menu_delete).setOnClickListener {
-            DataManager.projects.remove(note)
-            DataManager.saveData(this)
-            listSection.updateDisplayLists()
             popupWindow.dismiss()
+            showDeleteProjectConfirmation(note)
         }
+        
+        // Hide unused options for simplicity
+        menuView.findViewById<View>(R.id.menu_take_day_off).visibility = View.GONE
+        menuView.findViewById<View>(R.id.menu_hide_unhide).visibility = View.GONE
+        menuView.findViewById<View>(R.id.menu_undo).visibility = View.GONE
 
-        val hideUnhideView = menuView.findViewById<View>(R.id.menu_hide_unhide)
-        hideUnhideView.visibility = View.VISIBLE
-        val hideText = menuView.findViewById<TextView>(R.id.tv_hide_unhide_text)
-        hideText.text = if (note.isPinned) "UNPIN" else "PIN"
-        menuView.findViewById<ImageView>(R.id.iv_hide_unhide_icon).setImageResource(
-            if (note.isPinned) android.R.drawable.btn_star_big_off else android.R.drawable.btn_star_big_on
-        )
-
-        hideUnhideView.setOnClickListener {
-            note.isPinned = !note.isPinned
-            DataManager.saveData(this)
-            listSection.updateDisplayLists()
-            popupWindow.dismiss()
-        }
-
-        popupWindow.showAsDropDown(anchor, 0, -anchor.height)
+        popupWindow.showAsDropDown(anchor, 100, 0)
     }
 
     fun showProjectHistoryDialog(note: Note) {
@@ -249,8 +245,6 @@ class ProjectActivity : BaseActivity() {
 
     override fun onResume() {
         super.onResume()
-        updateTabUI(viewModel.isProjectsTab)
-        listSection.updateDisplayLists()
         themeManager.applyTheme()
     }
 }

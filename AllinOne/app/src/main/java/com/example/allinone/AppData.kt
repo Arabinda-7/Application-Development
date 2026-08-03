@@ -1,6 +1,13 @@
 package com.example.allinone
 
 import com.example.allinone.workspace.data.*
+import com.example.allinone.data.model.Habit
+import com.example.allinone.data.model.Workout
+import com.example.allinone.data.model.Task
+import com.example.allinone.data.model.Note
+import com.example.allinone.data.model.Transaction
+import com.example.allinone.data.model.PersonalLedger
+import com.example.allinone.data.model.PersonalLedgerEntry as LedgerEntry
 
 data class WorkoutProgressEntry(
     val name: String,
@@ -39,11 +46,11 @@ data class AllAppData(
     // Workspace Data
     val workspaceProjects: List<ProjectEntity>? = null,
     val workspaceGoals: List<GoalEntity>? = null,
-    val workspaceTasks: List<TaskEntity>? = null,
+    val workspaceTasks: List<WorkspaceTaskEntity>? = null,
     val workspaceFeatures: List<FeatureEntity>? = null,
     val workspaceBugs: List<BugEntity>? = null,
     val workspaceIdeas: List<IdeaEntity>? = null,
-    val workspaceNotes: List<NoteEntity>? = null,
+    val workspaceNotes: List<WorkspaceNoteEntity>? = null,
     val workspaceResources: List<ResourceEntity>? = null,
     val workspaceLogs: List<ActivityLogEntity>? = null,
     val workspaceRefs: List<NoteCrossReferenceEntity>? = null

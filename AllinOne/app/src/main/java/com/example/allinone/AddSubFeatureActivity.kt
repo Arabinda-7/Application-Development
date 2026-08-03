@@ -13,6 +13,7 @@ import androidx.activity.enableEdgeToEdge
 import androidx.core.content.ContextCompat
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
+import com.example.allinone.data.model.ProjectFeature
 import java.text.SimpleDateFormat
 import java.util.*
 
@@ -35,7 +36,7 @@ class AddSubFeatureActivity : BaseActivity() {
     private lateinit var tvBlockedBy: TextView
     private lateinit var etResourceUrl: EditText
 
-    private var selectedTag: String = ""
+    private var selectedTag: String = "TASKS"
     private var selectedDueDate: Long? = null
     private var blockedByFeatureId: String = ""
     private var selectedWeight: Int = 1

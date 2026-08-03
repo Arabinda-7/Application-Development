@@ -14,10 +14,16 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.ContextCompat
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
+import androidx.activity.viewModels
+import com.example.allinone.data.model.Habit
+import com.example.allinone.core.utils.UIUtils
+import dagger.hilt.android.AndroidEntryPoint
 import java.util.*
 
+@AndroidEntryPoint
 class AddHabitActivity : BaseActivity() {
 
+    private val viewModel: HabitTrackerViewModel by viewModels()
     private var habitId: Long = -1L
     private var existingHabit: Habit? = null
     
@@ -53,7 +59,7 @@ class AddHabitActivity : BaseActivity() {
 
         habitId = intent.getLongExtra("HABIT_ID", -1L)
         if (habitId != -1L) {
-            existingHabit = DataManager.habits.find { it.timestamp == habitId }
+            existingHabit = viewModel.habits.value.find { it.timestamp == habitId }
         }
 
         initViews()
@@ -264,19 +270,21 @@ class AddHabitActivity : BaseActivity() {
         val target = targetInput.text.toString().toIntOrNull() ?: 1
         
         if (existingHabit == null) {
-            DataManager.habits.add(Habit(name, false, selectedFrequency, selectedMode, target, 0, false, selectedColor, selectedIcon, repeatType = "SPECIFIC_DAYS", repeatDays = tempRepeatDays.toList(), repeatCount = 1))
+            viewModel.insertHabit(Habit(name, false, selectedFrequency, selectedMode, target, 0, false, selectedColor, selectedIcon, repeatType = "SPECIFIC_DAYS", repeatDays = tempRepeatDays.toList(), repeatCount = 1))
         } else {
             existingHabit?.let {
-                it.name = name
-                it.frequency = selectedFrequency
-                it.trackingMode = selectedMode
-                it.target = target
-                it.color = selectedColor
-                it.iconResId = selectedIcon
-                it.repeatDays = tempRepeatDays.toList()
+                val updatedHabit = it.copy(
+                    name = name,
+                    frequency = selectedFrequency,
+                    trackingMode = selectedMode,
+                    target = target,
+                    color = selectedColor,
+                    iconResId = selectedIcon,
+                    repeatDays = tempRepeatDays.toList()
+                )
+                viewModel.updateHabit(updatedHabit)
             }
         }
-        DataManager.saveData(this, true)
         UIUtils.performSuccessHaptic(this)
         setResult(RESULT_OK)
         finish()

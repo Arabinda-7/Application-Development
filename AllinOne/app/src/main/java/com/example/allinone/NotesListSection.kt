@@ -3,6 +3,7 @@ package com.example.allinone
 import android.content.Context
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
+import com.example.allinone.data.model.Note
 
 class NotesListSection(
     private val context: Context,
@@ -14,18 +15,14 @@ class NotesListSection(
     init {
         recyclerView.layoutManager = LinearLayoutManager(context)
         noteAdapter = NoteAdapter(mutableListOf()) {
-            DataManager.saveData(context)
+            // Callback for when a note is edited/changed within the adapter
             onDataChanged()
         }
         recyclerView.adapter = noteAdapter
     }
 
-    fun updateDisplayList(category: String) {
-        val filtered = DataManager.notes.filter { 
-            it.category == category && (DataManager.noteShowHidden || !it.isHidden) 
-        }.sortedByDescending { it.timestamp }
-        
-        noteAdapter.updateNotes(filtered)
+    fun updateDisplayList(notes: List<Note>) {
+        noteAdapter.updateNotes(notes)
     }
 
     fun setDeleteMode(enabled: Boolean) {

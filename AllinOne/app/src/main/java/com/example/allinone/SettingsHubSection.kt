@@ -8,6 +8,7 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.ImageView
 import android.widget.TextView
+import com.example.allinone.core.utils.UIUtils
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 
@@ -18,9 +19,9 @@ class SettingsHubSection(
     private val onSectionSelected: (String) -> Unit,
     private val onShowAvatarOptions: () -> Unit
 ) {
-    fun setup() {
+    fun setup(userName: String, userProfileImageUri: String?, userAvatarRes: Int) {
         recyclerView.layoutManager = LinearLayoutManager(context)
-        updateMiniProfileUI()
+        updateMiniProfileUI(userName, userProfileImageUri, userAvatarRes)
         showHub()
     }
 
@@ -62,14 +63,14 @@ class SettingsHubSection(
         }
     }
 
-    fun updateMiniProfileUI() {
-        layoutProfileHub.findViewById<TextView>(R.id.tv_mini_name).text = UIUtils.formatTitleCase(DataManager.userName)
+    fun updateMiniProfileUI(userName: String, userProfileImageUri: String?, userAvatarRes: Int) {
+        layoutProfileHub.findViewById<TextView>(R.id.tv_mini_name).text = UIUtils.formatTitleCase(userName)
         val ivProfile = layoutProfileHub.findViewById<ImageView>(R.id.iv_profile_pic)
         
-        if (DataManager.userProfileImageUri != null) {
-            ivProfile.setImageURI(Uri.parse(DataManager.userProfileImageUri))
+        if (userProfileImageUri != null) {
+            ivProfile.setImageURI(Uri.parse(userProfileImageUri))
         } else {
-            UIUtils.safeSetImageResource(ivProfile, DataManager.userAvatarRes, R.drawable.ic_launcher_foreground)
+            UIUtils.safeSetImageResource(ivProfile, userAvatarRes, R.drawable.ic_launcher_foreground)
         }
         
         layoutProfileHub.findViewById<View>(R.id.card_profile_entry).setOnClickListener {
@@ -78,6 +79,8 @@ class SettingsHubSection(
 
         ivProfile.setOnClickListener { onShowAvatarOptions() }
 
+        // These still use DataManager for now as they require repository flows in this section which is complex
+        // We'll leave them or pass them as parameters too
         val streak = DataManager.getCurrentStreak()
         val projects = DataManager.projects.count { it.category == "Project" }
         layoutProfileHub.findViewById<TextView>(R.id.tv_mini_stat_streak).text = "$streak Day Streak"

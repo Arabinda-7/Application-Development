@@ -8,6 +8,8 @@ import androidx.recyclerview.widget.RecyclerView
 import java.text.SimpleDateFormat
 import java.util.*
 
+import com.example.allinone.data.model.ProjectHistory
+
 class ProjectHistoryAdapter(private val history: List<ProjectHistory>) :
     RecyclerView.Adapter<ProjectHistoryAdapter.HistoryViewHolder>() {
 

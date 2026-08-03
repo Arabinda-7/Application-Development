@@ -10,9 +10,7 @@ import android.media.RingtoneManager
 import android.os.VibrationEffect
 import android.os.Vibrator
 import androidx.core.app.NotificationCompat
-
 import kotlinx.coroutines.*
-import kotlinx.coroutines.flow.filter
 import kotlinx.coroutines.flow.first
 
 class ReminderReceiver : BroadcastReceiver() {
@@ -22,34 +20,47 @@ class ReminderReceiver : BroadcastReceiver() {
         val pendingResult = goAsync()
         val taskName = intent.getStringExtra("TASK_NAME") ?: run { pendingResult.finish(); return }
         val taskTimestamp = intent.getLongExtra("TASK_TIMESTAMP", -1L)
+        val isWorkspace = intent.getBooleanExtra("IS_WORKSPACE", false)
         
-        if (taskName.startsWith("Note:") || taskName.startsWith("Milestone:")) {
-            triggerNotification(context, taskName)
-            triggerVibration(context)
-            pendingResult.finish()
-            return
-        }
-
         receiverScope.launch {
             try {
-                // Ensure DataManager is initialized if process was killed
-                if (!DataManager.isDataLoaded.value) {
-                    DataManager.initialize(context.applicationContext)
-                    // Wait for initial load
-                    withTimeoutOrNull(3000) {
-                        DataManager.isDataLoaded.filter { it }.first()
+                val entryPoint = DataManager.getEntryPoint(context)
+                val userSettings = entryPoint.userRepository().getUserSettings().first()
+                
+                if (isWorkspace) {
+                    if (userSettings.isWorkspaceNotificationEnabled) {
+                        triggerNotification(context, taskName)
+                        triggerVibration(context)
                     }
+                    return@launch
+                }
+
+                if (taskName.startsWith("Note:")) {
+                    if (userSettings.isNoteNotificationEnabled) {
+                        triggerNotification(context, taskName)
+                        triggerVibration(context)
+                    }
+                    return@launch
+                }
+                
+                if (taskName.startsWith("Milestone:")) {
+                    if (userSettings.isProjectNotificationEnabled) {
+                        triggerNotification(context, taskName)
+                        triggerVibration(context)
+                    }
+                    return@launch
                 }
 
                 // Query for task status
-                val task = synchronized(DataManager.tasks) {
-                    DataManager.tasks.find { it.timestamp == taskTimestamp }
-                }
+                val tasks = entryPoint.taskRepository().getTasks().first()
+                val task = tasks.find { it.timestamp == taskTimestamp }
                 
                 // Only notify if task exists and is NOT completed
                 if (task != null && !task.isCompleted) {
-                    triggerNotification(context, taskName)
-                    triggerVibration(context)
+                    if (userSettings.isTaskNotificationEnabled) {
+                        triggerNotification(context, taskName)
+                        triggerVibration(context)
+                    }
                 }
             } catch (e: Exception) {
                 e.printStackTrace()
@@ -83,10 +94,10 @@ class ReminderReceiver : BroadcastReceiver() {
             .setPriority(NotificationCompat.PRIORITY_HIGH)
             .setCategory(NotificationCompat.CATEGORY_ALARM)
             .setSound(soundUri)
-            .setVibrate(longArrayOf(0, 500, 200, 500))
+            .setVibrate(longArrayOf(0, 400, 200, 400))
             .setAutoCancel(true)
             .setContentIntent(pendingIntent)
-            .setFullScreenIntent(pendingIntent, true) // Makes it pop up more aggressively
+            .setFullScreenIntent(pendingIntent, true)
             .build()
 
         notificationManager.notify(taskName.hashCode(), notification)
@@ -94,7 +105,12 @@ class ReminderReceiver : BroadcastReceiver() {
 
     private fun triggerVibration(context: Context) {
         val vibrator = context.getSystemService(Context.VIBRATOR_SERVICE) as Vibrator
-        vibrator.vibrate(VibrationEffect.createOneShot(1000, VibrationEffect.DEFAULT_AMPLITUDE))
+        val pattern = longArrayOf(0, 400, 200, 400)
+        val amplitudes = intArrayOf(0, VibrationEffect.DEFAULT_AMPLITUDE, 0, VibrationEffect.DEFAULT_AMPLITUDE)
+        
+        if (vibrator.hasVibrator()) {
+            vibrator.vibrate(VibrationEffect.createWaveform(pattern, amplitudes, -1))
+        }
     }
 
     companion object {

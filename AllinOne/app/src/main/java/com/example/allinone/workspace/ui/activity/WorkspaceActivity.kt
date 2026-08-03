@@ -10,7 +10,7 @@ import androidx.lifecycle.ViewModelProvider
 import com.example.allinone.AppStyle
 import com.example.allinone.BaseActivity
 import com.example.allinone.LocalAppStyle
-import com.example.allinone.workspace.data.AppDatabase
+import com.example.allinone.data.database.AppDatabase
 import com.example.allinone.workspace.domain.WorkspaceRepository
 import com.example.allinone.workspace.ui.ProjectWorkspaceScreen
 import com.example.allinone.workspace.ui.WorkspaceViewModel

@@ -30,15 +30,15 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.allinone.LocalAppStyle
-import com.example.allinone.workspace.data.NoteEntity
+import com.example.allinone.workspace.data.WorkspaceNoteEntity
 import com.example.allinone.workspace.ui.WorkspaceViewModel
 
 @Composable
 fun NoteViewSection(
-    notes: List<NoteEntity>,
-    onViewNote: (NoteEntity) -> Unit,
-    onEditNote: (NoteEntity) -> Unit,
-    onDeleteNote: (NoteEntity) -> Unit
+    notes: List<WorkspaceNoteEntity>,
+    onViewNote: (WorkspaceNoteEntity) -> Unit,
+    onEditNote: (WorkspaceNoteEntity) -> Unit,
+    onDeleteNote: (WorkspaceNoteEntity) -> Unit
 ) {
     val style = LocalAppStyle.current
     LazyColumn(contentPadding = PaddingValues(bottom = 24.dp)) {
@@ -117,7 +117,7 @@ fun NoteViewSection(
 
 @Composable
 fun NoteDetailSection(
-    note: NoteEntity,
+    note: WorkspaceNoteEntity,
     onBack: () -> Unit,
     onEdit: () -> Unit,
     onDelete: () -> Unit
@@ -162,7 +162,7 @@ fun NoteDetailSection(
 
 @Composable
 fun NoteAddEditSection(
-    note: NoteEntity? = null,
+    note: WorkspaceNoteEntity? = null,
     projectId: String,
     viewModel: WorkspaceViewModel,
     onBack: () -> Unit,
@@ -193,7 +193,7 @@ fun NoteAddEditSection(
                 TextButton(
                     onClick = {
                         val updated = note?.copy(title = title, content = content)
-                            ?: NoteEntity(projectId = projectId, title = title, content = content)
+                            ?: WorkspaceNoteEntity(projectId = projectId, title = title, content = content)
                         
                         if (note == null) viewModel.addNote(title, content, projectId)
                         else viewModel.updateNote(updated)

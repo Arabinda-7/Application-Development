@@ -11,10 +11,24 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.*
 import androidx.core.content.ContextCompat
+import androidx.lifecycle.lifecycleScope
+import com.example.allinone.data.model.JournalEntry
+import com.example.allinone.data.model.Note
+import com.example.allinone.data.model.ProjectFeature
+import com.example.allinone.domain.repository.ProjectRepository
+import dagger.hilt.android.AndroidEntryPoint
+import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.launch
 import java.text.SimpleDateFormat
 import java.util.*
+import java.util.LinkedList
+import javax.inject.Inject
 
+@AndroidEntryPoint
 class EditProjectActivity : BaseActivity() {
+
+    @Inject
+    lateinit var repository: ProjectRepository
 
     private var projectId: Long = -1
     private var project: Note? = null
@@ -59,38 +73,66 @@ class EditProjectActivity : BaseActivity() {
     private var isGoalsExpanded = false
     private var isSubfeaturesExpanded = true
     private var currentSubfeatureFilter = "ALL"
+    private var currentSearchQuery = ""
     private var isActiveSubfeaturesExpanded = true
     private var isCompletedSubfeaturesExpanded = false
+    private val expandedFeatureIds = LinkedList<String>()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_edit_project)
 
-        projectId = intent.getLongExtra("PROJECT_ID", -1)
-        if (projectId != -1L) {
-            project = synchronized(DataManager.projects) {
-                DataManager.projects.find { it.timestamp == projectId }
-            }
-        }
-
-        if (project == null) {
-            finish()
-            return
-        }
-
-        // Initialize shared editing state
-        DataManager.currentEditingSubFeatures.clear()
-        DataManager.currentEditingSubFeatures.addAll(project?.subFeatures ?: mutableListOf())
-
         initViews()
         setupLogic()
         setupKeyboardHandling(findViewById(R.id.add_project_root), findViewById(R.id.add_project_content_container))
+
+        projectId = intent.getLongExtra("PROJECT_ID", -1)
+        if (projectId != -1L) {
+            lifecycleScope.launch {
+                val projects = repository.getAllProjects().first()
+                project = projects.find { it.timestamp == projectId }
+                
+                if (project == null) {
+                    finish()
+                    return@launch
+                }
+
+                // Initialize shared editing state
+                DataManager.currentEditingSubFeatures.clear()
+                DataManager.currentEditingSubFeatures.addAll(project?.subFeatures ?: mutableListOf())
+
+                populateUI()
+            }
+        } else {
+            finish()
+        }
+    }
+
+    private fun populateUI() {
+        project?.let { p ->
+            titleInput.setText(p.title)
+            contentInput.setText(p.content)
+            isPinned = p.isPinned
+            selectedColor = if (p.color != -1) p.color else ContextCompat.getColor(this, R.color.card_blue)
+            selectedDeadline = p.deadline
+            seekProgress.progress = p.progress
+            tvProgressValue.text = "${p.progress}%"
+            
+            updateStatusUI(p.status)
+            updatePriorityUI(p.priority)
+            updateDeadlineUI()
+            updateThemeVisuals()
+            refreshSubFeatures()
+            refreshGoalsUI()
+        }
     }
 
     override fun onResume() {
         super.onResume()
-        refreshSubFeatures()
-        refreshGoalsUI()
+        if (project != null) {
+            refreshSubFeatures()
+            refreshGoalsUI()
+        }
     }
 
     private fun initViews() {
@@ -131,23 +173,6 @@ class EditProjectActivity : BaseActivity() {
     }
 
     private fun setupLogic() {
-        project?.let { p ->
-            titleInput.setText(p.title)
-            contentInput.setText(p.content)
-            isPinned = p.isPinned
-            selectedColor = if (p.color != -1) p.color else ContextCompat.getColor(this, R.color.card_blue)
-            selectedDeadline = p.deadline
-            seekProgress.progress = p.progress
-            tvProgressValue.text = "${p.progress}%"
-            
-            updateStatusUI(p.status)
-            updatePriorityUI(p.priority)
-            updateDeadlineUI()
-            updateThemeVisuals()
-            refreshSubFeatures()
-            refreshGoalsUI()
-        }
-
         btnSave.setOnClickListener { saveProject() }
         btnDelete.setOnClickListener { showDeleteConfirmation() }
         btnPin.setOnClickListener { 
@@ -196,20 +221,32 @@ class EditProjectActivity : BaseActivity() {
             ivSubfeaturesMainChevron.setImageResource(if (isSubfeaturesExpanded) android.R.drawable.arrow_up_float else android.R.drawable.arrow_down_float)
         }
 
+        findViewById<EditText>(R.id.et_search_subfeatures).addTextChangedListener(object : android.text.TextWatcher {
+            override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {}
+            override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {
+                currentSearchQuery = s?.toString() ?: ""
+                refreshSubFeatures()
+            }
+            override fun afterTextChanged(s: android.text.Editable?) {}
+        })
+
         findViewById<View>(R.id.btn_add_subfeature).setOnClickListener {
             val nameInput = etNewSubfeature.text.toString().trim()
-            if (nameInput.isNotEmpty()) {
-                val finalName = DataManager.getUniqueFeatureName(nameInput, DataManager.currentEditingSubFeatures)
-                val newFeature = ProjectFeature(finalName, position = DataManager.currentEditingSubFeatures.size + 1)
-                DataManager.currentEditingSubFeatures.add(newFeature)
-                project?.subFeatures?.add(newFeature) // Immediate sync for persistence
-                etNewSubfeature.text.clear()
-                refreshSubFeatures()
-                startActivity(Intent(this, AddSubFeatureActivity::class.java).apply {
-                    putExtra("PROJECT_ID", projectId)
-                    putExtra("SUB_FEATURE_ID", newFeature.id)
-                })
+            val finalName = if (nameInput.isEmpty()) {
+                "Subfeature ${DataManager.currentEditingSubFeatures.size + 1}"
+            } else {
+                DataManager.getUniqueFeatureName(nameInput, DataManager.currentEditingSubFeatures)
             }
+            
+            val newFeature = ProjectFeature(finalName, position = DataManager.currentEditingSubFeatures.size + 1)
+            DataManager.currentEditingSubFeatures.add(newFeature)
+            project?.subFeatures?.add(newFeature) // Immediate sync for persistence
+            etNewSubfeature.text.clear()
+            refreshSubFeatures()
+            startActivity(Intent(this, AddSubFeatureActivity::class.java).apply {
+                putExtra("PROJECT_ID", projectId)
+                putExtra("SUB_FEATURE_ID", newFeature.id)
+            })
         }
     }
 
@@ -365,8 +402,13 @@ class EditProjectActivity : BaseActivity() {
         if (!isSubfeaturesExpanded) return
 
         val allSubs = DataManager.currentEditingSubFeatures
-        val filteredSubs = if (currentSubfeatureFilter == "ALL") allSubs 
-                          else allSubs.filter { it.tag.uppercase() == currentSubfeatureFilter || (currentSubfeatureFilter == "OTHER" && it.tag.isEmpty()) }
+        val filteredSubs = allSubs.filter { sub ->
+            val matchesCategory = if (currentSubfeatureFilter == "ALL") true 
+                                 else sub.tag.uppercase() == currentSubfeatureFilter || (currentSubfeatureFilter == "OTHER" && sub.tag.isEmpty())
+            val matchesSearch = if (currentSearchQuery.isEmpty()) true 
+                               else sub.name.contains(currentSearchQuery, true) || sub.details.contains(currentSearchQuery, true)
+            matchesCategory && matchesSearch
+        }
 
         val activeSubs = filteredSubs.filter { !it.isCompleted }
         val completedSubs = filteredSubs.filter { it.isCompleted }
@@ -525,8 +567,18 @@ class EditProjectActivity : BaseActivity() {
 
         layout.setOnClickListener {
             if (sub.details.isNotEmpty()) {
-                sub.isExpanded = !sub.isExpanded
-                tvDetails.visibility = if (sub.isExpanded) View.VISIBLE else View.GONE
+                if (sub.isExpanded) {
+                    sub.isExpanded = false
+                    expandedFeatureIds.remove(sub.id)
+                } else {
+                    if (expandedFeatureIds.size >= 2) {
+                        val oldestId = expandedFeatureIds.pollFirst()
+                        DataManager.currentEditingSubFeatures.find { it.id == oldestId }?.isExpanded = false
+                    }
+                    sub.isExpanded = true
+                    expandedFeatureIds.addLast(sub.id)
+                }
+                refreshSubFeatures()
             }
         }
         
@@ -548,18 +600,18 @@ class EditProjectActivity : BaseActivity() {
         menuView.findViewById<View>(R.id.menu_edit).visibility = View.GONE
 
         menuView.findViewById<View>(R.id.menu_delete).setOnClickListener {
-            android.app.AlertDialog.Builder(this)
-                .setTitle("Delete Milestone")
-                .setMessage("Are you sure you want to remove '${sub.name}'?")
-                .setPositiveButton("DELETE") { _, _ ->
-                    DataManager.currentEditingSubFeatures.remove(sub)
-                    project?.subFeatures?.remove(sub) // Immediate sync for persistence
-                    DataManager.currentEditingSubFeatures.forEachIndexed { index, feature -> feature.position = index + 1 }
-                    project?.subFeatures?.forEachIndexed { index, feature -> feature.position = index + 1 }
-                    refreshSubFeatures()
-                }
-                .setNegativeButton("CANCEL", null)
-                .show()
+            showStyledConfirmationDialog(
+                title = "Delete Milestone",
+                message = "Are you sure you want to remove '${sub.name}'?",
+                actionText = "DELETE",
+                actionColor = Color.parseColor("#FF5252")
+            ) {
+                DataManager.currentEditingSubFeatures.remove(sub)
+                project?.subFeatures?.remove(sub) // Immediate sync for persistence
+                DataManager.currentEditingSubFeatures.forEachIndexed { index, feature -> feature.position = index + 1 }
+                project?.subFeatures?.forEachIndexed { index, feature -> feature.position = index + 1 }
+                refreshSubFeatures()
+            }
             popupWindow.dismiss()
         }
 
@@ -647,21 +699,31 @@ class EditProjectActivity : BaseActivity() {
             p.subFeatures.clear()
             p.subFeatures.addAll(DataManager.currentEditingSubFeatures)
             p.updatedAt = System.currentTimeMillis()
+            p.isGlobalProject = true
             
-            DataManager.saveData(this)
-            finish()
+            lifecycleScope.launch {
+                repository.updateProject(p)
+                DataManager.saveData(this@EditProjectActivity)
+                finish()
+            }
         }
     }
 
     private fun showDeleteConfirmation() {
-        android.app.AlertDialog.Builder(this)
-            .setTitle("Delete Project")
-            .setMessage("Are you sure?")
-            .setPositiveButton("DELETE") { _, _ ->
-                DataManager.projects.remove(project)
-                DataManager.saveData(this)
-                finish()
-            }.setNegativeButton("CANCEL", null).show()
+        showStyledConfirmationDialog(
+            title = "Delete Project",
+            message = "Are you sure you want to delete this project? This action cannot be undone.",
+            actionText = "DELETE",
+            actionColor = Color.parseColor("#FF5252")
+        ) {
+            project?.let { p ->
+                lifecycleScope.launch {
+                    repository.deleteProject(p)
+                    DataManager.saveData(this@EditProjectActivity)
+                    finish()
+                }
+            }
+        }
     }
 
     private fun Int.dpToPx(): Int = (this * resources.displayMetrics.density).toInt()

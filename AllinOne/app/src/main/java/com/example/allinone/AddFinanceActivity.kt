@@ -14,6 +14,7 @@ import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
 import com.google.android.material.chip.Chip
 import com.google.android.material.chip.ChipGroup
+import com.example.allinone.data.model.Transaction
 import java.text.SimpleDateFormat
 import java.util.*
 

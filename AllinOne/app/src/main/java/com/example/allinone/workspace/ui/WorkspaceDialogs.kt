@@ -1,5 +1,7 @@
 package com.example.allinone.workspace.ui
 
+import com.example.allinone.data.model.*
+
 import androidx.compose.foundation.*
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.*
@@ -23,8 +25,8 @@ fun DeleteConfirmationDialog(
     onConfirm: () -> Unit
 ) {
     val title = when (entity) {
-        is NoteEntity -> "Delete Note"
-        is TaskEntity -> "Delete Task"
+        is WorkspaceNoteEntity -> "Delete Note"
+        is WorkspaceTaskEntity -> "Delete Task"
         is GoalEntity -> "Delete Goal"
         is FeatureEntity -> "Delete Feature"
         is BugEntity -> "Delete Bug"
@@ -34,8 +36,8 @@ fun DeleteConfirmationDialog(
     }
     
     val name = when (entity) {
-        is NoteEntity -> entity.title
-        is TaskEntity -> entity.title
+        is WorkspaceNoteEntity -> entity.title
+        is WorkspaceTaskEntity -> entity.title
         is GoalEntity -> entity.title
         is FeatureEntity -> entity.title
         is BugEntity -> entity.title
@@ -63,7 +65,7 @@ fun DeleteConfirmationDialog(
 }
 
 @Composable
-fun ImportSelectionDialog(onDismiss: () -> Unit, onImport: (com.example.allinone.Note) -> Unit) {
+fun ImportSelectionDialog(onDismiss: () -> Unit, onImport: (Note) -> Unit) {
     val notes = remember { com.example.allinone.DataManager.projects.filter { it.category == "Project" || it.category == "ProjectIdea" || it.subFeatures.isNotEmpty() } }
     AlertDialog(onDismissRequest = onDismiss, title = { Text("Import Project or Idea", color = Color.White) }, containerColor = Color(0xFF1A1A1A), text = {
         if (notes.isEmpty()) { Text("No existing projects or ideas found to import.", color = Color.White.copy(alpha = 0.6f)) }

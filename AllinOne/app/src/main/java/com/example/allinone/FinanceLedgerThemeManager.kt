@@ -3,6 +3,7 @@ package com.example.allinone
 import android.graphics.Color
 import android.graphics.drawable.GradientDrawable
 import android.view.View
+import com.example.allinone.core.utils.UIUtils
 import com.google.android.material.card.MaterialCardView
 
 class FinanceLedgerThemeManager(

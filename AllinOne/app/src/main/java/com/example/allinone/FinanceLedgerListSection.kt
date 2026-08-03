@@ -4,6 +4,7 @@ import android.content.Context
 import android.view.View
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
+import com.example.allinone.data.model.PersonalLedgerEntry as LedgerEntry
 
 class FinanceLedgerListSection(
     private val context: Context,

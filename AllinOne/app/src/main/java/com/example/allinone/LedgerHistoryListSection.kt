@@ -11,6 +11,8 @@ import androidx.recyclerview.widget.RecyclerView
 import java.text.SimpleDateFormat
 import java.util.*
 
+import com.example.allinone.data.model.PersonalLedgerEntry as LedgerEntry
+
 class LedgerHistoryListSection(
     private val recyclerView: RecyclerView,
     private val onLongClick: (View, LedgerEntry) -> Unit,

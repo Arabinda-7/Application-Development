@@ -21,6 +21,11 @@ import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
 import com.google.android.material.chip.Chip
 import com.google.android.material.chip.ChipGroup
+import com.example.allinone.core.utils.UIUtils
+import com.example.allinone.data.model.Task
+import com.example.allinone.data.model.Subtask
+import androidx.lifecycle.lifecycleScope
+import kotlinx.coroutines.launch
 import java.text.SimpleDateFormat
 import java.util.*
 
@@ -272,11 +277,14 @@ class AddTaskActivity : BaseActivity() {
             
             val isNew = existingTask == null || !DataManager.tasks.any { it.timestamp == task.timestamp }
 
-            if (isNew) {
-                DataManager.tasks.add(0, task)
-                DataManager.addActivity("Captured Task: $name")
-            } else {
-                DataManager.addActivity("Updated Task: $name")
+            lifecycleScope.launch {
+                if (isNew) {
+                    DataManager.addTask(task)
+                    DataManager.addActivity("Captured Task: $name")
+                } else {
+                    DataManager.updateTask(task)
+                    DataManager.addActivity("Updated Task: $name")
+                }
             }
             
             selectedReminder?.let { time ->
@@ -286,7 +294,6 @@ class AddTaskActivity : BaseActivity() {
                 DataManager.checkAndSetNewTodayNotification(time)
             }
 
-            DataManager.saveData(this)
             UIUtils.performSuccessHaptic(this)
             setResult(RESULT_OK)
             finish()

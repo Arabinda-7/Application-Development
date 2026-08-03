@@ -1,6 +1,7 @@
 package com.example.allinone
 
 import android.app.Dialog
+import com.example.allinone.security.SecurityManager
 import android.content.Context
 import android.content.pm.PackageManager
 import android.graphics.Rect
@@ -9,12 +10,17 @@ import android.view.MotionEvent
 import android.view.View
 import android.view.inputmethod.InputMethodManager
 import android.widget.EditText
+import android.widget.TextView
+import android.content.res.ColorStateList
+import android.graphics.Color
+import android.view.ViewGroup
 import androidx.activity.enableEdgeToEdge
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.ContextCompat
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
+import com.example.allinone.core.utils.UIUtils
 
 open class BaseActivity : AppCompatActivity() {
     private var appliedDisplaySize: String = ""
@@ -64,14 +70,42 @@ open class BaseActivity : AppCompatActivity() {
         dialog.window?.let { window ->
             window.setBackgroundDrawableResource(android.R.color.transparent)
             window.setLayout(
-                android.view.ViewGroup.LayoutParams.MATCH_PARENT,
-                android.view.ViewGroup.LayoutParams.WRAP_CONTENT
+                ViewGroup.LayoutParams.MATCH_PARENT,
+                ViewGroup.LayoutParams.WRAP_CONTENT
             )
             window.addFlags(android.view.WindowManager.LayoutParams.FLAG_BLUR_BEHIND)
             window.attributes.blurBehindRadius = 20
         }
         activeDialog = dialog
         dialog.show()
+    }
+
+    fun showStyledConfirmationDialog(
+        title: String,
+        message: String,
+        actionText: String = "CONFIRM",
+        actionColor: Int = Color.parseColor("#1A73E8"),
+        onConfirm: () -> Unit
+    ) {
+        val dialog = Dialog(this)
+        dialog.setContentView(R.layout.dialog_custom_confirm)
+        
+        dialog.findViewById<TextView>(R.id.tv_confirm_title).text = title
+        dialog.findViewById<TextView>(R.id.tv_confirm_message).text = message
+        
+        val btnCancel = dialog.findViewById<TextView>(R.id.btn_confirm_cancel)
+        val btnAction = dialog.findViewById<TextView>(R.id.btn_confirm_action)
+
+        btnAction.text = actionText
+        btnAction.backgroundTintList = ColorStateList.valueOf(actionColor)
+
+        btnCancel.setOnClickListener { dialog.dismiss() }
+        btnAction.setOnClickListener {
+            dialog.dismiss()
+            onConfirm()
+        }
+
+        showDialogSafe(dialog)
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {

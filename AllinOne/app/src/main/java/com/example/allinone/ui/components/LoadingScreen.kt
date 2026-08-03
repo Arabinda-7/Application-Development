@@ -85,7 +85,7 @@ fun LoadingScreen(onFinished: () -> Unit = {}) {
             progress.animateTo(
                 targetValue = 1f,
                 animationSpec = tween(
-                    durationMillis = loadingTime,
+                    durationMillis = loadingTime.toInt(),
                     easing = LinearEasing
                 )
             )

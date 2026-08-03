@@ -36,7 +36,7 @@ class WorkoutHistoryComposeHandler(
             }
             
             val trendData = remember(dataVersion) { 
-                DataManager.getLastSevenDaysDetailedProgress().map { Pair(it.first, it.second) } 
+                DataManager.getLastSevenDaysDetailedProgress().mapIndexed { idx, pair -> Pair(idx, pair.second) } 
             }
             val workoutColor = if (DataManager.globalWorkoutColor != -1) ComposeColor(DataManager.globalWorkoutColor) else ComposeColor(0xFFFFB800)
 
@@ -69,7 +69,8 @@ class WorkoutHistoryComposeHandler(
                 isWorkoutContext = true,
                 showPerformanceCard = true,
                 showTrendCard = true,
-                showBackgroundAura = false
+                showBackgroundAura = false,
+                showFilterSelector = false
             )
         }
     }

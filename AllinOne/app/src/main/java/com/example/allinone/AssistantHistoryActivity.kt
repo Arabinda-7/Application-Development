@@ -73,7 +73,7 @@ class AssistantHistoryActivity : BaseActivity() {
                     onBack = { finish() },
                     onClearAll = {
                         lifecycleScope.launch {
-                            aiChatRepo?.clearAllHistory()
+                            aiChatRepo?.clearEverything()
                         }
                     },
                     onSessionClick = { session ->

@@ -33,6 +33,7 @@ class OnboardingActivity : BaseActivity() {
         val userName = remember { mutableStateOf("") }
         val selectedAvatar = remember { mutableIntStateOf(R.drawable.boy_avatar_profile) }
         val selectedRoles = remember { mutableStateOf(setOf<String>()) }
+        val isAiEnabled = remember { mutableStateOf(false) }
 
         val sections = remember {
             listOf(
@@ -58,6 +59,7 @@ class OnboardingActivity : BaseActivity() {
             if (isNameFilled) {
                 list.add(OnboardingPageType.GLOBAL_HUB)
                 sections.forEach { if (it.isEnabled.value) list.add(OnboardingPageType.FEATURE_DEEP_DIVE) }
+                list.add(OnboardingPageType.AI_INTRO)
                 list.add(OnboardingPageType.ACTIVATION)
             }
             list
@@ -109,6 +111,7 @@ class OnboardingActivity : BaseActivity() {
                                 FeatureDeepDivePage(enabledSections[sectionIndex], accentColor)
                             }
                         }
+                        OnboardingPageType.AI_INTRO -> AIIntroPage(isAiEnabled, accentColor)
                         OnboardingPageType.ACTIVATION -> ActivationPage(accentColor)
                     }
                 }
@@ -134,16 +137,17 @@ class OnboardingActivity : BaseActivity() {
                             scope.launch { pagerState.animateScrollToPage(current + 1) }
                         }
                     } else {
-                        completeOnboarding(userName.value, selectedAvatar.intValue, sections)
+                        completeOnboarding(userName.value, selectedAvatar.intValue, sections, isAiEnabled.value)
                     }
                 }
             }
         }
     }
 
-    private fun completeOnboarding(name: String, avatar: Int, sections: List<OnboardingSection>) {
+    private fun completeOnboarding(name: String, avatar: Int, sections: List<OnboardingSection>, aiEnabled: Boolean) {
         DataManager.userName = if (name.isBlank()) "User" else name
         DataManager.userAvatarRes = avatar
+        DataManager.isAiAssistantEnabled = aiEnabled
         sections.forEach { section ->
             when (section.id) {
                 "HABITS" -> DataManager.showHabitSection = section.isEnabled.value

@@ -55,11 +55,11 @@ data class WorkspaceUIState(
     val projects: List<ProjectEntity> = emptyList(),
     val selectedProject: ProjectEntity? = null,
     val goals: List<GoalEntity> = emptyList(),
-    val tasks: List<TaskEntity> = emptyList(),
+    val tasks: List<WorkspaceTaskEntity> = emptyList(),
     val features: List<FeatureEntity> = emptyList(),
     val bugs: List<BugEntity> = emptyList(),
     val ideas: List<IdeaEntity> = emptyList(),
-    val notes: List<NoteEntity> = emptyList(),
+    val notes: List<WorkspaceNoteEntity> = emptyList(),
     val resources: List<ResourceEntity> = emptyList(),
     val logs: List<ActivityLogEntity> = emptyList(),
     val isLoading: Boolean = true

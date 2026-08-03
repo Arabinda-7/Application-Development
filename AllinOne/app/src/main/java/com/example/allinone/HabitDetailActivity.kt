@@ -15,11 +15,16 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.ContextCompat
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
+import androidx.activity.viewModels
+import com.example.allinone.data.model.Habit
+import dagger.hilt.android.AndroidEntryPoint
 import java.text.SimpleDateFormat
 import java.util.*
 
+@AndroidEntryPoint
 class HabitDetailActivity : BaseActivity() {
 
+    private val viewModel: HabitTrackerViewModel by viewModels()
     private var habit: Habit? = null
     private var currentCalendar = Calendar.getInstance()
     private lateinit var calendarGrid: GridLayout
@@ -32,7 +37,7 @@ class HabitDetailActivity : BaseActivity() {
         setupKeyboardHandling(findViewById(R.id.habit_detail_root), findViewById(R.id.habit_detail_content_container))
 
         val habitId = intent.getLongExtra("HABIT_ID", -1L)
-        habit = DataManager.habits.find { it.timestamp == habitId }
+        habit = viewModel.habits.value.find { it.timestamp == habitId }
 
         if (habit == null) {
             finish()

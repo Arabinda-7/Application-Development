@@ -15,10 +15,17 @@ import androidx.core.content.ContextCompat
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
 import com.google.android.material.chip.ChipGroup
+import androidx.activity.viewModels
+import com.example.allinone.data.model.Workout
+import com.example.allinone.domain.repository.WorkoutSettings
+import com.example.allinone.core.utils.UIUtils
+import dagger.hilt.android.AndroidEntryPoint
 import java.util.*
 
+@AndroidEntryPoint
 class AddWorkoutActivity : BaseActivity() {
 
+    private val viewModel: WorkoutViewModel by viewModels()
     private var workoutId: Long = -1L
     private var existingWorkout: Workout? = null
     
@@ -73,7 +80,7 @@ class AddWorkoutActivity : BaseActivity() {
 
         workoutId = intent.getLongExtra("WORKOUT_ID", -1L)
         if (workoutId != -1L) {
-            existingWorkout = DataManager.workouts.find { it.timestamp == workoutId }
+            existingWorkout = viewModel.workouts.value.find { it.timestamp == workoutId }
         }
 
         initViews()
@@ -82,6 +89,7 @@ class AddWorkoutActivity : BaseActivity() {
     }
 
     private fun initViews() {
+        // ... (unchanged)
         nameInput = findViewById(R.id.workout_name_input)
         targetInput = findViewById(R.id.target_input)
         targetSetsInput = findViewById(R.id.target_sets_input)
@@ -117,8 +125,9 @@ class AddWorkoutActivity : BaseActivity() {
     }
 
     private fun setupLogic() {
+        val settings = viewModel.workoutSettings.value
         tempRepeatDays = existingWorkout?.repeatDays?.toMutableList() ?: mutableListOf(0, 1, 2, 3, 4, 5, 6)
-        selectedMode = existingWorkout?.trackingMode ?: DataManager.workoutDefaultMode
+        selectedMode = existingWorkout?.trackingMode ?: settings.defaultMode
         selectedFrequency = existingWorkout?.frequency ?: "Anytime"
         selectedColor = existingWorkout?.color ?: colors[0]
         selectedIcon = existingWorkout?.iconResId ?: R.drawable.icons8_exercise_100
@@ -234,7 +243,8 @@ class AddWorkoutActivity : BaseActivity() {
             )
         )
 
-        DataManager.workoutMuscleGroups.forEach { group ->
+        val appSettings = settings.muscleGroups
+        appSettings.forEach { group ->
             val chip = com.google.android.material.chip.Chip(this)
             chip.text = group
             chip.isCheckable = true
@@ -431,21 +441,23 @@ class AddWorkoutActivity : BaseActivity() {
         val finalMuscleSelection = if (selectedMuscleGroups.isEmpty()) listOf("General") else selectedMuscleGroups.toList()
         
         if (existingWorkout == null) {
-            DataManager.workouts.add(Workout(name, false, selectedMode, target, repsPerSet = repsPerSet, frequency = selectedFrequency, color = selectedColor, iconResId = selectedIcon, muscleGroups = finalMuscleSelection, repeatType = "SPECIFIC_DAYS", repeatDays = tempRepeatDays.toList(), repeatCount = 1))
+            viewModel.insertWorkout(Workout(name, false, selectedMode, target, repsPerSet = repsPerSet, frequency = selectedFrequency, color = selectedColor, iconResId = selectedIcon, muscleGroups = finalMuscleSelection, repeatType = "SPECIFIC_DAYS", repeatDays = tempRepeatDays.toList(), repeatCount = 1))
         } else {
             existingWorkout?.let {
-                it.name = name
-                it.target = target
-                it.repsPerSet = repsPerSet
-                it.trackingMode = selectedMode
-                it.frequency = selectedFrequency
-                it.color = selectedColor
-                it.iconResId = selectedIcon
-                it.muscleGroups = finalMuscleSelection
-                it.repeatDays = tempRepeatDays.toList()
+                val updatedWorkout = it.copy(
+                    name = name,
+                    target = target,
+                    repsPerSet = repsPerSet,
+                    trackingMode = selectedMode,
+                    frequency = selectedFrequency,
+                    color = selectedColor,
+                    iconResId = selectedIcon,
+                    muscleGroups = finalMuscleSelection,
+                    repeatDays = tempRepeatDays.toList()
+                )
+                viewModel.updateWorkout(updatedWorkout)
             }
         }
-        DataManager.saveData(this, true)
         setResult(RESULT_OK)
         finish()
     }

@@ -2,6 +2,7 @@ package com.example.allinone.workspace.ui
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.example.allinone.data.model.*
 import com.example.allinone.workspace.data.*
 import com.example.allinone.workspace.domain.WorkspaceRepository
 import kotlinx.coroutines.flow.*
@@ -56,11 +57,11 @@ class WorkspaceViewModel(private val repository: WorkspaceRepository) : ViewMode
                     WorkspaceUIState(
                         selectedProject = array[0] as? ProjectEntity,
                         goals = array[1] as List<GoalEntity>,
-                        tasks = array[2] as List<TaskEntity>,
+                        tasks = array[2] as List<WorkspaceTaskEntity>,
                         features = array[3] as List<FeatureEntity>,
                         bugs = array[4] as List<BugEntity>,
                         ideas = array[5] as List<IdeaEntity>,
-                        notes = array[6] as List<NoteEntity>,
+                        notes = array[6] as List<WorkspaceNoteEntity>,
                         resources = array[7] as List<ResourceEntity>,
                         logs = array[8] as List<ActivityLogEntity>,
                         projects = array[9] as List<ProjectEntity>
@@ -104,7 +105,7 @@ class WorkspaceViewModel(private val repository: WorkspaceRepository) : ViewMode
     ) {
         com.example.allinone.DataManager.checkAndSetNewTodayNotification(dueDate)
         viewModelScope.launch {
-            repository.insertTask(TaskEntity(
+            repository.insertTask(WorkspaceTaskEntity(
                 projectId = projectId,
                 title = title,
                 description = description,
@@ -118,12 +119,12 @@ class WorkspaceViewModel(private val repository: WorkspaceRepository) : ViewMode
         }
     }
 
-    fun insertTask(task: TaskEntity) {
+    fun insertTask(task: WorkspaceTaskEntity) {
         com.example.allinone.DataManager.checkAndSetNewTodayNotification(task.dueDate)
         viewModelScope.launch { repository.insertTask(task) }
     }
 
-    fun deleteTask(task: TaskEntity) {
+    fun deleteTask(task: WorkspaceTaskEntity) {
         viewModelScope.launch { repository.deleteTask(task) }
     }
 
@@ -254,19 +255,19 @@ class WorkspaceViewModel(private val repository: WorkspaceRepository) : ViewMode
 
     fun addNote(title: String, content: String, projectId: String) {
         viewModelScope.launch {
-            repository.insertNote(NoteEntity(projectId = projectId, title = title, content = content))
+            repository.insertNote(WorkspaceNoteEntity(projectId = projectId, title = title, content = content))
         }
     }
 
-    fun updateNote(note: NoteEntity) {
+    fun updateNote(note: WorkspaceNoteEntity) {
         viewModelScope.launch { repository.updateNote(note) }
     }
 
-    fun deleteNote(note: NoteEntity) {
+    fun deleteNote(note: WorkspaceNoteEntity) {
         viewModelScope.launch { repository.deleteNote(note) }
     }
 
-    fun importNote(note: com.example.allinone.Note, isTransfer: Boolean = false) {
+    fun importNote(note: Note, isTransfer: Boolean = false) {
         viewModelScope.launch {
             repository.importFromNote(note)
             if (isTransfer) {
@@ -277,15 +278,15 @@ class WorkspaceViewModel(private val repository: WorkspaceRepository) : ViewMode
     }
 
     fun createSampleProject() {
-        val sampleNote = com.example.allinone.Note(
+        val sampleNote = Note(
             title = "Sample Workspace Project",
             content = "This is a sample project to showcase how the workspace works. It includes goals, tasks, and activity logs.",
             category = "Project"
         ).apply {
-            subFeatures.add(com.example.allinone.ProjectFeature(name = "Review Workspace Features", weight = 2))
-            subFeatures.add(com.example.allinone.ProjectFeature(name = "Add first task", isCompleted = true))
-            ideaGoals.add(com.example.allinone.JournalEntry("Understand the layout"))
-            journalEntries.add(com.example.allinone.JournalEntry("Successfully started exploring the new workspace!"))
+            subFeatures.add(ProjectFeature(name = "Review Workspace Features", weight = 2))
+            subFeatures.add(ProjectFeature(name = "Add first task", isCompleted = true))
+            ideaGoals.add(JournalEntry("Understand the layout"))
+            journalEntries.add(JournalEntry("Successfully started exploring the new workspace!"))
         }
         importNote(sampleNote)
     }
@@ -304,7 +305,7 @@ class WorkspaceViewModel(private val repository: WorkspaceRepository) : ViewMode
         viewModelScope.launch { repository.deleteResource(resource) }
     }
 
-    fun updateTask(task: TaskEntity) {
+    fun updateTask(task: WorkspaceTaskEntity) {
         com.example.allinone.DataManager.checkAndSetNewTodayNotification(task.dueDate)
         viewModelScope.launch { repository.updateTask(task) }
     }
@@ -329,7 +330,7 @@ class WorkspaceViewModel(private val repository: WorkspaceRepository) : ViewMode
     fun convertIdeaToTask(idea: IdeaEntity) {
         viewModelScope.launch {
             repository.insertIdea(idea.copy(status = "Converted"))
-            repository.insertTask(TaskEntity(
+            repository.insertTask(WorkspaceTaskEntity(
                 projectId = idea.projectId,
                 title = idea.title,
                 description = idea.description

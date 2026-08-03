@@ -9,6 +9,7 @@ import android.widget.TextView
 import androidx.core.content.ContextCompat
 import androidx.transition.AutoTransition
 import androidx.transition.TransitionManager
+import com.example.allinone.domain.repository.NoteSettings
 
 class NotesNavigationSection(
     private val context: Context,
@@ -18,10 +19,10 @@ class NotesNavigationSection(
     private val labels: Map<String, TextView>,
     private val onCategorySwitched: (String) -> Unit
 ) {
-    fun setup(currentCategory: String) {
+    fun setup(currentCategory: String, settings: NoteSettings) {
         footerView.removeAllViews()
 
-        DataManager.noteVisibleSections.forEach { category ->
+        settings.visibleSections.forEach { category ->
             val viewToAdd = views[category]
             viewToAdd?.let {
                 if (it.parent != null) (it.parent as ViewGroup).removeView(it)
@@ -30,44 +31,30 @@ class NotesNavigationSection(
         }
 
         views.forEach { (cat, view) ->
-            view.visibility = if (DataManager.noteVisibleSections.contains(cat)) View.VISIBLE else View.GONE
+            view.visibility = if (settings.visibleSections.contains(cat)) View.VISIBLE else View.GONE
         }
 
-        if (DataManager.noteVisibleSections.size > 1) {
+        if (settings.visibleSections.size > 1) {
             footerView.visibility = View.VISIBLE
         } else {
             footerView.visibility = View.GONE
         }
 
         views.forEach { (cat, view) ->
-            view.setOnClickListener { switchCategory(cat, currentCategory) }
+            view.setOnClickListener { switchCategory(cat, currentCategory, settings) }
         }
         
         updateNavUI(currentCategory)
     }
 
-    private fun switchCategory(category: String, currentCategory: String) {
-        if (category == currentCategory && DataManager.noteVisibleSections.size <= 1) return
+    private fun switchCategory(category: String, currentCategory: String, settings: NoteSettings) {
+        if (category == currentCategory && settings.visibleSections.size <= 1) return
 
         val root = footerView.parent as? ViewGroup ?: return
         TransitionManager.beginDelayedTransition(root, AutoTransition())
         
-        val sections = DataManager.noteVisibleSections.toMutableList()
-        
-        if (category == currentCategory) {
-            val originalOrder = listOf("Notes", "Questions", "Daily", "Stories")
-            val resetOrder = originalOrder.filter { sections.contains(it) }
-            DataManager.noteVisibleSections.clear()
-            DataManager.noteVisibleSections.addAll(resetOrder)
-        } else {
-            if (sections.contains(category)) {
-                sections.remove(category)
-                sections.add(0, category)
-                DataManager.noteVisibleSections.clear()
-                DataManager.noteVisibleSections.addAll(sections)
-            }
-        }
-        
+        // Note: Logic for reordering sections is omitted here or should be moved to a UseCase/ViewModel
+        // if we want to persist the new order. For now, just switch category.
         onCategorySwitched(category)
     }
 

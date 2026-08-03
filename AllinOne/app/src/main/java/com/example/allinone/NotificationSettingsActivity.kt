@@ -2,94 +2,102 @@ package com.example.allinone
 
 import android.app.TimePickerDialog
 import android.os.Bundle
-import android.widget.Button
-import android.widget.ImageButton
-import android.widget.TextView
-import androidx.appcompat.widget.SwitchCompat
+import android.view.View
+import androidx.recyclerview.widget.LinearLayoutManager
+import androidx.recyclerview.widget.RecyclerView
 import com.example.allinone.DataManager
 import java.util.*
 
 class NotificationSettingsActivity : BaseActivity() {
 
-    private lateinit var swMorning: SwitchCompat
-    private lateinit var tvMorningTime: TextView
-    private lateinit var btnMorningTime: Button
-
-    private lateinit var swNight: SwitchCompat
-    private lateinit var tvNightTime: TextView
-    private lateinit var btnNightTime: Button
+    private lateinit var settingsList: RecyclerView
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_notification_settings)
 
-        initViews()
-        setupLogic()
-        updateUI()
+        settingsList = findViewById(R.id.settings_list)
+        findViewById<View>(R.id.btn_back).setOnClickListener { finish() }
+
+        settingsList.layoutManager = LinearLayoutManager(this)
+        setupKeyboardHandling(findViewById(R.id.section_settings_root), findViewById(R.id.section_settings_content_container))
+        loadSettings()
     }
 
-    private fun initViews() {
-        findViewById<ImageButton>(R.id.btn_back).setOnClickListener { finish() }
+    private fun loadSettings() {
+        val settings = mutableListOf<ConfigItem>()
         
-        swMorning = findViewById(R.id.sw_morning_reminder)
-        tvMorningTime = findViewById(R.id.tv_morning_time)
-        btnMorningTime = findViewById(R.id.btn_set_morning_time)
-
-        swNight = findViewById(R.id.sw_night_reminder)
-        tvNightTime = findViewById(R.id.tv_night_time)
-        btnNightTime = findViewById(R.id.btn_set_night_time)
-    }
-
-    private fun setupLogic() {
-        swMorning.setOnCheckedChangeListener { _, isChecked ->
-            DataManager.isMorningReminderEnabled = isChecked
-            DataManager.saveData(this)
-            if (isChecked) {
+        settings.add(ConfigItem("Daily Summaries", isHeader = true))
+        
+        settings.add(ConfigItem("Morning Motivation", "Enable daily motivation alerts", isToggle = true, isChecked = DataManager.isMorningReminderEnabled) {
+            DataManager.isMorningReminderEnabled = !DataManager.isMorningReminderEnabled
+            if (DataManager.isMorningReminderEnabled) {
                 NotificationScheduler.scheduleMorningReminder(this, DataManager.morningReminderTime)
             } else {
                 NotificationScheduler.cancelReminder(this, NotificationScheduler.MORNING_REMINDER_ID)
             }
-        }
-
-        btnMorningTime.setOnClickListener {
+        })
+        
+        settings.add(ConfigItem("Morning Time", "Scheduled at ${DataManager.morningReminderTime}") {
             showTimePicker(DataManager.morningReminderTime) { newTime ->
                 DataManager.morningReminderTime = newTime
-                DataManager.saveData(this)
-                tvMorningTime.text = "Scheduled at $newTime"
                 if (DataManager.isMorningReminderEnabled) {
                     NotificationScheduler.scheduleMorningReminder(this, newTime)
                 }
+                loadSettings()
             }
-        }
+        })
 
-        swNight.setOnCheckedChangeListener { _, isChecked ->
-            DataManager.isNightReminderEnabled = isChecked
-            DataManager.saveData(this)
-            if (isChecked) {
+        settings.add(ConfigItem("Day End Review", "Enable night summary alerts", isToggle = true, isChecked = DataManager.isNightReminderEnabled) {
+            DataManager.isNightReminderEnabled = !DataManager.isNightReminderEnabled
+            if (DataManager.isNightReminderEnabled) {
                 NotificationScheduler.scheduleNightReminder(this, DataManager.nightReminderTime)
             } else {
                 NotificationScheduler.cancelReminder(this, NotificationScheduler.NIGHT_REMINDER_ID)
             }
-        }
+        })
 
-        btnNightTime.setOnClickListener {
+        settings.add(ConfigItem("Night Time", "Scheduled at ${DataManager.nightReminderTime}") {
             showTimePicker(DataManager.nightReminderTime) { newTime ->
                 DataManager.nightReminderTime = newTime
-                DataManager.saveData(this)
-                tvNightTime.text = "Scheduled at $newTime"
                 if (DataManager.isNightReminderEnabled) {
                     NotificationScheduler.scheduleNightReminder(this, newTime)
                 }
+                loadSettings()
             }
-        }
-    }
+        })
 
-    private fun updateUI() {
-        swMorning.isChecked = DataManager.isMorningReminderEnabled
-        tvMorningTime.text = "Scheduled at ${DataManager.morningReminderTime}"
+        settings.add(ConfigItem("Section Notifications", isHeader = true))
+        
+        settings.add(ConfigItem("Tasks", "Receive task reminders", isToggle = true, isChecked = DataManager.isTaskNotificationEnabled) {
+            DataManager.isTaskNotificationEnabled = !DataManager.isTaskNotificationEnabled
+        })
+        
+        settings.add(ConfigItem("Habits", "Receive habit alerts", isToggle = true, isChecked = DataManager.isHabitNotificationEnabled) {
+            DataManager.isHabitNotificationEnabled = !DataManager.isHabitNotificationEnabled
+        })
+        
+        settings.add(ConfigItem("Workouts", "Receive workout alerts", isToggle = true, isChecked = DataManager.isWorkoutNotificationEnabled) {
+            DataManager.isWorkoutNotificationEnabled = !DataManager.isWorkoutNotificationEnabled
+        })
+        
+        settings.add(ConfigItem("Notes", "Receive note reminders", isToggle = true, isChecked = DataManager.isNoteNotificationEnabled) {
+            DataManager.isNoteNotificationEnabled = !DataManager.isNoteNotificationEnabled
+        })
+        
+        settings.add(ConfigItem("Projects", "Receive project alerts", isToggle = true, isChecked = DataManager.isProjectNotificationEnabled) {
+            DataManager.isProjectNotificationEnabled = !DataManager.isProjectNotificationEnabled
+        })
 
-        swNight.isChecked = DataManager.isNightReminderEnabled
-        tvNightTime.text = "Scheduled at ${DataManager.nightReminderTime}"
+        settings.add(ConfigItem("Workspace", "Receive workspace alerts", isToggle = true, isChecked = DataManager.isWorkspaceNotificationEnabled) {
+            DataManager.isWorkspaceNotificationEnabled = !DataManager.isWorkspaceNotificationEnabled
+        })
+        
+        settings.add(ConfigItem("Finance", "Receive finance alerts", isToggle = true, isChecked = DataManager.isFinanceNotificationEnabled) {
+            DataManager.isFinanceNotificationEnabled = !DataManager.isFinanceNotificationEnabled
+        })
+
+        settingsList.adapter = ConfigAdapter(settings) { DataManager.saveData(this) }
     }
 
     private fun showTimePicker(currentTime: String, onTimeSelected: (String) -> Unit) {

@@ -11,6 +11,8 @@ import androidx.core.content.ContextCompat
 import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.RecyclerView
 import com.google.android.material.card.MaterialCardView
+import com.example.allinone.data.model.Note
+import com.example.allinone.core.utils.UIUtils
 import kotlinx.coroutines.*
 import java.text.SimpleDateFormat
 import java.util.*
@@ -23,6 +25,7 @@ class NoteAdapter(
     private val adapterScope = CoroutineScope(Dispatchers.Main + SupervisorJob())
     private var notes = initialNotes.toMutableList()
     private var isDeleteMode = false
+    private var isEditMode = false
     private val selectedNotes = mutableSetOf<Note>()
 
     override fun getItemViewType(position: Int): Int {
@@ -32,7 +35,7 @@ class NoteAdapter(
             "Questions" -> R.layout.item_note_questions
             "Daily" -> R.layout.item_note_daily
             "Stories" -> R.layout.item_note_stories
-            "ProjectIdea" -> R.layout.item_note_project_idea
+            "Idea", "ProjectIdea" -> R.layout.item_note_project_idea
             else -> R.layout.item_note_notes
         }
     }
@@ -81,6 +84,10 @@ class NoteAdapter(
                     selectedNotes.add(note)
                 }
                 notifyItemChanged(position)
+            } else if (isEditMode) {
+                if (context is ProjectActivity) {
+                    context.showEditIdeaDialog(note)
+                }
             } else {
                 when (context) {
                     is NotesActivity -> {
@@ -89,7 +96,7 @@ class NoteAdapter(
                         }
                         context.startActivity(intent)
                     }
-                    is ProjectActivity -> context.showEditIdeaDialog(note)
+                    is ProjectActivity -> context.onProjectItemClick(note)
                 }
             }
         }
@@ -109,6 +116,11 @@ class NoteAdapter(
     fun setDeleteMode(enabled: Boolean) {
         isDeleteMode = enabled
         selectedNotes.clear()
+        notifyDataSetChanged()
+    }
+
+    fun setEditMode(enabled: Boolean) {
+        isEditMode = enabled
         notifyDataSetChanged()
     }
 

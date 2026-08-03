@@ -1,9 +1,18 @@
 package com.example.allinone.data.repository
 
 import android.content.Context
+import com.example.allinone.security.SecurityManager
 import android.util.Log
 import com.example.allinone.*
-import com.example.allinone.workspace.data.AppDatabase
+import com.example.allinone.data.database.AppDatabase
+import com.example.allinone.data.database.GlobalNoteEntity
+import com.example.allinone.data.database.GlobalTaskEntity
+import com.example.allinone.data.database.HabitEntity
+import com.example.allinone.data.database.WorkoutEntity
+import com.example.allinone.data.database.TransactionEntity
+import com.example.allinone.data.database.PersonalLedgerEntity
+import com.example.allinone.data.database.LedgerEntryEntity
+import com.example.allinone.data.model.*
 import com.google.gson.Gson
 import com.google.gson.reflect.TypeToken
 import kotlinx.coroutines.Dispatchers
@@ -20,8 +29,6 @@ class LegacyMigrationManager(private val context: Context) {
         val hasMigrated = prefs.getBoolean("data_migrated_to_sql", false)
         Log.d(TAG, "Checking migration status. hasMigrated: $hasMigrated")
         
-        // Even if hasMigrated is true, we perform a safety check on each domain 
-        // to ensure no data was left behind during an import or interrupted migration.
         Log.i(TAG, "Checking for legacy data that needs migration...")
         try {
             migrateTasks()
@@ -119,9 +126,6 @@ class LegacyMigrationManager(private val context: Context) {
     }
 
     private suspend fun migrateProjects() {
-        // Projects share the same table as notes in this entities.kt design if I'm not careful
-        // Actually NoteEntity has isGlobalProject.
-        // If the table already has notes/projects, we skip for safety.
         if (db.noteDao().getAllNotes().first().any { it.isGlobalProject }) return
         
         val json = prefs.getString("projects_data", null) ?: return
@@ -132,8 +136,7 @@ class LegacyMigrationManager(private val context: Context) {
         } catch (e: Exception) { Log.e(TAG, "Project migration failed", e) }
     }
 
-    // Helper extensions (copied from repositories for local use during migration to avoid dependency loops if any)
-    private fun Note.toEntity(isGlobalProject: Boolean) = com.example.allinone.data.database.NoteEntity(
+    private fun Note.toEntity(isGlobalProject: Boolean) = GlobalNoteEntity(
         timestamp = timestamp, title = title, content = content, color = color, category = category,
         isHidden = isHidden, updatedAt = updatedAt, status = status, progress = progress, priority = priority,
         isPinned = isPinned, deadline = deadline, isArchived = isArchived, isDualExist = isDualExist,
@@ -141,36 +144,36 @@ class LegacyMigrationManager(private val context: Context) {
         changeHistory = changeHistory, isGlobalProject = isGlobalProject
     )
 
-    private fun Task.toEntity() = com.example.allinone.data.database.TaskEntity(
+    private fun Task.toEntity() = GlobalTaskEntity(
         timestamp = timestamp, name = name, isCompleted = isCompleted, color = color, priority = priority,
         reminderTime = reminderTime, category = category, section = section, isHidden = isHidden, subtasks = subtasks,
         completedTimestamp = completedTimestamp
     )
 
-    private fun Habit.toEntity() = com.example.allinone.data.database.HabitEntity(
+    private fun Habit.toEntity() = HabitEntity(
         timestamp = timestamp, name = name, isCompleted = isCompleted, frequency = frequency, trackingMode = trackingMode,
         target = target, progress = progress, isDayOff = isDayOff, color = color, iconResId = iconResId,
         repeatType = repeatType, repeatDays = repeatDays, repeatCount = repeatCount, completedDates = completedDates,
         dailyProgress = dailyProgress, reminderTime = reminderTime
     )
 
-    private fun Workout.toEntity() = com.example.allinone.data.database.WorkoutEntity(
+    private fun Workout.toEntity() = WorkoutEntity(
         timestamp = timestamp, name = name, isCompleted = isCompleted, trackingMode = trackingMode, target = target,
         repsPerSet = repsPerSet, progress = progress, frequency = frequency, isDayOff = isDayOff, color = color,
         iconResId = iconResId, muscleGroups = muscleGroups, repeatType = repeatType, repeatDays = repeatDays,
         repeatCount = repeatCount, completedDates = completedDates, dailyProgress = dailyProgress
     )
 
-    private fun Transaction.toEntity() = com.example.allinone.data.database.TransactionEntity(
+    private fun Transaction.toEntity() = TransactionEntity(
         id = id, title = title, amount = amount, type = type, category = category, timestamp = timestamp,
         categoryIcon = categoryIcon, categoryColor = categoryColor
     )
 
-    private fun PersonalLedger.toEntity() = com.example.allinone.data.database.PersonalLedgerEntity(
+    private fun PersonalLedger.toEntity() = PersonalLedgerEntity(
         id = id, personName = personName, entries = entries, timestamp = timestamp
     )
 
-    private fun LedgerEntry.toEntity() = com.example.allinone.data.database.LedgerEntryEntity(
+    private fun LedgerEntry.toEntity() = LedgerEntryEntity(
         id = id, personName = personName, amount = amount, type = type, note = note, isSettled = isSettled,
         dueDate = dueDate, paidAmount = paidAmount, timestamp = timestamp, settlementTimestamp = settlementTimestamp,
         paymentHistory = paymentHistory

@@ -374,6 +374,22 @@
                         android:textSize="14sp"
                         android:textStyle="bold" />
 
+                    <EditText
+                        android:id="@+id/et_search_subfeatures"
+                        android:layout_width="120dp"
+                        android:layout_height="wrap_content"
+                        android:layout_marginEnd="8dp"
+                        android:background="@drawable/glass_card_bg"
+                        android:backgroundTint="#22FFFFFF"
+                        android:hint="Search..."
+                        android:textColor="@color/white"
+                        android:textColorHint="#40FFFFFF"
+                        android:textSize="12sp"
+                        android:paddingHorizontal="12dp"
+                        android:paddingVertical="4dp"
+                        android:imeOptions="actionSearch"
+                        android:singleLine="true" />
+
                     <ImageView
                         android:id="@+id/iv_subfeatures_main_chevron"
                         android:layout_width="20dp"

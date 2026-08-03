@@ -30,7 +30,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.allinone.LocalAppStyle
-import com.example.allinone.workspace.data.TaskEntity
+import com.example.allinone.workspace.data.WorkspaceTaskEntity
 import com.example.allinone.workspace.ui.WorkspaceViewModel
 import kotlinx.coroutines.launch
 import java.text.SimpleDateFormat
@@ -38,11 +38,11 @@ import java.util.*
 
 @Composable
 fun TaskViewSection(
-    tasks: List<TaskEntity>,
-    onUpdateTask: (TaskEntity) -> Unit,
-    onViewTask: (TaskEntity) -> Unit,
-    onEditTask: (TaskEntity) -> Unit,
-    onDeleteTask: (TaskEntity) -> Unit
+    tasks: List<WorkspaceTaskEntity>,
+    onUpdateTask: (WorkspaceTaskEntity) -> Unit,
+    onViewTask: (WorkspaceTaskEntity) -> Unit,
+    onEditTask: (WorkspaceTaskEntity) -> Unit,
+    onDeleteTask: (WorkspaceTaskEntity) -> Unit
 ) {
     val style = LocalAppStyle.current
     val statuses = listOf("Todo", "In Progress", "Review", "Done")
@@ -145,7 +145,7 @@ fun TaskViewSection(
 }
 
 @Composable
-fun TaskItemUI(task: TaskEntity, onUpdateTask: (TaskEntity) -> Unit, onViewTask: (TaskEntity) -> Unit, onEditTask: (TaskEntity) -> Unit, onDeleteTask: (TaskEntity) -> Unit, index: Int? = null) {
+fun TaskItemUI(task: WorkspaceTaskEntity, onUpdateTask: (WorkspaceTaskEntity) -> Unit, onViewTask: (WorkspaceTaskEntity) -> Unit, onEditTask: (WorkspaceTaskEntity) -> Unit, onDeleteTask: (WorkspaceTaskEntity) -> Unit, index: Int? = null) {
     val style = LocalAppStyle.current
     var showMenu by remember { mutableStateOf(false) }
     val isDone = task.status == "Done"
@@ -314,10 +314,10 @@ fun TaskItemUI(task: TaskEntity, onUpdateTask: (TaskEntity) -> Unit, onViewTask:
 
 @Composable
 fun TaskDetailSection(
-    task: TaskEntity,
+    task: WorkspaceTaskEntity,
     onBack: () -> Unit,
     onEdit: () -> Unit,
-    onUpdateTask: (TaskEntity) -> Unit
+    onUpdateTask: (WorkspaceTaskEntity) -> Unit
 ) {
     val style = LocalAppStyle.current
     val accentColor = when(task.priority) {
@@ -393,7 +393,7 @@ fun TaskDetailSection(
 
 @Composable
 fun TaskAddEditSection(
-    task: TaskEntity? = null,
+    task: WorkspaceTaskEntity? = null,
     projectId: String,
     viewModel: WorkspaceViewModel,
     onBack: () -> Unit
@@ -428,7 +428,7 @@ fun TaskAddEditSection(
                     onClick = {
                         val progress = if (status == "Done") 100 else if (task?.status == "Done") 0 else task?.progress ?: 0
                         val updated = task?.copy(title = title, description = description, priority = priority, status = status, progress = progress, dueDate = dueDate)
-                            ?: TaskEntity(projectId = projectId, title = title, description = description, priority = priority, status = status, progress = progress, dueDate = dueDate)
+                            ?: WorkspaceTaskEntity(projectId = projectId, title = title, description = description, priority = priority, status = status, progress = progress, dueDate = dueDate)
                         
                         if (task == null) {
                              viewModel.insertTask(updated)

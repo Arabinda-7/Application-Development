@@ -7,6 +7,7 @@ import android.speech.RecognitionListener
 import android.speech.RecognizerIntent
 import android.speech.SpeechRecognizer
 import android.speech.tts.TextToSpeech
+import android.speech.tts.Voice
 import android.speech.tts.UtteranceProgressListener
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -52,6 +53,9 @@ class VoiceAssistantHandler(
     override fun onInit(status: Int) {
         if (status == TextToSpeech.SUCCESS) {
             tts?.language = Locale.getDefault()
+            
+            applySettings()
+
             isTtsReady = true
             tts?.setOnUtteranceProgressListener(object : UtteranceProgressListener() {
                 override fun onStart(utteranceId: String?) {}
@@ -96,12 +100,37 @@ class VoiceAssistantHandler(
     fun speak(text: String, isFollowUp: Boolean = false) {
         if (isMuted || !isTtsReady) return
         
+        applySettings()
         isThinking = false
         performHapticFeedback(VibrationEffect.EFFECT_TICK)
         
         val params = Bundle()
         val utteranceId = if (isFollowUp) "follow_up" else "response"
         tts?.speak(text, TextToSpeech.QUEUE_FLUSH, params, utteranceId)
+    }
+
+    fun getAvailableVoices(): List<Voice> {
+        val allVoices = tts?.voices ?: emptySet()
+        val locale = Locale.getDefault()
+        return allVoices.filter { 
+            it.locale.language == locale.language && 
+            it.locale.country == locale.country 
+        }.sortedWith(compareByDescending<Voice> { it.quality }.thenByDescending { !it.isNetworkConnectionRequired })
+    }
+
+    fun setVoiceByName(name: String) {
+        tts?.voices?.find { it.name == name }?.let { 
+            tts?.voice = it
+            DataManager.assistantVoiceName = name
+        }
+    }
+
+    private fun applySettings() {
+        tts?.setPitch(DataManager.assistantPitch)
+        tts?.setSpeechRate(DataManager.assistantSpeechRate)
+        DataManager.assistantVoiceName?.let { name ->
+            tts?.voices?.find { it.name == name }?.let { tts?.voice = it }
+        }
     }
 
     fun shutdown() {

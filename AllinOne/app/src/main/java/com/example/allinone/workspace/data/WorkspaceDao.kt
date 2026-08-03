@@ -61,28 +61,28 @@ interface WorkspaceDao {
 
     // Tasks
     @Query("SELECT * FROM tasks WHERE projectId = :projectId")
-    fun getTasksForProject(projectId: String): Flow<List<TaskEntity>>
+    fun getTasksForProject(projectId: String): Flow<List<WorkspaceTaskEntity>>
 
     @Query("SELECT * FROM tasks WHERE milestoneId = :milestoneId")
-    suspend fun getTasksByMilestone(milestoneId: String): List<TaskEntity>
+    suspend fun getTasksByMilestone(milestoneId: String): List<WorkspaceTaskEntity>
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
-    suspend fun insertTask(task: TaskEntity)
+    suspend fun insertTask(task: WorkspaceTaskEntity)
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
-    suspend fun insertAllTasks(tasks: List<TaskEntity>)
+    suspend fun insertAllTasks(tasks: List<WorkspaceTaskEntity>)
 
     @Update
-    suspend fun updateTask(task: TaskEntity)
+    suspend fun updateTask(task: WorkspaceTaskEntity)
 
     @Delete
-    suspend fun deleteTask(task: TaskEntity)
+    suspend fun deleteTask(task: WorkspaceTaskEntity)
 
     @Query("SELECT * FROM tasks")
-    suspend fun getAllTasksSync(): List<TaskEntity>
+    suspend fun getAllTasksSync(): List<WorkspaceTaskEntity>
 
     @Query("SELECT * FROM tasks WHERE dueDate >= :start AND dueDate < :end AND status != 'Done'")
-    suspend fun getTasksDueBetween(start: Long, end: Long): List<TaskEntity>
+    suspend fun getTasksDueBetween(start: Long, end: Long): List<WorkspaceTaskEntity>
 
     @Query("DELETE FROM tasks")
     suspend fun deleteAllTasks()
@@ -155,22 +155,22 @@ interface WorkspaceDao {
 
     // Notes
     @Query("SELECT * FROM workspace_notes WHERE projectId = :projectId")
-    fun getNotesForProject(projectId: String): Flow<List<NoteEntity>>
+    fun getNotesForProject(projectId: String): Flow<List<WorkspaceNoteEntity>>
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
-    suspend fun insertNote(note: NoteEntity)
+    suspend fun insertNote(note: WorkspaceNoteEntity)
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
-    suspend fun insertAllNotes(notes: List<NoteEntity>)
+    suspend fun insertAllNotes(notes: List<WorkspaceNoteEntity>)
 
     @Update
-    suspend fun updateNote(note: NoteEntity)
+    suspend fun updateNote(note: WorkspaceNoteEntity)
 
     @Delete
-    suspend fun deleteNote(note: NoteEntity)
+    suspend fun deleteNote(note: WorkspaceNoteEntity)
 
     @Query("SELECT * FROM workspace_notes")
-    suspend fun getAllNotesSync(): List<NoteEntity>
+    suspend fun getAllNotesSync(): List<WorkspaceNoteEntity>
 
     @Query("DELETE FROM workspace_notes")
     suspend fun deleteAllNotes()

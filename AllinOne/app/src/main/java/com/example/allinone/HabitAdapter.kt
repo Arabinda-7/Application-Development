@@ -18,10 +18,17 @@ import com.google.android.material.card.MaterialCardView
 import java.text.SimpleDateFormat
 import java.util.*
 
+import com.example.allinone.core.utils.UIUtils
+import com.example.allinone.data.model.Habit
+import com.example.allinone.domain.repository.HabitSettings
+
 class HabitAdapter(
-    private val allHabits: MutableList<Habit>,
-    private val onProgressChanged: (Boolean) -> Unit,
-    private val onTimerStart: (Habit, Int) -> Unit
+    private var allHabits: List<Habit>,
+    private var habitSettings: HabitSettings = HabitSettings(),
+    private val onProgressChanged: (Habit, Int, Boolean) -> Unit,
+    private val onTimerStart: (Habit, Int) -> Unit,
+    private val onAddActivity: (String) -> Unit = {},
+    private val onAddXP: (Int) -> Unit = {}
 ) : RecyclerView.Adapter<RecyclerView.ViewHolder>() {
 
     companion object {
@@ -33,9 +40,9 @@ class HabitAdapter(
     private var displayItems = mutableListOf<Any>()
     private var currentFilter = "All"
     private var selectedDayIndex = 6
-    private var selectedDateString = DataManager.getTrackingDateString()
-    private val todayDateString get() = DataManager.getTrackingDateString()
-    private var showCompleted = DataManager.habitShowCompleted
+    private var selectedDateString = SimpleDateFormat("yyyyMMdd", Locale.getDefault()).format(Date())
+    private val todayDateString get() = SimpleDateFormat("yyyyMMdd", Locale.getDefault()).format(Date())
+    private var showCompleted = habitSettings.showCompleted
 
     init {
         applyFilterAndSort()
@@ -162,7 +169,7 @@ class HabitAdapter(
                         } else {
                             notifyItemChanged(position)
                         }
-                        onProgressChanged(habit.isCompleted)
+                        onProgressChanged(habit, habit.progress, habit.isCompleted)
                     }
                 }
                 
@@ -179,7 +186,7 @@ class HabitAdapter(
                         } else {
                             notifyItemChanged(position)
                         }
-                        onProgressChanged(false)
+                        onProgressChanged(habit, habit.progress, false)
                     }
                 }
             } else {
@@ -206,16 +213,12 @@ class HabitAdapter(
                             if (!habit.completedDates.contains(selectedDateString)) {
                                 habit.completedDates.add(selectedDateString)
                                 triggerCompletionEffects(context)
-                                DataManager.addActivity("Finished Ritual: ${habit.name}")
-                                
-                                // Award XP
-                                if (DataManager.addXP(context, 10)) {
-                                    android.widget.Toast.makeText(context, "LEVEL UP! You are now Level ${DataManager.userLevel}", android.widget.Toast.LENGTH_LONG).show()
-                                }
+                                onAddActivity("Finished Ritual: ${habit.name}")
+                                onAddXP(10)
                             }
                             
                             applyFilterAndSort()
-                            onProgressChanged(true)
+                            onProgressChanged(habit, habit.progress, true)
                         }
                     }
                 }
@@ -244,13 +247,11 @@ class HabitAdapter(
             
             if (!habit.completedDates.contains(todayDateString)) {
                 habit.completedDates.add(todayDateString)
-                if (DataManager.addXP(context, 5)) {
-                    android.widget.Toast.makeText(context, "LEVEL UP! You are now Level ${DataManager.userLevel}", android.widget.Toast.LENGTH_LONG).show()
-                }
+                onAddXP(5)
             }
             
             applyFilterAndSort()
-            onProgressChanged(true)
+            onProgressChanged(habit, habit.progress, true)
             popupWindow.dismiss()
         }
 
@@ -263,9 +264,7 @@ class HabitAdapter(
         }
 
         menuView.findViewById<View>(R.id.menu_delete).setOnClickListener {
-            allHabits.remove(habit)
-            applyFilterAndSort()
-            onProgressChanged(false)
+            // Delete should be handled via ViewModel
             popupWindow.dismiss()
         }
 
@@ -281,7 +280,7 @@ class HabitAdapter(
             habit.completedDates.remove(selectedDateString)
 
             applyFilterAndSort()
-            onProgressChanged(true)
+            onProgressChanged(habit, habit.progress, habit.isCompleted)
             popupWindow.dismiss()
         }
 
@@ -309,11 +308,12 @@ class HabitAdapter(
             } else {
                 true 
             }
-            val isAvailableOnDate = DataManager.getTrackingDateString(habit.timestamp) <= selectedDateString
+            val habitCreationDate = SimpleDateFormat("yyyyMMdd", Locale.getDefault()).format(Date(habit.timestamp))
+            val isAvailableOnDate = habitCreationDate <= selectedDateString
             matchesTime && matchesDay && isAvailableOnDate
         }
 
-        val sorted = when (DataManager.habitSortOrder) {
+        val sorted = when (habitSettings.sortOrder) {
             "Streak" -> filtered.sortedByDescending { it.completedDates.size }
             "Time" -> {
                 val order = listOf("Morning", "Afternoon", "Evening", "Anytime")
@@ -348,7 +348,7 @@ class HabitAdapter(
     }
 
     private fun triggerCompletionEffects(context: android.content.Context) {
-        if (DataManager.habitCompletionHaptics) {
+        if (habitSettings.completionHaptics) {
             val vibrator = context.getSystemService(android.content.Context.VIBRATOR_SERVICE) as android.os.Vibrator
             if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.O) {
                 vibrator.vibrate(android.os.VibrationEffect.createOneShot(50, android.os.VibrationEffect.DEFAULT_AMPLITUDE))
@@ -357,13 +357,19 @@ class HabitAdapter(
             }
         }
         
-        if (DataManager.habitCompletionSound) {
+        if (habitSettings.completionSound) {
             try {
                 val notification = android.media.RingtoneManager.getDefaultUri(android.media.RingtoneManager.TYPE_NOTIFICATION)
                 val r = android.media.RingtoneManager.getRingtone(context, notification)
                 r.play()
             } catch (e: Exception) {}
         }
+    }
+
+    fun updateSettings(settings: HabitSettings) {
+        this.habitSettings = settings
+        this.showCompleted = settings.showCompleted
+        applyFilterAndSort()
     }
 
     private fun updateVisuals(holder: HabitViewHolder, isCompleted: Boolean) {
@@ -378,6 +384,11 @@ class HabitAdapter(
 
     fun setShowCompleted(show: Boolean) {
         showCompleted = show
+        applyFilterAndSort()
+    }
+
+    fun updateHabits(habits: List<Habit>) {
+        this.allHabits = habits
         applyFilterAndSort()
     }
 

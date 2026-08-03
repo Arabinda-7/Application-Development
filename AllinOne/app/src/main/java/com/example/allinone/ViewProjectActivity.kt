@@ -10,10 +10,22 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.*
 import androidx.core.content.ContextCompat
+import androidx.lifecycle.lifecycleScope
+import com.example.allinone.data.model.*
+import com.example.allinone.domain.repository.ProjectRepository
+import dagger.hilt.android.AndroidEntryPoint
+import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.launch
 import java.text.SimpleDateFormat
 import java.util.*
+import java.util.LinkedList
+import javax.inject.Inject
 
+@AndroidEntryPoint
 class ViewProjectActivity : BaseActivity() {
+
+    @Inject
+    lateinit var repository: ProjectRepository
 
     private var projectId: Long = -1
     private var project: Note? = null
@@ -33,38 +45,46 @@ class ViewProjectActivity : BaseActivity() {
     private var isDescriptionExpanded = false
     private var isGoalsExpanded = false
     private var currentSubfeatureFilter = "ALL"
+    private var currentSearchQuery = ""
     private var isActiveSubfeaturesExpanded = true
     private var isCompletedSubfeaturesExpanded = false
+    private val expandedFeatureIds = LinkedList<String>()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_view_project)
 
-        projectId = intent.getLongExtra("PROJECT_ID", -1)
-        if (projectId != -1L) {
-            project = synchronized(DataManager.projects) {
-                DataManager.projects.find { it.timestamp == projectId }
-            }
-        }
-
-        if (project == null) {
-            finish()
-            return
-        }
-
         initViews()
         setupLogic()
         setupKeyboardHandling(findViewById(R.id.add_project_root), findViewById(R.id.add_project_content_container))
+
+        projectId = intent.getLongExtra("PROJECT_ID", -1)
+        if (projectId != -1L) {
+            lifecycleScope.launch {
+                val projects = repository.getAllProjects().first()
+                project = projects.find { it.timestamp == projectId }
+                
+                if (project == null) {
+                    finish()
+                    return@launch
+                }
+
+                updateUI()
+            }
+        } else {
+            finish()
+        }
     }
 
     override fun onResume() {
         super.onResume()
         // Refresh data in case it was edited
         if (projectId != -1L) {
-            project = synchronized(DataManager.projects) {
-                DataManager.projects.find { it.timestamp == projectId }
+            lifecycleScope.launch {
+                val projects = repository.getAllProjects().first()
+                project = projects.find { it.timestamp == projectId }
+                project?.let { updateUI() }
             }
-            updateUI()
         }
     }
 
@@ -114,6 +134,15 @@ class ViewProjectActivity : BaseActivity() {
             findViewById<View>(R.id.container_goals).visibility = if (isGoalsExpanded) View.VISIBLE else View.GONE
             findViewById<ImageView>(R.id.iv_goals_chevron).setImageResource(if (isGoalsExpanded) android.R.drawable.arrow_up_float else android.R.drawable.arrow_down_float)
         }
+
+        findViewById<EditText>(R.id.et_search_subfeatures).addTextChangedListener(object : android.text.TextWatcher {
+            override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {}
+            override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {
+                currentSearchQuery = s?.toString() ?: ""
+                refreshSubFeatures()
+            }
+            override fun afterTextChanged(s: android.text.Editable?) {}
+        })
     }
 
     private fun updateUI() {
@@ -186,8 +215,13 @@ class ViewProjectActivity : BaseActivity() {
         containerSubfeatures.addView(filterBar)
 
         val allSubs = project?.subFeatures ?: emptyList()
-        val filteredSubs = if (currentSubfeatureFilter == "ALL") allSubs 
-                          else allSubs.filter { it.tag.uppercase() == currentSubfeatureFilter || (currentSubfeatureFilter == "OTHER" && it.tag.isEmpty()) }
+        val filteredSubs = allSubs.filter { sub ->
+            val matchesCategory = if (currentSubfeatureFilter == "ALL") true 
+                                 else sub.tag.uppercase() == currentSubfeatureFilter || (currentSubfeatureFilter == "OTHER" && sub.tag.isEmpty())
+            val matchesSearch = if (currentSearchQuery.isEmpty()) true 
+                               else sub.name.contains(currentSearchQuery, true) || sub.details.contains(currentSearchQuery, true)
+            matchesCategory && matchesSearch
+        }
 
         val activeSubs = filteredSubs.filter { !it.isCompleted }
         val completedSubs = filteredSubs.filter { it.isCompleted }
@@ -331,8 +365,20 @@ class ViewProjectActivity : BaseActivity() {
 
         layout.setOnClickListener {
             if (sub.details.isNotEmpty()) {
-                sub.isExpanded = !sub.isExpanded
-                tvDetails.visibility = if (sub.isExpanded) View.VISIBLE else View.GONE
+                if (sub.isExpanded) {
+                    sub.isExpanded = false
+                    expandedFeatureIds.remove(sub.id)
+                } else {
+                    if (expandedFeatureIds.size >= 2) {
+                        val oldestId = expandedFeatureIds.pollFirst()
+                        if (oldestId != null) {
+                            project?.subFeatures?.find { it.id == oldestId }?.isExpanded = false
+                        }
+                    }
+                    sub.isExpanded = true
+                    expandedFeatureIds.addLast(sub.id)
+                }
+                refreshSubFeatures()
             }
         }
         
@@ -359,31 +405,33 @@ class ViewProjectActivity : BaseActivity() {
         ivMark.setImageResource(if (sub.isCompleted) R.drawable.icons8_refresh_100 else R.drawable.icons8_check_mark_100)
         ivMark.imageTintList = ColorStateList.valueOf(Color.WHITE)
 
-        // Hide Edit in View mode as requested (only mark and delete mentioned)
-        // Actually, matching the app usually includes edit if available, 
-        // but user specifically said "options like mark as complete and delete".
         menuView.findViewById<View>(R.id.menu_edit).visibility = View.GONE
 
         btnMark.setOnClickListener {
             sub.isCompleted = !sub.isCompleted
-            DataManager.saveData(this)
-            updateUI()
-            popupWindow.dismiss()
+            lifecycleScope.launch {
+                project?.let { repository.updateProject(it) }
+                DataManager.saveData(this@ViewProjectActivity)
+                updateUI()
+                popupWindow.dismiss()
+            }
         }
 
         menuView.findViewById<View>(R.id.menu_delete).setOnClickListener {
-            android.app.AlertDialog.Builder(this)
-                .setTitle("Delete Milestone")
-                .setMessage("Are you sure you want to delete '${sub.name}'?")
-                .setPositiveButton("DELETE") { _, _ ->
-                    project?.subFeatures?.remove(sub)
-                    // Re-sort positions
-                    project?.subFeatures?.forEachIndexed { index, feature -> feature.position = index + 1 }
-                    DataManager.saveData(this)
+            showStyledConfirmationDialog(
+                title = "Delete Milestone",
+                message = "Are you sure you want to delete '${sub.name}'?",
+                actionText = "DELETE",
+                actionColor = Color.parseColor("#FF5252")
+            ) {
+                project?.subFeatures?.remove(sub)
+                project?.subFeatures?.forEachIndexed { index, feature -> feature.position = index + 1 }
+                lifecycleScope.launch {
+                    project?.let { repository.updateProject(it) }
+                    DataManager.saveData(this@ViewProjectActivity)
                     updateUI()
                 }
-                .setNegativeButton("CANCEL", null)
-                .show()
+            }
             popupWindow.dismiss()
         }
 

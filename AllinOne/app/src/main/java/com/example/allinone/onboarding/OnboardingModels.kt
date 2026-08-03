@@ -4,7 +4,7 @@ import androidx.compose.runtime.MutableState
 import androidx.compose.ui.graphics.vector.ImageVector
 
 enum class OnboardingPageType {
-    PROFILE, OVERVIEW, GLOBAL_HUB, FEATURE_DEEP_DIVE, ACTIVATION
+    PROFILE, OVERVIEW, GLOBAL_HUB, FEATURE_DEEP_DIVE, AI_INTRO, ACTIVATION
 }
 
 data class SubFeatureConfig(

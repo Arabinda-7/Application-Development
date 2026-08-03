@@ -10,13 +10,15 @@ import android.widget.PopupWindow
 import android.widget.TextView
 import androidx.activity.OnBackPressedCallback
 import androidx.activity.viewModels
+import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.lifecycleScope
-import androidx.recyclerview.widget.RecyclerView
-import com.google.android.material.card.MaterialCardView
+import androidx.lifecycle.repeatOnLifecycle
+import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.launch
 import java.text.SimpleDateFormat
 import java.util.*
 
+@AndroidEntryPoint
 class HabitTrackerActivity : BaseActivity() {
 
     private val viewModel: HabitTrackerViewModel by viewModels()
@@ -39,7 +41,7 @@ class HabitTrackerActivity : BaseActivity() {
         initSections()
         setupLogic()
         
-        if (DataManager.habitDefaultTab == "HISTORY") {
+        if (viewModel.habitSettings.value.defaultTab == "HISTORY") {
             navigationSection.switchTab("HISTORY")
         }
     }
@@ -54,19 +56,18 @@ class HabitTrackerActivity : BaseActivity() {
             findViewById(R.id.vp_calendar),
             findViewById(R.id.tv_date)
         ) { date ->
-            viewModel.selectedDateString = date
-            applyFilters()
+            viewModel.selectDate(date)
         }
 
         filterSection = HabitFilterSection(findViewById(R.id.filter_chips)) { filter ->
-            viewModel.selectedTimeFilter = filter
-            applyFilters()
+            viewModel.setTimeFilter(filter)
         }
 
         listSection = HabitListSection(
             this,
             findViewById(R.id.habit_list),
-            findViewById(R.id.btn_create_new_habit)
+            findViewById(R.id.btn_create_new_habit),
+            viewModel
         ) {
             updateAllUI()
         }
@@ -109,7 +110,7 @@ class HabitTrackerActivity : BaseActivity() {
             performanceSection.update(date)
         }
 
-        performanceSection = HabitPerformanceSection(findViewById(R.id.history_layout))
+        performanceSection = HabitPerformanceSection(findViewById(R.id.history_layout), viewModel)
 
         composeHandler = HabitHistoryComposeHandler(findViewById(R.id.history_compose_view)) {
             navigationSection.switchTab("TODAY")
@@ -121,17 +122,39 @@ class HabitTrackerActivity : BaseActivity() {
         filterSection.setup()
         navigationSection.setup()
         themeManager.applyTheme()
-        progressSection.update()
         composeHandler.setup()
         setupGestureDetector()
         setupKeyboardHandling(findViewById(R.id.habit_tracker_root), findViewById(R.id.habit_content_container))
         setupBackNavigation()
 
         lifecycleScope.launch {
-            DataManager.dataChangeSignal.collect {
-                runOnUiThread {
-                    applyFilters()
-                    updateAllUI()
+            repeatOnLifecycle(Lifecycle.State.STARTED) {
+                launch {
+                    viewModel.habits.collect { newList ->
+                        listSection.updateHabits(newList)
+                        applyFilters()
+                        updateAllUI()
+                    }
+                }
+                launch {
+                    viewModel.habitSettings.collect { settings ->
+                        listSection.updateSettings(settings)
+                    }
+                }
+                launch {
+                    viewModel.dailyProgress.collect { progress ->
+                        progressSection.update(progress)
+                    }
+                }
+                launch {
+                    viewModel.selectedDateString.collect {
+                        applyFilters()
+                    }
+                }
+                launch {
+                    viewModel.selectedTimeFilter.collect {
+                        applyFilters()
+                    }
                 }
             }
         }
@@ -143,14 +166,14 @@ class HabitTrackerActivity : BaseActivity() {
 
     private fun applyFilters() {
         listSection.applyFilter(
-            viewModel.selectedTimeFilter,
-            viewModel.getDayIndex(viewModel.selectedDateString),
-            viewModel.selectedDateString
+            viewModel.selectedTimeFilter.value,
+            viewModel.getDayIndex(viewModel.selectedDateString.value),
+            viewModel.selectedDateString.value
         )
     }
 
     private fun updateAllUI() {
-        progressSection.update()
+        // Progress is handled via Flow observation
         if (viewModel.currentTab == "HISTORY") {
             historyGridSection.setup(viewModel.currentGridCalendar)
             performanceSection.update(viewModel.currentlySelectedHistoryDate)
@@ -168,13 +191,12 @@ class HabitTrackerActivity : BaseActivity() {
         val ivToggle = menuView.findViewById<ImageView>(R.id.iv_toggle_completed)
         
         menuToggle.visibility = View.VISIBLE
-        tvToggle.text = if (DataManager.habitShowCompleted) "HIDE COMPLETED" else "SHOW COMPLETED"
-        ivToggle.setImageResource(if (DataManager.habitShowCompleted) android.R.drawable.ic_menu_view else android.R.drawable.ic_partial_secure)
+        val currentShowCompleted = viewModel.habitSettings.value.showCompleted
+        tvToggle.text = if (currentShowCompleted) "HIDE COMPLETED" else "SHOW COMPLETED"
+        ivToggle.setImageResource(if (currentShowCompleted) android.R.drawable.ic_menu_view else android.R.drawable.ic_partial_secure)
 
         menuToggle.setOnClickListener {
-            DataManager.habitShowCompleted = !DataManager.habitShowCompleted
-            listSection.setShowCompleted(DataManager.habitShowCompleted)
-            DataManager.saveData(this)
+            viewModel.updateShowCompleted(!currentShowCompleted)
             popupWindow.dismiss()
         }
 
@@ -227,7 +249,6 @@ class HabitTrackerActivity : BaseActivity() {
         super.onResume()
         applyFilters()
         themeManager.applyTheme()
-        progressSection.update()
         navigationSection.updateNavUI(viewModel.currentTab)
     }
 }

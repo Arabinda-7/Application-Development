@@ -8,6 +8,8 @@ import android.widget.TextView
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 
+import com.example.allinone.data.model.Note
+
 class ProjectHistoryActivity : BaseActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {

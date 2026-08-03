@@ -1,67 +1,50 @@
 package com.example.allinone
 
 import android.content.Context
+import android.view.View
+import androidx.recyclerview.widget.GridLayoutManager
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
-import androidx.recyclerview.widget.StaggeredGridLayoutManager
+import com.example.allinone.data.model.Note
 
 class ProjectListSection(
     private val context: Context,
-    private val projectList: RecyclerView,
-    private val ideaList: RecyclerView,
-    private val onProjectClick: (Note) -> Unit,
-    private val onIdeaClick: (Note) -> Unit,
+    private val projectRecyclerView: RecyclerView,
+    private val ideaRecyclerView: RecyclerView,
     private val onDataChanged: () -> Unit
 ) {
-    val projectAdapter: ProjectNoteAdapter
-    val ideaAdapter: NoteAdapter
+    private val projectAdapter: ProjectNoteAdapter
+    private val ideaAdapter: NoteAdapter
 
     init {
-        projectList.layoutManager = StaggeredGridLayoutManager(2, StaggeredGridLayoutManager.VERTICAL)
-        ideaList.layoutManager = LinearLayoutManager(context)
-
+        projectRecyclerView.layoutManager = GridLayoutManager(context, 2)
         projectAdapter = ProjectNoteAdapter(mutableListOf()) {
-            DataManager.saveData(context)
             onDataChanged()
         }
-        projectList.adapter = projectAdapter
+        projectRecyclerView.adapter = projectAdapter
 
+        ideaRecyclerView.layoutManager = LinearLayoutManager(context)
         ideaAdapter = NoteAdapter(mutableListOf()) {
-            DataManager.saveData(context)
             onDataChanged()
         }
-        ideaList.adapter = ideaAdapter
+        ideaRecyclerView.adapter = ideaAdapter
     }
 
-    fun updateDisplayLists() {
-        val activeNotes = synchronized(DataManager.projects) {
-            DataManager.projects.filter { !it.isArchived }
-        }
+    fun updateDisplayLists(allProjects: List<Note>) {
+        val projects = allProjects.filter { it.category == "Project" }.sortedByDescending { it.timestamp }
+        val ideas = allProjects.filter { it.category == "Idea" }.sortedByDescending { it.timestamp }
         
-        val roadmapList = activeNotes.filter {
-            DataManager.projectDualExistEnabled || it.isDualExist || it.category == "Project" || (it.subFeatures?.isNotEmpty() == true)
-        }
-        val visibleRoadmaps = if (DataManager.projectAutoArchive) {
-            roadmapList.filter { it.status != "Completed" }
-        } else {
-            roadmapList
-        }
-        val displayNotes = visibleRoadmaps.sortedWith(compareByDescending<Note> { it.isPinned }
-            .thenBy { it.status == "Completed" }
-            .thenByDescending { it.timestamp })
-
-        val ideasList = activeNotes.filter {
-            (DataManager.projectDualExistEnabled || it.isDualExist || it.category == "ProjectIdea" || (it.category != "Project" && (it.subFeatures?.isEmpty() != false)))
-            && it.category != "Project"
-        }
-        val sortedIdeas = ideasList.sortedByDescending { it.timestamp }
-
-        projectAdapter.updateNotes(displayNotes)
-        ideaAdapter.updateNotes(sortedIdeas)
+        projectAdapter.updateNotes(projects)
+        ideaAdapter.updateNotes(ideas)
     }
 
     fun setVisibility(isProjects: Boolean) {
-        projectList.visibility = if (isProjects) android.view.View.VISIBLE else android.view.View.GONE
-        ideaList.visibility = if (isProjects) android.view.View.GONE else android.view.View.VISIBLE
+        projectRecyclerView.visibility = if (isProjects) View.VISIBLE else View.GONE
+        ideaRecyclerView.visibility = if (isProjects) View.GONE else View.VISIBLE
+    }
+
+    fun setEditMode(enabled: Boolean) {
+        projectAdapter.setEditMode(enabled)
+        ideaAdapter.setEditMode(enabled)
     }
 }

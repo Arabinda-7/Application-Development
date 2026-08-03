@@ -6,6 +6,7 @@ import android.net.Uri
 import android.view.View
 import android.widget.ImageView
 import android.widget.TextView
+import com.example.allinone.core.utils.UIUtils
 
 class ProfileIdentitySection(
     private val rootView: View,

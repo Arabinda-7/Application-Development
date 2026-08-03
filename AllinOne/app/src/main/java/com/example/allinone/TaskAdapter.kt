@@ -12,6 +12,10 @@ import androidx.core.content.ContextCompat
 import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.RecyclerView
 import com.google.android.material.card.MaterialCardView
+import androidx.lifecycle.findViewTreeLifecycleOwner
+import androidx.lifecycle.lifecycleScope
+import com.example.allinone.core.utils.UIUtils
+import com.example.allinone.data.model.Task
 import kotlinx.coroutines.*
 import java.util.*
 
@@ -98,9 +102,9 @@ class TaskAdapter(
             holder.taskCompleted.backgroundTintList = android.content.res.ColorStateList.valueOf(checkTint)
             
             // Metadata
-            holder.tvCategory.text = task.category ?: "General"
+            holder.tvCategory.text = task.category
             
-            val subtasksList = task.subtasks ?: mutableListOf()
+            val subtasksList = task.subtasks
             if (subtasksList.isNotEmpty()) {
                 val completed = subtasksList.count { it.isCompleted }
                 holder.tvSubtasks.text = "$completed/${subtasksList.size} subtasks"
@@ -120,7 +124,7 @@ class TaskAdapter(
             // Subtask expansion rendering
             if (expandedTasks.contains(task)) {
                 holder.subtaskContainer.visibility = View.VISIBLE
-                renderSubtasks(holder.subtaskContainer, task, position)
+                renderSubtasks(holder.subtaskContainer, task)
             } else {
                 holder.subtaskContainer.visibility = View.GONE
             }
@@ -140,12 +144,15 @@ class TaskAdapter(
                         Toast.makeText(context, "Pending subtasks remain", Toast.LENGTH_SHORT).show()
                     }
                 } else if (holder.taskCompleted.isChecked) {
-                    task.isCompleted = true
-                    task.completedTimestamp = System.currentTimeMillis()
-                    DataManager.addActivity("Finished Task: ${task.name}")
+                    holder.itemView.findViewTreeLifecycleOwner()?.lifecycleScope?.launch {
+                        val updatedTask = task.copy(
+                            isCompleted = true,
+                            completedTimestamp = System.currentTimeMillis()
+                        )
+                        DataManager.updateTask(updatedTask)
+                        DataManager.addActivity("Finished Task: ${task.name}")
+                    }
                     expandedTasks.remove(task)
-                    updateDisplayList()
-                    DataManager.saveData(context)
                     onProgressChanged()
                 } else {
                     holder.taskCompleted.isChecked = true // Prevent simple uncheck
@@ -206,11 +213,11 @@ class TaskAdapter(
         }
 
         hideUnhideView.setOnClickListener {
-            task.isHidden = !task.isHidden
-            popupWindow.dismiss()
-            updateDisplayList()
-            onProgressChanged()
-            DataManager.saveData(context)
+            anchor.findViewTreeLifecycleOwner()?.lifecycleScope?.launch {
+                DataManager.updateTask(task.copy(isHidden = !task.isHidden))
+                popupWindow.dismiss()
+                onProgressChanged()
+            }
         }
 
         menuView.findViewById<View>(R.id.menu_edit).setOnClickListener {
@@ -223,22 +230,22 @@ class TaskAdapter(
         }
 
         menuView.findViewById<View>(R.id.menu_delete).setOnClickListener {
-            allTasks.remove(task)
-            updateDisplayList()
-            onProgressChanged()
-            DataManager.saveData(context)
-            popupWindow.dismiss()
+            anchor.findViewTreeLifecycleOwner()?.lifecycleScope?.launch {
+                DataManager.deleteTask(task)
+                onProgressChanged()
+                popupWindow.dismiss()
+            }
         }
 
         val undoView = menuView.findViewById<View>(R.id.menu_undo)
         if (task.isCompleted) {
             undoView.visibility = View.VISIBLE
             undoView.setOnClickListener {
-                task.isCompleted = false
-                updateDisplayList()
-                onProgressChanged()
-                DataManager.saveData(context)
-                popupWindow.dismiss()
+                anchor.findViewTreeLifecycleOwner()?.lifecycleScope?.launch {
+                    DataManager.updateTask(task.copy(isCompleted = false, completedTimestamp = null))
+                    onProgressChanged()
+                    popupWindow.dismiss()
+                }
             }
         }
 
@@ -260,6 +267,14 @@ class TaskAdapter(
         return if (position in displayItems.indices && displayItems[position] is Task) {
             displayItems[position] as Task
         } else null
+    }
+
+    fun updateTasks(newTasks: List<Task>) {
+        synchronized(allTasks) {
+            allTasks.clear()
+            allTasks.addAll(newTasks)
+        }
+        updateDisplayList()
     }
 
     fun updateDisplayList() {
@@ -342,7 +357,7 @@ class TaskAdapter(
         }
     }
 
-    private fun renderSubtasks(container: LinearLayout, task: Task, parentPosition: Int) {
+    private fun renderSubtasks(container: LinearLayout, task: Task) {
         container.removeAllViews()
         val context = container.context
         
@@ -364,10 +379,15 @@ class TaskAdapter(
             ctView.setPadding(0, 8, 0, 8)
             
             ctView.setOnClickListener {
-                subtask.isCompleted = !subtask.isCompleted
-                ctView.isChecked = subtask.isCompleted
-                DataManager.saveData(context)
-                notifyItemChanged(parentPosition) // To update the "X/Y subtasks" progress text
+                container.findViewTreeLifecycleOwner()?.lifecycleScope?.launch {
+                    val updatedSubtasks = task.subtasks.toMutableList()
+                    val subIndex = updatedSubtasks.indexOf(subtask)
+                    if (subIndex != -1) {
+                        updatedSubtasks[subIndex] = subtask.copy(isCompleted = !subtask.isCompleted)
+                        DataManager.updateTask(task.copy(subtasks = updatedSubtasks))
+                    }
+                }
+                // UI will update via Flow observation in Activity -> updateTasks()
             }
             container.addView(subView)
         }

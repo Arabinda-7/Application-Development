@@ -167,3 +167,55 @@ fun ActivationPage(accentColor: Color) {
         Text("Your universe is synchronized. Welcome to the future of personal management.", color = Color.White.copy(alpha = 0.5f), fontSize = 16.sp, textAlign = TextAlign.Center, modifier = Modifier.padding(horizontal = 32.dp, vertical = 16.dp))
     }
 }
+
+@Composable
+fun AIIntroPage(isAiEnabled: MutableState<Boolean>, accentColor: Color) {
+    Column(modifier = Modifier.fillMaxSize().padding(24.dp).verticalScroll(rememberScrollState())) {
+        Spacer(modifier = Modifier.height(8.dp))
+        Text("Intelligence Core", color = Color.White, fontSize = 32.sp, fontWeight = FontWeight.Black, lineHeight = 38.sp)
+        Text("Activate your on-device AI companion.", color = Color.White.copy(alpha = 0.5f), fontSize = 14.sp, modifier = Modifier.padding(top = 8.dp))
+        
+        Spacer(modifier = Modifier.height(40.dp))
+        
+        AICapabilityRow(Icons.Default.Mic, "Voice-to-Voice", "Natural conversation to manage your day.", accentColor)
+        AICapabilityRow(Icons.Default.AutoAwesome, "Smart Insights", "Personalized suggestions based on your habits.", accentColor)
+        AICapabilityRow(Icons.Default.Lock, "Privacy First", "Everything processed on-device. No data leaves.", accentColor)
+        
+        Spacer(modifier = Modifier.weight(1f))
+        
+        Surface(
+            onClick = { isAiEnabled.value = !isAiEnabled.value },
+            shape = RoundedCornerShape(24.dp),
+            color = if (isAiEnabled.value) accentColor.copy(alpha = 0.1f) else Color.White.copy(alpha = 0.05f),
+            border = BorderStroke(1.dp, if (isAiEnabled.value) accentColor else Color.White.copy(alpha = 0.1f)),
+            modifier = Modifier.fillMaxWidth()
+        ) {
+            Row(modifier = Modifier.padding(20.dp), verticalAlignment = Alignment.CenterVertically) {
+                Column(modifier = Modifier.weight(1f)) {
+                    Text("Enable AI Assistant", color = Color.White, fontWeight = FontWeight.Black, fontSize = 16.sp)
+                    Text("Unlock voice control and smart automation.", color = Color.White.copy(alpha = 0.5f), fontSize = 11.sp)
+                }
+                Switch(
+                    checked = isAiEnabled.value,
+                    onCheckedChange = { isAiEnabled.value = it },
+                    colors = SwitchDefaults.colors(checkedThumbColor = Color.White, checkedTrackColor = accentColor)
+                )
+            }
+        }
+        Spacer(modifier = Modifier.height(80.dp)) // Padding for footer
+    }
+}
+
+@Composable
+private fun AICapabilityRow(icon: androidx.compose.ui.graphics.vector.ImageVector, title: String, desc: String, accentColor: Color) {
+    Row(modifier = Modifier.padding(vertical = 12.dp), verticalAlignment = Alignment.CenterVertically) {
+        Box(modifier = Modifier.size(48.dp).clip(CircleShape).background(accentColor.copy(alpha = 0.1f)), contentAlignment = Alignment.Center) {
+            Icon(icon, contentDescription = null, tint = accentColor, modifier = Modifier.size(24.dp))
+        }
+        Spacer(modifier = Modifier.width(16.dp))
+        Column {
+            Text(title, color = Color.White, fontWeight = FontWeight.Bold, fontSize = 16.sp)
+            Text(desc, color = Color.White.copy(alpha = 0.5f), fontSize = 12.sp)
+        }
+    }
+}

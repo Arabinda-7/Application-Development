@@ -3,28 +3,46 @@ package com.example.allinone
 import android.app.Dialog
 import android.content.Intent
 import android.graphics.Color
+import android.net.Uri
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.*
-import androidx.recyclerview.widget.LinearLayoutManager
-import androidx.recyclerview.widget.RecyclerView
 import androidx.activity.OnBackPressedCallback
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.activity.viewModels
+import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.lifecycleScope
+import androidx.lifecycle.repeatOnLifecycle
+import androidx.recyclerview.widget.LinearLayoutManager
+import androidx.recyclerview.widget.RecyclerView
+import com.example.allinone.domain.repository.UserProfile
+import com.example.allinone.domain.repository.UserSettings
+import com.example.allinone.security.SecurityManager
+import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.launch
 import java.util.*
 
+@AndroidEntryPoint
 class SettingsActivity : BaseActivity() {
 
     private val viewModel: SettingsViewModel by viewModels()
+    private val profileViewModel: ProfileViewModel by viewModels()
     
     private lateinit var hubSection: SettingsHubSection
     private lateinit var appearanceHandler: SettingsAppearanceHandler
     private lateinit var helpHandler: SettingsHelpHandler
     private lateinit var backupHandler: SettingsBackupHandler
+    private var voiceHandler: VoiceAssistantHandler? = null
+
+    private val aiIntroLauncher = registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
+        if (result.resultCode == RESULT_OK) {
+            val settings = viewModel.settings.value
+            viewModel.updateSettings(settings.copy(isAiAssistantEnabled = true))
+            showSectionSettings("AI_ASSISTANT")
+        }
+    }
 
     private val exportLauncher = registerForActivityResult(ActivityResultContracts.CreateDocument("application/json")) { uri ->
         uri?.let {
@@ -56,15 +74,22 @@ class SettingsActivity : BaseActivity() {
 
         initHandlers()
         setupLogic()
+        observeViewModel()
+        
+        voiceHandler = VoiceAssistantHandler(this, {}, {}, {})
 
-        if (viewModel.currentPath == "HUB") showHub() else showSectionSettings(viewModel.currentPath)
+        showHub()
     }
 
     private fun showHub() {
-        viewModel.currentPath = "HUB"
         findViewById<TextView>(R.id.tv_title).text = "APP SETTINGS"
-        hubSection.updateMiniProfileUI()
         hubSection.showHub()
+        updateMiniProfile()
+    }
+
+    private fun updateMiniProfile() {
+        val profile = profileViewModel.userProfile.value
+        hubSection.updateMiniProfileUI(profile.name, profile.profileImageUri, profile.avatarRes)
     }
 
     private fun initHandlers() {
@@ -82,210 +107,134 @@ class SettingsActivity : BaseActivity() {
         setupKeyboardHandling(findViewById(R.id.settings_root_layout), findViewById(R.id.settings_content_container))
     }
 
+    private fun observeViewModel() {
+        lifecycleScope.launch {
+            repeatOnLifecycle(Lifecycle.State.STARTED) {
+                launch {
+                    viewModel.settings.collect { settings ->
+                        // Refresh logic if needed
+                    }
+                }
+                launch {
+                    profileViewModel.userProfile.collect { profile ->
+                        updateMiniProfile()
+                    }
+                }
+            }
+        }
+    }
+
     private fun handleBackNavigation() {
-        when (viewModel.currentPath) {
-            "HUB" -> finish()
-            "APPEARANCE_ICONS", "APPEARANCE_COLORS", "APPEARANCE_ADD_FEATURE", "APPEARANCE_COLOR", "APPEARANCE_ICON" -> showSectionSettings("APPEARANCE")
-            else -> showHub()
+        if (findViewById<View>(R.id.layout_profile_hub).visibility == View.VISIBLE) {
+            finish()
+        } else {
+            showHub()
         }
     }
 
     private fun showSectionSettings(section: String) {
-        viewModel.currentPath = section
         findViewById<TextView>(R.id.tv_title).text = section.replace("_", " ").uppercase()
         findViewById<View>(R.id.layout_profile_hub).visibility = View.GONE
 
-        val settings = mutableListOf<ConfigItem>()
+        val settings = viewModel.settings.value
+        val configItems = mutableListOf<ConfigItem>()
+        
         when(section) {
             "AI_ASSISTANT" -> {
-                settings.add(ConfigItem("Voice Output", "Allow assistant to speak in text chat", isToggle = true, isChecked = DataManager.isAssistantVoiceEnabled) {
-                    DataManager.isAssistantVoiceEnabled = !DataManager.isAssistantVoiceEnabled
-                    DataManager.saveData(this)
-                    showSectionSettings("AI_ASSISTANT")
-                })
-                settings.add(ConfigItem("AI Voice Chat", "Enable voice-to-voice interaction via AI long-press", isToggle = true, isChecked = DataManager.isAiVoiceChatEnabled) {
-                    DataManager.isAiVoiceChatEnabled = !DataManager.isAiVoiceChatEnabled
-                    DataManager.saveData(this)
-                    showSectionSettings("AI_ASSISTANT")
-                })
-                settings.add(ConfigItem("Auto-Cleanup History", "Delete chats older than 7 days", isToggle = true, isChecked = DataManager.isAssistantAutoCleanupEnabled) {
-                    DataManager.isAssistantAutoCleanupEnabled = !DataManager.isAssistantAutoCleanupEnabled
-                    if (DataManager.isAssistantAutoCleanupEnabled) {
-                        lifecycleScope.launch {
-                            DataManager.getAiChatRepository()?.cleanupOldHistory(7)
-                        }
+                configItems.add(ConfigItem("Enable AI Assistant", "Global toggle for chat and voice", isToggle = true, isChecked = settings.isAiAssistantEnabled) {
+                    if (!settings.isAiAssistantEnabled) {
+                        aiIntroLauncher.launch(Intent(this, AiAssistantIntroActivity::class.java))
+                    } else {
+                        viewModel.updateSettings(settings.copy(isAiAssistantEnabled = false))
+                        showSectionSettings("AI_ASSISTANT")
                     }
-                    DataManager.saveData(this)
-                    showSectionSettings("AI_ASSISTANT")
                 })
-                settings.add(ConfigItem("Danger Zone", isHeader = true))
-                settings.add(ConfigItem("Clear All History", "Permanently delete all chat sessions") {
-                    androidx.appcompat.app.AlertDialog.Builder(this)
-                        .setTitle("Clear History")
-                        .setMessage("Are you sure you want to delete all AI chat history? This cannot be undone.")
-                        .setPositiveButton("DELETE") { _, _ ->
-                            lifecycleScope.launch {
-                                DataManager.getAiChatRepository()?.clearAllHistory()
-                                Toast.makeText(this@SettingsActivity, "History Cleared", Toast.LENGTH_SHORT).show()
-                            }
-                        }
-                        .setNegativeButton("CANCEL", null)
-                        .show()
-                })
+
+                if (settings.isAiAssistantEnabled) {
+                    configItems.add(ConfigItem("Voice Output", "Allow assistant to speak in text chat", isToggle = true, isChecked = settings.isAssistantVoiceEnabled) {
+                        viewModel.updateSettings(settings.copy(isAssistantVoiceEnabled = !settings.isAssistantVoiceEnabled))
+                        showSectionSettings("AI_ASSISTANT")
+                    })
+                }
             }
             "SECURITY" -> {
-                settings.add(ConfigItem("App Access Lock", "Require PIN", isToggle = true, isChecked = DataManager.isAppLockEnabled) {
-                    if (!DataManager.isAppLockEnabled && DataManager.appLockPin == null) startActivity(Intent(this, LockActivity::class.java).apply { putExtra(LockActivity.EXTRA_MODE, LockActivity.MODE_SETUP) })
-                    else { DataManager.isAppLockEnabled = !DataManager.isAppLockEnabled; DataManager.saveData(this); showSectionSettings("SECURITY") }
+                configItems.add(ConfigItem("App Access Lock", "Require PIN", isToggle = true, isChecked = settings.isAppLockEnabled) {
+                    if (!settings.isAppLockEnabled && settings.appLockPin == null) {
+                        startActivity(Intent(this, LockActivity::class.java).apply { putExtra(LockActivity.EXTRA_MODE, LockActivity.MODE_SETUP) })
+                    } else {
+                        viewModel.updateSettings(settings.copy(isAppLockEnabled = !settings.isAppLockEnabled))
+                        showSectionSettings("SECURITY")
+                    }
                 })
-                if (DataManager.isAppLockEnabled && DataManager.appLockPin != null) {
-                    settings.add(ConfigItem("Change PIN", "Update security code") { startActivity(Intent(this, LockActivity::class.java).apply { putExtra(LockActivity.EXTRA_MODE, LockActivity.MODE_CHANGE) }) })
-                    settings.add(ConfigItem("Biometric Unlock", "Use Fingerprint/Face", isToggle = true, isChecked = DataManager.isBiometricLockEnabled) {
-                        DataManager.isBiometricLockEnabled = !DataManager.isBiometricLockEnabled
-                        DataManager.saveData(this)
+                if (settings.isAppLockEnabled && settings.appLockPin != null) {
+                    configItems.add(ConfigItem("Change PIN", "Update security code") { startActivity(Intent(this, LockActivity::class.java).apply { putExtra(LockActivity.EXTRA_MODE, LockActivity.MODE_CHANGE) }) })
+                    configItems.add(ConfigItem("Biometric Unlock", "Use Fingerprint/Face", isToggle = true, isChecked = settings.isBiometricLockEnabled) {
+                        viewModel.updateSettings(settings.copy(isBiometricLockEnabled = !settings.isBiometricLockEnabled))
                         showSectionSettings("SECURITY")
                     })
                 }
-                settings.add(ConfigItem("Screen Protection", "Block screenshots & recording", isToggle = true, isChecked = DataManager.isScreenshotProtectionEnabled) {
-                    DataManager.isScreenshotProtectionEnabled = !DataManager.isScreenshotProtectionEnabled
-                    DataManager.saveData(this)
-                    SecurityManager.setScreenshotProtection(this, DataManager.isScreenshotProtectionEnabled)
+                configItems.add(ConfigItem("Screen Protection", "Block screenshots & recording", isToggle = true, isChecked = settings.isScreenshotProtectionEnabled) {
+                    viewModel.updateSettings(settings.copy(isScreenshotProtectionEnabled = !settings.isScreenshotProtectionEnabled))
+                    SecurityManager.setScreenshotProtection(this, !settings.isScreenshotProtectionEnabled)
                     showSectionSettings("SECURITY")
                 })
             }
             "OTHERS" -> {
-                settings.add(ConfigItem("Offline Integrity", "No Internet permission requested", isHeader = true))
-                settings.add(ConfigItem("Strictly Offline", "App data is saved locally on your device") { })
-                settings.add(ConfigItem("Home Page Sections", "Customize dashboard visibility") { showHomePageSectionsDialog() })
-                settings.add(ConfigItem("Startup Loading Time", "Current: ${DataManager.startupLoadingTime/1000.0}s") { showLoadingTimeSliderDialog() })
-                settings.add(ConfigItem("Export Backup", "Save to JSON") { backupHandler.exportBackup() })
-                settings.add(ConfigItem("Import Backup", "Restore from JSON") { backupHandler.importBackup() })
+                configItems.add(ConfigItem("Offline Integrity", "No Internet permission requested", isHeader = true))
+                configItems.add(ConfigItem("Home Page Sections", "Customize dashboard visibility") { showHomePageSectionsDialog(settings) })
+                configItems.add(ConfigItem("Export Backup", "Save to JSON") { backupHandler.exportBackup() })
+                configItems.add(ConfigItem("Import Backup", "Restore from JSON") { backupHandler.importBackup() })
             }
             "APPEARANCE" -> {
-                settings.add(ConfigItem("Global Scaling", isHeader = true))
-                settings.add(ConfigItem("Follow System Settings", "Sync display and font size with phone", isToggle = true, isChecked = DataManager.isSystemAppearanceEnabled) {
-                    DataManager.isSystemAppearanceEnabled = !DataManager.isSystemAppearanceEnabled
-                    DataManager.saveData(this)
+                configItems.add(ConfigItem("Follow System Settings", "Sync display and font size with phone", isToggle = true, isChecked = settings.isSystemAppearanceEnabled) {
+                    viewModel.updateSettings(settings.copy(isSystemAppearanceEnabled = !settings.isSystemAppearanceEnabled))
                     recreate()
                 })
-                settings.add(ConfigItem("Current Focus Size", "Circle scale for mood logging (Current: ${DataManager.homeFocusSize})", options = listOf("S", "M", "L", "XL"), selectedIndex = listOf("S", "M", "L", "XL").indexOf(DataManager.homeFocusSize), onOptionSelected = { i ->
-                    DataManager.homeFocusSize = listOf("S", "M", "L", "XL")[i]
-                    DataManager.saveData(this)
-                    showSectionSettings("APPEARANCE")
-                }))
-                settings.add(ConfigItem("Global Display Size", "Icons and margins for all sub-sections (Current: ${DataManager.displaySize})", options = listOf("S", "M", "L", "XL"), selectedIndex = listOf("S", "M", "L", "XL").indexOf(DataManager.displaySize), onOptionSelected = { i ->
-                    DataManager.displaySize = listOf("S", "M", "L", "XL")[i]
-                    DataManager.saveData(this)
-                    showSectionSettings("APPEARANCE")
-                }))
-                settings.add(ConfigItem("Home Page Display Size", "Dedicated scale for the main dashboard (Current: ${DataManager.homeDisplaySize})", options = listOf("S", "M", "L", "XL"), selectedIndex = listOf("S", "M", "L", "XL").indexOf(DataManager.homeDisplaySize), onOptionSelected = { i ->
-                    DataManager.homeDisplaySize = listOf("S", "M", "L", "XL")[i]
-                    DataManager.saveData(this)
-                    showSectionSettings("APPEARANCE")
-                }))
-                settings.add(ConfigItem("Text Font Size", "Scaling for titles and content (Current: ${DataManager.fontSize})", options = listOf("XS", "S", "M", "L", "XL"), selectedIndex = listOf("XS", "S", "M", "L", "XL").indexOf(DataManager.fontSize), onOptionSelected = { i ->
-                    DataManager.fontSize = listOf("XS", "S", "M", "L", "XL")[i]
-                    DataManager.saveData(this)
-                    showSectionSettings("APPEARANCE")
-                }))
-
-                settings.add(ConfigItem("Advanced Look & Feel", isHeader = true))
-                settings.add(ConfigItem("Dynamic Coloring", "Use wallpaper colors (Android 12+)", isToggle = true, isChecked = DataManager.isDynamicColorEnabled) {
-                    DataManager.isDynamicColorEnabled = !DataManager.isDynamicColorEnabled
-                    DataManager.saveData(this)
-                    recreate()
-                })
-                settings.add(ConfigItem("Theme Mode", "Override system theme (Current: ${DataManager.appThemeMode})", options = listOf("LIGHT", "DARK", "OLED"), selectedIndex = listOf("LIGHT", "DARK", "OLED").indexOf(DataManager.appThemeMode), onOptionSelected = { i ->
-                    DataManager.appThemeMode = listOf("LIGHT", "DARK", "OLED")[i]
-                    DataManager.saveData(this)
+                configItems.add(ConfigItem("Theme Mode", "Override system theme (Current: ${settings.appThemeMode})", options = listOf("LIGHT", "DARK", "OLED"), selectedIndex = listOf("LIGHT", "DARK", "OLED").indexOf(settings.appThemeMode), onOptionSelected = { i ->
+                    viewModel.updateSettings(settings.copy(appThemeMode = listOf("LIGHT", "DARK", "OLED")[i]))
                     recreate()
                 }))
-                settings.add(ConfigItem("Accent Color", "Custom highlights app-wide") { appearanceHandler.showColorPickerDialog("APP_ACCENT") { showSectionSettings("APPEARANCE") } })
-                settings.add(ConfigItem("Border Radius", "Curvature for cards and buttons (Current: ${DataManager.appBorderRadius}dp)") { appearanceHandler.showBorderRadiusSliderDialog() })
-                settings.add(ConfigItem("Card Style", "Surface appearance (Current: ${DataManager.appCardStyle})", options = listOf("GLASS", "MATERIAL", "FLAT"), selectedIndex = listOf("GLASS", "MATERIAL", "FLAT").indexOf(DataManager.appCardStyle), onOptionSelected = { i ->
-                    DataManager.appCardStyle = listOf("GLASS", "MATERIAL", "FLAT")[i]
-                    DataManager.saveData(this)
-                    showSectionSettings("APPEARANCE")
-                }))
-                settings.add(ConfigItem("Font Family", "Change typography style (Current: ${DataManager.appFontFamily})", options = listOf("DEFAULT", "SERIF", "SANS_SERIF", "MONOSPACE"), selectedIndex = listOf("DEFAULT", "SERIF", "SANS_SERIF", "MONOSPACE").indexOf(DataManager.appFontFamily), onOptionSelected = { i ->
-                    DataManager.appFontFamily = listOf("DEFAULT", "SERIF", "SANS_SERIF", "MONOSPACE")[i]
-                    DataManager.saveData(this)
-                    showSectionSettings("APPEARANCE")
-                }))
-                settings.add(ConfigItem("Show Shadows", "Toggle UI depth and elevation", isToggle = true, isChecked = DataManager.appShowShadows) {
-                    DataManager.appShowShadows = !DataManager.appShowShadows
-                    DataManager.saveData(this)
-                    showSectionSettings("APPEARANCE")
-                })
-
-                settings.add(ConfigItem("Legacy Settings", isHeader = true))
-                settings.add(ConfigItem("Section Icons", "Manage icons") { showSectionSettings("APPEARANCE_ICONS") })
-                settings.add(ConfigItem("Section Colors", "Manage colors") { showSectionSettings("APPEARANCE_COLORS") })
-            }
-            "APPEARANCE_ICONS" -> {
-                listOf("HABIT", "WORKOUT", "TASK", "PROJECT", "NOTE", "FINANCE").forEach { settings.add(ConfigItem("$it Icon", "Change default") { appearanceHandler.showIconPickerDialog(it, section) { showSectionSettings("APPEARANCE_ICONS") } }) }
-            }
-            "APPEARANCE_COLORS" -> {
-                listOf("HABIT", "WORKOUT", "TASK", "PROJECT", "NOTE", "FINANCE").forEach { settings.add(ConfigItem("$it Theme", "Change color") { appearanceHandler.showColorPickerDialog(it) { showSectionSettings("APPEARANCE_COLORS") } }) }
-            }
-            "HELP" -> {
-                HelpData.getMasterGuides().forEach { a -> settings.add(ConfigItem(a.title, a.summary) { helpHandler.showMasterGuideDetail(a) }) }
-                listOf("HABITS", "WORKOUTS", "TASKS", "PROJECTS", "NOTES", "FINANCE").forEach { g -> settings.add(ConfigItem("$g Guide", "Walkthrough") { helpHandler.showHelpDetail(g) }) }
             }
         }
-        findViewById<RecyclerView>(R.id.settings_list).adapter = ConfigAdapter(settings) { DataManager.saveData(this) }
+        findViewById<RecyclerView>(R.id.settings_list).adapter = ConfigAdapter(configItems) { /* Callback */ }
     }
 
-    private fun showHomePageSectionsDialog() {
+    private fun showHomePageSectionsDialog(currentSettings: UserSettings) {
         val d = Dialog(this)
         d.setContentView(R.layout.dialog_manage_sections)
         d.window?.setBackgroundDrawableResource(android.R.color.transparent)
         d.window?.setLayout(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT)
 
         val container = d.findViewById<LinearLayout>(R.id.container_section_switches)
-        val sections = listOf(
-            "Habits" to { DataManager.showHabitSection } to { v: Boolean -> DataManager.showHabitSection = v },
-            "Workouts" to { DataManager.showWorkoutSection } to { v: Boolean -> DataManager.showWorkoutSection = v },
-            "Tasks" to { DataManager.showTaskSection } to { v: Boolean -> DataManager.showTaskSection = v },
-            "Notes" to { DataManager.showNoteSection } to { v: Boolean -> DataManager.showNoteSection = v },
-            "Projects" to { DataManager.showProjectSection } to { v: Boolean -> DataManager.showProjectSection = v },
-            "Finance" to { DataManager.showFinanceSection } to { v: Boolean -> DataManager.showFinanceSection = v }
+        val sections = mutableMapOf(
+            "Habits" to currentSettings.showHabitSection,
+            "Workouts" to currentSettings.showWorkoutSection,
+            "Tasks" to currentSettings.showTaskSection,
+            "Notes" to currentSettings.showNoteSection,
+            "Projects" to currentSettings.showProjectSection,
+            "Finance" to currentSettings.showFinanceSection
         )
 
-        sections.forEach { pair ->
-            val name = pair.first.first
-            val getter = pair.first.second
-            val setter = pair.second
-
+        sections.forEach { (name, isEnabled) ->
             val row = LayoutInflater.from(this).inflate(R.layout.item_manage_section_row, container, false)
             row.findViewById<TextView>(R.id.tv_section_name).text = name
             val sw = row.findViewById<androidx.appcompat.widget.SwitchCompat>(R.id.sw_section_toggle)
-            sw.isChecked = getter()
-            sw.setOnCheckedChangeListener { _, isChecked -> setter(isChecked) }
+            sw.isChecked = isEnabled
+            sw.setOnCheckedChangeListener { _, isChecked -> sections[name] = isChecked }
             container.addView(row)
         }
 
         d.findViewById<View>(R.id.btn_save_sections).setOnClickListener {
-            DataManager.saveData(this)
+            viewModel.updateSettings(currentSettings.copy(
+                showHabitSection = sections["Habits"] ?: true,
+                showWorkoutSection = sections["Workouts"] ?: true,
+                showTaskSection = sections["Tasks"] ?: true,
+                showNoteSection = sections["Notes"] ?: true,
+                showProjectSection = sections["Projects"] ?: true,
+                showFinanceSection = sections["Finance"] ?: true
+            ))
             d.dismiss()
         }
-        d.show()
-    }
-
-    private fun showLoadingTimeSliderDialog() {
-        val d = Dialog(this); d.setContentView(R.layout.dialog_settings_slider_loading)
-        d.window?.setBackgroundDrawableResource(android.R.color.transparent)
-        val slider = d.findViewById<SeekBar>(R.id.settings_slider)
-        val valueText = d.findViewById<TextView>(R.id.tv_slider_value)
-        d.findViewById<TextView>(R.id.tv_slider_title).text = "STARTUP LOADING TIME"
-        slider.max = 40; slider.progress = (DataManager.startupLoadingTime - 1000) / 100
-        valueText.text = "${DataManager.startupLoadingTime / 1000.0}s"
-        slider.setOnSeekBarChangeListener(object : SeekBar.OnSeekBarChangeListener {
-            override fun onProgressChanged(s: SeekBar?, p: Int, f: Boolean) { valueText.text = "${(1000 + p * 100) / 1000.0}s" }
-            override fun onStartTrackingTouch(s: SeekBar?) {}
-            override fun onStopTrackingTouch(s: SeekBar?) {}
-        })
-        d.findViewById<View>(R.id.btn_save_slider).setOnClickListener { DataManager.startupLoadingTime = 1000 + (slider.progress * 100); DataManager.saveData(this); d.dismiss(); showSectionSettings("OTHERS") }
         d.show()
     }
 
@@ -300,7 +249,11 @@ class SettingsActivity : BaseActivity() {
             row.addView(ImageView(this).apply {
                 val s = (80 * resources.displayMetrics.density).toInt()
                 layoutParams = LinearLayout.LayoutParams(s, s).apply { setMargins(24, 24, 24, 24) }
-                setImageResource(res); setOnClickListener { DataManager.userAvatarRes = res; DataManager.saveData(this@SettingsActivity); hubSection.updateMiniProfileUI(); d.dismiss() }
+                setImageResource(res); setOnClickListener { 
+                    val currentProfile = profileViewModel.userProfile.value
+                    profileViewModel.updateProfile(currentProfile.copy(avatarRes = res))
+                    d.dismiss() 
+                }
             })
         }
         container.removeAllViews(); container.addView(row); d.show()
@@ -308,6 +261,11 @@ class SettingsActivity : BaseActivity() {
 
     override fun onResume() {
         super.onResume()
-        if (viewModel.currentPath == "HUB") hubSection.updateMiniProfileUI()
+        updateMiniProfile()
+    }
+
+    override fun onDestroy() {
+        voiceHandler?.shutdown()
+        super.onDestroy()
     }
 }

@@ -8,6 +8,7 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.*
 import androidx.activity.viewModels
+import com.example.allinone.data.model.PersonalLedgerEntry as LedgerEntry
 
 class LedgerHistoryActivity : BaseActivity() {
 

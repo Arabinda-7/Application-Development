@@ -4,6 +4,7 @@ import android.view.View
 import android.widget.ImageView
 import android.widget.TextView
 import androidx.appcompat.widget.SwitchCompat
+import com.example.allinone.core.utils.UIUtils
 
 class ProfileSecurityHubSection(
     private val rootView: View,

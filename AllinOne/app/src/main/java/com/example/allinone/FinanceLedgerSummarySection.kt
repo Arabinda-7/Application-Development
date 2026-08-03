@@ -3,6 +3,7 @@ package com.example.allinone
 import android.graphics.Color
 import android.view.View
 import android.widget.TextView
+import com.example.allinone.data.model.PersonalLedgerEntry as LedgerEntry
 import java.util.*
 
 class FinanceLedgerSummarySection(

@@ -8,6 +8,8 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.ImageView
 import android.widget.LinearLayout
+import com.example.allinone.data.model.Note
+import com.example.allinone.core.utils.UIUtils
 import android.widget.ProgressBar
 import android.widget.TextView
 import androidx.core.content.ContextCompat
@@ -18,6 +20,7 @@ import java.util.*
 
 class ProjectNoteAdapter(
     private var notes: MutableList<Note>,
+    private var isEditMode: Boolean = false,
     private val onUpdate: () -> Unit
 ) : RecyclerView.Adapter<ProjectNoteAdapter.ProjectViewHolder>() {
 
@@ -105,13 +108,29 @@ class ProjectNoteAdapter(
         holder.statusBadge.setTextColor(statusColor)
 
         // Progress
-        holder.containerProgress.visibility = View.VISIBLE
+        holder.containerProgress.visibility = if (isEditMode) View.GONE else View.VISIBLE
         holder.progressBar.progress = if (note.status == "Completed") 100 else note.progress
         holder.tvProgressPercent.text = "${holder.progressBar.progress}%"
         holder.progressBar.progressTintList = ColorStateList.valueOf(statusColor)
 
+        // Delete Button in Edit Mode
+        holder.btnDelete.visibility = if (isEditMode) View.VISIBLE else View.GONE
+        holder.ivHistory.visibility = if (isEditMode) View.GONE else View.VISIBLE
+        
+        holder.btnDelete.setOnClickListener {
+            (context as? ProjectActivity)?.showDeleteProjectConfirmation(note)
+        }
+
         holder.itemView.setOnClickListener {
-            (context as? ProjectActivity)?.onProjectItemClick(note)
+            if (isEditMode) {
+                if (note.category == "Project") {
+                    (context as? ProjectActivity)?.showEditProjectNoteDialog(note)
+                } else {
+                    (context as? ProjectActivity)?.showEditIdeaDialog(note)
+                }
+            } else {
+                (context as? ProjectActivity)?.onProjectItemClick(note)
+            }
         }
 
         holder.itemView.setOnLongClickListener {
@@ -131,6 +150,11 @@ class ProjectNoteAdapter(
         notifyDataSetChanged()
     }
 
+    fun setEditMode(enabled: Boolean) {
+        isEditMode = enabled
+        notifyDataSetChanged()
+    }
+
     class ProjectViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
         val card: MaterialCardView = itemView.findViewById(R.id.project_note_card)
         val title: TextView = itemView.findViewById(R.id.tv_note_title)
@@ -145,5 +169,6 @@ class ProjectNoteAdapter(
         val progressBar: ProgressBar = itemView.findViewById(R.id.progress_bar)
         val tvProgressPercent: TextView = itemView.findViewById(R.id.tv_progress_percent)
         val accentBar: View = itemView.findViewById(R.id.accent_bar_project)
+        val btnDelete: View = itemView.findViewById(R.id.btn_delete_project)
     }
 }

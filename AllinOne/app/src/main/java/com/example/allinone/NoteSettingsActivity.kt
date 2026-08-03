@@ -4,21 +4,24 @@ import android.app.Dialog
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
-import android.view.ViewGroup
-import android.widget.EditText
-import android.widget.LinearLayout
-import android.widget.TextView
-import android.widget.Toast
-import androidx.activity.enableEdgeToEdge
-import androidx.core.view.ViewCompat
-import androidx.core.view.WindowInsetsCompat
+import android.widget.*
+import androidx.activity.viewModels
+import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.lifecycleScope
+import androidx.lifecycle.repeatOnLifecycle
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
+import com.example.allinone.core.utils.UIUtils
+import com.example.allinone.domain.repository.NoteSettings
+import dagger.hilt.android.AndroidEntryPoint
+import kotlinx.coroutines.launch
 
+@AndroidEntryPoint
 class NoteSettingsActivity : BaseActivity() {
 
     private lateinit var settingsList: RecyclerView
     private lateinit var tvTitle: TextView
+    private val viewModel: NoteSettingsViewModel by viewModels()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -32,62 +35,75 @@ class NoteSettingsActivity : BaseActivity() {
 
         settingsList.layoutManager = LinearLayoutManager(this)
         setupKeyboardHandling(findViewById(R.id.section_settings_root), findViewById(R.id.section_settings_content_container))
-        loadSettings()
+        
+        observeViewModel()
     }
 
-    private fun loadSettings() {
+    private fun observeViewModel() {
+        lifecycleScope.launch {
+            repeatOnLifecycle(Lifecycle.State.STARTED) {
+                viewModel.settings.collect { settings ->
+                    loadSettings(settings)
+                }
+            }
+        }
+    }
+
+    private fun loadSettings(currentSettings: NoteSettings) {
         val settings = mutableListOf<ConfigItem>()
         
         settings.add(ConfigItem("Structure", isHeader = true))
         settings.add(ConfigItem("Manage Sections", "Enable or disable note categories") {
-            showManageSectionsDialog()
+            showManageSectionsDialog(currentSettings)
         })
         
         settings.add(ConfigItem(
             "Default Startup Tab", 
-            "Current: ${DataManager.noteDefaultCategory}", 
-            options = DataManager.noteVisibleSections,
-            selectedIndex = DataManager.noteVisibleSections.indexOf(DataManager.noteDefaultCategory).takeIf { it != -1 },
+            "Current: ${currentSettings.defaultCategory}", 
+            options = currentSettings.visibleSections,
+            selectedIndex = currentSettings.visibleSections.indexOf(currentSettings.defaultCategory).takeIf { it != -1 },
             onOptionSelected = { index ->
-                val selectedTab = DataManager.noteVisibleSections[index]
-                DataManager.noteDefaultCategory = selectedTab
-                
-                // Reorder: Move selected to first position
-                val sections = DataManager.noteVisibleSections.toMutableList()
+                val selectedTab = currentSettings.visibleSections[index]
+                val sections = currentSettings.visibleSections.toMutableList()
                 sections.remove(selectedTab)
                 sections.add(0, selectedTab)
                 
-                DataManager.noteVisibleSections.clear()
-                DataManager.noteVisibleSections.addAll(sections)
-                
-                loadSettings()
+                viewModel.updateSettings(currentSettings.copy(
+                    defaultCategory = selectedTab,
+                    visibleSections = sections
+                ))
             }
         ))
 
         settings.add(ConfigItem("Organization", isHeader = true))
         settings.add(ConfigItem("Custom Templates", "Edit note pre-fill text") { 
-            showNoteTemplatesDialog()
+            showNoteTemplatesDialog(currentSettings)
         })
         
         settings.add(ConfigItem("Bulk Category Move", "Move all notes at once") { 
-            showNoteBulkMoveDialog()
+            showNoteBulkMoveDialog(currentSettings)
         })
 
         settings.add(ConfigItem("Maintenance", isHeader = true))
-        settings.add(ConfigItem("Show Hidden Notes", "Reveal your private logs", isToggle = true, isChecked = DataManager.noteShowHidden) {
-            DataManager.noteShowHidden = !DataManager.noteShowHidden
+        settings.add(ConfigItem("Show Hidden Notes", "Reveal your private logs", isToggle = true, isChecked = currentSettings.showHidden) {
+            viewModel.updateSettings(currentSettings.copy(showHidden = !currentSettings.showHidden))
         })
         
-        settings.add(ConfigItem("Auto-Cleanup", "Days: ${if (DataManager.noteAutoCleanupDays > 0) DataManager.noteAutoCleanupDays else "Off"}", options = listOf("Off", "7 Days", "30 Days", "90 Days"), selectedIndex = listOf(0, 7, 30, 90).indexOf(DataManager.noteAutoCleanupDays), onOptionSelected = { index ->
-            val options = listOf(0, 7, 30, 90)
-            DataManager.noteAutoCleanupDays = options[index]
-            loadSettings()
-        }))
+        val cleanupOptions = listOf(0, 7, 30, 90)
+        settings.add(ConfigItem(
+            "Auto-Cleanup", 
+            "Days: ${if (currentSettings.autoCleanupDays > 0) currentSettings.autoCleanupDays else "Off"}", 
+            options = listOf("Off", "7 Days", "30 Days", "90 Days"), 
+            selectedIndex = cleanupOptions.indexOf(currentSettings.autoCleanupDays).coerceAtLeast(0), 
+            onOptionSelected = { index ->
+                viewModel.updateSettings(currentSettings.copy(autoCleanupDays = cleanupOptions[index]))
+            }
+        ))
 
-        settingsList.adapter = ConfigAdapter(settings) { DataManager.saveData(this) }
+        settingsList.adapter = ConfigAdapter(settings) { /* No-op, we save via viewModel */ }
     }
 
-    private fun showManageSectionsDialog() {
+    private fun showManageSectionsDialog(currentSettings: NoteSettings) {
         val dialog = Dialog(this)
         dialog.setContentView(R.layout.dialog_manage_sections_note)
         
@@ -110,7 +126,7 @@ class NoteSettingsActivity : BaseActivity() {
         }
         
         val options = listOf("Notes", "Questions", "Daily", "Stories")
-        val tempSelection = DataManager.noteVisibleSections.toMutableList()
+        val tempSelection = currentSettings.visibleSections.toMutableList()
 
         options.forEach { option ->
             val switch = androidx.appcompat.widget.SwitchCompat(this).apply {
@@ -145,22 +161,17 @@ class NoteSettingsActivity : BaseActivity() {
         }
 
         btnSave.setOnClickListener {
-            val newSections = tempSelection.toList()
-            DataManager.noteVisibleSections.clear()
-            DataManager.noteVisibleSections.addAll(newSections)
-            
-            if (!DataManager.noteVisibleSections.contains(DataManager.noteDefaultCategory)) {
-                DataManager.noteDefaultCategory = DataManager.noteVisibleSections.firstOrNull() ?: "Notes"
-            }
-            
-            DataManager.saveData(this)
-            loadSettings()
+            val newDefault = if (tempSelection.contains(currentSettings.defaultCategory)) currentSettings.defaultCategory else tempSelection.first()
+            viewModel.updateSettings(currentSettings.copy(
+                visibleSections = tempSelection.toList(),
+                defaultCategory = newDefault
+            ))
             dialog.dismiss()
         }
         showDialogSafe(dialog)
     }
 
-    private fun showNoteTemplatesDialog() {
+    private fun showNoteTemplatesDialog(currentSettings: NoteSettings) {
         val dialog = Dialog(this)
         dialog.setContentView(R.layout.dialog_manage_categories_note)
         
@@ -180,7 +191,7 @@ class NoteSettingsActivity : BaseActivity() {
             cornerRadius = radius
         }
 
-        DataManager.noteTemplates.keys.forEach { name ->
+        currentSettings.noteTemplates.keys.forEach { name ->
             val iv = LayoutInflater.from(this).inflate(R.layout.item_category_manage_note, container, false)
             iv.findViewById<TextView>(R.id.tv_category_name).text = name
             iv.findViewById<View>(R.id.btn_remove_category).visibility = View.GONE
@@ -192,7 +203,7 @@ class NoteSettingsActivity : BaseActivity() {
             }
 
             iv.setOnClickListener { 
-                showSingleTemplateEditor(name)
+                showSingleTemplateEditor(name, currentSettings)
                 dialog.dismiss() 
             }
             container.addView(iv)
@@ -200,7 +211,7 @@ class NoteSettingsActivity : BaseActivity() {
         showDialogSafe(dialog)
     }
 
-    private fun showSingleTemplateEditor(name: String) {
+    private fun showSingleTemplateEditor(name: String, currentSettings: NoteSettings) {
         val dialog = Dialog(this)
         dialog.setContentView(R.layout.dialog_set_budget_note)
         
@@ -215,7 +226,7 @@ class NoteSettingsActivity : BaseActivity() {
 
         tvTitle.text = "EDIT: ${name.uppercase()}"
         et.setHint("Template content...")
-        et.setText(DataManager.noteTemplates[name])
+        et.setText(currentSettings.noteTemplates[name])
         et.inputType = android.text.InputType.TYPE_CLASS_TEXT or android.text.InputType.TYPE_TEXT_FLAG_MULTI_LINE
         et.setSingleLine(false)
         et.maxLines = 10
@@ -238,15 +249,16 @@ class NoteSettingsActivity : BaseActivity() {
         }
         
         btnSave.setOnClickListener {
-            DataManager.noteTemplates[name] = et.text.toString()
-            DataManager.saveData(this)
+            val newTemplates = currentSettings.noteTemplates.toMutableMap()
+            newTemplates[name] = et.text.toString()
+            viewModel.updateSettings(currentSettings.copy(noteTemplates = newTemplates))
             dialog.dismiss()
-            showNoteTemplatesDialog()
+            showNoteTemplatesDialog(currentSettings)
         }
         showDialogSafe(dialog)
     }
 
-    private fun showNoteBulkMoveDialog() {
+    private fun showNoteBulkMoveDialog(currentSettings: NoteSettings) {
         val dialog = Dialog(this)
         dialog.setContentView(R.layout.dialog_manage_categories_note)
         
@@ -266,7 +278,7 @@ class NoteSettingsActivity : BaseActivity() {
             cornerRadius = radius
         }
 
-        DataManager.noteVisibleSections.forEach { category ->
+        currentSettings.visibleSections.forEach { category ->
             val iv = LayoutInflater.from(this).inflate(R.layout.item_category_manage_note, container, false)
             iv.findViewById<TextView>(R.id.tv_category_name).text = category
             iv.findViewById<View>(R.id.btn_remove_category).visibility = View.GONE
@@ -278,10 +290,8 @@ class NoteSettingsActivity : BaseActivity() {
             }
 
             iv.setOnClickListener {
-                val count = DataManager.notes.size
-                DataManager.notes.forEach { it.category = category }
-                DataManager.saveData(this)
-                Toast.makeText(this, "Moved $count notes to $category", Toast.LENGTH_SHORT).show()
+                viewModel.bulkMoveNotes(category)
+                Toast.makeText(this, "Moving notes to $category...", Toast.LENGTH_SHORT).show()
                 dialog.dismiss()
             }
             container.addView(iv)

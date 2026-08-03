@@ -27,7 +27,7 @@ import com.example.allinone.LocalAppStyle
 import com.example.allinone.workspace.data.BugEntity
 import com.example.allinone.workspace.data.FeatureEntity
 import com.example.allinone.workspace.data.ProjectEntity
-import com.example.allinone.workspace.data.TaskEntity
+import com.example.allinone.workspace.data.WorkspaceTaskEntity
 import java.text.SimpleDateFormat
 import java.util.*
 
@@ -297,7 +297,7 @@ private fun StatsSection(
 @Composable
 fun FeatureItemCard(
     feature: FeatureEntity,
-    linkedTasks: List<TaskEntity>,
+    linkedTasks: List<WorkspaceTaskEntity>,
     onUpdate: (FeatureEntity) -> Unit,
     onViewFeature: (FeatureEntity) -> Unit,
     onEditFeature: (FeatureEntity) -> Unit,

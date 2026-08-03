@@ -13,10 +13,21 @@ import androidx.core.view.WindowInsetsCompat
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 
+import androidx.activity.viewModels
+import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.lifecycleScope
+import androidx.lifecycle.repeatOnLifecycle
+import com.example.allinone.domain.repository.WorkoutSettings
+import dagger.hilt.android.AndroidEntryPoint
+import kotlinx.coroutines.launch
+
+@AndroidEntryPoint
 class WorkoutSettingsActivity : BaseActivity() {
 
     private lateinit var settingsList: RecyclerView
     private lateinit var tvTitle: TextView
+    private val viewModel: WorkoutViewModel by viewModels()
+    private val settingsViewModel: SettingsViewModel by viewModels()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -30,48 +41,55 @@ class WorkoutSettingsActivity : BaseActivity() {
 
         settingsList.layoutManager = LinearLayoutManager(this)
         setupKeyboardHandling(findViewById(R.id.section_settings_root), findViewById(R.id.section_settings_content_container))
-        loadSettings()
+        
+        observeViewModel()
     }
 
-    private fun loadSettings() {
+    private fun observeViewModel() {
+        lifecycleScope.launch {
+            repeatOnLifecycle(Lifecycle.State.STARTED) {
+                viewModel.workoutSettings.collect { settings ->
+                    loadSettings(settings)
+                }
+            }
+        }
+    }
+
+    private fun loadSettings(currentSettings: WorkoutSettings) {
         val settings = mutableListOf<ConfigItem>()
         
         settings.add(ConfigItem("Configuration", isHeader = true))
         settings.add(ConfigItem("Manage Muscles", "Add or remove body part tags") { 
-            showManageMuscleGroupsDialog()
+            showManageMuscleGroupsDialog(currentSettings)
         })
 
-        settings.add(ConfigItem("Primary Filter Type", "Current: ${if (DataManager.workoutFilterType == "TIME") "Time of Day" else "Muscle Groups"}", options = listOf("Time of Day", "Muscle Groups"), selectedIndex = if (DataManager.workoutFilterType == "TIME") 0 else 1, onOptionSelected = { index ->
-            DataManager.workoutFilterType = if (index == 0) "TIME" else "MUSCLE"
-            loadSettings()
+        settings.add(ConfigItem("Primary Filter Type", "Current: ${if (currentSettings.filterType == "TIME") "Time of Day" else "Muscle Groups"}", options = listOf("Time of Day", "Muscle Groups"), selectedIndex = if (currentSettings.filterType == "TIME") 0 else 1, onOptionSelected = { index ->
+            viewModel.updateSettings(currentSettings.copy(filterType = if (index == 0) "TIME" else "MUSCLE"))
         }))
 
-        settings.add(ConfigItem("Workout Weight Unit", "Current: ${DataManager.workoutWeightUnit}", options = listOf("Kg", "Lb"), selectedIndex = if (DataManager.workoutWeightUnit == "Kg") 0 else 1, onOptionSelected = { index ->
-            DataManager.workoutWeightUnit = if (index == 0) "Kg" else "Lb"
-            loadSettings()
+        settings.add(ConfigItem("Workout Weight Unit", "Current: ${currentSettings.weightUnit}", options = listOf("Kg", "Lb"), selectedIndex = if (currentSettings.weightUnit == "Kg") 0 else 1, onOptionSelected = { index ->
+            viewModel.updateSettings(currentSettings.copy(weightUnit = if (index == 0) "Kg" else "Lb"))
         }))
         
         settings.add(ConfigItem("Performance", isHeader = true))
-        settings.add(ConfigItem("Auto-Rest Timer", "Trigger timer after set", isToggle = true, isChecked = DataManager.workoutAutoRestTimer) {
-            DataManager.workoutAutoRestTimer = !DataManager.workoutAutoRestTimer
+        settings.add(ConfigItem("Auto-Rest Timer", "Trigger timer after set", isToggle = true, isChecked = currentSettings.autoRestTimer) {
+            viewModel.updateSettings(currentSettings.copy(autoRestTimer = !currentSettings.autoRestTimer))
         })
         
-        settings.add(ConfigItem("Default Tracking Mode", "Current: ${DataManager.workoutDefaultMode}", options = listOf("Reps", "Sets", "Timer"), selectedIndex = listOf("Reps", "Sets", "Timer").indexOf(DataManager.workoutDefaultMode), onOptionSelected = { index ->
+        settings.add(ConfigItem("Default Tracking Mode", "Current: ${currentSettings.defaultMode}", options = listOf("Reps", "Sets", "Timer"), selectedIndex = listOf("Reps", "Sets", "Timer").indexOf(currentSettings.defaultMode), onOptionSelected = { index ->
             val modes = listOf("Reps", "Sets", "Timer")
-            DataManager.workoutDefaultMode = modes[index]
-            loadSettings()
+            viewModel.updateSettings(currentSettings.copy(defaultMode = modes[index]))
         }))
         
-        settings.add(ConfigItem("Rest Duration", "Current: ${DataManager.workoutRestDuration}s", options = listOf("30s", "60s", "90s", "120s", "180s"), selectedIndex = listOf(30, 60, 90, 120, 180).indexOf(DataManager.workoutRestDuration), onOptionSelected = { index ->
+        settings.add(ConfigItem("Rest Duration", "Current: ${currentSettings.restDuration}s", options = listOf("30s", "60s", "90s", "120s", "180s"), selectedIndex = listOf(30, 60, 90, 120, 180).indexOf(currentSettings.restDuration), onOptionSelected = { index ->
             val durations = listOf(30, 60, 90, 120, 180)
-            DataManager.workoutRestDuration = durations[index]
-            loadSettings()
+            viewModel.updateSettings(currentSettings.copy(restDuration = durations[index]))
         }))
 
-        settingsList.adapter = ConfigAdapter(settings) { DataManager.saveData(this) }
+        settingsList.adapter = ConfigAdapter(settings) { /* No-op */ }
     }
 
-    private fun showManageMuscleGroupsDialog() {
+    private fun showManageMuscleGroupsDialog(currentSettings: WorkoutSettings) {
         val dialog = Dialog(this)
         dialog.setContentView(R.layout.dialog_manage_categories_workout)
         
@@ -82,8 +100,9 @@ class WorkoutSettingsActivity : BaseActivity() {
         val root = dialog.findViewById<View>(R.id.dialog_root)
         val inputContainer = dialog.findViewById<View>(R.id.container_add_category)
 
-        val accentColor = if (DataManager.appAccentColor != -1) DataManager.appAccentColor else android.graphics.Color.parseColor("#1A73E8")
-        val radius = DataManager.appBorderRadius.toFloat() * resources.displayMetrics.density
+        val appSettings = settingsViewModel.settings.value
+        val accentColor = if (appSettings.appAccentColor != -1) appSettings.appAccentColor else android.graphics.Color.parseColor("#1A73E8")
+        val radius = appSettings.appBorderRadius.toFloat() * resources.displayMetrics.density
 
         // Apply theme to dialog components
         accentLine.setBackgroundColor(accentColor)
@@ -94,7 +113,7 @@ class WorkoutSettingsActivity : BaseActivity() {
 
         // Backgrounds with dynamic radius
         root.background = android.graphics.drawable.GradientDrawable().apply {
-            setColor(if (DataManager.appThemeMode == "OLED") android.graphics.Color.BLACK else android.graphics.Color.parseColor("#121212"))
+            setColor(if (appSettings.appThemeMode == "OLED") android.graphics.Color.BLACK else android.graphics.Color.parseColor("#121212"))
             cornerRadius = radius
         }
         
@@ -103,9 +122,9 @@ class WorkoutSettingsActivity : BaseActivity() {
             cornerRadius = radius * 0.6f
         }
 
-        fun refresh() {
+        fun refresh(muscles: List<String>) {
             container.removeAllViews()
-            DataManager.workoutMuscleGroups.forEach { g ->
+            muscles.forEach { g ->
                 val iv = LayoutInflater.from(this).inflate(R.layout.item_category_manage_workout, container, false)
                 iv.findViewById<TextView>(R.id.tv_category_name).text = g
                 
@@ -116,9 +135,9 @@ class WorkoutSettingsActivity : BaseActivity() {
                 }
 
                 iv.findViewById<View>(R.id.btn_remove_category).setOnClickListener { 
-                    DataManager.workoutMuscleGroups.remove(g)
-                    DataManager.saveData(this)
-                    refresh() 
+                    val newList = muscles.toMutableList().apply { remove(g) }
+                    viewModel.updateSettings(currentSettings.copy(muscleGroups = newList))
+                    refresh(newList)
                 }
                 container.addView(iv)
             }
@@ -127,13 +146,13 @@ class WorkoutSettingsActivity : BaseActivity() {
         btnAdd.setOnClickListener {
             val n = et.text.toString().trim()
             if (n.isNotEmpty()) { 
-                DataManager.workoutMuscleGroups.add(n)
-                DataManager.saveData(this)
+                val newList = currentSettings.muscleGroups.toMutableList().apply { add(n) }
+                viewModel.updateSettings(currentSettings.copy(muscleGroups = newList))
                 et.text.clear()
-                refresh() 
+                refresh(newList) 
             }
         }
-        refresh()
+        refresh(currentSettings.muscleGroups)
         showDialogSafe(dialog)
     }
 }

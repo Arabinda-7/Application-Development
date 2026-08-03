@@ -14,13 +14,17 @@ import androidx.core.content.ContextCompat
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.google.android.material.floatingactionbutton.FloatingActionButton
+import com.example.allinone.data.model.PersonalLedgerEntry
+import com.example.allinone.data.model.LedgerEntry
+import com.example.allinone.data.model.LedgerPayment
+import com.example.allinone.core.utils.UIUtils
 import java.text.SimpleDateFormat
 import java.util.*
 
 class PersonLedgerActivity : BaseActivity() {
 
     private lateinit var personName: String
-    private lateinit var personEntries: MutableList<LedgerEntry>
+    private lateinit var personEntries: MutableList<PersonalLedgerEntry>
     private lateinit var ledgerAdapter: LedgerAdapter
     
     private lateinit var tvOwe: TextView
@@ -161,20 +165,27 @@ class PersonLedgerActivity : BaseActivity() {
         }.sortedByDescending { if (showHistory) it.settlementTimestamp ?: 0 else it.timestamp }.toMutableList()
 
         if (::ledgerAdapter.isInitialized) {
-            ledgerAdapter.notifyDataSetChanged()
+            ledgerAdapter.updateEntries(personEntries)
         }
     }
 
     private fun updateSummary() {
-        val totalOwe = personEntries.filter { it.type == "Borrowed" && !it.isSettled }.sumOf { it.amount - it.paidAmount }
-        val totalOwed = personEntries.filter { it.type == "Lent" && !it.isSettled }.sumOf { it.amount - it.paidAmount }
+        var totalOwe = 0.0
+        var totalOwed = 0.0
+        for (entry in personEntries) {
+            if (!entry.isSettled) {
+                val remaining = entry.amount - entry.paidAmount
+                if (entry.type == "Borrowed") totalOwe += remaining
+                else if (entry.type == "Lent") totalOwed += remaining
+            }
+        }
         
         val currency = DataManager.financeCurrency
         tvOwe.text = String.format(Locale.US, "%s%.0f", currency, totalOwe)
         tvOwed.text = String.format(Locale.US, "%s%.0f", currency, totalOwed)
     }
 
-    private fun showCustomLedgerMenu(anchor: View, entry: LedgerEntry, isHistory: Boolean, onAction: () -> Unit) {
+    private fun showCustomLedgerMenu(anchor: View, entry: PersonalLedgerEntry, isHistory: Boolean, onAction: () -> Unit) {
         val inflater = LayoutInflater.from(this)
         val menuView = inflater.inflate(R.layout.menu_ledger_item, null)
         val popupWindow = PopupWindow(menuView, ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT, true)
@@ -252,7 +263,7 @@ class PersonLedgerActivity : BaseActivity() {
         popupWindow.showAsDropDown(anchor, 150, -100)
     }
 
-    private fun showAddPaymentDialog(context: Context, entry: LedgerEntry) {
+    private fun showAddPaymentDialog(context: Context, entry: PersonalLedgerEntry) {
         val dialog = Dialog(context)
         dialog.setContentView(R.layout.dialog_add_payment)
         dialog.window?.setBackgroundDrawableResource(android.R.color.transparent)
@@ -291,7 +302,7 @@ class PersonLedgerActivity : BaseActivity() {
         dialog.show()
     }
 
-    private fun showAddLedgerDialog(existingEntry: LedgerEntry? = null) {
+    private fun showAddLedgerDialog(existingEntry: PersonalLedgerEntry? = null) {
         val dialog = Dialog(this)
         dialog.setContentView(R.layout.dialog_add_ledger_person)
         dialog.window?.setBackgroundDrawableResource(android.R.color.transparent)
@@ -335,7 +346,7 @@ class PersonLedgerActivity : BaseActivity() {
             if (amount > 0) {
                 val type = if (rgType.checkedRadioButtonId == R.id.radio_borrowed) "Borrowed" else "Lent"
                 if (existingEntry == null) {
-                    val entry = LedgerEntry(personName = personName, amount = amount, type = type, note = etNote.text.toString().trim(), dueDate = selectedDueDate)
+                    val entry = PersonalLedgerEntry(personName = personName, amount = amount, type = type, note = etNote.text.toString().trim(), dueDate = selectedDueDate)
                     DataManager.ledgerEntries.add(0, entry)
                 } else {
                     existingEntry.amount = amount; existingEntry.type = type; existingEntry.note = etNote.text.toString().trim(); existingEntry.dueDate = selectedDueDate

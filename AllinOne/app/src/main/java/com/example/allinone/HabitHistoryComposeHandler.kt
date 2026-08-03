@@ -46,7 +46,7 @@ class HabitHistoryComposeHandler(
             
             val trendData = remember(selectedHabitName, dataVersion) { 
                 if (selectedHabitName == null) {
-                    DataManager.getLastSevenDaysDetailedProgress().map { Pair(it.first, it.second) }
+                    DataManager.getLastSevenDaysDetailedProgress().mapIndexed { index, pair -> Pair(index, pair.second) }
                 } else {
                     val habit = habits.find { it.name == selectedHabitName }
                     val sdf = SimpleDateFormat("yyyyMMdd", Locale.getDefault())
@@ -91,6 +91,7 @@ class HabitHistoryComposeHandler(
                 showPerformanceCard = true,
                 showTrendCard = true,
                 showBackgroundAura = false,
+                showFilterSelector = false,
                 habits = habits,
                 selectedHabitName = selectedHabitName,
                 onHabitSelected = { selectedHabitName = it },

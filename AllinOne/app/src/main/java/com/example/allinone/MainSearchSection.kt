@@ -1,6 +1,5 @@
 package com.example.allinone
 
-import android.app.AlertDialog
 import android.app.Dialog
 import android.content.Context
 import android.view.LayoutInflater
@@ -9,38 +8,58 @@ import android.view.ViewGroup
 import android.widget.TextView
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
+import dagger.hilt.android.EntryPointAccessors
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import java.util.*
 
 class MainSearchSection(private val context: Context) {
 
     fun performSearch(query: String) {
-        val results = mutableListOf<SearchResult>()
-        
-        // Tasks
-        synchronized(DataManager.tasks) {
-            DataManager.tasks.filter { it.name.contains(query, true) }.forEach { 
+        val entryPoint = EntryPointAccessors.fromApplication(context.applicationContext, DataManager.DataManagerEntryPoint::class.java)
+        val projectRepo = entryPoint.projectRepository()
+        val taskRepo = entryPoint.taskRepository()
+        val noteRepo = entryPoint.noteRepository()
+
+        CoroutineScope(Dispatchers.Main).launch {
+            val results = mutableListOf<SearchResult>()
+            
+            // Tasks
+            val tasks = withContext(Dispatchers.IO) { taskRepo.getTasks().first() }
+            tasks.filter { it.name.contains(query, true) || it.category.contains(query, true) }.forEach { 
                 results.add(SearchResult("TASK", it.name, it.category)) 
             }
-        }
-        
-        // Notes
-        synchronized(DataManager.notes) {
-            DataManager.notes.filter { it.title.contains(query, true) || it.content.contains(query, true) }.forEach {
+            
+            // Notes
+            val notes = withContext(Dispatchers.IO) { noteRepo.getAllNotes().first() }
+            notes.filter { !it.isGlobalProject && (it.title.contains(query, true) || it.content.contains(query, true)) }.forEach {
                 results.add(SearchResult("NOTE", it.title, it.content.take(50)))
             }
-        }
 
-        // Projects
-        synchronized(DataManager.projects) {
-            DataManager.projects.filter { it.title.contains(query, true) || it.content.contains(query, true) }.forEach {
-                results.add(SearchResult(if (it.category == "Project") "PROJECT" else "IDEA", it.title, it.content.take(50)))
+            // Projects & Ideas & Their Features
+            val projects = withContext(Dispatchers.IO) { projectRepo.getAllProjects().first() }
+            projects.forEach { project ->
+                val matchesTitle = project.title.contains(query, true)
+                val matchesContent = project.content.contains(query, true)
+                val matchingFeatures = project.subFeatures.filter { it.name.contains(query, true) || it.details.contains(query, true) }
+
+                if (matchesTitle || matchesContent) {
+                    results.add(SearchResult(if (project.category == "Project") "PROJECT" else "IDEA", project.title, project.content.take(50)))
+                }
+
+                matchingFeatures.forEach { feature ->
+                    results.add(SearchResult("FEATURE", feature.name, "From: ${project.title} | ${feature.details.take(30)}"))
+                }
             }
-        }
 
-        if (results.isEmpty()) {
-            showNoResultsDialog(query)
-        } else {
-            showSearchResultsDialog(query, results)
+            if (results.isEmpty()) {
+                showNoResultsDialog(query)
+            } else {
+                showSearchResultsDialog(query, results)
+            }
         }
     }
 
@@ -92,6 +111,7 @@ class MainSearchSection(private val context: Context) {
                 "NOTE" -> R.layout.item_search_result_note
                 "PROJECT" -> R.layout.item_search_result_project
                 "IDEA" -> R.layout.item_search_result_idea
+                "FEATURE" -> R.layout.item_search_result_project // Use project layout for feature too or create one
                 else -> R.layout.item_search_result_task
             }
         }

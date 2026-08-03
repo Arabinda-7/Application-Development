@@ -27,8 +27,8 @@ class HabitNavigationSection(
             composeView.visibility = View.GONE
         } else {
             todayLayout.visibility = View.GONE
-            historyLayout.visibility = View.VISIBLE
-            composeView.visibility = View.GONE
+            historyLayout.visibility = View.GONE
+            composeView.visibility = View.VISIBLE
         }
         updateNavUI(tab)
         onTabSwitched(tab)

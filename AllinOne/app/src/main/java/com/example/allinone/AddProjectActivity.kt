@@ -10,10 +10,23 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.*
 import androidx.core.content.ContextCompat
+import androidx.lifecycle.lifecycleScope
+import com.example.allinone.data.model.JournalEntry
+import com.example.allinone.data.model.Note
+import com.example.allinone.data.model.ProjectFeature
+import com.example.allinone.domain.repository.ProjectRepository
+import dagger.hilt.android.AndroidEntryPoint
+import kotlinx.coroutines.launch
 import java.text.SimpleDateFormat
+import javax.inject.Inject
 import java.util.*
+import java.util.LinkedList
 
+@AndroidEntryPoint
 class AddProjectActivity : BaseActivity() {
+
+    @Inject
+    lateinit var repository: ProjectRepository
 
     private lateinit var titleInput: EditText
     private lateinit var tvTitleHint: TextView
@@ -45,9 +58,11 @@ class AddProjectActivity : BaseActivity() {
     private var isGoalsExpanded = true
     private var isSubfeaturesExpanded = true
     private var currentSubfeatureFilter = "ALL"
+    private var currentSearchQuery = ""
     private var isActiveSubfeaturesExpanded = true
     private var isCompletedSubfeaturesExpanded = false
     private val tempGoals = mutableListOf<JournalEntry>()
+    private val expandedFeatureIds = LinkedList<String>()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -132,6 +147,15 @@ class AddProjectActivity : BaseActivity() {
             ivSubfeaturesMainChevron.setImageResource(if (isSubfeaturesExpanded) android.R.drawable.arrow_up_float else android.R.drawable.arrow_down_float)
         }
 
+        findViewById<EditText>(R.id.et_search_subfeatures).addTextChangedListener(object : android.text.TextWatcher {
+            override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {}
+            override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {
+                currentSearchQuery = s?.toString() ?: ""
+                refreshSubFeatures()
+            }
+            override fun afterTextChanged(s: android.text.Editable?) {}
+        })
+
         rgStatus.setOnCheckedChangeListener { _, checkedId ->
             selectedStatus = when (checkedId) {
                 R.id.rb_status_progress -> "DOING"
@@ -167,16 +191,19 @@ class AddProjectActivity : BaseActivity() {
 
         findViewById<View>(R.id.btn_add_subfeature).setOnClickListener {
             val nameInput = etNewSubfeature.text.toString().trim()
-            if (nameInput.isNotEmpty()) {
-                val finalName = DataManager.getUniqueFeatureName(nameInput, DataManager.currentEditingSubFeatures)
-                val newFeature = ProjectFeature(finalName, position = DataManager.currentEditingSubFeatures.size + 1)
-                DataManager.currentEditingSubFeatures.add(newFeature)
-                etNewSubfeature.text.clear()
-                refreshSubFeatures()
-                startActivity(Intent(this, AddSubFeatureActivity::class.java).apply {
-                    putExtra("SUB_FEATURE_ID", newFeature.id)
-                })
+            val finalName = if (nameInput.isEmpty()) {
+                "Subfeature ${DataManager.currentEditingSubFeatures.size + 1}"
+            } else {
+                DataManager.getUniqueFeatureName(nameInput, DataManager.currentEditingSubFeatures)
             }
+
+            val newFeature = ProjectFeature(finalName, position = DataManager.currentEditingSubFeatures.size + 1)
+            DataManager.currentEditingSubFeatures.add(newFeature)
+            etNewSubfeature.text.clear()
+            refreshSubFeatures()
+            startActivity(Intent(this, AddSubFeatureActivity::class.java).apply {
+                putExtra("SUB_FEATURE_ID", newFeature.id)
+            })
         }
     }
 
@@ -233,8 +260,13 @@ class AddProjectActivity : BaseActivity() {
         if (!isSubfeaturesExpanded) return
 
         val allSubs = DataManager.currentEditingSubFeatures
-        val filteredSubs = if (currentSubfeatureFilter == "ALL") allSubs 
-                          else allSubs.filter { it.tag.uppercase() == currentSubfeatureFilter || (currentSubfeatureFilter == "OTHER" && it.tag.isEmpty()) }
+        val filteredSubs = allSubs.filter { sub ->
+            val matchesCategory = if (currentSubfeatureFilter == "ALL") true 
+                                 else sub.tag.uppercase() == currentSubfeatureFilter || (currentSubfeatureFilter == "OTHER" && sub.tag.isEmpty())
+            val matchesSearch = if (currentSearchQuery.isEmpty()) true 
+                               else sub.name.contains(currentSearchQuery, true) || sub.details.contains(currentSearchQuery, true)
+            matchesCategory && matchesSearch
+        }
 
         val activeSubs = filteredSubs.filter { !it.isCompleted }
         val completedSubs = filteredSubs.filter { it.isCompleted }
@@ -392,8 +424,18 @@ class AddProjectActivity : BaseActivity() {
 
         layout.setOnClickListener {
             if (sub.details.isNotEmpty()) {
-                sub.isExpanded = !sub.isExpanded
-                tvDetails.visibility = if (sub.isExpanded) View.VISIBLE else View.GONE
+                if (sub.isExpanded) {
+                    sub.isExpanded = false
+                    expandedFeatureIds.remove(sub.id)
+                } else {
+                    if (expandedFeatureIds.size >= 2) {
+                        val oldestId = expandedFeatureIds.pollFirst()
+                        DataManager.currentEditingSubFeatures.find { it.id == oldestId }?.isExpanded = false
+                    }
+                    sub.isExpanded = true
+                    expandedFeatureIds.addLast(sub.id)
+                }
+                refreshSubFeatures()
             }
         }
         
@@ -416,16 +458,16 @@ class AddProjectActivity : BaseActivity() {
         menuView.findViewById<View>(R.id.menu_edit).visibility = View.GONE
 
         menuView.findViewById<View>(R.id.menu_delete).setOnClickListener {
-            android.app.AlertDialog.Builder(this)
-                .setTitle("Delete Milestone")
-                .setMessage("Are you sure you want to remove '${sub.name}'?")
-                .setPositiveButton("DELETE") { _, _ ->
-                    DataManager.currentEditingSubFeatures.remove(sub)
-                    DataManager.currentEditingSubFeatures.forEachIndexed { index, feature -> feature.position = index + 1 }
-                    refreshSubFeatures()
-                }
-                .setNegativeButton("CANCEL", null)
-                .show()
+            showStyledConfirmationDialog(
+                title = "Delete Milestone",
+                message = "Are you sure you want to remove '${sub.name}'?",
+                actionText = "DELETE",
+                actionColor = Color.parseColor("#FF5252")
+            ) {
+                DataManager.currentEditingSubFeatures.remove(sub)
+                DataManager.currentEditingSubFeatures.forEachIndexed { index, feature -> feature.position = index + 1 }
+                refreshSubFeatures()
+            }
             popupWindow.dismiss()
         }
 
@@ -505,12 +547,15 @@ class AddProjectActivity : BaseActivity() {
             note.status = selectedStatus
             note.priority = selectedPriority
             note.color = selectedColor
+            note.isGlobalProject = true
             note.subFeatures.addAll(DataManager.currentEditingSubFeatures)
             note.ideaGoals.addAll(tempGoals)
             
-            DataManager.projects.add(0, note)
-            DataManager.saveData(this)
-            finish()
+            lifecycleScope.launch {
+                repository.insertProject(note)
+                DataManager.saveData(this@AddProjectActivity)
+                finish()
+            }
         } else {
             Toast.makeText(this, "Please enter a title", Toast.LENGTH_SHORT).show()
         }

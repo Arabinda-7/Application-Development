@@ -1,19 +1,11 @@
-# Tasks - Project Access and Workspace UI Synchronization
+# Task: Subfeature UX Enhancements
 
-- [x] Update Workspace Entities with Deadline field
-    - [x] Add `deadline` to `FeatureEntity` in `Entities.kt`
-    - [x] Add `deadline` to `BugEntity` in `Entities.kt`
-- [x] Update `WorkspaceViewModel.kt` to support deadlines for Features and Bugs
-- [x] Implement Red Deadline display in `CommonWorkspaceComponents.kt`
-- [x] Sync Workspace Card Styling (Colored Titles)
-    - [x] Update `GoalViewSection` title color
-    - [x] Update `NoteViewSection` title color
-    - [x] Update `IdeaViewSection` title color
-    - [x] Update `ResourceViewSection` title color
-- [x] Add Deadline support and display to all Workspace sections
-    - [x] `GoalsSection.kt` (Add picker and display)
-    - [x] `TasksSection.kt` (Display red deadline)
-    - [x] `FeaturesSection.kt` (Add picker and display)
-    - [x] `BugsSection.kt` (Add picker and display)
-- [x] Restrict Workspace access in `HomeScreen.kt` when no projects exist
-- [x] Verify changes
+- [x] Set default tag for subfeatures
+    - [x] Update `AddSubFeatureActivity.kt`
+- [x] Implement default name for subfeatures
+    - [x] Update `AddProjectActivity.kt`
+    - [x] Update `EditProjectActivity.kt`
+- [x] Implement "Max 2" expansion logic for subfeature list
+    - [x] Update `AddProjectActivity.kt`
+    - [x] Update `EditProjectActivity.kt`
+    - [x] Update `ViewProjectActivity.kt`

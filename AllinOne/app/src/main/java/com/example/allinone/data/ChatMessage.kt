@@ -1,7 +1,0 @@
-package com.example.allinone.data
-
-data class ChatMessage(
-    val text: String,
-    val isUser: Boolean,
-    val timestamp: Long = System.currentTimeMillis()
-)

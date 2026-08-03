@@ -1,41 +1,27 @@
-# Implementation Plan - Project UI Tweaks (Separate Activities)
+# Implementation Plan - Fix Gradle Build Failure
 
-This plan addresses layout and visibility refinements for the separate project activities (View, Add, Edit).
+This plan addresses the Gradle build failure related to `AndroidLocationsBuildService` and memory pressure issues.
 
 ## Proposed Changes
 
-### [Layouts]
+### [Gradle Configuration]
 
-#### [MODIFY] [activity_edit_project.xml](file:///C:/Users/arabi/OneDrive/Desktop/App Development/AllinOne/app/src/main/res/layout/activity_edit_project.xml)
-- Hide the "Overall Progress" slider (`container_progress_input`).
-- Set the Description input (`note_content_input`) to `GONE` by default.
-- Set the Goals container (`container_goals`) to `GONE` by default.
-- Ensure chevrons for these sections are initialized to "down".
+#### [MODIFY] [gradle.properties](file:///C:/Users/arabi/OneDrive/Desktop/App Development/AllinOne/gradle.properties)
+- Reduce `org.gradle.jvmargs` to `-Xmx2g` to match available system RAM.
+- Reduce `kotlin.daemon.jvmargs` to `-Xmx1g`.
+- Disable `kotlin.compiler.execution.strategy=in-process` by commenting it out.
 
-#### [MODIFY] [activity_view_project.xml](file:///C:/Users/arabi/OneDrive/Desktop/App Development/AllinOne/app/src/main/res/layout/activity_view_project.xml)
-- Set the Description text (`note_content_input`) to `GONE` by default.
-- Ensure description chevron is initialized to "down".
+### [Cache Cleanup]
 
----
-
-### [Activities Logic]
-
-#### [MODIFY] [EditProjectActivity.kt](file:///C:/Users/arabi/OneDrive/Desktop/App Development/AllinOne/app/src/main/java/com/example/allinone/EditProjectActivity.kt)
-- Implement toggle logic for Description, Project Goals, and Sub-Features.
-- Ensure the "Add Sub-feature" input section is functional and correctly displays the list.
-- Handle chevron icon updates on expand/collapse.
-
-#### [MODIFY] [AddProjectActivity.kt](file:///C:/Users/arabi/OneDrive/Desktop/App Development/AllinOne/app/src/main/java/com/example/allinone/AddProjectActivity.kt)
-- Implement toggle logic for Description, Project Goals, and Sub-Features.
-- Ensure Sub-features and Goals sections are fully integrated with the UI (they were omitted in the initial split).
-
-#### [MODIFY] [ViewProjectActivity.kt](file:///C:/Users/arabi/OneDrive/Desktop/App Development/AllinOne/app/src/main/java/com/example/allinone/ViewProjectActivity.kt)
-- Update initial UI state to ensure Description is collapsed.
-- Ensure chevrons are correctly initialized.
+#### [ACTION] Clear Gradle and Build Caches
+- Run `./gradlew clean` (if possible).
+- Manually delete `.gradle/` and `build/` directories to ensure a fresh state.
 
 ## Verification Plan
 
+### Automated Tests
+- Run `./gradlew help` to verify configuration phase completes successfully.
+- Run `./gradlew assembleDebug` to verify the full build process.
+
 ### Manual Verification
-- **Add Project**: Verify Description and Goals are visible (new projects should probably be expanded by default to prompt input, or as requested).
-- **Edit Project**: Verify Progress bar is hidden. Verify Description and Goals are collapsed by default. Verify Sub-features can be added and seen.
-- **View Project**: Verify Description is collapsed by default.
+- Monitor system memory usage during the build to ensure it stays within stable limits.

@@ -1,0 +1,25 @@
+package com.example.allinone.data.model
+
+import kotlinx.serialization.Serializable
+
+@Serializable
+data class Habit(
+    var name: String,
+    var isCompleted: Boolean,
+    var frequency: String, // Time of day: Morning, Afternoon, Evening, Anytime
+    var trackingMode: String = "Reps",
+    var target: Int = 0,
+    var progress: Int = 0,
+    var isDayOff: Boolean = false,
+    var color: Int = -1,
+    var iconResId: Int = -1,
+    var repeatType: String = "SPECIFIC_DAYS",
+    var repeatDays: List<Int> = listOf(0, 1, 2, 3, 4, 5, 6),
+    var repeatCount: Int = 1,
+    val timestamp: Long = System.currentTimeMillis(),
+    var isExpanded: Boolean = false,
+    var isSelected: Boolean = false,
+    var completedDates: MutableList<String> = mutableListOf(),
+    var dailyProgress: MutableMap<String, Int> = mutableMapOf(),
+    var reminderTime: Long? = null
+)

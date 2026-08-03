@@ -11,6 +11,8 @@ import android.widget.*
 import androidx.activity.viewModels
 import java.text.SimpleDateFormat
 import java.util.*
+import com.example.allinone.data.model.PersonalLedgerEntry as LedgerEntry
+import com.example.allinone.data.model.LedgerPayment
 
 class LedgerActivity : BaseActivity() {
 

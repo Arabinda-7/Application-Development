@@ -1,43 +1,55 @@
-# Performance & UI Polish Plan
+# Implementation Plan - Extract Task Functionality from DataManager
 
-This plan addresses a specific UI glitch, performance risks in finance calculations, and modernizes deprecated Activity transitions.
+Extract task-related logic from the monolithic `DataManager.kt` into a clean architecture structure.
 
 ## User Review Required
 
 > [!IMPORTANT]
-> **Finance Performance**: I will be adding new SQL queries to `AppFinanceDao` to fetch monthly totals directly. This significantly reduces memory usage compared to filtering thousands of transactions in memory.
+> This refactoring will move all Task-related logic from `DataManager` and `TaskDataManager` into a new `TaskRepository`.
+> ViewModels will need to be updated to inject the new `TaskRepository` or Use Cases instead of using `DataManager.tasks` directly.
 
 ## Proposed Changes
 
-### 🎨 1. Dashboard UI Polish
-#### [MODIFY] [HomeScreen.kt](file:///C:/Users/arabi/OneDrive/Desktop/App Development/AllinOne/app/src/main/java/com/example/allinone/ui/home/HomeScreen.kt)
-- Update "Safe Spend" amount color logic:
-    - Use `Color.Red` when balance is negative.
-    - Keep `Color(0xFF2EC4B6)` (Cyan) when balance is positive.
+### [Component] Domain Layer
+Create interfaces and use cases for Task operations.
 
----
+#### [MODIFY] [TaskRepository](file:///C:/Users/arabi/OneDrive/Desktop/App Development/AllinOne/app/src/main/java/com/example/allinone/domain/repository/TaskRepository.kt)
+Update the interface to include all necessary methods for task management and settings.
 
-### 🚀 2. Finance Calculation Performance
-#### [MODIFY] [GlobalDaos.kt](file:///C:/Users/arabi/OneDrive/Desktop/App Development/AllinOne/app/src/main/java/com/example/allinone/data/database/GlobalDaos.kt)
-- Add `@Query` to `AppFinanceDao` to calculate `sum(amount)` for a specific `type` and time range (month/year) directly in SQLite.
+#### [NEW] [AddTaskUseCase](file:///C:/Users/arabi/OneDrive/Desktop/App Development/AllinOne/app/src/main/java/com/example/allinone/app/src/main/java/com/example/allinone/domain/usecase/task/AddTaskUseCase.kt)
+#### [NEW] [UpdateTaskUseCase](file:///C:/Users/arabi/OneDrive/Desktop/App Development/AllinOne/app/src/main/java/com/example/allinone/app/src/main/java/com/example/allinone/domain/usecase/task/UpdateTaskUseCase.kt)
+#### [NEW] [DeleteTaskUseCase](file:///C:/Users/arabi/OneDrive/Desktop/App Development/AllinOne/app/src/main/java/com/example/allinone/app/src/main/java/com/example/allinone/domain/usecase/task/DeleteTaskUseCase.kt)
+#### [NEW] [GetTasksUseCase](file:///C:/Users/arabi/OneDrive/Desktop/App Development/AllinOne/app/src/main/java/com/example/allinone/app/src/main/java/com/example/allinone/domain/usecase/task/GetTasksUseCase.kt)
 
-#### [MODIFY] [FinanceRepository.kt](file:///C:/Users/arabi/OneDrive/Desktop/App Development/AllinOne/app/src/main/java/com/example/allinone/data/repository/FinanceRepository.kt)
-- Expose new SQL-based calculation methods.
+### [Component] Data Layer
+Implement the repository and data source.
 
-#### [MODIFY] [FinanceDataManager.kt](file:///C:/Users/arabi/OneDrive/Desktop/App Development/AllinOne/app/src/main/java/com/example/allinone/data/FinanceDataManager.kt)
-- Delegate calculation calls to the repository instead of filtering the global `transactions` list.
+#### [NEW] [TaskLocalDataSource](file:///C:/Users/arabi/OneDrive/Desktop/App Development/AllinOne/app/src/main/java/com/example/allinone/app/src/main/java/com/example/allinone/data/datasource/TaskLocalDataSource.kt)
+Handles Room database operations and SharedPreferences for task settings.
 
----
+#### [NEW] [TaskRepositoryImpl](file:///C:/Users/arabi/OneDrive/Desktop/App Development/AllinOne/app/src/main/java/com/example/allinone/app/src/main/java/com/example/allinone/data/repository/TaskRepositoryImpl.kt)
+Implementation of `TaskRepository` using `TaskLocalDataSource`.
 
-### 📜 3. Modernize Activity Transitions
-#### [MODIFY] [MainActivity.kt](file:///C:/Users/arabi/OneDrive/Desktop/App Development/AllinOne/app/src/main/java/com/example/allinone/MainActivity.kt)
-#### [MODIFY] [LockActivity.kt](file:///C:/Users/arabi/OneDrive/Desktop/App Development/AllinOne/app/src/main/java/com/example/allinone/LockActivity.kt)
-#### [MODIFY] [ProfileActivity.kt](file:///C:/Users/arabi/OneDrive/Desktop/App Development/AllinOne/app/src/main/java/com/example/allinone/ProfileActivity.kt)
-- Replace `overridePendingTransition(enter, exit)` with the modern `overrideActivityTransition` (for API 34+) or use `ActivityOptionsCompat` for backward compatibility.
+### [Component] Infrastructure (DI)
+Prepare for Hilt by adding necessary annotations and a DI module.
+
+#### [NEW] [TaskDataModule](file:///C:/Users/arabi/OneDrive/Desktop/App Development/AllinOne/app/src/main/java/com/example/allinone/app/src/main/java/com/example/allinone/di/TaskDataModule.kt)
+Hilt module for binding the `TaskRepository`.
+
+### [Component] DataManager Cleanup
+Remove task-related logic from `DataManager.kt` and `TaskDataManager.kt`.
+
+#### [MODIFY] [DataManager.kt](file:///C:/Users/arabi/OneDrive/Desktop/App Development/AllinOne/app/src/main/java/com/example/allinone/app/src/main/java/com/example/allinone/DataManager.kt)
+Remove task-related properties, synchronization logic, and database observation.
+
+#### [MODIFY] [TaskDataManager.kt](file:///C:/Users/arabi/OneDrive/Desktop/App Development/AllinOne/app/src/main/java/com/example/allinone/app/src/main/java/com/example/allinone/data/TaskDataManager.kt)
+Deprecate or remove properties as they move to the repository.
 
 ## Verification Plan
 
+### Automated Tests
+- Create unit tests for `TaskRepositoryImpl` and `UseCases` using a mock data source.
+
 ### Manual Verification
-1. **Financial Indicator**: Log an expense that exceeds the budget. Verify that the "Safe Spend" text turns Red on the home screen.
-2. **Performance**: Verify dashboard loads instantly even with simulated high transaction volume (if possible).
-3. **Transitions**: Navigate between Profile and Main screen, and through the Lock screen. Verify animations still trigger correctly.
+- Verify that tasks are still correctly loaded, added, updated, and deleted in the UI.
+- Verify that task settings (e.g., show completed) are persisted across app restarts.

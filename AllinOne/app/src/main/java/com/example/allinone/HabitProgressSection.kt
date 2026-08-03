@@ -7,8 +7,7 @@ class HabitProgressSection(
     private val progressBar: ProgressBar,
     private val progressText: TextView
 ) {
-    fun update() {
-        val progress = DataManager.getHabitProgress()
+    fun update(progress: Int) {
         progressBar.progress = progress
         progressText.text = "$progress%"
     }

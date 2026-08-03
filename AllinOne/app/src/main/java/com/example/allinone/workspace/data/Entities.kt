@@ -1,8 +1,10 @@
 package com.example.allinone.workspace.data
 
 import androidx.room.*
+import kotlinx.serialization.Serializable
 import java.util.*
 
+@Serializable
 @Entity(tableName = "projects")
 data class ProjectEntity(
     @PrimaryKey val id: String = UUID.randomUUID().toString(),
@@ -19,6 +21,7 @@ data class ProjectEntity(
     val updatedAt: Long = System.currentTimeMillis()
 )
 
+@Serializable
 @Entity(
     tableName = "goals",
     foreignKeys = [
@@ -45,6 +48,7 @@ data class GoalEntity(
     val updatedAt: Long = System.currentTimeMillis()
 )
 
+@Serializable
 @Entity(
     tableName = "workspace_notes",
     foreignKeys = [
@@ -57,7 +61,7 @@ data class GoalEntity(
     ],
     indices = [Index("projectId")]
 )
-data class NoteEntity(
+data class WorkspaceNoteEntity(
     @PrimaryKey val id: String = UUID.randomUUID().toString(),
     val projectId: String,
     val title: String,
@@ -69,6 +73,7 @@ data class NoteEntity(
     val updatedAt: Long = System.currentTimeMillis()
 )
 
+@Serializable
 @Entity(
     tableName = "tasks",
     foreignKeys = [
@@ -81,7 +86,7 @@ data class NoteEntity(
     ],
     indices = [Index("projectId")]
 )
-data class TaskEntity(
+data class WorkspaceTaskEntity(
     @PrimaryKey val id: String = UUID.randomUUID().toString(),
     val projectId: String,
     val milestoneId: String? = null, // Linked to GoalEntity or FeatureEntity
@@ -99,6 +104,7 @@ data class TaskEntity(
     val updatedAt: Long = System.currentTimeMillis()
 )
 
+@Serializable
 @Entity(
     tableName = "features",
     foreignKeys = [
@@ -128,6 +134,7 @@ data class FeatureEntity(
     val updatedAt: Long = System.currentTimeMillis()
 )
 
+@Serializable
 @Entity(
     tableName = "bugs",
     foreignKeys = [
@@ -158,6 +165,7 @@ data class BugEntity(
     val updatedAt: Long = System.currentTimeMillis()
 )
 
+@Serializable
 @Entity(
     tableName = "ideas",
     foreignKeys = [
@@ -182,6 +190,7 @@ data class IdeaEntity(
     val updatedAt: Long = System.currentTimeMillis()
 )
 
+@Serializable
 @Entity(
     tableName = "resources",
     foreignKeys = [
@@ -204,6 +213,7 @@ data class ResourceEntity(
     val updatedAt: Long = System.currentTimeMillis()
 )
 
+@Serializable
 @Entity(
     tableName = "activity_logs",
     foreignKeys = [
@@ -226,12 +236,13 @@ data class ActivityLogEntity(
     val timestamp: Long = System.currentTimeMillis()
 )
 
+@Serializable
 @Entity(
     tableName = "note_cross_references",
     primaryKeys = ["noteId", "targetId"],
     foreignKeys = [
         ForeignKey(
-            entity = NoteEntity::class,
+            entity = WorkspaceNoteEntity::class,
             parentColumns = ["id"],
             childColumns = ["noteId"],
             onDelete = ForeignKey.CASCADE

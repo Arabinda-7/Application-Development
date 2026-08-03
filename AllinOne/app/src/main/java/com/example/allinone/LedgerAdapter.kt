@@ -15,15 +15,17 @@ import com.google.android.material.card.MaterialCardView
 import java.text.SimpleDateFormat
 import java.util.*
 
+import com.example.allinone.data.model.PersonalLedgerEntry
+
 class LedgerAdapter(
-    private var entries: List<LedgerEntry>,
+    private var entries: List<PersonalLedgerEntry>,
     private val onUpdate: () -> Unit,
-    private val onShowMenu: (View, LedgerEntry, Boolean, () -> Unit) -> Unit,
-    private val onAddPayment: (LedgerEntry) -> Unit,
-    private val onConfirmSettlement: (LedgerEntry) -> Unit
+    private val onShowMenu: (View, PersonalLedgerEntry, Boolean, () -> Unit) -> Unit,
+    private val onAddPayment: (PersonalLedgerEntry) -> Unit,
+    private val onConfirmSettlement: (PersonalLedgerEntry) -> Unit
 ) : RecyclerView.Adapter<LedgerAdapter.LedgerViewHolder>() {
 
-    fun updateEntries(newEntries: List<LedgerEntry>) {
+    fun updateEntries(newEntries: List<PersonalLedgerEntry>) {
         this.entries = newEntries
         notifyDataSetChanged()
     }

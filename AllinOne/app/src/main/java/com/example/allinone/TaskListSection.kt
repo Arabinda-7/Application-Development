@@ -4,6 +4,10 @@ import android.content.Context
 import androidx.recyclerview.widget.ItemTouchHelper
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
+import androidx.lifecycle.findViewTreeLifecycleOwner
+import androidx.lifecycle.lifecycleScope
+import kotlinx.coroutines.launch
+import com.example.allinone.data.model.Task
 
 class TaskListSection(
     private val context: Context,
@@ -31,13 +35,17 @@ class TaskListSection(
                 val task = taskAdapter.getTaskAt(position) ?: return
                 
                 if (direction == ItemTouchHelper.RIGHT) {
-                    task.isCompleted = true
-                    taskAdapter.updateDisplayList()
-                    DataManager.saveData(context)
+                    val updatedTask = task.copy(
+                        isCompleted = true,
+                        completedTimestamp = System.currentTimeMillis()
+                    )
+                    recyclerView.findViewTreeLifecycleOwner()?.lifecycleScope?.launch {
+                        DataManager.updateTask(updatedTask)
+                    }
                 } else {
-                    DataManager.tasks.remove(task)
-                    taskAdapter.updateDisplayList()
-                    DataManager.saveData(context)
+                    recyclerView.findViewTreeLifecycleOwner()?.lifecycleScope?.launch {
+                        DataManager.deleteTask(task)
+                    }
                 }
                 onDataChanged()
             }

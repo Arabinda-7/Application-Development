@@ -1,7 +1,6 @@
 package com.example.allinone
 
 import android.app.Activity
-import android.app.Dialog
 import android.content.Intent
 import android.graphics.Color
 import android.os.Bundle
@@ -10,21 +9,25 @@ import android.text.Editable
 import android.text.TextWatcher
 import android.view.View
 import android.widget.*
-import androidx.activity.enableEdgeToEdge
-import androidx.appcompat.app.AppCompatActivity
+import androidx.activity.viewModels
 import androidx.core.content.ContextCompat
-import androidx.core.view.ViewCompat
-import androidx.core.view.WindowInsetsCompat
+import androidx.lifecycle.lifecycleScope
+import com.example.allinone.data.model.Note
+import dagger.hilt.android.AndroidEntryPoint
+import kotlinx.coroutines.launch
 import java.text.SimpleDateFormat
 import java.util.*
 
+@AndroidEntryPoint
 class AddNoteActivity : BaseActivity() {
 
     private val VOICE_CODE = 1001
-    private var noteIndex: Int = -1
+    private var noteId: Long = -1L
     private var existingNote: Note? = null
     private var currentCategory: String = "Notes"
     
+    private val viewModel: AddNoteViewModel by viewModels()
+
     private lateinit var titleInput: EditText
     private lateinit var contentInput: EditText
     private lateinit var colorPreview: View
@@ -37,15 +40,18 @@ class AddNoteActivity : BaseActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_add_note)
 
-        noteIndex = intent.getIntExtra("NOTE_INDEX", -1)
+        noteId = intent.getLongExtra("NOTE_ID", -1L)
         currentCategory = intent.getStringExtra("CATEGORY") ?: "Notes"
         
-        if (noteIndex != -1 && noteIndex < DataManager.notes.size) {
-            existingNote = DataManager.notes[noteIndex]
+        initViews()
+        
+        lifecycleScope.launch {
+            if (noteId != -1L) {
+                existingNote = viewModel.getNoteById(noteId)
+            }
+            setupLogic()
         }
 
-        initViews()
-        setupLogic()
         setupKeyboardHandling(findViewById(R.id.add_note_root), findViewById(R.id.add_note_content_container))
     }
 
@@ -78,7 +84,7 @@ class AddNoteActivity : BaseActivity() {
             btnDelete.visibility = View.VISIBLE
             btnDelete.setOnClickListener { showDeleteConfirmation() }
         } else {
-            val template = DataManager.noteTemplates[currentCategory] ?: ""
+            val template = viewModel.settings.value.noteTemplates[currentCategory] ?: ""
             if (template.isNotEmpty()) {
                 contentInput.setText(template)
                 contentInput.setSelection(contentInput.text.length)
@@ -110,7 +116,7 @@ class AddNoteActivity : BaseActivity() {
         }
 
         findViewById<View>(R.id.btn_voice_input).apply {
-            visibility = if (DataManager.noteVoiceInputEnabled) View.VISIBLE else View.GONE
+            visibility = if (viewModel.settings.value.voiceInputEnabled) View.VISIBLE else View.GONE
             setOnClickListener { startVoiceInput() }
         }
         findViewById<View>(R.id.btn_reminder).setOnClickListener {
@@ -132,8 +138,7 @@ class AddNoteActivity : BaseActivity() {
             .setMessage("Are you sure you want to delete this note?")
             .setPositiveButton("DELETE") { _, _ ->
                 existingNote?.let { 
-                    DataManager.notes.remove(it)
-                    DataManager.saveData(this)
+                    viewModel.deleteNote(it)
                     Toast.makeText(this, "Note deleted", Toast.LENGTH_SHORT).show()
                     setResult(RESULT_OK)
                     finish()
@@ -194,25 +199,14 @@ class AddNoteActivity : BaseActivity() {
         val title = titleInput.text.toString().trim()
         val content = contentInput.text.toString()
         if (title.isNotEmpty()) {
-            val noteToUpdate = existingNote?.let { old ->
-                DataManager.notes.find { it.timestamp == old.timestamp }
-            }
+            val noteToSave = existingNote?.copy(
+                title = title,
+                content = content,
+                color = selectedColor,
+                updatedAt = System.currentTimeMillis()
+            ) ?: Note(title, content, color = selectedColor, category = currentCategory)
             
-            if (noteToUpdate == null) {
-                DataManager.notes.add(0, Note(title, content, color = selectedColor, category = currentCategory))
-            } else {
-                val index = DataManager.notes.indexOf(noteToUpdate)
-                if (index != -1) {
-                    val updatedNote = noteToUpdate.copy(
-                        title = title,
-                        content = content,
-                        color = selectedColor,
-                        updatedAt = System.currentTimeMillis()
-                    )
-                    DataManager.notes[index] = updatedNote
-                }
-            }
-            DataManager.saveData(this)
+            viewModel.saveNote(noteToSave, existingNote != null)
             setResult(RESULT_OK)
             finish()
         } else {

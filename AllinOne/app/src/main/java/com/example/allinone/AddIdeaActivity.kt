@@ -14,10 +14,21 @@ import androidx.activity.enableEdgeToEdge
 import androidx.core.content.ContextCompat
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
+import androidx.lifecycle.lifecycleScope
+import com.example.allinone.data.model.*
+import com.example.allinone.domain.repository.ProjectRepository
+import dagger.hilt.android.AndroidEntryPoint
+import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.launch
 import java.text.SimpleDateFormat
 import java.util.*
+import javax.inject.Inject
 
+@AndroidEntryPoint
 class AddIdeaActivity : BaseActivity() {
+
+    @Inject
+    lateinit var repository: ProjectRepository
 
     private var ideaId: Long = -1
     private var existingIdea: Note? = null
@@ -56,24 +67,70 @@ class AddIdeaActivity : BaseActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_add_idea)
 
-        ideaId = intent.getLongExtra("IDEA_ID", -1)
-        if (ideaId != -1L) {
-            existingIdea = synchronized(DataManager.projects) {
-                DataManager.projects.find { it.timestamp == ideaId }
-            }
-        }
-
-        DataManager.currentEditingIdeaSubFeatures.clear()
-        DataManager.currentEditingIdeaSubFeatures.addAll(existingIdea?.subFeatures ?: mutableListOf())
-
         initViews()
         setupLogic()
         setupKeyboardHandling(findViewById(R.id.add_idea_root), findViewById(R.id.add_idea_content_container))
+
+        ideaId = intent.getLongExtra("IDEA_ID", -1)
+        if (ideaId != -1L) {
+            lifecycleScope.launch {
+                val projects = repository.getAllProjects().first()
+                existingIdea = projects.find { it.timestamp == ideaId }
+                
+                existingIdea?.let {
+                    populateUI(it)
+                }
+            }
+        } else {
+            DataManager.currentEditingIdeaSubFeatures.clear()
+        }
+    }
+
+    private fun populateUI(idea: Note) {
+        titleInput.setText(idea.title)
+        contentInput.setText(idea.content)
+        currentPriority = idea.priority
+        tempGoals.clear()
+        tempGoals.addAll(idea.ideaGoals)
+        
+        DataManager.currentEditingIdeaSubFeatures.clear()
+        DataManager.currentEditingIdeaSubFeatures.addAll(idea.subFeatures)
+        
+        btnSave.text = "UPDATE"
+        btnDelete.visibility = View.VISIBLE
+        btnConvertIcon.visibility = View.VISIBLE
+        tvCharCount.text = "${idea.content.length} characters"
+        
+        tvCreatedAt.visibility = View.VISIBLE
+        val sdf = SimpleDateFormat("MMM dd, yyyy HH:mm", Locale.getDefault())
+        tvCreatedAt.text = "Created on: ${sdf.format(Date(idea.timestamp))}"
+        
+        if (idea.content.isNotEmpty()) {
+            containerDescription.visibility = View.GONE
+            btnToggleDescription.text = "DESCRIPTION ▼"
+        }
+        
+        if (tempGoals.isNotEmpty()) {
+            containerGoals.visibility = View.VISIBLE
+            btnToggleGoals.text = "IDEA GOALS ▲"
+        }
+        
+        if (DataManager.currentEditingIdeaSubFeatures.isNotEmpty()) {
+            layoutFeaturesContainer.visibility = View.VISIBLE
+            btnToggleFeatures.text = "FEATURES ▲"
+        }
+        
+        refreshGoalsUI()
+        refreshSubFeatures()
+        updatePriorityUI()
+        validateInputs()
     }
 
     override fun onResume() {
         super.onResume()
-        refreshSubFeatures()
+        if (existingIdea != null || ideaId == -1L) {
+            refreshSubFeatures()
+        }
     }
 
     private fun initViews() {
@@ -153,11 +210,13 @@ class AddIdeaActivity : BaseActivity() {
             .setTitle("Delete Idea")
             .setMessage("Are you sure you want to delete this idea?")
             .setPositiveButton("DELETE") { _, _ ->
-                existingIdea?.let { 
-                    DataManager.projects.remove(it)
-                    DataManager.saveData(this)
-                    Toast.makeText(this, "Idea deleted", Toast.LENGTH_SHORT).show()
-                    finish()
+                existingIdea?.let { idea ->
+                    lifecycleScope.launch {
+                        repository.deleteProject(idea)
+                        DataManager.saveData(this@AddIdeaActivity)
+                        Toast.makeText(this@AddIdeaActivity, "Idea deleted", Toast.LENGTH_SHORT).show()
+                        finish()
+                    }
                 }
             }
             .setNegativeButton("CANCEL", null)
@@ -651,31 +710,46 @@ class AddIdeaActivity : BaseActivity() {
             idea.subFeatures.addAll(DataManager.currentEditingIdeaSubFeatures)
             idea.ideaGoals.clear()
             idea.ideaGoals.addAll(tempGoals)
+            idea.isGlobalProject = true
 
-            if (existingIdea == null) DataManager.projects.add(0, idea)
-            DataManager.saveData(this)
-            DataManager.currentEditingIdeaSubFeatures.clear()
-            Toast.makeText(this, "Converted to Project Roadmap!", Toast.LENGTH_SHORT).show()
-            finish()
+            lifecycleScope.launch {
+                if (existingIdea == null) {
+                    repository.insertProject(idea)
+                } else {
+                    repository.updateProject(idea)
+                }
+                DataManager.saveData(this@AddIdeaActivity)
+                DataManager.currentEditingIdeaSubFeatures.clear()
+                Toast.makeText(this@AddIdeaActivity, "Converted to Project Roadmap!", Toast.LENGTH_SHORT).show()
+                finish()
+            }
         }
     }
 
     private fun saveIdea() {
         val title = titleInput.text.toString().trim()
         if (title.isNotEmpty()) {
-            val idea = existingIdea ?: Note(title = title, content = contentInput.text.toString(), category = "ProjectIdea")
+            val idea = existingIdea ?: Note(title = title, content = contentInput.text.toString(), category = "Idea")
             idea.title = title
             idea.content = contentInput.text.toString()
+            idea.category = "Idea"
             idea.priority = currentPriority
             idea.subFeatures.clear()
             idea.subFeatures.addAll(DataManager.currentEditingIdeaSubFeatures)
             idea.ideaGoals.clear()
             idea.ideaGoals.addAll(tempGoals)
+            idea.isGlobalProject = true
 
-            if (existingIdea == null) DataManager.projects.add(0, idea)
-            DataManager.saveData(this)
-            DataManager.currentEditingIdeaSubFeatures.clear()
-            finish()
+            lifecycleScope.launch {
+                if (existingIdea == null) {
+                    repository.insertProject(idea)
+                } else {
+                    repository.updateProject(idea)
+                }
+                DataManager.saveData(this@AddIdeaActivity)
+                DataManager.currentEditingIdeaSubFeatures.clear()
+                finish()
+            }
         }
     }
 

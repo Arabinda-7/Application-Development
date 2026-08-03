@@ -24,7 +24,7 @@ class PerformanceHistoryComposeHandler(
                 calculatePerformanceData(viewModel.selectedDate)
             }
             
-            val trendData = remember(dataVersion) { DataManager.getLastSevenDaysDetailedProgress() }
+            val trendData = remember(dataVersion) { DataManager.getLastSevenDaysDetailedProgress().mapIndexed { idx, pair -> Pair(idx, pair.second) } }
             val currentMood = remember(viewModel.selectedDate, dataVersion) { DataManager.dailyMoods[viewModel.selectedDate] }
 
             PerformanceDashboardScreen(

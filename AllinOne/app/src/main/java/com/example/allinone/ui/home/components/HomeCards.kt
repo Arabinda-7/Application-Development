@@ -24,7 +24,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.allinone.LocalAppStyle
-import com.example.allinone.UIUtils
+import com.example.allinone.core.utils.UIUtils
 import com.example.allinone.R
 import java.util.Locale
 

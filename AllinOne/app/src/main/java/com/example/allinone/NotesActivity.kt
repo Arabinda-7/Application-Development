@@ -2,13 +2,20 @@ package com.example.allinone
 
 import android.content.Intent
 import android.os.Bundle
-import android.view.LayoutInflater
 import android.view.View
-import android.view.ViewGroup
 import android.widget.*
 import androidx.activity.viewModels
+import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.lifecycleScope
+import androidx.lifecycle.repeatOnLifecycle
+import com.example.allinone.data.model.Note
 import com.google.android.material.floatingactionbutton.FloatingActionButton
+import dagger.hilt.android.AndroidEntryPoint
+import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.launch
 
+@OptIn(ExperimentalCoroutinesApi::class)
+@AndroidEntryPoint
 class NotesActivity : BaseActivity() {
 
     private val viewModel: NotesViewModel by viewModels()
@@ -23,20 +30,22 @@ class NotesActivity : BaseActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_notes)
 
-        applyAutoCleanup()
         initSections()
         setupLogic()
+        observeViewModel()
+
+        viewModel.applyAutoCleanup()
 
         if (intent.getBooleanExtra("QUICK_ADD", false)) {
             startActivity(Intent(this, AddNoteActivity::class.java).apply {
-                putExtra("CATEGORY", viewModel.currentCategory)
+                putExtra("CATEGORY", viewModel.currentCategory.value)
             })
         }
     }
 
     private fun initSections() {
         listSection = NotesListSection(this, findViewById(R.id.notes_list)) {
-            listSection.updateDisplayList(viewModel.currentCategory)
+            // Data changed callback
         }
 
         headerSection = NotesHeaderSection(
@@ -52,9 +61,10 @@ class NotesActivity : BaseActivity() {
             }
         )
 
+        val navRoot = findViewById<LinearLayout>(R.id.bottom_navigation_notes)
         navigationSection = NotesNavigationSection(
             this,
-            findViewById(R.id.bottom_navigation_notes),
+            navRoot,
             mapOf(
                 "Notes" to findViewById(R.id.nav_notes),
                 "Questions" to findViewById(R.id.nav_questions),
@@ -74,13 +84,11 @@ class NotesActivity : BaseActivity() {
                 "Stories" to findViewById(R.id.tv_stories_label)
             )
         ) { category ->
-            viewModel.currentCategory = category
-            listSection.updateDisplayList(category)
-            navigationSection.setup(category)
+            viewModel.setCategory(category)
         }
 
         themeManager = NotesThemeManager(
-            this,
+            this, 
             findViewById(R.id.note_aura_background),
             findViewById(R.id.btn_create_new_note)
         )
@@ -88,81 +96,54 @@ class NotesActivity : BaseActivity() {
 
     private fun setupLogic() {
         headerSection.setup()
-        navigationSection.setup(viewModel.currentCategory)
-        themeManager.applyTheme()
-        listSection.updateDisplayList(viewModel.currentCategory)
         
-        setupGestureDetector()
-        setupKeyboardHandling(findViewById(R.id.notes_root_layout), findViewById(R.id.notes_content_container))
-
         findViewById<FloatingActionButton>(R.id.btn_create_new_note).setOnClickListener {
             startActivity(Intent(this, AddNoteActivity::class.java).apply {
-                putExtra("CATEGORY", viewModel.currentCategory)
+                putExtra("CATEGORY", viewModel.currentCategory.value)
             })
         }
-    }
 
-    private fun toggleDeleteMode(enabled: Boolean) {
-        viewModel.isDeleteMode = enabled
-        listSection.setDeleteMode(enabled)
-        headerSection.setSettingsIcon(if (enabled) android.R.drawable.ic_menu_delete else R.drawable.baseline_tune_24)
-        findViewById<View>(R.id.btn_create_new_note).visibility = if (enabled) View.GONE else View.VISIBLE
-    }
-
-    private fun showSettingsMenu(anchor: View) {
-        val inflater = LayoutInflater.from(this)
-        val menuView = inflater.inflate(R.layout.layout_menu_note, null)
-        val popupWindow = PopupWindow(menuView, ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT, true)
-        popupWindow.elevation = 10f
-
-        val btnToggleHidden = menuView.findViewById<View>(R.id.menu_toggle_completed)
-        val tvToggleHidden = menuView.findViewById<TextView>(R.id.tv_toggle_completed)
-        val ivToggleHidden = menuView.findViewById<ImageView>(R.id.iv_toggle_completed)
-        
-        btnToggleHidden.visibility = View.VISIBLE
-        tvToggleHidden.text = if (DataManager.noteShowHidden) "HIDE HIDDEN" else "SHOW HIDDEN"
-        ivToggleHidden.setImageResource(if (DataManager.noteShowHidden) android.R.drawable.ic_menu_view else android.R.drawable.ic_partial_secure)
-
-        btnToggleHidden.setOnClickListener {
-            DataManager.noteShowHidden = !DataManager.noteShowHidden
-            DataManager.saveData(this)
-            listSection.updateDisplayList(viewModel.currentCategory)
-            popupWindow.dismiss()
-        }
-
-        val btnMultiDelete = menuView.findViewById<View>(R.id.menu_clear_completed)
-        btnMultiDelete.visibility = View.VISIBLE
-        (if (btnMultiDelete is ViewGroup && btnMultiDelete.childCount > 1) btnMultiDelete.getChildAt(1) as? TextView else null)?.text = "SELECT & DELETE"
-
-        btnMultiDelete.setOnClickListener {
-            toggleDeleteMode(true)
-            popupWindow.dismiss()
-        }
-        
-        menuView.findViewById<View>(R.id.menu_activity_settings).setOnClickListener {
-            startActivity(Intent(this, NoteSettingsActivity::class.java))
-            popupWindow.dismiss()
-        }
-        popupWindow.showAsDropDown(anchor, -150, 0)
-    }
-
-    private fun setupGestureDetector() {
         gestureDetector = android.view.GestureDetector(this, object : SwipeGestureListener() {
             override fun onSwipeLeft() {
-                if (DataManager.noteVisibleSections.size > 1) {
-                    val currentIndex = DataManager.noteVisibleSections.indexOf(viewModel.currentCategory)
-                    val nextIndex = (currentIndex + 1) % DataManager.noteVisibleSections.size
-                    navigationSection.setup(DataManager.noteVisibleSections[nextIndex])
+                val settings = viewModel.settings.value
+                if (settings.visibleSections.size > 1) {
+                    val currentIndex = settings.visibleSections.indexOf(viewModel.currentCategory.value)
+                    val nextIndex = (currentIndex + 1) % settings.visibleSections.size
+                    viewModel.setCategory(settings.visibleSections[nextIndex])
                 }
             }
             override fun onSwipeRight() {
-                if (DataManager.noteVisibleSections.size > 1) {
-                    val currentIndex = DataManager.noteVisibleSections.indexOf(viewModel.currentCategory)
-                    val prevIndex = if (currentIndex <= 0) DataManager.noteVisibleSections.size - 1 else currentIndex - 1
-                    navigationSection.setup(DataManager.noteVisibleSections[prevIndex])
+                val settings = viewModel.settings.value
+                if (settings.visibleSections.size > 1) {
+                    val currentIndex = settings.visibleSections.indexOf(viewModel.currentCategory.value)
+                    val prevIndex = if (currentIndex <= 0) settings.visibleSections.size - 1 else currentIndex - 1
+                    viewModel.setCategory(settings.visibleSections[prevIndex])
                 }
             }
         })
+    }
+
+    private fun observeViewModel() {
+        lifecycleScope.launch {
+            repeatOnLifecycle(Lifecycle.State.STARTED) {
+                launch {
+                    viewModel.notes.collect { notes ->
+                        listSection.updateDisplayList(notes)
+                    }
+                }
+                launch {
+                    viewModel.currentCategory.collect { category ->
+                        navigationSection.updateNavUI(category)
+                    }
+                }
+                launch {
+                    viewModel.settings.collect { settings ->
+                        navigationSection.setup(viewModel.currentCategory.value, settings)
+                        themeManager.applyTheme()
+                    }
+                }
+            }
+        }
     }
 
     override fun dispatchTouchEvent(ev: android.view.MotionEvent?): Boolean {
@@ -170,25 +151,33 @@ class NotesActivity : BaseActivity() {
         return super.dispatchTouchEvent(ev)
     }
 
-    private fun applyAutoCleanup() {
-        val days = DataManager.noteAutoCleanupDays
-        if (days <= 0) return
-        val cutoff = System.currentTimeMillis() - (days.toLong() * 24 * 60 * 60 * 1000)
-        if (DataManager.notes.removeAll { it.timestamp < cutoff && it.category != "Stories" }) {
-            DataManager.saveData(this)
+    private fun toggleDeleteMode(enabled: Boolean) {
+        viewModel.isDeleteMode = enabled
+        listSection.setDeleteMode(enabled)
+        headerSection.setSettingsIcon(if (enabled) R.drawable.ic_trash else R.drawable.baseline_tune_24)
+    }
+
+    private fun showSettingsMenu(anchor: View) {
+        val popup = PopupMenu(this, anchor)
+        popup.menu.add("Delete Mode").setOnMenuItemClickListener {
+            toggleDeleteMode(true)
+            true
         }
+        popup.menu.add("Settings").setOnMenuItemClickListener {
+            startActivity(Intent(this, NoteSettingsActivity::class.java))
+            true
+        }
+        popup.show()
     }
 
     fun showEditNoteDialog(note: Note) {
         startActivity(Intent(this, AddNoteActivity::class.java).apply {
-            putExtra("NOTE_INDEX", DataManager.notes.indexOf(note))
+            putExtra("NOTE_ID", note.timestamp) 
         })
     }
 
     override fun onResume() {
         super.onResume()
-        navigationSection.setup(viewModel.currentCategory)
-        listSection.updateDisplayList(viewModel.currentCategory)
         themeManager.applyTheme()
     }
 }

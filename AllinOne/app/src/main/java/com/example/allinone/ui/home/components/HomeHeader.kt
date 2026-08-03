@@ -37,9 +37,9 @@ import androidx.compose.ui.unit.Density
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.allinone.R
-import com.example.allinone.DashboardState
+import com.example.allinone.ui.home.DashboardState
 import com.example.allinone.LocalAppStyle
-import com.example.allinone.UIUtils
+import com.example.allinone.core.utils.UIUtils
 import java.util.*
 
 @Composable

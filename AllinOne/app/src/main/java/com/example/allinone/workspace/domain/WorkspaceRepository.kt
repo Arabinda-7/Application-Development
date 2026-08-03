@@ -1,6 +1,7 @@
 package com.example.allinone.workspace.domain
 
 import com.example.allinone.DataManager
+import com.example.allinone.data.model.*
 import com.example.allinone.workspace.data.*
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.firstOrNull
@@ -39,7 +40,7 @@ class WorkspaceRepository(private val dao: WorkspaceDao) {
     }
 
     // Since we need to handle automations, let's refine the update methods
-    suspend fun updateTask(task: TaskEntity) {
+    suspend fun updateTask(task: WorkspaceTaskEntity) {
         val updatedTask = task.copy(updatedAt = System.currentTimeMillis())
         dao.insertTask(updatedTask)
         
@@ -150,9 +151,9 @@ class WorkspaceRepository(private val dao: WorkspaceDao) {
         notifyChange()
     }
 
-    suspend fun insertTask(task: TaskEntity) = updateTask(task)
+    suspend fun insertTask(task: WorkspaceTaskEntity) = updateTask(task)
 
-    suspend fun deleteTask(task: TaskEntity) {
+    suspend fun deleteTask(task: WorkspaceTaskEntity) {
         dao.deleteTask(task)
         logActivity(task.projectId, "TASK", task.id, "DELETE", "Task '${task.title}' removed")
         // Trigger progress update
@@ -193,9 +194,9 @@ class WorkspaceRepository(private val dao: WorkspaceDao) {
 
     suspend fun generateFeatureTasks(feature: FeatureEntity) {
         val tasks = listOf(
-            TaskEntity(projectId = feature.projectId, milestoneId = feature.id, title = "UI Design - ${feature.title}", description = "Design the user interface and interactions"),
-            TaskEntity(projectId = feature.projectId, milestoneId = feature.id, title = "Implementation - ${feature.title}", description = "Core logic and data integration"),
-            TaskEntity(projectId = feature.projectId, milestoneId = feature.id, title = "Testing & QA - ${feature.title}", description = "Unit tests and user acceptance testing")
+            WorkspaceTaskEntity(projectId = feature.projectId, milestoneId = feature.id, title = "UI Design - ${feature.title}", description = "Design the user interface and interactions"),
+            WorkspaceTaskEntity(projectId = feature.projectId, milestoneId = feature.id, title = "Implementation - ${feature.title}", description = "Core logic and data integration"),
+            WorkspaceTaskEntity(projectId = feature.projectId, milestoneId = feature.id, title = "Testing & QA - ${feature.title}", description = "Unit tests and user acceptance testing")
         )
         tasks.forEach { dao.insertTask(it) }
         logActivity(feature.projectId, "FEATURE", feature.id, "AUTOMATION", "Generated boilerplate tasks for '${feature.title}'")
@@ -219,7 +220,7 @@ class WorkspaceRepository(private val dao: WorkspaceDao) {
             // Automation: Auto-Task creation on Confirmation
             if (bug.status == "Confirmed" && bug.linkedTaskId == null) {
                 val taskId = UUID.randomUUID().toString()
-                val task = TaskEntity(
+                val task = WorkspaceTaskEntity(
                     id = taskId,
                     projectId = bug.projectId,
                     title = "FIX BUG: ${bug.title}",
@@ -257,18 +258,18 @@ class WorkspaceRepository(private val dao: WorkspaceDao) {
         notifyChange()
     }
 
-    suspend fun insertNote(note: NoteEntity) {
+    suspend fun insertNote(note: WorkspaceNoteEntity) {
         dao.insertNote(note)
         logActivity(note.projectId, "NOTE", note.id, "CREATE", "Note '${note.title}' added")
         notifyChange()
     }
 
-    suspend fun updateNote(note: NoteEntity) {
+    suspend fun updateNote(note: WorkspaceNoteEntity) {
         dao.updateNote(note.copy(updatedAt = System.currentTimeMillis()))
         notifyChange()
     }
 
-    suspend fun deleteNote(note: NoteEntity) {
+    suspend fun deleteNote(note: WorkspaceNoteEntity) {
         dao.deleteNote(note)
         logActivity(note.projectId, "NOTE", note.id, "DELETE", "Note '${note.title}' removed")
         notifyChange()
@@ -299,14 +300,14 @@ class WorkspaceRepository(private val dao: WorkspaceDao) {
     fun getResourcesForProject(projectId: String) = dao.getResourcesForProject(projectId)
     fun getActivityLogs(projectId: String) = dao.getActivityLogs(projectId)
 
-    suspend fun getDeadlinesForToday(start: Long, end: Long): Triple<List<ProjectEntity>, List<GoalEntity>, List<TaskEntity>> {
+    suspend fun getDeadlinesForToday(start: Long, end: Long): Triple<List<ProjectEntity>, List<GoalEntity>, List<WorkspaceTaskEntity>> {
         val projects = dao.getProjectsDueBetween(start, end)
         val goals = dao.getGoalsDueBetween(start, end)
         val tasks = dao.getTasksDueBetween(start, end)
         return Triple(projects, goals, tasks)
     }
 
-    suspend fun importFromNote(note: com.example.allinone.Note) {
+    suspend fun importFromNote(note: Note) {
         val projectId = UUID.randomUUID().toString()
         val project = ProjectEntity(
             id = projectId,
@@ -322,7 +323,7 @@ class WorkspaceRepository(private val dao: WorkspaceDao) {
 
         // Map sub-features to tasks
         note.subFeatures.forEach { feature ->
-            dao.insertTask(TaskEntity(
+            dao.insertTask(WorkspaceTaskEntity(
                 projectId = projectId,
                 title = feature.name,
                 description = feature.details,
@@ -346,7 +347,7 @@ class WorkspaceRepository(private val dao: WorkspaceDao) {
 
         // Map journal entries to notes
         note.journalEntries.forEach { journal ->
-            dao.insertNote(NoteEntity(
+            dao.insertNote(WorkspaceNoteEntity(
                 projectId = projectId,
                 title = "Journal Entry",
                 content = journal.text,

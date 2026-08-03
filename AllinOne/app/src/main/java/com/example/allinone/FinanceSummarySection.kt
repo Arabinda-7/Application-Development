@@ -4,6 +4,7 @@ import android.view.View
 import android.widget.ProgressBar
 import android.widget.TextView
 import com.google.android.material.card.MaterialCardView
+import com.example.allinone.data.model.Transaction
 import java.util.*
 
 class FinanceSummarySection(

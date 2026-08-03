@@ -10,7 +10,9 @@ import androidx.core.app.NotificationCompat
 import com.example.allinone.DataManager
 import com.example.allinone.data.NotificationQuoteProvider
 import com.example.allinone.NotificationScheduler
+import com.example.allinone.domain.repository.UserSettings
 import kotlinx.coroutines.*
+import kotlinx.coroutines.flow.first
 import java.util.*
 
 class DailyReminderReceiver : BroadcastReceiver() {
@@ -24,17 +26,18 @@ class DailyReminderReceiver : BroadcastReceiver() {
             try {
                 if (!DataManager.isDataLoaded.value) {
                     DataManager.initialize(context.applicationContext)
-                    var count = 0
-                    while (!DataManager.isDataLoaded.value && count < 30) {
-                        delay(100)
-                        count++
+                    withTimeoutOrNull(3000) {
+                        DataManager.isDataLoaded.first { it }
                     }
                 }
 
+                val entryPoint = DataManager.getEntryPoint(context)
+                val userSettings = entryPoint.userRepository().getUserSettings().first()
+
                 if (type == "MORNING") {
-                    handleMorningReminder(context)
+                    handleMorningReminder(context, userSettings)
                 } else {
-                    handleNightReminder(context)
+                    handleNightReminder(context, userSettings)
                 }
             } catch (e: Exception) {
                 e.printStackTrace()
@@ -44,14 +47,29 @@ class DailyReminderReceiver : BroadcastReceiver() {
         }
     }
 
-    private fun handleMorningReminder(context: Context) {
+    private fun handleMorningReminder(context: Context, settings: UserSettings) {
         val quote = NotificationQuoteProvider.getRandomMorningQuote()
         val sectionsWithTasks = mutableSetOf<String>()
         
         synchronized(DataManager.tasks) {
             DataManager.tasks.filter { !it.isCompleted }.forEach { 
-                sectionsWithTasks.add(it.section)
+                val shouldNotify = when (it.section) {
+                    "Tasks" -> settings.isTaskNotificationEnabled
+                    "Habits" -> settings.isHabitNotificationEnabled
+                    "Workouts" -> settings.isWorkoutNotificationEnabled
+                    "Notes" -> settings.isNoteNotificationEnabled
+                    "Projects" -> settings.isProjectNotificationEnabled
+                    "Finance" -> settings.isFinanceNotificationEnabled
+                    else -> true
+                }
+                if (shouldNotify) {
+                    sectionsWithTasks.add(it.section)
+                }
             }
+        }
+        
+        if (settings.isWorkspaceNotificationEnabled) {
+            sectionsWithTasks.add("Workspaces")
         }
 
         val bigText = if (sectionsWithTasks.isNotEmpty()) {
@@ -62,15 +80,24 @@ class DailyReminderReceiver : BroadcastReceiver() {
 
         showNotification(context, "Morning Motivation", quote, bigText, 101)
         
-        // Reschedule for next day
-        if (DataManager.isMorningReminderEnabled) {
-            NotificationScheduler.scheduleMorningReminder(context, DataManager.morningReminderTime)
+        if (settings.isMorningReminderEnabled) {
+            NotificationScheduler.scheduleMorningReminder(context, settings.morningReminderTime)
         }
     }
 
-    private fun handleNightReminder(context: Context) {
+    private fun handleNightReminder(context: Context, settings: UserSettings) {
         val allTasks = synchronized(DataManager.tasks) { DataManager.tasks.toList() }
-        val unfinishedTasks = allTasks.filter { !it.isCompleted }
+        val unfinishedTasks = allTasks.filter { !it.isCompleted }.filter { 
+            when (it.section) {
+                "Tasks" -> settings.isTaskNotificationEnabled
+                "Habits" -> settings.isHabitNotificationEnabled
+                "Workouts" -> settings.isWorkoutNotificationEnabled
+                "Notes" -> settings.isNoteNotificationEnabled
+                "Projects" -> settings.isProjectNotificationEnabled
+                "Finance" -> settings.isFinanceNotificationEnabled
+                else -> true
+            }
+        }
         val completionRate = if (allTasks.isEmpty()) 100 else ((allTasks.size - unfinishedTasks.size) * 100) / allTasks.size
         
         val quote = NotificationQuoteProvider.getClosingQuote(completionRate)
@@ -83,9 +110,8 @@ class DailyReminderReceiver : BroadcastReceiver() {
 
         showNotification(context, "Day End Review", quote, bigText, 102)
         
-        // Reschedule for next day
-        if (DataManager.isNightReminderEnabled) {
-            NotificationScheduler.scheduleNightReminder(context, DataManager.nightReminderTime)
+        if (settings.isNightReminderEnabled) {
+            NotificationScheduler.scheduleNightReminder(context, settings.nightReminderTime)
         }
     }
 

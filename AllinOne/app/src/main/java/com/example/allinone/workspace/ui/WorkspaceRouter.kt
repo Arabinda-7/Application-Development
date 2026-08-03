@@ -39,14 +39,14 @@ fun WorkspaceDetailRouter(
 
         WorkspaceAction.AddTask, WorkspaceAction.EditTask -> {
             TaskAddEditSection(
-                task = editingEntity as? TaskEntity,
+                task = editingEntity as? WorkspaceTaskEntity,
                 projectId = selectedProjectId,
                 viewModel = viewModel,
                 onBack = onBack
             )
         }
         WorkspaceAction.ViewTask -> {
-            (editingEntity as? TaskEntity)?.let {
+            (editingEntity as? WorkspaceTaskEntity)?.let {
                 TaskDetailSection(
                     task = it,
                     onBack = onBack,
@@ -100,15 +100,15 @@ fun WorkspaceDetailRouter(
 
         WorkspaceAction.AddNote, WorkspaceAction.EditNote -> {
             NoteAddEditSection(
-                note = editingEntity as? NoteEntity,
+                note = editingEntity as? WorkspaceNoteEntity,
                 projectId = selectedProjectId,
                 viewModel = viewModel,
                 onBack = onBack,
-                onDelete = { (editingEntity as? NoteEntity)?.let { onDeleteEntity(it) } }
+                onDelete = { (editingEntity as? WorkspaceNoteEntity)?.let { onDeleteEntity(it) } }
             )
         }
         WorkspaceAction.ViewNote -> {
-            (editingEntity as? NoteEntity)?.let {
+            (editingEntity as? WorkspaceNoteEntity)?.let {
                 NoteDetailSection(
                     note = it, 
                     onBack = onBack, 

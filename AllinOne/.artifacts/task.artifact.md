@@ -1,5 +1,6 @@
-# Task List - AI Assistant Conversational Expansion
+# Tasks for Entity Unification & KSP Fix
 
-- [x] Modify `AssistantBrain.kt` to enhance loading and matching logic
-- [x] Verify build and basic conversational triggers
-- [x] Create walkthrough
+- [ ] Rename `NoteEntity` and `TaskEntity` to be unique `[/]`
+- [ ] Fix star imports in Room classes `[ ]`
+- [ ] Reset `AppDatabase` to minimal state `[ ]`
+- [ ] Incrementally add Room components and verify `[ ]`

@@ -1,68 +1,38 @@
 package com.example.allinone.data
 
-import com.example.allinone.R
+import com.example.allinone.DayHistory
+import com.example.allinone.data.model.*
+import java.util.*
+import javax.inject.Inject
+import javax.inject.Singleton
 
-object UserDataManager {
-    var userXP: Int = 0
-    var userLevel: Int = 1
-    var userName: String = "User"
-    var userBio: String = ""
-    var userAvatarRes: Int = R.drawable.boy_avatar_profile
-    var userProfileImageUri: String? = null
-    var recentActivities: MutableList<String> = java.util.Collections.synchronizedList(mutableListOf<String>())
-    var dailyMoods: MutableMap<String, String> = java.util.Collections.synchronizedMap(mutableMapOf<String, String>())
-    var lastMoodTimestamp: Long = 0
-    
-    var displaySize: String = "S"
-    var homeDisplaySize: String = "S"
-    var homeFocusSize: String = "M"
-    var fontSize: String = "S"
-    var isSystemAppearanceEnabled: Boolean = true
-    
-    var appThemeMode: String = "DARK"
-    var appAccentColor: Int = -1
-    var appFontFamily: String = "DEFAULT"
-    var appBorderRadius: Int = 16
-    var appCardStyle: String = "GLASS"
-    var appShowShadows: Boolean = true
-    var isDynamicColorEnabled: Boolean = false
-    var startupLoadingTime: Int = 2000
-    
-    var showHabitSection: Boolean = true
-    var showWorkoutSection: Boolean = true
-    var showTaskSection: Boolean = true
-    var showNoteSection: Boolean = true
-    var showProjectSection: Boolean = true
-    var showFinanceSection: Boolean = true
-    var showPerformanceSection: Boolean = true
-    
-    var isOnboardingCompleted: Boolean = false
-    var isAppLockEnabled: Boolean = false
-    var isBiometricLockEnabled: Boolean = false
-    var isScreenshotProtectionEnabled: Boolean = false
-    var isAppUnlocked: Boolean = false
-    var appLockPin: String? = null
-    var appLockQuestion: String? = null
-    var appLockAnswer: String? = null
-    
-    var userCustomColors: MutableList<Int> = java.util.Collections.synchronizedList(mutableListOf<Int>())
+/**
+ * UserDataManager: Manages in-memory user collections (tasks, habits, workouts, notes, projects, transactions)
+ * and performs daily performance calculation and analytics.
+ */
+@Singleton
+class UserDataManager @Inject constructor() {
 
-    fun addActivity(activity: String) {
-        recentActivities.add(0, activity)
-        if (recentActivities.size > 20) {
-            recentActivities.removeAt(recentActivities.size - 1)
-        }
+    val tasks: MutableList<Task> = Collections.synchronizedList(mutableListOf())
+    val habits: MutableList<Habit> = Collections.synchronizedList(mutableListOf())
+    val workouts: MutableList<Workout> = Collections.synchronizedList(mutableListOf())
+    val notes: MutableList<Note> = Collections.synchronizedList(mutableListOf())
+    val projects: MutableList<Note> = Collections.synchronizedList(mutableListOf())
+    val transactions: MutableList<Transaction> = Collections.synchronizedList(mutableListOf())
+    val ledgerEntries: MutableList<PersonalLedgerEntry> = Collections.synchronizedList(mutableListOf())
+    val personalLedgers: MutableList<PersonalLedger> = Collections.synchronizedList(mutableListOf())
+    val history: MutableMap<String, DayHistory> = Collections.synchronizedMap(mutableMapOf())
+
+    fun calculateDayHistory(dateKey: String): DayHistory {
+        val habitsComp = habits.count { it.completedDates.contains(dateKey) }
+        val workoutsComp = workouts.count { it.completedDates.contains(dateKey) }
+        return history[dateKey] ?: DayHistory(
+            habitsCompleted = habitsComp,
+            totalHabits = habits.size,
+            workoutsCompleted = workoutsComp,
+            totalWorkouts = workouts.size
+        )
     }
 
-    fun addXP(amount: Int): Boolean {
-        var leveledUp = false
-        userXP += amount
-        while (userXP >= userLevel * 100) {
-            userXP -= userLevel * 100
-            userLevel++
-            leveledUp = true
-            addActivity("Leveled up to Level $userLevel!")
-        }
-        return leveledUp
-    }
+    fun getDayHistory(dateKey: String): DayHistory? = history[dateKey]
 }

@@ -2,11 +2,18 @@ package com.example.allinone.data.database
 
 import androidx.room.Entity
 import androidx.room.PrimaryKey
-import com.example.allinone.*
+import kotlinx.serialization.Serializable
+import com.example.allinone.data.model.Subtask
+import com.example.allinone.data.model.LedgerPayment
+import com.example.allinone.data.model.PersonalLedgerEntry
+import com.example.allinone.data.model.JournalEntry
+import com.example.allinone.data.model.ProjectFeature
+import com.example.allinone.data.model.ProjectHistory
 import java.util.*
 
+@Serializable
 @Entity(tableName = "app_tasks")
-data class TaskEntity(
+data class GlobalTaskEntity(
     @PrimaryKey val timestamp: Long = System.currentTimeMillis(),
     val name: String,
     val isCompleted: Boolean = false,
@@ -20,6 +27,7 @@ data class TaskEntity(
     val completedTimestamp: Long? = null
 )
 
+@Serializable
 @Entity(tableName = "app_habits")
 data class HabitEntity(
     @PrimaryKey val timestamp: Long = System.currentTimeMillis(),
@@ -40,6 +48,7 @@ data class HabitEntity(
     val reminderTime: Long? = null
 )
 
+@Serializable
 @Entity(tableName = "app_workouts")
 data class WorkoutEntity(
     @PrimaryKey val timestamp: Long = System.currentTimeMillis(),
@@ -61,6 +70,7 @@ data class WorkoutEntity(
     val dailyProgress: Map<String, Int> = emptyMap()
 )
 
+@Serializable
 @Entity(tableName = "app_transactions")
 data class TransactionEntity(
     @PrimaryKey val id: String = UUID.randomUUID().toString(),
@@ -73,6 +83,7 @@ data class TransactionEntity(
     val categoryColor: Int = -1
 )
 
+@Serializable
 @Entity(tableName = "app_personal_ledgers")
 data class PersonalLedgerEntity(
     @PrimaryKey val id: String = UUID.randomUUID().toString(),
@@ -81,6 +92,7 @@ data class PersonalLedgerEntity(
     val timestamp: Long = System.currentTimeMillis()
 )
 
+@Serializable
 @Entity(tableName = "app_standalone_ledger_entries")
 data class LedgerEntryEntity(
     @PrimaryKey val id: String = UUID.randomUUID().toString(),
@@ -96,8 +108,9 @@ data class LedgerEntryEntity(
     val paymentHistory: List<LedgerPayment> = emptyList()
 )
 
+@Serializable
 @Entity(tableName = "app_notes")
-data class NoteEntity(
+data class GlobalNoteEntity(
     @PrimaryKey val timestamp: Long = System.currentTimeMillis(),
     val title: String,
     val content: String,

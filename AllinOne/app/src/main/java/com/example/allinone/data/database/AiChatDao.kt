@@ -63,4 +63,16 @@ interface AiChatDao {
         deleteOldSessions(threshold)
         deleteOrphanedMessages()
     }
+
+    @Query("SELECT * FROM ai_chat_messages")
+    suspend fun getAllMessagesSync(): List<AiChatEntity>
+
+    @Query("SELECT * FROM ai_chat_sessions")
+    suspend fun getAllSessionsSync(): List<AiChatSessionEntity>
+
+    @Insert(onConflict = OnConflictStrategy.REPLACE)
+    suspend fun insertAllMessages(messages: List<AiChatEntity>)
+
+    @Insert(onConflict = OnConflictStrategy.REPLACE)
+    suspend fun insertAllSessions(sessions: List<AiChatSessionEntity>)
 }

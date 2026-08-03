@@ -17,12 +17,19 @@ import androidx.core.content.ContextCompat
 import androidx.recyclerview.widget.RecyclerView
 import com.google.android.material.card.MaterialCardView
 import java.text.SimpleDateFormat
+import com.example.allinone.core.utils.UIUtils
+import com.example.allinone.data.model.Workout
+import com.example.allinone.domain.repository.WorkoutSettings
 import java.util.*
 
 class WorkoutAdapter(
-    private val allWorkouts: MutableList<Workout>,
+    private var allWorkouts: List<Workout>,
+    private var workoutSettings: WorkoutSettings = WorkoutSettings(),
     private val onProgressChanged: (Boolean) -> Unit,
-    private val onTimerStart: (Workout, Int) -> Unit
+    private val onTimerStart: (Workout, Int) -> Unit,
+    private val onAddActivity: (String) -> Unit = {},
+    private val onAddXP: (Int) -> Unit = {},
+    private val onDeleteWorkout: (Workout) -> Unit = {}
 ) : RecyclerView.Adapter<RecyclerView.ViewHolder>() {
 
     companion object {
@@ -34,9 +41,9 @@ class WorkoutAdapter(
     private var displayItems = mutableListOf<Any>()
     private var currentFilter = "All"
     private var selectedDayIndex = 0
-    private var selectedDateString = DataManager.getTrackingDateString()
-    private val todayDateString get() = DataManager.getTrackingDateString()
-    private var showCompleted = DataManager.workoutShowCompleted
+    private var selectedDateString = SimpleDateFormat("yyyyMMdd", Locale.getDefault()).format(Date())
+    private val todayDateString get() = SimpleDateFormat("yyyyMMdd", Locale.getDefault()).format(Date())
+    private var showCompleted = workoutSettings.showCompleted
 
     init {
         applyFilterAndSort()
@@ -251,10 +258,8 @@ class WorkoutAdapter(
                             workout.isExpanded = false
                             if (!workout.completedDates.contains(todayDateString)) {
                                 workout.completedDates.add(todayDateString)
-                                DataManager.addActivity("Finished Workout: ${workout.name}")
-                                if (DataManager.addXP(context, 25)) {
-                                    android.widget.Toast.makeText(context, "LEVEL UP! You are now Level ${DataManager.userLevel}", android.widget.Toast.LENGTH_LONG).show()
-                                }
+                                onAddActivity("Finished Workout: ${workout.name}")
+                                onAddXP(25)
                             }
                         }
                         TransitionManager.beginDelayedTransition(holder.itemView as ViewGroup)
@@ -271,13 +276,11 @@ class WorkoutAdapter(
                     TransitionManager.beginDelayedTransition(holder.itemView as ViewGroup)
                     workout.isExpanded = false
                     
-                    if (!workout.completedDates.contains(todayDateString)) {
-                        workout.completedDates.add(todayDateString)
-                        DataManager.addActivity("Finished Workout: ${workout.name}")
-                        if (DataManager.addXP(context, 25)) {
-                            android.widget.Toast.makeText(context, "LEVEL UP! You are now Level ${DataManager.userLevel}", android.widget.Toast.LENGTH_LONG).show()
-                        }
-                    }
+                if (!workout.completedDates.contains(todayDateString)) {
+                    workout.completedDates.add(todayDateString)
+                    onAddActivity("Finished Workout: ${workout.name}")
+                    onAddXP(25)
+                }
                     
                     applyFilterAndSort()
                     onProgressChanged(true)
@@ -317,9 +320,7 @@ class WorkoutAdapter(
             
             if (!workout.completedDates.contains(todayDateString)) {
                 workout.completedDates.add(todayDateString)
-                if (DataManager.addXP(context, 10)) {
-                    android.widget.Toast.makeText(context, "LEVEL UP! You are now Level ${DataManager.userLevel}", android.widget.Toast.LENGTH_LONG).show()
-                }
+                onAddXP(10)
             }
             
             applyFilterAndSort()
@@ -336,9 +337,7 @@ class WorkoutAdapter(
         }
 
         menuView.findViewById<View>(R.id.menu_delete).setOnClickListener {
-            allWorkouts.remove(workout)
-            applyFilterAndSort()
-            onProgressChanged(false)
+            onDeleteWorkout(workout)
             popupWindow.dismiss()
         }
 
@@ -381,7 +380,7 @@ class WorkoutAdapter(
             val matchesFilter = if (currentFilter == "All") {
                 true
             } else {
-                if (DataManager.workoutFilterType == "TIME") {
+                if (workoutSettings.filterType == "TIME") {
                     workout.frequency == currentFilter
                 } else {
                     workout.muscleGroups.contains(currentFilter)
@@ -393,7 +392,8 @@ class WorkoutAdapter(
             } else {
                 true 
             }
-            val isAvailableOnDate = DataManager.getTrackingDateString(workout.timestamp) <= selectedDateString
+            val workoutCreationDate = SimpleDateFormat("yyyyMMdd", Locale.getDefault()).format(Date(workout.timestamp))
+            val isAvailableOnDate = workoutCreationDate <= selectedDateString
             matchesFilter && matchesDay && isAvailableOnDate
         }
 
@@ -420,6 +420,17 @@ class WorkoutAdapter(
         }
 
         notifyDataSetChanged()
+    }
+
+    fun updateSettings(settings: WorkoutSettings) {
+        this.workoutSettings = settings
+        this.showCompleted = settings.showCompleted
+        applyFilterAndSort()
+    }
+
+    fun updateWorkouts(workouts: List<Workout>) {
+        this.allWorkouts = workouts
+        applyFilterAndSort()
     }
 
     fun setShowCompleted(show: Boolean) {

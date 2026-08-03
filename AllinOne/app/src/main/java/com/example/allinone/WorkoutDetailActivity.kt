@@ -13,11 +13,16 @@ import android.widget.ImageView
 import android.widget.TextView
 import androidx.appcompat.app.AlertDialog
 import androidx.core.content.ContextCompat
+import androidx.activity.viewModels
+import com.example.allinone.data.model.Workout
+import dagger.hilt.android.AndroidEntryPoint
 import java.text.SimpleDateFormat
 import java.util.*
 
+@AndroidEntryPoint
 class WorkoutDetailActivity : BaseActivity() {
 
+    private val viewModel: WorkoutViewModel by viewModels()
     private var workout: Workout? = null
     private var currentCalendar = Calendar.getInstance()
     private lateinit var calendarGrid: GridLayout
@@ -30,7 +35,7 @@ class WorkoutDetailActivity : BaseActivity() {
         setupKeyboardHandling(findViewById(R.id.workout_detail_root), findViewById(R.id.workout_detail_content_container))
 
         val workoutId = intent.getLongExtra("WORKOUT_ID", -1L)
-        workout = DataManager.workouts.find { it.timestamp == workoutId }
+        workout = viewModel.workouts.value.find { it.timestamp == workoutId }
 
         if (workout == null) {
             finish()
@@ -172,28 +177,28 @@ class WorkoutDetailActivity : BaseActivity() {
 
         builder.setPositiveButton("LOG") { _, _ ->
             val enteredValue = input.text.toString().toIntOrNull() ?: 0
-            val target = w.target.coerceAtLeast(1)
-            val percentage = ((enteredValue.coerceIn(0, target) * 100) / target)
+            val targetValue = w.target.coerceAtLeast(1)
+            val percentage = ((enteredValue.coerceIn(0, targetValue) * 100) / targetValue)
+            val today = SimpleDateFormat("yyyyMMdd", Locale.getDefault()).format(Date())
             
-            if (percentage > 0) {
-                w.dailyProgress[dateKey] = percentage
-                if (!w.completedDates.contains(dateKey)) w.completedDates.add(dateKey)
-                
-                // If logging for today, update current session
-                if (dateKey == DataManager.getTrackingDateString()) {
-                    w.progress = enteredValue.coerceIn(0, target)
-                    w.isCompleted = percentage == 100
-                }
+            val updatedWorkout = if (percentage > 0) {
+                w.copy(
+                    dailyProgress = w.dailyProgress.toMutableMap().apply { put(dateKey, percentage) },
+                    completedDates = w.completedDates.toMutableList().apply { if (!contains(dateKey)) add(dateKey) },
+                    progress = if (dateKey == today) enteredValue.coerceIn(0, targetValue) else w.progress,
+                    isCompleted = if (dateKey == today) percentage == 100 else w.isCompleted
+                )
             } else {
-                w.dailyProgress.remove(dateKey)
-                w.completedDates.remove(dateKey)
-                if (dateKey == DataManager.getTrackingDateString()) {
-                    w.progress = 0
-                    w.isCompleted = false
-                }
+                w.copy(
+                    dailyProgress = w.dailyProgress.toMutableMap().apply { remove(dateKey) },
+                    completedDates = w.completedDates.toMutableList().apply { remove(dateKey) },
+                    progress = if (dateKey == today) 0 else w.progress,
+                    isCompleted = if (dateKey == today) false else w.isCompleted
+                )
             }
             
-            DataManager.saveData(this)
+            viewModel.updateWorkout(updatedWorkout)
+            workout = updatedWorkout
             updateStats()
             setupCalendar()
         }

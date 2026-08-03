@@ -5,7 +5,16 @@ import androidx.activity.compose.setContent
 import androidx.compose.runtime.*
 import androidx.compose.ui.platform.LocalContext
 import androidx.lifecycle.lifecycleScope
-import com.example.allinone.data.ChatMessage
+import com.example.allinone.assistant.model.ChatMessage
+import com.example.allinone.data.model.Habit
+import com.example.allinone.data.model.Task
+import com.example.allinone.data.model.Subtask
+import com.example.allinone.data.model.Note
+import com.example.allinone.data.model.Workout
+import com.example.allinone.data.model.ProjectHistory
+import com.example.allinone.data.model.JournalEntry
+import com.example.allinone.data.model.ProjectFeature
+
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 
@@ -88,16 +97,16 @@ class AssistantSessionDetailActivity : BaseActivity() {
         chatMessages.add(userMsg)
         
         lifecycleScope.launch {
-            aiChatRepo?.insertMessage(sessionId, userMsg.text, userMsg.isUser, userMsg.timestamp)
+            aiChatRepo?.insertMessage(com.example.allinone.data.database.AiChatEntity(sessionId = sessionId, text = userMsg.text, isUser = userMsg.isUser, timestamp = userMsg.timestamp))
             
             delay(500)
             val action = AssistantBrain.parseCommand(command)
             val response = if (action != null) {
                 var res = action.dynamicResponse ?: ""
-                when (action.type) {
-                    "CHAT_RESPONSE" -> res = action.payload
+                when (action.type ?: "CHAT_RESPONSE") {
+                    "CHAT_RESPONSE" -> res = action.payload ?: ""
                     "ADD_HABIT" -> {
-                        val payload = action.payload
+                        val payload = action.payload ?: ""
                         val habit = if (payload.contains("|")) {
                             val parts = payload.split("|")
                             val name = parts[0]
@@ -112,7 +121,7 @@ class AssistantSessionDetailActivity : BaseActivity() {
                         if (res.isEmpty()) res = "Created habit: ${habit.name}"
                     }
                     "LOG_HABIT" -> {
-                        val habitName = action.payload
+                        val habitName = action.payload ?: ""
                         val habit = DataManager.habits.find { it.name.equals(habitName, ignoreCase = true) }
                         if (habit != null) {
                             habit.isCompleted = true
@@ -126,7 +135,7 @@ class AssistantSessionDetailActivity : BaseActivity() {
                         }
                     }
                     "ADD_TASK" -> {
-                        val payload = action.payload
+                        val payload = action.payload ?: ""
                         val task = if (payload.contains("|")) {
                             val parts = payload.split("|")
                             val name = parts[0]
@@ -143,7 +152,7 @@ class AssistantSessionDetailActivity : BaseActivity() {
                         if (res.isEmpty()) res = "Added task: ${task.name}"
                     }
                     "MARK_TASK_COMPLETE" -> {
-                        val name = action.payload
+                        val name = action.payload ?: ""
                         val task = DataManager.tasks.find { it.name.equals(name, ignoreCase = true) }
                         if (task != null) {
                             task.isCompleted = true
@@ -152,8 +161,9 @@ class AssistantSessionDetailActivity : BaseActivity() {
                         }
                     }
                     "MARK_SUBTASK_COMPLETE" -> {
-                        val parts = action.payload.split("|")
-                        val taskName = parts[0]
+                        val payload = action.payload ?: ""
+                        val parts = payload.split("|")
+                        val taskName = parts.getOrNull(0) ?: ""
                         val subName = parts.getOrNull(1) ?: ""
                         val task = DataManager.tasks.find { it.name.equals(taskName, ignoreCase = true) }
                         val subtask = task?.subtasks?.find { it.name.equals(subName, ignoreCase = true) }
@@ -164,7 +174,7 @@ class AssistantSessionDetailActivity : BaseActivity() {
                         }
                     }
                     "ADD_NOTE" -> {
-                        val payload = action.payload
+                        val payload = action.payload ?: ""
                         val note = if (payload.contains("|")) {
                             val parts = payload.split("|")
                             Note(title = parts[0], content = parts.getOrNull(1) ?: "")
@@ -176,7 +186,7 @@ class AssistantSessionDetailActivity : BaseActivity() {
                         if (res.isEmpty()) res = "Saved note: ${note.title}"
                     }
                     "ADD_WORKOUT" -> {
-                        val payload = action.payload
+                        val payload = action.payload ?: ""
                         val workout = if (payload.contains("|")) {
                             val parts = payload.split("|")
                             val name = parts[0]
@@ -193,8 +203,9 @@ class AssistantSessionDetailActivity : BaseActivity() {
                         if (res.isEmpty()) res = "Created workout: ${workout.name}"
                     }
                     "UPDATE_WORKOUT_PROGRESS" -> {
-                        val parts = action.payload.split("|")
-                        val name = parts[0]
+                        val payload = action.payload ?: ""
+                        val parts = payload.split("|")
+                        val name = parts.getOrNull(0) ?: ""
                         val inc = parts.getOrNull(1)?.toIntOrNull() ?: 0
                         val workout = DataManager.workouts.find { it.name.equals(name, ignoreCase = true) }
                         if (workout != null) {
@@ -209,7 +220,7 @@ class AssistantSessionDetailActivity : BaseActivity() {
                         }
                     }
                     "COMPLETE_WORKOUT" -> {
-                        val name = action.payload
+                        val name = action.payload ?: ""
                         val workout = DataManager.workouts.find { it.name.equals(name, ignoreCase = true) }
                         if (workout != null) {
                             workout.isCompleted = true
@@ -218,6 +229,109 @@ class AssistantSessionDetailActivity : BaseActivity() {
                                 workout.completedDates.add(DataManager.getTrackingDateString())
                             }
                             DataManager.saveData(this@AssistantSessionDetailActivity, true)
+                        }
+                    }
+                    "CREATE_PROJECT" -> {
+                        val payload = action.payload ?: ""
+                        val parts = payload.split("|")
+                        val title = parts[0]
+                        val desc = parts.getOrNull(1) ?: ""
+                        val status = parts.getOrNull(2) ?: "Not Started"
+                        val priority = parts.getOrNull(3)?.toIntOrNull() ?: 1
+                        val deadline = parts.getOrNull(4)?.toLongOrNull()
+                        val goalsStr = parts.getOrNull(5) ?: ""
+                        val featuresStr = parts.getOrNull(6) ?: ""
+
+                        val goals: MutableList<JournalEntry> = if (goalsStr.isNotEmpty()) goalsStr.split(";").map { JournalEntry(it) }.toMutableList() else mutableListOf()
+                        val features: MutableList<ProjectFeature> = if (featuresStr.isNotEmpty()) {
+                            featuresStr.split(";").map { f ->
+                                val fParts = f.split(",")
+                                ProjectFeature(
+                                    name = fParts[0],
+                                    tag = fParts.getOrNull(1) ?: "",
+                                    dueDate = fParts.getOrNull(2)?.toLongOrNull()
+                                )
+                            }.toMutableList()
+                        } else mutableListOf<ProjectFeature>()
+
+                        val project = Note(
+                            title = title,
+                            content = desc,
+                            status = status,
+                            priority = priority,
+                            deadline = deadline,
+                            ideaGoals = goals,
+                            subFeatures = features,
+                            isGlobalProject = true
+                        )
+                        DataManager.projects.add(0, project)
+                        DataManager.saveData(this@AssistantSessionDetailActivity)
+                        if (res.isEmpty()) res = "Created project: ${project.title}"
+                    }
+                    "ADD_PROJECT_FEATURE" -> {
+                        val parts = action.payload!!.split("|")
+                        val projTitle = parts[0]
+                        val featName = parts[1]
+                        val tag = parts.getOrNull(2) ?: "General"
+                        val deadline = parts.getOrNull(3)?.toLongOrNull()
+                        val project = DataManager.projects.find { it.title.equals(projTitle, ignoreCase = true) }
+                        project?.let { p ->
+                            p.subFeatures.add(ProjectFeature(name = featName, tag = tag, dueDate = deadline))
+                            p.changeHistory.add(ProjectHistory(action = "Sub-feature Added", description = "Added feature '$featName'"))
+                            DataManager.saveData(this@AssistantSessionDetailActivity, true)
+                        }
+                    }
+                    "UPDATE_PROJECT_PROPERTY" -> {
+                        val parts = action.payload!!.split("|")
+                        val projTitle = parts[0]
+                        val prop = parts[1]
+                        val value = parts[2]
+                        val project = DataManager.projects.find { it.title.equals(projTitle, ignoreCase = true) }
+                        project?.let { p ->
+                            when (prop) {
+                                "STATUS" -> p.status = value
+                                "PRIORITY" -> p.priority = if (value.contains("High", true)) 2 else if (value.contains("Low", true)) 0 else 1
+                                "DEADLINE" -> p.deadline = System.currentTimeMillis()
+                            }
+                            p.changeHistory.add(ProjectHistory(action = "Property Updated", description = "Changed $prop"))
+                            DataManager.saveData(this@AssistantSessionDetailActivity, true)
+                        }
+                    }
+                    "MARK_FEATURE_COMPLETE" -> {
+                        val parts = action.payload!!.split("|")
+                        val projTitle = parts[0]
+                        val featName = parts[1]
+                        val project = DataManager.projects.find { it.title.equals(projTitle, ignoreCase = true) }
+                        project?.let { p ->
+                            p.subFeatures.find { it.name.equals(featName, ignoreCase = true) }?.let { f ->
+                                f.isCompleted = true
+                                p.changeHistory.add(ProjectHistory(action = "Feature Completed", description = "Finished '$featName'"))
+                                DataManager.saveData(this@AssistantSessionDetailActivity, true)
+                            }
+                        }
+                    }
+                    "ADD_PROJECT_GOAL" -> {
+                        val parts = action.payload!!.split("|")
+                        val projTitle = parts[0]
+                        val goalText = parts[1]
+                        val project = DataManager.projects.find { it.title.equals(projTitle, ignoreCase = true) }
+                        project?.let { it.ideaGoals.add(JournalEntry(goalText)); DataManager.saveData(this@AssistantSessionDetailActivity, true) }
+                    }
+                    "CONVERT_NOTE_TO_PROJECT" -> {
+                        val noteTitle = action.payload!!
+                        DataManager.notes.find { it.title.equals(noteTitle, ignoreCase = true) }?.let { n ->
+                            n.isGlobalProject = true; DataManager.notes.remove(n); DataManager.projects.add(0, n); DataManager.saveData(this@AssistantSessionDetailActivity, true)
+                        }
+                    }
+                    "ADD_PROJECT_RESOURCE" -> {
+                        val parts = action.payload!!.split("|")
+                        DataManager.projects.find { it.title.equals(parts[0], ignoreCase = true) }?.let { p ->
+                            p.content += "\nResource: ${parts[1]}"; DataManager.saveData(this@AssistantSessionDetailActivity, true)
+                        }
+                    }
+                    "ARCHIVE_PROJECT" -> {
+                        DataManager.projects.find { it.title.equals(action.payload, ignoreCase = true) }?.let { p ->
+                            p.isArchived = true; DataManager.saveData(this@AssistantSessionDetailActivity, true)
                         }
                     }
                     else -> if (res.isEmpty()) res = "Executing ${action.type}: ${action.payload}"
@@ -229,7 +343,7 @@ class AssistantSessionDetailActivity : BaseActivity() {
             
             val assistantMsg = ChatMessage(response, false)
             chatMessages.add(assistantMsg)
-            aiChatRepo?.insertMessage(sessionId, assistantMsg.text, assistantMsg.isUser, assistantMsg.timestamp)
+            aiChatRepo?.insertMessage(com.example.allinone.data.database.AiChatEntity(sessionId = sessionId, text = assistantMsg.text, isUser = assistantMsg.isUser, timestamp = assistantMsg.timestamp))
             
             if (!isMuted) {
                 voiceHandler?.speak(response, response.trim().endsWith("?"))

@@ -2,6 +2,7 @@ package com.example.allinone
 
 import org.junit.Test
 import org.junit.Assert.*
+import com.example.allinone.core.utils.IntelligenceEngine
 
 class ManagementAnalyticsTest {
 
