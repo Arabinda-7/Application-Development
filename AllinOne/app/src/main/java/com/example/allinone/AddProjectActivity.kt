@@ -69,6 +69,8 @@ class AddProjectActivity : BaseActivity() {
         setContentView(R.layout.activity_add_project)
 
         DataManager.currentEditingSubFeatures.clear()
+        // Add default sub-feature
+        DataManager.currentEditingSubFeatures.add(ProjectFeature("Initial Milestone", position = 1))
 
         initViews()
         setupLogic()

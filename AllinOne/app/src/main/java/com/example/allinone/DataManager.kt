@@ -22,6 +22,7 @@ import dagger.hilt.components.SingletonComponent
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
+import kotlinx.coroutines.launch
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.first
@@ -48,6 +49,7 @@ object DataManager {
         fun assistantMemoryRepository(): AssistantMemoryRepository
         fun aiChatDao(): AiChatDao
         fun getTodayAgendaUseCase(): GetTodayAgendaUseCase
+        fun assistantBrain(): com.example.allinone.AssistantBrain
     }
 
     private var appContext: Context? = null
@@ -64,6 +66,57 @@ object DataManager {
     private val userDataManager = UserDataManager()
     private val workspaceDataManager = WorkspaceDataManager()
     private val backupDataManager = BackupDataManager()
+
+    private val syncScope = CoroutineScope(Dispatchers.Main + Job())
+    private var isSyncing = false
+
+    fun startSync(context: Context) {
+        if (isSyncing) return
+        isSyncing = true
+        val entryPoint = getEntryPoint(context)
+        
+        syncScope.launch {
+            entryPoint.habitRepository().getAllHabits().collect { list ->
+                habits.clear()
+                habits.addAll(list)
+                notifyDataChanged()
+            }
+        }
+
+        syncScope.launch {
+            entryPoint.taskRepository().getTasks().collect { list ->
+                tasks.clear()
+                tasks.addAll(list)
+                notifyDataChanged()
+            }
+        }
+        
+        syncScope.launch {
+            entryPoint.workoutRepository().getAllWorkouts().collect { list ->
+                workouts.clear()
+                workouts.addAll(list)
+                notifyDataChanged()
+            }
+        }
+        
+        syncScope.launch {
+            entryPoint.userRepository().getDayHistory().collect { map ->
+                history.clear()
+                history.putAll(map)
+                notifyDataChanged()
+            }
+        }
+        
+        syncScope.launch {
+            entryPoint.userRepository().getUserProfile().collect { profile ->
+                userName = profile.name
+                userAvatarRes = profile.avatarRes
+                dailyMoods.clear()
+                dailyMoods.putAll(profile.dailyMoods)
+                notifyDataChanged()
+            }
+        }
+    }
 
     val dataChangeSignal = MutableSharedFlow<Unit>(extraBufferCapacity = 1)
     val isDataLoaded = MutableStateFlow(true)
@@ -82,7 +135,7 @@ object DataManager {
     val currentEditingSubFeatures: MutableList<ProjectFeature> = Collections.synchronizedList(mutableListOf())
     val currentEditingIdeaSubFeatures: MutableList<ProjectFeature> get() = workspaceDataManager.currentEditingIdeaSubFeatures
     val projectTemplates: MutableMap<String, List<String>> = Collections.synchronizedMap(mutableMapOf())
-    val projectCustomTags: MutableList<String> = Collections.synchronizedList(mutableListOf())
+    val projectCustomTags: MutableList<String> = Collections.synchronizedList(mutableListOf("TASKS", "FEATURES", "BUGS", "RESOURCES", "OTHER"))
     val predefinedJourneys: List<Journey> = emptyList()
     val dailyMoods: MutableMap<String, String> = Collections.synchronizedMap(mutableMapOf())
 
@@ -90,7 +143,7 @@ object DataManager {
     var userName: String = "User"
     var userAvatarRes: Int = -1
     var isAiAssistantEnabled: Boolean = true
-    var isOnboardingCompleted: Boolean = true
+    var isOnboardingCompleted: Boolean = false
     var isAppLockEnabled: Boolean = false
     var isBiometricLockEnabled: Boolean = false
     var isAppUnlocked: Boolean = true
@@ -123,9 +176,9 @@ object DataManager {
 
     // Section Visibility & Categories
     var noteVisibleSections: MutableList<String> = Collections.synchronizedList(mutableListOf())
-    var taskVisibleSections: MutableList<String> = Collections.synchronizedList(mutableListOf("Morning", "Afternoon", "Evening", "Anytime"))
-    var taskDefaultSection: String = "Anytime"
-    var taskCustomCategories: MutableList<String> = Collections.synchronizedList(mutableListOf())
+    var taskVisibleSections: MutableList<String> = Collections.synchronizedList(mutableListOf("Tasks", "List"))
+    var taskDefaultSection: String = "Tasks"
+    var taskCustomCategories: MutableList<String> = Collections.synchronizedList(mutableListOf("General", "Personal", "Work", "Shopping"))
     var taskEditModeEnabled: Boolean = false
     var taskShowHidden: Boolean = false
     var taskShowCompleted: Boolean = true
@@ -204,7 +257,21 @@ object DataManager {
     }
 
     fun getLastSevenDaysDetailedProgress(): List<Triple<String, Int, Int>> {
-        return emptyList()
+        val sdf = SimpleDateFormat("yyyyMMdd", Locale.getDefault())
+        val result = mutableListOf<Triple<String, Int, Int>>()
+        val cal = Calendar.getInstance()
+        
+        for (i in 0 until 7) {
+            val dateKey = sdf.format(cal.time)
+            val h = calculateDayHistory(dateKey)
+            
+            val hProgress = if (h.totalHabits > 0) (h.habitsCompleted * 100) / h.totalHabits else 0
+            val wProgress = if (h.totalWorkouts > 0) (h.workoutsCompleted * 100) / h.totalWorkouts else 0
+            
+            result.add(Triple(dateKey, hProgress, wProgress))
+            cal.add(Calendar.DAY_OF_YEAR, -1)
+        }
+        return result.reversed()
     }
 
     fun getComprehensiveTodayAgenda(): Map<String, List<AgendaItem>> = emptyMap()
@@ -218,15 +285,30 @@ object DataManager {
 
     fun addTask(task: Task) {
         tasks.add(task)
+        appContext?.let { context ->
+            syncScope.launch {
+                getEntryPoint(context).taskRepository().addTask(task)
+            }
+        }
     }
 
     fun updateTask(task: Task) {
         val index = tasks.indexOfFirst { it.timestamp == task.timestamp }
         if (index != -1) tasks[index] = task
+        appContext?.let { context ->
+            syncScope.launch {
+                getEntryPoint(context).taskRepository().updateTask(task)
+            }
+        }
     }
 
     fun deleteTask(task: Task) {
         tasks.removeIf { it.timestamp == task.timestamp }
+        appContext?.let { context ->
+            syncScope.launch {
+                getEntryPoint(context).taskRepository().deleteTask(task)
+            }
+        }
     }
 
     fun clearAllHistory() {}
@@ -247,6 +329,20 @@ object DataManager {
 
     suspend fun refreshLegacyState(context: Context) {
         val entryPoint = getEntryPoint(context)
+        
+        // Sync Collections
+        val habitsList = entryPoint.habitRepository().getAllHabits().first()
+        habits.clear()
+        habits.addAll(habitsList)
+        
+        val workoutsList = entryPoint.workoutRepository().getAllWorkouts().first()
+        workouts.clear()
+        workouts.addAll(workoutsList)
+        
+        val historyMap = entryPoint.userRepository().getDayHistory().first()
+        history.clear()
+        history.putAll(historyMap)
+
         val profile = entryPoint.userRepository().getUserProfile().first()
         val settings = entryPoint.userRepository().getUserSettings().first()
         
@@ -287,7 +383,12 @@ object DataManager {
 
     fun init(context: Context) {
         appContext = context.applicationContext
-        backupDataManager.loadData(context)
+        syncScope.launch {
+            com.example.allinone.data.repository.LegacyMigrationManager(context).migrateIfNeeded()
+            backupDataManager.loadData(context)
+            startSync(context)
+            getEntryPoint(context).assistantBrain().initialize(context)
+        }
     }
 
     fun loadData(context: Context) {

@@ -60,6 +60,10 @@ class TaskRepositoryImpl @Inject constructor(
     // Settings
     override fun getTaskSettings(): Flow<TaskSettings> = localDataSource.settings
 
+    override suspend fun updateSettings(settings: TaskSettings) {
+        localDataSource.updateSettings(settings)
+    }
+
     override fun getShowCompleted() = localDataSource.getBoolean("task_show_completed", true)
     override fun setShowCompleted(show: Boolean) = localDataSource.setBoolean("task_show_completed", show)
     

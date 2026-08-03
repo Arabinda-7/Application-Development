@@ -2,14 +2,13 @@ package com.example.allinone.backup
 
 import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
+import javax.inject.Inject
+import javax.inject.Singleton
 
-object BackupSerializer {
-    private val json = Json {
-        prettyPrint = true
-        ignoreUnknownKeys = true
-        encodeDefaults = true
-    }
-
+@Singleton
+class BackupSerializer @Inject constructor(
+    private val json: Json
+) {
     fun serialize(data: BackupData): String {
         return json.encodeToString(data)
     }

@@ -27,6 +27,8 @@ import androidx.compose.ui.unit.sp
 import com.example.allinone.DayHistory
 import com.example.allinone.WorkoutProgressEntry
 
+import com.example.allinone.ui.performance.state.PerformanceFilterType
+
 @Composable
 fun PerformanceSummary(
     data: DayHistory, 
@@ -34,7 +36,8 @@ fun PerformanceSummary(
     themeColor: Color, 
     isWorkoutContext: Boolean = false,
     currentStreak: Int? = null,
-    longestStreak: Int? = null
+    longestStreak: Int? = null,
+    primaryFilter: PerformanceFilterType = PerformanceFilterType.OVERALL
 ) {
     val effectiveTotalItems = if (isWorkoutContext) data.totalWorkouts else data.totalHabits + data.totalWorkouts
     val effectiveTotalCompleted = if (isWorkoutContext) data.workoutsCompleted else data.habitsCompleted + data.workoutsCompleted
@@ -144,7 +147,7 @@ fun PerformanceSummary(
                         color = Color(0xFF29D9C3)
                     )
                     
-                    if (!data.workoutDetails.isNullOrEmpty()) {
+                    if (!data.workoutDetails.isNullOrEmpty() && primaryFilter == PerformanceFilterType.OVERALL) {
                         Spacer(modifier = Modifier.height(16.dp))
                         Text(
                             text = "WORKOUT DETAILS",
@@ -167,14 +170,14 @@ fun PerformanceSummary(
                     Spacer(modifier = Modifier.height(16.dp))
                 }
 
-                if (effectiveTotalItems > 0) {
+                if (effectiveTotalItems > 0 && primaryFilter == PerformanceFilterType.OVERALL) {
                     ProgressRow(
                         icon = "Σ",
                         label = "Total Performance ($effectiveTotalCompleted/$effectiveTotalItems)",
                         progress = effectiveTotalCompleted.toFloat() / effectiveTotalItems,
                         color = themeColor
                     )
-                } else {
+                } else if (effectiveTotalItems == 0) {
                     Text(
                         text = "No items scheduled for this day.",
                         color = Color.Gray,

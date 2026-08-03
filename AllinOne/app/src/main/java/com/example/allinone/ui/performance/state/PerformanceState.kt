@@ -27,5 +27,22 @@ data class PerformanceState(
     val trendData: List<Pair<Int, Int>> = emptyList(),
     val heatmapData: List<Int> = emptyList(),
     val habits: List<Habit> = emptyList(),
-    val moodColorTarget: Color = Color(0xFF1A73E8)
+    val moodColorTarget: Color = Color(0xFF1A73E8),
+    
+    // Advanced Analytics
+    val volumeData: List<Float> = emptyList(),
+    val diversityData: Map<String, Int> = emptyMap(),
+    val intensityData: List<Int> = emptyList(),
+    val muscleFocusData: Map<Int, List<String>> = emptyMap(),
+    val muscleDistribution: Map<String, Int> = emptyMap(),
+    val recoveryStatus: Map<String, Float> = emptyMap(),
+    val acwrData: Pair<List<Float>, List<Float>> = Pair(emptyList(), emptyList()),
+    val stabilityScore: Float = 0f,
+    val resilienceScore: Float = 0f,
+    val monthlyMomentum: List<Pair<String, Int>> = emptyList(),
+    val milestoneProgress: Triple<Int, Int, Float> = Triple(0, 0, 0f),
+    val temporalDensity: Map<Int, Map<String, Int>> = emptyMap(),
+    val correlations: List<Triple<String, String, Double>> = emptyList(),
+    val currentStreak: Int = 0,
+    val longestStreak: Int = 0
 )

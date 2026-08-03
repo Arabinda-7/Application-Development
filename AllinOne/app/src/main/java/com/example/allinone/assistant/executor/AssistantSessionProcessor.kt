@@ -24,7 +24,7 @@ class AssistantSessionProcessor @Inject constructor(
             is AssistantSession.ProjectPropertyUpdate -> handleProjectUpdate(session, cmd)
             else -> {
                 contextManager.setSession(null)
-                CommandAction("CHAT_RESPONSE", "Session type not fully implemented. Resetting context.")
+                CommandAction("CHAT_RESPONSE", dynamicResponse = "Session type not fully implemented. Resetting context.")
             }
         }
     }
@@ -34,7 +34,7 @@ class AssistantSessionProcessor @Inject constructor(
             HabitStep.TITLE -> {
                 session.tempName = cmd.capitalize()
                 session.step = HabitStep.CONFIRM_DEFAULT
-                CommandAction("CHAT_RESPONSE", "Should I use default settings for '${session.tempName}'? (Yes/No)")
+                CommandAction("CHAT_RESPONSE", dynamicResponse = "Should I use default settings for '${session.tempName}'? (Yes/No)")
             }
             HabitStep.CONFIRM_DEFAULT -> {
                 if (cmd.contains("yes")) {
@@ -42,13 +42,13 @@ class AssistantSessionProcessor @Inject constructor(
                     CommandAction("ADD_HABIT", session.tempName, "Habit '${session.tempName}' created!")
                 } else {
                     session.step = HabitStep.TARGET
-                    CommandAction("CHAT_RESPONSE", "What is the daily goal target (e.g., 10)?")
+                    CommandAction("CHAT_RESPONSE", dynamicResponse = "What is the daily goal target (e.g., 10)?")
                 }
             }
             HabitStep.TARGET -> {
                 session.tempTarget = cmd.filter { it.isDigit() }.toIntOrNull() ?: 1
                 session.step = HabitStep.FREQUENCY
-                CommandAction("CHAT_RESPONSE", "When do you want to do this? (Morning, Afternoon, Evening, Anytime)")
+                CommandAction("CHAT_RESPONSE", dynamicResponse = "When do you want to do this? (Morning, Afternoon, Evening, Anytime)")
             }
             HabitStep.FREQUENCY -> {
                 activeSessionFinished()
@@ -62,12 +62,12 @@ class AssistantSessionProcessor @Inject constructor(
             CompletionStep.NAME -> {
                 session.tempName = cmd
                 session.step = CompletionStep.CONFIRM
-                CommandAction("CHAT_RESPONSE", "Marking '${session.tempName}' as completed?")
+                CommandAction("CHAT_RESPONSE", dynamicResponse = "Marking '${session.tempName}' as completed?")
             }
             CompletionStep.CONFIRM -> {
                 activeSessionFinished()
                 if (cmd.contains("yes")) CommandAction("LOG_HABIT", session.tempName, "Marked as done!")
-                else CommandAction("CHAT_RESPONSE", "Action cancelled.")
+                else CommandAction("CHAT_RESPONSE", dynamicResponse = "Action cancelled.")
             }
         }
     }
@@ -77,17 +77,17 @@ class AssistantSessionProcessor @Inject constructor(
             WorkoutStep.TITLE -> {
                 session.tempName = cmd.capitalize()
                 session.step = WorkoutStep.MODE
-                CommandAction("CHAT_RESPONSE", "What will be the goal mode? (Reps, Sets, or Timer)")
+                CommandAction("CHAT_RESPONSE", dynamicResponse = "What will be the goal mode? (Reps, Sets, or Timer)")
             }
             WorkoutStep.MODE -> {
                 session.tempMode = if (cmd.contains("set")) "Sets" else if (cmd.contains("time")) "Timer" else "Reps"
                 session.step = WorkoutStep.TARGET
-                CommandAction("CHAT_RESPONSE", "What is the target value?")
+                CommandAction("CHAT_RESPONSE", dynamicResponse = "What is the target value?")
             }
             WorkoutStep.TARGET -> {
                 session.tempTarget = cmd.filter { it.isDigit() }.toIntOrNull() ?: 10
                 session.step = WorkoutStep.CONFIRM_DEFAULT
-                CommandAction("CHAT_RESPONSE", "Use default frequency? (Yes/No)")
+                CommandAction("CHAT_RESPONSE", dynamicResponse = "Use default frequency? (Yes/No)")
             }
             WorkoutStep.CONFIRM_DEFAULT -> {
                 if (cmd.contains("yes")) {
@@ -95,7 +95,7 @@ class AssistantSessionProcessor @Inject constructor(
                     CommandAction("ADD_WORKOUT", "${session.tempName}|${session.tempMode}|${session.tempTarget}", "Workout added!")
                 } else {
                     session.step = WorkoutStep.FREQUENCY
-                    CommandAction("CHAT_RESPONSE", "What is the frequency?")
+                    CommandAction("CHAT_RESPONSE", dynamicResponse = "What is the frequency?")
                 }
             }
             WorkoutStep.FREQUENCY -> {
@@ -110,12 +110,12 @@ class AssistantSessionProcessor @Inject constructor(
             TaskStep.NAME -> {
                 session.tempName = cmd
                 session.step = TaskStep.SUBTASK_PROMPT
-                CommandAction("CHAT_RESPONSE", "Any subtasks for this task? (Yes/No)")
+                CommandAction("CHAT_RESPONSE", dynamicResponse = "Any subtasks for this task? (Yes/No)")
             }
             TaskStep.SUBTASK_PROMPT -> {
                 if (cmd.contains("yes")) {
                     session.step = TaskStep.SUBTASK_NAME
-                    CommandAction("CHAT_RESPONSE", "Enter subtask name:")
+                    CommandAction("CHAT_RESPONSE", dynamicResponse = "Enter subtask name:")
                 } else {
                     activeSessionFinished()
                     CommandAction("ADD_TASK", session.tempName, "Task saved!")
@@ -124,9 +124,9 @@ class AssistantSessionProcessor @Inject constructor(
             TaskStep.SUBTASK_NAME -> {
                 session.tempSubtasks.add(cmd)
                 session.step = TaskStep.SUBTASK_PROMPT
-                CommandAction("CHAT_RESPONSE", "Added subtask. Any more?")
+                CommandAction("CHAT_RESPONSE", dynamicResponse = "Added subtask. Any more?")
             }
-            else -> CommandAction("CHAT_RESPONSE", "Processing task...")
+            else -> CommandAction("CHAT_RESPONSE", dynamicResponse = "Processing task...")
         }
     }
 
@@ -135,7 +135,7 @@ class AssistantSessionProcessor @Inject constructor(
             NoteStep.TITLE -> {
                 session.tempTitle = cmd
                 session.step = NoteStep.CONTENT
-                CommandAction("CHAT_RESPONSE", "What is the content of the note?")
+                CommandAction("CHAT_RESPONSE", dynamicResponse = "What is the content of the note?")
             }
             NoteStep.CONTENT -> {
                 activeSessionFinished()
@@ -149,19 +149,19 @@ class AssistantSessionProcessor @Inject constructor(
             ProjectStep.TITLE -> {
                 session.tempTitle = cmd
                 session.step = ProjectStep.DESC
-                CommandAction("CHAT_RESPONSE", "Project description?")
+                CommandAction("CHAT_RESPONSE", dynamicResponse = "Project description?")
             }
             ProjectStep.DESC -> {
                 session.tempDesc = cmd
                 session.step = ProjectStep.CONFIRM
-                CommandAction("CHAT_RESPONSE", "Create project '${session.tempTitle}'? (Yes/No)")
+                CommandAction("CHAT_RESPONSE", dynamicResponse = "Create project '${session.tempTitle}'? (Yes/No)")
             }
             ProjectStep.CONFIRM -> {
                 activeSessionFinished()
                 if (cmd.contains("yes")) CommandAction("CREATE_PROJECT", "${session.tempTitle}|${session.tempDesc}", "Project created!")
-                else CommandAction("CHAT_RESPONSE", "Cancelled.")
+                else CommandAction("CHAT_RESPONSE", dynamicResponse = "Cancelled.")
             }
-            else -> CommandAction("CHAT_RESPONSE", "Processing project...")
+            else -> CommandAction("CHAT_RESPONSE", dynamicResponse = "Processing project...")
         }
     }
 
@@ -170,14 +170,14 @@ class AssistantSessionProcessor @Inject constructor(
             FeatureStep.NAME -> {
                 session.tempName = cmd
                 session.step = FeatureStep.CONFIRM
-                CommandAction("CHAT_RESPONSE", "Add feature '${session.tempName}' to '${session.projectTitle}'? (Yes/No)")
+                CommandAction("CHAT_RESPONSE", dynamicResponse = "Add feature '${session.tempName}' to '${session.projectTitle}'? (Yes/No)")
             }
             FeatureStep.CONFIRM -> {
                 activeSessionFinished()
                 if (cmd.contains("yes")) CommandAction("ADD_PROJECT_FEATURE", "${session.projectTitle}|${session.tempName}", "Feature added!")
-                else CommandAction("CHAT_RESPONSE", "Cancelled.")
+                else CommandAction("CHAT_RESPONSE", dynamicResponse = "Cancelled.")
             }
-            else -> CommandAction("CHAT_RESPONSE", "Processing feature...")
+            else -> CommandAction("CHAT_RESPONSE", dynamicResponse = "Processing feature...")
         }
     }
 

@@ -8,7 +8,9 @@ import com.example.allinone.data.model.Note
 import com.example.allinone.data.model.Transaction
 import com.example.allinone.data.model.PersonalLedger
 import com.example.allinone.data.model.PersonalLedgerEntry as LedgerEntry
+import kotlinx.serialization.Serializable
 
+@Serializable
 data class WorkoutProgressEntry(
     val name: String,
     val progress: Int,
@@ -18,6 +20,7 @@ data class WorkoutProgressEntry(
     val isCompleted: Boolean = false
 )
 
+@Serializable
 data class DayHistory(
     val habitsCompleted: Int,
     val totalHabits: Int,

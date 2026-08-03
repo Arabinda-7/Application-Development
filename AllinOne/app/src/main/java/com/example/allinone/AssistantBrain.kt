@@ -42,7 +42,7 @@ class AssistantBrain @Inject constructor(
         // 1. Check for global "cancel" intent
         if (rawCmd == "cancel") {
             contextManager.clearContext()
-            return CommandAction("CHAT_RESPONSE", "Operation cancelled.")
+            return CommandAction("CHAT_RESPONSE", dynamicResponse = "Operation cancelled.")
         }
         
         // 2. Resolve pronouns based on recent context
@@ -61,12 +61,16 @@ class AssistantBrain @Inject constructor(
 
         // 5. Fallback to general Chat Responses from knowledge base
         val chatResponse = responseProvider.getChatResponse(resolvedCmd)
-        return if (chatResponse != null) {
-            CommandAction("CHAT_RESPONSE", chatResponse)
-        } else {
-            // Ultimate fallback
-            null
+        if (chatResponse != null) {
+            return CommandAction("CHAT_RESPONSE", dynamicResponse = chatResponse)
         }
+
+        // 6. Debug / Status checks
+        if (resolvedCmd == "brain status" || resolvedCmd == "debug") {
+            return CommandAction("CHAT_RESPONSE", dynamicResponse = "Brain status: Online. Knowledge base: ${responseProvider.getLoadedCount()} items loaded.")
+        }
+
+        return null
     }
 
     fun clearContext() {
@@ -74,26 +78,6 @@ class AssistantBrain @Inject constructor(
     }
 
     companion object {
-        /**
-         * Legacy Bridge: These methods are placeholders for components that don't use DI yet.
-         * They should be phased out as Activity-level injection is completed.
-         */
-        
-        fun initialize(context: Context) {
-            // Logic handled by injected instance in DataManager or Activity
-        }
-
-        fun clearContext() {
-            // Context clearance handled by instance
-        }
-
-        fun parseCommand(command: String, history: List<ChatMessage> = emptyList()): CommandAction? {
-            val contextManager = com.example.allinone.assistant.context.AssistantContextManager()
-            val entityExtractor = com.example.allinone.assistant.parser.AssistantEntityExtractor(contextManager)
-            val intentDetector = com.example.allinone.assistant.intent.AssistantIntentDetector(entityExtractor, contextManager)
-            return intentDetector.detectIntent(command)
-        }
-        
         fun generateInsights(context: Context): List<AssistantBrain.Insight> {
             // Moved to GetAssistantInsightsUseCase
             return emptyList()

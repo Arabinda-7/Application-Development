@@ -19,19 +19,19 @@ class AssistantIntentDetector @Inject constructor(
         // 1. Session Triggers (Multi-turn starts)
         if (cmd == "create a workout" || cmd == "start a workout" || cmd == "new workout") {
             contextManager.setSession(AssistantSession.WorkoutCreation())
-            return CommandAction("CHAT_RESPONSE", "Creating a new workout, what will be the title?")
+            return CommandAction("CHAT_RESPONSE", dynamicResponse = "Creating a new workout, what will be the title?")
         }
         if (cmd == "create a task" || cmd == "new task" || cmd == "add task") {
             contextManager.setSession(AssistantSession.TaskCreation())
-            return CommandAction("CHAT_RESPONSE", "Creating a new task, what will be the title?")
+            return CommandAction("CHAT_RESPONSE", dynamicResponse = "Creating a new task, what will be the title?")
         }
         if (cmd == "create a note" || cmd == "new note" || cmd == "take a note") {
             contextManager.setSession(AssistantSession.NoteCreation())
-            return CommandAction("CHAT_RESPONSE", "Creating a new note, what will be the title?")
+            return CommandAction("CHAT_RESPONSE", dynamicResponse = "Creating a new note, what will be the title?")
         }
         if (cmd == "create a project" || cmd == "new project" || cmd == "start a project" || cmd == "new roadmap") {
             contextManager.setSession(AssistantSession.ProjectCreation())
-            return CommandAction("CHAT_RESPONSE", "Creating a new project, what will be the title?")
+            return CommandAction("CHAT_RESPONSE", dynamicResponse = "Creating a new project, what will be the title?")
         }
 
         // 2. Project Management Intents
@@ -41,8 +41,8 @@ class AssistantIntentDetector @Inject constructor(
             return if (proj != null) {
                 contextManager.lastMentionedProject = proj.title
                 contextManager.setSession(AssistantSession.FeatureAddition(proj.title))
-                CommandAction("CHAT_RESPONSE", "Adding a new feature to '${proj.title}'. What is the name of the feature?")
-            } else CommandAction("CHAT_RESPONSE", "Project '$name' not found.")
+                CommandAction("CHAT_RESPONSE", dynamicResponse = "Adding a new feature to '${proj.title}'. What is the name of the feature?")
+            } else CommandAction("CHAT_RESPONSE", dynamicResponse = "Project '$name' not found.")
         }
 
         if (cmd.startsWith("update status for ") || cmd.startsWith("change status for ")) {
@@ -50,7 +50,7 @@ class AssistantIntentDetector @Inject constructor(
             val proj = entityExtractor.findProjectInCmd(name)
             return if (proj != null) {
                 contextManager.setSession(AssistantSession.ProjectPropertyUpdate(proj.title, "STATUS"))
-                CommandAction("CHAT_RESPONSE", "Current status of '${proj.title}' is ${proj.status}. What should I change it to?")
+                CommandAction("CHAT_RESPONSE", dynamicResponse = "Current status of '${proj.title}' is ${proj.status}. What should I change it to?")
             } else null
         }
 
@@ -69,10 +69,10 @@ class AssistantIntentDetector @Inject constructor(
             return if (habit != null) {
                 contextManager.lastMentionedHabit = habit
                 contextManager.setSession(AssistantSession.HabitCompletion(CompletionStep.CONFIRM, habit))
-                CommandAction("CHAT_RESPONSE", "Marking the habit '$habit' as completed?")
+                CommandAction("CHAT_RESPONSE", dynamicResponse = "Marking the habit '$habit' as completed?")
             } else {
                 contextManager.setSession(AssistantSession.HabitCompletion(CompletionStep.NAME))
-                CommandAction("CHAT_RESPONSE", "Which habit would you like to mark as completed?")
+                CommandAction("CHAT_RESPONSE", dynamicResponse = "Which habit would you like to mark as completed?")
             }
         }
 
@@ -93,7 +93,7 @@ class AssistantIntentDetector @Inject constructor(
             
             // 6. Help Intent
             cmd == "help" || cmd == "guide" || cmd == "what can you do" -> 
-                CommandAction("CHAT_RESPONSE", "I can help you manage habits, tasks, workouts and projects. Try 'Add task Buy Milk' or 'Create a project'.")
+                CommandAction("CHAT_RESPONSE", dynamicResponse = "I can help you manage habits, tasks, workouts and projects. Try 'Add task Buy Milk' or 'Create a project'.")
             
             else -> null
         }

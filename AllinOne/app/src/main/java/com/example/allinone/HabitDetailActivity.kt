@@ -16,7 +16,9 @@ import androidx.core.content.ContextCompat
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
 import androidx.activity.viewModels
+import androidx.lifecycle.lifecycleScope
 import com.example.allinone.data.model.Habit
+import kotlinx.coroutines.launch
 import dagger.hilt.android.AndroidEntryPoint
 import java.text.SimpleDateFormat
 import java.util.*
@@ -37,18 +39,27 @@ class HabitDetailActivity : BaseActivity() {
         setupKeyboardHandling(findViewById(R.id.habit_detail_root), findViewById(R.id.habit_detail_content_container))
 
         val habitId = intent.getLongExtra("HABIT_ID", -1L)
-        habit = viewModel.habits.value.find { it.timestamp == habitId }
-
-        if (habit == null) {
-            finish()
-            return
-        }
-
-        setupUI()
+        
         calendarGrid = findViewById(R.id.calendar_grid)
         tvMonth = findViewById(R.id.tv_calendar_month)
-        setupCalendar()
-        updateDynamicBackground()
+
+        lifecycleScope.launch {
+            viewModel.habits.collect { list ->
+                if (list.isNotEmpty()) {
+                    habit = list.find { it.timestamp == habitId }
+                    if (habit == null) {
+                        finish()
+                    } else {
+                        setupUI()
+                        setupCalendar()
+                        updateDynamicBackground()
+                    }
+                    // We found our data, we can stop collecting if we only need it once, 
+                    // or keep it to update UI if data changes. 
+                    // For now, let's just finish the setup.
+                }
+            }
+        }
     }
 
     private fun updateDynamicBackground() {

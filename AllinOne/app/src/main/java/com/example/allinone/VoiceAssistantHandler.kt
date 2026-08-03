@@ -9,11 +9,11 @@ import android.speech.SpeechRecognizer
 import android.speech.tts.TextToSpeech
 import android.speech.tts.Voice
 import android.speech.tts.UtteranceProgressListener
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.setValue
 import java.util.*
 
+/**
+ * VoiceAssistantHandler: Manages Speech Recognition and Text-to-Speech with robust error handling.
+ */
 class VoiceAssistantHandler(
     private val context: Context,
     private val onResults: (String) -> Unit,
@@ -25,8 +25,6 @@ class VoiceAssistantHandler(
     private var speechRecognizer: SpeechRecognizer? = null
     private var isTtsReady = false
     var isMuted = false
-    
-    var isThinking by mutableStateOf(false)
 
     private val vibrator = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
         val vibratorManager = context.getSystemService(Context.VIBRATOR_MANAGER_SERVICE) as VibratorManager
@@ -37,14 +35,16 @@ class VoiceAssistantHandler(
     }
 
     init {
+        ensureRecognizer()
         tts = TextToSpeech(context, this)
+    }
+
+    private fun ensureRecognizer() {
+        if (speechRecognizer != null) return
+        
         if (SpeechRecognizer.isRecognitionAvailable(context)) {
-            // Use on-device recognition for offline support (Android 12+)
-            speechRecognizer = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
-                SpeechRecognizer.createOnDeviceSpeechRecognizer(context)
-            } else {
-                SpeechRecognizer.createSpeechRecognizer(context)
-            }.apply {
+            // Standard recognizer is generally more stable than createOnDeviceSpeechRecognizer
+            speechRecognizer = SpeechRecognizer.createSpeechRecognizer(context).apply {
                 setRecognitionListener(createRecognitionListener())
             }
         }
@@ -53,9 +53,7 @@ class VoiceAssistantHandler(
     override fun onInit(status: Int) {
         if (status == TextToSpeech.SUCCESS) {
             tts?.language = Locale.getDefault()
-            
             applySettings()
-
             isTtsReady = true
             tts?.setOnUtteranceProgressListener(object : UtteranceProgressListener() {
                 override fun onStart(utteranceId: String?) {}
@@ -72,28 +70,54 @@ class VoiceAssistantHandler(
         }
     }
 
+    private var recognitionActive = false
+
     fun startListening() {
         if (speechRecognizer == null) {
-            onError("Speech recognition not available")
-            return
+            ensureRecognizer()
         }
         
-        performHapticFeedback(VibrationEffect.EFFECT_CLICK)
-
-        val intent = Intent(RecognizerIntent.ACTION_RECOGNIZE_SPEECH).apply {
-            putExtra(RecognizerIntent.EXTRA_LANGUAGE_MODEL, RecognizerIntent.LANGUAGE_MODEL_FREE_FORM)
-            putExtra(RecognizerIntent.EXTRA_LANGUAGE, Locale.getDefault())
-            putExtra(RecognizerIntent.EXTRA_PARTIAL_RESULTS, true)
-            // Explicitly prefer offline recognition
-            putExtra(RecognizerIntent.EXTRA_PREFER_OFFLINE, true)
+        if (speechRecognizer == null) {
+            onError("Speech recognition not available on this device")
+            return
         }
 
+        // Force reset state
+        speechRecognizer?.cancel()
+        recognitionActive = false
+        
+        tts?.stop()
+        
         onListeningStateChanged(true)
-        speechRecognizer?.startListening(intent)
+
+        // Shorter delay to feel more responsive
+        Handler(Looper.getMainLooper()).postDelayed({
+            try {
+                recognitionActive = true
+                performHapticFeedback(VibrationEffect.EFFECT_CLICK)
+                
+                val intent = Intent(RecognizerIntent.ACTION_RECOGNIZE_SPEECH).apply {
+                    putExtra(RecognizerIntent.EXTRA_LANGUAGE_MODEL, RecognizerIntent.LANGUAGE_MODEL_FREE_FORM)
+                    putExtra(RecognizerIntent.EXTRA_LANGUAGE, Locale.getDefault())
+                    putExtra(RecognizerIntent.EXTRA_PARTIAL_RESULTS, true)
+                    putExtra(RecognizerIntent.EXTRA_MAX_RESULTS, 1)
+                    
+                    // Allow cloud fallback
+                    putExtra(RecognizerIntent.EXTRA_PREFER_OFFLINE, false) 
+                }
+
+                speechRecognizer?.startListening(intent)
+            } catch (e: Exception) {
+                recognitionActive = false
+                onListeningStateChanged(false)
+                onError("Mic Error: ${e.message}")
+            }
+        }, 300) 
     }
 
     fun stopListening() {
         speechRecognizer?.stopListening()
+        recognitionActive = false
         onListeningStateChanged(false)
     }
 
@@ -101,7 +125,6 @@ class VoiceAssistantHandler(
         if (isMuted || !isTtsReady) return
         
         applySettings()
-        isThinking = false
         performHapticFeedback(VibrationEffect.EFFECT_TICK)
         
         val params = Bundle()
@@ -137,6 +160,7 @@ class VoiceAssistantHandler(
         tts?.stop()
         tts?.shutdown()
         speechRecognizer?.destroy()
+        speechRecognizer = null
     }
 
     private fun performHapticFeedback(effectId: Int) {
@@ -146,39 +170,61 @@ class VoiceAssistantHandler(
     }
 
     private fun createRecognitionListener() = object : RecognitionListener {
-        override fun onReadyForSpeech(params: Bundle?) {}
-        override fun onBeginningOfSpeech() {}
+        private var speechReceived = false
+
+        override fun onReadyForSpeech(params: Bundle?) {
+            speechReceived = false
+        }
+
+        override fun onBeginningOfSpeech() {
+            speechReceived = true
+        }
+
         override fun onRmsChanged(rmsdB: Float) {}
         override fun onBufferReceived(buffer: ByteArray?) {}
+        
         override fun onEndOfSpeech() {
-            onListeningStateChanged(false)
+            // We wait for onResults or onError for final state change
         }
 
         override fun onError(error: Int) {
-            onListeningStateChanged(false)
             val message = when (error) {
-                SpeechRecognizer.ERROR_AUDIO -> "Audio recording error"
-                SpeechRecognizer.ERROR_CLIENT -> "Client side error (Check if offline models are installed)"
-                SpeechRecognizer.ERROR_INSUFFICIENT_PERMISSIONS -> "Insufficient permissions"
+                SpeechRecognizer.ERROR_AUDIO -> "Audio record error"
+                SpeechRecognizer.ERROR_CLIENT -> "Mic client error"
+                SpeechRecognizer.ERROR_INSUFFICIENT_PERMISSIONS -> "Mic permission denied"
                 SpeechRecognizer.ERROR_NETWORK -> "Network error"
                 SpeechRecognizer.ERROR_NETWORK_TIMEOUT -> "Network timeout"
                 SpeechRecognizer.ERROR_NO_MATCH -> "No match found"
-                SpeechRecognizer.ERROR_RECOGNIZER_BUSY -> "RecognitionService busy"
-                SpeechRecognizer.ERROR_SERVER -> "Server error (Offline mode may need model download)"
-                SpeechRecognizer.ERROR_SPEECH_TIMEOUT -> "No speech input"
-                else -> "Unknown error: $error"
+                SpeechRecognizer.ERROR_RECOGNIZER_BUSY -> {
+                    recognitionActive = false
+                    onListeningStateChanged(false)
+                    return
+                }
+                SpeechRecognizer.ERROR_SERVER -> "Mic server error"
+                SpeechRecognizer.ERROR_SPEECH_TIMEOUT -> "Mic timeout"
+                else -> "Error: $error"
             }
-            onError(message)
+            
+            recognitionActive = false
+            onListeningStateChanged(false)
+            if (error != SpeechRecognizer.ERROR_NO_MATCH && error != SpeechRecognizer.ERROR_SPEECH_TIMEOUT) {
+                onError(message)
+            }
         }
 
         override fun onResults(results: Bundle?) {
+            recognitionActive = false
+            onListeningStateChanged(false)
             val matches = results?.getStringArrayList(SpeechRecognizer.RESULTS_RECOGNITION)
             if (!matches.isNullOrEmpty()) {
                 onResults(matches[0])
             }
         }
 
-        override fun onPartialResults(partialResults: Bundle?) {}
+        override fun onPartialResults(partialResults: Bundle?) {
+            // Partial results can be handled here for live UI updates
+        }
+
         override fun onEvent(eventType: Int, params: Bundle?) {}
     }
 }

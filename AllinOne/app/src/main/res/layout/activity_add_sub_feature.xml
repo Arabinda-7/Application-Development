@@ -21,8 +21,8 @@
 
             <ImageView
                 android:id="@+id/btn_close_subfeature"
-                android:layout_width="32dp"
-                android:layout_height="32dp"
+                android:layout_width="40dp"
+                android:layout_height="40dp"
                 android:src="@drawable/ic_back"
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toTopOf="parent"
@@ -245,7 +245,8 @@
                     android:text="DEPENDENCY (BLOCKED BY)"
                     android:textColor="#80FFFFFF"
                     android:textSize="10sp"
-                    android:textStyle="bold" />
+                    android:textStyle="bold"
+                    android:visibility="gone" />
 
                 <TextView
                     android:id="@+id/tv_blocked_by_selector"
@@ -259,7 +260,8 @@
                     android:textColor="@color/white"
                     android:textSize="14sp"
                     android:clickable="true"
-                    android:focusable="true" />
+                    android:focusable="true"
+                    android:visibility="gone" />
 
                 <TextView
                     android:id="@+id/label_resource"

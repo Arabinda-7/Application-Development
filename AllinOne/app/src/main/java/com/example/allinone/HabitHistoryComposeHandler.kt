@@ -35,8 +35,8 @@ class HabitHistoryComposeHandler(
             
             val performanceData = remember(selectedDate, selectedHabitName, dataVersion) {
                 if (selectedHabitName == null) {
-                    val raw = DataManager.getDayHistory(selectedDate)
-                    DayHistory(raw?.habitsCompleted ?: 0, raw?.totalHabits ?: 0, 0, 0, raw?.workoutDetails)
+                    val raw = DataManager.getDayHistory(selectedDate) ?: DataManager.calculateDayHistory(selectedDate)
+                    DayHistory(raw.habitsCompleted, raw.totalHabits, 0, 0, raw.workoutDetails)
                 } else {
                     val habit = habits.find { it.name == selectedHabitName }
                     val isCompleted = habit?.completedDates?.contains(selectedDate) == true
@@ -95,7 +95,8 @@ class HabitHistoryComposeHandler(
                 habits = habits,
                 selectedHabitName = selectedHabitName,
                 onHabitSelected = { selectedHabitName = it },
-                onSaveNote = { date, note -> DataManager.saveDayNote(date, note) }
+                onSaveNote = { date, note -> DataManager.saveDayNote(date, note) },
+                initialFilter = com.example.allinone.ui.performance.state.PerformanceFilterType.HABITS
             )
         }
     }

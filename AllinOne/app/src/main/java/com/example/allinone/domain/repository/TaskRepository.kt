@@ -2,7 +2,9 @@ package com.example.allinone.domain.repository
 
 import com.example.allinone.data.model.Task
 import kotlinx.coroutines.flow.Flow
+import kotlinx.serialization.Serializable
 
+@Serializable
 data class TaskSettings(
     val showCompleted: Boolean = true,
     val showHidden: Boolean = false,
@@ -28,6 +30,7 @@ interface TaskRepository {
 
     // Task Settings & Preferences
     fun getTaskSettings(): Flow<TaskSettings>
+    suspend fun updateSettings(settings: TaskSettings)
     fun getShowCompleted(): Boolean
     fun setShowCompleted(show: Boolean)
     fun getShowHidden(): Boolean

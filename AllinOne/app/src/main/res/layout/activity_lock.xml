@@ -202,12 +202,12 @@
 
         <TextView
             android:id="@+id/btn_back_setup"
-            android:layout_width="wrap_content"
+            android:layout_width="40dp"
             android:layout_height="40dp"
             android:layout_marginTop="24dp"
             android:background="?attr/selectableItemBackgroundBorderless"
             android:gravity="center"
-            android:paddingHorizontal="8dp"
+            android:paddingHorizontal="4dp"
             android:text="BACK"
             android:textColor="#80FFFFFF"
             android:textSize="12sp"

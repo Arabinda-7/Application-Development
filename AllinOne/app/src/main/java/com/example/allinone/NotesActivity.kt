@@ -51,6 +51,9 @@ class NotesActivity : BaseActivity() {
         headerSection = NotesHeaderSection(
             findViewById(R.id.notes_root_layout),
             onBack = { if (viewModel.isDeleteMode) toggleDeleteMode(false) else finish() },
+            onSearchChanged = { query ->
+                viewModel.setSearchQuery(query)
+            },
             onSettingsClicked = { anchor ->
                 if (viewModel.isDeleteMode) {
                     listSection.deleteSelectedNotes()
@@ -96,10 +99,17 @@ class NotesActivity : BaseActivity() {
 
     private fun setupLogic() {
         headerSection.setup()
+        setupKeyboardHandling(findViewById(R.id.notes_root_layout), findViewById(R.id.notes_content_container))
         
         findViewById<FloatingActionButton>(R.id.btn_create_new_note).setOnClickListener {
             startActivity(Intent(this, AddNoteActivity::class.java).apply {
                 putExtra("CATEGORY", viewModel.currentCategory.value)
+            })
+        }
+
+        findViewById<View>(R.id.btn_ai_assistant_notes).setOnClickListener {
+            startActivity(Intent(this, AssistantActivity::class.java).apply {
+                putExtra("START_VOICE", true)
             })
         }
 

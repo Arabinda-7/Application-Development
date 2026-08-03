@@ -14,8 +14,14 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 
 @Composable
-fun TrendChart(data: List<Pair<Int, Int>>, themeColor: Color, isWorkoutContext: Boolean = false) {
+fun TrendChart(
+    data: List<Pair<Int, Int>>, 
+    themeColor: Color, 
+    filterType: com.example.allinone.ui.performance.state.PerformanceFilterType = com.example.allinone.ui.performance.state.PerformanceFilterType.OVERALL
+) {
     val days = listOf("F", "S", "S", "M", "T", "W", "T")
+    val showHabits = filterType == com.example.allinone.ui.performance.state.PerformanceFilterType.OVERALL || filterType == com.example.allinone.ui.performance.state.PerformanceFilterType.HABITS
+    val showWorkouts = filterType == com.example.allinone.ui.performance.state.PerformanceFilterType.OVERALL || filterType == com.example.allinone.ui.performance.state.PerformanceFilterType.WORKOUTS
     
     Column {
         Row(
@@ -23,11 +29,13 @@ fun TrendChart(data: List<Pair<Int, Int>>, themeColor: Color, isWorkoutContext: 
             horizontalArrangement = Arrangement.End,
             verticalAlignment = Alignment.CenterVertically
         ) {
-            if (!isWorkoutContext) {
+            if (showHabits) {
                 LegendItem(color = themeColor, label = "Habits")
+            }
+            if (showHabits && showWorkouts) {
                 Spacer(modifier = Modifier.width(16.dp))
             }
-            if (isWorkoutContext || data.any { it.second > 0 }) {
+            if (showWorkouts) {
                 LegendItem(color = Color(0xFF29D9C3), label = "Workouts")
             }
         }
@@ -43,10 +51,11 @@ fun TrendChart(data: List<Pair<Int, Int>>, themeColor: Color, isWorkoutContext: 
         ) {
             data.forEach { pair ->
                 DoubleBar(
-                    habitProgress = pair.first.toFloat() / 100f,
-                    workoutProgress = pair.second.toFloat() / 100f,
+                    habitProgress = if (showHabits) pair.first.toFloat() / 100f else 0f,
+                    workoutProgress = if (showWorkouts) pair.second.toFloat() / 100f else 0f,
                     themeColor = themeColor,
-                    isWorkoutContext = isWorkoutContext
+                    showHabits = showHabits,
+                    showWorkouts = showWorkouts
                 )
             }
         }
@@ -55,7 +64,7 @@ fun TrendChart(data: List<Pair<Int, Int>>, themeColor: Color, isWorkoutContext: 
             days.forEach { day ->
                 Text(
                     text = day,
-                    modifier = Modifier.width(34.dp), // Matched to double bar + spacer width
+                    modifier = Modifier.width(if (showHabits && showWorkouts) 34.dp else 24.dp),
                     textAlign = TextAlign.Center,
                     fontSize = 10.sp,
                     color = Color.Gray
@@ -66,11 +75,17 @@ fun TrendChart(data: List<Pair<Int, Int>>, themeColor: Color, isWorkoutContext: 
 }
 
 @Composable
-fun DoubleBar(habitProgress: Float, workoutProgress: Float, themeColor: Color, isWorkoutContext: Boolean = false) {
+fun DoubleBar(
+    habitProgress: Float, 
+    workoutProgress: Float, 
+    themeColor: Color, 
+    showHabits: Boolean = true,
+    showWorkouts: Boolean = true
+) {
     val fullHeight = 90.dp
     Row(verticalAlignment = Alignment.Bottom) {
         // Habit Bar Column
-        if (!isWorkoutContext) {
+        if (showHabits) {
             Box(
                 modifier = Modifier
                     .width(14.dp)
@@ -81,7 +96,7 @@ fun DoubleBar(habitProgress: Float, workoutProgress: Float, themeColor: Color, i
                 Box(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .height(fullHeight * habitProgress.coerceIn(0.1f, 1f))
+                        .height(fullHeight * habitProgress.coerceIn(0.05f, 1f))
                         .background(
                             brush = Brush.verticalGradient(listOf(themeColor.copy(alpha = 0.4f), themeColor)),
                             shape = CircleShape
@@ -90,23 +105,23 @@ fun DoubleBar(habitProgress: Float, workoutProgress: Float, themeColor: Color, i
             }
         }
 
-        if (!isWorkoutContext && workoutProgress > 0) {
+        if (showHabits && showWorkouts) {
             Spacer(modifier = Modifier.width(6.dp))
         }
 
         // Workout Bar Column
-        if (isWorkoutContext || workoutProgress > 0) {
+        if (showWorkouts) {
             Box(
                 modifier = Modifier
                     .width(14.dp)
-                    .height(fullHeight) // Made equal to Habit bar height
+                    .height(fullHeight)
                     .background(Color.White.copy(alpha = 0.05f), CircleShape),
                 contentAlignment = Alignment.BottomCenter
             ) {
                 Box(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .height(fullHeight * workoutProgress.coerceIn(0.1f, 1f))
+                        .height(fullHeight * workoutProgress.coerceIn(0.05f, 1f))
                         .background(
                             brush = Brush.verticalGradient(listOf(Color(0xFF29D9C3).copy(alpha = 0.4f), Color(0xFF29D9C3))),
                             shape = CircleShape

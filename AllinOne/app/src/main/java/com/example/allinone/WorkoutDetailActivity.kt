@@ -14,7 +14,9 @@ import android.widget.TextView
 import androidx.appcompat.app.AlertDialog
 import androidx.core.content.ContextCompat
 import androidx.activity.viewModels
+import androidx.lifecycle.lifecycleScope
 import com.example.allinone.data.model.Workout
+import kotlinx.coroutines.launch
 import dagger.hilt.android.AndroidEntryPoint
 import java.text.SimpleDateFormat
 import java.util.*
@@ -35,19 +37,24 @@ class WorkoutDetailActivity : BaseActivity() {
         setupKeyboardHandling(findViewById(R.id.workout_detail_root), findViewById(R.id.workout_detail_content_container))
 
         val workoutId = intent.getLongExtra("WORKOUT_ID", -1L)
-        workout = viewModel.workouts.value.find { it.timestamp == workoutId }
-
-        if (workout == null) {
-            finish()
-            return
-        }
-
+        
         calendarGrid = findViewById(R.id.calendar_grid)
         tvMonth = findViewById(R.id.tv_calendar_month)
 
-        setupUI()
-        setupCalendar()
-        updateThemeVisuals()
+        lifecycleScope.launch {
+            viewModel.workouts.collect { list ->
+                if (list.isNotEmpty()) {
+                    workout = list.find { it.timestamp == workoutId }
+                    if (workout == null) {
+                        finish()
+                    } else {
+                        setupUI()
+                        setupCalendar()
+                        updateThemeVisuals()
+                    }
+                }
+            }
+        }
     }
 
     private fun updateThemeVisuals() {

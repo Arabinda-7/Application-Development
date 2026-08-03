@@ -10,7 +10,9 @@
         android:id="@+id/performance_root_layout"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:padding="16dp">
+        android:paddingHorizontal="16dp"
+        android:paddingTop="0dp"
+        android:paddingBottom="16dp">
 
         <!-- Header Section -->
         <androidx.constraintlayout.widget.ConstraintLayout
@@ -24,9 +26,9 @@
 
             <ImageButton
                 android:id="@+id/btn_back"
-                android:layout_width="36dp"
-                android:layout_height="36dp"
-                android:padding="9dp"
+                android:layout_width="40dp"
+                android:layout_height="40dp"
+                android:padding="11dp"
                 android:scaleType="centerInside"
                 android:background="@drawable/blur_circle_bg"
                 android:src="@drawable/ic_back"

@@ -83,6 +83,8 @@ class AddIdeaActivity : BaseActivity() {
             }
         } else {
             DataManager.currentEditingIdeaSubFeatures.clear()
+            // Add default sub-feature for new Idea
+            DataManager.currentEditingIdeaSubFeatures.add(ProjectFeature("Initial Idea Step", position = 1))
         }
     }
 

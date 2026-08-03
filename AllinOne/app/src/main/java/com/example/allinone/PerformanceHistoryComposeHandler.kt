@@ -52,7 +52,8 @@ class PerformanceHistoryComposeHandler(
                 performanceData = performanceData,
                 trendData = trendData,
                 currentMood = currentMood,
-                isWorkoutContext = false
+                isWorkoutContext = false,
+                initialFilter = com.example.allinone.ui.performance.state.PerformanceFilterType.OVERALL
             )
         }
     }

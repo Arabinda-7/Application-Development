@@ -31,7 +31,7 @@ class WorkoutHistoryComposeHandler(
             }
             
             val performanceData = remember(selectedDate, dataVersion) {
-                val fullHistory = DataManager.calculateDayHistory(selectedDate)
+                val fullHistory = DataManager.getDayHistory(selectedDate) ?: DataManager.calculateDayHistory(selectedDate)
                 DayHistory(0, 0, fullHistory.workoutsCompleted, fullHistory.totalWorkouts, fullHistory.workoutDetails)
             }
             
@@ -70,7 +70,8 @@ class WorkoutHistoryComposeHandler(
                 showPerformanceCard = true,
                 showTrendCard = true,
                 showBackgroundAura = false,
-                showFilterSelector = false
+                showFilterSelector = false,
+                initialFilter = com.example.allinone.ui.performance.state.PerformanceFilterType.WORKOUTS
             )
         }
     }

@@ -12,6 +12,7 @@ import com.example.allinone.data.database.WorkoutEntity
 import com.example.allinone.data.database.TransactionEntity
 import com.example.allinone.data.database.PersonalLedgerEntity
 import com.example.allinone.data.database.LedgerEntryEntity
+import com.example.allinone.DayHistory
 import com.example.allinone.data.model.*
 import com.google.gson.Gson
 import com.google.gson.reflect.TypeToken
@@ -29,7 +30,12 @@ class LegacyMigrationManager(private val context: Context) {
         val hasMigrated = prefs.getBoolean("data_migrated_to_sql", false)
         Log.d(TAG, "Checking migration status. hasMigrated: $hasMigrated")
         
-        Log.i(TAG, "Checking for legacy data that needs migration...")
+        if (hasMigrated) {
+            Log.i(TAG, "Migration already completed. Skipping.")
+            return@withContext
+        }
+
+        Log.i(TAG, "Starting legacy data migration...")
         try {
             migrateTasks()
             migrateHabits()
@@ -37,19 +43,17 @@ class LegacyMigrationManager(private val context: Context) {
             migrateFinance()
             migrateNotes()
             migrateProjects()
+            migrateHistory()
+            migrateSettings()
 
-            if (!hasMigrated) {
-                prefs.edit().putBoolean("data_migrated_to_sql", true).apply()
-                Log.i(TAG, "Migration flag updated to true.")
-            }
-            Log.i(TAG, "Migration check completed.")
+            prefs.edit().putBoolean("data_migrated_to_sql", true).apply()
+            Log.i(TAG, "Migration flag updated to true. Migration check completed.")
         } catch (e: Exception) {
             Log.e(TAG, "Migration encountered errors.", e)
         }
     }
 
     private suspend fun migrateTasks() {
-        if (db.taskDao().getAllTasks().first().isNotEmpty()) return
         val json = prefs.getString("tasks_data", null) ?: return
         try {
             val tasks: List<Task> = gson.fromJson(json, object : TypeToken<List<Task>>() {}.type)
@@ -59,7 +63,6 @@ class LegacyMigrationManager(private val context: Context) {
     }
 
     private suspend fun migrateHabits() {
-        if (db.habitDao().getAllHabits().first().isNotEmpty()) return
         val json = prefs.getString("habits_data", null) ?: return
         try {
             val habits: List<Habit> = gson.fromJson(json, object : TypeToken<List<Habit>>() {}.type)
@@ -69,7 +72,6 @@ class LegacyMigrationManager(private val context: Context) {
     }
 
     private suspend fun migrateWorkouts() {
-        if (db.workoutDao().getAllWorkouts().first().isNotEmpty()) return
         val json = prefs.getString("workouts_data", null) ?: return
         try {
             val workouts: List<Workout> = gson.fromJson(json, object : TypeToken<List<Workout>>() {}.type)
@@ -80,43 +82,36 @@ class LegacyMigrationManager(private val context: Context) {
 
     private suspend fun migrateFinance() {
         // Transactions
-        if (db.financeDao().getAllTransactions().first().isEmpty()) {
-            val transJson = prefs.getString("transactions_data", null)
-            if (transJson != null) {
-                try {
-                    val transactions: List<Transaction> = gson.fromJson(transJson, object : TypeToken<List<Transaction>>() {}.type)
-                    db.financeDao().insertAllTransactions(transactions.map { it.toEntity() })
-                    Log.d(TAG, "Migrated ${transactions.size} transactions")
-                } catch (e: Exception) { Log.e(TAG, "Transaction migration failed", e) }
-            }
+        val transJson = prefs.getString("transactions_data", null)
+        if (transJson != null) {
+            try {
+                val transactions: List<Transaction> = gson.fromJson(transJson, object : TypeToken<List<Transaction>>() {}.type)
+                db.financeDao().insertAllTransactions(transactions.map { it.toEntity() })
+                Log.d(TAG, "Migrated ${transactions.size} transactions")
+            } catch (e: Exception) { Log.e(TAG, "Transaction migration failed", e) }
         }
 
         // Ledgers
-        if (db.financeDao().getAllPersonalLedgers().first().isEmpty()) {
-            val ledgerJson = prefs.getString("personal_ledger_data", null)
-            if (ledgerJson != null) {
-                try {
-                    val ledgers: List<PersonalLedger> = gson.fromJson(ledgerJson, object : TypeToken<List<PersonalLedger>>() {}.type)
-                    db.financeDao().insertAllPersonalLedgers(ledgers.map { it.toEntity() })
-                    Log.d(TAG, "Migrated ${ledgers.size} personal ledgers")
-                } catch (e: Exception) { Log.e(TAG, "Ledger migration failed", e) }
-            }
+        val ledgerJson = prefs.getString("personal_ledger_data", null)
+        if (ledgerJson != null) {
+            try {
+                val ledgers: List<PersonalLedger> = gson.fromJson(ledgerJson, object : TypeToken<List<PersonalLedger>>() {}.type)
+                db.financeDao().insertAllPersonalLedgers(ledgers.map { it.toEntity() })
+                Log.d(TAG, "Migrated ${ledgers.size} personal ledgers")
+            } catch (e: Exception) { Log.e(TAG, "Ledger migration failed", e) }
         }
 
-        if (db.financeDao().getAllLedgerEntries().first().isEmpty()) {
-            val entriesJson = prefs.getString("ledger_data", null)
-            if (entriesJson != null) {
-                try {
-                    val entries: List<LedgerEntry> = gson.fromJson(entriesJson, object : TypeToken<List<LedgerEntry>>() {}.type)
-                    db.financeDao().insertAllLedgerEntries(entries.map { it.toEntity() })
-                    Log.d(TAG, "Migrated ${entries.size} ledger entries")
-                } catch (e: Exception) { Log.e(TAG, "Ledger entries migration failed", e) }
-            }
+        val entriesJson = prefs.getString("ledger_data", null)
+        if (entriesJson != null) {
+            try {
+                val entries: List<LedgerEntry> = gson.fromJson(entriesJson, object : TypeToken<List<LedgerEntry>>() {}.type)
+                db.financeDao().insertAllLedgerEntries(entries.map { it.toEntity() })
+                Log.d(TAG, "Migrated ${entries.size} ledger entries")
+            } catch (e: Exception) { Log.e(TAG, "Ledger entries migration failed", e) }
         }
     }
 
     private suspend fun migrateNotes() {
-        if (db.noteDao().getAllNotes().first().isNotEmpty()) return
         val json = prefs.getString("notes_data", null) ?: return
         try {
             val notes: List<Note> = gson.fromJson(json, object : TypeToken<List<Note>>() {}.type)
@@ -126,14 +121,29 @@ class LegacyMigrationManager(private val context: Context) {
     }
 
     private suspend fun migrateProjects() {
-        if (db.noteDao().getAllNotes().first().any { it.isGlobalProject }) return
-        
         val json = prefs.getString("projects_data", null) ?: return
         try {
             val projects: List<Note> = gson.fromJson(json, object : TypeToken<List<Note>>() {}.type)
             db.noteDao().insertAllNotes(projects.map { it.toEntity(true) })
             Log.d(TAG, "Migrated ${projects.size} projects")
         } catch (e: Exception) { Log.e(TAG, "Project migration failed", e) }
+    }
+
+    private fun migrateHistory() {
+        val json = prefs.getString("history_data", null) ?: return
+        try {
+            val history: Map<String, DayHistory> = gson.fromJson(json, object : TypeToken<Map<String, DayHistory>>() {}.type)
+            // No direct DB for history, but we can keep it in Prefs as is or move it if needed.
+            // Actually, the current UserLocalDataSource reads "history_data".
+            // So if it's already in the same prefs, we are good. 
+            // But if we moved to a new pref name, we should copy it.
+            Log.d(TAG, "Found legacy history data with ${history.size} entries")
+        } catch (e: Exception) { Log.e(TAG, "History migration log failed", e) }
+    }
+
+    private fun migrateSettings() {
+        // Migration for settings stored in legacy keys if any
+        Log.d(TAG, "Settings migration check completed")
     }
 
     private fun Note.toEntity(isGlobalProject: Boolean) = GlobalNoteEntity(

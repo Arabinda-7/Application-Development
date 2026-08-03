@@ -3,103 +3,69 @@ package com.example.allinone
 import android.content.Intent
 import android.os.Bundle
 import androidx.activity.compose.setContent
-import androidx.compose.animation.*
-import androidx.compose.foundation.background
-import androidx.compose.foundation.border
-import androidx.compose.foundation.clickable
-import androidx.compose.foundation.layout.*
-import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.items
-import androidx.compose.foundation.shape.CircleShape
-import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.filled.ArrowBack
-import androidx.compose.material.icons.filled.ChatBubbleOutline
-import androidx.compose.material.icons.filled.DeleteSweep
-import androidx.compose.material.icons.filled.Mic
-import androidx.compose.material.icons.filled.Search
-import androidx.compose.material3.*
-import androidx.compose.material3.TabRowDefaults.tabIndicatorOffset
 import androidx.compose.runtime.*
-import androidx.compose.ui.Alignment
-import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
-import androidx.compose.ui.draw.drawWithContent
-import androidx.compose.ui.graphics.Brush
-import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
 import androidx.lifecycle.lifecycleScope
 import com.example.allinone.data.database.AiChatSessionEntity
+import com.example.allinone.ui.assistant.AssistantHistoryScreen
+import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
 import java.text.SimpleDateFormat
 import java.util.*
 
+@OptIn(ExperimentalCoroutinesApi::class)
 class AssistantHistoryActivity : BaseActivity() {
 
-    private val aiChatRepo = DataManager.getAiChatRepository()
     private var groupedSessions by mutableStateOf<Map<String, List<AiChatSessionEntity>>>(emptyMap())
-    private var searchQuery by mutableStateOf("")
-    private var selectedTabIndex by mutableIntStateOf(0)
+    private val tabFlow = MutableStateFlow(0)
+    private val searchFlow = MutableStateFlow("")
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        
+        val aiChatRepo = DataManager.getAiChatRepository(this)
 
         lifecycleScope.launch {
-            val type = if (selectedTabIndex == 0) "chat" else "voice"
-            aiChatRepo?.getSessionsByType(type)?.collect { sessions ->
+            combine(tabFlow, searchFlow) { tab, query ->
+                tab to query
+            }.flatMapLatest { (tab, _) ->
+                val type = if (tab == 0) "chat" else "voice"
+                aiChatRepo?.getSessionsByType(type) ?: flowOf(emptyList())
+            }.collect { sessions ->
+                val query = searchFlow.value
                 groupedSessions = groupSessionsByDate(sessions.filter { 
-                    it.title.contains(searchQuery, ignoreCase = true) 
+                    it.title.contains(query, ignoreCase = true) 
                 })
             }
         }
 
         setContent {
             val appStyle = remember { AppStyle.fromSettings() }
+            val selectedTabIndex by tabFlow.collectAsState()
+            val searchQuery by searchFlow.collectAsState()
+
             CompositionLocalProvider(LocalAppStyle provides appStyle) {
                 AssistantHistoryScreen(
                     groupedSessions = groupedSessions,
                     searchQuery = searchQuery,
                     selectedTabIndex = selectedTabIndex,
-                    onTabChange = { index ->
-                        selectedTabIndex = index
-                        refreshSessions()
-                    },
-                    onSearchChange = { 
-                        searchQuery = it 
-                        refreshSessions()
-                    },
+                    onTabChange = { tabFlow.value = it },
+                    onSearchChange = { searchFlow.value = it },
                     onBack = { finish() },
                     onClearAll = {
-                        lifecycleScope.launch {
-                            aiChatRepo?.clearEverything()
-                        }
+                        lifecycleScope.launch { aiChatRepo?.clearEverything() }
                     },
                     onSessionClick = { session ->
-                        val intent = Intent(this, AssistantSessionDetailActivity::class.java).apply {
+                        val intent = Intent(this@AssistantHistoryActivity, AssistantSessionDetailActivity::class.java).apply {
                             putExtra("SESSION_ID", session.id)
                             putExtra("SESSION_TITLE", session.title)
                         }
                         startActivity(intent)
                     },
                     onDeleteSession = { session ->
-                        lifecycleScope.launch {
-                            aiChatRepo?.deleteSession(session)
-                        }
+                        lifecycleScope.launch { aiChatRepo?.deleteSession(session) }
                     }
                 )
-            }
-        }
-    }
-
-    private fun refreshSessions() {
-        lifecycleScope.launch {
-            val type = if (selectedTabIndex == 0) "chat" else "voice"
-            aiChatRepo?.getSessionsByType(type)?.collect { sessions ->
-                groupedSessions = groupSessionsByDate(sessions.filter { s -> 
-                    s.title.contains(searchQuery, ignoreCase = true) 
-                })
             }
         }
     }
@@ -107,15 +73,13 @@ class AssistantHistoryActivity : BaseActivity() {
     private fun groupSessionsByDate(sessions: List<AiChatSessionEntity>): Map<String, List<AiChatSessionEntity>> {
         val today = Calendar.getInstance()
         val yesterday = Calendar.getInstance().apply { add(Calendar.DATE, -1) }
-        val lastWeek = Calendar.getInstance().apply { add(Calendar.DATE, -7) }
 
         return sessions.groupBy { session ->
             val sessionCal = Calendar.getInstance().apply { timeInMillis = session.timestamp }
             when {
                 isSameDay(sessionCal, today) -> "Today"
                 isSameDay(sessionCal, yesterday) -> "Yesterday"
-                sessionCal.after(lastWeek) -> "Last 7 Days"
-                else -> SimpleDateFormat("MMMM yyyy", Locale.getDefault()).format(Date(session.timestamp))
+                else -> SimpleDateFormat("EEE, MMM dd", Locale.getDefault()).format(Date(session.timestamp))
             }
         }
     }
@@ -124,234 +88,4 @@ class AssistantHistoryActivity : BaseActivity() {
         return cal1.get(Calendar.YEAR) == cal2.get(Calendar.YEAR) &&
                 cal1.get(Calendar.DAY_OF_YEAR) == cal2.get(Calendar.DAY_OF_YEAR)
     }
-}
-
-@OptIn(ExperimentalMaterial3Api::class)
-@Composable
-fun AssistantHistoryScreen(
-    groupedSessions: Map<String, List<AiChatSessionEntity>>,
-    searchQuery: String,
-    selectedTabIndex: Int,
-    onTabChange: (Int) -> Unit,
-    onSearchChange: (String) -> Unit,
-    onBack: () -> Unit,
-    onClearAll: () -> Unit,
-    onSessionClick: (AiChatSessionEntity) -> Unit,
-    onDeleteSession: (AiChatSessionEntity) -> Unit
-) {
-    var showClearConfirm by remember { mutableStateOf(false) }
-    val style = LocalAppStyle.current
-
-    Scaffold(
-        topBar = {
-            TopAppBar(
-                title = { Text("AI HISTORY", fontWeight = FontWeight.Bold, fontSize = 16.sp, letterSpacing = 1.sp) },
-                navigationIcon = {
-                    IconButton(onClick = onBack) {
-                        Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Back")
-                    }
-                },
-                actions = {
-                    IconButton(onClick = { showClearConfirm = true }) {
-                        Icon(Icons.Default.DeleteSweep, contentDescription = "Clear All", tint = Color(0xFFEA4335))
-                    }
-                },
-                colors = TopAppBarDefaults.topAppBarColors(
-                    containerColor = Color.Black,
-                    titleContentColor = Color.White,
-                    navigationIconContentColor = Color.White
-                ),
-                modifier = Modifier.drawWithContent {
-                    drawContent()
-                    drawLine(
-                        color = style.accentColor.copy(alpha = 0.3f),
-                        start = androidx.compose.ui.geometry.Offset(0f, size.height),
-                        end = androidx.compose.ui.geometry.Offset(size.width, size.height),
-                        strokeWidth = 1.dp.toPx()
-                    )
-                }
-            )
-        },
-        containerColor = Color.Black
-    ) { padding ->
-        Column(
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(padding)
-                .background(Color.Black)
-        ) {
-            // Tabs
-            TabRow(
-                selectedTabIndex = selectedTabIndex,
-                containerColor = Color.Black,
-                contentColor = style.accentColor,
-                indicator = { tabPositions ->
-                    TabRowDefaults.SecondaryIndicator(
-                        Modifier.tabIndicatorOffset(tabPositions[selectedTabIndex]),
-                        color = style.accentColor
-                    )
-                },
-                divider = {}
-            ) {
-                Tab(
-                    selected = selectedTabIndex == 0,
-                    onClick = { onTabChange(0) },
-                    text = { Text("CHAT", fontSize = 12.sp, fontWeight = FontWeight.Bold) }
-                )
-                Tab(
-                    selected = selectedTabIndex == 1,
-                    onClick = { onTabChange(1) },
-                    text = { Text("VOICE", fontSize = 12.sp, fontWeight = FontWeight.Bold) }
-                )
-            }
-
-            // Search Bar
-            TextField(
-                value = searchQuery,
-                onValueChange = onSearchChange,
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(16.dp)
-                    .clip(RoundedCornerShape(12.dp))
-                    .border(1.dp, style.accentColor.copy(alpha = 0.3f), RoundedCornerShape(12.dp)),
-                placeholder = { Text("Search conversations...", color = Color.Gray, fontSize = 14.sp) },
-                leadingIcon = { Icon(Icons.Default.Search, contentDescription = null, tint = Color.Gray) },
-                colors = TextFieldDefaults.colors(
-                    focusedContainerColor = Color.Black,
-                    unfocusedContainerColor = Color.Black,
-                    focusedIndicatorColor = Color.Transparent,
-                    unfocusedIndicatorColor = Color.Transparent,
-                    focusedTextColor = Color.White,
-                    unfocusedTextColor = Color.White
-                ),
-                singleLine = true
-            )
-
-            if (groupedSessions.isEmpty()) {
-                Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-                    Text(
-                        if (searchQuery.isEmpty()) "No conversation history found." else "No matches found for \"$searchQuery\"",
-                        color = Color.Gray,
-                        fontSize = 14.sp
-                    )
-                }
-            } else {
-                LazyColumn(
-                    modifier = Modifier.fillMaxSize(),
-                    contentPadding = PaddingValues(bottom = 32.dp)
-                ) {
-                    groupedSessions.forEach { (dateLabel, sessions) ->
-                        item {
-                            Text(
-                                text = dateLabel.uppercase(),
-                                color = Color.Gray,
-                                fontSize = 11.sp,
-                                fontWeight = FontWeight.Bold,
-                                letterSpacing = 1.sp,
-                                modifier = Modifier.padding(horizontal = 20.dp, vertical = 12.dp)
-                            )
-                        }
-                        items(sessions) { session ->
-                            SessionItem(session, onSessionClick, onDeleteSession)
-                        }
-                    }
-                }
-            }
-        }
-
-        if (showClearConfirm) {
-            AlertDialog(
-                onDismissRequest = { showClearConfirm = false },
-                title = { Text("Clear All History?") },
-                text = { Text("This will permanently delete all your AI conversation threads. This action cannot be undone.") },
-                confirmButton = {
-                    TextButton(onClick = {
-                        onClearAll()
-                        showClearConfirm = false
-                    }) {
-                        Text("Clear All", color = Color(0xFFEA4335))
-                    }
-                },
-                dismissButton = {
-                    TextButton(onClick = { showClearConfirm = false }) {
-                        Text("Cancel", color = Color.White)
-                    }
-                },
-                containerColor = Color(0xFF1A1A1A),
-                titleContentColor = Color.White,
-                textContentColor = Color.LightGray
-            )
-        }
-    }
-}
-
-@Composable
-fun SessionItem(
-    session: AiChatSessionEntity,
-    onClick: (AiChatSessionEntity) -> Unit,
-    onDelete: (AiChatSessionEntity) -> Unit
-) {
-    val style = LocalAppStyle.current
-    Card(
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(horizontal = 16.dp, vertical = 6.dp)
-            .clickable { onClick(session) },
-        colors = CardDefaults.cardColors(containerColor = Color.Black),
-        shape = RoundedCornerShape(16.dp),
-        border = androidx.compose.foundation.BorderStroke(1.dp, style.accentColor.copy(alpha = 0.2f))
-    ) {
-        Row(
-            modifier = Modifier
-                .padding(16.dp)
-                .fillMaxWidth(),
-            verticalAlignment = Alignment.CenterVertically
-        ) {
-            Box(
-                modifier = Modifier
-                    .size(40.dp)
-                    .background(
-                        (if (session.type == "voice") Color(0xFFEA4335) else Color(0xFF4285F4)).copy(alpha = 0.1f), 
-                        CircleShape
-                    ),
-                contentAlignment = Alignment.Center
-            ) {
-                Icon(
-                    if (session.type == "voice") Icons.Default.Mic else Icons.Default.ChatBubbleOutline,
-                    contentDescription = null,
-                    tint = if (session.type == "voice") Color(0xFFEA4335) else Color(0xFF4285F4),
-                    modifier = Modifier.size(20.dp)
-                )
-            }
-            Spacer(modifier = Modifier.width(16.dp))
-            Column(modifier = Modifier.weight(1f)) {
-                Text(
-                    text = session.title,
-                    fontSize = 15.sp,
-                    fontWeight = FontWeight.Bold,
-                    color = Color.White,
-                    maxLines = 1
-                )
-                Spacer(modifier = Modifier.height(2.dp))
-                Text(
-                    text = formatSessionTime(session.timestamp),
-                    fontSize = 12.sp,
-                    color = Color.Gray
-                )
-            }
-            // Simple delete button for now, can be swipe later if needed
-            IconButton(onClick = { onDelete(session) }) {
-                Icon(
-                    Icons.Default.DeleteSweep,
-                    contentDescription = "Delete Thread",
-                    tint = Color.DarkGray,
-                    modifier = Modifier.size(20.dp)
-                )
-            }
-        }
-    }
-}
-
-private fun formatSessionTime(timestamp: Long): String {
-    return SimpleDateFormat("HH:mm", Locale.getDefault()).format(Date(timestamp))
 }

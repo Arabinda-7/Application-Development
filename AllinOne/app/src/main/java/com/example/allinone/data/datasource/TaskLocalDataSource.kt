@@ -68,6 +68,24 @@ class TaskLocalDataSource @Inject constructor(
         _settings.value = loadSettings()
     }
 
+    fun updateSettings(newSettings: TaskSettings) {
+        sharedPrefs.edit().apply {
+            putBoolean("task_show_completed", newSettings.showCompleted)
+            putBoolean("task_show_hidden", newSettings.showHidden)
+            putString("task_sort_order", newSettings.sortOrder)
+            putString("task_custom_categories", gson.toJson(newSettings.customCategories))
+            putBoolean("task_auto_archive", newSettings.autoArchive)
+            putInt("global_task_color", newSettings.globalTaskColor)
+            putInt("task_add_theme_color", newSettings.taskAddThemeColor)
+            putInt("global_task_icon", newSettings.globalTaskIcon)
+            putBoolean("task_edit_mode_enabled", newSettings.editModeEnabled)
+            putString("task_default_section", newSettings.defaultSection)
+            putString("task_visible_sections", gson.toJson(newSettings.visibleSections))
+            apply()
+        }
+        _settings.value = newSettings
+    }
+
     private fun loadSettings(): TaskSettings {
         return TaskSettings(
             showCompleted = sharedPrefs.getBoolean("task_show_completed", true),

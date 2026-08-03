@@ -4,6 +4,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.lifecycle.ViewModel
 import com.example.allinone.DataManager
 import com.example.allinone.DayHistory
+import com.example.allinone.*
 import com.example.allinone.data.model.Habit
 import com.example.allinone.ui.performance.state.PerformanceFilterType
 import com.example.allinone.ui.performance.state.PerformanceState
@@ -56,9 +57,10 @@ class PerformanceViewModel @Inject constructor() : ViewModel() {
         performanceData: DayHistory,
         trendData: List<Pair<Int, Int>>,
         habits: List<Habit>,
-        isWorkoutContext: Boolean
+        isWorkoutContext: Boolean,
+        forcedFilter: PerformanceFilterType? = null
     ) {
-        val initialFilter = if (isWorkoutContext) PerformanceFilterType.WORKOUTS else PerformanceFilterType.OVERALL
+        val initialFilter = forcedFilter ?: if (isWorkoutContext) PerformanceFilterType.WORKOUTS else PerformanceFilterType.OVERALL
         _uiState.update {
             it.copy(
                 selectedDate = selectedDate,
@@ -67,7 +69,8 @@ class PerformanceViewModel @Inject constructor() : ViewModel() {
                 trendData = trendData,
                 habits = habits,
                 isWorkoutContext = isWorkoutContext,
-                primaryFilter = initialFilter
+                primaryFilter = initialFilter,
+                selectedHabitName = if (initialFilter == PerformanceFilterType.HABITS) _uiState.value.selectedHabitName else null
             )
         }
         recalculateState()
@@ -117,10 +120,38 @@ class PerformanceViewModel @Inject constructor() : ViewModel() {
             }
         }
 
+        val heatmapData = when (state.primaryFilter) {
+            PerformanceFilterType.HABITS -> DataManager.getHeatmapData(state.currentMonth, "HABITS")
+            PerformanceFilterType.WORKOUTS -> DataManager.getHeatmapData(state.currentMonth, "WORKOUTS")
+            else -> DataManager.getHeatmapData(state.currentMonth, "ALL")
+        }
+
+        val streaks = when (state.primaryFilter) {
+            PerformanceFilterType.HABITS -> if (currentSelectedHabit != null) DataManager.getHabitStreaks(currentSelectedHabit) else null
+            PerformanceFilterType.WORKOUTS -> DataManager.getWorkoutStreaks()
+            else -> null
+        }
+
         _uiState.update {
             it.copy(
                 performanceData = filteredPerformance,
-                trendData = filteredTrend
+                trendData = filteredTrend,
+                heatmapData = heatmapData,
+                volumeData = if (state.primaryFilter != PerformanceFilterType.HABITS) DataManager.getMonthlyVolumeData(state.currentMonth) else emptyList(),
+                diversityData = if (state.primaryFilter != PerformanceFilterType.HABITS) DataManager.getWorkoutDiversityData() else emptyMap(),
+                intensityData = if (state.primaryFilter != PerformanceFilterType.HABITS) DataManager.getIntensityDistribution(state.currentMonth) else emptyList(),
+                muscleFocusData = if (state.primaryFilter != PerformanceFilterType.HABITS) DataManager.getDailyMuscleFocus(state.currentMonth) else emptyMap(),
+                muscleDistribution = if (state.primaryFilter != PerformanceFilterType.HABITS) DataManager.getMuscleDistributionData() else emptyMap(),
+                recoveryStatus = if (state.primaryFilter != PerformanceFilterType.HABITS) DataManager.getMuscleRecoveryStatus() else emptyMap(),
+                acwrData = if (state.primaryFilter != PerformanceFilterType.HABITS) DataManager.getACWRData() else Pair(emptyList(), emptyList()),
+                stabilityScore = if (state.primaryFilter == PerformanceFilterType.HABITS) DataManager.getStabilityIndex(currentSelectedHabit) else if (state.primaryFilter == PerformanceFilterType.WORKOUTS) DataManager.getTrainingStabilityScore() else 85f,
+                resilienceScore = if (state.primaryFilter == PerformanceFilterType.HABITS) DataManager.getResilienceScore(currentSelectedHabit) else 90f,
+                monthlyMomentum = if (state.primaryFilter == PerformanceFilterType.HABITS) DataManager.getMonthlyMomentumHistory(currentSelectedHabit) else emptyList(),
+                milestoneProgress = if (state.primaryFilter == PerformanceFilterType.HABITS) DataManager.getStreakMilestoneProgress(currentSelectedHabit) else Triple(0, 0, 0f),
+                temporalDensity = if (state.primaryFilter == PerformanceFilterType.HABITS) DataManager.getTemporalDensityData() else emptyMap(),
+                correlations = if (state.primaryFilter == PerformanceFilterType.HABITS) DataManager.getHabitCorrelationMatrix() else emptyList(),
+                currentStreak = streaks?.first ?: 0,
+                longestStreak = streaks?.second ?: 0
             )
         }
     }

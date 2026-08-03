@@ -21,8 +21,8 @@
 
         <ImageButton
             android:id="@+id/btn_back"
-            android:layout_width="48dp"
-            android:layout_height="48dp"
+            android:layout_width="40dp"
+            android:layout_height="40dp"
             android:layout_marginStart="8dp"
             android:layout_marginTop="12dp"
             android:background="?attr/selectableItemBackgroundBorderless"
@@ -66,14 +66,14 @@
 
         <ImageButton
             android:id="@+id/btn_calculate_balance"
-            android:layout_width="48dp"
-            android:layout_height="48dp"
+            android:layout_width="40dp"
+            android:layout_height="40dp"
             android:layout_marginEnd="4dp"
             android:background="?attr/selectableItemBackgroundBorderless"
             android:src="@drawable/baseline_tune_24"
             app:tint="@color/white"
             android:contentDescription="Calculate Balance"
-            android:padding="12dp"
+            android:padding="10dp"
             android:scaleType="centerInside"
             app:layout_constraintBottom_toBottomOf="@id/btn_back"
             app:layout_constraintEnd_toStartOf="@id/btn_person_settings"
@@ -81,8 +81,8 @@
 
         <ImageButton
             android:id="@+id/btn_person_settings"
-            android:layout_width="48dp"
-            android:layout_height="48dp"
+            android:layout_width="40dp"
+            android:layout_height="40dp"
             android:layout_marginEnd="8dp"
             android:background="?attr/selectableItemBackgroundBorderless"
             android:src="@drawable/baseline_settings_24"

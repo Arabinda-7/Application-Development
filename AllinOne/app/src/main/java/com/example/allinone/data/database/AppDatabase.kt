@@ -58,7 +58,7 @@ abstract class AppDatabase : RoomDatabase() {
                 val instance = Room.databaseBuilder(
                     context.applicationContext,
                     AppDatabase::class.java,
-                    "app_database"
+                    "all_in_one_db"
                 )
                 .openHelperFactory(factory)
                 .fallbackToDestructiveMigration()
@@ -71,7 +71,7 @@ abstract class AppDatabase : RoomDatabase() {
         fun resetDatabase(context: Context) {
             INSTANCE?.close()
             INSTANCE = null
-            context.deleteDatabase("app_database")
+            context.deleteDatabase("all_in_one_db")
         }
     }
 }

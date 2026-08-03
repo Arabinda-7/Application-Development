@@ -40,14 +40,17 @@ fun ExecutiveSummaryCard(
             Column(modifier = Modifier.padding(24.dp)) {
                 Row(verticalAlignment = Alignment.CenterVertically) {
                     if (showPerformance) {
-                        Column(modifier = Modifier.weight(1f)) {
+                        Column(
+                            modifier = Modifier
+                                .weight(1f)
+                                .clickable { onPerformanceClick() }
+                        ) {
                             Text(
                                 "Daily Performance", 
                                 color = style.accentColor, 
                                 fontSize = 10.sp, 
                                 fontWeight = FontWeight.Black, 
-                                letterSpacing = 1.sp,
-                                modifier = Modifier.clickable { onPerformanceClick() }
+                                letterSpacing = 1.sp
                             )
                             Text(
                                 "${overallProgress}% Completed", 

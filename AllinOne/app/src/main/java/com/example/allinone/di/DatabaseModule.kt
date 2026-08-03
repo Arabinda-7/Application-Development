@@ -2,7 +2,6 @@ package com.example.allinone.di
 
 import android.content.Context
 import android.content.SharedPreferences
-import androidx.room.Room
 import com.example.allinone.data.database.*
 import com.example.allinone.workspace.data.WorkspaceDao
 import com.example.allinone.security.SecurityManager
@@ -13,6 +12,7 @@ import dagger.Provides
 import dagger.hilt.InstallIn
 import dagger.hilt.android.qualifiers.ApplicationContext
 import dagger.hilt.components.SingletonComponent
+import kotlinx.serialization.json.Json
 import net.zetetic.database.sqlcipher.SupportOpenHelperFactory
 import javax.inject.Singleton
 
@@ -23,6 +23,14 @@ object DatabaseModule {
     @Provides
     @Singleton
     fun provideGson(): Gson = GsonBuilder().create()
+
+    @Provides
+    @Singleton
+    fun provideJson(): Json = Json {
+        ignoreUnknownKeys = true
+        encodeDefaults = true
+        prettyPrint = true
+    }
 
     @Provides
     @Singleton
@@ -37,16 +45,7 @@ object DatabaseModule {
     fun provideAppDatabase(
         @ApplicationContext context: Context
     ): AppDatabase {
-        val passphrase = SecurityManager.getDatabasePassphrase(context).toByteArray()
-        val factory = SupportOpenHelperFactory(passphrase)
-        return Room.databaseBuilder(
-            context,
-            AppDatabase::class.java,
-            "all_in_one_db"
-        )
-        .openHelperFactory(factory)
-        .fallbackToDestructiveMigration()
-        .build()
+        return AppDatabase.getDatabase(context)
     }
 
     @Provides
@@ -69,6 +68,11 @@ object DatabaseModule {
 
     @Provides
     fun provideAiChatDao(db: AppDatabase): AiChatDao = db.aiChatDao()
+
+    @Provides
+    @Singleton
+    fun provideAiChatRepository(dao: AiChatDao): com.example.allinone.data.repository.AiChatRepository = 
+        com.example.allinone.data.repository.AiChatRepository(dao)
 
     @Provides
     fun provideAssistantMemoryDao(db: AppDatabase): AssistantMemoryDao = db.assistantMemoryDao()

@@ -8,10 +8,11 @@
 
     <ImageView
         android:id="@+id/btn_back"
-        android:layout_width="24dp"
-        android:layout_height="24dp"
+        android:layout_width="40dp"
+        android:layout_height="40dp"
         android:src="@android:drawable/ic_menu_revert"
         android:rotation="180"
+        android:padding="8dp"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
         app:tint="@color/white"

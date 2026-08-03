@@ -14,7 +14,9 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.util.lerp
+import androidx.lifecycle.lifecycleScope
 import com.example.allinone.onboarding.*
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 import kotlin.math.absoluteValue
 
@@ -145,42 +147,38 @@ class OnboardingActivity : BaseActivity() {
     }
 
     private fun completeOnboarding(name: String, avatar: Int, sections: List<OnboardingSection>, aiEnabled: Boolean) {
-        DataManager.userName = if (name.isBlank()) "User" else name
-        DataManager.userAvatarRes = avatar
-        DataManager.isAiAssistantEnabled = aiEnabled
-        sections.forEach { section ->
-            when (section.id) {
-                "HABITS" -> DataManager.showHabitSection = section.isEnabled.value
-                "WORKOUTS" -> DataManager.showWorkoutSection = section.isEnabled.value
-                "TASKS" -> DataManager.showTaskSection = section.isEnabled.value
-                "NOTES" -> {
-                    DataManager.showNoteSection = section.isEnabled.value
-                    if (section.isEnabled.value) {
-                        val visibleSections = mutableListOf("Notes")
-                        section.subFeatures.forEach { sub ->
-                            when (sub.id) {
-                                "daily" -> if (sub.isEnabled.value) visibleSections.add("Daily")
-                                "questions" -> if (sub.isEnabled.value) visibleSections.add("Questions")
-                                "stories" -> if (sub.isEnabled.value) visibleSections.add("Stories")
-                            }
-                        }
-                        DataManager.noteVisibleSections = visibleSections
-                    }
-                }
-                "PROJECTS" -> {
-                    DataManager.showProjectSection = section.isEnabled.value
-                    if (section.isEnabled.value) {
-                        section.subFeatures.forEach { sub ->
-                            if (sub.id == "ideas") DataManager.projectIdeasEnabled = sub.isEnabled.value
-                        }
-                    }
-                }
-                "FINANCE" -> DataManager.showFinanceSection = section.isEnabled.value
+        val entryPoint = DataManager.getEntryPoint(this)
+        lifecycleScope.launch {
+            try {
+                // Update Profile
+                val currentProfile = entryPoint.userRepository().getUserProfile().first()
+                entryPoint.userRepository().updateUserProfile(currentProfile.copy(
+                    name = if (name.isBlank()) "User" else name,
+                    avatarRes = avatar
+                ))
+
+                // Update Settings
+                val currentSettings = entryPoint.userRepository().getUserSettings().first()
+                entryPoint.userRepository().updateUserSettings(currentSettings.copy(
+                    isOnboardingCompleted = true,
+                    isAiAssistantEnabled = aiEnabled,
+                    showHabitSection = sections.find { it.id == "HABITS" }?.isEnabled?.value ?: true,
+                    showWorkoutSection = sections.find { it.id == "WORKOUTS" }?.isEnabled?.value ?: true,
+                    showTaskSection = sections.find { it.id == "TASKS" }?.isEnabled?.value ?: true,
+                    showNoteSection = sections.find { it.id == "NOTES" }?.isEnabled?.value ?: true,
+                    showProjectSection = sections.find { it.id == "PROJECTS" }?.isEnabled?.value ?: true,
+                    showFinanceSection = sections.find { it.id == "FINANCE" }?.isEnabled?.value ?: true
+                ))
+                
+                // Force legacy sync for DataManager
+                DataManager.refreshLegacyState(this@OnboardingActivity)
+                
+                startActivity(Intent(this@OnboardingActivity, MainActivity::class.java))
+                finish()
+            } catch (e: Exception) {
+                startActivity(Intent(this@OnboardingActivity, MainActivity::class.java))
+                finish()
             }
         }
-        DataManager.isOnboardingCompleted = true
-        DataManager.saveData(this, immediate = true)
-        startActivity(Intent(this, MainActivity::class.java))
-        finish()
     }
 }

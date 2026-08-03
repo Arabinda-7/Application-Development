@@ -1,7 +1,7 @@
 package com.example.allinone.backup
 
 object BackupValidator {
-    const val CURRENT_VERSION = 1
+    const val CURRENT_VERSION = 2
 
     fun validate(data: BackupData): ValidationResult {
         if (data.version <= 0) return ValidationResult.Invalid("Invalid version")

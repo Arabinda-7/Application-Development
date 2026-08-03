@@ -44,33 +44,31 @@ fun PerformanceDashboardScreen(
     selectedHabitName: String? = null,
     onHabitSelected: (String?) -> Unit = {},
     onSaveNote: (String, String) -> Unit = { _, _ -> },
+    initialFilter: PerformanceFilterType? = null,
     viewModel: PerformanceViewModel = androidx.lifecycle.viewmodel.compose.viewModel()
 ) {
-    var primaryFilter by remember(isWorkoutContext) {
-        mutableStateOf(if (isWorkoutContext) PerformanceFilterType.WORKOUTS else if (selectedHabitName != null) PerformanceFilterType.HABITS else PerformanceFilterType.OVERALL)
+    val state by viewModel.uiState.collectAsState()
+
+    LaunchedEffect(selectedDate, currentMonth, performanceData, trendData, habits, isWorkoutContext, initialFilter) {
+        viewModel.initializeData(
+            selectedDate = selectedDate,
+            currentMonth = currentMonth,
+            performanceData = performanceData,
+            trendData = trendData,
+            habits = habits,
+            isWorkoutContext = isWorkoutContext,
+            forcedFilter = initialFilter
+        )
+    }
+    
+    LaunchedEffect(currentMood, overrideColor) {
+        viewModel.updateMood(currentMood, overrideColor)
     }
 
-    val currentIsWorkoutContext = primaryFilter == PerformanceFilterType.WORKOUTS
-
-    val moodColorTarget = remember(currentMood, overrideColor, primaryFilter) {
-        if (overrideColor != null && primaryFilter != PerformanceFilterType.OVERALL) return@remember overrideColor
-        when (currentMood) {
-            "🔥" -> Color(0xFFFFB800)
-            "⚡" -> Color(0xFF2EC4B6)
-            "🧘" -> Color(0xFF673AB7)
-            "💼" -> Color(0xFF1A73E8)
-            "😴" -> Color(0xFF9E9E9E)
-            "🧠" -> Color(0xFF3F51B5)
-            else -> {
-                if (primaryFilter == PerformanceFilterType.WORKOUTS) Color(0xFFFFB800)
-                else if (primaryFilter == PerformanceFilterType.HABITS) Color(0xFFFF7A59)
-                else Color(0xFF1A73E8)
-            }
-        }
-    }
+    val currentIsWorkoutContext = state.primaryFilter == PerformanceFilterType.WORKOUTS
 
     val animatedMoodColor by animateColorAsState(
-        targetValue = moodColorTarget,
+        targetValue = state.moodColorTarget,
         animationSpec = tween(durationMillis = 500),
         label = "MoodColorAnimation"
     )
@@ -108,24 +106,48 @@ fun PerformanceDashboardScreen(
                     title = title,
                     onBack = onBack,
                     showFilterSelector = showFilterSelector,
-                    primaryFilter = primaryFilter,
+                    primaryFilter = state.primaryFilter,
                     animatedMoodColor = animatedMoodColor,
                     habits = habits,
-                    selectedHabitName = selectedHabitName,
-                    onFilterSelected = { primaryFilter = it },
-                    onHabitSelected = onHabitSelected
+                    selectedHabitName = state.selectedHabitName,
+                    onFilterSelected = { viewModel.setPrimaryFilter(it) },
+                    onHabitSelected = { 
+                        viewModel.setSelectedHabit(it)
+                        onHabitSelected(it)
+                    },
+                    currentMonth = state.currentMonth
                 )
+            }
+
+            // Month History / Calendar (Moved up after title)
+            item {
+                Spacer(modifier = Modifier.height(16.dp))
+                Box(modifier = Modifier.padding(horizontal = 16.dp)) {
+                    PerformanceCalendarSection(
+                        currentMonth = state.currentMonth,
+                        selectedDate = state.selectedDate,
+                        themeColor = animatedMoodColor,
+                        onDateSelected = onDateSelected,
+                        onMonthChanged = { 
+                            viewModel.updateCurrentMonth(it)
+                            onMonthChanged(it)
+                        }
+                    )
+                }
             }
 
             if (showPerformanceCard) {
                 item {
-                    Box(modifier = Modifier.padding(horizontal = 24.dp)) {
+                    Spacer(modifier = Modifier.height(16.dp))
+                    Box(modifier = Modifier.padding(horizontal = 16.dp)) {
                         PerformanceSummaryContainer(
-                            performanceData = performanceData,
+                            performanceData = state.performanceData,
                             animatedMoodColor = animatedMoodColor,
-                            primaryFilter = primaryFilter,
+                            primaryFilter = state.primaryFilter,
                             isWorkoutContext = currentIsWorkoutContext,
-                            onShowPicker = onShowPicker
+                            onShowPicker = onShowPicker,
+                            currentStreak = state.currentStreak,
+                            longestStreak = state.longestStreak
                         )
                     }
                 }
@@ -134,14 +156,59 @@ fun PerformanceDashboardScreen(
             if (showTrendCard) {
                 item {
                     Spacer(modifier = Modifier.height(16.dp))
-                    Box(modifier = Modifier.padding(horizontal = 24.dp)) {
+                    Box(modifier = Modifier.padding(horizontal = 16.dp)) {
                         PerformanceCard(title = "TREND ANALYSIS") {
                             TrendChart(
-                                data = trendData,
+                                data = state.trendData,
                                 themeColor = animatedMoodColor,
-                                isWorkoutContext = currentIsWorkoutContext
+                                filterType = state.primaryFilter
                             )
                         }
+                    }
+                }
+            }
+
+            // Consistency Heatmap
+            item {
+                Spacer(modifier = Modifier.height(16.dp))
+                Box(modifier = Modifier.padding(horizontal = 16.dp)) {
+                    PerformanceHeatmapSection(
+                        heatmapData = state.heatmapData,
+                        animatedMoodColor = animatedMoodColor
+                    )
+                }
+            }
+
+            // Advanced Analytics Sections
+            if (state.primaryFilter == PerformanceFilterType.HABITS) {
+                item {
+                    Spacer(modifier = Modifier.height(16.dp))
+                    Box(modifier = Modifier.padding(horizontal = 16.dp)) {
+                        PerformanceHabitAnalyticsSection(
+                            stabilityScore = state.stabilityScore,
+                            resilienceScore = state.resilienceScore,
+                            momentumData = state.monthlyMomentum,
+                            milestone = state.milestoneProgress,
+                            temporalDensity = state.temporalDensity,
+                            correlations = state.correlations,
+                            animatedMoodColor = animatedMoodColor
+                        )
+                    }
+                }
+            } else if (state.primaryFilter == PerformanceFilterType.WORKOUTS) {
+                item {
+                    Spacer(modifier = Modifier.height(16.dp))
+                    Box(modifier = Modifier.padding(horizontal = 16.dp)) {
+                        PerformanceWorkoutAnalyticsSection(
+                            volumeData = state.volumeData,
+                            diversityData = state.diversityData,
+                            intensityData = state.intensityData,
+                            muscleFocus = state.muscleFocusData,
+                            muscleDistribution = state.muscleDistribution,
+                            recoveryStatus = state.recoveryStatus,
+                            acwrData = state.acwrData,
+                            animatedMoodColor = animatedMoodColor
+                        )
                     }
                 }
             }

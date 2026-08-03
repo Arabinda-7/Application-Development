@@ -79,8 +79,6 @@ class AddSubFeatureActivity : BaseActivity() {
 
     private fun applyIdeaModeUI() {
         if (isIdeaMode) {
-            findViewById<TextView>(R.id.label_tags).visibility = View.GONE
-            findViewById<View>(R.id.scroll_tags).visibility = View.GONE
             findViewById<TextView>(R.id.label_due_date).visibility = View.GONE
             findViewById<View>(R.id.container_due_date).visibility = View.GONE
             findViewById<TextView>(R.id.label_weight).visibility = View.GONE
@@ -374,13 +372,12 @@ class AddSubFeatureActivity : BaseActivity() {
     }
 
     private fun applyTagSpecificLayout(tag: String) {
-        if (isIdeaMode) return // Idea mode already hides most things
+        if (isIdeaMode) return
 
         val upperTag = tag.uppercase()
         val showDueDate = upperTag == "TASKS" || upperTag == "FEATURES" || upperTag == ""
         val showWeight = upperTag == "FEATURES" || upperTag == ""
         val showUrgency = upperTag == "TASKS" || upperTag == "FEATURES" || upperTag == "BUGS" || upperTag == ""
-        val showDependency = upperTag == "TASKS" || upperTag == "FEATURES" || upperTag == "BUGS" || upperTag == ""
         val showResource = upperTag == "RESOURCES" || upperTag == "FEATURES" || upperTag == ""
 
         findViewById<View>(R.id.label_due_date).visibility = if (showDueDate) View.VISIBLE else View.GONE
@@ -392,11 +389,12 @@ class AddSubFeatureActivity : BaseActivity() {
         findViewById<View>(R.id.label_urgency).visibility = if (showUrgency) View.VISIBLE else View.GONE
         findViewById<View>(R.id.rg_feature_priority).visibility = if (showUrgency) View.VISIBLE else View.GONE
 
-        findViewById<View>(R.id.label_dependency).visibility = if (showDependency) View.VISIBLE else View.GONE
-        findViewById<View>(R.id.tv_blocked_by_selector).visibility = if (showDependency) View.VISIBLE else View.GONE
-
         findViewById<View>(R.id.label_resource).visibility = if (showResource) View.VISIBLE else View.GONE
         findViewById<View>(R.id.et_resource_url).visibility = if (showResource) View.VISIBLE else View.GONE
+
+        // Keep Dependency (Blocked By) explicitly hidden as per previous instruction
+        findViewById<View>(R.id.label_dependency).visibility = View.GONE
+        findViewById<View>(R.id.tv_blocked_by_selector).visibility = View.GONE
     }
 
     private fun Int.dpToPx(): Int = (this * resources.displayMetrics.density).toInt()

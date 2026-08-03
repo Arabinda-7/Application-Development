@@ -21,6 +21,10 @@ import androidx.compose.ui.unit.sp
 import com.example.allinone.data.model.Habit
 import com.example.allinone.ui.performance.state.PerformanceFilterType
 
+import androidx.compose.ui.platform.LocalConfiguration
+import java.text.SimpleDateFormat
+import java.util.*
+
 /**
  * PerformanceHeader: Renders the top navigation bar, title text, 
  * filter selector chips, and habit selection chips.
@@ -35,44 +39,40 @@ fun PerformanceHeader(
     habits: List<Habit>,
     selectedHabitName: String?,
     onFilterSelected: (PerformanceFilterType) -> Unit,
-    onHabitSelected: (String?) -> Unit
+    onHabitSelected: (String?) -> Unit,
+    currentMonth: Calendar? = null
 ) {
+    val locale = LocalConfiguration.current.locales[0]
+
     Box(
         modifier = Modifier
             .fillMaxWidth()
-            .statusBarsPadding()
-            .padding(top = 8.dp, bottom = 12.dp, start = 24.dp, end = 24.dp)
+            .padding(top = 0.dp, bottom = 12.dp, start = 16.dp, end = 16.dp)
     ) {
         Column {
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.SpaceBetween,
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                if (onBack != null) {
-                    Box(
-                        modifier = Modifier
-                            .size(36.dp)
-                            .clip(CircleShape)
-                            .background(Color.White.copy(alpha = 0.08f))
-                            .clickable(
-                                interactionSource = remember { MutableInteractionSource() },
-                                indication = null
-                            ) { onBack.invoke() },
-                        contentAlignment = Alignment.Center
-                    ) {
-                        Icon(
-                            imageVector = Icons.AutoMirrored.Filled.ArrowBack,
-                            contentDescription = "Back",
-                            tint = Color.White,
-                            modifier = Modifier.size(18.dp)
-                        )
-                    }
+            if (onBack != null) {
+                Box(
+                    modifier = Modifier
+                        .size(36.dp)
+                        .clip(CircleShape)
+                        .background(Color.White.copy(alpha = 0.08f))
+                        .clickable(
+                            interactionSource = remember { MutableInteractionSource() },
+                            indication = null
+                        ) { onBack.invoke() },
+                    contentAlignment = Alignment.Center
+                ) {
+                    Icon(
+                        imageVector = Icons.AutoMirrored.Filled.ArrowBack,
+                        contentDescription = "Back",
+                        tint = Color.White,
+                        modifier = Modifier.size(18.dp)
+                    )
                 }
+                Spacer(modifier = Modifier.height(12.dp))
             }
 
             if (title != null) {
-                Spacer(modifier = Modifier.height(12.dp))
                 Text(
                     text = "MOMENTUM LOG",
                     color = Color.White.copy(alpha = 0.4f),
@@ -86,6 +86,17 @@ fun PerformanceHeader(
                     fontWeight = FontWeight.Black,
                     color = Color.White,
                     letterSpacing = (-0.5).sp
+                )
+            }
+
+            if (currentMonth != null) {
+                Text(
+                    text = SimpleDateFormat("MMMM yyyy", locale).format(currentMonth.time).uppercase(),
+                    color = animatedMoodColor,
+                    fontSize = 12.sp,
+                    fontWeight = FontWeight.Black,
+                    letterSpacing = 1.sp,
+                    modifier = Modifier.padding(top = 4.dp)
                 )
             }
 
@@ -113,7 +124,7 @@ fun PerformanceHeader(
                 }
             }
 
-            if (primaryFilter == PerformanceFilterType.HABITS && habits.isNotEmpty()) {
+            if (showFilterSelector && primaryFilter == PerformanceFilterType.HABITS && habits.isNotEmpty()) {
                 Spacer(modifier = Modifier.height(12.dp))
                 LazyRow(
                     modifier = Modifier.fillMaxWidth(),

@@ -25,11 +25,11 @@ fun PerformanceCard(
 ) {
     Surface(
         modifier = modifier.fillMaxWidth(),
-        color = Color(0xFF121216),
+        color = Color.Transparent,
         shape = RoundedCornerShape(24.dp),
         border = BorderStroke(1.dp, Color.White.copy(alpha = 0.08f))
     ) {
-        Column(modifier = Modifier.padding(20.dp)) {
+        Column(modifier = Modifier.padding(16.dp)) {
             Text(
                 text = title,
                 fontSize = 12.sp,
@@ -49,14 +49,19 @@ fun PerformanceSummaryContainer(
     animatedMoodColor: Color,
     primaryFilter: PerformanceFilterType,
     isWorkoutContext: Boolean,
-    onShowPicker: () -> Unit
+    onShowPicker: () -> Unit,
+    currentStreak: Int = 0,
+    longestStreak: Int = 0
 ) {
     PerformanceCard(title = "DAILY PROGRESS SUMMARY") {
         PerformanceSummary(
             data = performanceData,
             isExpanded = true,
             themeColor = animatedMoodColor,
-            isWorkoutContext = isWorkoutContext || primaryFilter == PerformanceFilterType.WORKOUTS
+            isWorkoutContext = isWorkoutContext || primaryFilter == PerformanceFilterType.WORKOUTS,
+            currentStreak = if (currentStreak > 0) currentStreak else null,
+            longestStreak = if (longestStreak > 0) longestStreak else null,
+            primaryFilter = primaryFilter
         )
     }
 }
