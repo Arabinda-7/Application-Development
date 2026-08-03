@@ -49,18 +49,13 @@ fun HomeScreen(
     onMoodSelected: (String) -> Unit = {},
     onSearchRequested: (String) -> Unit = {},
     onNotificationsMarkedAsViewed: (String) -> Unit = {},
-    isVoiceListening: Boolean = false,
-    isVoiceThinking: Boolean = false,
-    onVoiceMicClick: () -> Unit = {},
-    onVoiceSessionStarted: () -> Unit = {},
-    voiceMessages: List<ChatMessage> = emptyList()
+    onVoiceAssistantRequested: () -> Unit = {}
 ) {
     var showColorPicker by remember { mutableStateOf<String?>(null) }
     var searchQuery by remember { mutableStateOf("") }
     var showSpeedDial by remember { mutableStateOf(false) }
     var isSearchVisible by remember { mutableStateOf(false) }
     var showNotificationsDialog by remember { mutableStateOf(false) }
-    var showVoiceAssistant by remember { mutableStateOf(false) }
 
     val keyboardController = LocalSoftwareKeyboardController.current
     val style = LocalAppStyle.current
@@ -106,21 +101,17 @@ fun HomeScreen(
 
     val todayDateString = remember { SimpleDateFormat("yyyyMMdd", Locale.getDefault()).format(Date()) }
 
-    val isVoiceActive = isVoiceListening || isVoiceThinking || showVoiceAssistant
-
     Scaffold(
         contentWindowInsets = WindowInsets(0, 0, 0, 0),
         floatingActionButton = {
-            if (!isVoiceActive) {
-                QuickActionsFab(
-                    showSpeedDial = showSpeedDial,
-                    onToggleSpeedDial = { showSpeedDial = !showSpeedDial },
-                    onQuickAddTodo = { onQuickAddTodo(); showSpeedDial = false },
-                    onQuickAddExpense = { onQuickAddExpense(); showSpeedDial = false },
-                    onQuickAddNote = { onQuickAddNote(); showSpeedDial = false },
-                    offsetY = fabOffset
-                )
-            }
+            QuickActionsFab(
+                showSpeedDial = showSpeedDial,
+                onToggleSpeedDial = { showSpeedDial = !showSpeedDial },
+                onQuickAddTodo = { onQuickAddTodo(); showSpeedDial = false },
+                onQuickAddExpense = { onQuickAddExpense(); showSpeedDial = false },
+                onQuickAddNote = { onQuickAddNote(); showSpeedDial = false },
+                offsetY = fabOffset
+            )
         }
     ) { padding ->
         Column(
@@ -149,81 +140,69 @@ fun HomeScreen(
                 showRedDot = state.todayAgenda.isNotEmpty() && (state.lastViewedNotificationDate != todayDateString || state.hasNewTodayNotifications)
             )
 
-            // Wrap sections in AnimatedVisibility to prevent layout glitches
-            AnimatedVisibility(
-                visible = !isVoiceActive,
-                enter = fadeIn(tween(400)) + expandVertically(tween(400)),
-                exit = fadeOut(tween(400)) + shrinkVertically(tween(400))
-            ) {
-                Column {
-                    Spacer(modifier = Modifier.height(16.dp))
+            Column {
+                Spacer(modifier = Modifier.height(16.dp))
 
-                    ExecutiveSummaryCard(
-                        overallProgress = state.overallProgress,
-                        safeSpendAmount = state.safeSpendAmount,
-                        showPerformance = state.showPerformanceSection,
-                        showFinance = state.showFinanceSection,
-                        onPerformanceClick = onNavigateToPerformanceHistory
-                    )
+                ExecutiveSummaryCard(
+                    overallProgress = state.overallProgress,
+                    safeSpendAmount = state.safeSpendAmount,
+                    showPerformance = state.showPerformanceSection,
+                    showFinance = state.showFinanceSection,
+                    onPerformanceClick = onNavigateToPerformanceHistory
+                )
 
-                    PulseActivitySection(recentActions = state.recentActions)
+                PulseActivitySection(recentActions = state.recentActions)
 
-                    GrowthDisciplineSection(
-                        showHabit = state.showHabitSection,
-                        showWorkout = state.showWorkoutSection,
-                        habitProgress = state.habitProgress,
-                        workoutProgress = state.workoutProgress,
-                        habitColor = state.habitColor,
-                        workoutColor = state.workoutColor,
-                        habitIcon = state.habitIcon,
-                        workoutIcon = state.workoutIcon,
-                        auraAlpha = auraAlpha,
-                        onHabitClick = onNavigateToHabits,
-                        onWorkoutClick = onNavigateToWorkout,
-                        onHabitColorClick = { showColorPicker = "HABIT" },
-                        onWorkoutColorClick = { showColorPicker = "WORKOUT" }
-                    )
+                GrowthDisciplineSection(
+                    showHabit = state.showHabitSection,
+                    showWorkout = state.showWorkoutSection,
+                    habitProgress = state.habitProgress,
+                    workoutProgress = state.workoutProgress,
+                    habitColor = state.habitColor,
+                    workoutColor = state.workoutColor,
+                    habitIcon = state.habitIcon,
+                    workoutIcon = state.workoutIcon,
+                    auraAlpha = auraAlpha,
+                    onHabitClick = onNavigateToHabits,
+                    onWorkoutClick = onNavigateToWorkout,
+                    onHabitColorClick = { showColorPicker = "HABIT" },
+                    onWorkoutColorClick = { showColorPicker = "WORKOUT" }
+                )
 
-                    if (state.currentMood != null && (state.showHabitSection || state.showWorkoutSection)) {
-                        Spacer(modifier = Modifier.height(12.dp))
-                        AdviceBanner(text = state.growthAdvice, emoji = "✨")
-                    }
-
-                    ManagementNotesSection(
-                        showTask = state.showTaskSection,
-                        showNote = state.showNoteSection,
-                        showProject = state.showProjectSection,
-                        showFinance = state.showFinanceSection,
-                        safeSpendAmount = state.safeSpendAmount,
-                        taskColor = state.taskColor,
-                        noteColor = state.noteColor,
-                        projectColor = state.projectColor,
-                        financeColor = state.financeColor,
-                        taskIcon = state.taskIcon,
-                        noteIcon = state.noteIcon,
-                        projectIcon = state.projectIcon,
-                        financeIcon = state.financeIcon,
-                        auraAlpha = auraAlpha,
-                        onTaskClick = onNavigateToTodos,
-                        onNoteClick = onNavigateToNotes,
-                        onProjectClick = onNavigateToProjects,
-                        onFinanceClick = onNavigateToFinance,
-                        onTaskColorClick = { showColorPicker = "TASK" },
-                        onNoteColorClick = { showColorPicker = "NOTE" },
-                        onProjectColorClick = { showColorPicker = "PROJECT" },
-                        onFinanceColorClick = { showColorPicker = "FINANCE" }
-                    )
-
-                    if (state.currentMood != null && (state.showTaskSection || state.showNoteSection || state.showProjectSection || state.showFinanceSection)) {
-                        Spacer(modifier = Modifier.height(12.dp))
-                        AdviceBanner(text = state.managementAdvice, icon = Icons.Default.Star, borderColor = Color(0xFF2EC4B6), backgroundColor = Color(0xFF2EC4B6).copy(alpha = 0.1f))
-                    }
+                if (state.currentMood != null && (state.showHabitSection || state.showWorkoutSection)) {
+                    Spacer(modifier = Modifier.height(12.dp))
+                    AdviceBanner(text = state.growthAdvice, emoji = "✨")
                 }
-            }
 
-            // Optional: Maintain a minimum height to prevent the footer from jumping to the top
-            if (isVoiceActive) {
-                Box(modifier = Modifier.weight(1f))
+                ManagementNotesSection(
+                    showTask = state.showTaskSection,
+                    showNote = state.showNoteSection,
+                    showProject = state.showProjectSection,
+                    showFinance = state.showFinanceSection,
+                    safeSpendAmount = state.safeSpendAmount,
+                    taskColor = state.taskColor,
+                    noteColor = state.noteColor,
+                    projectColor = state.projectColor,
+                    financeColor = state.financeColor,
+                    taskIcon = state.taskIcon,
+                    noteIcon = state.noteIcon,
+                    projectIcon = state.projectIcon,
+                    financeIcon = state.financeIcon,
+                    auraAlpha = auraAlpha,
+                    onTaskClick = onNavigateToTodos,
+                    onNoteClick = onNavigateToNotes,
+                    onProjectClick = onNavigateToProjects,
+                    onFinanceClick = onNavigateToFinance,
+                    onTaskColorClick = { showColorPicker = "TASK" },
+                    onNoteColorClick = { showColorPicker = "NOTE" },
+                    onProjectColorClick = { showColorPicker = "PROJECT" },
+                    onFinanceColorClick = { showColorPicker = "FINANCE" }
+                )
+
+                if (state.currentMood != null && (state.showTaskSection || state.showNoteSection || state.showProjectSection || state.showFinanceSection)) {
+                    Spacer(modifier = Modifier.height(12.dp))
+                    AdviceBanner(text = state.managementAdvice, icon = Icons.Default.Star, borderColor = Color(0xFF2EC4B6), backgroundColor = Color(0xFF2EC4B6).copy(alpha = 0.1f))
+                }
             }
 
             Spacer(modifier = Modifier.height(32.dp))
@@ -231,24 +210,12 @@ fun HomeScreen(
             HomeFooter(
                 selectedTab = state.selectedTab,
                 isAiEnabled = state.isAiAssistantEnabled,
-                isAiVoiceEnabled = state.isAiVoiceChatEnabled,
-                showVoiceAssistant = showVoiceAssistant,
                 onTabSelected = onTabSelected,
                 onNavigateToAssistant = onNavigateToAssistant,
                 onNavigateToSettings = onNavigateToSettings,
-                onVoiceSessionStarted = onVoiceSessionStarted,
-                onVoiceAssistantToggle = { showVoiceAssistant = it }
+                onVoiceAssistantRequested = onVoiceAssistantRequested
             )
         }
-
-        VoiceAssistantOverlay(
-            isVisible = showVoiceAssistant,
-            onDismiss = { showVoiceAssistant = false },
-            isListening = isVoiceListening,
-            isThinking = isVoiceThinking,
-            messages = voiceMessages,
-            onMicClick = onVoiceMicClick
-        )
 
         if (showColorPicker != null) {
             ColorPickerDialog(

@@ -26,6 +26,8 @@ class TaskAdapter(
 
     private val adapterScope = CoroutineScope(Dispatchers.Main + SupervisorJob())
     private var updateJob: Job? = null
+    
+    private val sdfDisplayTime = java.text.SimpleDateFormat("MMM dd, HH:mm", java.util.Locale.getDefault())
 
     companion object {
         private const val TYPE_HEADER = 1
@@ -81,27 +83,11 @@ class TaskAdapter(
             holder.taskName.text = UIUtils.formatTitleCase(task.name)
             holder.taskCompleted.isChecked = task.isCompleted
             
-            // Selection for delete mode
             holder.selectionCheckbox.visibility = if (isDeleteMode) View.VISIBLE else View.GONE
             holder.selectionCheckbox.isChecked = task.isSelected
             
-            // Priority Indicator & Color
-            val priorityColor = when(task.priority) {
-                1 -> ContextCompat.getColor(context, R.color.card_orange)
-                2 -> Color.parseColor("#FF5252")
-                else -> ContextCompat.getColor(context, R.color.primary_blue)
-            }
-            holder.priorityIndicator.setBackgroundColor(priorityColor)
+            holder.bindTheme(task)
             
-            // Dynamic Card Styling - Priority Based
-            holder.taskCard.setCardBackgroundColor(UIUtils.adjustAlpha(priorityColor, 0.1f))
-            holder.taskCard.strokeColor = priorityColor
-            holder.taskCard.strokeWidth = (1.5 * context.resources.displayMetrics.density).toInt()
-            
-            val checkTint = if (task.isCompleted) Color.GRAY else priorityColor
-            holder.taskCompleted.backgroundTintList = android.content.res.ColorStateList.valueOf(checkTint)
-            
-            // Metadata
             holder.tvCategory.text = task.category
             
             val subtasksList = task.subtasks
@@ -116,8 +102,7 @@ class TaskAdapter(
             holder.ivReminder.visibility = if (task.reminderTime != null) View.VISIBLE else View.GONE
             
             val displayTime = task.reminderTime ?: task.timestamp
-            val sdf = java.text.SimpleDateFormat("MMM dd, HH:mm", java.util.Locale.getDefault())
-            holder.tvReminderTime.text = sdf.format(java.util.Date(displayTime))
+            holder.tvReminderTime.text = sdfDisplayTime.format(java.util.Date(displayTime))
             holder.tvReminderTime.visibility = View.VISIBLE
             holder.tvReminderTime.setTextColor(Color.parseColor("#B3FFFFFF"))
 
@@ -412,6 +397,23 @@ class TaskAdapter(
         val ivReminder: ImageView = itemView.findViewById(R.id.iv_reminder_icon)
         val tvReminderTime: TextView = itemView.findViewById(R.id.tv_reminder_time)
         val subtaskContainer: LinearLayout = itemView.findViewById(R.id.subtask_list_container)
+
+        fun bindTheme(task: Task) {
+            val context = itemView.context
+            val priorityColor = when(task.priority) {
+                1 -> ContextCompat.getColor(context, R.color.card_orange)
+                2 -> Color.parseColor("#FF5252")
+                else -> ContextCompat.getColor(context, R.color.primary_blue)
+            }
+            priorityIndicator.setBackgroundColor(priorityColor)
+            
+            taskCard.setCardBackgroundColor(UIUtils.adjustAlpha(priorityColor, 0.1f))
+            taskCard.strokeColor = priorityColor
+            taskCard.strokeWidth = (1.5 * context.resources.displayMetrics.density).toInt()
+            
+            val checkTint = if (task.isCompleted) Color.GRAY else priorityColor
+            taskCompleted.backgroundTintList = android.content.res.ColorStateList.valueOf(checkTint)
+        }
     }
 
     class HeaderViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {

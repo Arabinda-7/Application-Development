@@ -26,13 +26,10 @@ import com.example.allinone.ui.home.components.FooterItem
 fun HomeFooter(
     selectedTab: Int,
     isAiEnabled: Boolean,
-    isAiVoiceEnabled: Boolean,
-    showVoiceAssistant: Boolean,
     onTabSelected: (Int) -> Unit,
     onNavigateToAssistant: () -> Unit,
     onNavigateToSettings: () -> Unit,
-    onVoiceSessionStarted: () -> Unit,
-    onVoiceAssistantToggle: (Boolean) -> Unit
+    onVoiceAssistantRequested: () -> Unit
 ) {
     val style = LocalAppStyle.current
     val context = LocalContext.current
@@ -96,15 +93,7 @@ fun HomeFooter(
                             .background(style.accentColor)
                             .combinedClickable(
                                 onClick = { onNavigateToAssistant(); onTabSelected(1) },
-                                onLongClick = { 
-                                    if (isAiVoiceEnabled) {
-                                        if (!showVoiceAssistant) onVoiceSessionStarted()
-                                        onVoiceAssistantToggle(true)
-                                        onTabSelected(1)
-                                    } else {
-                                        Toast.makeText(context, "AI Voice Chat is disabled in settings", Toast.LENGTH_SHORT).show()
-                                    }
-                                }
+                                onLongClick = { onVoiceAssistantRequested() }
                             ),
                         contentAlignment = Alignment.Center
                     ) {
@@ -118,7 +107,7 @@ fun HomeFooter(
                 }
                 Text(
                     text = "AI",
-                    color = if (selectedTab == 1 || showVoiceAssistant) style.accentColor else Color.White.copy(alpha = 0.4f),
+                    color = if (selectedTab == 1) style.accentColor else Color.White.copy(alpha = 0.4f),
                     fontSize = 11.sp,
                     fontWeight = FontWeight.Bold
                 )

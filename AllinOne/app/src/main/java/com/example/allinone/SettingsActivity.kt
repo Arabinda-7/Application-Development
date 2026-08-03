@@ -23,6 +23,7 @@ import com.example.allinone.security.SecurityManager
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.launch
 import java.util.*
+import javax.inject.Inject
 
 @AndroidEntryPoint
 class SettingsActivity : BaseActivity() {
@@ -34,7 +35,7 @@ class SettingsActivity : BaseActivity() {
     private lateinit var appearanceHandler: SettingsAppearanceHandler
     private lateinit var helpHandler: SettingsHelpHandler
     private lateinit var backupHandler: SettingsBackupHandler
-    private var voiceHandler: VoiceAssistantHandler? = null
+    @Inject lateinit var voiceManager: VoiceInteractionManager
 
     private val aiIntroLauncher = registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
         if (result.resultCode == RESULT_OK) {
@@ -76,8 +77,6 @@ class SettingsActivity : BaseActivity() {
         setupLogic()
         observeViewModel()
         
-        voiceHandler = VoiceAssistantHandler(this, {}, {}, {})
-
         showHub()
     }
 
@@ -313,7 +312,7 @@ class SettingsActivity : BaseActivity() {
     }
 
     override fun onDestroy() {
-        voiceHandler?.shutdown()
+        // voiceManager.destroy() // It's a singleton, don't destroy it here if shared
         super.onDestroy()
     }
 }

@@ -3,6 +3,7 @@ package com.example.allinone
 import android.app.Dialog
 import android.content.Context
 import android.widget.TextView
+import android.widget.Toast
 import androidx.activity.result.ActivityResultLauncher
 import androidx.lifecycle.LifecycleCoroutineScope
 import com.example.allinone.core.utils.UIUtils
@@ -52,13 +53,31 @@ class SettingsBackupHandler(
     private fun performImport(content: String, password: CharArray?, onImportSuccess: () -> Unit) {
         scope.launch {
             if (DataManager.importData(context, content, password)) {
-                android.widget.Toast.makeText(context, "Data Restored Successfully", android.widget.Toast.LENGTH_LONG).show()
-                onImportSuccess()
+                showRestartDialog()
             } else {
                 val msg = if (password != null) "Incorrect password or corrupted file" else "Import Failed: Incompatible file"
                 android.widget.Toast.makeText(context, msg, android.widget.Toast.LENGTH_LONG).show()
             }
         }
+    }
+
+    private fun showRestartDialog() {
+        showConfirmationDialog(
+            "IMPORT SUCCESSFUL",
+            "Data has been restored. The app needs to restart to apply all changes correctly. Restart now?",
+            "RESTART APP"
+        ) {
+            restartApp()
+        }
+    }
+
+    private fun restartApp() {
+        val intent = context.packageManager.getLaunchIntentForPackage(context.packageName)
+        intent?.addFlags(android.content.Intent.FLAG_ACTIVITY_NEW_TASK or android.content.Intent.FLAG_ACTIVITY_CLEAR_TASK)
+        context.startActivity(intent)
+        // Kill process to ensure fresh Hilt/Room state
+        android.os.Process.killProcess(android.os.Process.myPid())
+        System.exit(0)
     }
 
     private fun showConfirmationDialog(title: String, message: String, pos: String, onConfirm: () -> Unit) {

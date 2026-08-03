@@ -80,11 +80,23 @@ object UIUtils {
         val systemDensity = android.content.res.Resources.getSystem().displayMetrics.density
         if (state.isSystemAppearanceEnabled) return systemDensity
 
-        val gScale = when (state.globalDisplaySize) { "XS" -> 0.85f; "L" -> 1.15f; else -> 1.0f }
-        val hScale = when (state.homeDisplaySize) { "XS" -> 0.85f; "L" -> 1.15f; else -> 1.0f }
-        val fScale = when (state.homeFocusSize) { "S" -> 0.85f; "L" -> 1.25f; else -> 1.0f }
+        val gScale = when (state.globalDisplaySize) { "XS" -> 0.85f; "S" -> 0.95f; "L" -> 1.1f; "XL" -> 1.25f; else -> 1.0f }
+        val hScale = when (state.homeDisplaySize) { "XS" -> 0.85f; "S" -> 0.95f; "L" -> 1.1f; "XL" -> 1.25f; else -> 1.0f }
+        val fScale = when (state.homeFocusSize) { "XS" -> 0.75f; "S" -> 0.85f; "L" -> 1.15f; "XL" -> 1.35f; else -> 1.0f }
 
         return systemDensity * gScale * hScale * fScale
+    }
+
+    fun getFontScale(state: DashboardState): Float {
+        if (state.isSystemAppearanceEnabled) return android.content.res.Resources.getSystem().configuration.fontScale
+        
+        return when (state.fontSize) {
+            "XS" -> 0.85f
+            "S" -> 0.92f
+            "L" -> 1.12f
+            "XL" -> 1.25f
+            else -> 1.0f
+        }
     }
 
     fun getAccentColor(context: Context): Int {

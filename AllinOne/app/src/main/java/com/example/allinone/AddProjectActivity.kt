@@ -11,6 +11,8 @@ import android.view.ViewGroup
 import android.widget.*
 import androidx.core.content.ContextCompat
 import androidx.lifecycle.lifecycleScope
+import com.example.allinone.core.utils.ProjectUiHelper
+import com.example.allinone.core.utils.ProjectUiHelper.dpToPx
 import com.example.allinone.data.model.JournalEntry
 import com.example.allinone.data.model.Note
 import com.example.allinone.data.model.ProjectFeature
@@ -179,9 +181,9 @@ class AddProjectActivity : BaseActivity() {
         DataManager.projectTemplates.forEach { (name, steps) ->
             val templateBtn = TextView(this).apply {
                 text = name; setTextColor(Color.WHITE); textSize = 12f
-                setPadding(24.dpToPx(), 12.dpToPx(), 24.dpToPx(), 12.dpToPx())
+                setPadding(24.dpToPx(this@AddProjectActivity), 12.dpToPx(this@AddProjectActivity), 24.dpToPx(this@AddProjectActivity), 12.dpToPx(this@AddProjectActivity))
                 background = ContextCompat.getDrawable(this@AddProjectActivity, R.drawable.priority_chip_bg)
-                layoutParams = LinearLayout.LayoutParams(ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT).apply { marginEnd = 12.dpToPx() }
+                layoutParams = LinearLayout.LayoutParams(ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT).apply { marginEnd = 12.dpToPx(this@AddProjectActivity) }
                 setOnClickListener {
                     DataManager.currentEditingSubFeatures.clear()
                     steps.forEachIndexed { i, step -> DataManager.currentEditingSubFeatures.add(ProjectFeature(step, position = i + 1)) }
@@ -222,42 +224,10 @@ class AddProjectActivity : BaseActivity() {
 
     private fun refreshSubFeatures() {
         containerSubfeatures.removeAllViews()
-        
-        // 1. Filter Bar
-        val filterBar = HorizontalScrollView(this).apply {
-            scrollBarSize = 0
-            isHorizontalScrollBarEnabled = false
-            layoutParams = LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT).apply {
-                setMargins(0, 0, 0, 8.dpToPx())
-            }
-        }
-        val filterContainer = LinearLayout(this).apply { orientation = LinearLayout.HORIZONTAL }
-        val categories = listOf("ALL", "TASKS", "FEATURES", "BUGS", "RESOURCES", "OTHER")
-        
-        categories.forEach { cat ->
-            val chip = TextView(this).apply {
-                text = cat
-                textSize = 10f
-                setTypeface(null, android.graphics.Typeface.BOLD)
-                setPadding(12.dpToPx(), 6.dpToPx(), 12.dpToPx(), 6.dpToPx())
-                val isSelected = currentSubfeatureFilter == cat
-                setTextColor(if (isSelected) Color.WHITE else Color.GRAY)
-                background = ContextCompat.getDrawable(this@AddProjectActivity, R.drawable.priority_chip_bg)
-                backgroundTintList = ColorStateList.valueOf(if (isSelected) Color.parseColor("#1A73E8") else Color.parseColor("#11FFFFFF"))
-                
-                layoutParams = LinearLayout.LayoutParams(ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT).apply {
-                    marginEnd = 8.dpToPx()
-                }
-                
-                setOnClickListener {
-                    currentSubfeatureFilter = cat
-                    refreshSubFeatures()
-                }
-            }
-            filterContainer.addView(chip)
-        }
-        filterBar.addView(filterContainer)
-        containerSubfeatures.addView(filterBar)
+        containerSubfeatures.addView(ProjectUiHelper.createSubfeatureFilterBar(this, currentSubfeatureFilter) { cat ->
+            currentSubfeatureFilter = cat
+            refreshSubFeatures()
+        })
 
         if (!isSubfeaturesExpanded) return
 
@@ -273,9 +243,8 @@ class AddProjectActivity : BaseActivity() {
         val activeSubs = filteredSubs.filter { !it.isCompleted }
         val completedSubs = filteredSubs.filter { it.isCompleted }
 
-        // 2. Active Section
         if (activeSubs.isNotEmpty()) {
-            addSectionHeader("Active (${activeSubs.size})", isActiveSubfeaturesExpanded) {
+            ProjectUiHelper.addSectionHeader(this, containerSubfeatures, "Active (${activeSubs.size})", isActiveSubfeaturesExpanded) {
                 isActiveSubfeaturesExpanded = !isActiveSubfeaturesExpanded
                 refreshSubFeatures()
             }
@@ -284,9 +253,8 @@ class AddProjectActivity : BaseActivity() {
             }
         }
 
-        // 3. Completed Section
         if (completedSubs.isNotEmpty()) {
-            addSectionHeader("Completed (${completedSubs.size})", isCompletedSubfeaturesExpanded) {
+            ProjectUiHelper.addSectionHeader(this, containerSubfeatures, "Completed (${completedSubs.size})", isCompletedSubfeaturesExpanded) {
                 isCompletedSubfeaturesExpanded = !isCompletedSubfeaturesExpanded
                 refreshSubFeatures()
             }
@@ -296,157 +264,23 @@ class AddProjectActivity : BaseActivity() {
         }
     }
 
-    private fun addSectionHeader(title: String, isExpanded: Boolean, onClick: () -> Unit) {
-        val header = LinearLayout(this).apply {
-            orientation = LinearLayout.HORIZONTAL
-            gravity = android.view.Gravity.CENTER_VERTICAL
-            setPadding(4.dpToPx(), 8.dpToPx(), 4.dpToPx(), 4.dpToPx())
-            setOnClickListener { onClick() }
-        }
-        val tv = TextView(this).apply {
-            text = title.uppercase()
-            setTextColor(Color.GRAY)
-            textSize = 10f
-            setTypeface(null, android.graphics.Typeface.BOLD)
-            layoutParams = LinearLayout.LayoutParams(0, ViewGroup.LayoutParams.WRAP_CONTENT, 1f)
-        }
-        val iv = ImageView(this).apply {
-            setImageResource(if (isExpanded) android.R.drawable.arrow_up_float else android.R.drawable.arrow_down_float)
-            imageTintList = ColorStateList.valueOf(Color.GRAY)
-            layoutParams = LinearLayout.LayoutParams(16.dpToPx(), 16.dpToPx())
-        }
-        header.addView(tv)
-        header.addView(iv)
-        containerSubfeatures.addView(header)
-    }
 
     private fun addSubfeatureRow(sub: ProjectFeature) {
-        val layout = LinearLayout(this).apply {
-            orientation = LinearLayout.VERTICAL
-            setPadding(0, 4.dpToPx(), 0, 4.dpToPx())
-            isClickable = true
-            isFocusable = true
-            background = ContextCompat.getDrawable(this@AddProjectActivity, R.drawable.glass_card_bg)
-            backgroundTintList = ColorStateList.valueOf(Color.TRANSPARENT)
-        }
-
-        val header = LinearLayout(this).apply {
-            orientation = LinearLayout.HORIZONTAL
-            gravity = android.view.Gravity.CENTER_VERTICAL
-        }
-
-        val tv = TextView(this).apply {
-            text = "${sub.position}. ${sub.name}"
-            setTextColor(Color.WHITE)
-            textSize = 14f
-            layoutParams = LinearLayout.LayoutParams(0, ViewGroup.LayoutParams.WRAP_CONTENT, 1f)
-            if (sub.isCompleted) {
-                paintFlags = paintFlags or Paint.STRIKE_THRU_TEXT_FLAG
-                alpha = 0.6f
-            }
-        }
-        
-        val containerMeta = LinearLayout(this).apply {
-            orientation = LinearLayout.HORIZONTAL
-            gravity = android.view.Gravity.CENTER_VERTICAL
-            layoutParams = LinearLayout.LayoutParams(ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT)
-        }
-
-        if (sub.tag.isNotEmpty()) {
-            val tvTag = TextView(this).apply {
-                text = sub.tag.uppercase()
-                setTextColor(Color.parseColor("#1A73E8"))
-                textSize = 10f
-                setTypeface(null, android.graphics.Typeface.BOLD)
-                setPadding(4.dpToPx(), 2.dpToPx(), 4.dpToPx(), 2.dpToPx())
-                background = ContextCompat.getDrawable(this@AddProjectActivity, R.drawable.priority_chip_bg)
-                backgroundTintList = ColorStateList.valueOf(Color.parseColor("#1A73E8")).withAlpha(30)
-                val params = LinearLayout.LayoutParams(ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT)
-                params.marginEnd = 4.dpToPx()
-                layoutParams = params
-            }
-            containerMeta.addView(tvTag)
-        }
-
-        val priorityText = when(sub.priority) { 2 -> "HIGH"; 1 -> "MED"; else -> "LOW" }
-        val priorityColor = when(sub.priority) { 2 -> Color.RED; 1 -> Color.parseColor("#FFB800"); else -> Color.parseColor("#2EC4B6") }
-        val tvPriority = TextView(this).apply {
-            text = priorityText
-            setTextColor(priorityColor)
-            textSize = 10f
-            setTypeface(null, android.graphics.Typeface.BOLD)
-            setPadding(4.dpToPx(), 2.dpToPx(), 4.dpToPx(), 2.dpToPx())
-            background = ContextCompat.getDrawable(this@AddProjectActivity, R.drawable.priority_chip_bg)
-            backgroundTintList = ColorStateList.valueOf(priorityColor).withAlpha(30)
-            val params = LinearLayout.LayoutParams(ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT)
-            params.marginEnd = 4.dpToPx()
-            layoutParams = params
-        }
-        containerMeta.addView(tvPriority)
-
-        val tvDate = TextView(this).apply {
-            sub.dueDate?.let {
-                text = SimpleDateFormat("MMM dd", Locale.getDefault()).format(Date(it))
-                setTextColor(Color.RED)
-                textSize = 12f
-                setPadding(4.dpToPx(), 0, 8.dpToPx(), 0)
-            } ?: run {
-                visibility = View.GONE
-            }
-        }
-
-        val btnEdit = ImageView(this).apply {
-            setImageResource(R.drawable.icons8_edit_pencil_100)
-            val iconSize = 20.dpToPx()
-            layoutParams = LinearLayout.LayoutParams(iconSize, iconSize)
-            setPadding(2.dpToPx(), 2.dpToPx(), 2.dpToPx(), 2.dpToPx())
-            imageTintList = ColorStateList.valueOf(Color.GRAY)
-            setOnClickListener {
+        val row = ProjectUiHelper.createSubFeatureItem(
+            this,
+            sub,
+            onEdit = { s ->
                 startActivity(Intent(this@AddProjectActivity, AddSubFeatureActivity::class.java).apply {
-                    putExtra("SUB_FEATURE_ID", sub.id)
+                    putExtra("SUB_FEATURE_ID", s.id)
                 })
-            }
-        }
-
-        val tvDetails = TextView(this).apply {
-            text = sub.details
-            setTextColor(Color.GRAY)
-            textSize = 12f
-            setPadding(24.dpToPx(), 4.dpToPx(), 8.dpToPx(), 8.dpToPx())
-            visibility = if (sub.isExpanded && sub.details.isNotEmpty()) View.VISIBLE else View.GONE
-        }
-
-        header.addView(tv)
-        header.addView(containerMeta)
-        header.addView(tvDate)
-        header.addView(btnEdit)
-        
-        layout.addView(header)
-        layout.addView(tvDetails)
-
-        layout.setOnClickListener {
-            if (sub.details.isNotEmpty()) {
-                if (sub.isExpanded) {
-                    sub.isExpanded = false
-                    expandedFeatureIds.remove(sub.id)
-                } else {
-                    if (expandedFeatureIds.size >= 2) {
-                        val oldestId = expandedFeatureIds.pollFirst()
-                        DataManager.currentEditingSubFeatures.find { it.id == oldestId }?.isExpanded = false
-                    }
-                    sub.isExpanded = true
-                    expandedFeatureIds.addLast(sub.id)
-                }
+            },
+            onLongClick = { view, s -> showSubFeatureMenu(view, s) },
+            onToggleExpansion = { s ->
+                ProjectUiHelper.handleSubfeatureExpansion(s, expandedFeatureIds, DataManager.currentEditingSubFeatures)
                 refreshSubFeatures()
             }
-        }
-        
-        layout.setOnLongClickListener {
-            showSubFeatureMenu(it, sub)
-            true
-        }
-        
-        containerSubfeatures.addView(layout)
+        )
+        containerSubfeatures.addView(row)
     }
 
     private fun showSubFeatureMenu(anchor: View, sub: ProjectFeature) {
@@ -480,67 +314,9 @@ class AddProjectActivity : BaseActivity() {
     }
 
     private fun refreshGoalsUI() {
-        goalsList.removeAllViews()
-        tempGoals.forEach { goal ->
-            val layout = LinearLayout(this).apply {
-                orientation = LinearLayout.HORIZONTAL
-                gravity = android.view.Gravity.CENTER_VERTICAL
-            }
-            val tv = TextView(this).apply {
-                text = goal.text
-                setTextColor(Color.WHITE)
-                layoutParams = LinearLayout.LayoutParams(0, ViewGroup.LayoutParams.WRAP_CONTENT, 1f)
-            }
-            val btnEdit = ImageView(this).apply {
-                setImageResource(R.drawable.icons8_edit_pencil_100)
-                val iconSize = 20.dpToPx()
-                layoutParams = LinearLayout.LayoutParams(iconSize, iconSize)
-                setPadding(2.dpToPx(), 2.dpToPx(), 2.dpToPx(), 2.dpToPx())
-                imageTintList = ColorStateList.valueOf(Color.GRAY)
-                setOnClickListener { showEditGoalDialog(goal) }
-            }
-            val btnDel = ImageView(this).apply {
-                setImageResource(android.R.drawable.ic_menu_close_clear_cancel)
-                val iconSize = 20.dpToPx()
-                layoutParams = LinearLayout.LayoutParams(iconSize, iconSize).apply { marginStart = 8.dpToPx() }
-                imageTintList = ColorStateList.valueOf(Color.parseColor("#80FFFFFF"))
-                setOnClickListener {
-                    android.app.AlertDialog.Builder(this@AddProjectActivity)
-                        .setTitle("Delete Goal")
-                        .setMessage("Are you sure you want to remove this goal?")
-                        .setPositiveButton("DELETE") { _, _ ->
-                            tempGoals.remove(goal)
-                            refreshGoalsUI()
-                        }
-                        .setNegativeButton("CANCEL", null)
-                        .show()
-                }
-            }
-            layout.addView(tv)
-            layout.addView(btnEdit)
-            layout.addView(btnDel)
-            goalsList.addView(layout)
-        }
+        ProjectUiHelper.refreshGoalsUI(this, goalsList, tempGoals) { refreshGoalsUI() }
     }
 
-    private fun showEditGoalDialog(goal: JournalEntry) {
-        val et = EditText(this).apply {
-            setText(goal.text)
-            setPadding(24.dpToPx(), 16.dpToPx(), 24.dpToPx(), 16.dpToPx())
-        }
-        android.app.AlertDialog.Builder(this)
-            .setTitle("Edit Goal")
-            .setView(et)
-            .setPositiveButton("UPDATE") { _, _ ->
-                val newText = et.text.toString().trim()
-                if (newText.isNotEmpty()) {
-                    goal.text = newText
-                    refreshGoalsUI()
-                }
-            }
-            .setNegativeButton("CANCEL", null)
-            .show()
-    }
 
     private fun saveProject() {
         val title = titleInput.text.toString().trim()
@@ -563,5 +339,4 @@ class AddProjectActivity : BaseActivity() {
         }
     }
 
-    private fun Int.dpToPx(): Int = (this * resources.displayMetrics.density).toInt()
 }

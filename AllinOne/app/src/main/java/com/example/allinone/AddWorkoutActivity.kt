@@ -16,6 +16,8 @@ import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
 import com.google.android.material.chip.ChipGroup
 import androidx.activity.viewModels
+import com.example.allinone.core.utils.WorkoutUiHelper
+import com.example.allinone.core.utils.WorkoutUiHelper.dpToPx
 import com.example.allinone.data.model.Workout
 import com.example.allinone.domain.repository.WorkoutSettings
 import com.example.allinone.core.utils.UIUtils
@@ -465,9 +467,9 @@ class AddWorkoutActivity : BaseActivity() {
     private fun setupGoalRollers() {
         val onGoalClick = View.OnClickListener {
             when (selectedMode) {
-                "Sets" -> showDividedRollerDialog(targetSetsInput, repsPerSetInput)
-                "Timer" -> showTimerRollerDialog(targetTimerInput)
-                else -> showSingleRollerDialog("REPS", targetInput, 0, 500)
+                "Sets" -> WorkoutUiHelper.showDividedRollerDialog(this, targetSetsInput, repsPerSetInput) { validateInputs() }
+                "Timer" -> WorkoutUiHelper.showTimerRollerDialog(this, targetTimerInput) { validateInputs() }
+                else -> WorkoutUiHelper.showSingleRollerDialog(this, "REPS", targetInput, 0, 500) { validateInputs() }
             }
         }
         
@@ -481,75 +483,4 @@ class AddWorkoutActivity : BaseActivity() {
         tvLabelTimer.setOnClickListener(onGoalClick)
     }
 
-    private fun showTimerRollerDialog(targetEditText: EditText) {
-        val dialog = Dialog(this)
-        dialog.setContentView(R.layout.dialog_timer_roller)
-        dialog.window?.setBackgroundDrawableResource(android.R.color.transparent)
-        
-        val npMin = dialog.findViewById<NumberPicker>(R.id.np_minutes)
-        val npSec = dialog.findViewById<NumberPicker>(R.id.np_seconds)
-        val btnConfirm = dialog.findViewById<View>(R.id.btn_confirm_picker)
-        
-        npMin.minValue = 0; npMin.maxValue = 60; npMin.wrapSelectorWheel = false
-        npSec.minValue = 0; npSec.maxValue = 59; npSec.wrapSelectorWheel = true
-        
-        val totalSeconds = targetEditText.text.toString().toIntOrNull() ?: 0
-        npMin.value = totalSeconds / 60
-        npSec.value = totalSeconds % 60
-        
-        btnConfirm.setOnClickListener {
-            val confirmedSeconds = (npMin.value * 60) + npSec.value
-            targetEditText.setText(confirmedSeconds.toString())
-            validateInputs()
-            dialog.dismiss()
-        }
-        showDialogSafe(dialog)
-    }
-
-    private fun showSingleRollerDialog(title: String, targetEditText: EditText, min: Int, max: Int) {
-        val dialog = Dialog(this)
-        dialog.setContentView(R.layout.dialog_number_picker)
-        dialog.window?.setBackgroundDrawableResource(android.R.color.transparent)
-        
-        val tvTitle = dialog.findViewById<TextView>(R.id.tv_picker_title)
-        val picker = dialog.findViewById<NumberPicker>(R.id.number_picker)
-        val btnConfirm = dialog.findViewById<View>(R.id.btn_confirm_picker)
-        
-        tvTitle.text = title
-        picker.minValue = min
-        picker.maxValue = max
-        picker.wrapSelectorWheel = false
-        picker.value = targetEditText.text.toString().toIntOrNull() ?: min
-        
-        btnConfirm.setOnClickListener {
-            targetEditText.setText(picker.value.toString())
-            validateInputs()
-            dialog.dismiss()
-        }
-        showDialogSafe(dialog)
-    }
-
-    private fun showDividedRollerDialog(setsEt: EditText, repsEt: EditText) {
-        val dialog = Dialog(this)
-        dialog.setContentView(R.layout.dialog_divided_roller)
-        dialog.window?.setBackgroundDrawableResource(android.R.color.transparent)
-        
-        val npSets = dialog.findViewById<NumberPicker>(R.id.np_sets)
-        val npReps = dialog.findViewById<NumberPicker>(R.id.np_reps)
-        val btnConfirm = dialog.findViewById<View>(R.id.btn_confirm_picker)
-        
-        npSets.minValue = 1; npSets.maxValue = 100; npSets.wrapSelectorWheel = false
-        npReps.minValue = 1; npReps.maxValue = 500; npReps.wrapSelectorWheel = false
-        
-        npSets.value = setsEt.text.toString().toIntOrNull() ?: 1
-        npReps.value = repsEt.text.toString().toIntOrNull() ?: 1
-        
-        btnConfirm.setOnClickListener {
-            setsEt.setText(npSets.value.toString())
-            repsEt.setText(npReps.value.toString())
-            validateInputs()
-            dialog.dismiss()
-        }
-        showDialogSafe(dialog)
-    }
 }

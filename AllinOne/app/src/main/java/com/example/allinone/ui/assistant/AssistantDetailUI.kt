@@ -51,7 +51,7 @@ fun AssistantScreen(
     val style = LocalAppStyle.current
 
     Scaffold(
-        containerColor = Color.Black,
+        containerColor = Color.Transparent,
         topBar = {
             TopAppBar(
                 title = {

@@ -6,6 +6,7 @@ import android.widget.ProgressBar
 import android.widget.TextView
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.ComposeView
+import com.example.allinone.ui.components.analytics.*
 import java.text.SimpleDateFormat
 import java.util.*
 

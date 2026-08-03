@@ -66,8 +66,10 @@ object DataManager {
     private val userDataManager = UserDataManager()
     private val workspaceDataManager = WorkspaceDataManager()
     private val backupDataManager = BackupDataManager()
+    private val assistantSettingsManager = com.example.allinone.data.AssistantSettingsManager()
 
-    private val syncScope = CoroutineScope(Dispatchers.Main + Job())
+    private val syncScope = CoroutineScope(Dispatchers.IO + Job())
+    private var saveJob: Job? = null
     private var isSyncing = false
 
     fun startSync(context: Context) {
@@ -119,7 +121,7 @@ object DataManager {
     }
 
     val dataChangeSignal = MutableSharedFlow<Unit>(extraBufferCapacity = 1)
-    val isDataLoaded = MutableStateFlow(true)
+    val isDataLoaded = MutableStateFlow(false)
 
     val tasks: MutableList<Task> get() = userDataManager.tasks
     val habits: MutableList<Habit> get() = userDataManager.habits
@@ -142,7 +144,7 @@ object DataManager {
     // User & Identity & App Lock
     var userName: String = "User"
     var userAvatarRes: Int = -1
-    var isAiAssistantEnabled: Boolean = true
+    var isAiAssistantEnabled: Boolean by assistantSettingsManager::isEnabled
     var isOnboardingCompleted: Boolean = false
     var isAppLockEnabled: Boolean = false
     var isBiometricLockEnabled: Boolean = false
@@ -197,9 +199,9 @@ object DataManager {
     var financeCustomCategories: MutableList<String> = Collections.synchronizedList(mutableListOf())
 
     // Voice & Assistant Preferences
-    var assistantVoiceName: String = ""
-    var assistantPitch: Float = 1.0f
-    var assistantSpeechRate: Float = 1.0f
+    var assistantVoiceName: String by assistantSettingsManager::voiceName
+    var assistantPitch: Float by assistantSettingsManager::pitch
+    var assistantSpeechRate: Float by assistantSettingsManager::speechRate
 
     // Section Visibility Preferences
     var showHabitSection: Boolean = true
@@ -216,7 +218,7 @@ object DataManager {
     var appBorderRadius: Int = 12
     var displaySize: String = "Normal"
     var fontSize: String = "Normal"
-    var isAssistantVoiceEnabled: Boolean = false
+    var isAssistantVoiceEnabled: Boolean by assistantSettingsManager::isVoiceEnabled
     var isScreenshotProtectionEnabled: Boolean = false
 
     // Color & Icon Theme Preferences
@@ -388,6 +390,7 @@ object DataManager {
             backupDataManager.loadData(context)
             startSync(context)
             getEntryPoint(context).assistantBrain().initialize(context)
+            isDataLoaded.value = true
         }
     }
 
@@ -396,8 +399,50 @@ object DataManager {
         backupDataManager.loadData(context)
     }
 
+    fun saveDataDebounced(context: Context) {
+        saveJob?.cancel()
+        saveJob = syncScope.launch {
+            kotlinx.coroutines.delay(1000) // 1 second debounce
+            saveData(context, immediate = true)
+        }
+    }
+
     fun saveData(context: Context, immediate: Boolean = false) {
         appContext = context.applicationContext
         backupDataManager.saveData(context)
+        
+        // Sync critical properties back to Repository
+        syncScope.launch {
+            val entryPoint = getEntryPoint(context)
+            val userRepo = entryPoint.userRepository()
+            
+            // Sync Profile
+            try {
+                val currentProfile = userRepo.getUserProfile().first()
+                userRepo.updateUserProfile(currentProfile.copy(
+                    name = userName,
+                    avatarRes = userAvatarRes
+                ))
+
+                // Sync Settings
+                val currentSettings = userRepo.getUserSettings().first()
+                userRepo.updateUserSettings(currentSettings.copy(
+                    isOnboardingCompleted = isOnboardingCompleted,
+                    isAiAssistantEnabled = isAiAssistantEnabled,
+                    appThemeMode = appThemeMode,
+                    appAccentColor = appAccentColor,
+                    displaySize = displaySize,
+                    fontSize = fontSize,
+                    showHabitSection = showHabitSection,
+                    showWorkoutSection = showWorkoutSection,
+                    showTaskSection = showTaskSection,
+                    showNoteSection = showNoteSection,
+                    showProjectSection = showProjectSection,
+                    showFinanceSection = showFinanceSection
+                ))
+            } catch (e: Exception) {
+                // Handle potential flow empty or other issues
+            }
+        }
     }
 }

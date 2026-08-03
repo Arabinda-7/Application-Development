@@ -14,8 +14,10 @@ import android.widget.NumberPicker
 import android.widget.PopupWindow
 import android.widget.TextView
 import androidx.core.content.ContextCompat
+import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.RecyclerView
 import com.google.android.material.card.MaterialCardView
+import kotlinx.coroutines.*
 import java.text.SimpleDateFormat
 import com.example.allinone.core.utils.UIUtils
 import com.example.allinone.data.model.Workout
@@ -32,6 +34,12 @@ class WorkoutAdapter(
     private val onDeleteWorkout: (Workout) -> Unit = {}
 ) : RecyclerView.Adapter<RecyclerView.ViewHolder>() {
 
+    private val adapterScope = CoroutineScope(Dispatchers.Main + SupervisorJob())
+    private var updateJob: Job? = null
+    
+    private val sdfYearMonthDay = SimpleDateFormat("yyyyMMdd", Locale.getDefault())
+    private val sdfDisplayTime = SimpleDateFormat("MMM dd, HH:mm", Locale.getDefault())
+
     companion object {
         private const val TYPE_HEADER = 1
     }
@@ -42,7 +50,7 @@ class WorkoutAdapter(
     private var currentFilter = "All"
     private var selectedDayIndex = 0
     private var selectedDateString = SimpleDateFormat("yyyyMMdd", Locale.getDefault()).format(Date())
-    private val todayDateString get() = SimpleDateFormat("yyyyMMdd", Locale.getDefault()).format(Date())
+    private val todayDateString get() = sdfYearMonthDay.format(Date())
     private var showCompleted = workoutSettings.showCompleted
 
     init {
@@ -129,30 +137,8 @@ class WorkoutAdapter(
                 }
             }
 
-            // Advanced Design Binding
-            val themeColor = if (workout.color != -1) workout.color else android.graphics.Color.parseColor("#1A73E8")
-            
-            // 1. Accent Bar Color
-            holder.itemView.findViewById<View>(R.id.accent_bar_workout).backgroundTintList = android.content.res.ColorStateList.valueOf(themeColor)
-            
-            // 2. Icon Container Tint
-            holder.itemView.findViewById<View>(R.id.icon_container_workout).backgroundTintList = android.content.res.ColorStateList.valueOf(themeColor).withAlpha(20)
+            holder.bindTheme(workout)
 
-            // 3. Card Styling (Glassmorphic)
-            holder.workoutCard.setCardBackgroundColor(android.graphics.Color.TRANSPARENT)
-            holder.workoutCard.strokeColor = themeColor
-            holder.workoutCard.strokeWidth = (1.5 * context.resources.displayMetrics.density).toInt()
-
-            // 4. Action Panel Dynamic Styling
-            holder.itemView.findViewById<com.google.android.material.card.MaterialCardView>(R.id.card_roller_container).strokeColor = themeColor
-            holder.btnFinishSelection.setCardBackgroundColor(android.graphics.Color.argb(30, android.graphics.Color.red(themeColor), android.graphics.Color.green(themeColor), android.graphics.Color.blue(themeColor)))
-            holder.btnFinishSelection.strokeColor = themeColor
-            holder.tvSelectedNumCircle.backgroundTintList = android.content.res.ColorStateList.valueOf(themeColor)
-            holder.btnFinishAll.setCardBackgroundColor(themeColor)
-            
-            UIUtils.safeSetImageResource(holder.workoutIcon, workout.iconResId, R.drawable.ic_workout_routine)
-
-            // Expansion Logic with Smooth Transition
             val shouldShowControls = workout.isExpanded && !isCompleted && selectedDateString == todayDateString
             holder.expandableControls.visibility = if (shouldShowControls) View.VISIBLE else View.GONE
             holder.expandChevron.rotation = if (workout.isExpanded) 180f else 0f
@@ -167,7 +153,6 @@ class WorkoutAdapter(
                 } else {
                     val wasExpanded = workout.isExpanded
                     if (!wasExpanded) {
-                        // Collapse others
                         displayItems.forEach { 
                             if (it is Workout && it.isExpanded) {
                                 it.isExpanded = false
@@ -176,7 +161,7 @@ class WorkoutAdapter(
                     }
                     TransitionManager.beginDelayedTransition(holder.itemView as ViewGroup)
                     workout.isExpanded = !wasExpanded
-                    notifyDataSetChanged() // Use notifyDataSetChanged to refresh all items to show collapses
+                    applyFilterAndSort()
                 }
             }
 
@@ -199,7 +184,6 @@ class WorkoutAdapter(
                 } else if (!isCompleted) {
                     val wasExpanded = workout.isExpanded
                     if (!wasExpanded) {
-                        // Collapse others
                         displayItems.forEach { 
                             if (it is Workout && it.isExpanded) {
                                 it.isExpanded = false
@@ -208,11 +192,10 @@ class WorkoutAdapter(
                     }
                     TransitionManager.beginDelayedTransition(holder.itemView as ViewGroup)
                     workout.isExpanded = !wasExpanded
-                    notifyDataSetChanged()
+                    applyFilterAndSort()
                 }
             }
 
-            // Context-aware UI based on tracking mode
             if (workout.trackingMode == "Timer") {
                 holder.layoutRepsControls.visibility = View.GONE
                 holder.btnStartTimer.visibility = if (shouldShowControls) View.VISIBLE else View.GONE
@@ -248,8 +231,6 @@ class WorkoutAdapter(
                     val addedValue = holder.numberPicker.value
                     if (addedValue > 0) {
                         workout.progress += addedValue
-                        
-                        // Track historical partial progress
                         val progressPercent = (workout.progress * 100) / workout.target.coerceAtLeast(1)
                         workout.dailyProgress[todayDateString] = progressPercent
 
@@ -276,11 +257,11 @@ class WorkoutAdapter(
                     TransitionManager.beginDelayedTransition(holder.itemView as ViewGroup)
                     workout.isExpanded = false
                     
-                if (!workout.completedDates.contains(todayDateString)) {
-                    workout.completedDates.add(todayDateString)
-                    onAddActivity("Finished Workout: ${workout.name}")
-                    onAddXP(25)
-                }
+                    if (!workout.completedDates.contains(todayDateString)) {
+                        workout.completedDates.add(todayDateString)
+                        onAddActivity("Finished Workout: ${workout.name}")
+                        onAddXP(25)
+                    }
                     
                     applyFilterAndSort()
                     onProgressChanged(true)
@@ -374,52 +355,66 @@ class WorkoutAdapter(
     }
 
     private fun applyFilterAndSort() {
-        displayItems.clear()
-
-        val filtered = allWorkouts.filter { workout ->
-            val matchesFilter = if (currentFilter == "All") {
-                true
-            } else {
-                if (workoutSettings.filterType == "TIME") {
-                    workout.frequency == currentFilter
-                } else {
-                    workout.muscleGroups.contains(currentFilter)
+        updateJob?.cancel()
+        updateJob = adapterScope.launch {
+            val oldSnapshot = displayItems.toList()
+            val newList = withContext(Dispatchers.Default) {
+                val list = mutableListOf<Any>()
+                
+                val filtered = allWorkouts.filter { workout ->
+                    val matchesFilter = if (currentFilter == "All") {
+                        true
+                    } else {
+                        if (workoutSettings.filterType == "TIME") {
+                            workout.frequency == currentFilter
+                        } else {
+                            workout.muscleGroups.contains(currentFilter)
+                        }
+                    }
+                    
+                    val matchesDay = if (workout.repeatType == "SPECIFIC_DAYS") {
+                        workout.repeatDays.contains(selectedDayIndex)
+                    } else {
+                        true 
+                    }
+                    
+                    val workoutCreationDate = sdfYearMonthDay.format(Date(workout.timestamp))
+                    val isAvailableOnDate = workoutCreationDate <= selectedDateString
+                    matchesFilter && matchesDay && isAvailableOnDate
                 }
+
+                val activeWorkouts = filtered.filter { !isWorkoutCompletedOnSelectedDate(it) }.sortedByDescending { it.timestamp }
+                val allCompleted = filtered.filter { isWorkoutCompletedOnSelectedDate(it) }.sortedByDescending { it.timestamp }
+                
+                val dayOffWorkouts = allCompleted.filter { it.isDayOff }
+                val strictlyCompleted = allCompleted.filter { !it.isDayOff }
+
+                list.addAll(activeWorkouts)
+
+                if (dayOffWorkouts.isNotEmpty()) {
+                    list.add("Day Off ${dayOffWorkouts.size}")
+                    if (isDayOffExpanded) {
+                        list.addAll(dayOffWorkouts)
+                    }
+                }
+
+                if (showCompleted && strictlyCompleted.isNotEmpty()) {
+                    list.add("Completed ${strictlyCompleted.size}")
+                    if (isCompletedExpanded) {
+                        list.addAll(strictlyCompleted)
+                    }
+                }
+                list
+            }
+
+            val diffResult = withContext(Dispatchers.Default) {
+                DiffUtil.calculateDiff(WorkoutDiffCallback(oldSnapshot, newList))
             }
             
-            val matchesDay = if (workout.repeatType == "SPECIFIC_DAYS") {
-                workout.repeatDays.contains(selectedDayIndex)
-            } else {
-                true 
-            }
-            val workoutCreationDate = SimpleDateFormat("yyyyMMdd", Locale.getDefault()).format(Date(workout.timestamp))
-            val isAvailableOnDate = workoutCreationDate <= selectedDateString
-            matchesFilter && matchesDay && isAvailableOnDate
+            displayItems.clear()
+            displayItems.addAll(newList)
+            diffResult.dispatchUpdatesTo(this@WorkoutAdapter)
         }
-
-        val activeWorkouts = filtered.filter { !isWorkoutCompletedOnSelectedDate(it) }.sortedByDescending { it.timestamp }
-        val allCompleted = filtered.filter { isWorkoutCompletedOnSelectedDate(it) }.sortedByDescending { it.timestamp }
-        
-        val dayOffWorkouts = allCompleted.filter { it.isDayOff }
-        val strictlyCompleted = allCompleted.filter { !it.isDayOff }
-
-        displayItems.addAll(activeWorkouts)
-
-        if (dayOffWorkouts.isNotEmpty()) {
-            displayItems.add("Day Off ${dayOffWorkouts.size}")
-            if (isDayOffExpanded) {
-                displayItems.addAll(dayOffWorkouts)
-            }
-        }
-
-        if (showCompleted && strictlyCompleted.isNotEmpty()) {
-            displayItems.add("Completed ${strictlyCompleted.size}")
-            if (isCompletedExpanded) {
-                displayItems.addAll(strictlyCompleted)
-            }
-        }
-
-        notifyDataSetChanged()
     }
 
     fun updateSettings(settings: WorkoutSettings) {
@@ -453,6 +448,12 @@ class WorkoutAdapter(
         }
     }
 
+    override fun onDetachedFromRecyclerView(recyclerView: RecyclerView) {
+        super.onDetachedFromRecyclerView(recyclerView)
+        updateJob?.cancel()
+        adapterScope.cancel()
+    }
+
     override fun getItemCount() = displayItems.size
 
     class WorkoutViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
@@ -471,10 +472,51 @@ class WorkoutAdapter(
         val tvFinishRepsLabel: TextView = itemView.findViewById(R.id.tv_finish_reps_label)
         val btnFinishAll: MaterialCardView = itemView.findViewById(R.id.btn_finish_all)
         val btnStartTimer: MaterialCardView = itemView.findViewById(R.id.btn_start_timer_workout)
+
+        fun bindTheme(workout: Workout) {
+            val context = itemView.context
+            val themeColor = if (workout.color != -1) workout.color else android.graphics.Color.parseColor("#1A73E8")
+            
+            itemView.findViewById<View>(R.id.accent_bar_workout).backgroundTintList = android.content.res.ColorStateList.valueOf(themeColor)
+            itemView.findViewById<View>(R.id.icon_container_workout).backgroundTintList = android.content.res.ColorStateList.valueOf(themeColor).withAlpha(20)
+
+            workoutCard.setCardBackgroundColor(android.graphics.Color.TRANSPARENT)
+            workoutCard.strokeColor = themeColor
+            workoutCard.strokeWidth = (1.5 * context.resources.displayMetrics.density).toInt()
+
+            itemView.findViewById<com.google.android.material.card.MaterialCardView>(R.id.card_roller_container).strokeColor = themeColor
+            btnFinishSelection.setCardBackgroundColor(android.graphics.Color.argb(30, android.graphics.Color.red(themeColor), android.graphics.Color.green(themeColor), android.graphics.Color.blue(themeColor)))
+            btnFinishSelection.strokeColor = themeColor
+            tvSelectedNumCircle.backgroundTintList = android.content.res.ColorStateList.valueOf(themeColor)
+            btnFinishAll.setCardBackgroundColor(themeColor)
+            
+            UIUtils.safeSetImageResource(workoutIcon, workout.iconResId, R.drawable.ic_workout_routine)
+        }
     }
 
     class HeaderViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
         val title: TextView = itemView.findViewById(R.id.tv_header_title)
         val chevron: ImageView = itemView.findViewById(R.id.iv_header_chevron)
+    }
+
+    private class WorkoutDiffCallback(private val oldList: List<Any>, private val newList: List<Any>) : DiffUtil.Callback() {
+        override fun getOldListSize(): Int = oldList.size
+        override fun getNewListSize(): Int = newList.size
+
+        override fun areItemsTheSame(oldItemPosition: Int, newItemPosition: Int): Boolean {
+            val oldItem = oldList[oldItemPosition]
+            val newItem = newList[newItemPosition]
+            return if (oldItem is Workout && newItem is Workout) {
+                oldItem.timestamp == newItem.timestamp
+            } else if (oldItem is String && newItem is String) {
+                oldItem == newItem
+            } else false
+        }
+
+        override fun areContentsTheSame(oldItemPosition: Int, newItemPosition: Int): Boolean {
+            val oldItem = oldList[oldItemPosition]
+            val newItem = newList[newItemPosition]
+            return oldItem == newItem
+        }
     }
 }

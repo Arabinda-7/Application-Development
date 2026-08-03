@@ -2,7 +2,7 @@ package com.example.allinone.di
 
 import android.content.Context
 import com.example.allinone.AssistantBrain
-import com.example.allinone.VoiceAssistantHandler
+import com.example.allinone.VoiceInteractionManager
 import com.example.allinone.assistant.context.AssistantContextManager
 import com.example.allinone.assistant.executor.AssistantSessionProcessor
 import com.example.allinone.assistant.intent.AssistantIntentDetector
@@ -62,12 +62,7 @@ object AssistantModule {
 
     @Provides
     @Singleton
-    fun provideVoiceAssistantHandler(
+    fun provideVoiceInteractionManager(
         @ApplicationContext context: Context
-    ): VoiceAssistantHandler = VoiceAssistantHandler(
-        context = context,
-        onResults = {},
-        onListeningStateChanged = {},
-        onError = {}
-    )
+    ): VoiceInteractionManager = VoiceInteractionManager(context)
 }

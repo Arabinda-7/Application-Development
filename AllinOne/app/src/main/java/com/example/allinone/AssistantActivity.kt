@@ -2,6 +2,7 @@ package com.example.allinone
 
 import android.content.Intent
 import android.os.Bundle
+import android.widget.Toast
 import androidx.activity.compose.setContent
 import androidx.compose.animation.*
 import androidx.compose.foundation.background
@@ -10,8 +11,10 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.material.icons.automirrored.filled.Send
 import androidx.compose.material.icons.filled.*
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
@@ -41,15 +44,14 @@ class AssistantActivity : BaseActivity() {
     @Inject lateinit var actionHandler: AssistantActionHandler
     @Inject lateinit var aiChatRepository: com.example.allinone.data.repository.AiChatRepository
     @Inject lateinit var autoCleanupAssistantHistoryUseCase: com.example.allinone.domain.usecase.assistant.AutoCleanupAssistantHistoryUseCase
+    @Inject lateinit var voiceManager: VoiceInteractionManager
 
     private var insights by mutableStateOf<List<AssistantBrain.Insight>>(emptyList())
     private var currentSessionId by mutableLongStateOf(-1L)
     private var commandInput by mutableStateOf("")
-    private var isListening by mutableStateOf(false)
     private var isThinking by mutableStateOf(false)
-    private var isMuted by mutableStateOf(false)
+    private var isVoiceMuted by mutableStateOf(false)
     private val chatMessages = mutableStateListOf<ChatMessage>()
-    private var voiceHandler: VoiceAssistantHandler? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -66,15 +68,15 @@ class AssistantActivity : BaseActivity() {
             currentSessionId = aiChatRepository.createSession("$prefix ${SimpleDateFormat("MMM dd, HH:mm", Locale.getDefault()).format(Date())}", type)
             chatMessages.clear()
             
-            initVoiceHandler()
-
             if (isVoiceSession) {
-                startVoiceInteraction()
+                toggleListening()
             }
         }
 
         setContent {
             val appStyle = remember { AppStyle.fromSettings() }
+            val isListening by voiceManager.isListening.collectAsState()
+            
             CompositionLocalProvider(LocalAppStyle provides appStyle) {
                 AssistantMainScreen(
                     insights = insights,
@@ -82,11 +84,11 @@ class AssistantActivity : BaseActivity() {
                     commandInput = commandInput,
                     isListening = isListening,
                     isThinking = isThinking,
-                    isMuted = isMuted,
+                    isMuted = isVoiceMuted,
                     onCommandChange = { commandInput = it },
                     onSend = { sendCommand(it) },
                     onListenToggle = { toggleListening() },
-                    onMuteToggle = { isMuted = !isMuted },
+                    onMuteToggle = { isVoiceMuted = !isVoiceMuted },
                     onNewChat = { createNewChat() },
                     onHistory = { startActivity(Intent(this@AssistantActivity, AssistantHistoryActivity::class.java)) },
                     onSettings = { startActivity(Intent(this@AssistantActivity, SettingsActivity::class.java)) },
@@ -96,30 +98,20 @@ class AssistantActivity : BaseActivity() {
         }
     }
 
-    private fun initVoiceHandler() {
-        voiceHandler = VoiceAssistantHandler(
-            this,
-            onResults = { text ->
-                isListening = false
-                isThinking = true
-                sendCommand(text)
-            },
-            onListeningStateChanged = { listening ->
-                isListening = listening
-            },
-            onError = { error ->
-                isListening = false
-                isThinking = false
-                if (!error.contains("No match") && !error.contains("No speech")) {
-                    chatMessages.add(ChatMessage("Voice: $error", false))
-                }
+    private fun toggleListening() {
+        if (voiceManager.isListening.value) {
+            voiceManager.stopListening()
+        } else {
+            checkAndRequestPermission(android.Manifest.permission.RECORD_AUDIO) {
+                voiceManager.startListening(
+                    onResult = { text ->
+                        sendCommand(text)
+                    },
+                    onError = { error ->
+                        Toast.makeText(this, error, Toast.LENGTH_SHORT).show()
+                    }
+                )
             }
-        )
-    }
-
-    private fun startVoiceInteraction() {
-        checkAndRequestPermission(android.Manifest.permission.RECORD_AUDIO) {
-            voiceHandler?.startListening()
         }
     }
 
@@ -135,6 +127,7 @@ class AssistantActivity : BaseActivity() {
         if (text.isBlank()) return
         chatMessages.add(ChatMessage(text, true))
         commandInput = ""
+        isThinking = true
         
         lifecycleScope.launch {
             try {
@@ -171,19 +164,11 @@ class AssistantActivity : BaseActivity() {
 
     private fun addAssistantMessage(text: String) {
         chatMessages.add(ChatMessage(text, false))
-        voiceHandler?.speak(text)
+        if (!isVoiceMuted) voiceManager.speak(text)
         lifecycleScope.launch {
             if (currentSessionId != -1L) {
                 aiChatRepository.insertMessage(currentSessionId, text, false, System.currentTimeMillis())
             }
-        }
-    }
-
-    private fun toggleListening() {
-        if (isListening) {
-            voiceHandler?.stopListening()
-        } else if (!isThinking) {
-            startVoiceInteraction()
         }
     }
 
@@ -209,7 +194,7 @@ class AssistantActivity : BaseActivity() {
         var showMenu by remember { mutableStateOf(false) }
 
         Scaffold(
-            containerColor = style.backgroundColor,
+            containerColor = Color.Transparent,
             topBar = {
                 CenterAlignedTopAppBar(
                     title = { Text("ASSISTANT", fontWeight = FontWeight.Bold, color = style.accentColor) },
@@ -252,7 +237,7 @@ class AssistantActivity : BaseActivity() {
             }
         ) { padding ->
             Column(modifier = Modifier.padding(padding).fillMaxSize()) {
-                if (insights.isNotEmpty() && !isListening && !isThinking) {
+                if (insights.isNotEmpty() && !isThinking && !isListening) {
                     LazyRow(contentPadding = PaddingValues(16.dp), horizontalArrangement = Arrangement.spacedBy(12.dp)) {
                         items(insights) { insight ->
                             InsightCard(insight)
@@ -279,18 +264,53 @@ class AssistantActivity : BaseActivity() {
                     }
                 }
 
-                ChatInputBar(commandInput, onCommandChange, onSend, isListening, onListenToggle, isMuted, onMuteToggle)
+                // Chat Input Bar (Integrated new voice listener)
+                Surface(
+                    color = style.surfaceColor,
+                    tonalElevation = 8.dp,
+                    shadowElevation = if (style.showShadows) 8.dp else 0.dp
+                ) {
+                    Row(
+                        modifier = Modifier.fillMaxWidth().padding(16.dp),
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        IconButton(onClick = onListenToggle) {
+                            Icon(
+                                imageVector = if (isListening) Icons.Default.MicOff else Icons.Default.Mic,
+                                contentDescription = null,
+                                tint = if (isListening) Color.Red else style.accentColor
+                            )
+                        }
+                        
+                        OutlinedTextField(
+                            value = commandInput,
+                            onValueChange = onCommandChange,
+                            modifier = Modifier.weight(1f),
+                            placeholder = { Text("Type a command...", color = Color.Gray) },
+                            colors = OutlinedTextFieldDefaults.colors(
+                                focusedTextColor = Color.White,
+                                unfocusedTextColor = Color.White,
+                                cursorColor = style.accentColor,
+                                focusedBorderColor = style.accentColor,
+                                unfocusedBorderColor = Color.Gray
+                            ),
+                            shape = RoundedCornerShape(24.dp)
+                        )
+                        Spacer(modifier = Modifier.width(8.dp))
+                        IconButton(
+                            onClick = { onSend(commandInput) },
+                            enabled = commandInput.isNotBlank()
+                        ) {
+                            Icon(Icons.AutoMirrored.Filled.Send, contentDescription = null, tint = style.accentColor)
+                        }
+                    }
+                }
             }
         }
     }
 
-    override fun onPause() {
-        voiceHandler?.stopListening()
-        super.onPause()
-    }
-
     override fun onDestroy() {
-        voiceHandler?.shutdown()
+        // voiceManager.destroy() // Singleton
         super.onDestroy()
     }
 }

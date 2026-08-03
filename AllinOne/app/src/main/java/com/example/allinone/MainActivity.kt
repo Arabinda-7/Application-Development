@@ -2,6 +2,7 @@ package com.example.allinone
 
 import android.content.Intent
 import android.os.Bundle
+import android.widget.Toast
 import androidx.activity.compose.setContent
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.activity.viewModels
@@ -10,14 +11,17 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.unit.Density
 import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
 import androidx.lifecycle.lifecycleScope
 import com.example.allinone.assistant.executor.AssistantActionHandler
 import com.example.allinone.assistant.model.ChatMessage
 import com.example.allinone.assistant.model.CommandAction
+import com.example.allinone.core.utils.UIUtils
 import com.example.allinone.ui.components.LoadingScreen
 import com.example.allinone.ui.home.HomeScreen
 import com.example.allinone.ui.home.DashboardState
+import com.example.allinone.ui.home.components.VoiceOverlay
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.launch
 import javax.inject.Inject
@@ -29,11 +33,8 @@ class MainActivity : BaseActivity() {
     @Inject lateinit var actionHandler: AssistantActionHandler
 
     private val viewModel: MainActivityViewModel by viewModels()
-    
-    private var isVoiceListening by mutableStateOf(false)
-    private var isVoiceThinking by mutableStateOf(false)
-    private val voiceMessages = mutableStateListOf<ChatMessage>()
-    private var voiceHandler: VoiceAssistantHandler? = null
+    private var voiceManager: VoiceInteractionManager? = null
+    private var showVoiceOverlay by mutableStateOf(false)
 
     private val lockLauncher = registerForActivityResult(
         ActivityResultContracts.StartActivityForResult()
@@ -46,10 +47,20 @@ class MainActivity : BaseActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         installSplashScreen()
+        
+        // Immediate check for onboarding status to avoid showing the loading screen
+        val prefs = com.example.allinone.security.SecurityManager.getEncryptedPrefs(this)
+        if (!prefs.getBoolean("onboarding_completed", false)) {
+            super.onCreate(savedInstanceState)
+            startActivity(Intent(this, OnboardingActivity::class.java))
+            finish()
+            return
+        }
+
         super.onCreate(savedInstanceState)
         
         brain.initialize(this)
-        initVoiceHandler()
+        voiceManager = VoiceInteractionManager(this)
 
         setContent {
             val dashboardState = viewModel.dashboardState
@@ -62,8 +73,16 @@ class MainActivity : BaseActivity() {
             } else if (!isOnboardingCompleted) {
                 Box(modifier = Modifier.fillMaxSize().background(androidx.compose.ui.graphics.Color.Black))
             } else {
-                val appStyle = remember { AppStyle.fromDashboardState(dashboardState) }
-                CompositionLocalProvider(LocalAppStyle provides appStyle) {
+                val appStyle = remember(dashboardState) { AppStyle.fromDashboardState(dashboardState) }
+                
+                val densityValue = remember(dashboardState) { UIUtils.getIsolatedMoodDensity(dashboardState) }
+                val fontScale = remember(dashboardState) { UIUtils.getFontScale(dashboardState) }
+                val customDensity = Density(density = densityValue, fontScale = fontScale)
+
+                CompositionLocalProvider(
+                    LocalAppStyle provides appStyle,
+                    androidx.compose.ui.platform.LocalDensity provides customDensity
+                ) {
                     Box(modifier = Modifier.fillMaxSize().background(appStyle.backgroundColor)) {
                         HomeScreen(
                             state = dashboardState,
@@ -73,6 +92,7 @@ class MainActivity : BaseActivity() {
                             onNavigateToNotes = { startActivity(Intent(this@MainActivity, NotesActivity::class.java)) },
                             onNavigateToProjects = { startActivity(Intent(this@MainActivity, ProjectActivity::class.java)) },
                             onNavigateToFinance = { startActivity(Intent(this@MainActivity, FinanceActivity::class.java)) },
+                            onNavigateToWorkspace = { startActivity(Intent(this@MainActivity, com.example.allinone.workspace.ui.activity.WorkspaceActivity::class.java)) },
                             onNavigateToSettings = { startActivity(Intent(this@MainActivity, SettingsActivity::class.java)) },
                             onNavigateToAssistant = { startActivity(Intent(this@MainActivity, AssistantActivity::class.java)) },
                             onNavigateToProfile = { startActivity(Intent(this@MainActivity, ProfileActivity::class.java)) },
@@ -85,11 +105,19 @@ class MainActivity : BaseActivity() {
                             onSearchRequested = { query ->
                                 MainSearchSection(this@MainActivity).performSearch(query)
                             },
-                            isVoiceListening = isVoiceListening,
-                            isVoiceThinking = isVoiceThinking,
-                            voiceMessages = voiceMessages,
-                            onVoiceMicClick = { toggleVoiceListening() },
-                            onVoiceSessionStarted = { startVoiceSession() }
+                            onVoiceAssistantRequested = { showVoiceOverlay = true; toggleVoice() }
+                        )
+
+                        // Integrated the new Voice Feature
+                        val isListening by voiceManager!!.isListening.collectAsState()
+                        val partialText by voiceManager!!.partialText.collectAsState()
+
+                        VoiceOverlay(
+                            isVisible = showVoiceOverlay,
+                            isListening = isListening,
+                            partialText = partialText,
+                            onDismiss = { showVoiceOverlay = false },
+                            onMicClick = { toggleVoice() }
                         )
                     }
                 }
@@ -99,11 +127,23 @@ class MainActivity : BaseActivity() {
                 if (isLoaded && !isOnboardingCompleted) {
                     startActivity(Intent(this@MainActivity, OnboardingActivity::class.java))
                     finish()
-                } else if (isLoaded && dashboardState.isAppLockEnabled && !isUnlocked && dashboardState.appLockPin != null) {
-                    val intent = Intent(this@MainActivity, LockActivity::class.java).apply {
-                        putExtra(LockActivity.EXTRA_MODE, LockActivity.MODE_AUTH)
+                } else if (isLoaded) {
+                    // Request all necessary permissions once loaded
+                    val permissions = mutableListOf(android.Manifest.permission.RECORD_AUDIO)
+                    if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.TIRAMISU) {
+                        permissions.add(android.Manifest.permission.POST_NOTIFICATIONS)
                     }
-                    lockLauncher.launch(intent)
+                    
+                    checkAndRequestPermissions(permissions.toTypedArray()) { 
+                        // Optional: handle results
+                    }
+
+                    if (dashboardState.isAppLockEnabled && !isUnlocked && dashboardState.appLockPin != null) {
+                        val intent = Intent(this@MainActivity, LockActivity::class.java).apply {
+                            putExtra(LockActivity.EXTRA_MODE, LockActivity.MODE_AUTH)
+                        }
+                        lockLauncher.launch(intent)
+                    }
                 }
             }
         }
@@ -111,86 +151,43 @@ class MainActivity : BaseActivity() {
         viewModel.refreshState(this)
     }
 
-    private fun initVoiceHandler() {
-        voiceHandler = VoiceAssistantHandler(
-            this,
-            onResults = { text ->
-                isVoiceListening = false
-                isVoiceThinking = true
-                processVoiceCommand(text)
-            },
-            onListeningStateChanged = { listening ->
-                isVoiceListening = listening
-            },
-            onError = { message ->
-                isVoiceListening = false
-                isVoiceThinking = false
-                android.widget.Toast.makeText(this, message, android.widget.Toast.LENGTH_SHORT).show()
-            }
-        )
-    }
-
-    private fun startVoiceSession() {
-        voiceMessages.clear()
-        isVoiceThinking = false
-        checkAndRequestPermission(android.Manifest.permission.RECORD_AUDIO) {
-            voiceHandler?.startListening()
-        }
-    }
-
-    private fun toggleVoiceListening() {
-        if (isVoiceListening) {
-            voiceHandler?.stopListening()
+    private fun toggleVoice() {
+        if (voiceManager?.isListening?.value == true) {
+            voiceManager?.stopListening()
         } else {
-            isVoiceThinking = false
             checkAndRequestPermission(android.Manifest.permission.RECORD_AUDIO) {
-                voiceHandler?.startListening()
+                voiceManager?.startListening(
+                    onResult = { text ->
+                        processCommand(text)
+                    },
+                    onError = { error ->
+                        Toast.makeText(this, error, Toast.LENGTH_SHORT).show()
+                    }
+                )
             }
         }
     }
 
-    private fun processVoiceCommand(text: String) {
+    private fun processCommand(text: String) {
         if (text.isBlank()) return
-        voiceMessages.add(ChatMessage(text, true))
-        isVoiceThinking = true
         
         lifecycleScope.launch {
             val action = brain.parseCommand(text)
-            isVoiceThinking = false
             handleAssistantAction(action)
         }
     }
 
     private fun handleAssistantAction(action: CommandAction?) {
-        if (action == null) {
-            val fallback = "I'm not sure how to help with that yet."
-            voiceMessages.add(ChatMessage(fallback, false))
-            voiceHandler?.speak(fallback)
-            return
-        }
-        
-        val responseText = action.dynamicResponse ?: if (action.type == "CHAT_RESPONSE") action.payload else null
-        responseText?.let { 
-            voiceMessages.add(ChatMessage(it, false)) 
-            voiceHandler?.speak(it)
-        }
+        if (action == null) return
         
         lifecycleScope.launch {
             val status = actionHandler.executeAction(this@MainActivity, action)
-            status?.let { 
-                voiceMessages.add(ChatMessage(it, false))
-                voiceHandler?.speak(it)
-            }
+            status?.let { voiceManager?.speak(it) }
         }
     }
 
-    override fun onPause() {
-        voiceHandler?.stopListening()
-        super.onPause()
-    }
-
     override fun onDestroy() {
-        voiceHandler?.shutdown()
+        voiceManager?.destroy()
         super.onDestroy()
     }
 }

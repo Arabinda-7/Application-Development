@@ -3,6 +3,7 @@ package com.example.allinone
 import android.os.Bundle
 import androidx.activity.compose.setContent
 import androidx.compose.runtime.*
+import androidx.compose.runtime.CompositionLocalProvider
 import androidx.lifecycle.lifecycleScope
 import com.example.allinone.assistant.executor.AssistantActionHandler
 import com.example.allinone.assistant.model.ChatMessage
@@ -21,12 +22,11 @@ class AssistantSessionDetailActivity : BaseActivity() {
     private var sessionId by mutableLongStateOf(-1L)
     private var sessionTitle by mutableStateOf("")
     private var commandInput by mutableStateOf("")
-    private var isListening by mutableStateOf(false)
     private var isThinking by mutableStateOf(false)
-    private var isMuted by mutableStateOf(!DataManager.isAssistantVoiceEnabled)
+    private var isVoiceMuted by mutableStateOf(!DataManager.isAssistantVoiceEnabled)
     private val chatMessages = mutableStateListOf<ChatMessage>()
     private val aiChatRepo by lazy { DataManager.getAiChatRepository(this) }
-    private var voiceHandler: VoiceAssistantHandler? = null
+    @Inject lateinit var voiceManager: VoiceInteractionManager
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -40,15 +40,6 @@ class AssistantSessionDetailActivity : BaseActivity() {
 
         brain.initialize(this)
 
-        voiceHandler = VoiceAssistantHandler(
-            context = this,
-            onResults = { command -> handleCommand(command) },
-            onListeningStateChanged = { listening -> isListening = listening },
-            onError = { _ -> isListening = false }
-        ).apply {
-            isMuted = this@AssistantSessionDetailActivity.isMuted
-        }
-
         lifecycleScope.launch {
             aiChatRepo?.getMessagesBySession(sessionId)?.collect { messages ->
                 chatMessages.clear()
@@ -58,24 +49,32 @@ class AssistantSessionDetailActivity : BaseActivity() {
 
         setContent {
             val appStyle = remember { AppStyle.fromSettings() }
+            val isListening by voiceManager.isListening.collectAsState()
+
             CompositionLocalProvider(LocalAppStyle provides appStyle) {
                 AssistantScreen(
                     chatMessages = chatMessages,
                     commandInput = commandInput,
                     isListening = isListening,
                     isThinking = isThinking,
-                    isMuted = isMuted,
+                    isMuted = isVoiceMuted,
                     onMuteToggle = { 
-                        isMuted = !isMuted
-                        voiceHandler?.isMuted = isMuted
-                        DataManager.isAssistantVoiceEnabled = !isMuted
+                        isVoiceMuted = !isVoiceMuted
+                        DataManager.isAssistantVoiceEnabled = !isVoiceMuted
                         DataManager.saveData(this@AssistantSessionDetailActivity)
                     },
                     onCommandChange = { commandInput = it },
                     onSendCommand = { handleCommand(commandInput) },
                     onMicClick = { 
                         checkAndRequestPermission(android.Manifest.permission.RECORD_AUDIO) {
-                            voiceHandler?.startListening()
+                            if (isListening) {
+                                voiceManager.stopListening()
+                            } else {
+                                voiceManager.startListening(
+                                    onResult = { handleCommand(it) },
+                                    onError = { isThinking = false }
+                                )
+                            }
                         }
                     },
                     onBack = { finish() },
@@ -120,14 +119,16 @@ class AssistantSessionDetailActivity : BaseActivity() {
 
     private fun addAssistantMessage(text: String) {
         chatMessages.add(ChatMessage(text, false))
-        if (!isMuted) voiceHandler?.speak(text, text.trim().endsWith("?"))
+        if (!isVoiceMuted) voiceManager.speak(text)
         lifecycleScope.launch {
             aiChatRepo?.insertMessage(com.example.allinone.data.database.AiChatEntity(sessionId = sessionId, text = text, isUser = false, timestamp = System.currentTimeMillis()))
         }
     }
 
     override fun onDestroy() {
-        voiceHandler?.shutdown()
+        // voiceManager is a singleton, we might not want to destroy it here if it's shared
+        // but we should at least stop listening/speaking if this activity is gone.
+        voiceManager.stopListening()
         super.onDestroy()
     }
 }
