@@ -66,8 +66,8 @@
 
         <ImageButton
             android:id="@+id/btn_note_search"
-            android:layout_width="48dp"
-            android:layout_height="48dp"
+            android:layout_width="32dp"
+            android:layout_height="32dp"
             android:background="?attr/selectableItemBackgroundBorderless"
             android:src="@android:drawable/ic_menu_search"
             app:layout_constraintBottom_toBottomOf="@id/btn_back"
@@ -80,8 +80,7 @@
             android:layout_width="40dp"
             android:layout_height="40dp"
             android:layout_marginEnd="16dp"
-            android:background="@drawable/circle_selected_bg"
-            android:backgroundTint="#1AFFFFFF"
+            android:background="?attr/selectableItemBackgroundBorderless"
             android:src="@drawable/baseline_tune_24"
             android:padding="8dp"
             android:scaleType="centerInside"
@@ -111,19 +110,6 @@
             android:paddingBottom="100dp"
             app:layout_constraintBottom_toTopOf="@id/bottom_navigation_notes"
             app:layout_constraintTop_toBottomOf="@id/tv_date" />
-
-        <com.google.android.material.floatingactionbutton.FloatingActionButton
-            android:id="@+id/btn_ai_assistant_notes"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginEnd="12dp"
-            android:layout_marginBottom="16dp"
-            android:src="@drawable/icons8_idea_100"
-            app:backgroundTint="#1A73E8"
-            app:fabSize="normal"
-            app:layout_constraintBottom_toTopOf="@id/bottom_navigation_notes"
-            app:layout_constraintEnd_toStartOf="@id/btn_create_new_note"
-            app:tint="@color/white" />
 
         <com.google.android.material.floatingactionbutton.FloatingActionButton
             android:id="@+id/btn_create_new_note"

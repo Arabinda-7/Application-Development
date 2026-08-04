@@ -267,7 +267,13 @@ class AddSubFeatureActivity : BaseActivity() {
 
     private fun refreshTagsUI() {
         containerTags.removeAllViews()
-        DataManager.projectCustomTags.forEach { tagName ->
+        val sortedTags = DataManager.projectCustomTags.toMutableList()
+        if (sortedTags.contains("OTHER")) {
+            sortedTags.remove("OTHER")
+            sortedTags.add(0, "OTHER")
+        }
+        
+        sortedTags.forEach { tagName ->
             val chip = TextView(this).apply {
                 text = tagName
                 setTextColor(Color.WHITE)
@@ -375,10 +381,11 @@ class AddSubFeatureActivity : BaseActivity() {
         if (isIdeaMode) return
 
         val upperTag = tag.uppercase()
-        val showDueDate = upperTag == "TASKS" || upperTag == "FEATURES" || upperTag == ""
-        val showWeight = upperTag == "FEATURES" || upperTag == ""
-        val showUrgency = upperTag == "TASKS" || upperTag == "FEATURES" || upperTag == "BUGS" || upperTag == ""
-        val showResource = upperTag == "RESOURCES" || upperTag == "FEATURES" || upperTag == ""
+        val isOther = upperTag == "OTHER"
+        val showDueDate = upperTag == "TASKS" || upperTag == "FEATURES" || upperTag == "" || isOther
+        val showWeight = upperTag == "FEATURES" || upperTag == "" || isOther
+        val showUrgency = upperTag == "TASKS" || upperTag == "FEATURES" || upperTag == "BUGS" || upperTag == "" || isOther
+        val showResource = upperTag == "RESOURCES" || upperTag == "FEATURES" || upperTag == "" || isOther
 
         findViewById<View>(R.id.label_due_date).visibility = if (showDueDate) View.VISIBLE else View.GONE
         findViewById<View>(R.id.container_due_date).visibility = if (showDueDate) View.VISIBLE else View.GONE

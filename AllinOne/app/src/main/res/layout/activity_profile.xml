@@ -11,6 +11,7 @@
         android:id="@+id/profile_root"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
+        android:paddingTop="4dp"
         android:paddingBottom="40dp">
 
         <!-- 1. Immersive Aura Header -->

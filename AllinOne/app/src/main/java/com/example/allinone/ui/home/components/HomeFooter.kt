@@ -39,12 +39,12 @@ fun HomeFooter(
             color = Color.Black,
             modifier = Modifier
                 .fillMaxWidth()
-                .height(65.dp)
+                .height(80.dp)
                 .align(Alignment.BottomCenter),
             border = BorderStroke(1.dp, style.accentColor.copy(alpha = 0.3f))
         ) {
             Row(
-                modifier = Modifier.fillMaxSize().padding(bottom = 4.dp),
+                modifier = Modifier.fillMaxSize().padding(bottom = 8.dp),
                 horizontalArrangement = Arrangement.SpaceEvenly,
                 verticalAlignment = Alignment.CenterVertically
             ) {
@@ -77,7 +77,7 @@ fun HomeFooter(
 
         if (isAiEnabled) {
             Column(
-                modifier = Modifier.align(Alignment.BottomCenter).padding(bottom = 6.dp),
+                modifier = Modifier.align(Alignment.BottomCenter).padding(bottom = 20.dp),
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {
                 Box(
@@ -105,6 +105,7 @@ fun HomeFooter(
                         )
                     }
                 }
+                Spacer(modifier = Modifier.height(4.dp))
                 Text(
                     text = "AI",
                     color = if (selectedTab == 1) style.accentColor else Color.White.copy(alpha = 0.4f),

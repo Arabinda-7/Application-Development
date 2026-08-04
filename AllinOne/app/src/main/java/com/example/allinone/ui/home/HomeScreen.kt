@@ -89,7 +89,7 @@ fun HomeScreen(
         else "$timePrefix, ${if (state.overallProgress >= 70) "Crushing it! 🔥" else if (state.overallProgress >= 30) "Great start! ⚡" else "Ready?"}"
     }
 
-    val footerHeightPx = with(LocalDensity.current) { 83.dp.toPx() }
+    val footerHeightPx = with(LocalDensity.current) { 108.dp.toPx() }
     val fabOffset by remember(scrollState.value, scrollState.maxValue) {
         derivedStateOf {
             if (scrollState.maxValue > 0) {

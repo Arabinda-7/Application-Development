@@ -97,13 +97,15 @@ fun ProjectWorkspaceScreen(
                     modifier = Modifier
                         .fillMaxSize()
                         .background(style.backgroundColor)
-                        .pointerInput(Unit) {
-                            detectDragGestures(
-                                onDrag = { change, dragAmount ->
-                                    if (isSidebarExpanded && dragAmount.x < -10) { isSidebarExpanded = false; change.consume() }
-                                    else if (!isSidebarExpanded && change.position.x < 100 && dragAmount.x > 10) { isSidebarExpanded = true; change.consume() }
-                                }
-                            )
+                        .pointerInput(uiState.projects) {
+                            if (uiState.projects.isNotEmpty()) {
+                                detectDragGestures(
+                                    onDrag = { change, dragAmount ->
+                                        if (isSidebarExpanded && dragAmount.x < -10) { isSidebarExpanded = false; change.consume() }
+                                        else if (!isSidebarExpanded && change.position.x < 100 && dragAmount.x > 10) { isSidebarExpanded = true; change.consume() }
+                                    }
+                                )
+                            }
                         }
                 ) {
                     WorkspaceBackgroundAura(selectedProject = uiState.selectedProject)
@@ -162,8 +164,7 @@ fun ProjectWorkspaceScreen(
                                             onAddProject = { activeCreationPage = WorkspaceAction.AddProject },
                                             onImportProject = { showImportDialog = true },
                                             onTrySample = { viewModel.createSampleProject() },
-                                            onToggleMenu = { isSidebarExpanded = !isSidebarExpanded },
-                                            isSidebarExpanded = isSidebarExpanded,
+                                            onBack = onBack,
                                             modifier = Modifier.statusBarsPadding()
                                         ) 
                                     } else {

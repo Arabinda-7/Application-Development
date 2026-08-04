@@ -16,6 +16,7 @@ import com.example.allinone.domain.usecase.habit.GetHabitProgressUseCase
 import com.example.allinone.domain.usecase.workout.GetWorkoutProgressUseCase
 import com.example.allinone.domain.usecase.finance.GetFinancialSummaryUseCase
 import com.example.allinone.domain.usecase.assistant.GetAssistantAdviceUseCase
+import com.example.allinone.domain.usecase.agenda.GetTodayAgendaUseCase
 import com.example.allinone.ui.home.DashboardState
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.combine
@@ -39,6 +40,7 @@ class MainActivityViewModel @Inject constructor(
     private val getWorkoutProgressUseCase: GetWorkoutProgressUseCase,
     private val getFinancialSummaryUseCase: GetFinancialSummaryUseCase,
     private val getAssistantAdviceUseCase: GetAssistantAdviceUseCase,
+    private val getTodayAgendaUseCase: GetTodayAgendaUseCase,
     private val updateUserSettingsUseCase: UpdateUserSettingsUseCase,
     private val updateUserProfileUseCase: UpdateUserProfileUseCase
 ) : ViewModel() {
@@ -66,7 +68,10 @@ class MainActivityViewModel @Inject constructor(
                 financeRepository.getFinanceSettings(),
                 projectRepository.getProjectSettings(),
                 taskRepository.getTaskSettings(),
-                getFinancialSummaryUseCase()
+                getFinancialSummaryUseCase(),
+                taskRepository.getTasks(),
+                projectRepository.getAllProjects(),
+                getTodayAgendaUseCase()
             ) { args ->
                 val profile = args[0] as UserProfile
                 val settings = args[1] as UserSettings
@@ -79,6 +84,9 @@ class MainActivityViewModel @Inject constructor(
                 val projectSettings = args[8] as ProjectSettings
                 val taskSettings = args[9] as TaskSettings
                 val financialSummary = args[10] as com.example.allinone.domain.usecase.finance.FinancialSummary
+                val globalTasks = args[11] as List<com.example.allinone.data.model.Task>
+                val globalProjects = args[12] as List<com.example.allinone.data.model.Note>
+                val agenda = args[13] as Map<String, List<com.example.allinone.domain.model.AgendaItem>>
                 
                 val habitProgress = getHabitProgressUseCase(habits)
                 val workoutProgress = getWorkoutProgressUseCase(workouts)
@@ -86,7 +94,7 @@ class MainActivityViewModel @Inject constructor(
                 
                 DashboardCombinedData(
                     profile, settings, habitProgress, workoutProgress, overallProgress, 
-                    habitSettings, workoutSettings, noteSettings, financeSettings, projectSettings, taskSettings, financialSummary
+                    habitSettings, workoutSettings, noteSettings, financeSettings, projectSettings, taskSettings, financialSummary, agenda
                 )
             }.collect { data ->
                 val profile = data.profile
@@ -113,7 +121,7 @@ class MainActivityViewModel @Inject constructor(
                         ?: "No upcoming milestones"
                 }
 
-                val agenda = DataManager.getComprehensiveTodayAgenda(context)
+                val agenda = data.agenda
                 val db = AppDatabase.getDatabase(context)
                 val hasProjects = synchronized(DataManager.projects) {
                     DataManager.projects.isNotEmpty()
@@ -231,6 +239,7 @@ class MainActivityViewModel @Inject constructor(
         val financeSettings: FinanceSettings,
         val projectSettings: ProjectSettings,
         val taskSettings: TaskSettings,
-        val financialSummary: com.example.allinone.domain.usecase.finance.FinancialSummary
+        val financialSummary: com.example.allinone.domain.usecase.finance.FinancialSummary,
+        val agenda: Map<String, List<com.example.allinone.domain.model.AgendaItem>>
     )
 }

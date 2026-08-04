@@ -107,12 +107,6 @@ class NotesActivity : BaseActivity() {
             })
         }
 
-        findViewById<View>(R.id.btn_ai_assistant_notes).setOnClickListener {
-            startActivity(Intent(this, AssistantActivity::class.java).apply {
-                putExtra("START_VOICE", true)
-            })
-        }
-
         gestureDetector = android.view.GestureDetector(this, object : SwipeGestureListener() {
             override fun onSwipeLeft() {
                 val settings = viewModel.settings.value

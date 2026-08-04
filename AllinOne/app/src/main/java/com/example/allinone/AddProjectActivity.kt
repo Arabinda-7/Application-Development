@@ -52,10 +52,14 @@ class AddProjectActivity : BaseActivity() {
     private lateinit var ivSubfeaturesMainChevron: ImageView
     private lateinit var layoutSubfeaturesFullContainer: View
     private lateinit var auraView: View
+    private lateinit var tvDeadlineDisplay: TextView
+    private lateinit var btnSetDeadline: TextView
 
     private var selectedColor = -1
     private var selectedPriority = 1 // MED
     private var selectedStatus = "TODO"
+    private var selectedTemplateName: String? = null
+    private var selectedDeadline: Long? = null
     private var isDescriptionExpanded = true
     private var isGoalsExpanded = true
     private var isSubfeaturesExpanded = true
@@ -108,6 +112,8 @@ class AddProjectActivity : BaseActivity() {
         ivSubfeaturesMainChevron = findViewById(R.id.iv_subfeatures_main_chevron)
         layoutSubfeaturesFullContainer = findViewById(R.id.layout_subfeatures_full_container)
         auraView = findViewById(R.id.aura_background)
+        tvDeadlineDisplay = findViewById(R.id.tv_deadline_display)
+        btnSetDeadline = findViewById(R.id.btn_set_deadline)
 
         findViewById<View>(R.id.btn_close_note).setOnClickListener { finish() }
     }
@@ -177,21 +183,11 @@ class AddProjectActivity : BaseActivity() {
             }
         }
 
+        findViewById<View>(R.id.cell_deadline).setOnClickListener { showDeadlinePicker() }
+        btnSetDeadline.setOnClickListener { showDeadlinePicker() }
+
         // Templates
-        DataManager.projectTemplates.forEach { (name, steps) ->
-            val templateBtn = TextView(this).apply {
-                text = name; setTextColor(Color.WHITE); textSize = 12f
-                setPadding(24.dpToPx(this@AddProjectActivity), 12.dpToPx(this@AddProjectActivity), 24.dpToPx(this@AddProjectActivity), 12.dpToPx(this@AddProjectActivity))
-                background = ContextCompat.getDrawable(this@AddProjectActivity, R.drawable.priority_chip_bg)
-                layoutParams = LinearLayout.LayoutParams(ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT).apply { marginEnd = 12.dpToPx(this@AddProjectActivity) }
-                setOnClickListener {
-                    DataManager.currentEditingSubFeatures.clear()
-                    steps.forEachIndexed { i, step -> DataManager.currentEditingSubFeatures.add(ProjectFeature(step, position = i + 1)) }
-                    refreshSubFeatures()
-                }
-            }
-            containerTemplates.addView(templateBtn)
-        }
+        refreshTemplatesUI()
 
         findViewById<View>(R.id.btn_add_subfeature).setOnClickListener {
             val nameInput = etNewSubfeature.text.toString().trim()
@@ -214,6 +210,15 @@ class AddProjectActivity : BaseActivity() {
     private fun updateThemeVisuals() {
         colorPreview.backgroundTintList = ColorStateList.valueOf(selectedColor)
         btnSave.setTextColor(selectedColor)
+        btnSetDeadline.setTextColor(selectedColor)
+        findViewById<ImageView>(R.id.cell_deadline).findViewById<ImageView>(android.R.id.icon)?.imageTintList = ColorStateList.valueOf(selectedColor) // Not correct ID, let's just find the first ImageView in the parent
+        
+        (findViewById<View>(R.id.cell_deadline) as? LinearLayout)?.let { layout ->
+            for (i in 0 until layout.childCount) {
+                val child = layout.getChildAt(i)
+                if (child is ImageView) child.imageTintList = ColorStateList.valueOf(selectedColor)
+            }
+        }
         
         val gradient = android.graphics.drawable.GradientDrawable(
             android.graphics.drawable.GradientDrawable.Orientation.TOP_BOTTOM,
@@ -317,6 +322,45 @@ class AddProjectActivity : BaseActivity() {
         ProjectUiHelper.refreshGoalsUI(this, goalsList, tempGoals) { refreshGoalsUI() }
     }
 
+    private fun refreshTemplatesUI() {
+        containerTemplates.removeAllViews()
+        DataManager.projectTemplates.forEach { (name, steps) ->
+            val isSelected = selectedTemplateName == name
+            val templateBtn = TextView(this).apply {
+                text = name
+                setTextColor(if (isSelected) Color.WHITE else Color.parseColor("#80FFFFFF"))
+                textSize = 12f
+                setTypeface(null, if (isSelected) android.graphics.Typeface.BOLD else android.graphics.Typeface.NORMAL)
+                setPadding(24.dpToPx(this@AddProjectActivity), 12.dpToPx(this@AddProjectActivity), 24.dpToPx(this@AddProjectActivity), 12.dpToPx(this@AddProjectActivity))
+                
+                background = ContextCompat.getDrawable(this@AddProjectActivity, R.drawable.priority_chip_bg)
+                backgroundTintList = ColorStateList.valueOf(if (isSelected) selectedColor else Color.parseColor("#11FFFFFF"))
+                
+                layoutParams = LinearLayout.LayoutParams(ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT).apply { marginEnd = 12.dpToPx(this@AddProjectActivity) }
+                setOnClickListener {
+                    selectedTemplateName = name
+                    DataManager.currentEditingSubFeatures.clear()
+                    steps.forEachIndexed { i, step -> DataManager.currentEditingSubFeatures.add(ProjectFeature(step, position = i + 1)) }
+                    refreshSubFeatures()
+                    refreshTemplatesUI()
+                }
+            }
+            containerTemplates.addView(templateBtn)
+        }
+    }
+
+    private fun showDeadlinePicker() {
+        val cal = Calendar.getInstance()
+        selectedDeadline?.let { cal.timeInMillis = it }
+        android.app.DatePickerDialog(this, { _, y, m, d ->
+            val newCal = Calendar.getInstance()
+            newCal.set(y, m, d)
+            selectedDeadline = newCal.timeInMillis
+            val sdf = SimpleDateFormat("MMM dd, yyyy", Locale.getDefault())
+            tvDeadlineDisplay.text = sdf.format(newCal.time)
+            tvDeadlineDisplay.setTextColor(Color.WHITE)
+        }, cal.get(Calendar.YEAR), cal.get(Calendar.MONTH), cal.get(Calendar.DAY_OF_MONTH)).show()
+    }
 
     private fun saveProject() {
         val title = titleInput.text.toString().trim()
@@ -333,6 +377,7 @@ class AddProjectActivity : BaseActivity() {
             note.status = selectedStatus
             note.priority = selectedPriority
             note.color = selectedColor
+            note.deadline = selectedDeadline
             note.isGlobalProject = true
             note.subFeatures.addAll(DataManager.currentEditingSubFeatures)
             note.ideaGoals.addAll(tempGoals)

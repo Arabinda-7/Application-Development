@@ -31,7 +31,7 @@ import com.example.allinone.R
 
 @Composable
 fun ProfilePage(userName: MutableState<String>, selectedAvatar: MutableIntState, selectedRoles: MutableState<Set<String>>, accentColor: Color) {
-    Column(modifier = Modifier.fillMaxSize().padding(24.dp).verticalScroll(rememberScrollState())) {
+    Column(modifier = Modifier.fillMaxSize().padding(horizontal = 24.dp).padding(top = 28.dp, bottom = 24.dp).verticalScroll(rememberScrollState())) {
         Spacer(modifier = Modifier.height(8.dp))
         Text("Personalize Identity", color = Color.White, fontSize = 32.sp, fontWeight = FontWeight.Black, lineHeight = 38.sp)
         Text("Your identity shapes the system's focus.", color = Color.White.copy(alpha = 0.5f), fontSize = 14.sp, modifier = Modifier.padding(top = 8.dp))

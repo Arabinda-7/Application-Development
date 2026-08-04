@@ -28,6 +28,10 @@ import javax.inject.Inject
 @AndroidEntryPoint
 class SettingsActivity : BaseActivity() {
 
+    companion object {
+        const val EXTRA_SECTION = "EXTRA_SECTION"
+    }
+
     private val viewModel: SettingsViewModel by viewModels()
     private val profileViewModel: ProfileViewModel by viewModels()
     
@@ -79,7 +83,12 @@ class SettingsActivity : BaseActivity() {
         setupLogic()
         observeViewModel()
         
-        showHub()
+        val targetSection = intent.getStringExtra(EXTRA_SECTION)
+        if (targetSection != null) {
+            showSectionSettings(targetSection)
+        } else {
+            showHub()
+        }
     }
 
     private fun showHub() {
@@ -205,6 +214,14 @@ class SettingsActivity : BaseActivity() {
                     configItems.add(ConfigItem("Show Shadows", "Toggle UI depth and elevation", isToggle = true, isChecked = settings.appShowShadows) {
                         viewModel.updateSettings(settings.copy(appShowShadows = !settings.appShowShadows))
                         showSectionSettings("APPEARANCE")
+                    })
+                }
+            }
+            "HELP" -> {
+                configItems.add(ConfigItem("Master Guides", isHeader = true))
+                HelpData.getMasterGuides().forEach { article ->
+                    configItems.add(ConfigItem(article.title, article.summary) {
+                        helpHandler.showMasterGuideDetail(article)
                     })
                 }
             }

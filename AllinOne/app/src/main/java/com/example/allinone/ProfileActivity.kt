@@ -36,6 +36,13 @@ class ProfileActivity : BaseActivity() {
     private lateinit var securitySection: ProfileSecurityHubSection
     private lateinit var dataSection: ProfileDataGovernanceSection
 
+    private var lastClickTime: Long = 0
+    private fun safeClick(action: () -> Unit) {
+        if (System.currentTimeMillis() - lastClickTime < 500) return
+        lastClickTime = System.currentTimeMillis()
+        action()
+    }
+
     private val imagePickerLauncher = registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
         if (result.resultCode == Activity.RESULT_OK) {
             val imageUri: Uri? = result.data?.data
@@ -174,28 +181,36 @@ class ProfileActivity : BaseActivity() {
         actionShare.findViewById<ImageView>(R.id.iv_action_icon).setImageResource(R.drawable.icons8_share_100_apng)
         actionShare.findViewById<TextView>(R.id.tv_action_label).text = "SHARE"
         actionShare.setOnClickListener {
-            val profile = viewModel.userProfile.value
-            val sendIntent: Intent = Intent().apply {
-                action = Intent.ACTION_SEND
-                putExtra(Intent.EXTRA_TEXT, "Hey, check out my profile on All in One app! I'm ${profile.name}.")
-                type = "text/plain"
+            safeClick {
+                val profile = viewModel.userProfile.value
+                val sendIntent: Intent = Intent().apply {
+                    action = Intent.ACTION_SEND
+                    putExtra(Intent.EXTRA_TEXT, "Hey, check out my profile on All in One app! I'm ${profile.name}.")
+                    type = "text/plain"
+                }
+                val shareIntent = Intent.createChooser(sendIntent, null)
+                startActivity(shareIntent)
             }
-            val shareIntent = Intent.createChooser(sendIntent, null)
-            startActivity(shareIntent)
         }
 
         val actionSettings = findViewById<View>(R.id.action_settings)
         actionSettings.findViewById<ImageView>(R.id.iv_action_icon).setImageResource(R.drawable.baseline_settings_24)
         actionSettings.findViewById<TextView>(R.id.tv_action_label).text = "SETTINGS"
         actionSettings.setOnClickListener {
-            startActivity(Intent(this, SettingsActivity::class.java))
+            safeClick {
+                startActivity(Intent(this, SettingsActivity::class.java))
+            }
         }
 
         val actionHelp = findViewById<View>(R.id.action_help)
         actionHelp.findViewById<ImageView>(R.id.iv_action_icon).setImageResource(R.drawable.icons8_info_100)
         actionHelp.findViewById<TextView>(R.id.tv_action_label).text = "HELP"
         actionHelp.setOnClickListener {
-            Toast.makeText(this, "Need help? Check documentation.", Toast.LENGTH_SHORT).show()
+            safeClick {
+                startActivity(Intent(this, SettingsActivity::class.java).apply {
+                    putExtra(SettingsActivity.EXTRA_SECTION, "HELP")
+                })
+            }
         }
     }
 

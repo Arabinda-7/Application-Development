@@ -305,11 +305,13 @@ class WorkspaceRepository(private val dao: WorkspaceDao) {
     fun getResourcesForProject(projectId: String) = dao.getResourcesForProject(projectId)
     fun getActivityLogs(projectId: String) = dao.getActivityLogs(projectId)
 
-    suspend fun getDeadlinesForToday(start: Long, end: Long): Triple<List<ProjectEntity>, List<GoalEntity>, List<WorkspaceTaskEntity>> {
-        val projects = dao.getProjectsDueBetween(start, end)
-        val goals = dao.getGoalsDueBetween(start, end)
-        val tasks = dao.getTasksDueBetween(start, end)
-        return Triple(projects, goals, tasks)
+    suspend fun getDeadlinesForToday(start: Long, end: Long): List<Any> {
+        val projects = dao.getProjectsDueBefore(end)
+        val goals = dao.getGoalsDueBefore(end)
+        val tasks = dao.getTasksDueBefore(end)
+        val features = dao.getFeaturesDueBefore(end)
+        val bugs = dao.getBugsDueBefore(end)
+        return projects + goals + tasks + features + bugs
     }
 
     suspend fun importFromNote(note: Note) {

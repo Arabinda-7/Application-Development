@@ -149,12 +149,10 @@ fun WorkspaceSidebar(selectedTab: WorkspaceTab, onTabSelected: (WorkspaceTab) ->
 }
 
 @Composable
-fun NoProjectsScreen(onAddProject: () -> Unit, onImportProject: () -> Unit, onTrySample: () -> Unit, onToggleMenu: () -> Unit, isSidebarExpanded: Boolean, modifier: Modifier = Modifier) {
+fun NoProjectsScreen(onAddProject: () -> Unit, onImportProject: () -> Unit, onTrySample: () -> Unit, onBack: () -> Unit, modifier: Modifier = Modifier) {
     Column(modifier = modifier.fillMaxSize(), horizontalAlignment = Alignment.CenterHorizontally) {
         Box(modifier = Modifier.fillMaxWidth().height(64.dp).padding(horizontal = 16.dp), contentAlignment = Alignment.CenterStart) {
-            androidx.compose.animation.AnimatedVisibility(visible = !isSidebarExpanded, enter = fadeIn(), exit = fadeOut()) {
-                IconButton(onClick = onToggleMenu) { Icon(Icons.Default.Menu, contentDescription = "Menu", tint = Color.White) }
-            }
+            IconButton(onClick = onBack) { Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Back", tint = Color.White) }
         }
         Column(modifier = Modifier.weight(1f), verticalArrangement = Arrangement.Center, horizontalAlignment = Alignment.CenterHorizontally) {
             Icon(Icons.Default.CreateNewFolder, contentDescription = null, tint = Color.White.copy(alpha = 0.3f), modifier = Modifier.size(80.dp))

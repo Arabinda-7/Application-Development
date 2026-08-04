@@ -28,8 +28,8 @@ interface WorkspaceDao {
     @Query("SELECT * FROM projects")
     suspend fun getAllProjectsSync(): List<ProjectEntity>
 
-    @Query("SELECT * FROM projects WHERE deadline >= :start AND deadline < :end AND status != 'Archived' AND status != 'Completed'")
-    suspend fun getProjectsDueBetween(start: Long, end: Long): List<ProjectEntity>
+    @Query("SELECT * FROM projects WHERE deadline < :end AND status != 'Archived' AND status != 'Completed'")
+    suspend fun getProjectsDueBefore(end: Long): List<ProjectEntity>
 
     @Query("DELETE FROM projects")
     suspend fun deleteAllProjects()
@@ -37,6 +37,9 @@ interface WorkspaceDao {
     // Goals
     @Query("SELECT * FROM goals WHERE projectId = :projectId ORDER BY createdAt ASC")
     fun getGoalsForProject(projectId: String): Flow<List<GoalEntity>>
+
+    @Query("SELECT * FROM goals ORDER BY createdAt ASC")
+    fun getAllGoals(): Flow<List<GoalEntity>>
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun insertGoal(goal: GoalEntity)
@@ -53,8 +56,8 @@ interface WorkspaceDao {
     @Query("SELECT * FROM goals")
     suspend fun getAllGoalsSync(): List<GoalEntity>
 
-    @Query("SELECT * FROM goals WHERE deadline >= :start AND deadline < :end AND status != 'Completed'")
-    suspend fun getGoalsDueBetween(start: Long, end: Long): List<GoalEntity>
+    @Query("SELECT * FROM goals WHERE deadline < :end AND status != 'Completed'")
+    suspend fun getGoalsDueBefore(end: Long): List<GoalEntity>
 
     @Query("DELETE FROM goals")
     suspend fun deleteAllGoals()
@@ -62,6 +65,9 @@ interface WorkspaceDao {
     // Tasks
     @Query("SELECT * FROM tasks WHERE projectId = :projectId")
     fun getTasksForProject(projectId: String): Flow<List<WorkspaceTaskEntity>>
+
+    @Query("SELECT * FROM tasks")
+    fun getAllTasks(): Flow<List<WorkspaceTaskEntity>>
 
     @Query("SELECT * FROM tasks WHERE milestoneId = :milestoneId")
     suspend fun getTasksByMilestone(milestoneId: String): List<WorkspaceTaskEntity>
@@ -81,8 +87,8 @@ interface WorkspaceDao {
     @Query("SELECT * FROM tasks")
     suspend fun getAllTasksSync(): List<WorkspaceTaskEntity>
 
-    @Query("SELECT * FROM tasks WHERE dueDate >= :start AND dueDate < :end AND status != 'Done'")
-    suspend fun getTasksDueBetween(start: Long, end: Long): List<WorkspaceTaskEntity>
+    @Query("SELECT * FROM tasks WHERE dueDate < :end AND status != 'Done'")
+    suspend fun getTasksDueBefore(end: Long): List<WorkspaceTaskEntity>
 
     @Query("DELETE FROM tasks")
     suspend fun deleteAllTasks()
@@ -90,6 +96,9 @@ interface WorkspaceDao {
     // Features
     @Query("SELECT * FROM features WHERE projectId = :projectId")
     fun getFeaturesForProject(projectId: String): Flow<List<FeatureEntity>>
+
+    @Query("SELECT * FROM features")
+    fun getAllFeatures(): Flow<List<FeatureEntity>>
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun insertFeature(feature: FeatureEntity)
@@ -106,12 +115,18 @@ interface WorkspaceDao {
     @Query("SELECT * FROM features")
     suspend fun getAllFeaturesSync(): List<FeatureEntity>
 
+    @Query("SELECT * FROM features WHERE deadline < :end AND status != 'Shipped'")
+    suspend fun getFeaturesDueBefore(end: Long): List<FeatureEntity>
+
     @Query("DELETE FROM features")
     suspend fun deleteAllFeatures()
 
     // Bugs
     @Query("SELECT * FROM bugs WHERE projectId = :projectId")
     fun getBugsForProject(projectId: String): Flow<List<BugEntity>>
+
+    @Query("SELECT * FROM bugs")
+    fun getAllBugs(): Flow<List<BugEntity>>
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun insertBug(bug: BugEntity)
@@ -127,6 +142,9 @@ interface WorkspaceDao {
 
     @Query("SELECT * FROM bugs")
     suspend fun getAllBugsSync(): List<BugEntity>
+
+    @Query("SELECT * FROM bugs WHERE deadline < :end AND status != 'Fixed' AND status != 'Verified'")
+    suspend fun getBugsDueBefore(end: Long): List<BugEntity>
 
     @Query("DELETE FROM bugs")
     suspend fun deleteAllBugs()

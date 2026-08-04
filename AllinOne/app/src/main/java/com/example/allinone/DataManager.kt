@@ -293,9 +293,6 @@ object DataManager {
         return result.reversed()
     }
 
-    fun getComprehensiveTodayAgenda(): Map<String, List<AgendaItem>> = emptyMap()
-    fun getComprehensiveTodayAgenda(context: Context): Map<String, List<AgendaItem>> = emptyMap()
-
     fun getHabitPerformanceByFrequency(): Map<String, Int> = emptyMap()
     fun getMoodCorrelationData(): Map<String, Int> = emptyMap()
 
