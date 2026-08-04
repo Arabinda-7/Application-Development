@@ -28,6 +28,52 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@id/bottom_sheet_handle" />
 
+    <com.google.android.material.imageview.ShapeableImageView
+        android:id="@+id/iv_edit_avatar"
+        android:layout_width="80dp"
+        android:layout_height="80dp"
+        android:layout_marginTop="24dp"
+        android:scaleType="centerCrop"
+        android:src="@drawable/boy_avatar_profile"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/tv_title"
+        app:shapeAppearanceOverlay="@style/ShapeAppearance.App.Circle"
+        android:background="#1AFFFFFF"
+        android:padding="2dp"
+        app:strokeColor="#2EC4B6"
+        app:strokeWidth="2dp"/>
+
+    <TextView
+        android:id="@+id/btn_change_photo"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="8dp"
+        android:text="CHANGE PHOTO"
+        android:textColor="#2EC4B6"
+        android:textSize="10sp"
+        android:textStyle="bold"
+        android:padding="8dp"
+        android:background="?attr/selectableItemBackground"
+        app:layout_constraintEnd_toEndOf="@id/iv_edit_avatar"
+        app:layout_constraintStart_toStartOf="@id/iv_edit_avatar"
+        app:layout_constraintTop_toBottomOf="@id/iv_edit_avatar" />
+
+    <HorizontalScrollView
+        android:id="@+id/scroll_avatars"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="12dp"
+        android:scrollbars="none"
+        app:layout_constraintTop_toBottomOf="@id/btn_change_photo">
+        <LinearLayout
+            android:id="@+id/container_avatars"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:paddingHorizontal="8dp"/>
+    </HorizontalScrollView>
+
     <com.google.android.material.textfield.TextInputLayout
         android:id="@+id/til_name"
         style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
@@ -38,7 +84,7 @@
         android:textColorHint="#66FFFFFF"
         app:boxStrokeColor="#2EC4B6"
         app:hintTextColor="#2EC4B6"
-        app:layout_constraintTop_toBottomOf="@id/tv_title">
+        app:layout_constraintTop_toBottomOf="@id/scroll_avatars">
 
         <com.google.android.material.textfield.TextInputEditText
             android:id="@+id/et_edit_name"

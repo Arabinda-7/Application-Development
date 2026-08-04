@@ -77,13 +77,14 @@
                 android:progress="75"
                 android:progressDrawable="@drawable/circular_progress_drawable" />
 
-            <ImageView
+            <com.google.android.material.imageview.ShapeableImageView
                 android:id="@+id/iv_profile_avatar"
                 android:layout_width="96dp"
                 android:layout_height="96dp"
                 android:layout_gravity="center"
                 android:scaleType="centerCrop"
                 android:src="@drawable/boy_avatar_profile"
+                app:shapeAppearanceOverlay="@style/ShapeAppearance.App.Circle"
                 android:contentDescription="Avatar" />
         </FrameLayout>
 

@@ -39,14 +39,12 @@ import javax.inject.Inject
 @AndroidEntryPoint
 class AssistantActivity : BaseActivity() {
 
-    @Inject lateinit var getAssistantInsightsUseCase: GetAssistantInsightsUseCase
     @Inject lateinit var brain: AssistantBrain
     @Inject lateinit var actionHandler: AssistantActionHandler
     @Inject lateinit var aiChatRepository: com.example.allinone.data.repository.AiChatRepository
     @Inject lateinit var autoCleanupAssistantHistoryUseCase: com.example.allinone.domain.usecase.assistant.AutoCleanupAssistantHistoryUseCase
     @Inject lateinit var voiceManager: VoiceInteractionManager
 
-    private var insights by mutableStateOf<List<AssistantBrain.Insight>>(emptyList())
     private var currentSessionId by mutableLongStateOf(-1L)
     private var commandInput by mutableStateOf("")
     private var isThinking by mutableStateOf(false)
@@ -60,7 +58,6 @@ class AssistantActivity : BaseActivity() {
 
         lifecycleScope.launch {
             autoCleanupAssistantHistoryUseCase()
-            insights = getAssistantInsightsUseCase()
             
             val isVoiceSession = intent.getBooleanExtra("START_VOICE", false)
             val prefix = if (isVoiceSession) "Voice Interaction" else "Chat"
@@ -87,7 +84,6 @@ class AssistantActivity : BaseActivity() {
 
             CompositionLocalProvider(LocalAppStyle provides appStyle) {
                 AssistantMainScreen(
-                    insights = insights,
                     chatMessages = chatMessages,
                     commandInput = commandInput,
                     isListening = isListening,
@@ -99,7 +95,11 @@ class AssistantActivity : BaseActivity() {
                     onMuteToggle = { isMuted = !isMuted },
                     onNewChat = { createNewChat() },
                     onHistory = { startActivity(Intent(this@AssistantActivity, AssistantHistoryActivity::class.java)) },
-                    onSettings = { startActivity(Intent(this@AssistantActivity, SettingsActivity::class.java)) },
+                    onSettings = { 
+                        startActivity(Intent(this@AssistantActivity, SettingsActivity::class.java).apply {
+                            putExtra(SettingsActivity.EXTRA_SECTION, "AI_ASSISTANT")
+                        }) 
+                    },
                     onBack = { finish() }
                 )
             }
@@ -184,7 +184,6 @@ class AssistantActivity : BaseActivity() {
     @OptIn(ExperimentalMaterial3Api::class)
     @Composable
     fun AssistantMainScreen(
-        insights: List<AssistantBrain.Insight>,
         chatMessages: List<ChatMessage>,
         commandInput: String,
         isListening: Boolean,
@@ -246,14 +245,6 @@ class AssistantActivity : BaseActivity() {
             }
         ) { padding ->
             Column(modifier = Modifier.padding(padding).fillMaxSize()) {
-                if (insights.isNotEmpty() && !isThinking && !isListening) {
-                    LazyRow(contentPadding = PaddingValues(16.dp), horizontalArrangement = Arrangement.spacedBy(12.dp)) {
-                        items(insights) { insight ->
-                            InsightCard(insight)
-                        }
-                    }
-                }
-
                 val listState = rememberLazyListState()
                 LaunchedEffect(chatMessages.size) {
                     if (chatMessages.isNotEmpty()) listState.animateScrollToItem(chatMessages.size - 1)

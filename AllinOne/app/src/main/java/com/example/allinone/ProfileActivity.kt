@@ -269,16 +269,68 @@ class ProfileActivity : BaseActivity() {
 
         val etName = view.findViewById<EditText>(R.id.et_edit_name)
         val etBio = view.findViewById<EditText>(R.id.et_edit_bio)
+        val ivEditAvatar = view.findViewById<com.google.android.material.imageview.ShapeableImageView>(R.id.iv_edit_avatar)
+        val btnChangePhoto = view.findViewById<View>(R.id.btn_change_photo)
+        val containerAvatars = view.findViewById<android.widget.LinearLayout>(R.id.container_avatars)
         val btnSave = view.findViewById<View>(R.id.btn_save_profile)
 
+        var tempImageUri: String? = profile.profileImageUri
+        var tempAvatarRes: Int = profile.avatarRes
+
+        fun updateSheetPreview() {
+            if (tempImageUri != null) {
+                ivEditAvatar.setImageURI(Uri.parse(tempImageUri))
+            } else {
+                ivEditAvatar.setImageResource(tempAvatarRes)
+            }
+        }
+
+        updateSheetPreview()
         etName.setText(profile.name)
         etBio.setText(profile.bio)
+
+        btnChangePhoto.setOnClickListener {
+            val pickerIntent = Intent(Intent.ACTION_OPEN_DOCUMENT).apply {
+                addCategory(Intent.CATEGORY_OPENABLE)
+                type = "image/*"
+            }
+            imagePickerLauncher.launch(pickerIntent)
+            bottomSheet.dismiss()
+        }
+
+        val avatars = listOf(R.drawable.boy_avatar_profile, R.drawable.girl_avatar_profile)
+        avatars.forEach { res ->
+            val iv = com.google.android.material.imageview.ShapeableImageView(this).apply {
+                val s = (48 * resources.displayMetrics.density).toInt()
+                layoutParams = android.widget.LinearLayout.LayoutParams(s, s).apply { setMargins(16, 16, 16, 16) }
+                setImageResource(res)
+                shapeAppearanceModel = ivEditAvatar.shapeAppearanceModel
+                strokeWidth = if (tempAvatarRes == res && tempImageUri == null) 4f else 0f
+                strokeColor = android.content.res.ColorStateList.valueOf(Color.parseColor("#2EC4B6"))
+                setOnClickListener {
+                    tempAvatarRes = res
+                    tempImageUri = null
+                    updateSheetPreview()
+                    // Update all strokes
+                    for (i in 0 until containerAvatars.childCount) {
+                        (containerAvatars.getChildAt(i) as? com.google.android.material.imageview.ShapeableImageView)?.strokeWidth = 0f
+                    }
+                    strokeWidth = 4f
+                }
+            }
+            containerAvatars.addView(iv)
+        }
 
         btnSave.setOnClickListener {
             val newName = etName.text.toString().trim()
             val newBio = etBio.text.toString().trim()
             if (newName.isNotEmpty()) {
-                viewModel.updateProfile(profile.copy(name = newName, bio = newBio))
+                viewModel.updateProfile(profile.copy(
+                    name = newName, 
+                    bio = newBio,
+                    profileImageUri = tempImageUri,
+                    avatarRes = tempAvatarRes
+                ))
                 bottomSheet.dismiss()
                 Toast.makeText(this, "Profile Updated", Toast.LENGTH_SHORT).show()
             } else {

@@ -24,17 +24,21 @@ import com.example.allinone.ui.home.components.VoiceOverlay
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.launch
+import java.text.SimpleDateFormat
+import java.util.*
 import javax.inject.Inject
 
 @AndroidEntryPoint
 class MainActivity : BaseActivity() {
 
     @Inject lateinit var assistantHandler: MainAssistantHandler
+    @Inject lateinit var aiChatRepository: com.example.allinone.data.repository.AiChatRepository
 
     private val viewModel: MainActivityViewModel by viewModels()
     private val navigationHandler by lazy { MainNavigationHandler(this) }
     private val mainHandler = android.os.Handler(android.os.Looper.getMainLooper())
     private var showVoiceOverlay by mutableStateOf(false)
+    private var currentVoiceSessionId by mutableLongStateOf(-1L)
     private val voiceConversation = mutableStateListOf<ChatMessage>()
 
     private val lockLauncher = registerForActivityResult(
@@ -97,6 +101,7 @@ class MainActivity : BaseActivity() {
                             onNavigateToAssistant = { navigationHandler.navigateToAssistant() },
                             onNavigateToProfile = { navigationHandler.navigateToProfile() },
                             onNavigateToPerformanceHistory = { navigationHandler.navigateToPerformanceHistory() },
+                            onTabSelected = { viewModel.updateSelectedTab(it) },
                             onQuickAddTodo = { startActivity(Intent(this@MainActivity, AddTaskActivity::class.java)) },
                             onQuickAddExpense = { startActivity(Intent(this@MainActivity, AddFinanceActivity::class.java)) },
                             onQuickAddNote = { startActivity(Intent(this@MainActivity, AddNoteActivity::class.java)) },
@@ -108,6 +113,12 @@ class MainActivity : BaseActivity() {
                             onVoiceAssistantRequested = { 
                                 showVoiceOverlay = true
                                 voiceConversation.clear()
+                                lifecycleScope.launch {
+                                    currentVoiceSessionId = aiChatRepository.createSession(
+                                        "Voice Interaction ${SimpleDateFormat("MMM dd, HH:mm", Locale.getDefault()).format(Date())}", 
+                                        "voice"
+                                    )
+                                }
                                 assistantHandler.toggleVoice(this@MainActivity, 
                                     onCommandProcessed = { handleVoiceCommand(it) },
                                     onError = { Toast.makeText(this@MainActivity, it, Toast.LENGTH_SHORT).show() }
@@ -126,6 +137,7 @@ class MainActivity : BaseActivity() {
                             messages = voiceConversation,
                             onDismiss = { 
                                 showVoiceOverlay = false
+                                currentVoiceSessionId = -1L
                                 voiceManager.stopListening()
                             },
                             onMicClick = { 
@@ -167,16 +179,29 @@ class MainActivity : BaseActivity() {
         viewModel.refreshState(this)
     }
 
+    override fun onResume() {
+        super.onResume()
+        viewModel.updateSelectedTab(0)
+        viewModel.refreshState(this)
+    }
+
     private fun handleVoiceCommand(text: String) {
         voiceConversation.add(ChatMessage(text, true))
         
         lifecycleScope.launch {
+            if (currentVoiceSessionId != -1L) {
+                aiChatRepository.insertMessage(currentVoiceSessionId, text, true, System.currentTimeMillis())
+            }
+
             val brain = assistantHandler.getBrain()
             val action = brain.parseCommand(text)
             
             if (action == null) {
                 val fallback = "I'm not sure how to help with that yet."
                 voiceConversation.add(ChatMessage(fallback, false))
+                if (currentVoiceSessionId != -1L) {
+                    aiChatRepository.insertMessage(currentVoiceSessionId, fallback, false, System.currentTimeMillis())
+                }
                 assistantHandler.getVoiceManager().speak(fallback)
                 return@launch
             }
@@ -184,12 +209,18 @@ class MainActivity : BaseActivity() {
             val responseText = action.dynamicResponse ?: if (action.type == "CHAT_RESPONSE") action.payload else null
             responseText?.let { 
                 voiceConversation.add(ChatMessage(it, false))
+                if (currentVoiceSessionId != -1L) {
+                    aiChatRepository.insertMessage(currentVoiceSessionId, it, false, System.currentTimeMillis())
+                }
                 assistantHandler.getVoiceManager().speak(it)
             }
             
             val status = assistantHandler.getActionHandler().executeAction(this@MainActivity, action)
             status?.let { 
                 voiceConversation.add(ChatMessage(it, false))
+                if (currentVoiceSessionId != -1L) {
+                    aiChatRepository.insertMessage(currentVoiceSessionId, it, false, System.currentTimeMillis())
+                }
                 assistantHandler.getVoiceManager().speak(it)
             }
         }
