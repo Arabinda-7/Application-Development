@@ -20,6 +20,8 @@ class MainAssistantHandler @Inject constructor(
     }
 
     fun getVoiceManager(): VoiceInteractionManager = voiceManager
+    fun getBrain(): AssistantBrain = brain
+    fun getActionHandler(): AssistantActionHandler = actionHandler
 
     fun toggleVoice(
         activity: BaseActivity,

@@ -10,7 +10,7 @@ import androidx.compose.material.icons.automirrored.filled.Send
 import androidx.compose.material.icons.filled.Mic
 import androidx.compose.material.icons.filled.MicOff
 import androidx.compose.material3.*
-import androidx.compose.runtime.Composable
+import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -20,6 +20,7 @@ import androidx.compose.ui.unit.sp
 import com.example.allinone.AssistantBrain
 import com.example.allinone.LocalAppStyle
 import com.example.allinone.assistant.model.ChatMessage
+import kotlinx.coroutines.delay
 
 @Composable
 fun InsightCard(insight: AssistantBrain.Insight) {
@@ -39,11 +40,27 @@ fun InsightCard(insight: AssistantBrain.Insight) {
 }
 
 @Composable
-fun ChatBubble(msg: ChatMessage) {
+fun ChatBubble(msg: ChatMessage, isLatest: Boolean = false) {
     val style = LocalAppStyle.current
     val alignment = if (msg.isUser) Alignment.End else Alignment.Start
     val color = if (msg.isUser) style.accentColor else style.surfaceColor
     
+    // Typewriter animation logic
+    var visibleText by remember(msg.timestamp) { 
+        mutableStateOf(if (msg.isUser || !isLatest) msg.text else "") 
+    }
+    
+    LaunchedEffect(msg.text, isLatest) {
+        if (!msg.isUser && isLatest && visibleText.length < msg.text.length) {
+            msg.text.forEachIndexed { index, _ ->
+                if (visibleText.length <= index) {
+                    visibleText = msg.text.substring(0, index + 1)
+                    delay(30) // Faster speed
+                }
+            }
+        }
+    }
+
     Column(modifier = Modifier.fillMaxWidth().padding(horizontal = 8.dp), horizontalAlignment = alignment) {
         Surface(
             color = color,
@@ -51,7 +68,7 @@ fun ChatBubble(msg: ChatMessage) {
             modifier = Modifier.widthIn(max = 300.dp)
         ) {
             Text(
-                msg.text,
+                visibleText,
                 modifier = Modifier.padding(12.dp),
                 color = if (msg.isUser) Color.Black else Color.White,
                 fontSize = 15.sp

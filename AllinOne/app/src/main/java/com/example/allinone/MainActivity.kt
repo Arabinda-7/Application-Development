@@ -14,6 +14,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.Density
 import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
 import androidx.lifecycle.lifecycleScope
+import com.example.allinone.assistant.model.ChatMessage
 import com.example.allinone.assistant.model.CommandAction
 import com.example.allinone.core.utils.UIUtils
 import com.example.allinone.ui.components.LoadingScreen
@@ -34,6 +35,7 @@ class MainActivity : BaseActivity() {
     private val navigationHandler by lazy { MainNavigationHandler(this) }
     private val mainHandler = android.os.Handler(android.os.Looper.getMainLooper())
     private var showVoiceOverlay by mutableStateOf(false)
+    private val voiceConversation = mutableStateListOf<ChatMessage>()
 
     private val lockLauncher = registerForActivityResult(
         ActivityResultContracts.StartActivityForResult()
@@ -105,46 +107,34 @@ class MainActivity : BaseActivity() {
                             },
                             onVoiceAssistantRequested = { 
                                 showVoiceOverlay = true
+                                voiceConversation.clear()
                                 assistantHandler.toggleVoice(this@MainActivity, 
-                                    onCommandProcessed = { 
-                                        showVoiceOverlay = false
-                                        assistantHandler.processCommand(this@MainActivity, lifecycleScope, it) 
-                                    },
-                                    onError = { 
-                                        showVoiceOverlay = false
-                                        Toast.makeText(this@MainActivity, it, Toast.LENGTH_SHORT).show() 
-                                    }
+                                    onCommandProcessed = { handleVoiceCommand(it) },
+                                    onError = { Toast.makeText(this@MainActivity, it, Toast.LENGTH_SHORT).show() }
                                 )
                             }
                         )
 
                         val voiceManager = assistantHandler.getVoiceManager()
-                        if (voiceManager != null) {
-                            val isListening by voiceManager.isListening.collectAsState()
-                            val partialText by voiceManager.partialText.collectAsState()
+                        val isListening by voiceManager.isListening.collectAsState()
+                        val partialText by voiceManager.partialText.collectAsState()
 
-                            VoiceOverlay(
-                                isVisible = showVoiceOverlay,
-                                isListening = isListening,
-                                partialText = partialText,
-                                onDismiss = { 
-                                    showVoiceOverlay = false
-                                    voiceManager.stopListening()
-                                },
-                                onMicClick = { 
-                                    assistantHandler.toggleVoice(this@MainActivity, 
-                                        onCommandProcessed = { 
-                                            showVoiceOverlay = false
-                                            assistantHandler.processCommand(this@MainActivity, lifecycleScope, it) 
-                                        },
-                                        onError = { 
-                                            showVoiceOverlay = false
-                                            Toast.makeText(this@MainActivity, it, Toast.LENGTH_SHORT).show() 
-                                        }
-                                    )
-                                }
-                            )
-                        }
+                        VoiceOverlay(
+                            isVisible = showVoiceOverlay,
+                            isListening = isListening,
+                            partialText = partialText,
+                            messages = voiceConversation,
+                            onDismiss = { 
+                                showVoiceOverlay = false
+                                voiceManager.stopListening()
+                            },
+                            onMicClick = { 
+                                assistantHandler.toggleVoice(this@MainActivity, 
+                                    onCommandProcessed = { handleVoiceCommand(it) },
+                                    onError = { Toast.makeText(this@MainActivity, it, Toast.LENGTH_SHORT).show() }
+                                )
+                            }
+                        )
                     }
                 }
             }
@@ -175,6 +165,34 @@ class MainActivity : BaseActivity() {
         }
 
         viewModel.refreshState(this)
+    }
+
+    private fun handleVoiceCommand(text: String) {
+        voiceConversation.add(ChatMessage(text, true))
+        
+        lifecycleScope.launch {
+            val brain = assistantHandler.getBrain()
+            val action = brain.parseCommand(text)
+            
+            if (action == null) {
+                val fallback = "I'm not sure how to help with that yet."
+                voiceConversation.add(ChatMessage(fallback, false))
+                assistantHandler.getVoiceManager().speak(fallback)
+                return@launch
+            }
+            
+            val responseText = action.dynamicResponse ?: if (action.type == "CHAT_RESPONSE") action.payload else null
+            responseText?.let { 
+                voiceConversation.add(ChatMessage(it, false))
+                assistantHandler.getVoiceManager().speak(it)
+            }
+            
+            val status = assistantHandler.getActionHandler().executeAction(this@MainActivity, action)
+            status?.let { 
+                voiceConversation.add(ChatMessage(it, false))
+                assistantHandler.getVoiceManager().speak(it)
+            }
+        }
     }
 
 

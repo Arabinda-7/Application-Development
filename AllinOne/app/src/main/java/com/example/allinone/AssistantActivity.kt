@@ -203,7 +203,7 @@ class AssistantActivity : BaseActivity() {
         var showMenu by remember { mutableStateOf(false) }
 
         Scaffold(
-            containerColor = style.backgroundColor,
+            containerColor = Color.Black,
             topBar = {
                 CenterAlignedTopAppBar(
                     title = { Text("ASSISTANT", fontWeight = FontWeight.Bold, color = style.accentColor) },
@@ -266,7 +266,8 @@ class AssistantActivity : BaseActivity() {
                     verticalArrangement = Arrangement.spacedBy(8.dp)
                 ) {
                     items(chatMessages) { msg ->
-                        ChatBubble(msg)
+                        val isLatest = chatMessages.last() == msg
+                        ChatBubble(msg, isLatest)
                     }
                     if (isThinking) {
                         item { ThinkingIndicator() }

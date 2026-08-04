@@ -137,7 +137,8 @@ fun AssistantScreen(
                         verticalArrangement = Arrangement.spacedBy(10.dp)
                     ) {
                         items(chatMessages) { message ->
-                            ChatBubble(message)
+                            val isLatest = chatMessages.last() == message
+                            ChatBubble(message, isLatest)
                         }
                     }
                 }

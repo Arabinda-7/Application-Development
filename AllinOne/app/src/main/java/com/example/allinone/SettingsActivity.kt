@@ -152,58 +152,61 @@ class SettingsActivity : BaseActivity() {
                 configItems.add(ConfigItem("Import Backup", "Restore from JSON") { backupHandler.importBackup() })
             }
             "APPEARANCE" -> {
-                configItems.add(ConfigItem("Global Scaling", isHeader = true))
+                configItems.add(ConfigItem("System Sync", isHeader = true))
                 configItems.add(ConfigItem("Follow System Settings", "Sync display and font size with phone", isToggle = true, isChecked = settings.isSystemAppearanceEnabled) {
                     viewModel.updateSettings(settings.copy(isSystemAppearanceEnabled = !settings.isSystemAppearanceEnabled))
                     recreate()
                 })
                 
-                val scaleOptions = listOf("XS", "S", "M", "L", "XL")
-                configItems.add(ConfigItem("Current Focus Size", "Circle scale for mood logging (Current: ${settings.homeFocusSize})", options = scaleOptions, selectedIndex = scaleOptions.indexOf(settings.homeFocusSize), onOptionSelected = { i ->
-                    viewModel.updateSettings(settings.copy(homeFocusSize = scaleOptions[i]))
-                    showSectionSettings("APPEARANCE")
-                }))
-                configItems.add(ConfigItem("Global Display Size", "Icons and margins for all sub-sections (Current: ${settings.displaySize})", options = scaleOptions, selectedIndex = scaleOptions.indexOf(settings.displaySize), onOptionSelected = { i ->
-                    viewModel.updateSettings(settings.copy(displaySize = scaleOptions[i]))
-                    showSectionSettings("APPEARANCE")
-                }))
-                configItems.add(ConfigItem("Home Page Display Size", "Dedicated scale for the main dashboard (Current: ${settings.homeDisplaySize})", options = scaleOptions, selectedIndex = scaleOptions.indexOf(settings.homeDisplaySize), onOptionSelected = { i ->
-                    viewModel.updateSettings(settings.copy(homeDisplaySize = scaleOptions[i]))
-                    showSectionSettings("APPEARANCE")
-                }))
-                configItems.add(ConfigItem("Text Font Size", "Scaling for titles and content (Current: ${settings.fontSize})", options = scaleOptions, selectedIndex = scaleOptions.indexOf(settings.fontSize), onOptionSelected = { i ->
-                    viewModel.updateSettings(settings.copy(fontSize = scaleOptions[i]))
-                    showSectionSettings("APPEARANCE")
-                }))
+                if (!settings.isSystemAppearanceEnabled) {
+                    configItems.add(ConfigItem("Global Scaling", isHeader = true))
+                    val scaleOptions = listOf("XS", "S", "M", "L", "XL")
+                    configItems.add(ConfigItem("Current Focus Size", "Circle scale for mood logging (Current: ${settings.homeFocusSize})", options = scaleOptions, selectedIndex = scaleOptions.indexOf(settings.homeFocusSize), onOptionSelected = { i ->
+                        viewModel.updateSettings(settings.copy(homeFocusSize = scaleOptions[i]))
+                        showSectionSettings("APPEARANCE")
+                    }))
+                    configItems.add(ConfigItem("Global Display Size", "Icons and margins for all sub-sections (Current: ${settings.displaySize})", options = scaleOptions, selectedIndex = scaleOptions.indexOf(settings.displaySize), onOptionSelected = { i ->
+                        viewModel.updateSettings(settings.copy(displaySize = scaleOptions[i]))
+                        showSectionSettings("APPEARANCE")
+                    }))
+                    configItems.add(ConfigItem("Home Page Display Size", "Dedicated scale for the main dashboard (Current: ${settings.homeDisplaySize})", options = scaleOptions, selectedIndex = scaleOptions.indexOf(settings.homeDisplaySize), onOptionSelected = { i ->
+                        viewModel.updateSettings(settings.copy(homeDisplaySize = scaleOptions[i]))
+                        showSectionSettings("APPEARANCE")
+                    }))
+                    configItems.add(ConfigItem("Text Font Size", "Scaling for titles and content (Current: ${settings.fontSize})", options = scaleOptions, selectedIndex = scaleOptions.indexOf(settings.fontSize), onOptionSelected = { i ->
+                        viewModel.updateSettings(settings.copy(fontSize = scaleOptions[i]))
+                        showSectionSettings("APPEARANCE")
+                    }))
 
-                configItems.add(ConfigItem("Advanced Look & Feel", isHeader = true))
-                configItems.add(ConfigItem("Theme Mode", "Override system theme (Current: ${settings.appThemeMode})", options = listOf("LIGHT", "DARK", "OLED"), selectedIndex = listOf("LIGHT", "DARK", "OLED").indexOf(settings.appThemeMode), onOptionSelected = { i ->
-                    viewModel.updateSettings(settings.copy(appThemeMode = listOf("LIGHT", "DARK", "OLED")[i]))
-                    recreate()
-                }))
-                configItems.add(ConfigItem("Accent Color", "Custom highlights app-wide") {
-                    appearanceHandler.showColorPickerDialog("APP_ACCENT") { showSectionSettings("APPEARANCE") }
-                })
-                configItems.add(ConfigItem("Border Radius", "Curvature for cards and buttons (Current: ${settings.appBorderRadius}dp)") {
-                    appearanceHandler.showBorderRadiusSliderDialog()
-                })
-                
-                val cardStyles = listOf("DEFAULT", "FLAT", "GLASS", "NEOMORPHIC")
-                configItems.add(ConfigItem("Card Style", "Surface appearance (Current: ${settings.appCardStyle})", options = cardStyles, selectedIndex = cardStyles.indexOf(settings.appCardStyle), onOptionSelected = { i ->
-                    viewModel.updateSettings(settings.copy(appCardStyle = cardStyles[i]))
-                    showSectionSettings("APPEARANCE")
-                }))
-                
-                val fontFamilies = listOf("DEFAULT", "SERIF", "MONOSPACE", "CONDENSED")
-                configItems.add(ConfigItem("Font Family", "Change typography style (Current: ${settings.appFontFamily})", options = fontFamilies, selectedIndex = fontFamilies.indexOf(settings.appFontFamily), onOptionSelected = { i ->
-                    viewModel.updateSettings(settings.copy(appFontFamily = fontFamilies[i]))
-                    showSectionSettings("APPEARANCE")
-                }))
-                
-                configItems.add(ConfigItem("Show Shadows", "Toggle UI depth and elevation", isToggle = true, isChecked = settings.appShowShadows) {
-                    viewModel.updateSettings(settings.copy(appShowShadows = !settings.appShowShadows))
-                    showSectionSettings("APPEARANCE")
-                })
+                    configItems.add(ConfigItem("Advanced Look & Feel", isHeader = true))
+                    configItems.add(ConfigItem("Theme Mode", "Override system theme (Current: ${settings.appThemeMode})", options = listOf("LIGHT", "DARK", "OLED"), selectedIndex = listOf("LIGHT", "DARK", "OLED").indexOf(settings.appThemeMode), onOptionSelected = { i ->
+                        viewModel.updateSettings(settings.copy(appThemeMode = listOf("LIGHT", "DARK", "OLED")[i]))
+                        recreate()
+                    }))
+                    configItems.add(ConfigItem("Accent Color", "Custom highlights app-wide") {
+                        appearanceHandler.showColorPickerDialog("APP_ACCENT") { showSectionSettings("APPEARANCE") }
+                    })
+                    configItems.add(ConfigItem("Border Radius", "Curvature for cards and buttons (Current: ${settings.appBorderRadius}dp)") {
+                        appearanceHandler.showBorderRadiusSliderDialog()
+                    })
+                    
+                    val cardStyles = listOf("DEFAULT", "FLAT", "GLASS", "NEOMORPHIC")
+                    configItems.add(ConfigItem("Card Style", "Surface appearance (Current: ${settings.appCardStyle})", options = cardStyles, selectedIndex = cardStyles.indexOf(settings.appCardStyle), onOptionSelected = { i ->
+                        viewModel.updateSettings(settings.copy(appCardStyle = cardStyles[i]))
+                        showSectionSettings("APPEARANCE")
+                    }))
+                    
+                    val fontFamilies = listOf("DEFAULT", "SERIF", "MONOSPACE", "CONDENSED")
+                    configItems.add(ConfigItem("Font Family", "Change typography style (Current: ${settings.appFontFamily})", options = fontFamilies, selectedIndex = fontFamilies.indexOf(settings.appFontFamily), onOptionSelected = { i ->
+                        viewModel.updateSettings(settings.copy(appFontFamily = fontFamilies[i]))
+                        showSectionSettings("APPEARANCE")
+                    }))
+                    
+                    configItems.add(ConfigItem("Show Shadows", "Toggle UI depth and elevation", isToggle = true, isChecked = settings.appShowShadows) {
+                        viewModel.updateSettings(settings.copy(appShowShadows = !settings.appShowShadows))
+                        showSectionSettings("APPEARANCE")
+                    })
+                }
             }
         }
         findViewById<RecyclerView>(R.id.settings_list).adapter = ConfigAdapter(configItems) { /* Callback */ }
