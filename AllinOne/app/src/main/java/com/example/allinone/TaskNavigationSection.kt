@@ -44,6 +44,10 @@ class TaskNavigationSection(
         }
 
         navTasks.setOnClickListener { switchSection("Tasks", currentSection) }
+        navTasks.setOnLongClickListener {
+            TaskAnalyticsHandler.show(footerView.context)
+            true
+        }
         navTodo.setOnClickListener { switchSection("List", currentSection) }
         
         updateNavUI(currentSection)

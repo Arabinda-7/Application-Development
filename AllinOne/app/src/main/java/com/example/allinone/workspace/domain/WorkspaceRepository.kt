@@ -77,11 +77,16 @@ class WorkspaceRepository(private val dao: WorkspaceDao) {
     private suspend fun checkAndUpdateProject(projectId: String) {
         val goals = dao.getGoalsForProject(projectId).firstOrNull() ?: emptyList()
         val features = dao.getFeaturesForProject(projectId).firstOrNull() ?: emptyList()
+        val tasks = dao.getTasksForProject(projectId).firstOrNull() ?: emptyList()
+        val bugs = dao.getBugsForProject(projectId).firstOrNull() ?: emptyList()
         
         val allGoalsDone = goals.all { it.status == "Completed" }
         val allFeaturesDone = features.all { it.status == "Shipped" }
+        val allTasksDone = tasks.all { it.status == "Done" }
+        val allBugsFixed = bugs.all { it.status == "Fixed" || it.status == "Verified" }
         
-        if (allGoalsDone && allFeaturesDone && (goals.isNotEmpty() || features.isNotEmpty())) {
+        if (allGoalsDone && allFeaturesDone && allTasksDone && allBugsFixed && 
+            (goals.isNotEmpty() || features.isNotEmpty() || tasks.isNotEmpty() || bugs.isNotEmpty())) {
             val project = dao.getProjectById(projectId).firstOrNull()
             if (project != null && project.status != "Completed") {
                 dao.updateProject(project.copy(status = "Completed", updatedAt = System.currentTimeMillis()))

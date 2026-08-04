@@ -28,15 +28,40 @@ open class BaseActivity : AppCompatActivity() {
     private var activeDialog: Dialog? = null
 
     private var onPermissionGranted: (() -> Unit)? = null
+    private var requestedPermission: String? = null
+
     private val permissionLauncher = registerForActivityResult(ActivityResultContracts.RequestPermission()) { isGranted ->
         if (isGranted) {
             onPermissionGranted?.invoke()
+        } else {
+            requestedPermission?.let { perm ->
+                if (!androidx.core.app.ActivityCompat.shouldShowRequestPermissionRationale(this, perm)) {
+                    showPermissionSettingsDialog(perm)
+                }
+            }
         }
     }
 
     private var onPermissionsResult: ((Map<String, Boolean>) -> Unit)? = null
     private val multiplePermissionsLauncher = registerForActivityResult(ActivityResultContracts.RequestMultiplePermissions()) { result ->
         onPermissionsResult?.invoke(result)
+    }
+
+    fun showPermissionSettingsDialog(permission: String) {
+        val name = if (permission.contains("RECORD_AUDIO")) "Microphone" else "Required"
+        showStyledConfirmationDialog(
+            title = "$name Permission",
+            message = "$name access is required for this feature. Please enable it in App Settings.",
+            actionText = "SETTINGS",
+            onConfirm = {
+                try {
+                    val intent = android.content.Intent(android.provider.Settings.ACTION_APPLICATION_DETAILS_SETTINGS).apply {
+                        data = android.net.Uri.fromParts("package", packageName, null)
+                    }
+                    startActivity(intent)
+                } catch (e: Exception) {}
+            }
+        )
     }
 
     fun checkAndRequestPermission(permission: String, onGranted: () -> Unit) {
@@ -46,6 +71,7 @@ open class BaseActivity : AppCompatActivity() {
             }
             else -> {
                 onPermissionGranted = onGranted
+                requestedPermission = permission
                 permissionLauncher.launch(permission)
             }
         }

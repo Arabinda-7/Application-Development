@@ -83,6 +83,18 @@ class WorkspaceViewModel(private val repository: WorkspaceRepository) : ViewMode
     }
 
     fun updateProject(project: ProjectEntity) {
+        if (project.status == "Completed") {
+            val (canComplete, message) = canCompleteProject(project.id)
+            if (!canComplete) {
+                // We don't have a way to emit a one-time event easily here without a side effect
+                // For now, let's at least log it and prevent it if possible, 
+                // but the UI should ideally handle the blocking.
+                // I'll add a property to UIState to show an error message.
+                _uiState.update { it.copy(errorMessage = message) }
+                return
+            }
+        }
+        _uiState.update { it.copy(errorMessage = null) }
         viewModelScope.launch { repository.updateProject(project) }
     }
 
@@ -90,6 +102,10 @@ class WorkspaceViewModel(private val repository: WorkspaceRepository) : ViewMode
         viewModelScope.launch {
             repository.deleteProject(project)
         }
+    }
+
+    fun clearErrorMessage() {
+        _uiState.update { it.copy(errorMessage = null) }
     }
 
     fun addTask(
@@ -271,7 +287,7 @@ class WorkspaceViewModel(private val repository: WorkspaceRepository) : ViewMode
         viewModelScope.launch {
             repository.importFromNote(note)
             if (isTransfer) {
-                com.example.allinone.DataManager.projects.remove(note)
+                com.example.allinone.DataManager.deleteProject(note)
             }
             loadProjects()
         }

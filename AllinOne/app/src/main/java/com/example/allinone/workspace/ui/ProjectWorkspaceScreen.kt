@@ -111,6 +111,16 @@ fun ProjectWorkspaceScreen(
                     Scaffold(
                         containerColor = Color.Transparent,
                         contentWindowInsets = WindowInsets(0, 0, 0, 0),
+                        snackbarHost = {
+                            uiState.errorMessage?.let { message ->
+                                val snackbarHostState = remember { SnackbarHostState() }
+                                LaunchedEffect(message) {
+                                    snackbarHostState.showSnackbar(message)
+                                    viewModel.clearErrorMessage()
+                                }
+                                SnackbarHost(hostState = snackbarHostState)
+                            }
+                        },
                         floatingActionButton = {
                             WorkspaceSpeedDialFab(
                                 currentTab = currentTab,

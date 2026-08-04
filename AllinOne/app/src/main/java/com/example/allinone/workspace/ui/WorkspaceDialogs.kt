@@ -66,7 +66,7 @@ fun DeleteConfirmationDialog(
 
 @Composable
 fun ImportSelectionDialog(onDismiss: () -> Unit, onImport: (Note) -> Unit) {
-    val notes = remember { com.example.allinone.DataManager.projects.filter { it.category == "Project" || it.category == "ProjectIdea" || it.subFeatures.isNotEmpty() } }
+    val notes = remember { com.example.allinone.DataManager.projects.filter { it.category == "Project" || it.category == "ProjectIdea" || it.category == "Idea" || it.subFeatures.isNotEmpty() } }
     AlertDialog(onDismissRequest = onDismiss, title = { Text("Import Project or Idea", color = Color.White) }, containerColor = Color(0xFF1A1A1A), text = {
         if (notes.isEmpty()) { Text("No existing projects or ideas found to import.", color = Color.White.copy(alpha = 0.6f)) }
         else { 

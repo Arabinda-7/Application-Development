@@ -67,6 +67,7 @@ object DataManager {
     private val workspaceDataManager = WorkspaceDataManager()
     private val backupDataManager = BackupDataManager()
     private val assistantSettingsManager = com.example.allinone.data.AssistantSettingsManager()
+    private val securitySettingsManager = com.example.allinone.data.SecuritySettingsManager()
 
     private val syncScope = CoroutineScope(Dispatchers.IO + Job())
     private var saveJob: Job? = null
@@ -97,6 +98,22 @@ object DataManager {
             entryPoint.workoutRepository().getAllWorkouts().collect { list ->
                 workouts.clear()
                 workouts.addAll(list)
+                notifyDataChanged()
+            }
+        }
+
+        syncScope.launch {
+            entryPoint.noteRepository().getAllNotes().collect { list ->
+                notes.clear()
+                notes.addAll(list.filter { !it.isGlobalProject })
+                notifyDataChanged()
+            }
+        }
+
+        syncScope.launch {
+            entryPoint.projectRepository().getAllProjects().collect { list ->
+                projects.clear()
+                projects.addAll(list)
                 notifyDataChanged()
             }
         }
@@ -146,12 +163,12 @@ object DataManager {
     var userAvatarRes: Int = -1
     var isAiAssistantEnabled: Boolean by assistantSettingsManager::isEnabled
     var isOnboardingCompleted: Boolean = false
-    var isAppLockEnabled: Boolean = false
-    var isBiometricLockEnabled: Boolean = false
+    var isAppLockEnabled: Boolean by securitySettingsManager::isAppLockEnabled
+    var isBiometricLockEnabled: Boolean by securitySettingsManager::isBiometricLockEnabled
     var isAppUnlocked: Boolean = true
-    var appLockQuestion: String = ""
-    var appLockAnswer: String = ""
-    var appLockPin: String = ""
+    var appLockQuestion: String by securitySettingsManager::appLockQuestion
+    var appLockAnswer: String by securitySettingsManager::appLockAnswer
+    var appLockPin: String by securitySettingsManager::appLockPin
 
     // Notification & Reminder Preferences
     var isWorkspaceNotificationEnabled: Boolean = true
@@ -219,7 +236,7 @@ object DataManager {
     var displaySize: String = "Normal"
     var fontSize: String = "Normal"
     var isAssistantVoiceEnabled: Boolean by assistantSettingsManager::isVoiceEnabled
-    var isScreenshotProtectionEnabled: Boolean = false
+    var isScreenshotProtectionEnabled: Boolean by securitySettingsManager::isScreenshotProtectionEnabled
 
     // Color & Icon Theme Preferences
     var globalHabitColor: Int = -1
@@ -313,6 +330,15 @@ object DataManager {
         }
     }
 
+    fun deleteProject(note: Note) {
+        projects.removeIf { it.timestamp == note.timestamp }
+        appContext?.let { context ->
+            syncScope.launch {
+                getEntryPoint(context).projectRepository().deleteProject(note)
+            }
+        }
+    }
+
     fun clearAllHistory() {}
     fun addActivity(activity: String) {}
     fun saveDayNote(date: String, note: String) {}
@@ -340,6 +366,14 @@ object DataManager {
         val workoutsList = entryPoint.workoutRepository().getAllWorkouts().first()
         workouts.clear()
         workouts.addAll(workoutsList)
+
+        val notesList = entryPoint.noteRepository().getAllNotes().first()
+        notes.clear()
+        notes.addAll(notesList.filter { !it.isGlobalProject })
+
+        val projectsList = entryPoint.projectRepository().getAllProjects().first()
+        projects.clear()
+        projects.addAll(projectsList)
         
         val historyMap = entryPoint.userRepository().getDayHistory().first()
         history.clear()

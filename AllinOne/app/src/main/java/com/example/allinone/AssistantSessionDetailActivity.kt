@@ -18,6 +18,7 @@ class AssistantSessionDetailActivity : BaseActivity() {
 
     @Inject lateinit var brain: AssistantBrain
     @Inject lateinit var actionHandler: AssistantActionHandler
+    @Inject lateinit var voiceManager: VoiceInteractionManager
 
     private var sessionId by mutableLongStateOf(-1L)
     private var sessionTitle by mutableStateOf("")
@@ -26,7 +27,6 @@ class AssistantSessionDetailActivity : BaseActivity() {
     private var isVoiceMuted by mutableStateOf(!DataManager.isAssistantVoiceEnabled)
     private val chatMessages = mutableStateListOf<ChatMessage>()
     private val aiChatRepo by lazy { DataManager.getAiChatRepository(this) }
-    @Inject lateinit var voiceManager: VoiceInteractionManager
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -71,6 +71,7 @@ class AssistantSessionDetailActivity : BaseActivity() {
                                 voiceManager.stopListening()
                             } else {
                                 voiceManager.startListening(
+                                    activity = this@AssistantSessionDetailActivity,
                                     onResult = { handleCommand(it) },
                                     onError = { isThinking = false }
                                 )
@@ -126,8 +127,6 @@ class AssistantSessionDetailActivity : BaseActivity() {
     }
 
     override fun onDestroy() {
-        // voiceManager is a singleton, we might not want to destroy it here if it's shared
-        // but we should at least stop listening/speaking if this activity is gone.
         voiceManager.stopListening()
         super.onDestroy()
     }

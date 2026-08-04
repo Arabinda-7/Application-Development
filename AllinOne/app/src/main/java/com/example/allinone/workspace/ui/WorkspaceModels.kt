@@ -62,7 +62,8 @@ data class WorkspaceUIState(
     val notes: List<WorkspaceNoteEntity> = emptyList(),
     val resources: List<ResourceEntity> = emptyList(),
     val logs: List<ActivityLogEntity> = emptyList(),
-    val isLoading: Boolean = true
+    val isLoading: Boolean = true,
+    val errorMessage: String? = null
 )
 
 data class ProjectStats(

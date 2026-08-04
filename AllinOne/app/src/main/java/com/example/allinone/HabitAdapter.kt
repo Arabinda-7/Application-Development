@@ -13,8 +13,10 @@ import android.widget.ImageView
 import android.widget.LinearLayout
 import android.widget.PopupWindow
 import android.widget.TextView
+import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.RecyclerView
 import com.google.android.material.card.MaterialCardView
+import kotlinx.coroutines.*
 import java.text.SimpleDateFormat
 import java.util.*
 
@@ -31,6 +33,11 @@ class HabitAdapter(
     private val onAddXP: (Int) -> Unit = {}
 ) : RecyclerView.Adapter<RecyclerView.ViewHolder>() {
 
+    private val adapterScope = CoroutineScope(Dispatchers.Main + SupervisorJob())
+    private var updateJob: Job? = null
+    
+    private val sdfYearMonthDay = SimpleDateFormat("yyyyMMdd", Locale.getDefault())
+
     companion object {
         private const val TYPE_HEADER = 1
     }
@@ -41,7 +48,7 @@ class HabitAdapter(
     private var currentFilter = "All"
     private var selectedDayIndex = 6
     private var selectedDateString = SimpleDateFormat("yyyyMMdd", Locale.getDefault()).format(Date())
-    private val todayDateString get() = SimpleDateFormat("yyyyMMdd", Locale.getDefault()).format(Date())
+    private val todayDateString get() = sdfYearMonthDay.format(Date())
     private var showCompleted = habitSettings.showCompleted
 
     init {
@@ -105,24 +112,7 @@ class HabitAdapter(
             holder.habitName.text = UIUtils.formatTitleCase(habit.name)
             holder.habitCompleted.isChecked = isCompleted
             
-            // Advanced Design Binding
-            val themeColor = if (habit.color != -1) habit.color else android.graphics.Color.parseColor("#1A73E8")
-            
-            // 1. Accent Bar Color
-            holder.itemView.findViewById<View>(R.id.accent_bar).backgroundTintList = android.content.res.ColorStateList.valueOf(themeColor)
-            
-            // 2. Icon Container Tint
-            holder.itemView.findViewById<View>(R.id.icon_container).backgroundTintList = android.content.res.ColorStateList.valueOf(themeColor).withAlpha(20)
-
-            // 3. Card Styling (Glassmorphic)
-            holder.habitCard.setCardBackgroundColor(android.graphics.Color.TRANSPARENT)
-            holder.habitCard.strokeColor = themeColor
-            holder.habitCard.strokeWidth = (1.5 * context.resources.displayMetrics.density).toInt()
-
-            // 4. Checkbox Tint (Always themed for border/fill)
-            holder.habitCompleted.backgroundTintList = android.content.res.ColorStateList.valueOf(themeColor)
-
-            UIUtils.safeSetImageResource(holder.habitIcon, habit.iconResId, R.drawable.ic_habit_tracker)
+            holder.bindTheme(habit)
 
             holder.habitCard.setOnClickListener {
                 val intent = Intent(context, HabitDetailActivity::class.java).apply {
@@ -204,7 +194,6 @@ class HabitAdapter(
                         holder.habitCompleted.isChecked = true
                         return@setOnClickListener
                     } else {
-                        // Marking logic
                         if (holder.habitCompleted.isChecked) {
                             habit.isCompleted = true
                             habit.progress = habit.target
@@ -299,52 +288,65 @@ class HabitAdapter(
     }
 
     private fun applyFilterAndSort() {
-        displayItems.clear()
+        updateJob?.cancel()
+        updateJob = adapterScope.launch {
+            val oldSnapshot = displayItems.toList()
+            val newList = withContext(Dispatchers.Default) {
+                val list = mutableListOf<Any>()
 
-        val filtered = allHabits.filter { habit ->
-            val matchesTime = if (currentFilter == "All") true else habit.frequency == currentFilter
-            val matchesDay = if (habit.repeatType == "SPECIFIC_DAYS") {
-                habit.repeatDays.contains(selectedDayIndex)
-            } else {
-                true 
+                val filtered = allHabits.filter { habit ->
+                    val matchesTime = if (currentFilter == "All") true else habit.frequency == currentFilter
+                    val matchesDay = if (habit.repeatType == "SPECIFIC_DAYS") {
+                        habit.repeatDays.contains(selectedDayIndex)
+                    } else {
+                        true 
+                    }
+                    val habitCreationDate = sdfYearMonthDay.format(Date(habit.timestamp))
+                    val isAvailableOnDate = habitCreationDate <= selectedDateString
+                    matchesTime && matchesDay && isAvailableOnDate
+                }
+
+                val sorted = when (habitSettings.sortOrder) {
+                    "Streak" -> filtered.sortedByDescending { it.completedDates.size }
+                    "Time" -> {
+                        val order = listOf("Morning", "Afternoon", "Evening", "Anytime")
+                        filtered.sortedBy { order.indexOf(it.frequency) }
+                    }
+                    else -> filtered.sortedByDescending { it.timestamp }
+                }
+
+                val activeHabits = sorted.filter { !isHabitCompletedOnSelectedDate(it) }
+                val allCompleted = sorted.filter { isHabitCompletedOnSelectedDate(it) }
+                
+                val dayOffHabits = allCompleted.filter { it.isDayOff }
+                val strictlyCompleted = allCompleted.filter { !it.isDayOff }
+
+                list.addAll(activeHabits)
+
+                if (dayOffHabits.isNotEmpty()) {
+                    list.add("Day Off ${dayOffHabits.size}")
+                    if (isDayOffExpanded) {
+                        list.addAll(dayOffHabits)
+                    }
+                }
+
+                if (showCompleted && strictlyCompleted.isNotEmpty()) {
+                    list.add("Completed ${strictlyCompleted.size}")
+                    if (isCompletedExpanded) {
+                        list.addAll(strictlyCompleted)
+                    }
+                }
+                list
             }
-            val habitCreationDate = SimpleDateFormat("yyyyMMdd", Locale.getDefault()).format(Date(habit.timestamp))
-            val isAvailableOnDate = habitCreationDate <= selectedDateString
-            matchesTime && matchesDay && isAvailableOnDate
-        }
 
-        val sorted = when (habitSettings.sortOrder) {
-            "Streak" -> filtered.sortedByDescending { it.completedDates.size }
-            "Time" -> {
-                val order = listOf("Morning", "Afternoon", "Evening", "Anytime")
-                filtered.sortedBy { order.indexOf(it.frequency) }
+            val diffResult = withContext(Dispatchers.Default) {
+                DiffUtil.calculateDiff(HabitDiffCallback(oldSnapshot, newList))
             }
-            else -> filtered.sortedByDescending { it.timestamp }
+            
+            displayItems.clear()
+            displayItems.addAll(newList)
+            diffResult.dispatchUpdatesTo(this@HabitAdapter)
         }
-
-        val activeHabits = sorted.filter { !isHabitCompletedOnSelectedDate(it) }
-        val allCompleted = sorted.filter { isHabitCompletedOnSelectedDate(it) }
-        
-        val dayOffHabits = allCompleted.filter { it.isDayOff }
-        val strictlyCompleted = allCompleted.filter { !it.isDayOff }
-
-        displayItems.addAll(activeHabits)
-
-        if (dayOffHabits.isNotEmpty()) {
-            displayItems.add("Day Off ${dayOffHabits.size}")
-            if (isDayOffExpanded) {
-                displayItems.addAll(dayOffHabits)
-            }
-        }
-
-        if (showCompleted && strictlyCompleted.isNotEmpty()) {
-            displayItems.add("Completed ${strictlyCompleted.size}")
-            if (isCompletedExpanded) {
-                displayItems.addAll(strictlyCompleted)
-            }
-        }
-
-        notifyDataSetChanged()
     }
 
     private fun triggerCompletionEffects(context: android.content.Context) {
@@ -382,6 +384,12 @@ class HabitAdapter(
         }
     }
 
+    override fun onDetachedFromRecyclerView(recyclerView: RecyclerView) {
+        super.onDetachedFromRecyclerView(recyclerView)
+        updateJob?.cancel()
+        adapterScope.cancel()
+    }
+
     fun setShowCompleted(show: Boolean) {
         showCompleted = show
         applyFilterAndSort()
@@ -408,10 +416,47 @@ class HabitAdapter(
         val tvProgress: TextView = itemView.findViewById(R.id.tv_habit_progress)
         val btnIncrement: ImageButton = itemView.findViewById(R.id.btn_increment)
         val btnDecrement: ImageButton = itemView.findViewById(R.id.btn_decrement)
+
+        fun bindTheme(habit: Habit) {
+            val context = itemView.context
+            val themeColor = if (habit.color != -1) habit.color else android.graphics.Color.parseColor("#1A73E8")
+            
+            itemView.findViewById<View>(R.id.accent_bar).backgroundTintList = android.content.res.ColorStateList.valueOf(themeColor)
+            itemView.findViewById<View>(R.id.icon_container).backgroundTintList = android.content.res.ColorStateList.valueOf(themeColor).withAlpha(20)
+
+            habitCard.setCardBackgroundColor(android.graphics.Color.TRANSPARENT)
+            habitCard.strokeColor = themeColor
+            habitCard.strokeWidth = (1.5 * context.resources.displayMetrics.density).toInt()
+
+            habitCompleted.backgroundTintList = android.content.res.ColorStateList.valueOf(themeColor)
+
+            UIUtils.safeSetImageResource(habitIcon, habit.iconResId, R.drawable.ic_habit_tracker)
+        }
     }
 
     class HeaderViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
         val title: TextView = itemView.findViewById(R.id.tv_header_title)
         val chevron: ImageView = itemView.findViewById(R.id.iv_header_chevron)
+    }
+
+    private class HabitDiffCallback(private val oldList: List<Any>, private val newList: List<Any>) : DiffUtil.Callback() {
+        override fun getOldListSize(): Int = oldList.size
+        override fun getNewListSize(): Int = newList.size
+
+        override fun areItemsTheSame(oldItemPosition: Int, newItemPosition: Int): Boolean {
+            val oldItem = oldList[oldItemPosition]
+            val newItem = newList[newItemPosition]
+            return if (oldItem is Habit && newItem is Habit) {
+                oldItem.timestamp == newItem.timestamp
+            } else if (oldItem is String && newItem is String) {
+                oldItem == newItem
+            } else false
+        }
+
+        override fun areContentsTheSame(oldItemPosition: Int, newItemPosition: Int): Boolean {
+            val oldItem = oldList[oldItemPosition]
+            val newItem = newList[newItemPosition]
+            return oldItem == newItem
+        }
     }
 }

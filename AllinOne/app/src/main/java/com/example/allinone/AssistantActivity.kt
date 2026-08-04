@@ -50,7 +50,7 @@ class AssistantActivity : BaseActivity() {
     private var currentSessionId by mutableLongStateOf(-1L)
     private var commandInput by mutableStateOf("")
     private var isThinking by mutableStateOf(false)
-    private var isVoiceMuted by mutableStateOf(false)
+    private var isMuted by mutableStateOf(false)
     private val chatMessages = mutableStateListOf<ChatMessage>()
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -76,7 +76,15 @@ class AssistantActivity : BaseActivity() {
         setContent {
             val appStyle = remember { AppStyle.fromSettings() }
             val isListening by voiceManager.isListening.collectAsState()
+            val partialText by voiceManager.partialText.collectAsState()
             
+            // Auto-fill input with partial text for live feedback
+            LaunchedEffect(partialText) {
+                if (partialText.isNotEmpty()) {
+                    commandInput = partialText
+                }
+            }
+
             CompositionLocalProvider(LocalAppStyle provides appStyle) {
                 AssistantMainScreen(
                     insights = insights,
@@ -84,11 +92,11 @@ class AssistantActivity : BaseActivity() {
                     commandInput = commandInput,
                     isListening = isListening,
                     isThinking = isThinking,
-                    isMuted = isVoiceMuted,
+                    isMuted = isMuted,
                     onCommandChange = { commandInput = it },
                     onSend = { sendCommand(it) },
                     onListenToggle = { toggleListening() },
-                    onMuteToggle = { isVoiceMuted = !isVoiceMuted },
+                    onMuteToggle = { isMuted = !isMuted },
                     onNewChat = { createNewChat() },
                     onHistory = { startActivity(Intent(this@AssistantActivity, AssistantHistoryActivity::class.java)) },
                     onSettings = { startActivity(Intent(this@AssistantActivity, SettingsActivity::class.java)) },
@@ -104,6 +112,7 @@ class AssistantActivity : BaseActivity() {
         } else {
             checkAndRequestPermission(android.Manifest.permission.RECORD_AUDIO) {
                 voiceManager.startListening(
+                    activity = this@AssistantActivity,
                     onResult = { text ->
                         sendCommand(text)
                     },
@@ -164,7 +173,7 @@ class AssistantActivity : BaseActivity() {
 
     private fun addAssistantMessage(text: String) {
         chatMessages.add(ChatMessage(text, false))
-        if (!isVoiceMuted) voiceManager.speak(text)
+        if (!isMuted) voiceManager.speak(text)
         lifecycleScope.launch {
             if (currentSessionId != -1L) {
                 aiChatRepository.insertMessage(currentSessionId, text, false, System.currentTimeMillis())
@@ -194,7 +203,7 @@ class AssistantActivity : BaseActivity() {
         var showMenu by remember { mutableStateOf(false) }
 
         Scaffold(
-            containerColor = Color.Transparent,
+            containerColor = style.backgroundColor,
             topBar = {
                 CenterAlignedTopAppBar(
                     title = { Text("ASSISTANT", fontWeight = FontWeight.Bold, color = style.accentColor) },
@@ -310,7 +319,7 @@ class AssistantActivity : BaseActivity() {
     }
 
     override fun onDestroy() {
-        // voiceManager.destroy() // Singleton
+        voiceManager.stopListening()
         super.onDestroy()
     }
 }

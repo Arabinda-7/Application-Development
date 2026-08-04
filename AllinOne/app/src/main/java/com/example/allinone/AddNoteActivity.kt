@@ -117,7 +117,11 @@ class AddNoteActivity : BaseActivity() {
 
         findViewById<View>(R.id.btn_voice_input).apply {
             visibility = if (viewModel.settings.value.voiceInputEnabled) View.VISIBLE else View.GONE
-            setOnClickListener { startVoiceInput() }
+            setOnClickListener {
+                checkAndRequestPermission(android.Manifest.permission.RECORD_AUDIO) {
+                    startVoiceInput()
+                }
+            }
         }
         findViewById<View>(R.id.btn_reminder).setOnClickListener {
             if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.TIRAMISU) {

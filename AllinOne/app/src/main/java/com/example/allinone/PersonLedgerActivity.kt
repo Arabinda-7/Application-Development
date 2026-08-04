@@ -18,6 +18,7 @@ import com.example.allinone.data.model.PersonalLedgerEntry
 import com.example.allinone.data.model.LedgerEntry
 import com.example.allinone.data.model.LedgerPayment
 import com.example.allinone.core.utils.UIUtils
+import com.example.allinone.core.utils.LedgerMathHelper
 import java.text.SimpleDateFormat
 import java.util.*
 
@@ -170,15 +171,7 @@ class PersonLedgerActivity : BaseActivity() {
     }
 
     private fun updateSummary() {
-        var totalOwe = 0.0
-        var totalOwed = 0.0
-        for (entry in personEntries) {
-            if (!entry.isSettled) {
-                val remaining = entry.amount - entry.paidAmount
-                if (entry.type == "Borrowed") totalOwe += remaining
-                else if (entry.type == "Lent") totalOwed += remaining
-            }
-        }
+        val (totalOwe, totalOwed) = LedgerMathHelper.calculateActiveSums(personEntries)
         
         val currency = DataManager.financeCurrency
         tvOwe.text = String.format(Locale.US, "%s%.0f", currency, totalOwe)

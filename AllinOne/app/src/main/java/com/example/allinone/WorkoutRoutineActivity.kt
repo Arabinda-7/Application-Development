@@ -2,7 +2,6 @@ package com.example.allinone
 
 import android.app.Activity
 import android.content.Intent
-import android.graphics.Color
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
@@ -14,6 +13,7 @@ import androidx.activity.viewModels
 import androidx.core.content.ContextCompat
 import com.example.allinone.data.model.Workout
 import com.example.allinone.domain.repository.WorkoutSettings
+import com.example.allinone.ui.workout.WorkoutUiHandler
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.repeatOnLifecycle
@@ -40,28 +40,8 @@ class WorkoutRoutineActivity : BaseActivity() {
 
     private val timerActivityResultLauncher = registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
         if (result.resultCode == Activity.RESULT_OK) {
-            if (viewModel.currentlyTimingWorkoutPosition != -1) {
-                val workout = viewModel.workouts.value[viewModel.currentlyTimingWorkoutPosition]
-                val today = SimpleDateFormat("yyyyMMdd", Locale.getDefault()).format(Date())
-                
-                val updatedWorkout = workout.copy(
-                    isCompleted = true,
-                    progress = workout.target,
-                    dailyProgress = workout.dailyProgress.toMutableMap().apply { put(today, 100) },
-                    completedDates = workout.completedDates.toMutableList().apply { 
-                        if (!contains(today)) add(today) 
-                    }
-                )
-                
-                if (!workout.completedDates.contains(today)) {
-                    viewModel.addActivity("Finished Workout: ${workout.name}")
-                    viewModel.addXP(25)
-                }
-                
-                viewModel.updateWorkout(updatedWorkout)
-                viewModel.currentlyTimingWorkoutPosition = -1
-                updateHistoryUI()
-            }
+            viewModel.completeWorkoutWithTimer(viewModel.currentlyTimingWorkoutPosition)
+            viewModel.currentlyTimingWorkoutPosition = -1
         }
     }
 
@@ -112,7 +92,6 @@ class WorkoutRoutineActivity : BaseActivity() {
             if (tab == "HISTORY") {
                 historyGridSection.setup(viewModel.currentGridCalendar)
                 performanceSection.update(viewModel.currentlySelectedHistoryDate)
-                updateHistoryUI()
             }
         }
 
@@ -175,7 +154,12 @@ class WorkoutRoutineActivity : BaseActivity() {
                 launch {
                     viewModel.workoutSettings.collect { settings ->
                         listSection.updateSettings(settings)
-                        setupDynamicFilterChips(settings)
+                        WorkoutUiHandler.setupDynamicFilterChips(this@WorkoutRoutineActivity, findViewById(R.id.filter_chips), settings)
+                    }
+                }
+                launch {
+                    viewModel.stats.collect { stats ->
+                        updateHistoryUI(stats)
                     }
                 }
             }
@@ -183,7 +167,11 @@ class WorkoutRoutineActivity : BaseActivity() {
 
         findViewById<View>(R.id.btn_back).setOnClickListener { finish() }
         findViewById<View>(R.id.btn_back_history).setOnClickListener { finish() }
-        findViewById<View>(R.id.btn_workout_settings).setOnClickListener { showSettingsPopup(it) }
+        findViewById<View>(R.id.btn_workout_settings).setOnClickListener { 
+            WorkoutUiHandler.showSettingsPopup(this, it, viewModel) {
+                navigationSection.switchTab("HISTORY")
+            }
+        }
 
         findViewById<View>(R.id.btn_create_new_workout).setOnClickListener {
             startActivity(Intent(this, AddWorkoutActivity::class.java))
@@ -201,22 +189,20 @@ class WorkoutRoutineActivity : BaseActivity() {
 
     private fun updateAllUI() {
         progressSection.update()
-        updateHistoryUI()
         if (viewModel.currentTab == "HISTORY") {
             historyGridSection.setup(viewModel.currentGridCalendar)
             performanceSection.update(viewModel.currentlySelectedHistoryDate)
         }
     }
 
-    private fun updateHistoryUI() {
-        val streaks = viewModel.getStreaks()
-        findViewById<TextView>(R.id.history_current_streak)?.text = streaks.first.toString()
-        findViewById<TextView>(R.id.history_best_streak)?.text = "Best Streak: ${streaks.second}"
+    private fun updateHistoryUI(stats: WorkoutStats) {
+        findViewById<TextView>(R.id.history_current_streak)?.text = stats.streaks.first.toString()
+        findViewById<TextView>(R.id.history_best_streak)?.text = "Best Streak: ${stats.streaks.second}"
         
-        findViewById<TextView>(R.id.history_workouts_finished)?.text = viewModel.getTotalFinished().toString()
-        findViewById<TextView>(R.id.history_workouts_this_month)?.text = "This month: ${viewModel.getWorkoutsThisMonth()}"
+        findViewById<TextView>(R.id.history_workouts_finished)?.text = stats.totalFinished.toString()
+        findViewById<TextView>(R.id.history_workouts_this_month)?.text = "This month: ${stats.workoutsThisMonth}"
         
-        findViewById<TextView>(R.id.history_efficiency)?.text = "${viewModel.getGlobalCompletionRate()}%"
+        findViewById<TextView>(R.id.history_efficiency)?.text = "${stats.completionRate}%"
     }
 
     private fun startTimerForWorkout(workout: Workout, position: Int) {
@@ -228,77 +214,6 @@ class WorkoutRoutineActivity : BaseActivity() {
         timerActivityResultLauncher.launch(intent)
     }
 
-    private fun showSettingsPopup(anchor: View) {
-        val inflater = LayoutInflater.from(this)
-        val menuView = inflater.inflate(R.layout.layout_menu_workout, null)
-        val popupWindow = PopupWindow(menuView, ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT, true)
-        popupWindow.elevation = 10f
-
-        val menuToggle = menuView.findViewById<View>(R.id.menu_toggle_completed)
-        val tvToggle = menuView.findViewById<TextView>(R.id.tv_toggle_completed)
-        val ivToggle = menuView.findViewById<ImageView>(R.id.iv_toggle_completed)
-        
-        menuToggle.visibility = View.VISIBLE
-        tvToggle.text = if (DataManager.workoutShowCompleted) "HIDE COMPLETED" else "SHOW COMPLETED"
-        ivToggle.setImageResource(if (DataManager.workoutShowCompleted) android.R.drawable.ic_menu_view else android.R.drawable.ic_partial_secure)
-
-        menuToggle.setOnClickListener {
-            val current = viewModel.workoutSettings.value
-            viewModel.updateSettings(current.copy(showCompleted = !current.showCompleted))
-            popupWindow.dismiss()
-        }
-
-        menuView.findViewById<View>(R.id.menu_action_primary).apply {
-            visibility = View.VISIBLE
-            findViewById<TextView>(R.id.tv_action_primary).text = "HISTORY"
-            findViewById<ImageView>(R.id.iv_action_primary).setImageResource(R.drawable.ic_history)
-            setOnClickListener {
-                navigationSection.switchTab("HISTORY")
-                popupWindow.dismiss()
-            }
-        }
-
-        menuView.findViewById<View>(R.id.menu_activity_settings).setOnClickListener {
-            startActivity(Intent(this, WorkoutSettingsActivity::class.java))
-            popupWindow.dismiss()
-        }
-
-        popupWindow.showAsDropDown(anchor, -150, 0)
-    }
-
-    private fun setupDynamicFilterChips(settings: WorkoutSettings) {
-        val filterGroup = findViewById<RadioGroup>(R.id.filter_chips)
-        // Keep ALL chip, remove others
-        val allChip = findViewById<View>(R.id.chip_all)
-        filterGroup.removeAllViews()
-        filterGroup.addView(allChip)
-
-        if (settings.filterType == "TIME") {
-            addFilterChip(filterGroup, "MORNING")
-            addFilterChip(filterGroup, "AFTERNOON")
-            addFilterChip(filterGroup, "EVENING")
-        } else {
-            settings.muscleGroups.forEach { muscle ->
-                addFilterChip(filterGroup, muscle.uppercase())
-            }
-        }
-    }
-
-    private fun addFilterChip(group: RadioGroup, label: String) {
-        val rb = RadioButton(this)
-        val params = RadioGroup.LayoutParams((80 * resources.displayMetrics.density).toInt(), (38 * resources.displayMetrics.density).toInt())
-        params.setMargins((2 * resources.displayMetrics.density).toInt(), (2 * resources.displayMetrics.density).toInt(), (2 * resources.displayMetrics.density).toInt(), (2 * resources.displayMetrics.density).toInt())
-        rb.layoutParams = params
-        rb.background = ContextCompat.getDrawable(this, R.drawable.filter_chip_bg)
-        rb.buttonDrawable = null
-        rb.text = label
-        rb.gravity = android.view.Gravity.CENTER
-        rb.setTextColor(Color.WHITE)
-        rb.textSize = 10f
-        rb.typeface = android.graphics.Typeface.DEFAULT_BOLD
-        rb.id = View.generateViewId()
-        group.addView(rb)
-    }
 
     private fun setupGestureDetector() {
         gestureDetector = android.view.GestureDetector(this, object : SwipeGestureListener() {
@@ -334,7 +249,6 @@ class WorkoutRoutineActivity : BaseActivity() {
         applyFilters()
         themeManager.applyTheme()
         progressSection.update()
-        updateHistoryUI()
         navigationSection.updateNavUI(viewModel.currentTab)
     }
 

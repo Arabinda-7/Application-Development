@@ -16,8 +16,14 @@ import androidx.core.content.ContextCompat
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
 import android.app.AlertDialog
+import androidx.activity.viewModels
 import androidx.biometric.BiometricManager
 import androidx.biometric.BiometricPrompt
+import androidx.lifecycle.lifecycleScope
+import com.example.allinone.security.BiometricAuthHelper
+import com.example.allinone.ui.security.LockViewModel
+import kotlinx.coroutines.flow.collectLatest
+import kotlinx.coroutines.launch
 import java.util.concurrent.Executor
 
 class LockActivity : BaseActivity() {
@@ -31,6 +37,9 @@ class LockActivity : BaseActivity() {
         const val MODE_VERIFY_FOR_RECOVERY = 6
         const val EXTRA_MODE = "lock_mode"
     }
+
+    private val viewModel: LockViewModel by viewModels()
+    private lateinit var biometricHelper: BiometricAuthHelper
 
     private var currentMode = MODE_AUTH
     private var enteredPin = ""
@@ -49,9 +58,6 @@ class LockActivity : BaseActivity() {
     private lateinit var tvSetupSelectedQuestion: TextView
     private lateinit var etSetupRecoveryAnswer: EditText
 
-    private lateinit var executor: Executor
-    private lateinit var biometricPrompt: BiometricPrompt
-    private lateinit var promptInfo: BiometricPrompt.PromptInfo
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -93,51 +99,52 @@ class LockActivity : BaseActivity() {
         setupHeader()
         setupKeypad()
 
+        biometricHelper = BiometricAuthHelper(
+            activity = this,
+            onAuthSuccess = {
+                setResult(RESULT_OK)
+                finish()
+                applyInstantTransition()
+            },
+            onAuthError = { error ->
+                Toast.makeText(applicationContext, error, Toast.LENGTH_SHORT).show()
+            }
+        )
+
+        observeViewModel()
+
         if (currentMode == MODE_SETUP_RECOVERY) {
             showRecoverySetupUI()
         }
 
         if (currentMode == MODE_AUTH && DataManager.isBiometricLockEnabled) {
-            setupBiometrics()
-            showBiometricPrompt()
+            biometricHelper.showBiometricPrompt()
         }
     }
 
-    private fun setupBiometrics() {
-        executor = ContextCompat.getMainExecutor(this)
-        biometricPrompt = BiometricPrompt(this, executor, object : BiometricPrompt.AuthenticationCallback() {
-            override fun onAuthenticationError(errorCode: Int, errString: CharSequence) {
-                super.onAuthenticationError(errorCode, errString)
-                if (errorCode != BiometricPrompt.ERROR_USER_CANCELED && errorCode != BiometricPrompt.ERROR_NEGATIVE_BUTTON) {
-                    Toast.makeText(applicationContext, "Auth error: $errString", Toast.LENGTH_SHORT).show()
+    private fun observeViewModel() {
+        lifecycleScope.launch {
+            viewModel.enteredPin.collectLatest { pin ->
+                enteredPin = pin
+                updateDots()
+            }
+        }
+
+        lifecycleScope.launch {
+            viewModel.isConfirming.collectLatest { confirming ->
+                isConfirming = confirming
+            }
+        }
+
+        lifecycleScope.launch {
+            viewModel.uiState.collectLatest { state ->
+                if (state is LockViewModel.LockUiState.PinComplete) {
+                    handlePinComplete()
                 }
             }
-
-            override fun onAuthenticationSucceeded(result: BiometricPrompt.AuthenticationResult) {
-                super.onAuthenticationSucceeded(result)
-                setResult(RESULT_OK)
-                finish()
-                applyInstantTransition()
-            }
-
-            override fun onAuthenticationFailed() {
-                super.onAuthenticationFailed()
-            }
-        })
-
-        promptInfo = BiometricPrompt.PromptInfo.Builder()
-            .setTitle("Biometric Login")
-            .setSubtitle("Unlock using your biometric credential")
-            .setNegativeButtonText("Use PIN")
-            .build()
-    }
-
-    private fun showBiometricPrompt() {
-        val biometricManager = BiometricManager.from(this)
-        if (biometricManager.canAuthenticate(BiometricManager.Authenticators.BIOMETRIC_STRONG) == BiometricManager.BIOMETRIC_SUCCESS) {
-            biometricPrompt.authenticate(promptInfo)
         }
     }
+
 
     private fun setupRecovery() {
         btnForgotPin.setOnClickListener {
@@ -153,9 +160,7 @@ class LockActivity : BaseActivity() {
             if (answer.equals(DataManager.appLockAnswer, ignoreCase = true)) {
                 Toast.makeText(this, "Identity Verified. Reset your PIN.", Toast.LENGTH_SHORT).show()
                 currentMode = MODE_SETUP
-                isConfirming = false
-                enteredPin = ""
-                updateDots()
+                viewModel.resetSetup()
                 setupHeader()
                 hideRecoveryUI()
             } else {
@@ -215,21 +220,12 @@ class LockActivity : BaseActivity() {
 
         keys.forEach { id ->
             findViewById<TextView>(id).setOnClickListener {
-                if (enteredPin.length < 4) {
-                    enteredPin += (it as TextView).text
-                    updateDots()
-                    if (enteredPin.length == 4) {
-                        handlePinComplete()
-                    }
-                }
+                viewModel.appendDigit((it as TextView).text.toString())
             }
         }
 
         findViewById<View>(R.id.btn_backspace).setOnClickListener {
-            if (enteredPin.isNotEmpty()) {
-                enteredPin = enteredPin.dropLast(1)
-                updateDots()
-            }
+            viewModel.removeDigit()
         }
 
         findViewById<View>(R.id.btn_done).setOnClickListener {
@@ -265,9 +261,7 @@ class LockActivity : BaseActivity() {
             MODE_SETUP -> {
                 if (!isConfirming) {
                     firstAttemptPin = enteredPin
-                    enteredPin = ""
-                    isConfirming = true
-                    updateDots()
+                    viewModel.setConfirming(enteredPin)
                     tvTitle.text = "CONFIRM PIN"
                     tvSub.text = "Enter your PIN again to verify"
                 } else {
@@ -276,7 +270,6 @@ class LockActivity : BaseActivity() {
                         DataManager.isAppLockEnabled = true
                         DataManager.saveData(this)
                         
-                        // If recovery is already set, just finish and return to Settings
                         if (DataManager.appLockQuestion != null) {
                             Toast.makeText(this, "PIN Updated Successfully", Toast.LENGTH_SHORT).show()
                             setResult(RESULT_OK)
@@ -293,8 +286,7 @@ class LockActivity : BaseActivity() {
             MODE_CHANGE -> {
                 if (enteredPin == DataManager.appLockPin) {
                     currentMode = MODE_SETUP
-                    enteredPin = ""
-                    updateDots()
+                    viewModel.resetPinEntry()
                     setupHeader()
                 } else {
                     showError("Incorrect current PIN")
@@ -302,8 +294,7 @@ class LockActivity : BaseActivity() {
             }
             MODE_VERIFY_FOR_RECOVERY -> {
                 if (enteredPin == DataManager.appLockPin) {
-                    enteredPin = ""
-                    updateDots()
+                    viewModel.resetPinEntry()
                     showRecoverySetupUI()
                 } else {
                     showError("Incorrect PIN")
@@ -313,17 +304,13 @@ class LockActivity : BaseActivity() {
     }
 
     private fun resetSetup() {
-        enteredPin = ""
-        firstAttemptPin = ""
-        isConfirming = false
-        updateDots()
+        viewModel.resetSetup()
         setupHeader()
     }
 
     private fun showError(message: String) {
         Toast.makeText(this, message, Toast.LENGTH_SHORT).show()
-        enteredPin = ""
-        updateDots()
+        viewModel.resetPinEntry()
     }
 
     private fun applyInstantTransition() {

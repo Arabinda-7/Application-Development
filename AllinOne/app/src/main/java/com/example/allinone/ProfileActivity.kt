@@ -128,15 +128,11 @@ class ProfileActivity : BaseActivity() {
 
     private fun setupLogic() {
         val scrollView = findViewById<View>(R.id.profile_scroll_view)
-        setupKeyboardHandling(scrollView, null)
 
         val btnBack = findViewById<View>(R.id.btn_back)
         ViewCompat.setOnApplyWindowInsetsListener(scrollView) { v, insets ->
             val systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars())
             val imeInsets = insets.getInsets(WindowInsetsCompat.Type.ime())
-            val layoutParams = btnBack.layoutParams as ViewGroup.MarginLayoutParams
-            layoutParams.topMargin = systemBars.top + (16 * resources.displayMetrics.density).toInt()
-            btnBack.layoutParams = layoutParams
             v.setPadding(v.paddingLeft, 0, v.paddingRight, imeInsets.bottom.coerceAtLeast(systemBars.bottom))
             insets
         }

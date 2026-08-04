@@ -464,6 +464,15 @@ class EditProjectActivity : BaseActivity() {
 
     private fun saveProject() {
         project?.let { p ->
+            val newStatus = tvGridStatus.text.toString()
+            if (newStatus == "DONE") {
+                val unfinishedMilestones = DataManager.currentEditingSubFeatures.count { !it.isCompleted }
+                if (unfinishedMilestones > 0) {
+                    Toast.makeText(this, "Cannot complete project. $unfinishedMilestones Milestones are still pending.", Toast.LENGTH_LONG).show()
+                    return
+                }
+            }
+
             p.title = titleInput.text.toString()
             p.content = contentInput.text.toString()
             p.isPinned = isPinned

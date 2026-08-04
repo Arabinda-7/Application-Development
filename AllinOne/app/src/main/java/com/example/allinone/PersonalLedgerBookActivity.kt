@@ -12,8 +12,10 @@ import androidx.core.content.ContextCompat
 import com.google.android.material.floatingactionbutton.FloatingActionButton
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
+import com.example.allinone.core.utils.LedgerMathHelper
 import com.example.allinone.core.utils.UIUtils
 import com.example.allinone.data.model.*
+import com.example.allinone.ui.finance.PersonalBookAdapter
 import java.text.SimpleDateFormat
 import java.util.*
 
@@ -40,7 +42,34 @@ class PersonalLedgerBookActivity : BaseActivity() {
         val list = findViewById<RecyclerView>(R.id.person_ledger_list)
         list.layoutManager = LinearLayoutManager(this)
         
-        adapter = PersonalBookAdapter()
+        adapter = PersonalBookAdapter(
+            context = this,
+            entries = ledger.entries,
+            showHistory = showHistory,
+            onSettle = { entry ->
+                entry.isSettled = true
+                entry.settlementTimestamp = System.currentTimeMillis()
+                DataManager.saveData(this)
+                updateSummary()
+                adapter.notifyDataSetChanged()
+            },
+            onEdit = { entry -> showAddEntryDialog(entry) },
+            onDelete = { entry ->
+                ledger.entries.remove(entry)
+                DataManager.saveData(this)
+                updateSummary()
+                adapter.notifyDataSetChanged()
+                Toast.makeText(this, "Entry deleted", Toast.LENGTH_SHORT).show()
+            },
+            onUndo = { entry ->
+                entry.isSettled = false
+                DataManager.saveData(this)
+                updateSummary()
+                adapter.notifyDataSetChanged()
+                Toast.makeText(this, "Entry moved back to active", Toast.LENGTH_SHORT).show()
+            },
+            onToggleExpansion = { position -> adapter.notifyItemChanged(position) }
+        )
         list.adapter = adapter
 
         updateSummary()
@@ -114,7 +143,7 @@ class PersonalLedgerBookActivity : BaseActivity() {
                 "Toggle History" -> {
                     showHistory = !showHistory
                     findViewById<View>(R.id.tv_history_label).visibility = if (showHistory) View.VISIBLE else View.GONE
-                    adapter.notifyDataSetChanged()
+                    adapter.updateData(showHistory)
                     Toast.makeText(this, if (showHistory) "Showing History" else "Showing Active Ledger", Toast.LENGTH_SHORT).show()
                 }
                 "Delete Personal Ledger" -> {
@@ -136,9 +165,7 @@ class PersonalLedgerBookActivity : BaseActivity() {
     }
 
     private fun updateSummary() {
-        val activeEntries = ledger.entries.filter { !it.isSettled }
-        val owe = activeEntries.filter { it.type == "Borrowed" }.sumOf { it.amount - it.paidAmount }
-        val owed = activeEntries.filter { it.type == "Lent" }.sumOf { it.amount - it.paidAmount }
+        val (owe, owed) = LedgerMathHelper.calculateActiveSums(ledger.entries)
         
         val currency = DataManager.financeCurrency
         tvOwe.text = String.format(Locale.US, "%s%.0f", currency, owe)
@@ -152,16 +179,13 @@ class PersonalLedgerBookActivity : BaseActivity() {
             return
         }
 
-        val totalOwe = activeEntries.filter { it.type == "Borrowed" }.sumOf { it.amount - it.paidAmount }
-        val totalOwed = activeEntries.filter { it.type == "Lent" }.sumOf { it.amount - it.paidAmount }
+        val (totalOwe, totalOwed) = LedgerMathHelper.calculateActiveSums(ledger.entries)
         
         val currency = DataManager.financeCurrency
         val message = "Summary: Lent ${currency}${totalOwed.toInt()} | Borrowed ${currency}${totalOwe.toInt()}\n\n" +
             if (totalOwe == totalOwed) {
                 "Balance is equal. Both will be settled. Proceed?"
             } else {
-                val net = totalOwed - totalOwe
-                val netType = if (net > 0) "Lent" else "Borrowed"
                 "Covered entries will be settled and the remainder will update the latest entry. Proceed?"
             }
 
@@ -174,43 +198,12 @@ class PersonalLedgerBookActivity : BaseActivity() {
     }
 
     private fun performAutoReconciliation(totalOwe: Double, totalOwed: Double) {
-        val now = System.currentTimeMillis()
-        val activeEntries = ledger.entries.filter { !it.isSettled }.sortedBy { it.timestamp }
-        
-        val smallerSideAmount = if (totalOwed > totalOwe) totalOwe else totalOwed
-        val typeToSettle = if (totalOwed > totalOwe) "Borrowed" else "Lent"
-        
-        // 1. Settle all entries of the smaller side
-        activeEntries.filter { it.type == typeToSettle }.forEach {
-            it.isSettled = true
-            it.settlementTimestamp = now
-            it.note += " (Offset via Check)"
+        if (LedgerMathHelper.performAutoReconciliation(ledger.entries, totalOwe, totalOwed)) {
+            DataManager.saveData(this)
+            updateSummary()
+            adapter.notifyDataSetChanged()
+            Toast.makeText(this, "Balance reconciled successfully", Toast.LENGTH_SHORT).show()
         }
-
-        // 2. Partial settlement of the larger side (FIFO)
-        var remainingToOffset = smallerSideAmount
-        val largerSideType = if (typeToSettle == "Borrowed") "Lent" else "Borrowed"
-        
-        activeEntries.filter { it.type == largerSideType }.forEach { entry ->
-            if (remainingToOffset > 0) {
-                val availableForOffset = entry.amount - entry.paidAmount
-                val offsetApplied = Math.min(availableForOffset, remainingToOffset)
-                
-                entry.paidAmount += offsetApplied
-                entry.paymentHistory.add(LedgerPayment(offsetApplied, now))
-                remainingToOffset -= offsetApplied
-                
-                if (entry.paidAmount >= entry.amount) {
-                    entry.isSettled = true
-                    entry.settlementTimestamp = now
-                }
-            }
-        }
-
-        DataManager.saveData(this)
-        updateSummary()
-        adapter.notifyDataSetChanged()
-        Toast.makeText(this, "Balance reconciled successfully", Toast.LENGTH_SHORT).show()
     }
 
     private fun showAddEntryDialog(existingEntry: PersonalLedgerEntry? = null) {
@@ -277,113 +270,4 @@ class PersonalLedgerBookActivity : BaseActivity() {
         dialog.show()
     }
 
-    inner class PersonalBookAdapter : RecyclerView.Adapter<PersonalBookAdapter.ViewHolder>() {
-        
-        private fun getFilteredEntries() = ledger.entries.filter { it.isSettled == showHistory }
-            .sortedByDescending { if (showHistory) it.settlementTimestamp ?: 0 else it.timestamp }
-
-        override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder {
-            val view = LayoutInflater.from(parent.context).inflate(R.layout.item_ledger_book, parent, false)
-            return ViewHolder(view)
-        }
-
-        override fun onBindViewHolder(holder: ViewHolder, position: Int) {
-            val entry = getFilteredEntries()[position]
-            holder.tvType.text = entry.type.uppercase()
-            val remaining = entry.amount - entry.paidAmount
-            holder.tvAmount.text = "${DataManager.financeCurrency}${remaining.toInt()}"
-            holder.tvDate.text = SimpleDateFormat("MMM dd, yyyy", Locale.getDefault()).format(Date(entry.timestamp))
-            holder.progressBar.progress = if (entry.amount > 0) ((entry.paidAmount / entry.amount) * 100).toInt() else 0
-
-            val isOverdue = entry.dueDate?.let { it < System.currentTimeMillis() && !entry.isSettled } ?: false
-            
-            if (showHistory) {
-                holder.cardView.setCardBackgroundColor(Color.parseColor("#0DFFFFFF"))
-                holder.cardView.strokeColor = Color.parseColor("#00000000")
-                holder.cardView.alpha = 0.6f
-                holder.tvType.setTextColor(Color.parseColor("#80FFFFFF"))
-                holder.tvAmount.setTextColor(Color.parseColor("#4CAF50"))
-            } else {
-                holder.cardView.setCardBackgroundColor(Color.parseColor("#1A1A1A"))
-                holder.cardView.alpha = 1.0f
-                holder.cardView.strokeColor = Color.parseColor(if (isOverdue) "#FF5252" else "#22FFFFFF")
-                holder.cardView.strokeWidth = if (isOverdue) (2 * resources.displayMetrics.density).toInt() else (1 * resources.displayMetrics.density).toInt()
-                
-                val typeColor = if (entry.type == "Borrowed") Color.parseColor("#FF5252") else Color.parseColor("#4CAF50")
-                holder.tvType.setTextColor(typeColor)
-                holder.tvAmount.setTextColor(typeColor)
-            }
-
-            holder.btnSettle.setOnClickListener {
-                entry.isSettled = true
-                entry.settlementTimestamp = System.currentTimeMillis()
-                DataManager.saveData(this@PersonalLedgerBookActivity)
-                updateSummary()
-                notifyDataSetChanged()
-            }
-
-            holder.itemView.setOnClickListener {
-                entry.isExpanded = !entry.isExpanded
-                notifyItemChanged(position)
-            }
-
-            holder.itemView.setOnLongClickListener {
-                showEntryMenu(it, entry)
-                true
-            }
-        }
-
-        private fun showEntryMenu(anchor: View, entry: PersonalLedgerEntry) {
-            val inflater = LayoutInflater.from(this@PersonalLedgerBookActivity)
-            val menuView = inflater.inflate(R.layout.menu_ledger_item, null)
-            val popupWindow = PopupWindow(menuView, ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT, true)
-            popupWindow.elevation = 20f
-
-            val btnUndo = menuView.findViewById<View>(R.id.menu_undo)
-            val btnDelete = menuView.findViewById<View>(R.id.menu_delete)
-            val btnEdit = menuView.findViewById<View>(R.id.menu_edit)
-
-            menuView.findViewById<View>(R.id.menu_take_day_off).visibility = View.GONE
-            menuView.findViewById<View>(R.id.menu_hide_unhide).visibility = View.GONE
-
-            btnEdit.visibility = if (showHistory) View.GONE else View.VISIBLE
-            btnUndo.visibility = if (showHistory) View.VISIBLE else View.GONE
-
-            btnUndo.setOnClickListener {
-                entry.isSettled = false
-                DataManager.saveData(this@PersonalLedgerBookActivity)
-                updateSummary()
-                notifyDataSetChanged()
-                popupWindow.dismiss()
-                Toast.makeText(this@PersonalLedgerBookActivity, "Entry moved back to active", Toast.LENGTH_SHORT).show()
-            }
-
-            btnEdit.setOnClickListener {
-                popupWindow.dismiss()
-                showAddEntryDialog(entry)
-            }
-
-            btnDelete.setOnClickListener {
-                ledger.entries.remove(entry)
-                DataManager.saveData(this@PersonalLedgerBookActivity)
-                updateSummary()
-                notifyDataSetChanged()
-                popupWindow.dismiss()
-                Toast.makeText(this@PersonalLedgerBookActivity, "Entry deleted", Toast.LENGTH_SHORT).show()
-            }
-
-            popupWindow.showAsDropDown(anchor, 150, -100)
-        }
-
-        override fun getItemCount() = getFilteredEntries().size
-
-        inner class ViewHolder(v: View) : RecyclerView.ViewHolder(v) {
-            val cardView: com.google.android.material.card.MaterialCardView = v as com.google.android.material.card.MaterialCardView
-            val tvType: TextView = v.findViewById(R.id.tv_ledger_type)
-            val tvAmount: TextView = v.findViewById(R.id.tv_ledger_amount)
-            val tvDate: TextView = v.findViewById(R.id.tv_ledger_date)
-            val btnSettle: ImageView = v.findViewById(R.id.btn_settle_ledger)
-            val progressBar: ProgressBar = v.findViewById(R.id.pb_debt_progress_circular)
-        }
-    }
 }

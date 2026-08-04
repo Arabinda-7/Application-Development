@@ -35,6 +35,8 @@ class SettingsActivity : BaseActivity() {
     private lateinit var appearanceHandler: SettingsAppearanceHandler
     private lateinit var helpHandler: SettingsHelpHandler
     private lateinit var backupHandler: SettingsBackupHandler
+    private lateinit var securityHandler: SettingsSecurityHandler
+    private lateinit var aiHandler: SettingsAiHandler
     @Inject lateinit var voiceManager: VoiceInteractionManager
 
     private val aiIntroLauncher = registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
@@ -96,6 +98,8 @@ class SettingsActivity : BaseActivity() {
         appearanceHandler = SettingsAppearanceHandler(this) { recreate() }
         helpHandler = SettingsHelpHandler(this)
         backupHandler = SettingsBackupHandler(this, exportLauncher, importLauncher, lifecycleScope)
+        securityHandler = SettingsSecurityHandler(this, viewModel) { showSectionSettings("SECURITY") }
+        aiHandler = SettingsAiHandler(this, viewModel, aiIntroLauncher) { showSectionSettings("AI_ASSISTANT") }
     }
 
     private fun setupLogic() {
@@ -139,49 +143,8 @@ class SettingsActivity : BaseActivity() {
         val configItems = mutableListOf<ConfigItem>()
         
         when(section) {
-            "AI_ASSISTANT" -> {
-                configItems.add(ConfigItem("Enable AI Assistant", "Global toggle for chat and voice", isToggle = true, isChecked = settings.isAiAssistantEnabled) {
-                    if (!settings.isAiAssistantEnabled) {
-                        aiIntroLauncher.launch(Intent(this, AiAssistantIntroActivity::class.java))
-                    } else {
-                        viewModel.updateSettings(settings.copy(isAiAssistantEnabled = false))
-                        showSectionSettings("AI_ASSISTANT")
-                    }
-                })
-
-                if (settings.isAiAssistantEnabled) {
-                    configItems.add(ConfigItem("Voice Output", "Allow assistant to speak in text chat", isToggle = true, isChecked = settings.isAssistantVoiceEnabled) {
-                        viewModel.updateSettings(settings.copy(isAssistantVoiceEnabled = !settings.isAssistantVoiceEnabled))
-                        showSectionSettings("AI_ASSISTANT")
-                    })
-                    configItems.add(ConfigItem("Auto-Cleanup History", "Delete conversations older than 7 days", isToggle = true, isChecked = settings.isAssistantAutoCleanupEnabled) {
-                        viewModel.updateSettings(settings.copy(isAssistantAutoCleanupEnabled = !settings.isAssistantAutoCleanupEnabled))
-                        showSectionSettings("AI_ASSISTANT")
-                    })
-                }
-            }
-            "SECURITY" -> {
-                configItems.add(ConfigItem("App Access Lock", "Require PIN", isToggle = true, isChecked = settings.isAppLockEnabled) {
-                    if (!settings.isAppLockEnabled && settings.appLockPin == null) {
-                        startActivity(Intent(this, LockActivity::class.java).apply { putExtra(LockActivity.EXTRA_MODE, LockActivity.MODE_SETUP) })
-                    } else {
-                        viewModel.updateSettings(settings.copy(isAppLockEnabled = !settings.isAppLockEnabled))
-                        showSectionSettings("SECURITY")
-                    }
-                })
-                if (settings.isAppLockEnabled && settings.appLockPin != null) {
-                    configItems.add(ConfigItem("Change PIN", "Update security code") { startActivity(Intent(this, LockActivity::class.java).apply { putExtra(LockActivity.EXTRA_MODE, LockActivity.MODE_CHANGE) }) })
-                    configItems.add(ConfigItem("Biometric Unlock", "Use Fingerprint/Face", isToggle = true, isChecked = settings.isBiometricLockEnabled) {
-                        viewModel.updateSettings(settings.copy(isBiometricLockEnabled = !settings.isBiometricLockEnabled))
-                        showSectionSettings("SECURITY")
-                    })
-                }
-                configItems.add(ConfigItem("Screen Protection", "Block screenshots & recording", isToggle = true, isChecked = settings.isScreenshotProtectionEnabled) {
-                    viewModel.updateSettings(settings.copy(isScreenshotProtectionEnabled = !settings.isScreenshotProtectionEnabled))
-                    SecurityManager.setScreenshotProtection(this, !settings.isScreenshotProtectionEnabled)
-                    showSectionSettings("SECURITY")
-                })
-            }
+            "AI_ASSISTANT" -> configItems.addAll(aiHandler.getConfigItems(settings))
+            "SECURITY" -> configItems.addAll(securityHandler.getConfigItems(settings))
             "OTHERS" -> {
                 configItems.add(ConfigItem("Offline Integrity", "No Internet permission requested", isHeader = true))
                 configItems.add(ConfigItem("Home Page Sections", "Customize dashboard visibility") { showHomePageSectionsDialog(settings) })

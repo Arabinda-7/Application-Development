@@ -18,6 +18,8 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.allinone.LocalAppStyle
+import com.example.allinone.VoiceAuraGlow
+import com.example.allinone.GoogleVoiceBars
 
 @Composable
 fun VoiceOverlay(
@@ -53,7 +55,7 @@ fun VoiceOverlay(
                     horizontalAlignment = Alignment.CenterHorizontally
                 ) {
                     Text(
-                        text = if (isListening) "I'm listening..." else "Press to speak",
+                        text = if (isListening) "I'm listening..." else if (isVisible) "Initializing..." else "Press to speak",
                         color = style.accentColor,
                         fontSize = 18.sp,
                         fontWeight = FontWeight.Bold
@@ -67,16 +69,32 @@ fun VoiceOverlay(
                         fontSize = 16.sp
                     )
 
-                    Spacer(modifier = Modifier.height(32.dp))
+                    Spacer(modifier = Modifier.height(24.dp))
+                    
+                    if (isListening) {
+                        GoogleVoiceBars(isListening = true)
+                        Spacer(modifier = Modifier.height(24.dp))
+                    }
 
-                    IconButton(
-                        onClick = onMicClick,
-                        modifier = Modifier
-                            .size(64.dp)
-                            .clip(CircleShape)
-                            .background(if (isListening) Color.Red else style.accentColor)
+                    Box(
+                        contentAlignment = Alignment.Center,
+                        modifier = Modifier.size(120.dp)
                     ) {
-                        Icon(Icons.Default.Mic, contentDescription = null, tint = Color.White)
+                        VoiceAuraGlow(
+                            isListening = isListening,
+                            isThinking = false, // Home overlay is usually just listening
+                            accentColor = style.accentColor
+                        )
+                        
+                        IconButton(
+                            onClick = onMicClick,
+                            modifier = Modifier
+                                .size(64.dp)
+                                .clip(CircleShape)
+                                .background(if (isListening) Color.Red else style.accentColor)
+                        ) {
+                            Icon(Icons.Default.Mic, contentDescription = null, tint = Color.White)
+                        }
                     }
                     
                     Spacer(modifier = Modifier.height(16.dp))

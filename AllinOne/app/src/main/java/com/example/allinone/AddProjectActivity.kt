@@ -321,6 +321,14 @@ class AddProjectActivity : BaseActivity() {
     private fun saveProject() {
         val title = titleInput.text.toString().trim()
         if (title.isNotEmpty()) {
+            if (selectedStatus == "DONE") {
+                val unfinishedMilestones = DataManager.currentEditingSubFeatures.count { !it.isCompleted }
+                if (unfinishedMilestones > 0) {
+                    Toast.makeText(this, "Cannot complete project. $unfinishedMilestones Milestones are still pending.", Toast.LENGTH_LONG).show()
+                    return
+                }
+            }
+
             val note = Note(title = title, content = contentInput.text.toString(), category = "Project")
             note.status = selectedStatus
             note.priority = selectedPriority

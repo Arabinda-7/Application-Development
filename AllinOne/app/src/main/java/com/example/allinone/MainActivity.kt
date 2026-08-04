@@ -14,8 +14,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.Density
 import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
 import androidx.lifecycle.lifecycleScope
-import com.example.allinone.assistant.executor.AssistantActionHandler
-import com.example.allinone.assistant.model.ChatMessage
 import com.example.allinone.assistant.model.CommandAction
 import com.example.allinone.core.utils.UIUtils
 import com.example.allinone.ui.components.LoadingScreen
@@ -23,17 +21,18 @@ import com.example.allinone.ui.home.HomeScreen
 import com.example.allinone.ui.home.DashboardState
 import com.example.allinone.ui.home.components.VoiceOverlay
 import dagger.hilt.android.AndroidEntryPoint
+import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 @AndroidEntryPoint
 class MainActivity : BaseActivity() {
 
-    @Inject lateinit var brain: AssistantBrain
-    @Inject lateinit var actionHandler: AssistantActionHandler
+    @Inject lateinit var assistantHandler: MainAssistantHandler
 
     private val viewModel: MainActivityViewModel by viewModels()
-    private var voiceManager: VoiceInteractionManager? = null
+    private val navigationHandler by lazy { MainNavigationHandler(this) }
+    private val mainHandler = android.os.Handler(android.os.Looper.getMainLooper())
     private var showVoiceOverlay by mutableStateOf(false)
 
     private val lockLauncher = registerForActivityResult(
@@ -59,8 +58,7 @@ class MainActivity : BaseActivity() {
 
         super.onCreate(savedInstanceState)
         
-        brain.initialize(this)
-        voiceManager = VoiceInteractionManager(this)
+        assistantHandler.initialize(this)
 
         setContent {
             val dashboardState = viewModel.dashboardState
@@ -86,17 +84,17 @@ class MainActivity : BaseActivity() {
                     Box(modifier = Modifier.fillMaxSize().background(appStyle.backgroundColor)) {
                         HomeScreen(
                             state = dashboardState,
-                            onNavigateToHabits = { startActivity(Intent(this@MainActivity, HabitTrackerActivity::class.java)) },
-                            onNavigateToWorkout = { startActivity(Intent(this@MainActivity, WorkoutRoutineActivity::class.java)) },
-                            onNavigateToTodos = { startActivity(Intent(this@MainActivity, TaskActivity::class.java)) },
-                            onNavigateToNotes = { startActivity(Intent(this@MainActivity, NotesActivity::class.java)) },
-                            onNavigateToProjects = { startActivity(Intent(this@MainActivity, ProjectActivity::class.java)) },
-                            onNavigateToFinance = { startActivity(Intent(this@MainActivity, FinanceActivity::class.java)) },
-                            onNavigateToWorkspace = { startActivity(Intent(this@MainActivity, com.example.allinone.workspace.ui.activity.WorkspaceActivity::class.java)) },
-                            onNavigateToSettings = { startActivity(Intent(this@MainActivity, SettingsActivity::class.java)) },
-                            onNavigateToAssistant = { startActivity(Intent(this@MainActivity, AssistantActivity::class.java)) },
-                            onNavigateToProfile = { startActivity(Intent(this@MainActivity, ProfileActivity::class.java)) },
-                            onNavigateToPerformanceHistory = { startActivity(Intent(this@MainActivity, PerformanceHistoryActivity::class.java)) },
+                            onNavigateToHabits = { navigationHandler.navigateToHabits() },
+                            onNavigateToWorkout = { navigationHandler.navigateToWorkout() },
+                            onNavigateToTodos = { navigationHandler.navigateToTodos() },
+                            onNavigateToNotes = { navigationHandler.navigateToNotes() },
+                            onNavigateToProjects = { navigationHandler.navigateToProjects() },
+                            onNavigateToFinance = { navigationHandler.navigateToFinance() },
+                            onNavigateToWorkspace = { navigationHandler.navigateToWorkspace() },
+                            onNavigateToSettings = { navigationHandler.navigateToSettings() },
+                            onNavigateToAssistant = { navigationHandler.navigateToAssistant() },
+                            onNavigateToProfile = { navigationHandler.navigateToProfile() },
+                            onNavigateToPerformanceHistory = { navigationHandler.navigateToPerformanceHistory() },
                             onQuickAddTodo = { startActivity(Intent(this@MainActivity, AddTaskActivity::class.java)) },
                             onQuickAddExpense = { startActivity(Intent(this@MainActivity, AddFinanceActivity::class.java)) },
                             onQuickAddNote = { startActivity(Intent(this@MainActivity, AddNoteActivity::class.java)) },
@@ -105,20 +103,48 @@ class MainActivity : BaseActivity() {
                             onSearchRequested = { query ->
                                 MainSearchSection(this@MainActivity).performSearch(query)
                             },
-                            onVoiceAssistantRequested = { showVoiceOverlay = true; toggleVoice() }
+                            onVoiceAssistantRequested = { 
+                                showVoiceOverlay = true
+                                assistantHandler.toggleVoice(this@MainActivity, 
+                                    onCommandProcessed = { 
+                                        showVoiceOverlay = false
+                                        assistantHandler.processCommand(this@MainActivity, lifecycleScope, it) 
+                                    },
+                                    onError = { 
+                                        showVoiceOverlay = false
+                                        Toast.makeText(this@MainActivity, it, Toast.LENGTH_SHORT).show() 
+                                    }
+                                )
+                            }
                         )
 
-                        // Integrated the new Voice Feature
-                        val isListening by voiceManager!!.isListening.collectAsState()
-                        val partialText by voiceManager!!.partialText.collectAsState()
+                        val voiceManager = assistantHandler.getVoiceManager()
+                        if (voiceManager != null) {
+                            val isListening by voiceManager.isListening.collectAsState()
+                            val partialText by voiceManager.partialText.collectAsState()
 
-                        VoiceOverlay(
-                            isVisible = showVoiceOverlay,
-                            isListening = isListening,
-                            partialText = partialText,
-                            onDismiss = { showVoiceOverlay = false },
-                            onMicClick = { toggleVoice() }
-                        )
+                            VoiceOverlay(
+                                isVisible = showVoiceOverlay,
+                                isListening = isListening,
+                                partialText = partialText,
+                                onDismiss = { 
+                                    showVoiceOverlay = false
+                                    voiceManager.stopListening()
+                                },
+                                onMicClick = { 
+                                    assistantHandler.toggleVoice(this@MainActivity, 
+                                        onCommandProcessed = { 
+                                            showVoiceOverlay = false
+                                            assistantHandler.processCommand(this@MainActivity, lifecycleScope, it) 
+                                        },
+                                        onError = { 
+                                            showVoiceOverlay = false
+                                            Toast.makeText(this@MainActivity, it, Toast.LENGTH_SHORT).show() 
+                                        }
+                                    )
+                                }
+                            )
+                        }
                     }
                 }
             }
@@ -151,43 +177,9 @@ class MainActivity : BaseActivity() {
         viewModel.refreshState(this)
     }
 
-    private fun toggleVoice() {
-        if (voiceManager?.isListening?.value == true) {
-            voiceManager?.stopListening()
-        } else {
-            checkAndRequestPermission(android.Manifest.permission.RECORD_AUDIO) {
-                voiceManager?.startListening(
-                    onResult = { text ->
-                        processCommand(text)
-                    },
-                    onError = { error ->
-                        Toast.makeText(this, error, Toast.LENGTH_SHORT).show()
-                    }
-                )
-            }
-        }
-    }
-
-    private fun processCommand(text: String) {
-        if (text.isBlank()) return
-        
-        lifecycleScope.launch {
-            val action = brain.parseCommand(text)
-            handleAssistantAction(action)
-        }
-    }
-
-    private fun handleAssistantAction(action: CommandAction?) {
-        if (action == null) return
-        
-        lifecycleScope.launch {
-            val status = actionHandler.executeAction(this@MainActivity, action)
-            status?.let { voiceManager?.speak(it) }
-        }
-    }
 
     override fun onDestroy() {
-        voiceManager?.destroy()
+        assistantHandler.destroy()
         super.onDestroy()
     }
 }

@@ -10,6 +10,7 @@ import android.widget.ImageView
 import android.widget.LinearLayout
 import android.widget.ProgressBar
 import android.widget.TextView
+import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.RecyclerView
 import com.google.android.material.card.MaterialCardView
 import java.text.SimpleDateFormat
@@ -25,9 +26,15 @@ class LedgerAdapter(
     private val onConfirmSettlement: (PersonalLedgerEntry) -> Unit
 ) : RecyclerView.Adapter<LedgerAdapter.LedgerViewHolder>() {
 
+    private val sdfDate = SimpleDateFormat("MMM dd, yyyy", Locale.getDefault())
+    private val sdfLog = SimpleDateFormat("MMM dd, h:mm a", Locale.getDefault())
+    private val sdfDue = SimpleDateFormat("MMM dd", Locale.getDefault())
+
     fun updateEntries(newEntries: List<PersonalLedgerEntry>) {
+        val diffCallback = LedgerDiffCallback(this.entries, newEntries)
+        val diffResult = DiffUtil.calculateDiff(diffCallback)
         this.entries = newEntries
-        notifyDataSetChanged()
+        diffResult.dispatchUpdatesTo(this)
     }
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): LedgerViewHolder {
@@ -37,12 +44,14 @@ class LedgerAdapter(
 
     override fun onBindViewHolder(holder: LedgerViewHolder, position: Int) {
         val entry = entries[position]
+        val context = holder.itemView.context
+        
         holder.tvName.text = entry.personName
         holder.tvType.text = entry.type.uppercase()
         
         val remaining = entry.amount - entry.paidAmount
         holder.tvAmount.text = "${DataManager.financeCurrency}${remaining.toInt()}"
-        holder.tvDate.text = SimpleDateFormat("MMM dd, yyyy", Locale.getDefault()).format(Date(entry.timestamp))
+        holder.tvDate.text = sdfDate.format(Date(entry.timestamp))
         
         val progress = if (entry.amount > 0) ((entry.paidAmount / entry.amount) * 100).toInt() else 0
         holder.progressBar.progress = progress
@@ -51,50 +60,18 @@ class LedgerAdapter(
         val typeColor = if (entry.type == "Borrowed") Color.parseColor("#FF5252") else Color.parseColor("#4CAF50")
         
         holder.cardView.setCardBackgroundColor(Color.TRANSPARENT)
-        holder.cardView.strokeWidth = (1.5f * holder.itemView.resources.displayMetrics.density).toInt()
+        holder.cardView.strokeWidth = (1.5f * context.resources.displayMetrics.density).toInt()
         
         if (isOverdue) {
             holder.cardView.strokeColor = Color.parseColor("#FF5252")
-            holder.cardView.strokeWidth = (2.5f * holder.itemView.resources.displayMetrics.density).toInt()
+            holder.cardView.strokeWidth = (2.5f * context.resources.displayMetrics.density).toInt()
         } else {
             holder.cardView.strokeColor = typeColor
         }
 
         if (entry.isExpanded && entry.paymentHistory.isNotEmpty()) {
             holder.historyContainer.visibility = View.VISIBLE
-            holder.historyContainer.removeAllViews()
-            
-            val title = TextView(holder.itemView.context).apply {
-                text = "PAYMENT LOG"
-                setTextColor(Color.parseColor("#80FFFFFF"))
-                textSize = 10f
-                setPadding(0, 8, 0, 8)
-                setTypeface(null, android.graphics.Typeface.BOLD)
-            }
-            holder.historyContainer.addView(title)
-
-            entry.paymentHistory.forEach { payment ->
-                val row = LinearLayout(holder.itemView.context).apply {
-                    orientation = LinearLayout.HORIZONTAL
-                    setPadding(0, 4, 0, 4)
-                    
-                    val tvDate = TextView(holder.itemView.context).apply {
-                        layoutParams = LinearLayout.LayoutParams(0, ViewGroup.LayoutParams.WRAP_CONTENT, 1f)
-                        text = SimpleDateFormat("MMM dd, h:mm a", Locale.getDefault()).format(Date(payment.timestamp))
-                        setTextColor(Color.parseColor("#B0B0B0"))
-                        textSize = 11f
-                    }
-                    val tvAmt = TextView(holder.itemView.context).apply {
-                        text = "+${DataManager.financeCurrency}${payment.amount.toInt()}"
-                        setTextColor(Color.parseColor("#4CAF50"))
-                        textSize = 11f
-                        setTypeface(null, android.graphics.Typeface.BOLD)
-                    }
-                    addView(tvDate)
-                    addView(tvAmt)
-                }
-                holder.historyContainer.addView(row)
-            }
+            renderPaymentLog(holder.historyContainer, entry)
         } else {
             holder.historyContainer.visibility = View.GONE
         }
@@ -110,7 +87,6 @@ class LedgerAdapter(
         }
 
         if (entry.dueDate != null && !entry.isSettled) {
-            val sdfDue = SimpleDateFormat("MMM dd", Locale.getDefault())
             entry.dueDate?.let { dueDate ->
                 holder.tvDueDate.text = if (isOverdue) "OVERDUE: ${sdfDue.format(Date(dueDate))}" else "DUE: ${sdfDue.format(Date(dueDate))}"
                 holder.tvDueDate.visibility = View.VISIBLE
@@ -125,10 +101,10 @@ class LedgerAdapter(
 
         holder.tvAmount.setOnClickListener { onAddPayment(entry) }
         holder.tvName.setOnClickListener {
-            val intent = Intent(holder.itemView.context, PersonLedgerActivity::class.java).apply {
+            val intent = Intent(context, PersonLedgerActivity::class.java).apply {
                 putExtra("personName", entry.personName)
             }
-            holder.itemView.context.startActivity(intent)
+            context.startActivity(intent)
         }
         holder.btnSettle.setOnClickListener { onConfirmSettlement(entry) }
         holder.itemView.setOnClickListener {
@@ -138,6 +114,43 @@ class LedgerAdapter(
         holder.itemView.setOnLongClickListener {
             onShowMenu(it, entry, false) {}
             true
+        }
+    }
+
+    private fun renderPaymentLog(container: LinearLayout, entry: PersonalLedgerEntry) {
+        container.removeAllViews()
+        val context = container.context
+        
+        val title = TextView(context).apply {
+            text = "PAYMENT LOG"
+            setTextColor(Color.parseColor("#80FFFFFF"))
+            textSize = 10f
+            setPadding(0, 8, 0, 8)
+            setTypeface(null, android.graphics.Typeface.BOLD)
+        }
+        container.addView(title)
+
+        entry.paymentHistory.forEach { payment ->
+            val row = LinearLayout(context).apply {
+                orientation = LinearLayout.HORIZONTAL
+                setPadding(0, 4, 0, 4)
+                
+                val tvDate = TextView(context).apply {
+                    layoutParams = LinearLayout.LayoutParams(0, ViewGroup.LayoutParams.WRAP_CONTENT, 1f)
+                    text = sdfLog.format(Date(payment.timestamp))
+                    setTextColor(Color.parseColor("#B0B0B0"))
+                    textSize = 11f
+                }
+                val tvAmt = TextView(context).apply {
+                    text = "+${DataManager.financeCurrency}${payment.amount.toInt()}"
+                    setTextColor(Color.parseColor("#4CAF50"))
+                    textSize = 11f
+                    setTypeface(null, android.graphics.Typeface.BOLD)
+                }
+                addView(tvDate)
+                addView(tvAmt)
+            }
+            container.addView(row)
         }
     }
 
@@ -154,5 +167,25 @@ class LedgerAdapter(
         val btnSettle: ImageView = view.findViewById(R.id.btn_settle_ledger)
         val progressBar: ProgressBar = view.findViewById(R.id.pb_debt_progress_circular)
         val historyContainer: LinearLayout = view.findViewById(R.id.container_payment_history)
+    }
+
+    private class LedgerDiffCallback(private val oldList: List<PersonalLedgerEntry>, private val newList: List<PersonalLedgerEntry>) : DiffUtil.Callback() {
+        override fun getOldListSize(): Int = oldList.size
+        override fun getNewListSize(): Int = newList.size
+
+        override fun areItemsTheSame(oldItemPosition: Int, newItemPosition: Int): Boolean {
+            return oldList[oldItemPosition].id == newList[newItemPosition].id
+        }
+
+        override fun areContentsTheSame(oldItemPosition: Int, newItemPosition: Int): Boolean {
+            val oldItem = oldList[oldItemPosition]
+            val newItem = newList[newItemPosition]
+            return oldItem.amount == newItem.amount &&
+                   oldItem.paidAmount == newItem.paidAmount &&
+                   oldItem.isSettled == newItem.isSettled &&
+                   oldItem.isExpanded == newItem.isExpanded &&
+                   oldItem.note == newItem.note &&
+                   oldItem.dueDate == newItem.dueDate
+        }
     }
 }

@@ -20,6 +20,13 @@ import com.example.allinone.domain.usecase.user.AddXPUseCase
 
 import com.example.allinone.domain.usecase.workout.GetWorkoutStatisticsUseCase
 
+data class WorkoutStats(
+    val streaks: Pair<Int, Int>,
+    val totalFinished: Int,
+    val workoutsThisMonth: Int,
+    val completionRate: Int
+)
+
 @HiltViewModel
 class WorkoutViewModel @Inject constructor(
     private val workoutRepository: WorkoutRepository,
@@ -39,6 +46,17 @@ class WorkoutViewModel @Inject constructor(
 
     val workoutSettings: StateFlow<WorkoutSettings> = workoutRepository.getWorkoutSettings()
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), WorkoutSettings())
+
+    val stats: StateFlow<WorkoutStats> = workouts
+        .map { list ->
+            WorkoutStats(
+                streaks = getWorkoutStatisticsUseCase.getStreaks(list),
+                totalFinished = getWorkoutStatisticsUseCase.getTotalFinished(list),
+                workoutsThisMonth = getWorkoutStatisticsUseCase.getWorkoutsThisMonth(list),
+                completionRate = getWorkoutStatisticsUseCase.getGlobalCompletionRate(list)
+            )
+        }
+        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), WorkoutStats(Pair(0, 0), 0, 0, 0))
 
     fun updateSettings(newSettings: WorkoutSettings) {
         viewModelScope.launch {
@@ -74,6 +92,28 @@ class WorkoutViewModel @Inject constructor(
         viewModelScope.launch {
             addActivityUseCase(activity)
         }
+    }
+
+    fun completeWorkoutWithTimer(position: Int) {
+        if (position == -1 || position >= workouts.value.size) return
+        val workout = workouts.value[position]
+        val today = SimpleDateFormat("yyyyMMdd", Locale.getDefault()).format(Date())
+        
+        val updatedWorkout = workout.copy(
+            isCompleted = true,
+            progress = workout.target,
+            dailyProgress = workout.dailyProgress.toMutableMap().apply { put(today, 100) },
+            completedDates = workout.completedDates.toMutableList().apply { 
+                if (!contains(today)) add(today) 
+            }
+        )
+        
+        if (!workout.completedDates.contains(today)) {
+            addActivity("Finished Workout: ${workout.name}")
+            addXP(25)
+        }
+        
+        updateWorkout(updatedWorkout)
     }
 
     fun getStreaks() = getWorkoutStatisticsUseCase.getStreaks(workouts.value)
