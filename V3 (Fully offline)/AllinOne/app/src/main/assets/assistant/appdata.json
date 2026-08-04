@@ -1,0 +1,826 @@
+[
+  {
+    "keys": ["what is this app", "about this app", "all in one app"],
+    "values": [
+      "This is your All-in-One Personal Productivity suite. It combines Habit tracking, Finance management, Task organization, and Note-taking into a single, offline-first application.",
+      "All-in-One is an integrated workspace for your life. Manage your money, your routines, your tasks, and your thoughts in one private, secure place.",
+      "It's a privacy-first productivity hub. I help you stay on top of your finances, habits, notes, and tasks without ever sending your data to the cloud."
+    ]
+  },
+  {
+    "keys": ["what are habits", "how do habits work", "habit tracking"],
+    "values": [
+      "Habits are daily or recurring routines you want to build. You can track your consistency, see streaks, and monitor your long-term discipline in the Habits section.",
+      "In this app, habits represent the small actions you repeat to build a better life. We track your progress, streaks, and frequency to help you stay consistent.",
+      "The Habits section is for building routines. Whether it's drinking water or meditation, you can track how often you succeed and maintain your momentum."
+    ]
+  },
+  {
+    "keys": ["what are tasks", "todo list", "to-do"],
+    "values": [
+      "Tasks are one-off items you need to get done. You can organize them with subtasks, set priorities, and add reminders so you never miss a deadline.",
+      "Think of the Tasks section as your master To-Do list. It supports subtasks, priority levels, and reminders to help you execute your daily plan.",
+      "Tasks are individual goals or chores. Unlike habits, they are typically completed once. You can categorize them and set deadlines for better focus."
+    ]
+  },
+  {
+    "keys": ["what is finance", "expense tracking", "money management"],
+    "values": [
+      "The Finance section helps you track your income and expenses, set monthly budgets, and visualize your spending patterns to reach your savings goals.",
+      "Our finance tool is a private ledger for your money. Track every dollar, set budgets for different categories, and see your financial health through automated graphs.",
+      "Manage your money better with the Finance module. Log what you spend and earn, monitor your budget, and work towards your long-term savings targets."
+    ]
+  },
+  {
+    "keys": ["what are notes", "journaling", "quick notes"],
+    "values": [
+      "Notes are for capturing your ideas, thoughts, or project details. You can use them for everything from simple lists to detailed roadmaps.",
+      "The Notes section is your creative canvas. Use it for journaling, brainstorming ideas, or storing important information securely on your device.",
+      "Notes help you offload your mental load. Capture quick thoughts, write long-form journals, or document your project roadmaps here."
+    ]
+  },
+  {
+    "keys": ["what are projects", "roadmap", "project management"],
+    "values": [
+      "Projects allow you to group related notes and tasks. Use them to track major milestones and see the overall progress of your big goals.",
+      "A project is a high-level goal that requires multiple steps. You can link tasks and notes to it, and track its progress through sub-features.",
+      "Use Projects for your big missions. It combines tasks, ideas, and resources into a single view to help you manage complex goals effectively."
+    ]
+  },
+  {
+    "keys": ["who are you", "what is your identity"],
+    "values": [
+      "I am your built-in Personal Assistant. I live entirely on your device and use local intelligence to help you manage your life more effectively.",
+      "I'm your local AI companion. I don't live in the cloud—I live right here on your phone to help you stay organized and private.",
+      "Your private AI assistant. My job is to analyze your productivity patterns and help you manage your habits, finances, and tasks."
+    ]
+  },
+  {
+    "keys": ["is it offline", "does it need internet", "offline mode"],
+    "values": [
+      "Yes! This app is 100% offline. All your data stays on your phone, and all my AI processing happens locally. No internet required.",
+      "Absolutely. You can use every feature of this app in the middle of a desert without a signal. Your privacy is guaranteed by our offline-first design.",
+      "Offline by default. We don't have a backend server, so your data never leaves your device. This makes the app fast, secure, and always available."
+    ]
+  },
+  {
+    "keys": ["how can you help me", "what can you do for me"],
+    "values": [
+      "I can help you add habits, log expenses, create tasks, search through your notes, and provide personalized insights based on your progress.",
+      "Ask me to 'Add habit', 'Create task', or 'Log expense'. I can also find your notes or tell you how your productivity is trending this week.",
+      "I'm here to streamline your life. I can handle data entry via voice, provide discipline scores, and help you navigate the app's many features."
+    ]
+  },
+  {
+    "keys": ["how to add a habit", "new habit", "create habit"],
+    "values": [
+      "Just say 'Add habit' followed by the name, or go to the Habits section and tap the '+' button!",
+      "You can create one by saying 'New habit [name]' or by navigating to the Habit Tracker and using the quick-add button.",
+      "Tell me 'Start a habit for [name]' and I'll walk you through the setup, or do it manually in the Habits section."
+    ]
+  },
+  {
+    "keys": ["how to log expense", "track spending", "add expense"],
+    "values": [
+      "Tell me 'Log 50 expense' or tap the '+' button in the Finance section. You can also categorize it for better tracking.",
+      "Just say 'Log [amount] expense' to quickly record spending. For more details, use the 'Add Transaction' button in the Finance area.",
+      "Expenses can be added by voice—'Log 500 for food'—or manually in the Finance section using the '+' icon."
+    ]
+  },
+  {
+    "keys": ["how to add task", "new task", "create task"],
+    "values": [
+      "Say 'Add task' followed by your task name. You can even add subtasks by saying 'with subtasks' followed by a list!",
+      "Create a task by telling me 'Remind me to [task name]'. You can add deadlines and priority levels in the Task section.",
+      "Tap the '+' icon on the home screen for a quick task, or say 'Add task [name]' to save it to your master list."
+    ]
+  },
+  {
+    "keys": ["what is the intelligent feed", "dashboard insights", "feed summary"],
+    "values": [
+      "The Intelligent Feed analyzes your data to show you momentum alerts, spending forecasts, and mood-productivity correlations.",
+      "It's your AI dashboard. I look for patterns in your habits and finances to give you actionable advice for the day ahead.",
+      "Check the Intelligent Feed for your daily briefing. I summarize your top priorities and highlight any risks to your project deadlines."
+    ]
+  },
+  {
+    "keys": ["how to change theme", "dark mode", "app colors"],
+    "values": [
+      "Go to Settings -> Appearance -> Theme. You can choose between Light, Dark, or OLED modes.",
+      "Head to the Settings menu and look for Appearance. You can customize the accent color and the overall background theme there.",
+      "Customize your look in Settings! Switch to OLED mode for deep blacks or pick a vibrant accent color that fits your style."
+    ]
+  },
+  {
+    "keys": ["how to search", "find notes", "searching"],
+    "values": [
+      "You can use the search bar on the home screen or ask me to 'Search notes for...' followed by your query.",
+      "Tap the search icon in the top bar to find anything across tasks, habits, and notes instantly.",
+      "Search is global. Type your query into the home screen search bar to see results from every section of the app."
+    ]
+  },
+  {
+    "keys": ["is my data private", "privacy policy", "data security"],
+    "values": [
+      "Extremely private. We don't have servers. Your data is stored in an encrypted database on your device and never leaves it.",
+      "Your privacy is our core mission. We use local encryption and zero cloud storage to ensure you are the only one who can access your data.",
+      "No one—including the developers—can see your data. It's locked behind your device's security and stored 100% locally."
+    ]
+  },
+  {
+    "keys": ["how to delete habit", "remove habit"],
+    "values": [
+      "In the Habits section, long-press a habit card or tap the delete icon to remove it from your routine.",
+      "Go to the Habit Tracker, open the habit details or long-press the card to find the delete option.",
+      "To remove a habit, navigate to its section and use the archive or delete function found in the long-press menu."
+    ]
+  },
+  {
+    "keys": ["what is a streak", "consistency score"],
+    "values": [
+      "A streak represents how many consecutive days you've completed a habit. The higher the streak, the stronger the routine!",
+      "Streaks track your daily consistency. Completing a habit every day builds your streak; missing a day resets it (unless you use a grace day).",
+      "Your streak is a visual indicator of your discipline. It shows how many days in a row you've successfully performed a habit."
+    ]
+  },
+  {
+    "keys": ["how to set budget", "monthly budget"],
+    "values": [
+      "Tell me 'Set budget to 1000' or navigate to the Finance section and use the budget settings option.",
+      "In the Finance section, tap on the settings icon to set your monthly budget for different categories or your overall total.",
+      "Set your spending limits by saying 'My budget is [amount]' or by updating the budget field in the Finance module."
+    ]
+  },
+  {
+    "keys": ["how to add income", "track earnings"],
+    "values": [
+      "Go to Finance -> Add Transaction and select 'Income', or just tell me 'Log 5000 income'.",
+      "You can record earnings by saying 'Log [amount] income'. I'll add it to your monthly total and update your savings forecast.",
+      "Tap the '+' in Finance and toggle the type to 'Income' to track your money coming in."
+    ]
+  },
+  {
+    "keys": ["how to use projects", "creating roadmaps"],
+    "values": [
+      "Navigate to the Projects section and tap '+'. You can add tasks and sub-features to track complex goals step-by-step.",
+      "Start a project to organize your big goals. Link relevant notes and tasks to keep everything related to that mission in one place.",
+      "Projects are for long-term objectives. Add a title, a deadline, and then start populating it with sub-features and linked notes."
+    ]
+  },
+  {
+    "keys": ["what is the mood tracker", "logging mood"],
+    "values": [
+      "You can log your daily mood on the Home screen. I use this to see how your mood impacts your productivity over time.",
+      "Mood tracking helps me find your 'Success Drivers'. Log how you feel every day to see patterns in your energy and discipline.",
+      "Use the mood emojis on the home screen to record your state of mind. Over time, I'll show you how your mood correlates with your habit completion."
+    ]
+  },
+  {
+    "keys": ["how to export data", "backup database"],
+    "values": [
+      "Go to Settings -> Data Management -> Export. This creates a file you can use to backup or move your data.",
+      "Export your data from the settings menu to keep a personal backup. You can use this file to restore your data on a new device.",
+      "Backing up is easy: head to Settings, then Data Management, and tap Export to save your database as a JSON file."
+    ]
+  },
+  {
+    "keys": ["how to import data", "restore backup"],
+    "values": [
+      "Go to Settings -> Data Management -> Import and select your previously exported backup file.",
+      "To restore your data, use the Import tool in settings and browse for your All-in-One backup JSON file.",
+      "If you have a backup file, you can restore your entire history through the Import option in the Data Management settings."
+    ]
+  },
+  {
+    "keys": ["can i use this on multiple devices", "sync"],
+    "values": [
+      "Since we are offline-first for privacy, there is no automatic cloud sync. You can move your data manually using Export/Import.",
+      "Manual sync is possible by exporting your data on one device and importing it on another. We don't use the cloud to keep your data 100% private.",
+      "We prioritize privacy over cloud sync. To use multiple devices, you'll need to manually transfer your backup files."
+    ]
+  },
+  {
+    "keys": ["how to set reminder", "task notification"],
+    "values": [
+      "When adding a task, you can pick a date and time for a reminder. Make sure the app has notification permissions enabled!",
+      "Reminders can be set during task creation. I'll send you a notification at the exact time you specify to keep you on track.",
+      "Don't forget a thing! Set a reminder when you create a task, and I'll alert you via your device's notification system."
+    ]
+  },
+  {
+    "keys": ["what are subtasks", "breaking down tasks"],
+    "values": [
+      "Subtasks are smaller steps for a larger task. You can check them off individually to track progress towards the main goal.",
+      "Break complex tasks into manageable subtasks. This makes big goals less intimidating and provides more frequent dopamine hits.",
+      "Use subtasks to outline the specific actions needed to finish a major task. You can manage them directly inside the task details."
+    ]
+  },
+  {
+    "keys": ["how to categorize finance", "expense categories"],
+    "values": [
+      "When logging an expense, you can choose from categories like Food, Transport, or Bills. Manage these in Finance Settings.",
+      "Categorization helps you see where your money goes. Pick from our defaults or create your own custom categories in the settings.",
+      "Organize your spending by category! You can assign icons and colors to each category to make your financial charts easier to read."
+    ]
+  },
+  {
+    "keys": ["what is the focus mode", "productivity timer"],
+    "values": [
+      "While we don't have a dedicated Pomodoro timer yet, you can track 'Focus' as a habit to build the routine of deep work.",
+      "Use 'Deep Work' as a habit to track your focus sessions. We're constantly evolving, so stay tuned for more dedicated focus tools!",
+      "Focus is a skill you can build. Try setting a timer on your device and logging the session as a 'Focus' habit here afterward."
+    ]
+  },
+  {
+    "keys": ["how to view history", "past progress"],
+    "values": [
+      "Most sections have a 'History' icon in the top bar. You can view your daily, weekly, or monthly progress there.",
+      "Tap the history button in any module (Habits, Tasks, Finance) to see a detailed breakdown of your past performance.",
+      "Your data is archived automatically. Use the history views to look back at your streaks, spending, and completed projects."
+    ]
+  },
+  {
+    "keys": ["what is the aura color", "mood color"],
+    "values": [
+      "The app's aura color changes based on your current mood and productivity levels, reflecting your daily 'energy'.",
+      "Aura colors are a visual representation of your day. They shift based on what you've logged in the mood tracker and your task completion.",
+      "Look at the aura glow in the AI section—it reflects your current productivity state and mood, giving the app a personalized feel."
+    ]
+  },
+  {
+    "keys": ["how to mark habit complete", "finish habit"],
+    "values": [
+      "Just tap the checkmark on the habit card in the Habits section, or tell me 'Mark habit [name] as completed'.",
+      "Check off a habit by tapping its card or saying 'Habit [name] done'. I'll update your streak and consistency score immediately.",
+      "Marking a habit as done is easy! Use the checkbox in the Habit Tracker or tell me via voice to log your success."
+    ]
+  },
+  {
+    "keys": ["how to archive task", "completed tasks"],
+    "values": [
+      "Completed tasks can be archived or hidden. Check your Task Settings to decide how you want them displayed.",
+      "Archive tasks to keep your list clean. You can toggle visibility for completed and archived items in the Task module settings.",
+      "Once a task is done, you can archive it to remove it from your immediate focus while still keeping it in your history."
+    ]
+  },
+  {
+    "keys": ["can i use voice", "voice commands"],
+    "values": [
+      "Absolutely! Tap the microphone icon on the home screen or in the AI section to talk to me directly.",
+      "Voice commands are fully supported for all major actions. Just hit the mic and say what you want to add or track.",
+      "I love hearing from you! Use the voice button for hands-free logging of habits, expenses, tasks, and notes."
+    ]
+  },
+  {
+    "keys": ["what is the performance history", "discipline score"],
+    "values": [
+      "This shows your overall consistency across all domains—habits, tasks, and workouts—over time.",
+      "Discipline scores weigh your success in every module. It's a high-level view of how well you're sticking to your overall life system.",
+      "Check your performance history to see a bird's-eye view of your productivity trends across the entire app."
+    ]
+  },
+  {
+    "keys": ["how to add note category", "organize notes"],
+    "values": [
+      "In the Notes section, you can add and manage categories to keep your thoughts organized by topic.",
+      "Create custom categories for your notes to keep your ideas, journals, and roadmaps separate and easy to find.",
+      "Organize your thoughts by adding categories in the Notes section. You can then filter your list to see only what's relevant."
+    ]
+  },
+  {
+    "keys": ["what is the ledger", "personal ledger"],
+    "values": [
+      "The Personal Ledger helps you track money you owe or others owe you. Manage multiple ledgers for friends or business.",
+      "Use the ledger to keep track of debts and loans. It's a simple way to remember who owes you money and what you need to pay back.",
+      "Ledgers are dedicated tracking sheets for interpersonal or business debts. You can have multiple ledgers for different people or projects."
+    ]
+  },
+  {
+    "keys": ["how to change currency", "money symbol"],
+    "values": [
+      "Go to Finance Settings -> Currency. You can choose from various symbols like $, £, €, or ₹.",
+      "Choose your preferred currency symbol in the Finance module's settings to match your local region.",
+      "Navigate to Finance Settings to switch between different currency symbols for all your money tracking."
+    ]
+  },
+  {
+    "keys": ["how to use sub-features", "project steps"],
+    "values": [
+      "Inside any Project, you can add 'Sub-features' which act as specific milestones for that project's completion.",
+      "Sub-features are the building blocks of a project. Add them to track individual components of a larger goal.",
+      "Track complex missions by breaking them into sub-features. Each one represents a milestone toward your final project objective."
+    ]
+  },
+  {
+    "keys": ["what is velocity", "task speed"],
+    "values": [
+      "Velocity is a measure of how many tasks you complete per day. I use this to help predict if you'll hit your project deadlines.",
+      "Your task velocity shows your work speed. It's calculated from your completion history and helps estimate future timelines.",
+      "I track your daily task output as 'Velocity'. This allows me to forecast when your active projects are likely to be finished."
+    ]
+  },
+  {
+    "keys": ["how to lock app", "security", "pin"],
+    "values": [
+      "Go to Settings -> Security. You can enable a PIN lock or Biometric authentication to protect your private data.",
+      "Enable App Lock in the Security settings to require a PIN or fingerprint every time you open the application.",
+      "Secure your data by setting up a PIN or using biometrics. You'll find these options in the main Security menu."
+    ]
+  },
+  {
+    "keys": ["what is the workspace", "project workspace"],
+    "values": [
+      "The Workspace is a dedicated area for managing complex projects, combining notes, tasks, and sub-features in one view.",
+      "Our Workspace feature integrates your project details, related tasks, and brainstorming notes into a single cohesive dashboard.",
+      "Use the Workspace for deep focus on one project. It brings together all relevant info so you don't have to switch between tabs."
+    ]
+  },
+  {
+    "keys": ["how to reset data", "clear all"],
+    "values": [
+      "You can clear specific sections in their settings, or perform a full factory reset in Settings -> Data Management.",
+      "To start fresh, head to Data Management and select 'Factory Reset'. This will wipe everything permanently.",
+      "Warning: Factory reset deletes all data. If you just want to clear one section, check that section's specific settings instead."
+    ]
+  },
+  {
+    "keys": ["is it free", "cost", "subscription"],
+    "values": [
+      "This app is free to use. There are no hidden subscriptions because we believe your productivity tools shouldn't be a burden.",
+      "All-in-One is completely free. We don't have a premium tier—every single feature is available to every user from day one.",
+      "No ads, no subscriptions, no cost. This is a private tool built for the community to manage their lives better."
+    ]
+  },
+  {
+    "keys": ["how to use templates", "note templates"],
+    "values": [
+      "When creating a new note, you can select from various templates like 'Meeting Minutes' or 'Journal Entry' to save time.",
+      "Templates provide a pre-set structure for your notes. Choose one when you tap the '+' button in the Notes section.",
+      "Save time with note templates! Whether it's a daily log or a project outline, we have structures ready for you to fill in."
+    ]
+  },
+  {
+    "keys": ["what is the momentum alert", "streak warning"],
+    "values": [
+      "If you're on a multi-day streak, I'll send you an alert to encourage you to keep it going!",
+      "Momentum alerts are my way of cheering you on. If you're doing great with your habits, I'll notify you to maintain the energy.",
+      "I'll ping you when your momentum is high or if you're about to lose a long streak. My goal is to keep you consistent."
+    ]
+  },
+  {
+    "keys": ["how to log workout", "exercise tracking"],
+    "values": [
+      "Navigate to the Workouts section and tap '+'. You can track reps, sets, or time-based exercises.",
+      "Log your training by saying 'Add workout [name]' or using the '+' button in the workout tracker.",
+      "Training logged! You can track your sets, reps, and even set rest timers inside the Workout module."
+    ]
+  },
+  {
+    "keys": ["what is the finance forecast", "spending prediction"],
+    "values": [
+      "I analyze your spending habits to predict if you'll stay within your budget for the rest of the month.",
+      "Check your finance charts for a forecast. I look at your daily average to estimate your total monthly expenditure.",
+      "My finance engine predicts your end-of-month balance based on your current spending patterns and active budget."
+    ]
+  },
+  {
+    "keys": ["how to customize home", "edit home screen"],
+    "values": [
+      "Go to Settings -> Appearance. You can choose which sections (Habits, Finance, Tasks, etc.) are visible on your home screen.",
+      "Your home screen is yours to build. Toggle different modules on or off in the Appearance settings.",
+      "Only want to see Finance and Tasks? No problem. Customize your home screen visibility in the main Settings menu."
+    ]
+  },
+  {
+    "keys": ["what is the discipline milestone", "badges"],
+    "values": [
+      "As you complete more habits and tasks, you'll earn milestones that celebrate your growing self-discipline.",
+      "Milestones are your productivity 'Level Ups'. Reach certain completion totals to unlock badges and increase your rank.",
+      "Track your growth through discipline milestones. Each one marks a significant step in your journey toward total self-mastery."
+    ]
+  },
+  {
+    "keys": ["how to add sub-feature", "project milestone"],
+    "values": [
+      "Open any project and tap the '+' icon in the Sub-features section to add a new milestone.",
+      "Milestones (sub-features) can be added inside a project to break it down into smaller, checkable phases.",
+      "To add a new step to your roadmap, open the project and use the sub-feature list to create a new milestone."
+    ]
+  },
+  {
+    "keys": ["what is priority score", "how to prioritize tasks"],
+    "values": [
+      "Your priority score is calculated based on a task's age, its set priority level, deadlines, and subtasks.",
+      "Priority scores help you focus. I calculate them automatically to show you which tasks are most urgent and impactful.",
+      "I use an algorithm to score your tasks. Higher scores mean the task is older, has higher priority, or has a closer deadline."
+    ]
+  },
+  {
+    "keys": ["task velocity details", "understanding velocity"],
+    "values": [
+      "Task velocity tracks how many items you complete over time. I use this to estimate how much work you can handle.",
+      "Understand your work capacity with Velocity. It's a moving average of your daily task completions.",
+      "I track how fast you finish tasks as 'Velocity'. This metric is key for predicting if you'll hit your project deadlines."
+    ]
+  },
+  {
+    "keys": ["how project forecasting works", "predicting deadlines"],
+    "values": [
+      "By comparing your current task velocity with the remaining work, I can estimate if you will finish before your deadline.",
+      "Forecasting uses your historical work speed to predict future completion dates for your active projects.",
+      "I'll let you know if a project is at risk by analyzing your remaining sub-features against your recent daily output."
+    ]
+  },
+  {
+    "keys": ["task bulk mode", "managing many tasks"],
+    "values": [
+      "Bulk mode allows you to select multiple tasks at once to move, delete, or mark them as completed.",
+      "Use bulk actions in the Task section to organize large lists quickly. You can change categories or archive items in groups.",
+      "Managing dozens of tasks? Enable bulk mode in settings or the task menu to edit multiple items simultaneously."
+    ]
+  },
+  {
+    "keys": ["nested tasks", "deep hierarchies"],
+    "values": [
+      "You can break complex goals into nested hierarchies by adding subtasks to tasks, and grouping tasks within projects.",
+      "All-in-One supports deep task organization. Use subtasks for steps, and projects to group your major life domains.",
+      "Build a hierarchy for your goals: Life Area -> Project -> Task -> Subtask. It's the ultimate way to stay organized."
+    ]
+  },
+  {
+    "keys": ["ledger summary", "debt overview"],
+    "values": [
+      "The Ledger Summary gives you a birds-eye view of your total net balance across all personal ledgers.",
+      "See exactly how much money is 'in the air' with the Ledger Summary. It totals up all your active loans and debts.",
+      "Check your total financial commitments in the Ledger section to see if you are net positive or negative across all friends."
+    ]
+  },
+  {
+    "keys": ["changing graph colors", "finance visuals"],
+    "values": [
+      "You can customize the colors of your spending and savings graphs in Finance Settings for better readability.",
+      "Make your financial data pop by picking custom colors for your expenditure and savings charts in the settings.",
+      "Head to Finance Settings to change the colors used in your monthly graphs and trend visualizations."
+    ]
+  },
+  {
+    "keys": ["savings vs budget", "difference between savings and budget"],
+    "values": [
+      "A budget is a spending limit; a savings goal is a target amount to set aside. Tracking both ensures stability.",
+      "Budgets keep your spending in check. Savings goals help you accumulate wealth. You can set both in the Finance module.",
+      "Understand your money: use budgets to prevent overspending and savings goals to build your future."
+    ]
+  },
+  {
+    "keys": ["transaction search", "find payment"],
+    "values": [
+      "Use the search icon in the Finance section to find specific transactions by their name, category, or amount.",
+      "I can find any transaction in seconds. Use the search bar in the Finance tracker to filter by text or value.",
+      "Looking for a specific payment? The search feature in Finance will find it across all your history and ledgers."
+    ]
+  },
+  {
+    "keys": ["monthly comparison", "compare spending"],
+    "values": [
+      "In the Finance History, you can compare your current month's spending against previous months.",
+      "See your progress over time with monthly comparisons. We'll show you if you're spending more or less than last month.",
+      "Track your financial trends by looking at the month-over-month comparison charts in the Finance section."
+    ]
+  },
+  {
+    "keys": ["settle ledger", "close debt"],
+    "values": [
+      "To settle a ledger entry, simply add a transaction that brings the balance to zero. Then archive the ledger.",
+      "Paid back your debt? Log a transaction in that ledger to zero it out, then you can safely archive it.",
+      "Mark a ledger as settled by ensuring the balance is zeroed. Use the 'Settle' button for a quick summary of the final payment."
+    ]
+  },
+  {
+    "keys": ["recurring expenses", "track bills"],
+    "values": [
+      "Track recurring expenses by creating a specific category for them and logging them regularly in the Finance tracker.",
+      "While not automated yet, you can easily log monthly bills by using the quick-add categories in your Finance module.",
+      "Keep on top of your bills by creating a 'Subscriptions' or 'Utilities' category and logging payments as they happen."
+    ]
+  },
+  {
+    "keys": ["what are grace days", "habit flexibility"],
+    "values": [
+      "Grace days allow you to miss a day of a habit without breaking your streak. Useful for busy or difficult times.",
+      "Use grace days to keep your momentum alive when life gets in the way. They prevent one bad day from resetting your long streak.",
+      "Habit flexibility is key. Grace days allow you to skip a day while maintaining your 'Consistency' score."
+    ]
+  },
+  {
+    "keys": ["how is discipline level calculated", "user level"],
+    "values": [
+      "Your discipline level increases as you consistently complete habits and tasks. High completion rates earn more XP.",
+      "I weigh your success in every area to calculate your Level. Consistency is the fastest way to rank up your profile.",
+      "Your rank reflects your habits. The more you do, the higher your Level and XP total will grow."
+    ]
+  },
+  {
+    "keys": ["momentum vs streak", "difference between momentum and streak"],
+    "values": [
+      "A streak is consecutive days; Momentum is a complex score weighing consistency across all your active habits.",
+      "Streaks are about one habit. Momentum is about your whole life system. I track both to give you a full picture of your discipline.",
+      "Momentum takes into account your total output, while streaks focus on single-habit continuity."
+    ]
+  },
+  {
+    "keys": ["what is success driver", "mood productivity link"],
+    "values": [
+      "Success Driver is a correlation I find between your mood and your productivity. It shows which states lead to best days.",
+      "I analyze your logs to find 'Success Drivers'. For example, I might notice you're 50% more productive when you log a 'Happy' mood.",
+      "By linking mood and productivity data, I can show you exactly which emotional states correlate with your peak performance."
+    ]
+  },
+  {
+    "keys": ["what is a mindset dip", "burnout warning"],
+    "values": [
+      "If I notice a decrease in sentiment or productivity over several days, I'll flag it as a mindset dip and suggest a break.",
+      "A mindset dip alert means your recent notes and task output show signs of burnout. I'll recommend some rest or focus shifts.",
+      "I watch for patterns of fatigue. If your consistency drops sharply, I'll flag it as a 'Mindset Dip' to help you recover faster."
+    ]
+  },
+  {
+    "keys": ["how to earn user xp", "earning experience"],
+    "values": [
+      "You earn XP for almost every productive action: finishing habits, completing tasks, or reaching project milestones.",
+      "Every 'Win' in the app adds to your XP. Check off your list and log your routines to see your experience grow.",
+      "XP is your productivity currency. Log your life consistently to climb the levels and reach 'Master' status."
+    ]
+  },
+  {
+    "keys": ["leveling up benefits", "high level rewards"],
+    "values": [
+      "Leveling up reflects your growth in self-discipline. Higher levels unlock new badges and provide a sense of development.",
+      "As you level up, you'll earn badges that commemorate your journey. It's a visual record of your growing discipline.",
+      "Higher levels are a testament to your long-term consistency. Each rank up represents weeks or months of intentional living."
+    ]
+  },
+  {
+    "keys": ["unlocking badges", "achievements"],
+    "values": [
+      "Badges are earned for specific milestones, like a 30-day habit streak or reaching a savings goal.",
+      "Check your profile to see your achievements. I unlock badges automatically as you hit major productivity and financial goals.",
+      "Earn 'Master' badges by being elite in specific areas like Finance, Habit Tracking, or Task Execution."
+    ]
+  },
+  {
+    "keys": ["customizing avatar", "profile picture"],
+    "values": [
+      "You can change your profile avatar in the Profile section. Pick an icon that represents your current focus.",
+      "Update your look! Select a new avatar and add your name to personalize your All-in-One experience.",
+      "Head to your Profile to pick a custom avatar and see your total XP and current Discipline Level."
+    ]
+  },
+  {
+    "keys": ["how to add bio", "profile description"],
+    "values": [
+      "In the Profile section, you can add a short bio or a personal mission statement to remind yourself of your 'Why'.",
+      "Set your mission! Use the bio field in your profile to write down your core purpose for using this app.",
+      "A personal bio helps keep your goals in focus. Add your mission statement in the Profile module settings."
+    ]
+  },
+  {
+    "keys": ["why edge ai", "on-device processing"],
+    "values": [
+      "Edge AI means processing happens on your device. This ensures your data is private, works offline, and responds instantly.",
+      "I am an 'Edge' AI. I don't use a server to think. Everything stays on your phone, making my responses fast and your data safe.",
+      "We use on-device intelligence to protect your privacy. This means you don't need internet and we don't need your data on our servers."
+    ]
+  },
+  {
+    "keys": ["is the database encrypted", "data protection"],
+    "values": [
+      "Yes, all your data is stored in a locally encrypted SQL database. No one can read it without your unique device key.",
+      "We use SQLCipher to encrypt your local database. Your notes, finances, and habits are protected by military-grade security.",
+      "Encryption is built-in. Even if your phone is lost, your data within this app remains locked and unreadable by unauthorized parties."
+    ]
+  },
+  {
+    "keys": ["why no cloud sync", "local vs cloud"],
+    "values": [
+      "We avoid cloud sync to guarantee 100% privacy. We ensure that your most personal data can never be leaked or hacked from a server.",
+      "Local-only is a feature, not a bug. By not having a cloud backend, we eliminate the primary way personal data is stolen or misused.",
+      "Your life isn't a commodity. We don't use the cloud so that you maintain total, exclusive ownership of your own information."
+    ]
+  },
+  {
+    "keys": ["ram usage", "app efficiency"],
+    "values": [
+      "Our local AI is highly optimized to run with minimal RAM. We use lightweight models that provide intelligence without slowing down your phone.",
+      "We prioritize performance. Our AI engine is designed to be lean, ensuring the app remains snappy even on older hardware.",
+      "Battery and RAM efficiency are key. We've optimized all our local processing to have a negligible impact on your device's resources."
+    ]
+  },
+  {
+    "keys": ["how local tts works", "offline voice"],
+    "values": [
+      "We use the built-in Android Text-to-Speech engine. This allows me to talk to you without needing an internet connection.",
+      "My voice is generated entirely on your device. This keeps our conversations private and ensures I can always respond aloud, even offline.",
+      "Offline voice output is powered by your system's TTS settings. You can even change my voice speed and pitch in your Android settings."
+    ]
+  },
+  {
+    "keys": ["display size xs", "extra small layout"],
+    "values": [
+      "The XS display size compacts the UI, allowing you to see more data on a single screen without scrolling.",
+      "If you want to see everything at a glance, the XS display setting is for you. It optimizes space for power users.",
+      "XS mode shrinks text and padding, giving you a dense, data-rich view of your life's progress."
+    ]
+  },
+  {
+    "keys": ["display size l", "large layout"],
+    "values": [
+      "The L display size increases text and icon sizes, making the app much easier to read and navigate.",
+      "For better accessibility, use the L display size. It provides large, clear elements and high contrast for easy use.",
+      "L mode is designed for readability. It increases the size of all UI components to ensure you never have to squint."
+    ]
+  },
+  {
+    "keys": ["custom fonts", "typography settings"],
+    "values": [
+      "You can choose between Serif, Sans-Serif, and Monospace fonts in Appearance Settings to match your preference.",
+      "Pick your favorite font style! Whether you like a classic Serif look or a modern Monospace, we have options in settings.",
+      "Head to Appearance to customize your typography. You can change both the font family and the overall font size scale."
+    ]
+  },
+  {
+    "keys": ["what is oled mode", "pure black theme"],
+    "values": [
+      "OLED mode uses true black backgrounds. On OLED screens, this saves battery by turning off pixels completely.",
+      "Pure Black (OLED) mode is beautiful and efficient. It reduces eye strain and extends battery life on modern devices.",
+      "Switch to OLED mode in Appearance Settings for a stunning true-black experience that's easy on both your eyes and your battery."
+    ]
+  },
+  {
+    "keys": ["dynamic colors", "system color sync"],
+    "values": [
+      "On Android 12+, you can enable Dynamic Colors to have the app's accent match your phone's wallpaper.",
+      "Enjoy a unified look with Dynamic Coloring. We'll pull colors from your system theme to make the app feel part of your device.",
+      "Toggle Dynamic Colors in settings to sync All-in-One's appearance with your system's Material You theme."
+    ]
+  },
+  {
+    "keys": ["what is morning briefing", "daily summary"],
+    "values": [
+      "Every morning, I can provide a summary of your top 3 priority tasks and any habits you need to focus on.",
+      "The Morning Briefing is your daily plan. I highlight your most urgent goals to help you start the day with clarity.",
+      "I'll help you focus every morning by surfacing your 'Big Three' tasks and upcoming deadlines in your briefing."
+    ]
+  },
+  {
+    "keys": ["what is night planning", "evening review"],
+    "values": [
+      "Night planning helps you review what you accomplished today and set intentions for tomorrow before you sleep.",
+      "End your day right with a Night Planning session. It's the best way to clear your head and prepare for a productive tomorrow.",
+      "My Night Planning tool helps you reflect on your wins and map out your next day, reducing morning decision fatigue."
+    ]
+  },
+  {
+    "keys": ["note auto-cleanup", "stale notes"],
+    "values": [
+      "Auto-cleanup automatically deletes or archives old, unpinned notes after a set period to keep your workspace clutter-free.",
+      "Don't let your notes get messy. Enable Auto-Cleanup to automatically archive stale content that you haven't interacted with.",
+      "Keep your 'Second Brain' sharp! Use the auto-cleanup settings to prune unimportant notes after 30, 60, or 90 days."
+    ]
+  },
+  {
+    "keys": ["deadline alerts", "project warnings"],
+    "values": [
+      "If a project is falling behind its predicted schedule, I'll send an alert so you can adjust your focus.",
+      "My 'Deadline Risk' engine monitors your work speed. If you're likely to miss a date, I'll notify you with a priority alert.",
+      "I'll keep you on schedule. If your daily task velocity drops too low to meet your project goals, I'll let you know."
+    ]
+  },
+  {
+    "keys": ["how smart sorting works", "auto organization"],
+    "values": [
+      "Smart sorting uses priority scores and schedules to ensure relevant items are always at the top of your list.",
+      "We use algorithms to bring the most important work to your attention. Smart sorting handles the organization so you don't have to.",
+      "Our sorting system weighs deadlines, task age, and priority levels to keep your home screen optimized for action."
+    ]
+  },
+  {
+    "keys": ["what is screenshot protection", "prevent screen capture"],
+    "values": [
+      "Screenshot protection prevents other apps from taking screenshots of your private data within this app.",
+      "Enable this in Security to block all screen capture attempts. It's an extra layer of safety for your most sensitive notes and finances.",
+      "Protect your data from prying eyes! This setting makes the app's window invisible to screen recording and capture tools."
+    ]
+  },
+  {
+    "keys": ["biometric lock", "fingerprint security"],
+    "values": [
+      "Biometric lock allows you to use your fingerprint or face recognition to unlock the app instead of typing a PIN.",
+      "Fast and secure: use your device's biometrics to protect your All-in-One vault with just a touch.",
+      "Navigate to Security Settings to enable Biometric Lock. It's the most convenient way to keep your data private and accessible."
+    ]
+  },
+  {
+    "keys": ["forgot pin", "pin recovery"],
+    "values": [
+      "Since we are offline and don't have your PIN on a server, we cannot recover it. Reinstalling is the only way (which clears data).",
+      "We have no 'forgot password' link because we have no cloud. Please keep your PIN safe, or use biometrics as a backup.",
+      "Your PIN is strictly local. For your safety, we cannot reset it. Always export a backup of your data occasionally!"
+    ]
+  },
+  {
+    "keys": ["security audit", "check protection"],
+    "values": [
+      "The Security Audit reviews your current lock status, encryption, and protection settings to ensure your data is safe.",
+      "Run a security check in the settings to see if your vault is fully protected by PINs, biometrics, and encryption.",
+      "I'll help you audit your security. Check the main settings to see my report on your app's current protection level."
+    ]
+  },
+  {
+    "keys": ["app timeout", "auto lock time"],
+    "values": [
+      "App timeout sets how long the app stays unlocked in the background before requiring your PIN again.",
+      "Customize your security: set a timeout for the app lock so it only re-locks after you've been away for a few minutes.",
+      "Control your lock frequency. Set a custom timeout duration in the Security menu to balance convenience and safety."
+    ]
+  },
+  {
+    "keys": ["what is the speed dial", "quick actions"],
+    "values": [
+      "The Speed Dial is the expandable '+' button on the home screen that gives one-tap access to tasks, habits, and expenses.",
+      "Use the Floating Action Button (Speed Dial) to quickly log your day. It's the fastest way to add any type of data.",
+      "Tap the '+' icon to reveal the speed dial. It's designed for rapid entry of everything from a quick note to a new expense."
+    ]
+  },
+  {
+    "keys": ["long-press actions", "home shortcuts"],
+    "values": [
+      "Long-pressing items provides quick shortcuts, like long-pressing the AI button to immediately start the voice assistant.",
+      "Save time with long-press! Try it on the AI button for voice mode, or on cards to reveal edit and delete options.",
+      "Every module has shortcuts. Long-press on lists or buttons to see hidden actions and speed up your workflow."
+    ]
+  },
+  {
+    "keys": ["navigation drawer", "switching sections"],
+    "values": [
+      "The navigation drawer (top left) lets you jump quickly between Habits, Finance, Tasks, Notes, and Settings.",
+      "Open the side menu to navigate the entire app. It's your home base for moving between different productivity modules.",
+      "The drawer is always available on the left. Use it to switch your focus from money management to your project roadmaps."
+    ]
+  },
+  {
+    "keys": ["top bar icons", "header shortcuts"],
+    "values": [
+      "Icons in the top bar provide quick access to section-specific history, search, and additional settings.",
+      "Look at the header of each screen! You'll find context-aware icons for history, search, and data filtering.",
+      "The top bar is your toolkit. Each section has unique icons there to help you manage your history and settings efficiently."
+    ]
+  },
+  {
+    "keys": ["finding intelligent feed", "insight access"],
+    "values": [
+      "You can find the Intelligent Feed in the top-right menu of the Home screen or the AI section.",
+      "Access your AI insights via the three-dot menu on the home screen or inside the All-in-One AI module.",
+      "Your personalized feed is just a tap away. Look for the 'Intelligent Feed' option in the main app menus."
+    ]
+  },
+  {
+    "keys": ["factory reset", "wipe all data"],
+    "values": [
+      "A factory reset permanently deletes all your data, settings, and history, returning the app to its original state.",
+      "Need a clean slate? Use the Factory Reset in Data Management to wipe all encrypted databases from your device.",
+      "Warning: This action is irreversible. Factory resetting will remove every habit, note, and transaction you've logged."
+    ]
+  },
+  {
+    "keys": ["how to check version", "app build info"],
+    "values": [
+      "You can find your current app version at the very bottom of the Settings screen.",
+      "Check the settings page footer for build information and your current All-in-One version number.",
+      "Stay updated! Your current version is displayed at the bottom of the main settings menu."
+    ]
+  },
+  {
+    "keys": ["what is data synergy", "integrated productivity"],
+    "values": [
+      "Data Synergy is how your mood, tasks, habits, and finance data interact to give you a complete picture of your life.",
+      "We believe everything is connected. Data Synergy analyzes how your spending affects your mood, and how mood affects your work.",
+      "Integrated productivity means your data works together. I look for patterns across all modules to help you find balance."
+    ]
+  },
+  {
+    "keys": ["habit reminders", "routine alerts"],
+    "values": [
+      "You can set specific notification times for each habit to remind you exactly when it's time to take action.",
+      "Don't miss your routines! Set custom alerts for individual habits so I can nudge you at the right time every day.",
+      "Habit notifications help you build consistency. Pick a time for each habit and I'll send you a helpful reminder."
+    ]
+  },
+  {
+    "keys": ["budget exhaustion", "running out of money"],
+    "values": [
+      "Budget exhaustion is my prediction of when you will run out of monthly funds based on your daily spending average.",
+      "I'll warn you if your current spending rate is too high. Budget exhaustion shows you the date you'll hit $0 if you don't slow down.",
+      "Stay financially safe with exhaustion alerts. I calculate how many days of funds you have left based on recent habits."
+    ]
+  }
+]

@@ -1,0 +1,272 @@
+[
+  {
+    "keys": ["what about the", "how do I", "what is the best way to", "can you tell me how to", "what should I", "how can I"],
+    "values": [
+      "I'd love to help! Could you tell me a bit more about what you're trying to do?",
+      "I'm listening! What specific topic or task were you thinking of?",
+      "Happy to guide you! What particular detail would you like to know about?",
+      "Gladly! What specifically were you looking to accomplish?"
+    ]
+  },
+  {
+    "keys": ["do it", "please do it", "go ahead and do it", "can you do that now", "do it for me", "go do it"],
+    "values": [
+      "I'm ready to help! Could you clarify which action you'd like me to take?",
+      "Sure thing! What specific task would you like me to get started on?",
+      "Happy to help out! Could you tell me what you'd like done?",
+      "I'm on it! What exact step or task are we doing?"
+    ]
+  },
+  {
+    "keys": ["fix this", "can you fix this", "please fix it", "fix it for me", "help me fix this", "fix this error"],
+    "values": [
+      "I'd be glad to help fix it! What issue or error are you running into?",
+      "Let's get that sorted out! Could you describe what needs fixing?",
+      "Happy to help troubleshoot! What specifically seems to be going wrong?",
+      "Let's fix it together! Could you share a quick detail about the problem?"
+    ]
+  },
+  {
+    "keys": ["call him", "send a message to him", "can you contact him", "tell him about it", "reach out to him", "give him a call"],
+    "values": [
+      "I can certainly help with that! Who would you like me to contact?",
+      "Sure thing! Could you tell me the name of the person you'd like to reach?",
+      "Gladly! Which contact should I reach out to?",
+      "Happy to help! What is the name of the person you're referring to?"
+    ]
+  },
+  {
+    "keys": ["set a reminder", "remind me later", "add a reminder for me", "set alarm for that", "remind me about this", "create a reminder"],
+    "values": [
+      "I'd be happy to set a reminder! What date and time works best for you?",
+      "Sure thing! When would you like me to remind you?",
+      "Gladly! Could you specify the day or time for this reminder?",
+      "Setting a reminder is easy! What time should I set it for?"
+    ]
+  },
+  {
+    "keys": ["what's the weather", "how is the weather outside", "is it going to rain", "weather forecast please", "what is the weather today", "check the weather"],
+    "values": [
+      "I can check that right away! Which city or location are you asking about?",
+      "Happy to check the forecast! What city or area are you located in?",
+      "Sure thing! Could you specify which city's weather you'd like to see?",
+      "Gladly! What location should I look up for you?"
+    ]
+  },
+  {
+    "keys": ["give me directions", "how do I get there", "show me the route", "directions please", "how to reach there", "route to destination"],
+    "values": [
+      "I can help with directions! Where are you heading to today?",
+      "Sure thing! What is your destination?",
+      "Gladly! Could you tell me the place or address you want to reach?",
+      "Happy to guide the way! Where would you like directions to?"
+    ]
+  },
+  {
+    "keys": ["what about that", "tell me about that", "how is that doing", "what about it", "how is that going", "tell me more about that"],
+    "values": [
+      "I want to make sure I've got the right context! What item or topic are you referring to?",
+      "I'm listening! Could you remind me which specific subject we're discussing?",
+      "Gladly! Which topic or item did you have in mind?",
+      "Happy to help! Could you specify what 'that' refers to?"
+    ]
+  },
+  {
+    "keys": ["open the file", "open my document", "open it up", "open file please", "access the file", "open the document"],
+    "values": [
+      "I'd be happy to open it! What is the exact name of the file you need?",
+      "Sure thing! Which document or file would you like to access?",
+      "Gladly! Could you specify the file name or type?",
+      "Opening files is easy! What is the name of your document?"
+    ]
+  },
+  {
+    "keys": ["so if I want to", "I was thinking that maybe", "what if we", "if I try to", "what happens when I", "so when you"],
+    "values": [
+      "Take your time! What were you thinking of finishing that sentence with?",
+      "I'm listening! How would you like to complete that thought?",
+      "Feel free to finish your sentence! What were you considering?",
+      "I'm right here! Please go ahead and complete your idea."
+    ]
+  },
+  {
+    "keys": ["save this", "save it", "please save that", "save this file", "save this note", "can you save this"],
+    "values": [
+      "I can definitely save it! What title or file name would you like to give it?",
+      "Sure thing! Where or under what name should I save this for you?",
+      "Gladly! What name would you prefer for this saved item?",
+      "Happy to save it! What should I call this file?"
+    ]
+  },
+  {
+    "keys": ["search for it", "look it up", "can you search that", "search it up", "look this up for me", "do a search"],
+    "values": [
+      "I'd be glad to look it up! What keyword or topic should I search for?",
+      "Sure thing! What specific information are you searching for?",
+      "Gladly! Could you tell me what item or topic to look up?",
+      "Happy to search! What query would you like me to find?"
+    ]
+  },
+  {
+    "keys": ["schedule the meeting", "book a meeting", "add meeting to calendar", "set up a meeting", "schedule meeting please", "calendar a meeting"],
+    "values": [
+      "I can help schedule that! Who is the meeting with, and at what time?",
+      "Sure thing! What is the title and date for this meeting?",
+      "Gladly! Could you share the details for when to set the meeting?",
+      "Happy to book it! What time and day work for this event?"
+    ]
+  },
+  {
+    "keys": ["check it", "can you check that for me", "please check it out", "check this for me", "go check it", "give it a check"],
+    "values": [
+      "I'd be happy to check! What specific file, message, or setting should I look at?",
+      "Sure thing! Could you clarify what item you'd like me to inspect?",
+      "Gladly! What specifically are we checking on right now?",
+      "Happy to check for you! What item or update should I review?"
+    ]
+  },
+  {
+    "keys": ["send an email", "draft an email", "send email for me", "write an email", "send email please", "email this"],
+    "values": [
+      "I can help draft that email! Who is the recipient?",
+      "Sure thing! What is the email address or name of the person you're writing to?",
+      "Gladly! Could you tell me who you'd like to send this email to?",
+      "Happy to assist! Who should I address this message to?"
+    ]
+  },
+  {
+    "keys": ["explain it", "can you explain it", "please explain that to me", "explain it to me", "give me an explanation of it", "explain that"],
+    "values": [
+      "I'd love to explain! What specific concept or topic are we covering?",
+      "Sure thing! Could you mention which topic you'd like me to explain?",
+      "Gladly! What exact subject would you like simplified?",
+      "Happy to explain! What process or idea should we focus on?"
+    ]
+  },
+  {
+    "keys": ["pick one for me", "choose one", "which one is better", "pick one", "make a choice for me", "choose for me"],
+    "values": [
+      "I'd be happy to help choose! What are the options you're deciding between?",
+      "Sure thing! Could you list the choices you'd like me to help compare?",
+      "Gladly! What options do we have on the table?",
+      "Happy to offer a recommendation! What are the different choices?"
+    ]
+  },
+  {
+    "keys": ["calculate this", "do the math for me", "what is the total", "calculate it", "do this calculation", "math calculation please"],
+    "values": [
+      "I'd be glad to calculate it! What numbers or equation are we working with?",
+      "Sure thing! Could you share the numbers you'd like calculated?",
+      "Gladly! What math problem or total should I solve for you?",
+      "Happy to calculate! What equation would you like me to run?"
+    ]
+  },
+  {
+    "keys": ["play the song", "play that music", "put on some music", "play a track", "play music please", "start playing music"],
+    "values": [
+      "I'd love to play some music! What song title or artist do you prefer?",
+      "Sure thing! Which song or genre would you like to listen to?",
+      "Gladly! Could you tell me the track or playlist name?",
+      "Happy to play music! What artist or song should I start?"
+    ]
+  },
+  {
+    "keys": ["add to my list", "put this on the shopping list", "add it to list", "add to grocery list", "add item to my list", "put it on list"],
+    "values": [
+      "I can add that right away! What item would you like put on your list?",
+      "Sure thing! What specific item should I add for you?",
+      "Gladly! Could you name the item you want on the shopping list?",
+      "Happy to update your list! What grocery or task should I add?"
+    ]
+  },
+  {
+    "keys": ["that thing we talked about", "you know what I mean", "about earlier", "referring to that thing", "that item from earlier", "as we discussed"],
+    "values": [
+      "I want to make sure I'm on the same page! Which topic were we discussing?",
+      "Could you refresh my memory on which specific item you mean?",
+      "Gladly! Which point or task from earlier did you want to revisit?",
+      "Happy to help! What was the exact subject of our earlier chat?"
+    ]
+  },
+  {
+    "keys": ["book a ticket for me", "reserve a seat", "get me a ticket", "book a ticket", "reserve ticket please", "buy a ticket"],
+    "values": [
+      "I can help with booking! What movie, flight, or event is this for?",
+      "Sure thing! Where or for what event are you booking a ticket?",
+      "Gladly! Could you specify the destination or show for the ticket?",
+      "Happy to assist! What event or travel route is this ticket for?"
+    ]
+  },
+  {
+    "keys": ["wake me up", "set a morning alarm", "wake me up later", "set an alarm for me", "wake me up tomorrow", "alarm set please"],
+    "values": [
+      "I'd be glad to set an alarm! What exact time should I wake you up?",
+      "Sure thing! What time would you like your alarm set for?",
+      "Gladly! Could you tell me the specific hour for your alarm?",
+      "Happy to help! What time should the alarm go off?"
+    ]
+  },
+  {
+    "keys": ["change the setting", "adjust my settings", "update settings", "change setting please", "adjust setting", "modify settings"],
+    "values": [
+      "I can help adjust settings! Which setting would you like to change?",
+      "Sure thing! Could you specify if it's volume, brightness, or another option?",
+      "Gladly! What preference or configuration are we updating?",
+      "Happy to help! Which setting should I adjust for you?"
+    ]
+  },
+  {
+    "keys": ["delete it", "remove that file", "delete this for me", "remove it", "delete file please", "trash this item"],
+    "values": [
+      "To be safe, could you confirm the exact name of the file to delete?",
+      "I want to make sure we remove the right item! What file name should I delete?",
+      "Sure thing! Which specific file or item would you like removed?",
+      "Happy to help! What is the title of the document to be deleted?"
+    ]
+  },
+  {
+    "keys": ["send a text", "text her", "send a message", "write a text message", "text him please", "send SMS message"],
+    "values": [
+      "I can help send a text! Who would you like me to message?",
+      "Sure thing! What is the name or number of the recipient?",
+      "Gladly! Could you tell me who should receive this text message?",
+      "Happy to assist! Who are we texting today?"
+    ]
+  },
+  {
+    "keys": ["what should I do", "give me advice", "what is my best option", "what should I do now", "need your advice", "what do you suggest"],
+    "values": [
+      "I'd be happy to share thoughts! What situation or decision are you facing?",
+      "Sure thing! Could you tell me a little context about the choice you're making?",
+      "Gladly! What specific scenario would you like advice on?",
+      "Happy to help evaluate options! What choice are you considering right now?"
+    ]
+  },
+  {
+    "keys": ["convert this for me", "change the units", "do a conversion", "convert this value", "unit conversion please", "convert this number"],
+    "values": [
+      "I can calculate that conversion! What number and units are we converting?",
+      "Sure thing! Which units are we converting to and from?",
+      "Gladly! What value and measurement unit should I convert for you?",
+      "Happy to help! What starting number and target units are you using?"
+    ]
+  },
+  {
+    "keys": ["launch the app", "open the application", "start the program", "open app please", "launch application", "start the app"],
+    "values": [
+      "I'd be glad to open it! What is the exact name of the application?",
+      "Sure thing! Which app would you like me to launch for you?",
+      "Gladly! Could you specify which program you want opened?",
+      "Happy to help! What application should I start up?"
+    ]
+  },
+  {
+    "keys": ["happy to help my friend", "tell me what you need dear friend", "always ready to help my friend", "clarify for me my friend", "asking nicely dear friend"],
+    "values": [
+      "I'm always ready to help you, my friend! Could you tell me a bit more about what you need?",
+      "Happy to assist, dear friend! What specific detail can I help you figure out?",
+      "Thank you my friend! Tell me what you'd like to work on, and we'll get started.",
+      "Always glad to lend a hand, my dear friend! What task shall we look at together?"
+    ]
+  }
+]

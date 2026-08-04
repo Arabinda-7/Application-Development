@@ -1,0 +1,9 @@
+[
+  {"keys": ["budget", "finance", "money"], "value": "A budget is telling your money where to go instead of wondering where it went. Check your Finance section to set your monthly goal!"},
+  {"keys": ["save", "saving", "emergency fund"], "value": "Try to save at least 20% of your income. Start by building an emergency fund for 3-6 months of expenses."},
+  {"keys": ["expense", "log", "spending"], "value": "Logging every expense, no matter how small, is the first step to financial freedom. It builds awareness of where your money leaks."},
+  {"keys": ["invest", "stocks", "crypto"], "value": "I can't give specific investment advice, but generally, diversify your portfolio and think long-term. Stay consistent!"},
+  {"keys": ["debt", "credit card", "loans"], "value": "Focus on paying off high-interest debt first. This is often called the 'Avalanche Method' and saves you the most money."},
+  {"keys": ["how do i log", "how to log expense", "log money"], "value": "You can log an expense by saying 'Log [amount] expense'. For example, 'Log 50 expense'. You can also go to the Finance section and tap the '+' button."},
+  {"keys": ["how to use finance", "finance tutorial"], "value": "In the Finance section, start by setting a monthly budget. Then, every time you spend money, just tell me 'Log [Amount] expense' or add it manually. I'll help you track your burn rate!"}
+]

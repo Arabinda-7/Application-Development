@@ -1,0 +1,802 @@
+[
+  {
+    "keys": ["hello", "hello!", "hello.", "HELLO", "helloo", "hello there", "hello there!", "hallo", "hello again", "hello to you", "hello pal"],
+    "values": [
+      "Hello, it's really wonderful to see you today. How are you doing?",
+      "Hello there, i'm so glad you stopped by. What's on your mind today?",
+      "Hello! Ready to dive into whatever you have planned today?"
+    ]
+  },
+  {
+    "keys": ["hi", "hi!", "hi.", "HI", "hii", "hiii", "hi there", "hi there!", "hi friend hi", "hi hi", "hi to you"],
+    "values": [
+      "Hi there, so good to hear from you. How are things going today?",
+      "Hi! Always happy when you pop in to say hello.",
+      "Hi there! Hope you're having a bright and pleasant day so far."
+    ]
+  },
+  {
+    "keys": ["hey", "hey!", "hey...", "HEY", "heyy", "heyyy", "hey there", "hey there!", "hey you", "heya", "hey hey"],
+    "values": [
+      "Hey there, it's so nice to see you. How's your day treating you?",
+      "Hey! Great to hear from you today.",
+      "Hey there! What exciting things are you up to right now?"
+    ]
+  },
+  {
+    "keys": ["good morning", "good morning!", "good morning.", "GOOD MORNING", "gdmornin", "mornin", "morning!", "g'morning", "good morning there", "good morning to you", "gdmorning", "good mornin"],
+    "values": [
+      "Good morning, wishing you a peaceful and energizing start to your day. How did you sleep?",
+      "Morning! Hope you have a wonderful day ahead filled with good moments.",
+      "Good morning! Ready to take on today with full momentum?"
+    ]
+  },
+  {
+    "keys": ["good afternoon", "good afternoon!", "good afternoon.", "GOOD AFTERNOON", "g'afternoon", "afternoon!", "good after noon", "good afternoon there", "afternoon check in", "good afternoon to you"],
+    "values": [
+      "Good afternoon! How has your day been shaping up so far?",
+      "Afternoon! Nice to pause and check in with you.",
+      "Good afternoon! Hope you're having a smooth and restful afternoon."
+    ]
+  },
+  {
+    "keys": ["good evening", "good evening!", "good evening.", "GOOD EVENING", "g'evening", "evening!", "good eveing", "good evening there", "evening greeting", "good evening to you"],
+    "values": [
+      "Good evening, i hope you had a fulfilling day today. How are you unwinding?",
+      "Evening! So nice to connect with you tonight.",
+      "Good evening! Time to kick back and relax."
+    ]
+  },
+  {
+    "keys": ["good night", "good night!", "goodnight", "GOODNIGHT", "g'night", "gnight!", "good night there", "bedtime hi", "nighty night", "good night sleep well"],
+    "values": [
+      "Good night! Sleep tight and get some wonderful rest tonight.",
+      "Goodnight! Hoping you have sweet dreams and a peaceful sleep.",
+      "Good night! You worked hard today—enjoy your rest."
+    ]
+  },
+  {
+    "keys": ["welcome back", "welcome back!", "im back", "i'm back", "I'm back!", "back again", "im back again", "i am back", "hey im back", "yo im back", "i'm back now"],
+    "values": [
+      "Welcome back, i'm so glad to see you again. How did your break go?",
+      "Hey, welcome back! It's always great when you return.",
+      "Welcome back! Ready to pick up right where we left off?"
+    ]
+  },
+  {
+    "keys": ["long time no see", "long time no see!", "been a while", "it's been a while", "its been a while", "long time no chat", "haven't talked in a while", "long time no see friend"],
+    "values": [
+      "Long time no see, it's so wonderful to hear from you again. How have you been?",
+      "It really has been a while! I've missed our chats—hope life has been treating you well.",
+      "Welcome back! So great to reconnect after some time."
+    ]
+  },
+  {
+    "keys": ["nice to meet you", "nice to meet you!", "pleasure to meet you", "glad to meet you", "nice meeting you", "nice meeting you!", "great to meet you"],
+    "values": [
+      "Nice to meet you, i'm so glad we're connecting today. How can I assist you?",
+      "Pleasure to meet you! Hope you're having a wonderful day so far.",
+      "Glad to meet you! Ready whenever you are to chat or work on something."
+    ]
+  },
+  {
+    "keys": ["greetings", "greetings!", "Greetings.", "GREETINGS", "greetings to you", "greetings friend", "formal greetings", "greetings today"],
+    "values": [
+      "Greetings, it is a distinct pleasure to connect with you today. How may I help?",
+      "Greetings! I hope this day brings you success and tranquility.",
+      "Greetings to you as well! Wishing you a productive and smooth day ahead."
+    ]
+  },
+  {
+    "keys": ["what's up", "what's up!", "whats up", "whatsup", "sup", "sup!", "SUP", "watsup", "wassup", "whatcha up to"],
+    "values": [
+      "Not much on my end, just ready to help! What's up with you today?",
+      "Hey, all good here. What's going on in your world?",
+      "Sup! Hope your day is turning out awesome."
+    ]
+  },
+  {
+    "keys": ["hey friend", "hi buddy", "hello friend", "hey buddy", "hi friend", "hello buddy", "hey my friend", "hello my friend"],
+    "values": [
+      "Hey friend, so great to see you today. How are you holding up?",
+      "Hi buddy! Always brightens my day to hear from you.",
+      "Hello friend! Hope you're having a fantastic day so far."
+    ]
+  },
+  {
+    "keys": ["HEYYY!!", "lets do this!", "ready to crush today!", "good morning super excited", "hyped today hi", "high energy hello", "super pumped hi", "lets gooo hello"],
+    "values": [
+      "Love that awesome energy! Let me know what we're tackling first!",
+      "Hey, that enthusiasm is contagious. Ready whenever you are!",
+      "YES, love the excitement today. What are we conquering?"
+    ]
+  },
+  {
+    "keys": ["so tired today hi", "barely awake morning", "need coffee hello", "sleepy morning hi", "exhausted today hi", "low energy hello", "yawning hi"],
+    "values": [
+      "Take it nice and easy today. Hope you get a warm cup of coffee soon!",
+      "Sleepy starts happen to everyone. Go at your own comfortable pace today.",
+      "Sending you cozy vibes! Don't push yourself too hard today."
+    ]
+  },
+  {
+    "keys": ["good morning happy weekend", "weekend morning!", "good morning saturday", "good morning sunday", "mornin weekend", "gdmornin weekend", "Happy Weekend!", "weekend morning greeting"],
+    "values": [
+      "Happy weekend! Hope you have a peaceful and refreshing day planned.",
+      "Good morning! Weekend mornings are perfect for relaxing and unwinding.",
+      "Morning! Hope your weekend gets off to a wonderful start."
+    ]
+  },
+  {
+    "keys": ["happy holidays hi", "festive greeting hello", "happy holiday season", "holiday morning hi", "season's greetings hello"],
+    "values": [
+      "Happy holidays! Wishing you warmth, joy, and wonderful moments today.",
+      "Season's greetings! Hope your holiday season is filled with peace.",
+      "Happy holidays to you! May your days be bright and cozy."
+    ]
+  },
+  {
+    "keys": ["haven't talked in forever", "back after months", "returning after a long time", "been ages hi", "long time no see stranger", "long absence hello"],
+    "values": [
+      "It really has been ages, i'm so thrilled to see you back. How have you been?",
+      "Welcome back after so long! So good to hear your voice again.",
+      "It's been quite a while! Hope life has been full of good things for you."
+    ]
+  },
+  {
+    "keys": ["starting my day hello", "first checkin of the day", "beginning my day hi", "starting out today hello", "first greeting of the day"],
+    "values": [
+      "Good morning, glad to be part of your day's start. What's on your agenda?",
+      "Starting out strong today! Hope your morning goes smoothly.",
+      "Welcome to the start of your day! Wishing you great focus and peace."
+    ]
+  },
+  {
+    "keys": ["starting conversation naturally", "hey got a minute", "quick chat hi", "just wanted to say hi", "starting a chat hello"],
+    "values": [
+      "I've always got time for you! What's on your mind?",
+      "Hey, always happy to chat. What are you thinking about?",
+      "Sure thing! I'm all ears—how can I help?"
+    ]
+  },
+  {
+    "keys": ["good morning early bird", "gdmornin early", "Good morning!! early start today", "mornin early", "early morning hi", "good morning early", "Good morning! Up early today"],
+    "values": [
+      "Good early morning, up with the sun today? Hope you have a peaceful start.",
+      "Morning, you're up bright and early today. Wishing you great productivity.",
+      "Early start today! Make sure to grab a warm beverage to start off right."
+    ]
+  },
+  {
+    "keys": ["happy monday morning", "good morning happy monday", "Happy Monday!", "mornin monday", "gdmornin monday", "monday morning!", "happy monday", "happy monday!!"],
+    "values": [
+      "Happy Monday! Wishing you a smooth and successful start to your week.",
+      "Good morning and happy Monday! Let's tackle this week together.",
+      "Morning, fresh week, fresh opportunities ahead. How are you feeling?"
+    ]
+  },
+  {
+    "keys": ["happy friday morning", "good morning happy friday", "Happy Friday!", "mornin friday", "gdmornin friday", "friday morning!", "happy friday", "happy friday!!"],
+    "values": [
+      "Happy Friday! The weekend is almost here—finish the week strong!",
+      "Good morning and happy Friday! Hope your day flies by smoothly.",
+      "Morning, made it to Friday! Any fun weekend plans ahead?"
+    ]
+  },
+  {
+    "keys": ["good morning sunny day", "sunny morning!", "good morning sun is shining", "mornin sunny", "gdmornin sunny", "bright sunny morning", "Good morning sunny"],
+    "values": [
+      "Good morning! Sounds like a gorgeous sunny day outside.",
+      "Morning! Sunshine always brings great energy—enjoy your day!",
+      "Good morning! Perfect weather to step outside and recharge."
+    ]
+  },
+  {
+    "keys": ["good morning rainy day", "rainy morning!", "good morning it's raining", "mornin rainy", "gdmornin rainy", "cozy rainy morning", "Good morning rain"],
+    "values": [
+      "Good morning! Rainy mornings are perfect for settling in with a hot drink.",
+      "Morning! Stay cozy and warm inside while the rain falls.",
+      "Good morning! Nothing quite like the soothing sound of morning rain."
+    ]
+  },
+  {
+    "keys": ["good mid morning", "mid morning hi", "gdmornin mid morning", "good morning nearly noon", "mid-morning hello", "Good mid morning!", "midmorning checkin"],
+    "values": [
+      "Good mid-morning! Hope your day has been smooth so far.",
+      "Morning! Mid-morning already—how are your tasks coming along?",
+      "Good mid-morning! Perfect time for a quick stretch or tea break."
+    ]
+  },
+  {
+    "keys": ["good noon", "good midday", "good noon!", "Happy noon", "good noon there", "noon greeting", "good midday to you", "Good Noon!", "midday hello"],
+    "values": [
+      "Good midday! Halfway through the workday already.",
+      "Happy noon! Make sure to take a nice lunch break today.",
+      "Good noon! Time to pause, refuel, and catch your breath."
+    ]
+  },
+  {
+    "keys": ["good afternoon after lunch", "post lunch hi", "afternoon post lunch", "just ate lunch hello", "good afternoon lunch break", "afternoon lunch done"],
+    "values": [
+      "Good afternoon! Hope you had a tasty and satisfying lunch.",
+      "Afternoon! Recharged after lunch and ready to jump back in?",
+      "Good afternoon! Hope lunch gave you a nice boost of focus."
+    ]
+  },
+  {
+    "keys": ["good late afternoon", "late afternoon hi", "late afternoon checkin", "good afternoon wrapping up", "late afternoon greeting", "Good late afternoon!"],
+    "values": [
+      "Good late afternoon! Almost time to wrap things up for the day.",
+      "Afternoon! You're near the finish line for today.",
+      "Good late afternoon! Hope it's been a satisfying day."
+    ]
+  },
+  {
+    "keys": ["sunset greeting hi", "twilight hello", "evening sunset hi", "beautiful sunset greeting", "dusk hello"],
+    "values": [
+      "Good evening! Sunset time is always so peaceful.",
+      "Hello! Hope you get to enjoy the beautiful twilight colors tonight.",
+      "Good evening! Time to slow down as the day ends."
+    ]
+  },
+  {
+    "keys": ["good cozy evening", "cozy evening hi", "good evening relaxed", "cozy evening greeting", "relaxing evening hi", "Good cozy evening!"],
+    "values": [
+      "Good evening! Perfect night to wrap up in comfort and unwind.",
+      "Evening! Enjoy your cozy downtime tonight.",
+      "Good evening! Hope your surroundings are warm and peaceful."
+    ]
+  },
+  {
+    "keys": ["good late evening", "late evening hi", "good evening winding down", "late evening greeting", "Good late evening!", "winding down evening"],
+    "values": [
+      "Good late evening! Winding down after a full day?",
+      "Evening! Getting ready to turn off the lights soon?",
+      "Good late evening! Hope you get some deeply restful sleep tonight."
+    ]
+  },
+  {
+    "keys": ["good midnight", "midnight hi", "happy midnight", "midnight checkin", "hello midnight", "Good midnight!", "12am hello"],
+    "values": [
+      "Good midnight! Late night hours can be surprisingly calm.",
+      "Midnight already! Hope whatever you're working on is going smoothly.",
+      "Hello! Late night for you—make sure to catch some sleep soon."
+    ]
+  },
+  {
+    "keys": ["late night hi", "night owl hello", "up late hi", "insomnia hello", "can't sleep hi", "super late night greeting", "1am hello", "2am hi"],
+    "values": [
+      "Hello night owl, still awake at this hour? Hope all is well.",
+      "Late night check-in! Hope everything is peaceful around you.",
+      "Hey there, up late tonight? Don't forget to rest when you can."
+    ]
+  },
+  {
+    "keys": ["howdy", "howdy!", "howdy partner", "howdy there", "HOWDY", "howdy howdy", "howdy friend"],
+    "values": [
+      "Howdy! Hope you're having a fine and pleasant day.",
+      "Howdy partner! How are things out your way today?",
+      "Howdy there! Always great to see your friendly greeting."
+    ]
+  },
+  {
+    "keys": ["yo", "yo!", "YO", "yoo", "yooo", "yo yo", "yo there", "yo whats up"],
+    "values": [
+      "Yo! What's good today?",
+      "Yo! How's it going on your end?",
+      "Yo there! Ready to jump into whatever you need."
+    ]
+  },
+  {
+    "keys": ["hiya", "hiya!", "HIYA", "hiya there", "hiya friend", "hiya hiya"],
+    "values": [
+      "Hiya! So cheerful to see you today.",
+      "Hiya there! Hope your day is off to a bright start.",
+      "Hiya! How's everything going with you?"
+    ]
+  },
+  {
+    "keys": ["hope you are well", "hope this finds you well", "hope all is well", "hope you're doing well", "hope all is well with you"],
+    "values": [
+      "Thank you kindly! I hope you are doing wonderfully today as well.",
+      "I appreciate that! Wishing you health and happiness today.",
+      "Thank you! I hope everything is flowing smoothly for you too."
+    ]
+  },
+  {
+    "keys": ["good day", "good day!", "good day to you", "Good day.", "GOOD DAY", "good day sir", "good day ma'am"],
+    "values": [
+      "Good day to you! Hope all is going well.",
+      "A very good day! How can I be of service today?",
+      "Good day! Wishing you peace and productivity today."
+    ]
+  },
+  {
+    "keys": ["busy day ahead hi", "so much to do today hello", "crazy schedule today hi", "stressed morning hi", "packed day hello"],
+    "values": [
+      "Take a deep breath! You've got this—one step at a time.",
+      "Sounds like a full plate today. Let me know how I can help lighten it.",
+      "Pace yourself today! You'll power through it all."
+    ]
+  },
+  {
+    "keys": ["chilling today hi", "relaxed morning hi", "nothing much to do hello", "lazy day hi", "quiet day hello"],
+    "values": [
+      "Sounds lovely! Enjoy every minute of your peaceful day.",
+      "Low-key days are the best. Enjoy the calm!",
+      "Nice! Take all the time you need to unwind."
+    ]
+  },
+  {
+    "keys": ["back to work hi", "starting my work session", "time to focus hello", "work mode on hi", "let's get to work hello"],
+    "values": [
+      "Work mode engaged! Wishing you maximum productivity.",
+      "Let's get right into focus mode! What are we tackling?",
+      "Time to grind! Hope your work goes smoothly today."
+    ]
+  },
+  {
+    "keys": ["time to code hi", "starting coding session", "hello world dev mode", "coder greeting hi", "ready to write code hello"],
+    "values": [
+      "Happy coding! May your build pass on the very first try.",
+      "Dev mode active! What exciting feature are we building today?",
+      "Hello coder! Ready to squash bugs and write clean logic?"
+    ]
+  },
+  {
+    "keys": ["study time hi", "time to study hello", "got my books ready hi", "study session start", "learning session hi"],
+    "values": [
+      "Happy studying! Hope your brain absorbs everything smoothly today.",
+      "Study session time! Take your time and stay focused.",
+      "Wishing you a super productive and clear study session!"
+    ]
+  },
+  {
+    "keys": ["creative time hi", "time to write hello", "design mode hi", "creative session start", "brainstorming hi"],
+    "values": [
+      "Let the creativity flow! Exciting to see what you design today.",
+      "Creative mode engaged! Hope inspiration strikes brightly.",
+      "Brainstorming time! Let's turn those ideas into reality."
+    ]
+  },
+  {
+    "keys": ["you there?", "you there", "are you there?", "are you around?", "anybody there?", "anyone here?", "you around?"],
+    "values": [
+      "Right here and ready to help! What's up?",
+      "Yep, I'm right here! How can I assist you today?",
+      "Present and accounted for! What's on your mind?"
+    ]
+  },
+  {
+    "keys": ["knock knock", "knock knock!", "knock knock...", "anybody home?", "knock knock hello"],
+    "values": [
+      "Who's there? Ready for a good joke or a chat!",
+      "Come on in! How can I help you today?",
+      "Door is open! What's on your mind?"
+    ]
+  },
+  {
+    "keys": ["ping", "ping!", "ping...", "PING", "ping pong hi", "quick ping"],
+    "values": [
+      "Pong! Ready when you are.",
+      "Pong! How can I help you right now?",
+      "Ack, received loud and clear. What's up?"
+    ]
+  },
+  {
+    "keys": ["hey quick question", "hi quick question", "hello quick question", "got a quick question hi", "quick query hello"],
+    "values": [
+      "Fire away! I'm all ears.",
+      "Ask away! Ready to help out.",
+      "Sure thing! What would you like to know?"
+    ]
+  },
+  {
+    "keys": ["how's your day going?", "hows your day going", "how is your day going", "how's your day so far?", "hows your day so far"],
+    "values": [
+      "My day is going great, thank you! How about yours?",
+      "Everything is going smooth and steady! How is your day coming along?",
+      "It's been a lovely day so far! How are things on your end?"
+    ]
+  },
+  {
+    "keys": ["how's everything?", "hows everything", "how is everything?", "how's everything going?", "hows everything going?"],
+    "values": [
+      "Everything is going great! How are things with you?",
+      "All good across the board! How's life treating you today?",
+      "Things are running smoothly! Hope everything is good on your end too."
+    ]
+  },
+  {
+    "keys": ["hola", "hola!", "hola amigo", "hola there", "HOLA", "hola how are you"],
+    "values": [
+      "¡Hola! How are you doing today?",
+      "Hola! Good to connect with you.",
+      "¡Hola! Hope you're having a wonderful day."
+    ]
+  },
+  {
+    "keys": ["bonjour", "bonjour!", "bonjour there", "BONJOUR", "bonjour my friend"],
+    "values": [
+      "Bonjour! Hope you are having a lovely day.",
+      "Bonjour! So nice to connect with you today.",
+      "Bonjour there! How may I assist you?"
+    ]
+  },
+  {
+    "keys": ["ciao", "ciao!", "ciao bella", "ciao there", "CIAO", "ciao how are you"],
+    "values": [
+      "Ciao! Great to hear from you today.",
+      "Ciao there! Hope your day is going wonderfully.",
+      "Ciao! How can I help you out right now?"
+    ]
+  },
+  {
+    "keys": ["aloha", "aloha!", "aloha there", "ALOHA", "aloha state of mind hi"],
+    "values": [
+      "Aloha! Bringing warm island vibes to your day.",
+      "Aloha there! Hope you're having a peaceful and happy day.",
+      "Aloha! How can I assist you today?"
+    ]
+  },
+  {
+    "keys": ["namaste", "namaste!", "NAMASTE", "namaste there", "namaste friend"],
+    "values": [
+      "Namaste! Wishing you peace and joy today.",
+      "Namaste! So wonderful to connect with you.",
+      "Namaste there! How are you doing today?"
+    ]
+  },
+  {
+    "keys": ["g'day", "g'day mate", "gday", "gday mate!", "GDAY", "g'day there"],
+    "values": [
+      "G'day mate! How are things going out your way?",
+      "G'day! Hope you're having a top-notch day.",
+      "G'day there! What are we tackling today?"
+    ]
+  },
+  {
+    "keys": ["right then hello", "cheerio hi", "top of the morning", "cheers mate hi", "right then hi"],
+    "values": [
+      "Cheers! Hope you're having a splendid day.",
+      "Right then! Ready to dive into whatever you have lined up.",
+      "Cheers mate! How are things coming along today?"
+    ]
+  },
+  {
+    "keys": ["what's crackin?", "whats crackin", "what crackin", "whats crackin today", "what's crackin friend"],
+    "values": [
+      "Not much, just staying ready for action. What's crackin with you?",
+      "All good here! What's popping on your end?",
+      "Hey, ready to get things moving. What's crackin?"
+    ]
+  },
+  {
+    "keys": ["what's poppin?", "whats poppin", "whats poppin today", "poppin hi", "what's poppin friend"],
+    "values": [
+      "Everything's smooth! What's poppin with you?",
+      "Hey! All good vibes here—what's poppin?",
+      "Just staying ready to assist! What's going on?"
+    ]
+  },
+  {
+    "keys": ["how's it hangin?", "hows it hangin", "how's it hanging", "hows it hanging?", "how's it hangin brother"],
+    "values": [
+      "Hanging loose and feeling good! How about you?",
+      "All smooth over here! How are things with you?",
+      "Can't complain! How's your day turning out?"
+    ]
+  },
+  {
+    "keys": ["ahoy", "ahoy!", "ahoy there", "AHOY", "ahoy matey", "ahoy captain"],
+    "values": [
+      "Ahoy there! Welcome aboard today.",
+      "Ahoy! Smooth sailing ahead today.",
+      "Ahoy captain! What adventure are we embarking on today?"
+    ]
+  },
+  {
+    "keys": ["got my coffee morning", "coffee in hand hi", "morning coffee time", "sipping coffee morning", "good morning coffee ready"],
+    "values": [
+      "Nothing beats that first morning coffee! Enjoy every sip.",
+      "Morning! Coffee in hand means you're ready to conquer the day.",
+      "Good morning, best way to start the day. How's it tasting?"
+    ]
+  },
+  {
+    "keys": ["got my tea morning", "tea time morning hi", "morning tea ready", "sipping hot tea hello", "good morning tea break"],
+    "values": [
+      "A hot cup of tea is the best morning cozy ritual! Enjoy.",
+      "Morning! Hope that tea gives you a soothing start to the day.",
+      "Good morning! Nothing quite like a peaceful tea break."
+    ]
+  },
+  {
+    "keys": ["eating breakfast hi", "breakfast time morning", "morning breakfast checkin", "having breakfast hello", "good morning breakfast time"],
+    "values": [
+      "Good morning! Hope you're enjoying a nutritious breakfast.",
+      "Morning! Great way to fuel your body for the day ahead.",
+      "Good morning! Enjoy your breakfast break."
+    ]
+  },
+  {
+    "keys": ["post workout hi", "just finished workout morning", "after gym hello", "workout done hi", "post exercise greeting"],
+    "values": [
+      "Great job getting that workout in! Endorphins must be flowing.",
+      "Awesome start to the day! Nothing feels better than post-workout energy.",
+      "Good morning! Way to crush that workout early."
+    ]
+  },
+  {
+    "keys": ["on my commute hi", "commuting to work hello", "on the bus hi", "on the train morning", "driving to work hi"],
+    "values": [
+      "Stay safe on your commute! Hope traffic is light today.",
+      "Commute time! Hope you've got some good tunes or a podcast playing.",
+      "Wishing you a quick and hassle-free commute to work!"
+    ]
+  },
+  {
+    "keys": ["on my phone hi", "mobile hi", "quick hello from phone", "on the go hi", "out and about hello"],
+    "values": [
+      "Hey on the go! Hope your outing is going smoothly.",
+      "Hey there! Convenient connecting with you wherever you are.",
+      "Hello from mobile! Take care while you're out and about."
+    ]
+  },
+  {
+    "keys": ["freezing morning hi", "so cold today good morning", "brrr cold morning", "winter morning hello", "chilly day hi"],
+    "values": [
+      "Brrr! Stay warm and bundle up out there today.",
+      "Good morning! Perfect day for thick sweaters and hot drinks.",
+      "Morning! Stay cozy indoors if you can."
+    ]
+  },
+  {
+    "keys": ["hot day hi", "so hot today good morning", "sweltering afternoon hi", "summer heat hello", "scorching day hi"],
+    "values": [
+      "Stay cool out there! Don't forget to stay hydrated.",
+      "Good morning! Sounds like a warm one—hope you stay cool in the shade.",
+      "Afternoon! Keep cool and take it easy in the heat today."
+    ]
+  },
+  {
+    "keys": ["crisp autumn morning", "fall day hi", "autumn breeze hello", "fall morning greeting", "autumn leaves morning hi"],
+    "values": [
+      "Autumn weather is so crisp and refreshing! Enjoy the day.",
+      "Good morning! Beautiful fall vibes out there.",
+      "Morning! Love the crisp air of autumn mornings."
+    ]
+  },
+  {
+    "keys": ["spring day hi", "beautiful spring morning", "spring breeze hello", "flowers blooming morning", "spring morning greeting"],
+    "values": [
+      "Spring is in the air! Hope you get to enjoy the fresh flowers.",
+      "Good morning! Beautiful spring weather brings so much fresh energy.",
+      "Morning! Hope your spring day is full of warmth and color."
+    ]
+  },
+  {
+    "keys": ["gdmrnng", "gdmornin there", "gdmornin friend", "gdmrn", "gdmrning"],
+    "values": [
+      "Good morning! Hope you have a wonderful start to your day.",
+      "Morning! Great to hear from you today.",
+      "Good morning! Wishing you a clear and pleasant day."
+    ]
+  },
+  {
+    "keys": ["heyyyy", "heyyyy!", "heyyy there", "heyyy friend", "heyyyyy"],
+    "values": [
+      "Heyyy! Great to see you today.",
+      "Hey there! How's your day coming along?",
+      "Heyyy! What fun stuff are you working on?"
+    ]
+  },
+  {
+    "keys": ["wassup friend", "wassuuup", "wassup there", "wassup how are u", "wassup bro"],
+    "values": [
+      "Wassup! Hope everything is smooth on your side.",
+      "Hey! Not much over here—wassup with you?",
+      "Wassup! Ready to assist whenever you are."
+    ]
+  },
+  {
+    "keys": ["gnight all", "gnite", "gnight sleep well", "gnite friend", "gnight bedtime"],
+    "values": [
+      "Good night! Have a peaceful and restful sleep.",
+      "G'night! Hope you wake up refreshed tomorrow.",
+      "Goodnight! Rest well tonight."
+    ]
+  },
+  {
+    "keys": ["hru", "hru?", "hru today", "hey hru", "hi hru"],
+    "values": [
+      "I'm doing fantastic, thank you! How are you doing today?",
+      "Doing great over here! How are things with you?",
+      "All good on my end! How are you feeling today?"
+    ]
+  },
+  {
+    "keys": ["sup bro", "sup man", "sup there", "sup u", "sup today"],
+    "values": [
+      "Sup, everything is quiet and smooth here. What's up with you?",
+      "Sup! Ready to jump into whatever you need.",
+      "Hey! All good on my end—sup with you?"
+    ]
+  },
+  {
+    "keys": ["happy new year", "happy new year!", "good morning happy new year", "new year greeting hi", "cheers to the new year hello"],
+    "values": [
+      "Happy New Year! Wishing you health, joy, and success all year long.",
+      "Happy New Year! Fresh start for exciting new goals.",
+      "Good morning and Happy New Year! Let's make this year great."
+    ]
+  },
+  {
+    "keys": ["happy wednesday", "happy hump day", "good morning wednesday", "hump day morning hi", "wednesday checkin"],
+    "values": [
+      "Happy Wednesday! Over the midweek hill already.",
+      "Good morning and happy Hump Day! Weekend is drawing closer.",
+      "Happy Wednesday! Hope your week is progressing smoothly."
+    ]
+  },
+  {
+    "keys": ["sunday evening hi", "quiet sunday night hello", "sunday evening prep hi", "winding down sunday", "sunday night greeting"],
+    "values": [
+      "Good Sunday evening! Hope you had a relaxing weekend.",
+      "Sunday night peace! Take time to unwind before the new week begins.",
+      "Evening! Wishing you a calm and restful Sunday night."
+    ]
+  },
+  {
+    "keys": ["look who's here", "look who it is", "look who showed up hi", "well look who's here hello", "look who came by hi"],
+    "values": [
+      "Always a pleasant surprise! How are you doing today?",
+      "Great to see you! What brings you by today?",
+      "Welcome! Happy to connect with you."
+    ]
+  },
+  {
+    "keys": ["sending good vibes hi", "good vibes today hello", "positive vibes morning hi", "wishing you a good day hi", "good energy greeting"],
+    "values": [
+      "Thank you! Sending double the good vibes right back to you.",
+      "Positive vibes received and appreciated! Hope your day is bright.",
+      "Love the positive energy! Wishing you a fantastic day ahead."
+    ]
+  },
+  {
+    "keys": ["just popping in to say hi", "quick hi before break", "just stopping by hi", "quick hello pop in", "dropping by to say hi"],
+    "values": [
+      "Glad you popped in! Hope you have a great rest of your day.",
+      "Thanks for stopping by! Enjoy your break.",
+      "Always nice when you drop by to say hello!"
+    ]
+  },
+  {
+    "keys": ["checking in before bed", "quick hi before sleep", "heading to sleep soon hi", "about to sleep hello", "bedtime checkin hi"],
+    "values": [
+      "Hope you have a peaceful and refreshing sleep tonight!",
+      "Rest up well! Talk to you whenever you wake up.",
+      "Glad you checked in! Sleep tight and pleasant dreams."
+    ]
+  },
+  {
+    "keys": ["lunchtime hi", "grabbing lunch hello", "lunch break checkin", "eating lunch hi", "midday lunch greeting"],
+    "values": [
+      "Enjoy your lunch! Take time to relax while eating.",
+      "Lunchtime! Hope you have something delicious lined up.",
+      "Enjoy your meal break! Good to take a step away from work."
+    ]
+  },
+  {
+    "keys": ["afternoon slump hi", "need an afternoon pick me up", "feeling sleepy afternoon hi", "slump time hello", "3pm energy dip hi"],
+    "values": [
+      "3 PM energy dips are real! Take a quick stretch or grab water.",
+      "Hang in there! An afternoon stretch works wonders.",
+      "The afternoon slump happens to the best of us! Take it step by step."
+    ]
+  },
+  {
+    "keys": ["wrapping up work hi", "done with work for today hello", "workday complete hi", "clocking out hello", "end of workday greeting"],
+    "values": [
+      "Congrats on wrapping up! Time to relax and enjoy your evening.",
+      "Workday complete! Hope you feel accomplished today.",
+      "Great job today! Enjoy a well-deserved rest tonight."
+    ]
+  },
+  {
+    "keys": ["hello hope everything is going smoothly", "hi hope things are smooth", "gdmornin hope all is well", "hello hope your day is easy", "hi hope you're having a smooth day"],
+    "values": [
+      "Everything is going very smoothly, thank you! How about with you?",
+      "Things are running great! I hope your day is going easily too.",
+      "Appreciate the kind thought! Hope everything is calm and smooth for you."
+    ]
+  },
+  {
+    "keys": ["hello hello!", "hello hello", "hi hi!", "hey hey there", "hello hello there"],
+    "values": [
+      "Hello hello! Super great to see you today.",
+      "Hi hi! How are things going on your end?",
+      "Hello hello! Ready whenever you are."
+    ]
+  },
+  {
+    "keys": ["brewing coffee morning", "making morning coffee hi", "waiting for coffee hello", "coffee brewing good morning", "fresh coffee morning hi"],
+    "values": [
+      "Nothing beats the smell of fresh coffee brewing in the morning!",
+      "Good morning! Hope that coffee turns out delicious.",
+      "Morning! The best reward to start the day."
+    ]
+  },
+  {
+    "keys": ["sunny weekend afternoon hi", "beautiful weekend afternoon hello", "saturday afternoon sunshine hi", "sunday afternoon sunny hi", "weekend sunshine hi"],
+    "values": [
+      "Perfect sunny weekend afternoon! Hope you're enjoying the outdoors.",
+      "Good afternoon! Enjoy the gorgeous sunshine today.",
+      "Afternoon! Nothing like a warm, sunny weekend day."
+    ]
+  },
+  {
+    "keys": ["cozy rainy evening hi", "rainy night hello", "rain outside cozy evening hi", "listening to rain evening hello", "rainy evening relaxation"],
+    "values": [
+      "Rainy evenings are pure comfort. Enjoy the cozy vibes tonight.",
+      "Good evening! Listening to the rain outside is so relaxing.",
+      "Evening! Wrap up in a blanket and enjoy the peaceful evening."
+    ]
+  },
+  {
+    "keys": ["quick morning hi", "brief morning checkin", "fast morning hello", "just saying morning", "quick morning greeting"],
+    "values": [
+      "Good morning! Thanks for checking in briefly.",
+      "Morning! Hope you have a wonderful day ahead.",
+      "Good morning! Have a smooth and successful day."
+    ]
+  },
+  {
+    "keys": ["quick evening hi", "brief evening checkin", "fast evening hello", "just saying good evening", "quick evening greeting"],
+    "values": [
+      "Good evening! Glad you stopped by for a quick hi.",
+      "Evening! Hope you have a peaceful night.",
+      "Good evening! Enjoy your downtime tonight."
+    ]
+  },
+  {
+    "keys": ["friday afternoon hi", "friday afternoon vibes hello", "almost weekend afternoon hi", "wrapping up friday afternoon", "friday afternoon checkin"],
+    "values": [
+      "Friday afternoon! The weekend is almost here.",
+      "Good afternoon! Just a few more hours until the weekend.",
+      "Afternoon! Hope your Friday finishes on a high note."
+    ]
+  },
+  {
+    "keys": ["monday afternoon hi", "monday afternoon checkin", "pushing through monday afternoon", "monday afternoon push hi", "survived monday morning hello"],
+    "values": [
+      "You made it past Monday morning! You've got this.",
+      "Good afternoon! Keep that momentum going for the rest of Monday.",
+      "Afternoon! Halfway through Monday already."
+    ]
+  },
+  {
+    "keys": ["late night studying hi", "midnight study session hello", "cramming late night hi", "study night owl hello", "late night books hi"],
+    "values": [
+      "Late night studying! Remember to take short breaks so your brain stays sharp.",
+      "Hope the study session is going well! Don't push too hard without sleep.",
+      "Late night focus! You're working hard—make sure to rest soon."
+    ]
+  },
+  {
+    "keys": ["morning walk hi", "out for a morning walk hello", "fresh air morning stroll hi", "morning walk greeting", "walking outside morning hi"],
+    "values": [
+      "Morning walks are the best start! Enjoy the fresh air.",
+      "Good morning! Great way to clear your head and start the day.",
+      "Morning! Hope your walk is invigorating and pleasant."
+    ]
+  },
+  {
+    "keys": ["trusted companion hi", "hello trusted companion", "hey trusted friend hi", "hello buddy companion", "greetings companion hi"],
+    "values": [
+      "Hello my friend, always right here for you. How are you doing today?",
+      "Hey friend, so good to connect. How can I make your day brighter?",
+      "Hello there! Ready to listen or assist with whatever is on your mind."
+    ]
+  }
+]

@@ -1,6 +1,0 @@
-- [x] Standardize synchronization and fix entity mapping in `DataManager.kt`
-- [x] Implement robust task identification by timestamp in `AddTaskActivity.kt`
-- [x] Implement robust note identification by timestamp and add permission check in `AddNoteActivity.kt`
-- [x] Fix synchronization in `ReminderReceiver.kt`
-- [x] Add synchronization to `NoteAdapter.kt` DiffUtil calculations
-- [x] Verify changes through code analysis and build check

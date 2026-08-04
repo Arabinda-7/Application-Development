@@ -1,0 +1,450 @@
+[
+  {
+    "keys": ["habit", "routine", "daily"],
+    "values": [
+      "Small habits, when repeated daily, lead to massive results. Don't focus on the goal, focus on the system.",
+      "Consistency is the key to transformation. Your daily routines define your future self.",
+      "A habit is a system of small wins. Master the routine, and the goals will take care of themselves."
+    ]
+  },
+  {
+    "keys": ["streak", "consistency", "momentum"],
+    "values": [
+      "Don't break the chain! Even if you only do 1 minute of a habit, doing something is better than doing nothing.",
+      "Streaks are proof of your commitment. Keep that momentum alive, one day at a time.",
+      "Your momentum is your most valuable asset. Protect your streak by showing up, even on your hardest days."
+    ]
+  },
+  {
+    "keys": ["habit stack", "stacking"],
+    "values": [
+      "Try habit stacking: After [Current Habit], I will [New Habit]. For example: After I pour my coffee, I will meditate for 1 minute.",
+      "Link a new habit to an existing one. It creates an automatic trigger that makes the new routine effortless.",
+      "Stacking is a superpower. Pair your new goal with a habit you already do consistently to anchor it in your day."
+    ]
+  },
+  {
+    "keys": ["cue", "trigger"],
+    "values": [
+      "Design your environment to make good habits easy and bad habits hard. Put your workout clothes out the night before!",
+      "A good cue is the 'spark' for your habit. Make your triggers obvious and unavoidable in your daily environment.",
+      "Every habit starts with a cue. Optimize your surroundings to highlight the positive triggers and hide the negative ones."
+    ]
+  },
+  {
+    "keys": ["small wins", "progress"],
+    "values": [
+      "Celebrate small wins. They build the dopamine needed to stay motivated for the long haul.",
+      "Progress isn't always linear, but every small win counts. Acknowledge your efforts today!",
+      "Don't overlook the tiny victories. They are the building blocks of massive long-term change."
+    ]
+  },
+  {
+    "keys": ["how do i add a habit", "how to add habit"],
+    "values": [
+      "Just say 'Add habit [Name]'. For example, 'Add habit Meditation'. Or go to Habit Tracker and tap the '+' icon.",
+      "You can log a new routine by telling me 'New habit [name]' or by using the plus button in the Habits section.",
+      "To start tracking, navigate to Habits and hit '+', or simply tell me what you want to start doing daily."
+    ]
+  },
+  {
+    "keys": ["how to use habits", "habit tutorial"],
+    "values": [
+      "To start with habits, go to the Habit Tracker, tap '+', and name your habit. Remember, consistency is more important than intensity!",
+      "Building a routine is easy: add a habit, set its frequency, and check it off every day to build your discipline score.",
+      "Use the Habits section to track daily actions. Streaks show your consistency, and the aura color reflects your overall success."
+    ]
+  },
+  {
+    "keys": ["create a habit", "start a habit", "new habit"],
+    "values": [
+      "Creating a new habit, what will be the title?",
+      "Let's start a new routine. What do you want to call this habit?",
+      "New habit setup initiated. What is the name of the habit you want to track?"
+    ]
+  },
+  {
+    "keys": ["incomplete habits", "active habits"],
+    "values": [
+      "Checking your active habits for today...",
+      "Let's see what's still on your to-do list for today's routines.",
+      "Gathering your pending habits. You've got this!"
+    ]
+  },
+  {
+    "keys": ["completed habits", "how many completed"],
+    "values": [
+      "Calculating your wins for today...",
+      "Let's review everything you've successfully checked off today.",
+      "Looking at your completed routines. Great job on showing up!"
+    ]
+  },
+  {
+    "keys": ["total habits", "all habits"],
+    "values": [
+      "Gathering your full habit list...",
+      "Accessing all the routines you're currently tracking.",
+      "Let's look at your entire habit portfolio."
+    ]
+  },
+  {
+    "keys": ["available in morning", "morning habits"],
+    "values": [
+      "Let's see what's on the agenda for this morning...",
+      "Morning routines coming right up. Time to start the day strong!",
+      "Here are your habits scheduled for the morning hours."
+    ]
+  },
+  {
+    "keys": ["available in afternoon", "afternoon habits"],
+    "values": [
+      "Here are your afternoon goals...",
+      "Checking your midday routines to keep your momentum going.",
+      "Afternoon habits list is ready. How is your day progressing?"
+    ]
+  },
+  {
+    "keys": ["available in evening", "evening habits"],
+    "values": [
+      "Your evening routines...",
+      "Let's see how you're winding down today. Here are your evening habits.",
+      "Gathering your nightly habits. Time for some end-of-day consistency."
+    ]
+  },
+  {
+    "keys": ["anytime habits"],
+    "values": [
+      "These can be done anytime today...",
+      "Here are your flexible habits that don't have a specific time slot.",
+      "Looking for your 'Anytime' routines. You can fit these in whenever you have a moment."
+    ]
+  },
+  {
+    "keys": ["mark habit", "habit mark", "mark as completed"],
+    "values": [
+      "Which habit would you like to mark as completed?",
+      "Tell me the name of the habit you've finished, and I'll log it for you.",
+      "Ready to celebrate a win! Which routine did you complete?"
+    ]
+  },
+  {
+    "keys": ["habit advice", "give me a habit tip", "tip for today"],
+    "values": [
+      "Here is a tip: Focus on the 'identity' you want to build. Instead of 'I want to run', say 'I am a runner'.",
+      "Pro tip: Never miss twice. If you miss one day, make getting back on track your #1 priority for tomorrow.",
+      "Habit hack: Reduce the friction. If you want to read, put your book on your pillow. Make the good path easy."
+    ]
+  },
+  {
+    "keys": ["best morning habit", "start my day"],
+    "values": [
+      "The best morning habit is often the simplest: drink a full glass of water or make your bed.",
+      "Start with a 'Win'. Making your bed gives you an immediate sense of accomplishment before the day even begins.",
+      "Hydration first! Drinking water as soon as you wake up is the best way to jumpstart your body and brain."
+    ]
+  },
+  {
+    "keys": ["break a bad habit", "bad routine", "stop doing"],
+    "values": [
+      "To break a bad habit, identify the 'Cue' that triggers it. Change your environment to remove that trigger.",
+      "Stop bad habits by making them difficult. Increase the 'friction'—hide the snacks or delete the distracting apps.",
+      "Replace, don't just remove. If you want to stop a bad routine, have a positive one ready to take its place when the cue hits."
+    ]
+  },
+  {
+    "keys": ["atomic habits", "james clear"],
+    "values": [
+      "Atomic Habits teaches us that 1% better every day leads to a 37x improvement in a year. Focus on tiny gains.",
+      "Tiny habits, massive impact. The 'Atomic' approach is about the systems, not just the goals.",
+      "Remember the core lesson of Atomic Habits: You don't rise to the level of your goals, you fall to the level of your systems."
+    ]
+  },
+  {
+    "keys": ["identity habits", "become someone"],
+    "values": [
+      "Identity-based habits are powerful. Decide who you want to be, then prove it to yourself with small wins.",
+      "Stop focusing on results and start focusing on identity. 'I am the type of person who never misses a workout.'",
+      "True behavior change is identity change. Every time you perform a habit, you are casting a vote for the person you want to become."
+    ]
+  },
+  {
+    "keys": ["2 minute rule", "two minute rule"],
+    "values": [
+      "The 2-Minute Rule: If a new habit takes less than two minutes, just do it. It builds the habit of starting.",
+      "Make it too easy to fail. If you want to run 5k, start by just putting on your running shoes. That takes less than 2 minutes.",
+      "Master the art of showing up. Spend just 2 minutes on your goal. Once you start, it's much easier to continue."
+    ]
+  },
+  {
+    "keys": ["habit friction", "make it easy"],
+    "values": [
+      "Reduce friction for good habits and increase it for bad ones. Environment is stronger than willpower.",
+      "Set your future self up for success. Prepare your environment tonight so tomorrow's habits feel effortless.",
+      "The secret to discipline is often just good design. Make the right choice the easiest choice in your room."
+    ]
+  },
+  {
+    "keys": ["discipline vs motivation", "no motivation"],
+    "values": [
+      "Motivation is a feeling; discipline is a system. Build systems so you don't have to rely on your mood.",
+      "Don't wait to 'feel like it'. Discipline means doing what needs to be done even when you'd rather not.",
+      "Motivation gets you started, but discipline keeps you going. Rely on your schedule, not your emotions."
+    ]
+  },
+  {
+    "keys": ["failed my habit", "missed a day", "reset"],
+    "values": [
+      "Never miss twice. Missing one day is an accident; missing two is the start of a new habit. Get back on track today!",
+      "Setbacks are data, not failure. Analyze why you missed, adjust your system, and start a new streak now.",
+      "Forgive yourself and move forward. The best time to restart was yesterday; the second best time is right now."
+    ]
+  },
+  {
+    "keys": ["how many habits", "too many habits"],
+    "values": [
+      "Don't overload yourself. Start with 1-3 core habits. Once they are automatic, then you can add more.",
+      "Focus is about saying no. It's better to master one habit perfectly than to fail at five at once.",
+      "Quality over quantity. Pick the 'Keystone' habit that will have the biggest impact on your life and master it first."
+    ]
+  },
+  {
+    "keys": ["reading habit tip", "read more"],
+    "values": [
+      "To read more, always keep a book on your pillow. Read just one page before sleep—it usually turns into ten.",
+      "Turn reading into a 'trigger' response. Whenever you're waiting in line, open a book instead of social media.",
+      "Environment hack: place books in every room. If a book is within reach, you're 10x more likely to read it."
+    ]
+  },
+  {
+    "keys": ["water habit tip", "hydration"],
+    "values": [
+      "Hydration tip: Carry a reusable water bottle everywhere. If it's in your line of sight, you'll drink more.",
+      "Drink a glass of water before every meal. It's an easy stack that ensures you stay hydrated throughout the day.",
+      "Set a 'water cue'. Every time you finish a task, take three big sips of water. Small sips add up to big health wins."
+    ]
+  },
+  {
+    "keys": ["sleep habit tip", "better sleep"],
+    "values": [
+      "For better sleep, try a 'Digital Sunset'. Put away all screens 30-60 minutes before bed.",
+      "Consistency is everything for sleep. Try to wake up and go to bed at the same time every day, even on weekends.",
+      "Prepare your 'Cave'. Keep your bedroom dark, cool, and quiet to signal to your body that it's time for deep rest."
+    ]
+  },
+  {
+    "keys": ["exercise habit tip", "workout routine"],
+    "values": [
+      "Exercise tip: Don't wait for 'gym time'. If you're busy, do 10 squats or a 1-minute plank. Just keep the habit alive.",
+      "Make it social! If you have a workout buddy, you're much less likely to skip your exercise habit.",
+      "Dress for success. Put on your workout clothes as soon as you get home. It's the 'spark' that leads to the movement."
+    ]
+  },
+  {
+    "keys": ["journaling habit tip", "write daily"],
+    "values": [
+      "Journaling tip: Start with 'One Line a Day'. Just write one thing you're grateful for. The low barrier makes it stick.",
+      "Focus on the 'Brain Dump'. Use your journal to clear your mind of worries before they clutter your sleep.",
+      "Try 'Morning Pages': three pages of stream-of-consciousness writing to clear the mental fog as soon as you wake up."
+    ]
+  },
+  {
+    "keys": ["why track habits", "benefit of tracking"],
+    "values": [
+      "Tracking provides visual proof of progress. It turns invisible effort into a visible 'win', triggering dopamine.",
+      "What gets measured gets managed. Tracking your habits keeps you honest and highlights where you need to improve.",
+      "The 'Seinfeld Strategy': Don't break the chain. Seeing a long string of checkmarks is the best motivator to keep going."
+    ]
+  },
+  {
+    "keys": ["restart a streak", "streak lost"],
+    "values": [
+      "A lost streak is data. Analyze why you stopped, adjust your environment, and start a new streak today.",
+      "Your past progress isn't gone just because the counter reset. Your brain still has the neural pathways you built!",
+      "Don't let a reset demotivate you. Today is Day 1 of your best streak yet. Let's go!"
+    ]
+  },
+  {
+    "keys": ["habit grace days", "flexibility"],
+    "values": [
+      "The app supports 'Grace Days'. Use them for planned breaks or emergencies so you stay flexible without 'failing'.",
+      "Rigidity is the enemy of long-term habits. Use grace days to handle life's surprises while keeping your momentum high.",
+      "A grace day isn't a failure—it's a strategic pause. Use them wisely to prevent burnout on your high-streak habits."
+    ]
+  },
+  {
+    "keys": ["visual cues", "reminders"],
+    "values": [
+      "Visual cues are triggers. A sticky note or a specific notification can act as the 'spark' that starts your routine.",
+      "Make your habits unavoidable. If you want to take vitamins, put them right next to your toothbrush.",
+      "The eyes have it. If you can see the tools for your habit, your brain will automatically start preparing to do it."
+    ]
+  },
+  {
+    "keys": ["social habits", "accountability"],
+    "values": [
+      "Social habits are easier. Tell a friend about your goal. Accountability is a powerful motivator.",
+      "Join a group or find a partner. Shared goals are 2x easier to achieve because you don't want to let the other person down.",
+      "Public commitment works. Share your progress with someone you respect to add a positive 'pressure' to succeed."
+    ]
+  },
+  {
+    "keys": ["habit cues", "triggers", "reminder cues"],
+    "values": [
+      "A good cue is highly specific. Instead of 'I will meditate', try 'When I sit down at my desk, I will meditate'.",
+      "Use 'If-Then' planning: IF [Cue happens], THEN I will [Perform habit]. It removes the need for decision making.",
+      "The best triggers are events that already happen every day, like waking up, drinking coffee, or arriving at work."
+    ]
+  },
+  {
+    "keys": ["habit rewards", "celebration", "dopamine hit"],
+    "values": [
+      "Give yourself an immediate reward after a hard habit. Even a mental 'Good job!' triggers a dopamine release.",
+      "Reinforce the loop. Celebrate the completion of every habit to tell your brain: 'This felt good, let's do it again!'",
+      "Use 'Temptation Bundling': only allow yourself to do something you LOVE while you're doing a habit you need to BUILD."
+    ]
+  },
+  {
+    "keys": ["habit boredom", "fatigue", "tired of routine"],
+    "values": [
+      "The threat to success is not failure but boredom. When a habit becomes easy, it gets boring. Fall in love with it.",
+      "Boredom is a sign of mastery. When you get tired of a routine, it means it's becoming automatic. Keep going!",
+      "Elite performers do the same boring things every day with high quality. Embrace the repetition as your path to success."
+    ]
+  },
+  {
+    "keys": ["how long to form a habit", "66 days", "21 days"],
+    "values": [
+      "On average, it takes 66 days for a behavior to become automatic. Don't be discouraged—consistency over speed.",
+      "Forget the 21-day myth. For most life-changing habits, you need around 2 months of daily practice to make them stick.",
+      "Building neural pathways takes time. Give yourself at least 60 days of effort before you expect a habit to feel 'easy'."
+    ]
+  },
+  {
+    "keys": ["keystone habits", "foundation habit"],
+    "values": [
+      "Focus on keystone habits: exercise or meditation naturally lead to other good behaviors like better eating or focus.",
+      "A keystone habit is one that ripples through your whole life. Find the one routine that makes everything else easier.",
+      "Fix your sleep or your movement first. These keystone routines provide the energy needed to tackle every other goal."
+    ]
+  },
+  {
+    "keys": ["meditation tip", "mindfulness habit"],
+    "values": [
+      "Meditation tip: Start with just 3 conscious breaths. You don't need 30 minutes to get the benefits of presence.",
+      "Don't try to 'clear your mind'. Just notice when it wanders and gently bring it back. That 'returning' is the exercise.",
+      "Use your environment. Meditate in the same chair at the same time every day to build a strong mental anchor."
+    ]
+  },
+  {
+    "keys": ["deep work habit", "focus time", "uninterrupted work"],
+    "values": [
+      "Deep work habit: Schedule 90 minutes of 'no-phone' time for your most important task. Protect your flow.",
+      "Focus is a muscle. Start with 20 minutes of deep work and gradually build up to longer, uninterrupted sessions.",
+      "Clear the decks. Before you start deep work, remove all digital and physical distractions from your workspace."
+    ]
+  },
+  {
+    "keys": ["digital detox", "screen time habit"],
+    "values": [
+      "Digital detox: Try a 'Phone-Free First Hour'. Don't check notifications for 60 minutes to protect your focus.",
+      "Charge your phone in another room at night. It prevents the habit of 'scrolling before sleeping' and 'checking upon waking'.",
+      "Set boundaries with your devices. Use grayscale mode or app limits to reduce the addictive 'pull' of social media."
+    ]
+  },
+  {
+    "keys": ["learning habit", "skill building"],
+    "values": [
+      "To learn a new skill, spend just 15 minutes a day on it. Over a year, that's nearly 100 hours of focused practice!",
+      "Consistency beats intensity in learning. Daily 10-minute sessions are better than one 3-hour marathon per week.",
+      "Apply what you learn immediately. The habit of 'Learning by Doing' is the fastest way to master any new craft."
+    ]
+  },
+  {
+    "keys": ["financial habit", "saving tip"],
+    "values": [
+      "Financial habit: Log every single expense, no matter how small. Awareness is the first step to financial freedom.",
+      "Pay yourself first. Make 'Saving [amount]' your first financial habit every time you receive income.",
+      "Wait 24 hours before any non-essential purchase. This one habit can save you thousands by eliminating impulse buys."
+    ]
+  },
+  {
+    "keys": ["posture habit", "sit straight"],
+    "values": [
+      "Posture tip: Set a 'posture check' every time you drink water. Shoulders back, spine straight—you'll feel more energetic.",
+      "Imagine a string pulling the top of your head toward the ceiling. This simple mental cue can fix your posture instantly.",
+      "Your physical state affects your mental state. Sit tall to feel more confident and focused during your work habits."
+    ]
+  },
+  {
+    "keys": ["breathing habit", "stress relief"],
+    "values": [
+      "When stressed, try the 4-7-8 technique: Inhale for 4, hold for 7, exhale for 8. It's a reset for your nervous system.",
+      "Box breathing: Inhale 4, Hold 4, Exhale 4, Hold 4. Navy SEALs use this habit to stay calm under extreme pressure.",
+      "Breathe through your nose, not your mouth. It's a simple health habit that improves oxygen delivery and lowers stress."
+    ]
+  },
+  {
+    "keys": ["gratitude habit", "thankfulness"],
+    "values": [
+      "Gratitude habit: At the end of the day, think of three specific things that went well. It retrains your brain.",
+      "Don't just say 'I'm grateful for my health'. Be specific: 'I'm grateful for the energy I had to walk in the park today'.",
+      "Write a 'Thank You' note once a week. The habit of expressing gratitude to others is a massive happiness booster."
+    ]
+  },
+  {
+    "keys": ["planning habit", "tomorrow's plan"],
+    "values": [
+      "Plan tomorrow today: Spend 5 minutes every evening writing down your 'Top 3' tasks. You'll wake up with a mission.",
+      "The 'Shutdown Ritual': end your workday by reviewing your progress and mapping out tomorrow's first action.",
+      "Don't start your morning by planning. Start it by EXECUTING the plan you made the night before."
+    ]
+  },
+  {
+    "keys": ["cleaning habit", "tidy room"],
+    "values": [
+      "The 'One-Room Rule': Spend 10 minutes a day tidying just one area. A clean environment leads to a clear mind.",
+      "The 'Never Leave a Room Empty-Handed' habit: always take one item that belongs elsewhere with you when you move.",
+      "Outer order, inner calm. A daily 5-minute 'reset' of your workspace will drastically improve your focus the next day."
+    ]
+  },
+  {
+    "keys": ["social media limit", "unplugging"],
+    "values": [
+      "Limit social media by removing apps from your home screen. Increase 'friction' to open them to reduce usage.",
+      "Try 'No-Social-Media Sundays'. A weekly day of unplugging gives your brain the dopamine reset it needs.",
+      "Delete the apps, use the browser. Making social media slightly annoying to access is the best way to break the habit."
+    ]
+  },
+  {
+    "keys": ["walking habit", "10k steps"],
+    "values": [
+      "Walking tip: Take a 10-minute walk after lunch. It aids digestion and provides a much-needed mental break.",
+      "Walk while you talk. Turn your phone calls into 'Walking Meetings' to hit your step goal without losing productivity.",
+      "Park further away. This tiny habit adds thousands of steps to your week with almost zero extra effort."
+    ]
+  },
+  {
+    "keys": ["sunlight habit", "morning light"],
+    "values": [
+      "Try to get 10 minutes of direct sunlight shortly after waking up. It regulates your circadian rhythm and improves mood.",
+      "Morning light is your biological clock's 'Reset' button. It helps you wake up faster and sleep better at night.",
+      "Step outside for your first coffee. That early light exposure is more powerful for energy than the caffeine itself."
+    ]
+  },
+  {
+    "keys": ["evening wind-down", "pre-sleep routine"],
+    "values": [
+      "Your evening routine is the foundation for tomorrow's success. Lower the lights and cool the room for deep rest.",
+      "The '10-3-2-1-0' Rule: No caffeine 10h before bed, no food 3h, no work 2h, no screens 1h, and 0 snooze hits.",
+      "Signal 'End of Day' to your brain. A consistent sequence like: Tea, Journal, Read, Sleep works like a charm."
+    ]
+  },
+  {
+    "keys": ["habit visualization", "mental rehearsal"],
+    "values": [
+      "Spend 1 minute visualizing yourself performing your habit successfully. It builds the pathways that make it easier.",
+      "See the finish line. Visualize the feeling of checking off your habits at the end of a productive day.",
+      "Mental rehearsal is half the battle. If you can see yourself doing it, you've already overcome the hardest part."
+    ]
+  }
+]

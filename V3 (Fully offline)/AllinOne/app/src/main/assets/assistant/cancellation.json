@@ -1,0 +1,362 @@
+[
+  {
+    "keys": ["no", "no!", "no.", "NO", "noo", "nooo", "no pal", "no buddy", "no friend", "no thanks pal buddy"],
+    "values": [
+      "No problem at all! We'll skip that.",
+      "Understood! Let me know if you'd like to do something else.",
+      "Got it! I'm here whenever you're ready for the next task.",
+      "All good! Feel free to reach out whenever you need anything."
+    ]
+  },
+  {
+    "keys": ["nope", "nope!", "nope.", "NOPE", "noope", "nope pal", "nope buddy", "nope friend", "nope not now"],
+    "values": [
+      "Nope it is! We'll leave that aside for now.",
+      "Got it! Let me know whenever you want to move on to something new.",
+      "All clear! I'm right here if you need anything else.",
+      "No problem at all! Enjoy the rest of your day."
+    ]
+  },
+  {
+    "keys": ["cancel", "cancel!", "cancel this", "CANCEL", "cancel it", "cancel process", "cancel action", "cancel request pal"],
+    "values": [
+      "Cancelled! Everything has been stopped as requested.",
+      "Got it! Action cancelled—let me know what you'd like to do next.",
+      "Understood! Cancelled and cleared out.",
+      "All done! Feel free to start a new task whenever you're ready."
+    ]
+  },
+  {
+    "keys": ["forget it", "forget it!", "forget about it", "forget it pal", "just forget it", "forget it buddy", "forget it friend"],
+    "values": [
+      "No worries at all! We'll forget about that and move on.",
+      "Got it! It's completely cleared. What else can I assist with?",
+      "Understood! No pressure at all—we can drop that topic.",
+      "All good! Reach out whenever you'd like to try something else."
+    ]
+  },
+  {
+    "keys": ["maybe later", "maybe later!", "maybe another time", "maybe l8r", "perhaps later", "maybe later pal", "maybe later buddy"],
+    "values": [
+      "Sounds like a plan! We can always revisit this whenever you're ready.",
+      "No problem at all! Take all the time you need.",
+      "Understood! Whenever you feel like coming back to it, I'll be here.",
+      "All good! Hope the rest of your day goes smoothly."
+    ]
+  },
+  {
+    "keys": ["not now", "not now!", "not right now", "not now pal", "not at the moment", "not now buddy", "not now friend"],
+    "values": [
+      "Understood! We can pause right here for now.",
+      "No rush whatsoever! Let me know when the timing is better for you.",
+      "Got it! I'm right here whenever you're ready to pick things back up.",
+      "All good! Take your time with whatever you're working on."
+    ]
+  },
+  {
+    "keys": ["never mind", "nevermind", "nvm", "nvm!", "never mind pal", "nevermind buddy", "never mind friend", "never mind it"],
+    "values": [
+      "No problem at all! We'll move past that.",
+      "Got it! Never mind it is—what would you like to focus on next?",
+      "Understood! Feel free to ask or share whatever you need.",
+      "All good! Ready whenever you are for the next thought."
+    ]
+  },
+  {
+    "keys": ["stop", "stop!", "STOP", "stop action", "stop this", "stop process", "stop task", "stop execution pal"],
+    "values": [
+      "Stopped! Everything is on hold as requested.",
+      "Got it! Process stopped immediately. How can I help you next?",
+      "Understood! Stopped and standing by.",
+      "All good! Let me know when you'd like to resume or start something new."
+    ]
+  },
+  {
+    "keys": ["leave it", "leave it!", "just leave it", "leave it be", "leave it pal", "leave it buddy", "leave it for now"],
+    "values": [
+      "Leaving it right there! No problem at all.",
+      "Got it! We'll leave that as is. What's next on your mind?",
+      "Understood! Everything stays just as it is.",
+      "All good! Reach out whenever you want to revisit."
+    ]
+  },
+  {
+    "keys": ["don't do that", "dont do that", "don't do it", "dont do it", "please don't do that", "don't do that pal"],
+    "values": [
+      "Got it! I won't proceed with that.",
+      "Understood! Stepping back right away. What would you prefer instead?",
+      "No problem at all! Action stopped.",
+      "All good! Feel free to guide me on what to do next."
+    ]
+  },
+  {
+    "keys": ["i changed my mind", "im changed my mind", "changed my mind", "changed mind", "i changed my mind pal", "changed my mind buddy"],
+    "values": [
+      "Changing your mind is completely fine! What direction would you like to take?",
+      "Got it! We'll adjust to your new choice immediately.",
+      "Understood! Flexibility is key—tell me what you'd prefer now.",
+      "All good! Ready for whatever new idea you have."
+    ]
+  },
+  {
+    "keys": ["no thanks", "no thank you", "no thx", "no thanks pal", "no thanks buddy", "no thanks friend", "no thank u"],
+    "values": [
+      "No problem at all! Thanks for letting me know.",
+      "Got it! We'll skip that offer. How else can I assist you?",
+      "Understood! Have a wonderful and restful day.",
+      "All good! Reach out whenever you need anything else."
+    ]
+  },
+  {
+    "keys": ["skip it", "skip it!", "skip this", "skip step", "skip it pal", "skip it buddy", "skip step pal"],
+    "values": [
+      "Skipped! Moving right along to what's next.",
+      "Got it! Step skipped. What would you like to focus on now?",
+      "Understood! We'll jump straight past that.",
+      "All good! Ready for your next instruction."
+    ]
+  },
+  {
+    "keys": ["abort", "abort!", "ABORT", "abort process", "abort action", "abort task", "abort operation pal"],
+    "values": [
+      "Aborted! Everything has been safely halted.",
+      "Got it! Operation aborted—standing by for your next move.",
+      "Understood! Aborted immediately without changes.",
+      "All good! Let me know what you'd like to work on next."
+    ]
+  },
+  {
+    "keys": ["disregard", "disregard that", "disregard this", "disregard my last message", "disregard last pal"],
+    "values": [
+      "Disregarded! Scratching that from the record.",
+      "Got it! Previous message ignored. What's on your mind now?",
+      "Understood! We'll pretend that never happened.",
+      "All good! Ready whenever you are to continue."
+    ]
+  },
+  {
+    "keys": ["don't worry about it", "dont worry about it", "dont worry", "no need to worry", "don't worry about it pal"],
+    "values": [
+      "Got it! We'll move right past it without any worries.",
+      "Understood! Keeping things easy and relaxed.",
+      "All good! Thanks for letting me know.",
+      "No problem at all! Feel free to bring up whatever is next."
+    ]
+  },
+  {
+    "keys": ["scrap it", "scrap this", "scrap that idea", "scrap the process", "scrap it pal", "scrap this idea"],
+    "values": [
+      "Scrapped! We'll clear that out and start fresh whenever you're ready.",
+      "Got it! Idea scrapped. What fresh path should we explore?",
+      "Understood! Wiping the slate clean for you.",
+      "All good! Ready for your next creative thought."
+    ]
+  },
+  {
+    "keys": ["hold off", "hold off for now", "hold off on that", "hold on that", "hold off pal"],
+    "values": [
+      "Holding off for now! Everything is paused until you say otherwise.",
+      "Got it! We'll put a pin in that for now.",
+      "Understood! Take all the time you need before deciding.",
+      "All good! Ready whenever you want to resume."
+    ]
+  },
+  {
+    "keys": ["pause that", "pause for now", "pause action", "pause task", "pause process pal"],
+    "values": [
+      "Paused! Everything is frozen right where you left it.",
+      "Got it! Task paused. Let me know when you want to unpause.",
+      "Understood! Taking a pause right here.",
+      "All good! I'll be here whenever you're ready to resume."
+    ]
+  },
+  {
+    "keys": ["i'll pass", "ill pass", "i'm gonna pass", "pass on this", "pass on that pal"],
+    "values": [
+      "Passing on this one! Completely fine by me.",
+      "Got it! We'll move on to other options.",
+      "Understood! Let me know if there's a different topic you prefer.",
+      "All good! Enjoy the rest of your day."
+    ]
+  },
+  {
+    "keys": ["don't bother", "dont bother", "don't bother with that", "no need to bother", "don't bother pal"],
+    "values": [
+      "No bother at all, but we'll skip it! Let me know what else you need.",
+      "Got it! Dropping that task completely.",
+      "Understood! Easy peasy—what shall we tackle next?",
+      "All good! Reach out whenever you feel like chatting again."
+    ]
+  },
+  {
+    "keys": ["no need", "no need for that", "no need thanks", "no need pal", "no need buddy"],
+    "values": [
+      "Got it! No need for that—we'll skip it entirely.",
+      "Understood! Saving you time and keeping things simple.",
+      "All good! Feel free to ask for anything else.",
+      "No problem at all! Enjoy your day ahead."
+    ]
+  },
+  {
+    "keys": ["let's not", "lets not", "let's not do that", "lets skip this", "let's not pal"],
+    "values": [
+      "Let me refrain from that then! Completely fine.",
+      "Got it! We won't go down that path.",
+      "Understood! Let me know what alternative you prefer.",
+      "All good! Ready whenever you are for a new idea."
+    ]
+  },
+  {
+    "keys": ["cancel request", "cancel my order", "cancel instruction", "cancel task pal", "cancel demand"],
+    "values": [
+      "Request cancelled! Nothing will be processed.",
+      "Got it! Your request has been cleared out completely.",
+      "Understood! Cancelled as requested. What's next?",
+      "All good! Reach out whenever you need another request handled."
+    ]
+  },
+  {
+    "keys": ["undo that", "undo", "undo action", "undo last step", "undo that pal"],
+    "values": [
+      "Undone! Last action has been reverted.",
+      "Got it! Reverted back to the previous state.",
+      "Understood! Undo complete. Where should we go from here?",
+      "All good! Feel free to give your next command."
+    ]
+  },
+  {
+    "keys": ["quit", "quit process", "quit task", "quit action", "quit execution pal"],
+    "values": [
+      "Quit! Process terminated cleanly.",
+      "Got it! Quitting out of that activity for you.",
+      "Understood! Session ended smoothly.",
+      "All good! Standing by whenever you want to restart."
+    ]
+  },
+  {
+    "keys": ["not required", "no longer required", "not necessary", "unnecessary", "not required pal"],
+    "values": [
+      "Got it! Deemed not required—skipping that for you.",
+      "Understood! We'll keep things focused on what matters.",
+      "All good! Let me know if another priority comes up.",
+      "No problem! Have a wonderful rest of your day."
+    ]
+  },
+  {
+    "keys": ["decline", "i decline", "decline offer", "decline request", "decline option pal"],
+    "values": [
+      "Declined! Respecting your choice completely.",
+      "Got it! Declined and cleared.",
+      "Understood! Let me know if there's anything else you'd like.",
+      "All good! Have a pleasant day ahead."
+    ]
+  },
+  {
+    "keys": ["dismiss", "dismiss this", "dismiss notification", "dismiss action", "dismiss pal"],
+    "values": [
+      "Dismissed! Cleared right off.",
+      "Got it! Notification dismissed.",
+      "Understood! Moving back to the main view for you.",
+      "All good! Ready for your next input."
+    ]
+  },
+  {
+    "keys": ["drop it", "drop this", "drop that topic", "drop the matter", "drop it pal"],
+    "values": [
+      "Dropped! We won't mention or process that again.",
+      "Got it! Topic dropped completely.",
+      "Understood! What new subject would you like to explore?",
+      "All good! Ready whenever you are for something fresh."
+    ]
+  },
+  {
+    "keys": ["nvm bye", "nvm thx", "nvm forget it", "nvm leave it", "nvm skip it"],
+    "values": [
+      "NVM! Catch you later when you're back.",
+      "Got it! Thanks for letting me know. Take care!",
+      "Understood! Have an awesome day ahead.",
+      "All good! Ready whenever you need me again."
+    ]
+  },
+  {
+    "keys": ["nah", "nahh", "nahhh", "nah I'm good", "nah pal", "nah buddy"],
+    "values": [
+      "Nah it is! Completely fine by me.",
+      "Got it! We'll pass on that.",
+      "Understood! Let me know if there's anything else.",
+      "All good! Have a great day."
+    ]
+  },
+  {
+    "keys": ["no way mate", "nah mate", "no thanks mate", "not today mate", "no mate"],
+    "values": [
+      "No worries mate! We'll skip that right away.",
+      "Got it mate! All cleared out for you.",
+      "Understood! Take care and talk soon mate.",
+      "All good! Catch you next time around."
+    ]
+  },
+  {
+    "keys": ["no gracias", "cancelar", "ahora no", "no por favor", "no gracias amigo"],
+    "values": [
+      "¡Entendido! Cancelling right away for you.",
+      "No problem! We'll skip that for now.",
+      "All good! Let me know whenever you're ready again.",
+      "¡No hay problema! Have a great day."
+    ]
+  },
+  {
+    "keys": ["non merci", "annuler", "pas maintenant", "laisse tomber", "non merci mon ami"],
+    "values": [
+      "Compris! We'll cancel and leave that aside.",
+      "Pas de problème! Take all the time you need.",
+      "All good! Ready whenever you want to return.",
+      "Understood! Have a wonderful day."
+    ]
+  },
+  {
+    "keys": ["no grazie", "annulla", "non ora", "lascia stare", "no grazie amico"],
+    "values": [
+      "Capito! Cancelling that right away.",
+      "Nessun problema! We'll skip that for now.",
+      "All good! Ready whenever you need assistance.",
+      "Understood! Have a lovely rest of your day."
+    ]
+  },
+  {
+    "keys": ["decline confirmation", "cancel confirmation", "refuse confirmation", "cancel confirmation pal"],
+    "values": [
+      "Confirmation cancelled! Nothing will be confirmed or saved.",
+      "Got it! Refused and reset to initial state.",
+      "Understood! Cancelled safely for you.",
+      "All good! Let me know what you'd like to do next."
+    ]
+  },
+  {
+    "keys": ["decline option", "reject option", "skip option", "pass option", "reject option pal"],
+    "values": [
+      "Option rejected! We'll look at other choices whenever you're ready.",
+      "Got it! Skipped that option completely.",
+      "Understood! Let me know which alternative you prefer.",
+      "All good! Take your time deciding."
+    ]
+  },
+  {
+    "keys": ["decline survey", "skip prompt", "cancel prompt", "close prompt", "dismiss prompt pal"],
+    "values": [
+      "Prompt closed! Back to your regular session.",
+      "Got it! Skipped and dismissed cleanly.",
+      "Understood! Continuing without any prompts.",
+      "All good! Ready for your next command."
+    ]
+  },
+  {
+    "keys": ["no thank you my friend", "maybe another time my friend", "never mind dear friend", "no thanks my friend"],
+    "values": [
+      "Understood my friend! I respect your decision completely.",
+      "No problem at all, my friend! We can always chat another time.",
+      "All good, dear friend! I'm right here whenever you need me.",
+      "No stress at all! Wishing you a peaceful and happy day."
+    ]
+  }
+]

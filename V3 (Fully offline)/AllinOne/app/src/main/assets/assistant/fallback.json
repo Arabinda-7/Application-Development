@@ -1,0 +1,272 @@
+[
+  {
+    "keys": ["asdfghjkl", "qwertyuiop", "zxcvbnm", "fgjklfdg", "kljhgfds", "asdfghjk"],
+    "values": [
+      "I didn't quite catch that! Could you rephrase what you'd like to do?",
+      "Looks like some random keys got pressed there. What can I help you with?",
+      "I'm not sure what that means. Feel free to type your question again!",
+      "I missed that one! Could you try typing your message once more?"
+    ]
+  },
+  {
+    "keys": ["hnv form u", "hw r u dng", "cnt undertand", "plc hlp m", "cln my dsk", "hw to do dat"],
+    "values": [
+      "That came across a bit jumbled. Could you try typing that out again?",
+      "I want to make sure I understand correctly! Could you rephrase your question?",
+      "I didn't quite understand that phrase. Could you spell that out for me?",
+      "Happy to help once I understand! Could you give that another try?"
+    ]
+  },
+  {
+    "keys": ["???", "...", "!!!", "?!?", "???!!!", "...?"],
+    "values": [
+      "I see your message! What question or topic did you have in mind?",
+      "I'm here! What would you like to talk about or work on?",
+      "How can I assist you today? Feel free to type out your question.",
+      "I'm ready whenever you are! What would you like to ask?"
+    ]
+  },
+  {
+    "keys": ["uh", "um", "hmm...", "err", "well...", "ah..."],
+    "values": [
+      "Take your time! What would you like to ask or explore?",
+      "I'm listening whenever you're ready! What's on your mind?",
+      "No rush at all! Feel free to type your message when ready.",
+      "Take all the time you need! What can I help you with today?"
+    ]
+  },
+  {
+    "keys": ["thing", "stuff", "it", "that", "there", "this thing"],
+    "values": [
+      "Could you specify what 'thing' or topic you're referring to?",
+      "I'd love to help! What specific item or topic are we talking about?",
+      "Could you give me a bit more detail about what you need?",
+      "Happy to help once I know a bit more! What item did you mean?"
+    ]
+  },
+  {
+    "keys": ["hola how do I", "bonjour please do", "danke for the", "gracias can you", "ciao how to"],
+    "values": [
+      "I didn't quite get the full message. Could you state your request clearly in English?",
+      "I want to help you out! Could you rephrase your question for me?",
+      "Feel free to try rephrasing that! What can I do for you today?",
+      "Happy to assist! Could you restate what you need?"
+    ]
+  },
+  {
+    "keys": ["because when the", "and then after", "so if it", "but when you", "after the thing"],
+    "values": [
+      "Looks like that sentence got cut off. Could you finish your thought?",
+      "I'm listening! How would you like to complete that question?",
+      "Take your time finishing your sentence! What were you going to ask?",
+      "Feel free to complete your message so I can give you a helpful answer."
+    ]
+  },
+  {
+    "keys": ["unclear audio snippet", "muffled voice text", "background noise text", "audio garbled text", "garbled message input"],
+    "values": [
+      "That message came through a little muffled. Could you try typing or saying it again?",
+      "I couldn't quite hear or read that clearly. Mind giving it another shot?",
+      "Sorry, that was hard to make out! Could you rephrase your request?",
+      "I missed a few words there. Could you repeat your question clearly?"
+    ]
+  },
+  {
+    "keys": ["purple potato airplane", "banana microwave sky", "yellow elephant running speed", "green table singing clock", "blue shoe swimming paper"],
+    "values": [
+      "Those words seem a bit random together! What topic are you looking to explore?",
+      "I'm not sure how those connect! Could you explain what you'd like to do?",
+      "That's an interesting combination of words! What question can I help answer?",
+      "I didn't catch the connection there. Feel free to rephrase your goal!"
+    ]
+  },
+  {
+    "keys": ["fly my drone", "drive my car", "teleport me home", "cook my dinner", "make me coffee physically"],
+    "values": [
+      "I'm an offline text software companion, so I can't interact with physical objects! How else can I help?",
+      "I can't perform physical real-world tasks, but I can help answer questions or organize notes!",
+      "Physical actions like that are outside what I can do! Is there a question I can answer instead?",
+      "I can't control physical devices directly, but I'd be happy to help with information or writing!"
+    ]
+  },
+  {
+    "keys": ["asap tbd fyi wtf", "brb ttyl idfk omfg", "nvm imo tbh ngl", "afaik iirc tbf imo", "btw fyi tbd asap"],
+    "values": [
+      "That's a lot of abbreviations at once! Could you spell out your question clearly?",
+      "I didn't quite get the full message behind those acronyms. What can I do for you?",
+      "Could you rephrase your question in full words so I can give you a great answer?",
+      "Happy to help once I understand! Could you state your request plainly?"
+    ]
+  },
+  {
+    "keys": ["123456789", "987654321", "555 777 999", "12 34 56 78", "00000000"],
+    "values": [
+      "I see a list of numbers! What calculation or task would you like to do with them?",
+      "What would you like me to do with these numbers? I'd be happy to help!",
+      "Are we doing a math problem, or did you need these saved somewhere?",
+      "Let me know what you'd like to calculate or check with these figures!"
+    ]
+  },
+  {
+    "keys": ["what is the diff...", "how to calculate th...", "can you explain th...", "where is the loc...", "how does this sy..."],
+    "values": [
+      "Looks like your message got cut off mid-word! Could you send the full question?",
+      "I'm ready to answer! Please complete the rest of your sentence.",
+      "That got truncated at the end. Mind re-sending the whole message?",
+      "Feel free to finish your thought! I'm listening."
+    ]
+  },
+  {
+    "keys": ["jjjjjjjjjj", "kkkkkkkkkk", "mmmmmmmmmm", "pppppppppp", "zzzzzzzzzz"],
+    "values": [
+      "Looks like a key got held down accidentally! How can I help you today?",
+      "I think your keyboard might have bumped something there! What can I do for you?",
+      "Oops, looks like some repeated letters! What question did you want to ask?",
+      "I didn't quite catch that. Feel free to type out what you need!"
+    ]
+  },
+  {
+    "keys": ["yes no maybe so", "left right up down", "start stop pause play", "open close turn on off", "high low medium fast"],
+    "values": [
+      "Those are opposite options! Which specific direction or action did you prefer?",
+      "I'm not sure which of those choices you'd like to pick! Could you clarify?",
+      "Let's focus on one action at a time! Which choice would you like to go with?",
+      "Could you tell me which specific option you'd like me to assist with?"
+    ]
+  },
+  {
+    "keys": ["wash my clothes", "mop the kitchen floor", "water my real plants", "clean my room physically", "fold my laundry"],
+    "values": [
+      "I'm a digital software companion, so I can't do physical chores! How else can I help?",
+      "Physical housework is out of my reach, but I can help you set a reminder for it!",
+      "I wish I could help with physical chores! Is there a digital task I can do for you?",
+      "I can't do physical cleaning, but I can help organize your schedule or answer questions!"
+    ]
+  },
+  {
+    "keys": ["---> <---", "===> <===", "*** ### ***", "^^^ ~~~ ^^^", "+++ --- +++"],
+    "values": [
+      "I see some symbols! What specific task or question did you have in mind?",
+      "How can I assist you today? Feel free to state your request in plain text.",
+      "I'm not sure what those symbols mean! What would you like to work on?",
+      "I'm ready to help! Could you type out your question in words?"
+    ]
+  },
+  {
+    "keys": ["u fr fr no cap", "bruh moment real quick", "sheesh fr ngl", "bet bet fr fr", "vibes real quick bro"],
+    "values": [
+      "I hear the vibe, but I'm not sure what specific question you're asking!",
+      "What specific topic or task can I help you out with today?",
+      "Could you rephrase your question clearly so I can give you a helpful response?",
+      "Happy to chat! What question or goal do you have in mind right now?"
+    ]
+  },
+  {
+    "keys": ["5 + - * /", "100 / * +", "equals minus plus", "plus plus minus divide", "times divide plus"],
+    "values": [
+      "Looks like some math operators without numbers! What equation should we solve?",
+      "Which numbers would you like to calculate with those signs?",
+      "I can handle math calculations easily! What numbers are we working with?",
+      "Please share the full equation so I can solve it accurately for you."
+    ]
+  },
+  {
+    "keys": ["if else while for", "def class return import", "var let const function", "public static void main", "select from where group"],
+    "values": [
+      "I see some programming keywords! What coding question or issue can I help with?",
+      "What specific coding task or language problem are you trying to solve?",
+      "Are you working on a code script? Let me know what you'd like to build or fix!",
+      "I can help with code concepts! Could you share what you're working on?"
+    ]
+  },
+  {
+    "keys": ["yesterday tomorrow today", "monday tuesday wednesday thursday", "january february march april", "next week last week this week", "morning night afternoon evening"],
+    "values": [
+      "I see a list of time frames! Which specific date or time were you interested in?",
+      "What event or reminder are we scheduling for those days?",
+      "Could you clarify which specific time or day you'd like to talk about?",
+      "Let me know what task or event belongs to these time options!"
+    ]
+  },
+  {
+    "keys": ["wha", "how", "whe", "whi", "what i"],
+    "values": [
+      "Looks like your question word got cut short! What were you trying to ask?",
+      "Take your time! What question were you starting to type?",
+      "I'm listening! Feel free to complete your question.",
+      "No rush! Re-type your question whenever you're ready."
+    ]
+  },
+  {
+    "keys": ["😀😃😄😁", "🎉🎊🥳", "❓❓❓", "👍👎👌", "🚀⭐🌟"],
+    "values": [
+      "Love the emojis! What question or topic can I help you with today?",
+      "Nice emojis! How can I assist you right now?",
+      "I see your message! Feel free to type out what you'd like to talk about.",
+      "Ready when you are! What's on your mind today?"
+    ]
+  },
+  {
+    "keys": ["blue sky red carpet green grass", "coffee tea water juice", "dog cat bird fish", "car bike bus train", "sun moon star cloud"],
+    "values": [
+      "That's a wide variety of words! What specific question are you asking?",
+      "I'm not quite sure how those connect together. What would you like to know?",
+      "Could you rephrase your thought so I can give you a helpful answer?",
+      "Happy to help once I understand your goal! What are we focusing on?"
+    ]
+  },
+  {
+    "keys": ["ducking ducking ducking", "ducking auto correct", "auto correct mess up", "typo ducking text", "ducking auto correct text"],
+    "values": [
+      "Autocorrect can definitely be silly sometimes! What were you trying to type?",
+      "No worries at all—Autocorrect gets us all. What was your original question?",
+      "Feel free to try typing that again! What can I help you with?",
+      "Autocorrect mishaps happen! Give it another shot whenever you like."
+    ]
+  },
+  {
+    "keys": [".txt .pdf .doc", ".exe .apk .zip", ".mp3 .mp4 .wav", ".jpg .png .gif", ".py .js .html"],
+    "values": [
+      "I see some file formats! What would you like to do with these file types?",
+      "Are you looking to convert, organize, or open a specific file?",
+      "Let me know what file action you'd like to perform!",
+      "Which specific file or document are we working with today?"
+    ]
+  },
+  {
+    "keys": ["what??? why??? how???", "huh??? what???", "why??? what???", "how??? why???", "what??? huh???"],
+    "values": [
+      "I hear your confusion! What specific topic or question can I clarify for you?",
+      "Let's figure it out together! What part feels confusing right now?",
+      "Take a deep breath and tell me what you'd like to understand better!",
+      "I'm right here to help explain! What topic should we look at?"
+    ]
+  },
+  {
+    "keys": ["http://...", "file:///...", "C:\\...", "undefined null void", "404 not found text"],
+    "values": [
+      "Looks like a raw link or file path got pasted! What question do you have about it?",
+      "What would you like me to look up or process regarding that link/path?",
+      "Could you clarify what you'd like me to do with that pasted text?",
+      "Happy to help if you tell me what information you need from it!"
+    ]
+  },
+  {
+    "keys": ["I guess that maybe I should...", "Perhaps if we try to...", "Maybe it would be better to...", "I was thinking that...", "It might be good if..."],
+    "values": [
+      "I'm listening! What were you thinking of completing that statement with?",
+      "Feel free to finish your thought! What option are you considering?",
+      "Take your time! What direction were you thinking of taking?",
+      "I'm right here! Go ahead and complete your idea whenever you like."
+    ]
+  },
+  {
+    "keys": ["sorry my friend didn't catch that", "pardon me dear friend try again", "always listening my friend please rephrase", "unclear message my friend", "pardon me my friend"],
+    "values": [
+      "I didn't quite catch that, my dear friend! Could you rephrase your question for me?",
+      "Pardon me, my friend! Mind typing your message out once more so I can help?",
+      "Always happy to listen, my friend! Could you give that request another try?",
+      "I want to make sure I give you a great answer, my dear friend. Please try again!"
+    ]
+  }
+]

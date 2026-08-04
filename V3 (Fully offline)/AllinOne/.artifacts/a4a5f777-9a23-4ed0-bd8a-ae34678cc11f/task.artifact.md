@@ -1,0 +1,9 @@
+- [x] Create `AiChatSessionEntity.kt` and update `AiChatEntity.kt`
+- [x] Update `AiChatDao.kt` with session and search queries
+- [x] Update `AppDatabase.kt` and `AiChatRepository.kt`
+- [x] Implement Session logic in `AssistantActivity.kt` (New Chat, auto-titling)
+- [x] Redesign `AssistantHistoryActivity.kt` (Session list, search bar, swipe-to-delete)
+- [x] Create `AssistantSessionDetailActivity.kt`
+- [x] Enhance `ChatBubble` in `AssistantUIComponents.kt` (Copy, better formatting)
+- [x] Register new activities in `AndroidManifest.xml`
+- [x] Final verification

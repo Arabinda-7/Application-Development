@@ -1,0 +1,542 @@
+[
+  {
+    "keys": ["thank you", "thank you!", "thank you.", "THANK YOU", "thank u", "thnk u", "thank you there", "thank you so much pal", "thank u friend", "thank you pal"],
+    "values": [
+      "Happy I could help! Is there anything else on your mind today?",
+      "Glad I could be of assistance. Feel free to ask whenever you need anything.",
+      "Anytime! I'm always happy to lend a hand.",
+      "It's my pleasure! Hope everything else goes smoothly for you."
+    ]
+  },
+  {
+    "keys": ["thanks", "thanks!", "thanks.", "THANKS", "thanx", "thx", "tnx", "thanks there", "thanks friend", "thanks pal"],
+    "values": [
+      "You're very welcome! Let me know if you need help with anything else.",
+      "Glad that was helpful! Have a great rest of your day.",
+      "Happy to help out anytime. What else can we tackle today?",
+      "Anytime at all! Enjoy your day ahead."
+    ]
+  },
+  {
+    "keys": ["thanks a lot", "thanks a lot!", "thanks a bunch", "thanks a million", "thanks a ton", "thanks a lot friend", "thanks a bunch pal"],
+    "values": [
+      "So glad I could help you out! Don't hesitate to reach out if you need more info.",
+      "Happy to be of service! Wishing you a fantastic day ahead.",
+      "Anytime! Really glad that made things easier for you.",
+      "It's no trouble at all. Glad everything worked out well!"
+    ]
+  },
+  {
+    "keys": ["appreciate it", "appreciate it!", "really appreciate it", "i appreciate it", "much appreciated pal", "appreciate it friend", "truly appreciate it"],
+    "values": [
+      "I appreciate your kind words! Always happy to assist.",
+      "Glad I could help out! Feel free to pop in anytime you have a question.",
+      "That means a lot, thank you! Hope the rest of your day is smooth.",
+      "Happy to help! Let me know if there's anything else you need."
+    ]
+  },
+  {
+    "keys": ["you're helpful", "you are so helpful", "you're very helpful", "super helpful", "very helpful", "so helpful thanks", "extremely helpful"],
+    "values": [
+      "Thank you for the sweet compliment! Glad I could make things clearer.",
+      "Happy to hear that! Assisting you is always a pleasure.",
+      "I'm glad that was useful. Let me know whenever another question pops up.",
+      "Appreciate that! Always here whenever you need a hand."
+    ]
+  },
+  {
+    "keys": ["that helped", "that really helped", "that helped a lot", "that helped me out", "that helped so much", "that helped thanks", "that helped big time"],
+    "values": [
+      "Really glad to hear that! Hope your next steps go just as smoothly.",
+      "Awesome! Happy that gave you the boost you needed.",
+      "Glad it was useful! Feel free to ask if anything else comes up.",
+      "That's great news! Enjoy the rest of your productive day."
+    ]
+  },
+  {
+    "keys": ["wonderful!", "that's wonderful", "wonderful work", "wonderful job", "wonderful response", "wonderful help", "simply wonderful"],
+    "values": [
+      "Thank you so much! Really glad you found it helpful.",
+      "Glad you liked it! Hoping the rest of your tasks go just as well.",
+      "Appreciate the warm compliment! Feel free to reach out anytime.",
+      "That makes my day! Happy to help whenever you need."
+    ]
+  },
+  {
+    "keys": ["perfect!", "that's perfect", "perfect work", "perfect answer", "absolutely perfect", "perfect thanks", "just perfect"],
+    "values": [
+      "Delighted to hear that! Glad we got it sorted out perfectly.",
+      "Awesome! So happy that hit the mark for you.",
+      "Perfect! Let me know if you need help with anything else.",
+      "Glad it worked out so well for you! Have a wonderful day."
+    ]
+  },
+  {
+    "keys": ["excellent!", "excellent work", "that's excellent", "excellent job", "superb work", "excellent answer", "excellent help"],
+    "values": [
+      "Thank you for the high praise! Really happy to help.",
+      "Glad it met your expectations! Let me know if another task comes up.",
+      "Appreciate the feedback! Always striving to give you the best answers.",
+      "Wonderful! Enjoy the rest of your day."
+    ]
+  },
+  {
+    "keys": ["amazing!", "that's amazing", "amazing work", "you're amazing", "amazing answer", "so amazing", "amazing help"],
+    "values": [
+      "You're very kind! I'm just glad I could make things easy for you.",
+      "Thank you! Hearing that brightens my day.",
+      "Happy to hear that! Reach out whenever you need another answer.",
+      "Glad you think so! Enjoy your day to the fullest."
+    ]
+  },
+  {
+    "keys": ["nice work", "nice work!", "great job", "good job", "great work", "awesome job friend", "nice job thanks"],
+    "values": [
+      "Thanks a bunch! Really glad I could help you out today.",
+      "Appreciate it! Teamwork makes everything easier.",
+      "Glad you liked the result! What shall we tackle next?",
+      "Thank you! Always happy to put in good work for you."
+    ]
+  },
+  {
+    "keys": ["you're kind", "you are so kind", "that's very kind of you", "so sweet", "very thoughtful", "kind of you thanks", "you're so sweet"],
+    "values": [
+      "Thank you for such a thoughtful compliment! It's a joy helping you.",
+      "You're very kind yourself! Wishing you a peaceful and happy day.",
+      "Appreciate your warm words! Feel free to connect whenever you like.",
+      "That means a lot to hear! Happy to be here for you."
+    ]
+  },
+  {
+    "keys": ["much appreciated", "much appreciated!", "very much appreciated", "greatly appreciated", "much appreciated friend", "deeply appreciated"],
+    "values": [
+      "Glad I could be of help! Have a smooth and pleasant day.",
+      "Thank you! It's always a pleasure assisting you.",
+      "Appreciated right back! Let me know if you need anything further.",
+      "Happy to assist! Enjoy the rest of your day."
+    ]
+  },
+  {
+    "keys": ["thank you very much", "thank you so much", "thank u so much", "thx so much", "thank you so much friend", "thank u very much"],
+    "values": [
+      "You are so very welcome! Glad I could make a difference.",
+      "So happy I could help out! Feel free to return anytime.",
+      "My absolute pleasure! Wishing you great success with your day.",
+      "Thank you for the warm thanks! Have a wonderful day ahead."
+    ]
+  },
+  {
+    "keys": ["thanks for the help", "thank you for your help", "thanks for helping me out", "thanks for all your help", "thank u for helping"],
+    "values": [
+      "Anytime at all! Helping you out is what I'm here for.",
+      "Glad I could assist! Let me know if you run into any more questions.",
+      "Happy to help! Hope your day stays bright and productive.",
+      "You're welcome! Reach out whenever you need a quick hand."
+    ]
+  },
+  {
+    "keys": ["you saved me time", "saved me so much time", "that saved me a lot of time", "saved time thanks", "saved me precious time"],
+    "values": [
+      "Saving you time is the best goal! Glad we got it done fast.",
+      "Awesome! Now you have more time to enjoy your day.",
+      "Happy to speed things up for you! Anything else you need quickly?",
+      "Glad to be of service! Enjoy your saved time."
+    ]
+  },
+  {
+    "keys": ["that solved it", "that fixed my issue", "problem solved thanks", "solved my problem", "that solved my problem", "issue fixed thanks"],
+    "values": [
+      "Fantastic news! So glad the issue is completely sorted out.",
+      "Awesome! Nothing feels better than a solved problem.",
+      "Glad that worked! Don't hesitate to ask if any other issue comes up.",
+      "Great to hear! Have a stress-free day ahead."
+    ]
+  },
+  {
+    "keys": ["awesome!", "that's awesome", "awesome job", "so awesome", "awesome work", "awesome help", "totally awesome"],
+    "values": [
+      "Glad you think so! Hope it makes your day even better.",
+      "Awesome! Happy to bring good energy to your tasks.",
+      "Thank you! Feel free to drop by whenever you need more help.",
+      "Really glad that helped out! Have a great day."
+    ]
+  },
+  {
+    "keys": ["fantastic!", "that's fantastic", "fantastic job", "fantastic work", "fantastic answer", "fantastic help"],
+    "values": [
+      "Thank you so much! Really glad you liked the response.",
+      "Fantastic news! Wishing you continued success today.",
+      "Appreciate the enthusiasm! Let me know if you need anything else.",
+      "Glad it turned out great! Have a wonderful afternoon."
+    ]
+  },
+  {
+    "keys": ["brilliant!", "that's brilliant", "brilliant work", "brilliant answer", "brilliant job", "simply brilliant"],
+    "values": [
+      "Thank you for the high praise! Happy it worked out so well.",
+      "Glad I could deliver a great answer! What else can I help with?",
+      "Appreciate that! Enjoy your day and take care.",
+      "Wonderful! Feel free to ask anytime you need quick clarity."
+    ]
+  },
+  {
+    "keys": ["great explanation", "clear explanation thanks", "explained it well thanks", "great explanation thanks", "superb explanation"],
+    "values": [
+      "Glad the explanation was clear! Making things simple is always the goal.",
+      "Happy to help break it down! Let me know if you need any more details.",
+      "Thank you! Glad it made total sense to you.",
+      "Appreciate that! Hope your next steps are smooth and easy."
+    ]
+  },
+  {
+    "keys": ["spot on!", "that's spot on", "spot on answer", "hit the nail on the head", "spot on thanks"],
+    "values": [
+      "Glad we nailed it! Happy to give you exact information.",
+      "Awesome! Thanks for letting me know it was right on target.",
+      "Glad that hit the spot! Feel free to ask whenever you need more.",
+      "Great! Wishing you smooth sailing ahead."
+    ]
+  },
+  {
+    "keys": ["couldn't have done it without you", "helped me complete this", "couldn't do it without u", "huge help completing this"],
+    "values": [
+      "You did all the real work—I was just happy to assist!",
+      "Glad we got through it together! Congratulations on finishing.",
+      "Happy to be your trusty helper! Feel free to reach out anytime.",
+      "Appreciate the kind compliment! Wishing you a great day."
+    ]
+  },
+  {
+    "keys": ["you're the best", "you are the best", "ur the best", "you're awesome", "you are awesome", "ur awesome"],
+    "values": [
+      "That's so kind of you to say! You're pretty awesome yourself.",
+      "Thank you! Helping wonderful users like you makes my day.",
+      "Glad I could be of great help! Have an incredible day ahead.",
+      "Appreciate the love! Reach out whenever you need anything."
+    ]
+  },
+  {
+    "keys": ["thanks for being quick", "super fast thanks", "quick response appreciated", "fast answer thanks", "thanks for fast reply"],
+    "values": [
+      "Speed and clarity are top priorities! Glad I could get it to you fast.",
+      "Happy to help without delay! Enjoy the rest of your day.",
+      "Fast response for a busy day! Let me know if you need anything else.",
+      "Glad to save you time! Catch you later."
+    ]
+  },
+  {
+    "keys": ["that makes sense now", "makes total sense thanks", "now i get it thanks", "makes sense thanks", "totally get it now thanks"],
+    "values": [
+      "Glad it clicked! Clearing up confusion is always satisfying.",
+      "Awesome! Nothing better than that 'aha' moment.",
+      "Happy to help clarify! Ask away if any other questions pop up.",
+      "Great! Enjoy applying your new understanding today."
+    ]
+  },
+  {
+    "keys": ["exactly what i needed", "just what i needed", "precisely what i needed thanks", "exactly what i wanted thanks"],
+    "values": [
+      "Perfect! Really glad I could provide exactly what you were looking for.",
+      "Glad to deliver the exact info you needed! Have a fantastic day.",
+      "Awesome! Let me know if you need help with your next task.",
+      "Happy it fit your needs completely! Take care."
+    ]
+  },
+  {
+    "keys": ["super clear thanks", "very clear answer", "so clear thanks", "crystal clear thanks", "super clear explanation"],
+    "values": [
+      "Glad it was crystal clear! Clear answers make life much easier.",
+      "Happy to hear that! Feel free to ask if you need anything else explained.",
+      "Thank you! Always happy to break things down clearly for you.",
+      "Awesome! Hope your day stays clear and smooth."
+    ]
+  },
+  {
+    "keys": ["love it!", "love this response", "love your help", "really love this", "love it thanks"],
+    "values": [
+      "So happy to hear that! Your positive feedback means everything.",
+      "Glad you love it! Wishing you a bright and happy day.",
+      "Awesome! Feel free to stop by whenever you need more help.",
+      "Thank you! Enjoy your day to the fullest."
+    ]
+  },
+  {
+    "keys": ["outstanding!", "outstanding job", "outstanding work", "outstanding effort", "outstanding answer"],
+    "values": [
+      "Thank you for such high praise! I'm genuinely happy to help.",
+      "Glad I could deliver outstanding results for you! Have a great day.",
+      "Appreciate the kind rating! Reach out anytime you need assistance.",
+      "Wonderful! Hope the rest of your day is just as outstanding."
+    ]
+  },
+  {
+    "keys": ["incredible!", "that's incredible", "incredible job", "incredible help", "incredible work thanks"],
+    "values": [
+      "Thank you! I'm super happy that the solution worked so well.",
+      "Glad you found it incredible! Wishing you a fantastic day ahead.",
+      "Appreciate your warm feedback! Always happy to assist.",
+      "Awesome! Let me know if you need anything else today."
+    ]
+  },
+  {
+    "keys": ["top notch!", "top notch work", "top notch help", "top tier response", "top notch answer"],
+    "values": [
+      "Thank you kindly! Always striving to provide top-quality help.",
+      "Glad it was top notch for you! Have an amazing rest of your day.",
+      "Appreciate that feedback! Reach out whenever you need more assistance.",
+      "Delighted to help! Take good care of yourself."
+    ]
+  },
+  {
+    "keys": ["beyond helpful", "more than helpful", "exceeded my expectations thanks", "beyond expectations thanks"],
+    "values": [
+      "That is so wonderful to hear! Really glad I could exceed expectations.",
+      "Thank you! Going the extra mile for you is always my goal.",
+      "Glad I could provide such thorough help! Have a great day ahead.",
+      "Appreciate your kind words! Feel free to ask anytime."
+    ]
+  },
+  {
+    "keys": ["you rock!", "you rock buddy", "ur rockstar", "rockstar help", "you rock thanks"],
+    "values": [
+      "You rock too! Thanks for being such a great user to chat with.",
+      "Haha, thank you! Glad I could bring some good energy to your task.",
+      "Appreciate the compliment! Catch you next time you need help.",
+      "Awesome! Have a rocking day ahead."
+    ]
+  },
+  {
+    "keys": ["good stuff!", "good stuff thanks", "really good stuff", "great stuff thanks", "solid stuff thanks"],
+    "values": [
+      "Glad you found it useful! Good stuff is what we aim for.",
+      "Awesome! Hope it serves your project or task well.",
+      "Thank you! Let me know if you want to explore further.",
+      "Glad to deliver solid info! Have a pleasant day."
+    ]
+  },
+  {
+    "keys": ["thanks for the advice", "great advice thanks", "good suggestion thanks", "helpful advice thanks"],
+    "values": [
+      "Glad the suggestion resonated with you! Hope it works out great.",
+      "You're very welcome! Let me know how things turn out.",
+      "Happy to share good advice anytime! Have a productive day.",
+      "Hope it leads to awesome results for you! Take care."
+    ]
+  },
+  {
+    "keys": ["thanks for clarifying", "thanks for clearing that up", "clarification appreciated", "thanks for explaining"],
+    "values": [
+      "Happy to clear up any doubts! Ask away if anything else comes up.",
+      "Glad that cleared things up! Have a smooth day ahead.",
+      "Always happy to provide clarity! Take care.",
+      "Awesome! Glad everything is crystal clear now."
+    ]
+  },
+  {
+    "keys": ["you saved my day", "saved the day thanks", "lifesaver thanks", "total lifesaver", "saved my day thanks"],
+    "values": [
+      "So happy I could step in and rescue your task! Have a great rest of your day.",
+      "Glad to be of service in a pinch! Don't hesitate to reach out again.",
+      "Awesome! Saving the day is the best feeling. Take care!",
+      "Happy everything turned out great in the end!"
+    ]
+  },
+  {
+    "keys": ["that was easy thanks", "made it so easy thanks", "made it simple thanks", "super simple thanks"],
+    "values": [
+      "Keeping things simple and stress-free is key! Glad it helped.",
+      "Happy it was effortless for you! Enjoy the rest of your day.",
+      "Simplicity is the goal! Let me know if you need help with anything else.",
+      "Awesome! Have a calm and easy day ahead."
+    ]
+  },
+  {
+    "keys": ["very impressive!", "impressive work", "impressive job", "so impressive", "impressive help"],
+    "values": [
+      "Thank you for the high praise! Really glad you liked the output.",
+      "Glad I could impress! Wishing you a productive and happy day.",
+      "Appreciate the compliment! Always happy to put in top effort.",
+      "Wonderful! Feel free to drop by whenever you need assistance."
+    ]
+  },
+  {
+    "keys": ["always reliable thanks", "reliable help thanks", "dependable as always", "always helpful thanks"],
+    "values": [
+      "Thank you! Being a reliable partner for you is always my goal.",
+      "Glad you can depend on me! Reach out whenever you need help.",
+      "Appreciate your ongoing trust! Have a wonderful day ahead.",
+      "Always here for you! Enjoy your day."
+    ]
+  },
+  {
+    "keys": ["thanks for the info", "thanks for the information", "great info thanks", "useful info thanks"],
+    "values": [
+      "Glad the info was helpful! Feel free to ask if you need more details.",
+      "Happy to provide good information! Enjoy your day.",
+      "You're welcome! Let me know if another topic comes up.",
+      "Hope that info serves you well today! Take care."
+    ]
+  },
+  {
+    "keys": ["appreciate the effort", "thanks for putting in effort", "effort appreciated", "great effort thanks"],
+    "values": [
+      "Thank you! Putting in good work for you is always a pleasure.",
+      "Glad the effort paid off for your task! Have a great day.",
+      "Appreciate your thoughtful feedback! Always happy to help.",
+      "Awesome! Enjoy the rest of your day."
+    ]
+  },
+  {
+    "keys": ["super useful", "extremely useful thanks", "so handy thanks", "very useful info", "super useful help"],
+    "values": [
+      "Glad you found it so handy! Useful answers are what I strive for.",
+      "Awesome! Feel free to use the info whenever you need.",
+      "Happy it brought value to your task! Have a great day.",
+      "Wonderful! Ask away if you need any more useful tips."
+    ]
+  },
+  {
+    "keys": ["got it thanks", "got it!", "understood thanks", "roger that thanks", "got it loud and clear"],
+    "values": [
+      "Awesome! Glad everything is clear. Let me know if you need more help.",
+      "Understood! Have a great time tackling your next steps.",
+      "Roger that! Enjoy the rest of your productive day.",
+      "Glad you got it! Take care and talk soon."
+    ]
+  },
+  {
+    "keys": ["smooth and fast thanks", "fast and smooth help", "quick and clean thanks", "smooth transaction thanks"],
+    "values": [
+      "Smooth and fast is how we like it! Glad it worked out great.",
+      "Happy we got it done so seamlessly! Enjoy your day.",
+      "Appreciate the feedback! Reach out whenever you need another quick hand.",
+      "Awesome! Have a wonderful day ahead."
+    ]
+  },
+  {
+    "keys": ["thanks for your patience", "appreciate the patience", "patient response thanks", "thanks for being patient"],
+    "values": [
+      "Patience is always part of good service! Glad we sorted it out.",
+      "You're very welcome! Taking time to get things right is always worth it.",
+      "Happy to take all the time needed for a clear answer! Take care.",
+      "No rush at all! Always happy to help you work through things."
+    ]
+  },
+  {
+    "keys": ["kudos!", "kudos to you", "kudos for the great help", "hats off thanks", "kudos friend"],
+    "values": [
+      "Kudos right back to you for asking great questions!",
+      "Thank you! Really appreciate the recognition.",
+      "Glad I could earn your kudos today! Have an awesome day.",
+      "Appreciate the hat tip! Enjoy your day to the fullest."
+    ]
+  },
+  {
+    "keys": ["neat solution thanks", "slick solution", "clean answer thanks", "neat work", "clean solution thanks"],
+    "values": [
+      "Glad the solution was neat and clean! Simple fixes are the best.",
+      "Happy to deliver a slick solution! Hope it works out perfectly.",
+      "Thank you! Always happy to keep answers tidy and efficient.",
+      "Awesome! Enjoy your day ahead."
+    ]
+  },
+  {
+    "keys": ["gold star work", "stellar job", "stellar response thanks", "5 stars thanks", "stellar help"],
+    "values": [
+      "Thank you for the 5-star compliment! Truly appreciate it.",
+      "Glad I could deliver stellar service for you! Have a bright day.",
+      "Appreciate the gold star! Always here to provide top effort.",
+      "Wonderful! Hope your day stays just as stellar."
+    ]
+  },
+  {
+    "keys": ["thanks for the detailed response", "great detail thanks", "detailed answer appreciated", "thx for details"],
+    "values": [
+      "Glad the details helped illuminate things for you!",
+      "Happy to provide comprehensive info! Let me know if you need more.",
+      "Appreciate that! Deep dives are always fun when helpful.",
+      "Awesome! Hope those details guide your next steps smoothly."
+    ]
+  },
+  {
+    "keys": ["made my job easier", "made things so easy for me", "lightened my load thanks", "easier work thanks"],
+    "values": [
+      "Lightening your workload is a top priority! Glad it helped.",
+      "Awesome! Hope you have an easy and relaxing afternoon.",
+      "Glad to make your tasks simpler! Reach out anytime.",
+      "Happy to take some pressure off! Enjoy your day."
+    ]
+  },
+  {
+    "keys": ["thanks for being friendly", "friendly response thanks", "nice attitude thanks", "friendly help thanks"],
+    "values": [
+      "Being warm and friendly is always natural when chatting with you!",
+      "Thank you! Friendly conversations make every day brighter.",
+      "Appreciate your kindness! Wishing you a peaceful day.",
+      "Happy to bring good vibes to our chat! Take care."
+    ]
+  },
+  {
+    "keys": ["thanks for double checking", "thx for verifying", "checking appreciated", "thanks for checking"],
+    "values": [
+      "Double checking ensures everything stays accurate! Glad I could verify.",
+      "Happy to verify for you anytime! Have a smooth day.",
+      "Accuracy matters! Glad we made sure everything was correct.",
+      "You're welcome! Catch you next time."
+    ]
+  },
+  {
+    "keys": ["thanks for standing by", "thanks for sticking with me", "glad you helped", "thanks for your support"],
+    "values": [
+      "Standing by to help you is always a pleasure! Glad we solved it.",
+      "Happy to stick with you until everything was complete!",
+      "Appreciate your persistence! Have a fantastic day.",
+      "Always in your corner! Take good care."
+    ]
+  },
+  {
+    "keys": ["thx a lottt", "thx so muchhh", "tnx bro", "thnq so much", "thx a tonnn"],
+    "values": [
+      "You're so welcome! Super happy I could help out.",
+      "Glad I could help bro! Have an awesome day.",
+      "Anytime at all! Enjoy your day ahead.",
+      "Happy to help out! Talk to you soon."
+    ]
+  },
+  {
+    "keys": ["muchas gracias", "gracias amigo", "gracias!", "muchas gracias friend", "gracias por todo"],
+    "values": [
+      "¡De nada! Happy I could assist you today.",
+      "¡De nada amigo! Wishing you a wonderful day.",
+      "¡Muchas gracias to you too! Have a great time ahead.",
+      "Glad to help! ¡Hasta luego!"
+    ]
+  },
+  {
+    "keys": ["merci!", "merci beaucoup", "merci friend", "merci beaucoup friend", "grand merci"],
+    "values": [
+      "De rien! Happy to be of service to you today.",
+      "Merci to you as well! Hope your day is pleasant and bright.",
+      "De rien my friend! Take care and enjoy your day.",
+      "Glad I could help out! Have a delightful afternoon."
+    ]
+  },
+  {
+    "keys": ["grazie!", "grazie mille", "grazie friend", "grazie mille friend", "molte grazie"],
+    "values": [
+      "Prego! Happy to assist you anytime.",
+      "Grazie mille to you as well! Have a wonderful day ahead.",
+      "Prego my friend! Enjoy your day to the fullest.",
+      "Glad to help out! Take great care."
+    ]
+  },
+  {
+    "keys": ["thank you my friend", "heartfelt thanks", "deeply grateful friend", "warmest thanks", "grateful for your help"],
+    "values": [
+      "Your warm gratitude means so much to me! It's a genuine pleasure helping you.",
+      "Heartfelt thanks right back to you! Wishing you peace and joy today.",
+      "I am deeply glad I could assist a friend like you. Take care!",
+      "Thank you my friend! Always right here whenever you need me."
+    ]
+  }
+]

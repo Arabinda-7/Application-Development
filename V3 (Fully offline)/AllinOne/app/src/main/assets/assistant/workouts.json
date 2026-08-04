@@ -1,0 +1,490 @@
+[
+  {
+    "keys": ["workout", "exercise", "gym"],
+    "values": [
+      "The best workout is the one you actually do. Consistency beats intensity every single time.",
+      "Movement is medicine. Whether it's lifting, running, or stretching, your body was built to move.",
+      "Your future self will thank you for today's effort. Let's make this session count!"
+    ]
+  },
+  {
+    "keys": ["recovery", "rest day", "sore"],
+    "values": [
+      "Muscles grow when you rest, not when you work out. Ensure you have at least one or two rest days per week.",
+      "Rest is just as important as training. Listen to your body—it's okay to take a day off to recover and rebuild.",
+      "Overtraining is real. If you're feeling persistent fatigue, a strategic rest day will actually help you get stronger."
+    ]
+  },
+  {
+    "keys": ["cardio", "running", "walking"],
+    "values": [
+      "Cardio is great for heart health and mood. Even a 20-minute brisk walk can make a huge difference in your day.",
+      "Get your heart rate up! Running, cycling, or fast walking clears the mind and builds endurance.",
+      "Don't underestimate the power of steady-state cardio. It's the foundation of long-term cardiovascular health."
+    ]
+  },
+  {
+    "keys": ["how do i add a workout", "how to add workout"],
+    "values": [
+      "Say 'Add workout [Name]'. For example, 'Add workout Pushups'. You can also manage your full routine in the Workout section.",
+      "To log a new exercise, just tell me 'New workout [name]' or tap the plus icon in the Workouts module.",
+      "You can add workouts by voice or manually. Head to the Workout Tracker to see your full schedule and add new items."
+    ]
+  },
+  {
+    "keys": ["create a workout", "start a workout", "new workout"],
+    "values": [
+      "Creating a new workout, what will be the title?",
+      "Let's set up a new exercise. What should we call this workout?",
+      "New workout initiation. Please provide the title for this exercise."
+    ]
+  },
+  {
+    "keys": ["incomplete workouts", "active workouts"],
+    "values": [
+      "Checking your list for today...",
+      "Let's see what training you have left to do today.",
+      "Gathering your pending exercises. Time to put in the work!"
+    ]
+  },
+  {
+    "keys": ["completed workouts", "how many completed"],
+    "values": [
+      "Let's see what you've accomplished today...",
+      "Calculating your training wins for the day. Great effort!",
+      "Checking your completed exercises. You're making progress!"
+    ]
+  },
+  {
+    "keys": ["total workouts", "all workouts"],
+    "values": [
+      "Gathering your full routine...",
+      "Accessing all the exercises in your current program.",
+      "Here is the complete list of your tracked workouts."
+    ]
+  },
+  {
+    "keys": ["add reps", "add sets", "add minutes", "add seconds"],
+    "values": [
+      "Updating your progress...",
+      "Log received! I'm adding that to your workout history.",
+      "Progress recorded. Every rep counts toward your goal!"
+    ]
+  },
+  {
+    "keys": ["finish workout", "complete workout", "done with"],
+    "values": [
+      "Marking it as completed...",
+      "Excellent work! I've logged that workout as finished for today.",
+      "Session complete. Your consistency is paying off!"
+    ]
+  },
+  {
+    "keys": ["how many to go", "reps left", "sets left"],
+    "values": [
+      "Let me check your remaining targets...",
+      "Checking your workout goals. Here is what's left to finish.",
+      "Let's see how much closer you are to finishing this exercise."
+    ]
+  },
+  {
+    "keys": ["warm up", "stretching", "mobility"],
+    "values": [
+      "Never skip the warm-up! 5-10 minutes of dynamic stretching prepares your joints and prevents injury.",
+      "Think of a warm-up as a 'system check' for your body. It wakes up your nervous system for the hard work ahead.",
+      "Mobility first. Use dynamic movements to increase blood flow before you start your main lifting or cardio sets."
+    ]
+  },
+  {
+    "keys": ["strength training", "lifting weights", "building muscle"],
+    "values": [
+      "Focus on compound movements like squats, deadlifts, and presses. They give you the best return on your time.",
+      "Building muscle takes time and tension. Focus on controlled movements and slow eccentric phases for maximum growth.",
+      "Lifting weights isn't just about size; it's about bone density, metabolic health, and functional strength."
+    ]
+  },
+  {
+    "keys": ["workout hydration", "drink water during workout"],
+    "values": [
+      "Stay hydrated! Sip water consistently during your session. For sessions over an hour, consider electrolytes.",
+      "Hydration is key for performance. Even slight dehydration can significantly decrease your strength and focus.",
+      "Don't wait until you're thirsty to drink. Maintain a steady intake of water throughout your entire workout."
+    ]
+  },
+  {
+    "keys": ["post workout", "after workout meal", "protein"],
+    "values": [
+      "Recovery starts with nutrition. Aim for protein and carbohydrates within 2 hours of your session.",
+      "Refuel your engine. Protein helps repair muscle fibers, while carbs replenish your glycogen stores.",
+      "After training, prioritize high-quality nutrition to ensure your body has the building blocks it needs to grow."
+    ]
+  },
+  {
+    "keys": ["pushup tip", "form for pushups"],
+    "values": [
+      "Pushup tip: Keep your core tight and elbows at a 45-degree angle. Quality over quantity ensures shoulder health.",
+      "Don't let your hips sag! Maintain a straight line from your head to your heels throughout the pushup motion.",
+      "Focus on a full range of motion. Chest all the way to the floor, and a full lockout at the top for maximum engagement."
+    ]
+  },
+  {
+    "keys": ["squat tip", "form for squats"],
+    "values": [
+      "Squat tip: Keep your weight on your heels and your chest up. Imagine sitting back into a chair.",
+      "Drive your knees out as you descend. This prevents them from caving in and protects your ligaments.",
+      "Depth matters, but form is king. Squat as low as you can while maintaining a neutral spine and flat feet."
+    ]
+  },
+  {
+    "keys": ["plank tip", "core strength"],
+    "values": [
+      "Plank tip: Don't let your hips sag or hike up too high. Squeeze your glutes and core to create a straight line.",
+      "Active planks are better. Push through your elbows and pull your toes toward your head to maximize core tension.",
+      "Quality planks: it's better to hold a perfect position for 30 seconds than a poor one for 3 minutes."
+    ]
+  },
+  {
+    "keys": ["progressive overload", "getting stronger"],
+    "values": [
+      "To keep progressing, use 'Progressive Overload': gradually increase weight, reps, or decrease rest time each week.",
+      "If it doesn't challenge you, it won't change you. Always look for small ways to make your workouts harder over time.",
+      "Track your numbers! Beating last week's performance by even one rep is the secret to long-term physical gains."
+    ]
+  },
+  {
+    "keys": ["hiit", "interval training", "high intensity"],
+    "values": [
+      "HIIT is powerful for burning fat and improving fitness in a short amount of time. 15-20 minutes is often all you need!",
+      "Work hard, rest hard. The secret of HIIT is the intensity of the work intervals. Push yourself to the limit!",
+      "Interval training builds an 'engine'. It improves your anaerobic capacity and heart rate recovery speed."
+    ]
+  },
+  {
+    "keys": ["mind muscle connection", "focus on muscle"],
+    "values": [
+      "Practice 'Mind-Muscle Connection'. Focus intently on the muscle you're working for better fiber recruitment.",
+      "Don't just move the weight from A to B. FEEL the muscle contracting and stretching with every single repetition.",
+      "Close your eyes if you have to. Visualizing the muscle working can significantly improve the quality of your sets."
+    ]
+  },
+  {
+    "keys": ["breathing during exercise", "how to breathe"],
+    "values": [
+      "Don't hold your breath! Generally, exhale on the effort (exertion) and inhale on the easier part of the movement.",
+      "Proper breathing stabilizes your core. Use the 'Valsalva' maneuver for heavy lifts, but keep a steady rhythm for cardio.",
+      "Breathe through your nose to maintain a lower heart rate during steady-state exercise. It's more efficient for oxygen exchange."
+    ]
+  },
+  {
+    "keys": ["morning workout benefit", "training in the morning"],
+    "values": [
+      "Morning workouts jumpstart your metabolism and boost your mood. Plus, it's one less thing to worry about later!",
+      "Win the morning! Training early builds mental discipline and ensures your fitness goal is met before life gets busy.",
+      "Early movement regulates your circadian rhythm. It helps you wake up faster and improves your sleep quality tonight."
+    ]
+  },
+  {
+    "keys": ["evening workout benefit", "training at night"],
+    "values": [
+      "Evening workouts can be a great way to de-stress after a long day. You might also have more strength later in the day.",
+      "Use your training to 'process' the day. Heavy lifting or a long run is a perfect release for workplace stress.",
+      "Performance peak: many people find their body temperature and strength are highest in the late afternoon and early evening."
+    ]
+  },
+  {
+    "keys": ["sleep and gym", "rest and performance"],
+    "values": [
+      "Sleep is your superpower. Aim for 7-9 hours. Lack of sleep decreases strength, coordination, and recovery speed.",
+      "You don't get stronger IN the gym; you get stronger while you SLEEP after the gym. Prioritize your rest as much as your reps.",
+      "Recovery happens in bed. Deep sleep is when your body releases growth hormones to repair the tissues you worked today."
+    ]
+  },
+  {
+    "keys": ["pain vs discomfort", "should i stop"],
+    "values": [
+      "Learn the difference: Discomfort (burning/tiredness) is normal. Sharp or sudden pain is a signal to stop immediately.",
+      "Listen to your body. 'Good' pain is the burn of hard work. 'Bad' pain is sharp, localized, or feels like a snap or tear.",
+      "Longevity is the goal. It's better to end a session early and rest than to push through pain and be out for 6 months."
+    ]
+  },
+  {
+    "keys": ["home workout", "no gym", "bodyweight"],
+    "values": [
+      "You don't need a gym to get fit! Bodyweight exercises like lunges, burpees, and planks can be done anywhere.",
+      "Your body IS the gym. Calisthenics build incredible functional strength and can be practiced in any small space.",
+      "Master the basics at home: pushups, squats, and pullups. These foundation movements are enough for an elite physique."
+    ]
+  },
+  {
+    "keys": ["consistency over intensity", "daily movement"],
+    "values": [
+      "Better to work out for 15 minutes every day than 3 hours once a week. Your body responds best to regular stimulus.",
+      "Don't wait for 'perfect' conditions. Even a mediocre workout done consistently is better than a perfect one that never happens.",
+      "The goal is 'Daily Movement'. Whether it's a heavy lift or a light walk, just keep the habit of moving your body alive."
+    ]
+  },
+  {
+    "keys": ["track progress", "why log workouts"],
+    "values": [
+      "Logging workouts helps you stay accountable and provides visual proof that you're getting stronger over time.",
+      "Data is motivation. Seeing your reps and weights increase over the weeks is the best way to stay committed to your goals.",
+      "What gets measured gets managed. Tracking your training allows you to identify plateaus and adjust your program for success."
+    ]
+  },
+  {
+    "keys": ["motivation to gym", "don't want to workout"],
+    "values": [
+      "Action creates motivation, not the other way around. Commit to just 5 minutes—you'll likely finish the whole session.",
+      "Rely on your system, not your mood. Your workout is a non-negotiable appointment with your future self.",
+      "The workouts you LEAST want to do are often the ones that build the most discipline. Just show up and start moving."
+    ]
+  },
+  {
+    "keys": ["active recovery", "yoga", "light movement"],
+    "values": [
+      "On rest days, try 'Active Recovery' like light yoga or a steady walk. It keeps blood moving and helps flush out waste.",
+      "Don't just sit on the couch. Gentle movement on your off-days improves flexibility and speeds up muscle repair.",
+      "Recovery isn't just about doing nothing. Low-intensity movement keeps your joints healthy and your mind focused."
+    ]
+  },
+  {
+    "keys": ["leg day tip", "leg workout", "quads and hamstrings"],
+    "values": [
+      "Don't skip leg day! Training large groups like quads and glutes releases growth hormones, benefiting your whole body.",
+      "Legs are your foundation. A strong lower body improves your performance in every other physical activity and sport.",
+      "Leg day is a mental test. Mastering the heavy squat or lunge builds a level of grit that transfers into your work and life."
+    ]
+  },
+  {
+    "keys": ["chest workout tip", "bench press form"],
+    "values": [
+      "Chest tip: Retract your shoulder blades and plant your feet firmly. Focus on pushing with your chest, not just arms.",
+      "Think about 'squeezing' the weights together at the top of the movement to maximize the contraction of your pec muscles.",
+      "Safety first on bench: always use a spotter or safety bars, and avoid bouncing the bar off your chest."
+    ]
+  },
+  {
+    "keys": ["back workout tip", "pullup form", "rows"],
+    "values": [
+      "Back training: focus on 'pulling with your elbows'. This helps engage the lats rather than relying solely on biceps.",
+      "A strong back is the secret to good posture and a powerful physique. Prioritize rows and pullups for a balanced body.",
+      "Squeeze your shoulder blades together at the peak of every row. It's about the contraction, not just the movement."
+    ]
+  },
+  {
+    "keys": ["shoulder health", "shoulder press", "rotator cuff"],
+    "values": [
+      "Protect your shoulders! Include lateral raises and face pulls to balance your physique and keep your rotator cuffs stable.",
+      "Don't over-train the front delts. Focus on rear and side delts to maintain healthy posture and prevent the 'hunched' look.",
+      "Warm up your rotator cuffs with light internal and external rotations. Your shoulders are your most mobile and fragile joints."
+    ]
+  },
+  {
+    "keys": ["arm workout", "biceps and triceps"],
+    "values": [
+      "Arms tip: focus on full range of motion. For biceps, don't swing. For triceps, ensure full extension at the bottom.",
+      "Want bigger arms? Focus on triceps. They make up two-thirds of your arm's mass and give you that 'full' look.",
+      "Control the eccentric! The way down is just as important for growth as the way up. Don't let the weight just drop."
+    ]
+  },
+  {
+    "keys": ["core vs abs", "abdominal training"],
+    "values": [
+      "Core training isn't just six-pack abs. It includes your lower back, obliques, and stabilizing muscles. Planks are better than sit-ups.",
+      "Your core is your center of power. A strong core protects your spine and improves your strength in all other lifts.",
+      "Train for stability, not just vanity. Use 'anti-rotation' exercises like the Paloff press to build a functional, bulletproof core."
+    ]
+  },
+  {
+    "keys": ["deadlift form", "lower back safety"],
+    "values": [
+      "Deadlift tip: keep the bar close to your shins and maintain a neutral spine. Power comes from hips, not lower back.",
+      "Hinge, don't squat. The deadlift is a posterior chain movement. Focus on the 'hip hinge' to load the glutes and hamstrings.",
+      "Check your slack. Before you lift, pull the 'click' out of the bar and tension your whole body to prevent a jerky start."
+    ]
+  },
+  {
+    "keys": ["lunges tip", "leg stability"],
+    "values": [
+      "Lunges tip: keep your torso upright and front knee aligned with toes. Don't let your knee cave in—protect your ACL.",
+      " Lunges are the ultimate test of balance and unilateral strength. They quickly reveal and fix any left-right imbalances.",
+      "Step back for better knee health. Reverse lunges are often easier on the joints while still providing a massive stimulus."
+    ]
+  },
+  {
+    "keys": ["pre workout meal", "what to eat before gym"],
+    "values": [
+      "Eat complex carbs like oats or a banana 30-60 minutes before training. Avoid heavy, greasy meals that cause issues.",
+      "Fuel for the work. A mix of fast-acting carbs and a little protein is the perfect pre-session snack to keep energy high.",
+      "Listen to your digestion. Some perform best fasted, others need a full meal. Find what allows you to train with high intensity."
+    ]
+  },
+  {
+    "keys": ["creatine facts", "supplements for muscle"],
+    "values": [
+      "Creatine is one of the most researched and safe supplements. It helps with explosive power and muscle hydration.",
+      "3-5 grams of Creatine monohydrate daily is all you need. It's not a magic pill, but it's a proven performance booster.",
+      "Don't worry about 'loading' phases. Just be consistent with your daily dose, and you'll see the benefits in 2-3 weeks."
+    ]
+  },
+  {
+    "keys": ["caffeine and gym", "pre workout drink"],
+    "values": [
+      "Caffeine boosts focus and reduces perceived exertion. Avoid taking it too late, as it interferes with recovery sleep.",
+      "A simple cup of coffee is often the best pre-workout. It's effective, cheap, and lacks the artificial fillers of many supplements.",
+      "Don't become dependent on caffeine to train. If you need it every day, you might actually need more sleep and rest."
+    ]
+  },
+  {
+    "keys": ["foam rolling", "self massage", "sore muscles"],
+    "values": [
+      "Foam rolling breaks up tight fascia and improves blood flow. Spend 1-2 minutes on sore areas like quads or lats.",
+      "Think of foam rolling as 'active rest'. It's a great tool for managing muscle soreness and maintaining your range of motion.",
+      "It shouldn't be unbearable pain. Use a pressure that allows you to breathe deeply and relax into the 'knots' in your muscles."
+    ]
+  },
+  {
+    "keys": ["ankle mobility", "squat depth"],
+    "values": [
+      "Struggling with squat depth? Check your ankle mobility. Tight calves often limit how far your knees can track forward.",
+      "Better ankles = better squats. Spend time on 'calf stretches' and 'ankle circles' to improve your lower body mechanics.",
+      "Test your mobility: can you touch your knee to a wall with your toes 4 inches away? If not, focus on ankle work."
+    ]
+  },
+  {
+    "keys": ["mental toughness", "mindset in gym"],
+    "values": [
+      "The body achieves what the mind believes. Focus on 'one more rep' when it gets tough—that's where the growth is.",
+      "Gym progress is 10% physical and 90% mental. Learning to stay calm under a heavy bar builds life-changing resilience.",
+      "Visualize your success before the set starts. A confident mind leads to a stronger, more capable body."
+    ]
+  },
+  {
+    "keys": ["resistance bands", "travel workout"],
+    "values": [
+      "Resistance bands are great for travel. They provide 'constant tension', which is excellent for muscle endurance.",
+      "Don't underestimate the band! You can mimic almost any gym movement with a good set of resistance bands and some creativity.",
+      "Perfect for isolation: use bands at the end of your workout to 'pump' the muscles and improve the mind-muscle connection."
+    ]
+  },
+  {
+    "keys": ["kettlebell training", "functional fitness"],
+    "values": [
+      "Kettlebells are amazing for functional power. Swings work your entire posterior chain and improve conditioning.",
+      "The kettlebell is the ultimate 'minimalist' gym. One bell is enough for a full-body strength and cardio session.",
+      "Focus on the 'snap' in your hips for swings. It's an explosive movement that builds incredible athletic power."
+    ]
+  },
+  {
+    "keys": ["calisthenics benefit", "bodyweight strength"],
+    "values": [
+      "Calisthenics builds incredible relative strength and body control. Mastering pullups and dips is a powerful display of fitness.",
+      "Bodyweight training is the purest form of strength. It ensures your muscles and joints work in perfect harmony.",
+      "Start with the basics and progress to 'lever' or 'planche' movements. The journey of calisthenics is a path to total body mastery."
+    ]
+  },
+  {
+    "keys": ["spotter importance", "gym safety"],
+    "values": [
+      "Safety first! Use a spotter when lifting heavy, especially on bench or squats. Or use the safety bars in the rack.",
+      "A spotter isn't just for safety; they provide the mental confidence to push for those final, growth-inducing reps.",
+      "Never be afraid to ask for a spot. Most people in the gym are happy to help and respect anyone training hard."
+    ]
+  },
+  {
+    "keys": ["ego lifting", "lifting too heavy"],
+    "values": [
+      "Leave your ego at the door. Lifting more than you can handle leads to injury. Form always comes before weight.",
+      "Nobody cares how much you lift if your form is terrible. Focus on the quality of the movement to get the actual results.",
+      "Weight is just a tool. If the weight is so heavy that the target muscle isn't doing the work, you're just wasting your time."
+    ]
+  },
+  {
+    "keys": ["body fat percentage", "body composition"],
+    "values": [
+      "Don't just chase a number on the scale. Focus on body composition—muscle vs fat is what actually changes your look.",
+      "The scale is a liar. You can weigh the same but look completely different by gaining muscle and losing fat simultaneously.",
+      "Use photos and the way your clothes fit as your primary metrics. They are much more accurate than a daily scale weight."
+    ]
+  },
+  {
+    "keys": ["spot reduction myth", "lose belly fat"],
+    "values": [
+      "Myth alert: You cannot 'spot reduce' fat. Doing crunches won't burn belly fat. Fat loss happens through a calorie deficit.",
+      "Abs are made in the gym but revealed in the kitchen. To see your core, focus on your overall nutrition and activity levels.",
+      "Train the whole body. Large movements burn more energy and help reveal the muscle definition you're working for."
+    ]
+  },
+  {
+    "keys": ["sweating and weight loss", "gym myth"],
+    "values": [
+      "Sweating is just your body's cooling mechanism. It doesn't mean you're burning more fat. Focus on the intensity of effort.",
+      "Don't wear extra layers to 'sweat more'. You'll just dehydrate yourself and decrease your performance. Stay cool and work hard.",
+      "The best workouts often leave you drenched, but the sweat is a byproduct of work, not the goal itself."
+    ]
+  },
+  {
+    "keys": ["rest between sets", "recovery time"],
+    "values": [
+      "Rest 1-2 minutes for hypertrophy (growth) and 3-5 for pure strength. Wait until you feel ready for another quality effort.",
+      "Don't rush! Your muscles need time to replenish their ATP stores between heavy sets to maintain high performance.",
+      "Use your rest time to breathe deeply and reset your mental focus for the next set. Don't spend it all scrolling your phone!"
+    ]
+  },
+  {
+    "keys": ["grip strength", "forearm workout"],
+    "values": [
+      "Grip strength is a great indicator of health. Include farmer's walks or dead hangs to build powerful forearms.",
+      "Don't let your grip be the limiting factor in your lifts. Train your forearms directly to keep up with your back and legs.",
+      "A crushing grip is a sign of a strong central nervous system. It's one of the most functional 'real world' strengths you can have."
+    ]
+  },
+  {
+    "keys": ["pullup vs chinup", "back vs biceps"],
+    "values": [
+      "Pullups (palms away) work the lats more. Chinups (palms facing you) engage biceps more. Both are elite exercises.",
+      "Switch your grip regularly to target different areas of your back and arms. Variety is key for complete upper body growth.",
+      "Master the pullup. It is one of the most effective movements for building a V-taper and a truly strong upper body."
+    ]
+  },
+  {
+    "keys": ["overtraining signs", "burnout"],
+    "values": [
+      "Watch for overtraining: persistent fatigue, decreased performance, and poor sleep. If you have these, take a rest day.",
+      "Listen to the signals. If your weights are going DOWN week after week, your body is begging for more recovery time.",
+      "Training is a stressor. If your life stress is high, you may need to lower your training intensity to avoid total burnout."
+    ]
+  },
+  {
+    "keys": ["deload week", "taking a break"],
+    "values": [
+      "Every 4-8 weeks, try a 'Deload Week'. Reduce weights or volume by 50% to allow your nervous system to fully recover.",
+      "A deload isn't a week off; it's a week of 'easy' work. It prevents plateaus and keeps your joints feeling fresh.",
+      "Strategic recovery: the deload week allows your body to 'supercompensate', leading to a burst of progress when you return."
+    ]
+  },
+  {
+    "keys": ["active lifestyle", "neat", "non exercise activity"],
+    "values": [
+      "NEAT (Non-Exercise Activity) like walking or taking stairs often burns more calories than your actual workouts.",
+      "Stay active all day! A 1-hour workout can't undo 23 hours of sitting. Get up and move every hour if you can.",
+      "Movement is a lifestyle. Look for opportunities to be active outside the gym to maintain your metabolic health."
+    ]
+  },
+  {
+    "keys": ["goal setting gym", "fitness goals"],
+    "values": [
+      "Set SMART goals: Specific, Measurable, Achievable, Relevant, and Time-bound. 'Perform 5 pullups by December'.",
+      "Process goals over outcome goals. Instead of 'lose 10lbs', set a goal to 'log 4 workouts every week'.",
+      "Write your goals in the 'Projects' section! Link your workouts to your big vision to stay motivated during the hard weeks."
+    ]
+  },
+  {
+    "keys": ["bodyweight dip", "tricep exercise"],
+    "values": [
+      "Dip tip: lean forward for chest engagement, or stay upright to focus on triceps. Avoid locking elbows aggressively.",
+      "Dips are the 'upper body squat'. They build massive power in the triceps, shoulders, and chest simultaneously.",
+      "Control the descent on your dips. Going too fast can strain your shoulders. Focus on a deep, controlled stretch."
+    ]
+  }
+]

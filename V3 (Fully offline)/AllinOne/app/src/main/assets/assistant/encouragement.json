@@ -1,0 +1,542 @@
+[
+  {
+    "keys": ["i finished it", "finished it!", "i finished it pal", "finally finished it", "finished at last", "i finished it buddy"],
+    "values": [
+      "Great job getting that done! Crossing the finish line feels so satisfying.",
+      "Awesome work! Your consistent effort really paid off.",
+      "Glad to hear it's wrapped up! Take a moment to enjoy the accomplishment.",
+      "Well done! Ticking that off your list is a solid victory."
+    ]
+  },
+  {
+    "keys": ["i'm done", "im done", "all done now", "i am done with this", "done with it", "i'm done pal", "im done buddy"],
+    "values": [
+      "All done! Take a well-deserved breather now.",
+      "Nice job seeing it through! Feels good to get it off your shoulders.",
+      "Done and dusted! Be proud of sticking with it until the end.",
+      "Awesome! Enjoy that great feeling of wrapping things up."
+    ]
+  },
+  {
+    "keys": ["i completed it", "task completed", "successfully completed it", "i completed my task", "completed it pal", "task completed buddy"],
+    "values": [
+      "Congratulations on completing it! Steady progress leads to great results.",
+      "Task completed! Your focus and discipline pulled you through.",
+      "Solid effort! Completing what you set out to do builds great momentum.",
+      "Well done! Enjoy the satisfaction of a job well finished."
+    ]
+  },
+  {
+    "keys": ["i finally did it", "finally did it!", "i did it at last", "finally accomplished it", "finally did it pal", "finally did it buddy"],
+    "values": [
+      "You finally did it! Your perseverance really made the difference.",
+      "Awesome! Nothing beats the feeling of pushing through until you succeed.",
+      "So glad to hear that! You stuck with it and got the result.",
+      "Fantastic work! Give yourself credit for not letting up."
+    ]
+  },
+  {
+    "keys": ["i achieved my goal", "goal achieved", "achieved my main goal", "hit my goal today", "achieved goal pal", "goal achieved buddy"],
+    "values": [
+      "Congratulations on achieving your goal! That's a huge milestone.",
+      "Hitting your goal is proof of your hard work. Enjoy the achievement!",
+      "Well earned! Every small step you took brought you to this success.",
+      "Awesome job! Celebrate this win and let it fuel your next endeavor."
+    ]
+  },
+  {
+    "keys": ["i kept going", "i kept moving forward", "pushed through and kept going", "stayed on track", "kept going pal", "kept going buddy"],
+    "values": [
+      "Pushing through when it's tough takes true grit. Well done!",
+      "Keeping going is what separates progress from stopping. Great determination!",
+      "Proud of you for staying on track! Consistency makes all the difference.",
+      "Solid persistence! Continuing forward even when tired is a real win."
+    ]
+  },
+  {
+    "keys": ["i didn't quit", "ididnt quit", "didn't give up", "i refused to quit", "pushed past wanting to quit", "didn't quit pal"],
+    "values": [
+      "Refusing to quit is the ultimate test of resilience. Great job!",
+      "Standing firm and not giving up is something to be truly proud of.",
+      "You proved your mental toughness today. Excellent determination!",
+      "Glad you held on! Overcoming the urge to stop makes you stronger."
+    ]
+  },
+  {
+    "keys": ["i improved", "i've improved", "my skills improved", "saw real improvement today", "improved pal", "noticeable improvement"],
+    "values": [
+      "Seeing real improvement is so rewarding! Your practice is showing.",
+      "Great growth! Moving forward step by step builds lasting skill.",
+      "Awesome! Keep honoring the process and your progress will continue.",
+      "Well done! Improvement comes from honest effort, and you're putting it in."
+    ]
+  },
+  {
+    "keys": ["i made progress", "made good progress today", "making steady progress", "progress was made", "made progress pal", "good progress today"],
+    "values": [
+      "Progress is progress, no matter the size! Keep up the momentum.",
+      "Steady progress adds up over time. Great job staying active!",
+      "Glad to hear things are moving forward! Every step counts.",
+      "Solid work! Focus on this forward motion and keep going."
+    ]
+  },
+  {
+    "keys": ["i succeeded", "i succeeded at last", "successful result", "succeeded in my attempt", "succeeded pal", "success today buddy"],
+    "values": [
+      "Congratulations on your success! Your preparation paid off.",
+      "Success is well deserved when you put in the work. Great job!",
+      "Awesome outcome! Take a moment to savor your accomplishment.",
+      "Well done! Your dedication brought about a fantastic result."
+    ]
+  },
+  {
+    "keys": ["i tried again", "gave it another try", "tried once more", "attempted it again", "tried again pal", "gave it another shot"],
+    "values": [
+      "Trying again takes courage. Proud of you for dusting yourself off!",
+      "That's true resilience! Taking another shot shows great character.",
+      "Glad you gave it another go! Every attempt builds experience.",
+      "Way to go! Pushing past a setback is how real growth happens."
+    ]
+  },
+  {
+    "keys": ["i'm getting better", "im getting better", "getting better every day", "skills are improving", "getting better pal", "improving every day"],
+    "values": [
+      "Getting better day by day is the best trend. Keep it up!",
+      "Awesome! Your dedication to practice is clearly yielding results.",
+      "Glad to hear your skills are refining! Stay consistent and enjoy the climb.",
+      "Continuous growth is a great feeling. Well done on your effort!"
+    ]
+  },
+  {
+    "keys": ["i won", "i won!", "won the competition", "got the win today", "took home the win", "i won pal", "won today buddy"],
+    "values": [
+      "Congratulations on the win! That's an awesome reward for your effort.",
+      "Woohoo! Victory feels fantastic when you work hard for it.",
+      "Awesome job coming out on top! Enjoy your win.",
+      "Great victory! Be proud of your performance and execution."
+    ]
+  },
+  {
+    "keys": ["i solved it", "solved the problem", "cracked the problem", "figured it out finally", "solved it pal", "cracked it buddy"],
+    "values": [
+      "Crack the code feels so satisfying! Great problem-solving skills.",
+      "Awesome! Patience and analytical thinking got you the answer.",
+      "Glad you figured it out! Overcoming a tough puzzle is so rewarding.",
+      "Well done! You didn't give up until you found the solution."
+    ]
+  },
+  {
+    "keys": ["i accomplished it", "accomplished my mission", "mission accomplished", "accomplished the task", "accomplished it pal", "mission accomplished buddy"],
+    "values": [
+      "Mission accomplished! Outstanding dedication and focus.",
+      "Great job completing your objective! Feel good about your effort.",
+      "Accomplishing what you plan is a solid milestone. Well done!",
+      "Awesome! Another goal checked off through your own hard work."
+    ]
+  },
+  {
+    "keys": ["i passed the test", "passed my exam", "aced the test", "passed with good marks", "passed the exam pal", "aced it buddy"],
+    "values": [
+      "Congratulations on passing your test! Your study prep paid off.",
+      "Awesome news! Passing that exam is a major weight off your mind.",
+      "Great job acing it! Enjoy the relief and celebrate your result.",
+      "Well done! Your hard work and preparation delivered a great pass."
+    ]
+  },
+  {
+    "keys": ["crossed the finish line", "reached the finish line", "completed the marathon", "crossed finish line pal", "finished the race buddy"],
+    "values": [
+      "Crossing the finish line is an unforgettable feeling! Great endurance.",
+      "You ran the race and saw it through to the end. Amazing job!",
+      "Proud of your stamina and grit! Crossing that line is a huge feat.",
+      "Well done! Enjoy your victory lap and get some well-earned rest."
+    ]
+  },
+  {
+    "keys": ["overcame a big obstacle", "cleared the hurdle", "overcame the difficulty", "cleared the obstacle pal", "overcame difficulty buddy"],
+    "values": [
+      "Overcoming obstacles builds real strength. Great job navigating through!",
+      "Hurdles are meant to be cleared, and you jumped right over it. Nice work!",
+      "Glad you pushed past that difficulty! You proved your capability.",
+      "Solid effort! Conquering tough challenges makes future tasks easier."
+    ]
+  },
+  {
+    "keys": ["stuck to my routine today", "followed my schedule completely", "didn't break the streak", "stuck to schedule pal", "routine followed buddy"],
+    "values": [
+      "Sticking to your routine takes great discipline. Awesome job!",
+      "Consistency wins! Following your schedule builds long-term success.",
+      "Glad you maintained your streak today! Keep that steady momentum.",
+      "Great self-control! Ticking off your planned schedule feels fantastic."
+    ]
+  },
+  {
+    "keys": ["broke my personal record", "hit a new personal best", "set a personal record", "hit a PB today", "new personal best pal"],
+    "values": [
+      "New personal best! Outdoing your past self is the ultimate win.",
+      "Congratulations on breaking your record! Your hard work is working.",
+      "Awesome milestone! Celebrate raising your own bar.",
+      "Setting a new personal record takes high focus. Outstanding work!"
+    ]
+  },
+  {
+    "keys": ["finished a tough project", "completed hard project", "wrapped up big project", "finished project pal", "hard project completed buddy"],
+    "values": [
+      "Wrapping up a big project is a massive relief! Fantastic job.",
+      "Your hard work on that project was worth it. Congratulations!",
+      "Awesome completion! Stand tall knowing you brought it to the end.",
+      "Great job handling a complex project! Time to enjoy the result."
+    ]
+  },
+  {
+    "keys": ["mastered a tough concept", "learned hard topic", "understood complex idea", "mastered concept pal", "got the tough topic buddy"],
+    "values": [
+      "Unlocking a tough concept is so empowering! Great mental effort.",
+      "Awesome! Breaking down complex ideas takes patience and focus.",
+      "Glad it clicked for you! Learning difficult things expands your mind.",
+      "Well done! Knowledge gained through hard effort stays with you."
+    ]
+  },
+  {
+    "keys": ["beat procrastination today", "didn't procrastinate today", "stayed focused all day", "beat procrastination pal", "no procrastination today"],
+    "values": [
+      "Beating procrastination is a huge win for your day! Great focus.",
+      "Awesome self-control! Taking immediate action beats delay every time.",
+      "Proud of you for diving straight into tasks today! Keep it up.",
+      "Great job getting things done without delay! Feels productive."
+    ]
+  },
+  {
+    "keys": ["kept my promise to myself", "followed through on promise", "kept my word", "kept promise pal", "followed through buddy"],
+    "values": [
+      "Keeping promises to yourself builds unshakable self-trust. Great work!",
+      "Following through shows true self-respect. Be proud of yourself.",
+      "Awesome discipline! Honoring your commitment is a powerful habit.",
+      "Well done! Every kept promise strengthens your confidence."
+    ]
+  },
+  {
+    "keys": ["fixed a stubborn bug", "solved the tricky issue", "resolved the code bug", "fixed the bug pal", "solved tricky bug buddy"],
+    "values": [
+      "Fixing stubborn bugs takes real patience and detective work. Great job!",
+      "Awesome fix! Finding that bug must feel like a massive relief.",
+      "Glad you cracked the issue! Your debugging persistence paid off.",
+      "Well done! Nothing beats the high of fixing a tricky error."
+    ]
+  },
+  {
+    "keys": ["finished reading a whole book", "read the last chapter", "completed the book", "finished the book pal", "read whole book buddy"],
+    "values": [
+      "Finishing a book is such a satisfying milestone! Enjoy the knowledge.",
+      "Awesome! Closing the final page of a good book feels great.",
+      "Great reading dedication! What was your favorite takeaway from it?",
+      "Well done! On to the next great read whenever you're ready."
+    ]
+  },
+  {
+    "keys": ["stood up for myself today", "asserted myself confidently", "spoke up for myself", "stood up for myself pal", "asserted myself buddy"],
+    "values": [
+      "Standing up for yourself takes real courage. Proud of you!",
+      "Setting clear boundaries and speaking up is crucial self-respect.",
+      "Awesome bravery! Claiming your space is an important growth step.",
+      "Well done standing firm! Respecting your own boundaries matters."
+    ]
+  },
+  {
+    "keys": ["managed stress well today", "stayed calm under pressure", "handled stress gracefully", "managed stress pal", "stayed calm buddy"],
+    "values": [
+      "Handling stress calmly is a true superpower. Great composure!",
+      "Awesome emotional control! Keeping calm keeps your mind clear.",
+      "Proud of you for staying grounded during pressure today.",
+      "Well done! Managing stress effectively protects your energy."
+    ]
+  },
+  {
+    "keys": ["built a solid routine", "established my new routine", "consistently stuck to habit", "routine established pal", "solid new routine buddy"],
+    "values": [
+      "Building a solid routine grounds your daily progress. Great effort!",
+      "Awesome, Routines automate your success over time. Keep it going.",
+      "Glad your new habit is locking into place! Consistency wins.",
+      "Well done! Establishing positive structure brings peace of mind."
+    ]
+  },
+  {
+    "keys": ["improved my workout reps", "lifted heavier today", "ran faster today", "workout improved pal", "lifted heavier buddy"],
+    "values": [
+      "Progress in physical exercise takes real grit. Great job pushing!",
+      "Awesome gains! Lifting heavier or running faster proves your growth.",
+      "Proud of your physical strength progress! Stay safe and keep pushing.",
+      "Well done! Body adaptation follows consistent hard work."
+    ]
+  },
+  {
+    "keys": ["made a healthy choice today", "chose the healthy option", "stuck to healthy eating", "healthy choice pal", "chose healthy option buddy"],
+    "values": [
+      "Making healthy choices builds long-term vitality! Great decision.",
+      "Awesome self-care! Choosing health over convenience is a win.",
+      "Proud of your healthy choices today! Your body will thank you.",
+      "Well done! Every healthy choice compounds into great wellness."
+    ]
+  },
+  {
+    "keys": ["cleaned the whole room", "organized my workspace fully", "tidied up completely", "cleaned whole room pal", "workspace organized buddy"],
+    "values": [
+      "A clean and organized space brings immediate mental clarity! Great job.",
+      "Awesome cleanup! Enjoy the fresh, peaceful environment you created.",
+      "Tidying up completely feels so satisfying. Enjoy your fresh space!",
+      "Well done! An organized room makes focused work so much easier."
+    ]
+  },
+  {
+    "keys": ["mastered a new recipe", "cooked a dish perfectly", "recipe turned out great", "mastered recipe pal", "dish cooked perfectly buddy"],
+    "values": [
+      "Cooking a new dish perfectly is a delicious victory! Bon appétit.",
+      "Awesome culinary skills! Mastering recipes is so fun and tasty.",
+      "Glad it turned out great! Enjoy every bite of your creation.",
+      "Well done chef! Nothing beats a successful homemade meal."
+    ]
+  },
+  {
+    "keys": ["showed up despite being tired", "pushed through low energy", "showed up today", "showed up tired pal", "pushed through low energy buddy"],
+    "values": [
+      "Showing up when low energy is tough takes true discipline. Proud of you!",
+      "Awesome persistence! You proved that commitment beats temporary tiredness.",
+      "Glad you put in the effort despite being tired! Get good rest tonight.",
+      "Well done! Showing up regularly is the core of long-term progress."
+    ]
+  },
+  {
+    "keys": ["stayed patient through it all", "remained patient today", "exercised great patience", "stayed patient pal", "remained patient buddy"],
+    "values": [
+      "Patience under pressure is a rare and powerful virtue. Great job!",
+      "Awesome composure! Staying calm while waiting prevents mistakes.",
+      "Proud of your patient attitude! Good things come to those who wait.",
+      "Well done! Patience keeps your mind peaceful through difficulties."
+    ]
+  },
+  {
+    "keys": ["faced my fear head on", "conquered my fear today", "did it despite fear", "faced fear pal", "conquered fear today buddy"],
+    "values": [
+      "Facing fear head-on is how confidence is born. Outstanding bravery!",
+      "Awesome courage! Stepping past your comfort zone expands your world.",
+      "Proud of your bravery today! You proved fear doesn't control you.",
+      "Well done! Conquering a fear makes future challenges feel smaller."
+    ]
+  },
+  {
+    "keys": ["submitted assignment early", "turned in work ahead of time", "finished assignment early", "submitted early pal", "turned in work early buddy"],
+    "values": [
+      "Submitting early is the ultimate stress-free flex! Great time management.",
+      "Awesome efficiency! Beating deadlines gives you total peace of mind.",
+      "Glad it's turned in ahead of schedule! Enjoy your free time.",
+      "Well done! Finishing early proves great planning and focus."
+    ]
+  },
+  {
+    "keys": ["kept a positive attitude", "stayed positive through challenges", "maintained good mood", "positive attitude pal", "stayed positive buddy"],
+    "values": [
+      "Keeping a positive attitude in tough moments lights up your whole day.",
+      "Awesome mindset! Optimism helps you find solutions faster.",
+      "Glad you maintained a good mood! Positive energy is contagious.",
+      "Well done! Mindset is everything, and yours was spot on today."
+    ]
+  },
+  {
+    "keys": ["learned from my mistake", "turned mistake into lesson", "grew from error", "learned from mistake pal", "grew from error buddy"],
+    "values": [
+      "Turning mistakes into lessons is true wisdom. Great growth mindset!",
+      "Awesome perspective! Errors are just tuition for future wisdom.",
+      "Glad you extracted the lesson! That's how real improvement works.",
+      "Well done! You're stronger and wiser because of how you responded."
+    ]
+  },
+  {
+    "keys": ["saved money today", "stuck to my budget", "resisted impulse buying", "saved money pal", "stuck to budget buddy"],
+    "values": [
+      "Sticking to your budget protects your future security! Smart move.",
+      "Awesome financial discipline! Resisting impulse buys takes willpower.",
+      "Glad you saved today! Small savings add up to big freedom over time.",
+      "Well done! Smart money choices today build peace of mind tomorrow."
+    ]
+  },
+  {
+    "keys": ["finished my painting", "finished my drawing", "completed my creative piece", "wrapped up art project", "finished artwork pal"],
+    "values": [
+      "Completing a creative artwork brings your inner vision to life. Beautiful!",
+      "Awesome creation! Bringing an art piece to completion takes real focus.",
+      "Glad your artwork is finished! Enjoy seeing your creation complete.",
+      "Well done! Art enriches life, and your effort shines through."
+    ]
+  },
+  {
+    "keys": ["delivered a great speech", "presentation went smoothly", "nailed the presentation", "delivered great presentation pal", "nailed presentation buddy"],
+    "values": [
+      "Nailed it! Delivering a smooth presentation takes prep and poise.",
+      "Awesome public speaking effort! Be proud of sharing your ideas clearly.",
+      "Glad it went so well! Take a bow for a job fantastically done.",
+      "Well done! Delivering a strong presentation builds great confidence."
+    ]
+  },
+  {
+    "keys": ["helped a friend in need", "assisted someone today", "did a good deed", "helped out someone pal", "assisted someone buddy"],
+    "values": [
+      "Helping others brings genuine warmth to the world. Kindness matters!",
+      "Awesome spirit! Lend a helping hand is one of the best things we can do.",
+      "Glad you made someone's day easier! Your kindness is appreciated.",
+      "Well done! Small acts of help ripple out in wonderful ways."
+    ]
+  },
+  {
+    "keys": ["prioritized mental health today", "took a restful mental break", "practiced self care", "mental health prioritized pal", "practiced self care buddy"],
+    "values": [
+      "Taking care of your mental health is vital and wise. Great choice!",
+      "Awesome self-awareness! Resting your mind restores your strength.",
+      "Glad you gave yourself space today! Self-care is essential work.",
+      "Well done prioritizing inner peace! Your well-being comes first."
+    ]
+  },
+  {
+    "keys": ["played the song without mistakes", "mastered the music piece", "played piano well", "played guitar well", "mastered music piece pal"],
+    "values": [
+      "Playing a piece flawlessly feels like pure magic! Great musical focus.",
+      "Awesome milestone! All those hours of practice paid off brilliantly.",
+      "Glad the song came together! Enjoy making such beautiful sound.",
+      "Well done musician! Practice turns difficulty into effortless art."
+    ]
+  },
+  {
+    "keys": ["hit a 100 day streak", "100 days of consistent effort", "reached 100 day milestone", "hit 100 day streak pal", "100 days consistency buddy"],
+    "values": [
+      "100 days of consistency is incredible dedication! Outstanding milestone.",
+      "Awesome discipline! A triple-digit streak is proof of true commitment.",
+      "So proud of your 100-day effort! That's how major transformations happen.",
+      "Well done! Keep this incredible momentum going strong into the future."
+    ]
+  },
+  {
+    "keys": ["turned a bad day around", "saved a rough day", "ended day on positive note", "turned day around pal", "saved rough day buddy"],
+    "values": [
+      "Turning a bad day around shows true emotional strength! Well done.",
+      "Awesome resilience! You refused to let a rough morning ruin your night.",
+      "Glad you ended today on a positive note! You took back control.",
+      "Well done! Shifting your mindset mid-day is a powerful skill."
+    ]
+  },
+  {
+    "keys": ["stayed calm during disagreement", "handled conflict peacefully", "kept composure", "stayed calm during dispute pal", "handled conflict well buddy"],
+    "values": [
+      "Keeping your composure during conflict takes immense maturity. Great job!",
+      "Awesome calm energy! Peacefulness de-escalates tough moments.",
+      "Glad you stayed composed! Controlled responses protect your peace.",
+      "Well done! Poise under pressure is true character."
+    ]
+  },
+  {
+    "keys": ["repaired a broken item", "fixed something at home", "mended the item", "repaired broken item pal", "fixed something home buddy"],
+    "values": [
+      "Fixing broken things yourself is so satisfying and practical! Nice work.",
+      "Awesome handy skills! Repairing beats replacing every time.",
+      "Glad it's working again! Enjoy your fixed item.",
+      "Well done! Your practical efforts saved money and brought utility back."
+    ]
+  },
+  {
+    "keys": ["wrote a full essay today", "completed writing my article", "finished the draft", "wrote full article pal", "completed writing essay buddy"],
+    "values": [
+      "Writing a full piece takes deep focus and structure! Great work.",
+      "Awesome completion! Getting your thoughts down on paper feels great.",
+      "Glad the article/essay draft is finished! Enjoy a well-earned break.",
+      "Well done writer! Completing a full text is a solid accomplishment."
+    ]
+  },
+  {
+    "keys": ["solved the puzzle quickly", "completed jigsaw puzzle", "cracked crossword fast", "solved puzzle fast pal", "completed jigsaw buddy"],
+    "values": [
+      "Fast puzzle solving proves sharp cognitive skills! Great mental work.",
+      "Awesome brain power! Cracking puzzles fast is super satisfying.",
+      "Glad you got it solved so quickly! Enjoy your sharp focus.",
+      "Well done! Brain exercises like puzzles keep you sharp."
+    ]
+  },
+  {
+    "keys": ["maintained 2 hours of focus", "worked 2 hours straight uninterrupted", "2 hours deep focus", "maintained 2 hrs focus pal", "2 hours uninterrupted focus buddy"],
+    "values": [
+      "Two hours of deep uninterrupted focus is high-level output! Outstanding job.",
+      "Awesome focus block! You got so much accomplished in that time.",
+      "Glad you stayed in the flow zone! Take a well-deserved rest break now.",
+      "Well done! Deep focus sessions like that move mountains."
+    ]
+  },
+  {
+    "keys": ["refused to abandon my goal", "stayed committed to target", "didn't give up on goal", "refused to abandon goal pal", "stayed committed target buddy"],
+    "values": [
+      "Staying committed when things get tough builds real character. Proud of you!",
+      "Awesome loyalty to your vision! Unwavering dedication leads to victory.",
+      "Glad you held firm to your goal! Persistence overcomes every obstacle.",
+      "Well done! Your commitment to your target is inspiring."
+    ]
+  },
+  {
+    "keys": ["learned new software tool", "mastered a new app", "learned to use new tool", "learned new tool pal", "mastered new app buddy"],
+    "values": [
+      "Learning new tools expands your capability! Great technical effort.",
+      "Awesome skill update! Mastering new software keeps you adaptable.",
+      "Glad you got the hang of the new tool! It will save you time ahead.",
+      "Well done! Continuous learning of modern tools keeps you sharp."
+    ]
+  },
+  {
+    "keys": ["organized my digital folders", "cleaned up computer files", "decluttered my drive", "organized digital files pal", "decluttered drive buddy"],
+    "values": [
+      "Digital decluttering brings so much fresh peace of mind! Great work.",
+      "Awesome file organization! Finding things quickly saves so much time.",
+      "Glad your drive is neat and tidy! A clean desktop feels fantastic.",
+      "Well done! Digital cleanliness makes work so much smoother."
+    ]
+  },
+  {
+    "keys": ["reached savings target", "hit my financial goal", "saved up intended amount", "reached savings target pal", "hit financial goal buddy"],
+    "values": [
+      "Hitting your financial savings target is a major security milestone! Congratulations.",
+      "Awesome financial discipline! Your patient saving paid off.",
+      "So proud of your financial responsibility! Enjoy the peace of mind.",
+      "Well done! Savings milestones provide great freedom and stability."
+    ]
+  },
+  {
+    "keys": ["reconnected warmly with someone", "restored a good relationship", "reconnected with someone pal", "restored good relationship buddy", "reconnected with an old friend today"],
+    "values": [
+      "Reconnecting warmly brings so much heart satisfaction. So happy for you!",
+      "Awesome warmth! Nurturing meaningful relationships is true wealth.",
+      "Glad you reached out and reconnected! Good bonds are precious.",
+      "Well done! Restoring connection brings genuine peace."
+    ]
+  },
+  {
+    "keys": ["showed kindness despite stress", "stayed gracious and kind", "showed kindness under pressure pal", "stayed gracious kind buddy", "showed kindness today"],
+    "values": [
+      "Staying kind when stressed takes true nobility. Beautiful character!",
+      "Awesome grace! Kindness in difficult moments lights up the world.",
+      "Proud of your gentle attitude! You chose grace over anger.",
+      "Well done! Kindness under pressure shows who you really are."
+    ]
+  },
+  {
+    "keys": ["completed 100% of habits today", "ticked off all daily habits", "all daily habits completed", "completed 100% habits pal", "ticked off all habits buddy"],
+    "values": [
+      "A 100% daily habit completion day is a perfect execution score! Well done.",
+      "Awesome consistency! Ticking off every habit feels incredibly good.",
+      "Proud of your full execution today! You set the bar high and hit it.",
+      "Well done! Complete habit execution builds unstoppable momentum."
+    ]
+  },
+  {
+    "keys": ["proud of your progress my friend", "cheering your milestone dear friend", "always proud of your effort my friend", "encouraging your effort my friend", "celebrating your progress dear friend"],
+    "values": [
+      "I'm always so proud of your effort and progress, my friend! Keep shining.",
+      "Cheering for every milestone you hit, dear friend! You're doing amazing.",
+      "Thank you my friend! Always right here celebrating your positive journey.",
+      "Keep taking steady, confident steps forward, my dear friend! Proud of you."
+    ]
+  }
+]

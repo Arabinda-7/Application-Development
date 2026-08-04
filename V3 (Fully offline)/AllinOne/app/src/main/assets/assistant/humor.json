@@ -1,0 +1,362 @@
+[
+  {
+    "keys": ["tell me a joke", "tell me a good joke", "got any jokes", "say a joke", "share a joke", "tell a joke pal"],
+    "values": [
+      "Why did the bicycle fall over? Because it was two-tired!",
+      "What do you call a fake noodle? An impasta!",
+      "Why don't eggs tell jokes? They'd crack each other up!",
+      "What do you call a sleeping dinosaur? A dino-snore!"
+    ]
+  },
+  {
+    "keys": ["make me laugh", "make me chuckle", "make me laugh please", "need a laugh today", "make me laugh pal", "crack a funny one for me"],
+    "values": [
+      "What do you call a bear with no teeth? A gummy bear!",
+      "Why did the golfer bring two pairs of pants? In case he got a hole in one!",
+      "What did one wall say to the other? I'll meet you at the corner!",
+      "Why do cows wear bells? Because their horns don't work!"
+    ]
+  },
+  {
+    "keys": ["say something funny", "tell me something funny", "say something humorous", "give me something funny", "funny line please"],
+    "values": [
+      "My wallet is like an onion: opening it makes me cry!",
+      "I'm on a seafood diet. I see food and I eat it!",
+      "I used to play piano by ear, but now I use my hands!",
+      "I'm reading a book on anti-gravity. It's impossible to put down!"
+    ]
+  },
+  {
+    "keys": ["i'm bored cheer me up", "bored tell a joke", "bored make me smile", "bored cheer me up pal", "so bored make me laugh"],
+    "values": [
+      "Why couldn't the pony sing a lullaby? Because she was a little hoarse!",
+      "Why did the tomato turn red? Because it saw the salad dressing!",
+      "What do you call a cheese that isn't yours? Nacho cheese!",
+      "Why don't skeletons fight each other? They don't have the guts!"
+    ]
+  },
+  {
+    "keys": ["cheer me up", "cheer me up with humor", "need a smile today", "brighten my mood with a joke", "cheer me up pal"],
+    "values": [
+      "What goes up and down but never moves? A flight of stairs!",
+      "Why was the math book sad? Because it had too many problems!",
+      "What do you call a bee that can't make up its mind? A maybe!",
+      "Why did the computer go to the doctor? It had a virus!"
+    ]
+  },
+  {
+    "keys": ["tell me a funny story", "short funny story", "funny anecdote", "funny story pal", "tell a quick funny story"],
+    "values": [
+      "A man walked into a library asking for a burger, so the librarian whispered, 'Sir, this is a library!'",
+      "A guy asked his friend if spiders play baseball, and his friend said, 'Only when catching flies!'",
+      "A snail bought a sports car painted with a big 'S' so people would say, 'Look at that S-car go!'",
+      "A man told his doctor he felt like a pair of curtains, so the doctor said, 'Pull yourself together!'"
+    ]
+  },
+  {
+    "keys": ["tell me a dad joke", "got a dad joke", "share a classic dad joke", "dad joke please", "tell a dad joke pal"],
+    "values": [
+      "How do you make a tissue dance? Put a little boogie in it!",
+      "Did you hear about the restaurant on the moon? Great food, no atmosphere!",
+      "What do you call a factory that makes okay products? A satisfactory!",
+      "Why did the scarecrow win an award? Because he was outstanding in his field!"
+    ]
+  },
+  {
+    "keys": ["tell me a tech joke", "technology joke", "funny gadget joke", "tech humor joke", "technology joke pal"],
+    "values": [
+      "There are 10 types of people in the world: those who understand binary, and those who don't!",
+      "Why was the computer cold? It left its Windows open!",
+      "What is a computer's favorite snack? Microchips!",
+      "Why did the smartphone get glasses? Because it lost its contacts!"
+    ]
+  },
+  {
+    "keys": ["tell me a programming joke", "coder joke", "programmer joke", "developer joke", "programming humor joke"],
+    "values": [
+      "Why do programmers prefer dark mode? Because light attracts bugs!",
+      "A programmer was asked to buy bread and if they had eggs get a dozen, so he bought 12 loaves!",
+      "How many programmers does it take to change a lightbulb? None, that's a hardware problem!",
+      "There's no place like localhost!"
+    ]
+  },
+  {
+    "keys": ["tell me a work joke", "office joke", "workplace humor joke", "work joke pal", "funny work joke"],
+    "values": [
+      "Why did the employee get fired from the calendar factory? He took a few days off!",
+      "My boss told me to have a good day, so I went home!",
+      "Nothing brightens up a Friday like realizing it's actually Thursday!",
+      "I love my job, except for the 8 hours between arriving and leaving!"
+    ]
+  },
+  {
+    "keys": ["tell me a study joke", "school joke", "exam humor joke", "student joke", "study joke pal"],
+    "values": [
+      "Why did the student eat his homework? Because his teacher told him it was a piece of cake!",
+      "Why was the teacher wearing sunglasses? Because her students were so bright!",
+      "What's the best place to hide a secret in a school? In the textbook!",
+      "Why did the clock get sent to detention? It tocked too much in class!"
+    ]
+  },
+  {
+    "keys": ["productivity joke", "to do list joke", "procrastination joke", "productivity humor", "funny productivity joke"],
+    "values": [
+      "I put 'procrastinate' on my to-do list so I can cross something off today!",
+      "My productivity peak is right when I should be going to sleep!",
+      "I'm super productive at doing everything except what I'm supposed to do!",
+      "Doing nothing is hard work: you never know when you're done!"
+    ]
+  },
+  {
+    "keys": ["animal puns", "cat or dog pun", "tell me an animal pun", "funny animal pun", "pet pun joke"],
+    "values": [
+      "What do you call a sleeping cat? A purr-ito!",
+      "What do dogs do after they finish obedience school? They get their master's degree!",
+      "Why are frogs always so happy? Because they eat whatever bugs them!",
+      "What do you call an alligator in a vest? An investigator!"
+    ]
+  },
+  {
+    "keys": ["food puns", "kitchen pun", "tell me a food pun", "tasty pun", "funny food pun"],
+    "values": [
+      "Don't go bacon my heart! I couldn't if I fried!",
+      "Why did the grape stop in the middle of the road? Because it ran out of juice!",
+      "What did the bagel say to the doughnut? You're so holistic!",
+      "Why did the banana go to the doctor? Because it wasn't peeling well!"
+    ]
+  },
+  {
+    "keys": ["funny wordplay", "clever wordplay joke", "wordplay pun", "clever wordplay humor", "wordplay joke pal"],
+    "values": [
+      "I used to be a banker, but I lost interest!",
+      "Time flies like an arrow, but fruit flies like a banana!",
+      "I wanted to be a sculptor, but I couldn't handle the pressure!",
+      "I'm reading a book on teleportation. It gets me nowhere!"
+    ]
+  },
+  {
+    "keys": ["light sarcasm joke", "witty sarcastic response", "gentle sarcastic humor", "light sarcasm pal", "witty sarcasm joke"],
+    "values": [
+      "I'm not saying I'm lazy, I'm just on energy-saving mode!",
+      "I would agree with you, but then we'd both be wrong!",
+      "My brain has 40 tabs open, 3 are frozen, and music is playing from nowhere!",
+      "I'm not great at advice, but can I interest you in a sarcastic comment?"
+    ]
+  },
+  {
+    "keys": ["tease me harmlessly", "playful teasing", "harmless playful tease", "playful joke pal", "tease me friendly"],
+    "values": [
+      "Are you always this awesome, or is today a special occasion?",
+      "You work so hard, even your coffee needs a coffee break!",
+      "If thinking was an Olympic sport, you'd take home the gold medal today!",
+      "You're doing great—don't let your inner couch potato convince you otherwise!"
+    ]
+  },
+  {
+    "keys": ["math joke", "tell me a math joke", "geometry joke", "algebra humor", "funny math joke"],
+    "values": [
+      "Why was 6 afraid of 7? Because 7 ate 9!",
+      "What did the triangle say to the circle? You're pointless!",
+      "Parallel lines have so much in common. It's a shame they'll never meet!",
+      "Why is the angle sub-zero? Because it's acute one!"
+    ]
+  },
+  {
+    "keys": ["science joke", "physics joke", "chemistry joke", "biology joke", "funny science joke"],
+    "values": [
+      "Why can't you trust atoms? Because they make up everything!",
+      "What did one charged particle say to the other? I've got my eye on ion!",
+      "Why did the physicist break up with the biologist? There was no chemistry!",
+      "What is a cloud's favorite game? Precipitation tag!"
+    ]
+  },
+  {
+    "keys": ["weather joke", "rain or sun joke", "climate humor joke", "funny weather joke", "weather pun joke"],
+    "values": [
+      "What falls in winter but never gets hurt? Snow!",
+      "What did one raindrop say to the other? Two's company, three's a cloud!",
+      "Why did the sun go to school? To get a little brighter!",
+      "What does a cloud wear under its raincoat? Thunderwear!"
+    ]
+  },
+  {
+    "keys": ["coffee joke", "tea joke", "caffeine humor", "funny coffee joke", "tea pun joke"],
+    "values": [
+      "How does a penguin make coffee? With Ig-loo grounds!",
+      "What do you call sad coffee? Depresso!",
+      "Why did the teapot get promoted? Because it handled pressure so well!",
+      "What is a coffee's favorite song? Don't Worry, Be Decaf!"
+    ]
+  },
+  {
+    "keys": ["time joke", "clock joke", "watch humor", "funny time joke", "clock pun joke"],
+    "values": [
+      "What did one clock say to the other? What time are you free?",
+      "Why did the man sit on his clock? He wanted to be on time!",
+      "Why did the boy throw his clock out the window? He wanted to see time fly!",
+      "What is a clock's favorite food? Seconds!"
+    ]
+  },
+  {
+    "keys": ["book joke", "reading joke", "library humor", "funny book joke", "reading pun joke"],
+    "values": [
+      "Why did the book join the police force? To cover all the stories!",
+      "Why are books so brave? Because they have great spine!",
+      "What did the librarian say to the book? I'm checking you out!",
+      "Why did the bookmark quit? Because it was tired of being held between pages!"
+    ]
+  },
+  {
+    "keys": ["music joke", "band joke", "guitar humor", "funny music joke", "music pun joke"],
+    "values": [
+      "Why did the piano get locked out? Because the keys were inside!",
+      "What's a ghost's favorite musical instrument? A sheet-drum!",
+      "Why was the guitar feeling flat? Because it lost its pick!",
+      "What kind of music do planets listen to? Nep-tunes!"
+    ]
+  },
+  {
+    "keys": ["space joke", "planet joke", "astronomy humor", "funny space joke", "space pun joke"],
+    "values": [
+      "How do space parties get started? They planet!",
+      "Why did the astronaut break up with his girlfriend? He needed space!",
+      "What is an astronaut's favorite key on the keyboard? The spacebar!",
+      "What do you call a tick on the moon? A luna-tick!"
+    ]
+  },
+  {
+    "keys": ["sports joke", "gym joke", "fitness humor", "funny sports joke", "exercise pun joke"],
+    "values": [
+      "Why did the gym close down? It just didn't work out!",
+      "What's a runner's favorite subject? Jog-raphy!",
+      "Why are basketball players such sloppy eaters? They're always dribbling!",
+      "Why did the bicycle stay home? It was exhausted!"
+    ]
+  },
+  {
+    "keys": ["shopping joke", "money budget humor", "wallet joke", "funny shopping joke", "shopping pun joke"],
+    "values": [
+      "Where does a dinosaur shop for clothes? At the Dino-store!",
+      "Why is money called dough? Because everybody needs it!",
+      "My wallet is on a strict low-spending diet right now!",
+      "What do you call a rich fish? A goldfish!"
+    ]
+  },
+  {
+    "keys": ["sleep joke", "pillow joke", "nap time humor", "funny sleep joke", "bedtime pun joke"],
+    "values": [
+      "Why did the boy sleep on a ruler? To see how long he slept!",
+      "What do you call a sleepy dragon? A total drag-on!",
+      "Why is bedtime the best time? Because dreams have no cover charge!",
+      "What do pillows say to each other? Rest up, buddy!"
+    ]
+  },
+  {
+    "keys": ["weekend joke", "saturday sunday joke", "weekend humor", "funny weekend joke", "weekend pun joke"],
+    "values": [
+      "Why are Saturdays and Sundays so strong? Because the rest are week-days!",
+      "What is a weekend's favorite sport? Chill-nastics!",
+      "Nothing says 'weekend' quite like sleeping past your alarm!",
+      "Saturdays are proof that good things come to those who wait!"
+    ]
+  },
+  {
+    "keys": ["morning coffee joke", "waking up joke", "early bird humor", "funny morning joke", "morning pun joke"],
+    "values": [
+      "Mornings are 90% coffee and 10% trying to remember where I left my keys!",
+      "Why did the alarm clock get mad? Because people kept hitting it!",
+      "I'm an early bird, as long as early means after 9 AM!",
+      "Morning motto: Espresso yourself!"
+    ]
+  },
+  {
+    "keys": ["keyboard joke", "mouse computer joke", "screen humor", "funny keyboard joke", "keyboard pun joke"],
+    "values": [
+      "Why was the keyboard so relaxed? Because it had lots of space!",
+      "What is a computer mouse's favorite food? Cheese-board!",
+      "Why did the Esc key leave the room? It needed an escape!",
+      "What did the Spacebar say to Control? You're pushing my buttons!"
+    ]
+  },
+  {
+    "keys": ["wifi joke", "internet connection joke", "online browsing humor", "funny wifi joke", "internet pun joke"],
+    "values": [
+      "Why did the Wi-Fi router get a trophy? It had the best connection!",
+      "What is a web browser's favorite drink? Tab!",
+      "Why was the internet connection so modest? It didn't like to buffer!",
+      "What does a router say when it's happy? Everything is connecting smoothly!"
+    ]
+  },
+  {
+    "keys": ["fruit puns", "vegetable pun", "banana apple pun", "funny fruit pun", "veggie pun joke"],
+    "values": [
+      "Why did the apple go to the gym? To get core strength!",
+      "What did the sweet potato say to the potato? I yam what I yam!",
+      "Why are oranges so calm? They know how to peel fine!",
+      "What's a cucumber's favorite motto? Stay cool!"
+    ]
+  },
+  {
+    "keys": ["ocean puns", "fish pun", "sea life humor", "funny fish pun", "ocean pun joke"],
+    "values": [
+      "What do you call a fish with no eyes? A fsh!",
+      "Why are fish so smart? Because they live in schools!",
+      "What did the ocean say to the shore? Nothing, it just waved!",
+      "Where do fish keep their money? In the river bank!"
+    ]
+  },
+  {
+    "keys": ["plant puns", "flower garden pun", "tree humor", "funny plant pun", "garden pun joke"],
+    "values": [
+      "Why did the plant go to therapy? It wanted to get to the root of the problem!",
+      "What do trees wear to parties? Bark-ing attire!",
+      "Why are flowers such good listeners? They're all ears and petals!",
+      "What's a plant's favorite math topic? Square roots!"
+    ]
+  },
+  {
+    "keys": ["car joke", "traffic driving joke", "road humor", "funny car joke", "driving pun joke"],
+    "values": [
+      "Why did the car get a cold? It left its hood up!",
+      "What kind of car does a snake drive? An Ana-conda!",
+      "Why are steering wheels so polite? They always turn when asked!",
+      "What do cars eat for breakfast? Brake-fast!"
+    ]
+  },
+  {
+    "keys": ["art joke", "painting color joke", "artist humor", "funny art joke", "art pun joke"],
+    "values": [
+      "Why did the painter go to jail? For framing a picture!",
+      "What is a primary color's favorite game? Hue-and-seek!",
+      "Why was the paintbrush so talented? It had great stroke of genius!",
+      "What did the artist say to the canvas? I'm drawn to you!"
+    ]
+  },
+  {
+    "keys": ["pizza joke", "burger humor", "fast food joke", "funny pizza joke", "pizza pun joke"],
+    "values": [
+      "What does a pizza say when it wants to joke around? Slice to meet you!",
+      "Why did the burger go to the gym? To get better buns!",
+      "How do you know a pizza is honest? It has nothing to slice!",
+      "What is a burger's favorite sport? Pickle-ball!"
+    ]
+  },
+  {
+    "keys": ["holiday joke", "festive season humor", "celebration joke", "holiday pun", "funny holiday joke"],
+    "values": [
+      "What do snowmen eat for breakfast? Frosted Flakes!",
+      "Why do holidays make people happy? Because joy is in the air!",
+      "What is a party's favorite drink? Pop!",
+      "Why did the gift box smile? Because it was wrapped up in fun!"
+    ]
+  },
+  {
+    "keys": ["funny joke my friend", "cheer up joke dear friend", "humorous chat with friend", "funny line my friend", "share a smile dear friend"],
+    "values": [
+      "Always happy to share a quick chuckle with you, my friend!",
+      "Smiling is contagious, dear friend! Hope that brought a grin to your face.",
+      "Laughter makes every day brighter, my friend. Glad we could share a joke!",
+      "Have a fantastic day full of smiles and good vibes, my dear friend!"
+    ]
+  }
+]

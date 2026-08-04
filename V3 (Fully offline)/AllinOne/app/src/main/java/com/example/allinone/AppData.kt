@@ -1,0 +1,60 @@
+package com.example.allinone
+
+import com.example.allinone.workspace.data.*
+import com.example.allinone.data.model.Habit
+import com.example.allinone.data.model.Workout
+import com.example.allinone.data.model.Task
+import com.example.allinone.data.model.Note
+import com.example.allinone.data.model.Transaction
+import com.example.allinone.data.model.PersonalLedger
+import com.example.allinone.data.model.PersonalLedgerEntry as LedgerEntry
+import kotlinx.serialization.Serializable
+
+@Serializable
+data class WorkoutProgressEntry(
+    val name: String,
+    val progress: Int,
+    val target: Int,
+    val unit: String,
+    val color: Int = -1,
+    val isCompleted: Boolean = false
+)
+
+@Serializable
+data class DayHistory(
+    val habitsCompleted: Int,
+    val totalHabits: Int,
+    val workoutsCompleted: Int,
+    val totalWorkouts: Int,
+    val workoutDetails: List<WorkoutProgressEntry>? = null,
+    val notes: String? = null
+)
+
+data class AllAppData(
+    val habits: List<Habit>? = null,
+    val workouts: List<Workout>? = null,
+    val tasks: List<Task>? = null,
+    val notes: List<Note>? = null,
+    val projects: List<Note>? = null,
+    val history: Map<String, DayHistory>? = null,
+    val transactions: List<Transaction>? = null,
+    val ledgerEntries: List<LedgerEntry>? = null,
+    val personalLedgers: List<PersonalLedger>? = null,
+    val monthlyBudget: Double = 0.0,
+    val monthlySavingsGoal: Double = 0.0,
+    val monthlyBudgets: Map<String, Double>? = null,
+    val monthlySavingsGoals: Map<String, Double>? = null,
+    val dailyMoods: Map<String, String>? = null,
+
+    // Workspace Data
+    val workspaceProjects: List<ProjectEntity>? = null,
+    val workspaceGoals: List<GoalEntity>? = null,
+    val workspaceTasks: List<WorkspaceTaskEntity>? = null,
+    val workspaceFeatures: List<FeatureEntity>? = null,
+    val workspaceBugs: List<BugEntity>? = null,
+    val workspaceIdeas: List<IdeaEntity>? = null,
+    val workspaceNotes: List<WorkspaceNoteEntity>? = null,
+    val workspaceResources: List<ResourceEntity>? = null,
+    val workspaceLogs: List<ActivityLogEntity>? = null,
+    val workspaceRefs: List<NoteCrossReferenceEntity>? = null
+)

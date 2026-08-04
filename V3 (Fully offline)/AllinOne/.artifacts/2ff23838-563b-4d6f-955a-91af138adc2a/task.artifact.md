@@ -1,0 +1,11 @@
+- [x] Copy `nlu_training_dataset.json` to assets
+- [x] Update `AssistantBrain.kt`:
+    - [x] Add `NluItem` data classes
+    - [x] Load NLU dataset in `initialize`
+    - [x] Enhance `parseCommand` with complex intent matching and regex parameter extraction
+- [x] Update `DataManager.kt`:
+    - [x] Add methods for income logging
+    - [x] Add search capability for notes
+- [x] Update `AssistantActivity.kt`:
+    - [x] Expand `handleCommand` logic to process new action types
+- [ ] Verify build and functionality

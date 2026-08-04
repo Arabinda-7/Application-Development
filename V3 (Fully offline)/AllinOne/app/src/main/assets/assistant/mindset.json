@@ -1,0 +1,9 @@
+[
+  {"keys": ["meditate", "mindful", "calm"], "value": "Meditation isn't about clearing your mind, it's about observing your thoughts without judgment. Start with just 3 minutes."},
+  {"keys": ["stress", "anxiety", "overwhelmed"], "value": "When stressed, focus on your breath. Inhale for 4, hold for 4, exhale for 4, hold for 4. This is 'Box Breathing'."},
+  {"keys": ["gratitude", "happy", "blessed"], "value": "Practice gratitude daily. Write down 3 things you're thankful for every morning to rewire your brain for positivity."},
+  {"keys": ["sleep", "insomnia", "tired"], "value": "Good sleep is the foundation of productivity. Try to get 7-9 hours and keep a consistent sleep schedule."},
+  {"keys": ["writing prompt", "creative block"], "value": "Here's a prompt for you: 'You find a key in your pocket that you've never seen before. You walk to the nearest locked door and it fits perfectly.' What's inside?"},
+  {"keys": ["stressed", "overwhelmed"], "value": "I'm sorry you're feeling that way. Let's break things down. What is the **one** smallest thing we can do right now to make progress? I can remind you to take a 5-minute breather."},
+  {"keys": ["digital detox", "phone", "screen"], "value": "Try a digital detox: No screens 1 hour before bed and 1 hour after waking up. Your brain will thank you."}
+]

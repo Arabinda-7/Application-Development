@@ -1,0 +1,24 @@
+package com.example.allinone.data.model
+
+import kotlinx.serialization.Serializable
+
+@Serializable
+data class ProjectFeature(
+    var name: String,
+    var isCompleted: Boolean = false,
+    var details: String = "",
+    var position: Int = 0,
+    var resourceUrl: String = "",
+    var resourcePath: String = "",
+    var blockedByNodeId: String = "",
+    // val subFeatures: MutableList<ProjectFeature> = mutableListOf(),
+    val subFeatures: MutableList<String> = mutableListOf(),
+    val id: String = java.util.UUID.randomUUID().toString(),
+    var isExpanded: Boolean = false,
+    var tag: String = "", // e.g., UI, LOGIC, BUG
+    var dueDate: Long? = null,
+    var weight: Int = 1,
+    var priority: Int = 0, // 0: Low, 1: Med, 2: High
+    var hasReminder: Boolean = false,
+    val createdAt: Long = System.currentTimeMillis()
+)

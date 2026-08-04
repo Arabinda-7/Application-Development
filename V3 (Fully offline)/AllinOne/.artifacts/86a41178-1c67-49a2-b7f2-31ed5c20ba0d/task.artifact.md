@@ -1,0 +1,2 @@
+- [x] Modify `FinanceHistoryActivity.kt` to wrap `DataManager.loadData(this)` in `lifecycleScope.launch`
+- [x] Verify the build
